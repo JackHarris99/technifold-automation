@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { CompanyPayload, Company, CompanyStats } from '@/types';
+import { CompanyPayload, Company, CompanyStats, CustomerProfile, OrderHistory, CustomerAnalytics } from '@/types';
 
 let supabaseClient: SupabaseClient | null = null;
 
@@ -119,6 +119,99 @@ export function generatePortalUrl(portalToken: string): string {
     ? 'http://localhost:3000' 
     : (process.env.NEXT_PUBLIC_BASE_URL || 'https://technifold.com');
   return `${baseUrl}/${portalToken}`;
+}
+
+// Customer intelligence functions
+export async function getCustomerProfile(companyId: string): Promise<CustomerProfile | null> {
+  try {
+    const supabase = getSupabaseClient();
+    
+    const { data, error } = await supabase
+      .from('companies')
+      .select('*')
+      .eq('company_id', companyId)
+      .single();
+
+    if (error || !data) {
+      return null;
+    }
+
+    // Get sales statistics for this company
+    const { data: salesStats, error: salesError } = await supabase
+      .from('sales')
+      .select('txn_date, sale_total, total')
+      .eq('company_id', companyId);
+
+    let totalOrders = 0;
+    let totalSpent = 0;
+    let lastOrderDate = undefined;
+
+    if (!salesError && salesStats) {
+      totalOrders = salesStats.length;
+      totalSpent = salesStats.reduce((sum, sale) => sum + (sale.sale_total || sale.total || 0), 0);
+      
+      // Get most recent order date
+      const sortedSales = salesStats
+        .filter(sale => sale.txn_date)
+        .sort((a, b) => new Date(b.txn_date).getTime() - new Date(a.txn_date).getTime());
+      
+      if (sortedSales.length > 0) {
+        lastOrderDate = sortedSales[0].txn_date;
+      }
+    }
+
+    return {
+      ...data,
+      total_orders: totalOrders,
+      total_spent: totalSpent,
+      last_order_date: lastOrderDate,
+      portal_last_accessed: undefined, // Would come from analytics table
+    } as CustomerProfile;
+  } catch (error) {
+    console.error('Error fetching customer profile:', error);
+    return null;
+  }
+}
+
+export async function getCustomerOrderHistory(companyId: string): Promise<OrderHistory[]> {
+  try {
+    const supabase = getSupabaseClient();
+    
+    console.log('Fetching sales for company:', companyId);
+    
+    const { data, error } = await supabase
+      .from('sales')
+      .select('*')
+      .eq('company_id', companyId)
+      .order('txn_date', { ascending: false })
+      .limit(50);
+
+    console.log('Sales query result:', { data, error, companyId });
+
+    if (error) {
+      console.error('Error fetching sales history:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
+      return [];
+    }
+
+    // Transform sales data to OrderHistory format
+    return (data || []).map(sale => ({
+      order_id: sale.sale_id || sale.id || `sale-${Math.random()}`,
+      order_date: sale.txn_date,
+      total_amount: sale.sale_total || sale.total || 0,
+      status: 'completed',
+      items: [{
+        consumable_code: sale.consumable_code || '',
+        description: sale.description || '',
+        quantity: sale.quantity || 1,
+        unit_price: sale.unit_price || 0,
+        total_price: sale.line_total || sale.total || 0
+      }]
+    }));
+  } catch (error) {
+    console.error('Error fetching order history:', error);
+    return [];
+  }
 }
 
 export { getSupabaseClient as supabase };
