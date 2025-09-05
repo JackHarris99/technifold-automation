@@ -1,10 +1,20 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { CompanyPayload } from '@/types';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+let supabaseClient: SupabaseClient | null = null;
+
+function getSupabaseClient() {
+  if (!supabaseClient) {
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error('Missing required Supabase environment variables');
+    }
+    supabaseClient = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+  }
+  return supabaseClient;
+}
 
 export async function getPayloadByToken(token: string): Promise<CompanyPayload | null> {
   try {
@@ -13,6 +23,8 @@ export async function getPayloadByToken(token: string): Promise<CompanyPayload |
     if (!uuidRegex.test(token)) {
       return null;
     }
+
+    const supabase = getSupabaseClient();
 
     // First, get the company_id from the portal token
     const { data: companyData, error: companyError } = await supabase
@@ -43,4 +55,4 @@ export async function getPayloadByToken(token: string): Promise<CompanyPayload |
   }
 }
 
-export { supabase };
+export { getSupabaseClient as supabase };
