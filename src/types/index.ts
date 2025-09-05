@@ -24,3 +24,33 @@ export type CartItem = {
   price: number | null;
   quantity: number;
 };
+
+// Admin dashboard types
+export type Company = {
+  company_id: string;
+  company_name: string;
+  portal_token: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type CompanyStats = {
+  company_id: string;
+  company_name: string;
+  portal_token: string;
+  total_orders: number;
+  total_spent: number;
+  last_order_date: string | null;
+  portal_last_accessed: string | null;
+};
+
+export type EmailCampaign = {
+  id: string;
+  name: string;
+  subject: string;
+  template: string;
+  scheduled_date: string | null;
+  sent_date: string | null;
+  status: 'draft' | 'scheduled' | 'sent' | 'failed';
+  recipient_count: number;
+};
