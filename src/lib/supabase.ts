@@ -214,4 +214,55 @@ export async function getCustomerOrderHistory(companyId: string): Promise<OrderH
   }
 }
 
+// Product catalog functions
+export async function getProductCategories(): Promise<string[]> {
+  try {
+    const supabase = getSupabaseClient();
+    
+    const { data, error } = await supabase
+      .from('products')
+      .select('category')
+      .eq('type', 'tool');
+
+    console.log('Product categories query:', { data, error });
+
+    if (error || !data) {
+      return [];
+    }
+
+    // Get unique categories
+    const uniqueCategories = [...new Set(data.map(item => item.category).filter(Boolean))];
+    console.log('Unique tool categories:', uniqueCategories);
+    
+    return uniqueCategories;
+  } catch (error) {
+    console.error('Error fetching product categories:', error);
+    return [];
+  }
+}
+
+export async function getToolsByCategory(category: string) {
+  try {
+    const supabase = getSupabaseClient();
+    
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('type', 'tool')
+      .eq('category', category);
+
+    console.log(`Tools in category "${category}":`, { data, error });
+
+    if (error) {
+      console.error('Error fetching tools by category:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Error in getToolsByCategory:', error);
+    return [];
+  }
+}
+
 export { getSupabaseClient as supabase };
