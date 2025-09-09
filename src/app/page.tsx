@@ -1,5 +1,6 @@
 // import Link from 'next/link'; // Currently unused
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
+import { ProductCategoriesMenu } from '@/components/marketing/ProductCategoriesMenu';
 import { HeroSection } from '@/components/marketing/HeroSection';
 import { ProductShowcase } from '@/components/marketing/ProductShowcase';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
@@ -8,6 +9,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
       <MarketingHeader />
+      <ProductCategoriesMenu />
       <main>
         <HeroSection />
         <ProductShowcase />
