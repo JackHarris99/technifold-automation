@@ -1,4 +1,4 @@
-import Link from 'next/link';
+// import Link from 'next/link'; // Currently unused
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { HeroSection } from '@/components/marketing/HeroSection';
 import { ProductShowcase } from '@/components/marketing/ProductShowcase';

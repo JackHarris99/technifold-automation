@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { CompanyPayload, Company, CompanyStats, CustomerProfile, OrderHistory, CustomerAnalytics } from '@/types';
+import { CompanyPayload, Company, CustomerProfile, OrderHistory } from '@/types';
 
 let supabaseClient: SupabaseClient | null = null;
 
@@ -116,9 +116,9 @@ export function generatePortalUrl(portalToken: string): string {
   // In development, always use localhost. In production, use the configured base URL.
   const isDevelopment = process.env.NODE_ENV === 'development';
   const baseUrl = isDevelopment 
-    ? 'http://localhost:3000' 
+    ? 'http://localhost:3008' 
     : (process.env.NEXT_PUBLIC_BASE_URL || 'https://technifold.com');
-  return `${baseUrl}/${portalToken}`;
+  return `${baseUrl}/portal/${portalToken}`;
 }
 
 // Customer intelligence functions
@@ -263,6 +263,81 @@ export async function getToolsByCategory(category: string) {
     console.error('Error in getToolsByCategory:', error);
     return [];
   }
+}
+
+// Technical product data sheet functions
+export async function getToolByProductCode(productCode: string) {
+  try {
+    const supabase = getSupabaseClient();
+    
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('product_code', productCode)
+      .eq('type', 'tool')
+      .single();
+
+    console.log(`Tool details for "${productCode}":`, { data, error });
+
+    if (error || !data) {
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error fetching tool by product code:', error);
+    return null;
+  }
+}
+
+export async function getCompatibleConsumables(productCode: string) {
+  try {
+    console.log(`Looking for consumables compatible with "${productCode}" using tool_consumable_map`);
+    const supabase = getSupabaseClient();
+    
+    // Query the tool_consumable_map table to find consumables for this tool
+    const { data, error } = await supabase
+      .from('tool_consumable_map')
+      .select(`
+        consumable_code,
+        products!tool_consumable_map_consumable_code_fkey (
+          product_code,
+          description,
+          price,
+          currency,
+          type,
+          active
+        )
+      `)
+      .eq('tool_code', productCode);
+      
+    console.log(`Found ${data?.length || 0} compatible consumables for "${productCode}"`);
+    
+    if (error) {
+      console.error('Error fetching compatible consumables:', error);
+      return [];
+    }
+    
+    // Transform the data to return the consumable products
+    const consumables = (data || [])
+      .map(item => item.products)
+      .filter((product): product is NonNullable<typeof product> => product && 'active' in product && Boolean(product.active));
+      
+    console.log(`Returning ${consumables.length} active consumables`);
+    return consumables;
+  } catch (error) {
+    console.error('Error in getCompatibleConsumables:', error);
+    return [];
+  }
+}
+
+// URL encoding/decoding utilities for product codes with forward slashes
+export function encodeProductCodeForUrl(productCode: string): string {
+  return productCode.replace(/\//g, '--');
+}
+
+export function decodeProductCodeFromUrl(encodedCode: string): string {
+  return encodedCode.replace(/--/g, '/');
 }
 
 export { getSupabaseClient as supabase };
