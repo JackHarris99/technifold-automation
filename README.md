@@ -22,7 +22,7 @@ A Next.js application for companies to browse and order consumables through pers
 Create a `.env.local` file with:
 
 ```env
-NEXT_PUBLIC_BASE_URL=https://yourdomain.com  
+NEXT_PUBLIC_BASE_URL=https://technifold-automation-yv8i.vercel.app
 SUPABASE_URL=your_supabase_project_url
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```

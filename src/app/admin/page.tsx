@@ -1,10 +1,15 @@
-import { getAllCompanies } from '@/lib/supabase';
+import { getAllCompanies, getAllProductsWithDatasheets } from '@/lib/supabase';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 
 export default async function AdminPage() {
-  const companies = await getAllCompanies();
+  const [companies, products] = await Promise.all([
+    getAllCompanies(),
+    getAllProductsWithDatasheets()
+  ]);
 
-  return <AdminDashboard companies={companies} />;
+  console.log(`Loaded ${companies.length} companies and ${products.length} products from database`);
+
+  return <AdminDashboard companies={companies} products={products} />;
 }
 
 export const metadata = {

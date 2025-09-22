@@ -115,8 +115,8 @@ export async function getAllCompanies(): Promise<Company[]> {
 export function generatePortalUrl(portalToken: string): string {
   // In development, always use localhost. In production, use the configured base URL.
   const isDevelopment = process.env.NODE_ENV === 'development';
-  const baseUrl = isDevelopment 
-    ? 'http://localhost:3008' 
+  const baseUrl = isDevelopment
+    ? 'http://localhost:3000'
     : (process.env.NEXT_PUBLIC_BASE_URL || 'https://technifold.com');
   return `${baseUrl}/portal/${portalToken}`;
 }
@@ -261,6 +261,30 @@ export async function getToolsByCategory(category: string) {
     return data || [];
   } catch (error) {
     console.error('Error in getToolsByCategory:', error);
+    return [];
+  }
+}
+
+// Get all products for admin datasheet listing
+export async function getAllProductsWithDatasheets() {
+  try {
+    const supabase = getSupabaseClient();
+
+    const { data, error } = await supabase
+      .from('products')
+      .select('product_code, product_desc, category, type, price')
+      .eq('type', 'tool')
+      .order('category', { ascending: true })
+      .order('product_desc', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching products with datasheets:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Error in getAllProductsWithDatasheets:', error);
     return [];
   }
 }
