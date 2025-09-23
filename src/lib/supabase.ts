@@ -328,33 +328,32 @@ export async function getCompatibleConsumables(productCode: string) {
     // Query the tool_consumable_map table to find consumables for this tool
     const { data, error } = await supabase
       .from('tool_consumable_map')
-      .select(`
-        consumable_code,
-        products!tool_consumable_map_consumable_code_fkey (
-          product_code,
-          description,
-          price,
-          currency,
-          type,
-          active
-        )
-      `)
+      .select('consumable_code')
       .eq('tool_code', productCode);
       
     console.log(`Found ${data?.length || 0} compatible consumables for "${productCode}"`);
     
-    if (error) {
-      console.error('Error fetching compatible consumables:', error);
+    if (error || !data || data.length === 0) {
+      console.error('Error or no data in tool_consumable_map:', error);
       return [];
     }
-    
-    // Transform the data to return the consumable products
-    const consumables = (data || [])
-      .map(item => item.products)
-      .filter((product): product is NonNullable<typeof product> => product && 'active' in product && Boolean(product.active));
-      
-    console.log(`Returning ${consumables.length} active consumables`);
-    return consumables;
+
+    // Get the consumable codes
+    const consumableCodes = data.map(item => item.consumable_code);
+
+    // Fetch the actual product details for these consumables
+    const { data: products, error: productsError } = await supabase
+      .from('products')
+      .select('product_code, description, price, currency, type, category')
+      .in('product_code', consumableCodes);
+
+    if (productsError) {
+      console.error('Error fetching consumable products:', productsError);
+      return [];
+    }
+
+    console.log(`Returning ${products?.length || 0} consumables`);
+    return products || [];
   } catch (error) {
     console.error('Error in getCompatibleConsumables:', error);
     return [];

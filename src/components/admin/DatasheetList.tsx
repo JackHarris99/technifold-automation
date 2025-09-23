@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { encodeProductCodeForUrl } from '@/lib/supabase';
 
 export interface Product {
   product_code: string;
@@ -120,7 +121,7 @@ export function DatasheetList({ products }: DatasheetListProps) {
 
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <Link
-                    href={`/datasheet/${product.product_code}`}
+                    href={`/datasheet/${encodeProductCodeForUrl(product.product_code)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:text-blue-900 flex items-center justify-end"
