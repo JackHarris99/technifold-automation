@@ -218,11 +218,12 @@ export async function getCustomerOrderHistory(companyId: string): Promise<OrderH
 export async function getProductCategories(): Promise<string[]> {
   try {
     const supabase = getSupabaseClient();
-    
+
     const { data, error } = await supabase
       .from('products')
       .select('category')
-      .eq('type', 'tool');
+      .eq('type', 'tool')
+      .range(0, 9999); // Handle up to 10,000 products
 
     console.log('Product categories query:', { data, error });
 
@@ -244,12 +245,13 @@ export async function getProductCategories(): Promise<string[]> {
 export async function getToolsByCategory(category: string) {
   try {
     const supabase = getSupabaseClient();
-    
+
     const { data, error } = await supabase
       .from('products')
       .select('*')
       .eq('type', 'tool')
-      .eq('category', category);
+      .eq('category', category)
+      .range(0, 9999); // Handle up to 10,000 products per category
 
     console.log(`Tools in category "${category}":`, { data, error });
 
@@ -270,17 +272,21 @@ export async function getAllProductsWithDatasheets() {
   try {
     const supabase = getSupabaseClient();
 
-    const { data, error } = await supabase
+    // Fetch products with explicit range to bypass default limit
+    const { data, error, count } = await supabase
       .from('products')
-      .select('product_code, product_desc, category, type, price')
+      .select('product_code, product_desc, category, type, price', { count: 'exact' })
       .eq('type', 'tool')
       .order('category', { ascending: true })
-      .order('product_desc', { ascending: true });
+      .order('product_desc', { ascending: true })
+      .range(0, 9999); // Explicitly request up to 10,000 records
 
     if (error) {
       console.error('Error fetching products with datasheets:', error);
       return [];
     }
+
+    console.log(`Found ${data?.length || 0} tool products out of ${count} total matching records`);
 
     return data || [];
   } catch (error) {
