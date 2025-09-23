@@ -41,8 +41,8 @@ export async function generateMetadata({ params }: PageProps) {
   }
 
   return {
-    title: `${tool.product_name || tool.name || decodedProductCode} - Technical Specifications | Technifold`,
-    description: `Technical data sheet for ${tool.product_name || decodedProductCode}. Specifications, compatibility, and consumables information.`,
+    title: `${tool.description || decodedProductCode} - Technical Specifications | Technifold`,
+    description: `Technical data sheet for ${tool.description || decodedProductCode}. Specifications, compatibility, and consumables information.`,
     robots: 'noindex, nofollow', // Not for public SEO - direct access only
   };
 }

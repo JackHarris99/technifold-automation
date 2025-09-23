@@ -5,10 +5,12 @@ import { useState } from 'react';
 
 export interface Product {
   product_code: string;
-  product_desc: string;
+  description: string;
   category: string;
   type: string;
   price: number | null;
+  currency?: string;
+  active?: boolean;
 }
 
 interface DatasheetListProps {
@@ -23,7 +25,7 @@ export function DatasheetList({ products }: DatasheetListProps) {
 
   const filteredProducts = products.filter(product => {
     const matchesSearch =
-      product.product_desc.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.product_code.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
@@ -102,7 +104,7 @@ export function DatasheetList({ products }: DatasheetListProps) {
 
                 <td className="px-6 py-4">
                   <div className="text-sm text-gray-900">
-                    {product.product_desc}
+                    {product.description}
                   </div>
                 </td>
 

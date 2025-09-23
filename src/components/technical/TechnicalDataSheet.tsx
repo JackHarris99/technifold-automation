@@ -21,7 +21,7 @@ export function TechnicalDataSheet({ tool, consumables }: TechnicalDataSheetProp
                 </Link>
               </nav>
               <h1 className="text-3xl font-bold text-gray-900">
-                {tool.product_name || tool.name || tool.product_code}
+                {tool.description || tool.product_code}
               </h1>
               <p className="text-gray-600 mt-1">
                 Technical Data Sheet • Product Code: {tool.product_code}

@@ -272,13 +272,13 @@ export async function getAllProductsWithDatasheets() {
   try {
     const supabase = getSupabaseClient();
 
-    // Fetch products with explicit range to bypass default limit
+    // Fetch products with correct column names
     const { data, error, count } = await supabase
       .from('products')
-      .select('product_code, product_desc, category, type, price', { count: 'exact' })
+      .select('product_code, description, category, type, price, currency, active', { count: 'exact' })
       .eq('type', 'tool')
       .order('category', { ascending: true })
-      .order('product_desc', { ascending: true })
+      .order('description', { ascending: true })
       .range(0, 9999); // Explicitly request up to 10,000 records
 
     if (error) {
