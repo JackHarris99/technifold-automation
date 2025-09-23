@@ -7,7 +7,12 @@ export default async function AdminPage() {
     getAllProductsWithDatasheets()
   ]);
 
-  console.log(`Loaded ${companies.length} companies and ${products.length} products from database`);
+  console.log(`Admin Page Data:`, {
+    companiesCount: companies.length,
+    productsCount: products.length,
+    sampleProducts: products.slice(0, 3),
+    productTypes: [...new Set(products.map(p => p.type))]
+  });
 
   return <AdminDashboard companies={companies} products={products} />;
 }
