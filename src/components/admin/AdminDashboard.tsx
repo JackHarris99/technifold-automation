@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { Company } from '@/types';
 import { AdminHeader } from './AdminHeader';
 import { CompanyList } from './CompanyList';
-import { DatasheetList } from './DatasheetList';
+import { DatasheetList, Product } from './DatasheetList';
 
 interface AdminDashboardProps {
   companies: Company[];
-  products: any[];
+  products: Product[];
 }
 
 export function AdminDashboard({ companies, products }: AdminDashboardProps) {

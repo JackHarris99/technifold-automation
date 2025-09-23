@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
-interface Product {
+export interface Product {
   product_code: string;
   product_desc: string;
   category: string;
