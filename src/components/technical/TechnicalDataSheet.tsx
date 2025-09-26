@@ -1,4 +1,9 @@
+'use client';
+
 import Link from 'next/link';
+import Image from 'next/image';
+import { useState } from 'react';
+import { getProductImagePath } from '@/lib/productImages';
 
 interface TechnicalDataSheetProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -8,6 +13,9 @@ interface TechnicalDataSheetProps {
 }
 
 export function TechnicalDataSheet({ tool, consumables }: TechnicalDataSheetProps) {
+  const [imageError, setImageError] = useState(false);
+  const productImagePath = getProductImagePath(tool.product_code);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -46,15 +54,26 @@ export function TechnicalDataSheet({ tool, consumables }: TechnicalDataSheetProp
           {/* Product Image and Overview */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-              {/* Product Image Placeholder */}
-              <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                <div className="text-center">
-                  <svg className="w-24 h-24 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                  </svg>
-                  <p className="text-gray-500 text-sm">Product Image</p>
-                  <p className="text-xs text-gray-400">{tool.product_code}</p>
-                </div>
+              {/* Product Image */}
+              <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center relative">
+                {productImagePath && !imageError ? (
+                  <Image
+                    src={productImagePath}
+                    alt={tool.description || tool.product_code}
+                    fill
+                    className="object-contain p-4"
+                    onError={() => setImageError(true)}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                ) : (
+                  <div className="text-center">
+                    <svg className="w-24 h-24 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                    <p className="text-gray-500 text-sm">Product Image</p>
+                    <p className="text-xs text-gray-400">{tool.product_code}</p>
+                  </div>
+                )}
               </div>
 
               {/* Quick Info */}
