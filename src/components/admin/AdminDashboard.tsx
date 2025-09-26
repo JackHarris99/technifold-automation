@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Company } from '@/types';
 import { AdminHeader } from './AdminHeader';
-import { CompanyList } from './CompanyList';
+import { CompanyGrid } from './CompanyGrid';
 import { DatasheetList, Product } from './DatasheetList';
 
 interface AdminDashboardProps {
@@ -72,29 +72,19 @@ export function AdminDashboard({ companies, products }: AdminDashboardProps) {
         </div>
 
         {/* Tab Content */}
-        <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-          {activeTab === 'customers' ? (
-            <>
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">Company Portal Links</h2>
-                <p className="text-sm text-gray-500 mt-1">
-                  {companies.length} companies with permanent portal access
-                </p>
-              </div>
-              <CompanyList companies={companies} />
-            </>
-          ) : (
-            <>
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">Product Technical Datasheets</h2>
-                <p className="text-sm text-gray-500 mt-1">
-                  View and manage technical datasheets for all products
-                </p>
-              </div>
-              <DatasheetList products={products} />
-            </>
-          )}
-        </div>
+        {activeTab === 'customers' ? (
+          <CompanyGrid companies={companies} />
+        ) : (
+          <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-medium text-gray-900">Product Technical Datasheets</h2>
+              <p className="text-sm text-gray-500 mt-1">
+                View and manage technical datasheets for all products
+              </p>
+            </div>
+            <DatasheetList products={products} />
+          </div>
+        )}
       </main>
     </div>
   );
