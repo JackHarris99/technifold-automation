@@ -212,28 +212,60 @@ export function TechnicalDataSheet({ tool, consumables }: TechnicalDataSheetProp
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {consumables.map((consumable, index) => (
-                    <div key={consumable.product_code || index} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-medium text-gray-900 text-sm">
-                          {consumable.product_name || consumable.name || consumable.description}
-                        </h3>
-                        {consumable.price && (
-                          <span className="text-sm font-medium text-gray-900">£{consumable.price}</span>
-                        )}
+                  {consumables.map((consumable, index) => {
+                    const consumableImagePath = getProductImagePath(consumable.product_code);
+                    return (
+                      <div key={consumable.product_code || index} className="border border-gray-200 rounded-lg overflow-hidden">
+                        <div className="flex">
+                          {/* Consumable Image */}
+                          <div className="w-24 h-24 bg-gray-100 flex-shrink-0 relative">
+                            {consumableImagePath ? (
+                              <Image
+                                src={consumableImagePath}
+                                alt={consumable.description || consumable.product_code}
+                                fill
+                                className="object-contain p-2"
+                                sizes="96px"
+                                onError={(e) => {
+                                  // Hide image if it fails to load
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                }}
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Consumable Details */}
+                          <div className="flex-1 p-3">
+                            <div className="flex justify-between items-start mb-1">
+                              <h3 className="font-medium text-gray-900 text-sm">
+                                {consumable.description || consumable.product_code}
+                              </h3>
+                              {consumable.price && (
+                                <span className="text-sm font-medium text-gray-900 ml-2">£{consumable.price}</span>
+                              )}
+                            </div>
+
+                            <p className="text-xs text-gray-500 font-mono">
+                              {consumable.product_code}
+                            </p>
+
+                            {consumable.category && (
+                              <p className="text-xs text-gray-600 mt-1">
+                                Category: {consumable.category}
+                              </p>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      
-                      <p className="text-xs text-gray-500 font-mono mb-2">
-                        {consumable.product_code}
-                      </p>
-                      
-                      {consumable.description && (
-                        <p className="text-xs text-gray-600">
-                          {consumable.description}
-                        </p>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
