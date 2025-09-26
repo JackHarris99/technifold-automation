@@ -6,6 +6,8 @@ import { useState } from 'react';
 import { encodeProductCodeForUrl } from '@/lib/supabase';
 import { getProductImagePath } from '@/lib/productImages';
 
+// DatasheetGrid component - Updated 2025-09-26
+
 export interface Product {
   product_code: string;
   description: string;
