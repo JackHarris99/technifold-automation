@@ -14,13 +14,25 @@ export function CompanyGrid({ companies }: CompanyGridProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [selectedLetter, setSelectedLetter] = useState<string>('all');
   const itemsPerPage = 24; // Shows nicely as 4x6 or 3x8 grid
 
-  // Filter companies based on search
-  const filteredCompanies = companies.filter(company =>
-    company.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    company.company_id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Generate alphabet array plus numbers and special
+  const alphabet = ['All', '#', ...Array.from({length: 26}, (_, i) => String.fromCharCode(65 + i))];
+
+  // Filter companies based on search and letter
+  const filteredCompanies = companies.filter(company => {
+    const matchesSearch = searchTerm === '' ||
+      company.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      company.company_id.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const firstChar = company.company_name[0]?.toUpperCase();
+    const matchesLetter = selectedLetter === 'all' ||
+      (selectedLetter === '#' && !firstChar?.match(/[A-Z]/)) ||
+      firstChar === selectedLetter;
+
+    return matchesSearch && matchesLetter;
+  });
 
   // Pagination
   const totalPages = Math.ceil(filteredCompanies.length / itemsPerPage);
@@ -28,14 +40,39 @@ export function CompanyGrid({ companies }: CompanyGridProps) {
   const endIndex = startIndex + itemsPerPage;
   const currentCompanies = filteredCompanies.slice(startIndex, endIndex);
 
-  // Reset to page 1 when search changes
+  // Reset to page 1 when search or letter changes
   const handleSearch = (value: string) => {
     setSearchTerm(value);
     setCurrentPage(1);
   };
 
+  const handleLetterClick = (letter: string) => {
+    setSelectedLetter(letter.toLowerCase());
+    setCurrentPage(1);
+    setSearchTerm(''); // Clear search when using alphabet
+  };
+
   return (
     <div className="space-y-4">
+      {/* Alphabet Navigation */}
+      <div className="bg-white rounded-lg shadow-sm p-3">
+        <div className="flex flex-wrap gap-1 justify-center">
+          {alphabet.map(letter => (
+            <button
+              key={letter}
+              onClick={() => handleLetterClick(letter)}
+              className={`px-3 py-1.5 text-sm font-medium rounded transition-colors ${
+                selectedLetter === letter.toLowerCase()
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {letter}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Header Controls */}
       <div className="bg-white rounded-lg shadow-sm p-4">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Company } from '@/types';
 import { AdminHeader } from './AdminHeader';
 import { CompanyGrid } from './CompanyGrid';
-import { DatasheetList, Product } from './DatasheetList';
+import { DatasheetGrid, Product } from './DatasheetGrid';
 
 interface AdminDashboardProps {
   companies: Company[];
@@ -75,15 +75,7 @@ export function AdminDashboard({ companies, products }: AdminDashboardProps) {
         {activeTab === 'customers' ? (
           <CompanyGrid companies={companies} />
         ) : (
-          <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-medium text-gray-900">Product Technical Datasheets</h2>
-              <p className="text-sm text-gray-500 mt-1">
-                View and manage technical datasheets for all products
-              </p>
-            </div>
-            <DatasheetList products={products} />
-          </div>
+          <DatasheetGrid products={products} />
         )}
       </main>
     </div>
