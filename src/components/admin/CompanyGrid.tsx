@@ -29,7 +29,7 @@ export function CompanyGrid({ companies }: CompanyGridProps) {
     const firstChar = company.company_name[0]?.toUpperCase();
     const matchesLetter = selectedLetter === 'all' ||
       (selectedLetter === '#' && !firstChar?.match(/[A-Z]/)) ||
-      firstChar === selectedLetter;
+      firstChar?.toLowerCase() === selectedLetter;
 
     return matchesSearch && matchesLetter;
   });

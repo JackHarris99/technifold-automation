@@ -27,6 +27,7 @@ export function DatasheetGrid({ products }: DatasheetGridProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const itemsPerPage = 24;
 
   // Get unique categories
@@ -140,6 +141,7 @@ export function DatasheetGrid({ products }: DatasheetGridProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {currentProducts.map((product) => {
             const imagePath = getProductImagePath(product.product_code);
+            const imageHasFailed = failedImages.has(product.product_code);
             return (
               <div
                 key={product.product_code}
@@ -147,16 +149,15 @@ export function DatasheetGrid({ products }: DatasheetGridProps) {
               >
                 {/* Product Image */}
                 <div className="aspect-square bg-gray-100 relative">
-                  {imagePath ? (
+                  {imagePath && !imageHasFailed ? (
                     <Image
                       src={imagePath}
                       alt={product.description}
                       fill
                       className="object-contain p-4"
                       sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
+                      onError={() => {
+                        setFailedImages(prev => new Set(prev).add(product.product_code));
                       }}
                     />
                   ) : (
