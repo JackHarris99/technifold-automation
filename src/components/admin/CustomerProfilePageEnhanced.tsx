@@ -267,7 +267,6 @@ export function CustomerProfilePage({ profile, orderHistory, ownedTools = [], or
             </div>
 
             {/* Consumables Ordered */}
-            {console.log('Ordered Consumables:', orderedConsumables)}
             {orderedConsumables && orderedConsumables.length > 0 ? (
               <div className="bg-white shadow-sm rounded-lg">
                 <div className="px-6 py-4 border-b border-gray-200">
