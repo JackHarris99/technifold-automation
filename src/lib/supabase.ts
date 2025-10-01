@@ -558,29 +558,8 @@ export async function getCompanyOrderedConsumables(companyId: string): Promise<A
       return [];
     }
 
-    // Fetch product details for these consumables
-    const { data: products, error: productsError } = await supabase
-      .from('products')
-      .select('product_code, description, category, type, price')
-      .in('product_code', uniqueConsumableCodes);
-
-    if (productsError) {
-      console.error('Error fetching consumable details:', productsError);
-    }
-
-    // Filter out tools and merge product details with sales data
-    const consumableProducts = (products || []).filter(p => p.type !== 'tool');
-
-    // If we have product data, use it; otherwise use sales data
-    const enrichedConsumables = consumableProducts.length > 0
-      ? consumableProducts.map(product => ({
-          ...product,
-          ...consumableMap[product.product_code]
-        }))
-      : Object.values(consumableMap).filter(item => {
-          // If no product data, include all non-tool items from sales
-          return true;
-        });
+    // Just return the sales data directly, no need to join with products table
+    const enrichedConsumables = Object.values(consumableMap);
 
     // Sort by last_ordered date (most recent first)
     return enrichedConsumables.sort((a, b) =>
