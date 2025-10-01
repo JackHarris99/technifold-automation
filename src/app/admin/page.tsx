@@ -20,11 +20,18 @@ export default async function AdminPage() {
     categoryCount[cat] = (categoryCount[cat] || 0) + 1;
   });
 
-  // For now, put all companies in customers until we fix category filtering
-  const customers = allCompanies;
-  const partners = [] as typeof allCompanies;
-  const press = [] as typeof allCompanies;
-  const prospects = [] as typeof allCompanies;
+  // Split companies by category (using lowercase as in database)
+  let customers = allCompanies.filter(c => (c as any).category === 'customers');
+  const partners = allCompanies.filter(c => (c as any).category === 'partners');
+  const press = allCompanies.filter(c => (c as any).category === 'press');
+  const prospects = allCompanies.filter(c => (c as any).category === 'prospects');
+
+  // If no categorized companies, show all in customers tab as fallback
+  const uncategorized = allCompanies.filter(c => !(c as any).category);
+  if (customers.length === 0 && partners.length === 0 && press.length === 0 && prospects.length === 0) {
+    // All companies are uncategorized, show them in customers tab
+    customers = uncategorized;
+  }
 
   console.log(`Admin Page Data:`, {
     availableCategories: categories,

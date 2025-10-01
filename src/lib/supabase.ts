@@ -85,7 +85,7 @@ export async function getAllCompanies(): Promise<Company[]> {
     while (hasMore) {
       const { data, error } = await supabase
         .from('companies')
-        .select('company_id, company_name, portal_token, created_at, updated_at')
+        .select('company_id, company_name, portal_token, created_at, updated_at, category')
         .order('company_name')
         .range(from, from + batchSize - 1);
 
