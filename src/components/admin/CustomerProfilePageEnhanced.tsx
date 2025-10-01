@@ -1,9 +1,7 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { CustomerProfile, OrderHistory, CompanyPayload } from '@/types';
 import { AdminHeader } from './AdminHeader';
-import { generatePortalUrl, encodeProductCodeForUrl } from '@/lib/supabase';
-import { getProductImagePath } from '@/lib/productImages';
+import { generatePortalUrl } from '@/lib/supabase';
 
 interface Tool {
   product_code: string;
@@ -166,54 +164,18 @@ export function CustomerProfilePage({ profile, orderHistory, portalData, ownedTo
                   <p className="text-sm text-gray-500 mt-1">Equipment purchased by this company</p>
                 </div>
                 <div className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {ownedTools.map((tool, index) => {
-                      const imagePath = tool.product_code ? getProductImagePath(tool.product_code) : null;
-                      const safeProductCode = tool.product_code ? encodeProductCodeForUrl(tool.product_code) : '';
-                      return (
-                        <div key={`tool-${index}`} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                          <div className="aspect-w-16 aspect-h-9 bg-gray-100 relative h-48">
-                            {imagePath ? (
-                              <Image
-                                src={imagePath}
-                                alt={tool.description || 'Product'}
-                                fill
-                                className="object-contain p-4"
-                                sizes="(max-width: 768px) 100vw, 50vw"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.style.display = 'none';
-                                }}
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <svg className="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                                </svg>
-                              </div>
-                            )}
-                          </div>
-                          <div className="p-4">
-                            <h4 className="font-semibold text-gray-900 mb-1">{tool.description || 'Unknown Product'}</h4>
-                            <p className="text-xs text-gray-500 font-mono mb-2">{tool.product_code || 'N/A'}</p>
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                                {tool.category || 'Tool'}
-                              </span>
-                              {safeProductCode && (
-                                <Link
-                                  href={`/datasheet/${safeProductCode}`}
-                                  target="_blank"
-                                  className="text-xs text-blue-600 hover:text-blue-800"
-                                >
-                                  View Datasheet →
-                                </Link>
-                              )}
-                            </div>
-                          </div>
+                  <div className="space-y-2">
+                    {ownedTools.map((tool, index) => (
+                      <div key={`tool-${index}`} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{tool.description || 'Unknown Product'}</p>
+                          <p className="text-xs text-gray-500 font-mono">{tool.product_code || 'N/A'}</p>
                         </div>
-                      );
-                    })}
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                          {tool.category || 'Tool'}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
