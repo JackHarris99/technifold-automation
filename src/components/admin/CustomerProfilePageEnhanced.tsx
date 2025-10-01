@@ -267,7 +267,8 @@ export function CustomerProfilePage({ profile, orderHistory, ownedTools = [], or
             </div>
 
             {/* Consumables Ordered */}
-            {orderedConsumables && orderedConsumables.length > 0 && (
+            {console.log('Ordered Consumables:', orderedConsumables)}
+            {orderedConsumables && orderedConsumables.length > 0 ? (
               <div className="bg-white shadow-sm rounded-lg">
                 <div className="px-6 py-4 border-b border-gray-200">
                   <h3 className="text-lg font-medium text-gray-900">Consumables Ordered</h3>
@@ -320,6 +321,17 @@ export function CustomerProfilePage({ profile, orderHistory, ownedTools = [], or
                       );
                     })}
                   </div>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white shadow-sm rounded-lg">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <h3 className="text-lg font-medium text-gray-900">Consumables Ordered</h3>
+                  <p className="text-sm text-gray-500 mt-1">Products this company has purchased</p>
+                </div>
+                <div className="p-6">
+                  <p className="text-sm text-gray-500">No consumables ordered yet or data not available.</p>
+                  <p className="text-xs text-gray-400 mt-2">Debug: {orderedConsumables ? `Array length: ${orderedConsumables.length}` : 'orderedConsumables is undefined'}</p>
                 </div>
               </div>
             )}
