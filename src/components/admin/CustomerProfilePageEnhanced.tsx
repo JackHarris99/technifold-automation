@@ -1,7 +1,9 @@
 import Link from 'next/link';
-import { CustomerProfile, OrderHistory, CompanyPayload } from '@/types';
+import Image from 'next/image';
+import { CustomerProfile, OrderHistory } from '@/types';
 import { AdminHeader } from './AdminHeader';
 import { generatePortalUrl } from '@/lib/supabase';
+import { getProductImagePath } from '@/lib/productImages';
 
 interface Tool {
   product_code: string;
@@ -11,14 +13,23 @@ interface Tool {
   [key: string]: unknown;
 }
 
+interface Consumable {
+  product_code: string;
+  description: string;
+  category?: string;
+  total_ordered: number;
+  last_ordered?: string;
+  [key: string]: unknown;
+}
+
 interface CustomerProfilePageProps {
   profile: CustomerProfile;
   orderHistory: OrderHistory[];
-  portalData: CompanyPayload | null;
   ownedTools?: Tool[];
+  orderedConsumables?: Consumable[];
 }
 
-export function CustomerProfilePage({ profile, orderHistory, portalData, ownedTools = [] }: CustomerProfilePageProps) {
+export function CustomerProfilePage({ profile, orderHistory, ownedTools = [], orderedConsumables = [] }: CustomerProfilePageProps) {
   const portalUrl = generatePortalUrl(profile.portal_token);
 
   return (
@@ -255,42 +266,59 @@ export function CustomerProfilePage({ profile, orderHistory, portalData, ownedTo
               </div>
             </div>
 
-            {/* Available Products */}
-            {portalData && portalData.reorder_items.length > 0 && (
+            {/* Consumables Ordered */}
+            {orderedConsumables && orderedConsumables.length > 0 && (
               <div className="bg-white shadow-sm rounded-lg">
                 <div className="px-6 py-4 border-b border-gray-200">
-                  <h3 className="text-lg font-medium text-gray-900">Portal Products</h3>
-                  <p className="text-sm text-gray-500 mt-1">Items available in their portal</p>
+                  <h3 className="text-lg font-medium text-gray-900">Consumables Ordered</h3>
+                  <p className="text-sm text-gray-500 mt-1">All consumable products this company has purchased</p>
                 </div>
                 <div className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900 mb-3">
-                        Recent Items ({portalData.reorder_items.length})
-                      </h4>
-                      <div className="space-y-2 max-h-48 overflow-y-auto">
-                        {portalData.reorder_items.slice(0, 10).map((item) => (
-                          <div key={item.consumable_code} className="flex justify-between items-center text-xs bg-gray-50 p-2 rounded">
-                            <span className="truncate">{item.description}</span>
-                            <span className="font-medium">£{item.price}</span>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {orderedConsumables.map((consumable) => {
+                      const imagePath = getProductImagePath(consumable.product_code);
+                      return (
+                        <div key={consumable.product_code} className="border border-gray-200 rounded-lg overflow-hidden">
+                          <div className="aspect-square bg-gray-100 relative">
+                            {imagePath ? (
+                              <Image
+                                src={imagePath}
+                                alt={consumable.description}
+                                fill
+                                className="object-contain p-2"
+                                sizes="(max-width: 768px) 50vw, 25vw"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = '/product-placeholder.svg';
+                                }}
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                </svg>
+                              </div>
+                            )}
                           </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900 mb-3">
-                        Tool Categories ({portalData.by_tool_tabs.length})
-                      </h4>
-                      <div className="space-y-2">
-                        {portalData.by_tool_tabs.map((tab) => (
-                          <div key={tab.tool_code} className="text-xs bg-blue-50 p-2 rounded">
-                            <div className="font-medium text-blue-900">{tab.tool_desc}</div>
-                            <div className="text-blue-700">{tab.items.length} items</div>
+                          <div className="p-3">
+                            <h4 className="text-xs font-medium text-gray-900 truncate" title={consumable.description}>
+                              {consumable.description}
+                            </h4>
+                            <p className="text-xs text-gray-500 font-mono mt-1">{consumable.product_code}</p>
+                            <div className="mt-2 space-y-1">
+                              <div className="text-xs text-gray-600">
+                                Qty: <span className="font-medium">{consumable.total_ordered}</span>
+                              </div>
+                              {consumable.last_ordered && (
+                                <div className="text-xs text-gray-500">
+                                  Last: {new Date(consumable.last_ordered).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        ))}
-                      </div>
-                    </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>

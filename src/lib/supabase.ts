@@ -296,7 +296,10 @@ export async function getCustomerOrderHistory(companyId: string): Promise<OrderH
       return acc;
     }, {} as Record<string, OrderHistory>);
 
-    return Object.values(groupedByInvoice);
+    // Sort by order_date descending (latest first)
+    return Object.values(groupedByInvoice).sort((a, b) =>
+      new Date(b.order_date).getTime() - new Date(a.order_date).getTime()
+    );
   } catch (error) {
     console.error('Error fetching order history:', error);
     return [];
@@ -495,6 +498,85 @@ export async function getCompatibleConsumables(productCode: string) {
     return products || [];
   } catch (error) {
     console.error('Error in getCompatibleConsumables:', error);
+    return [];
+  }
+}
+
+// Get all consumables ordered by a company
+export async function getCompanyOrderedConsumables(companyId: string): Promise<Array<{
+  product_code: string;
+  description: string;
+  category?: string;
+  type?: string;
+  total_ordered: number;
+  last_ordered?: string;
+  [key: string]: unknown;
+}>> {
+  try {
+    const supabase = getSupabaseClient();
+
+    // Get all unique consumables from sales for this company
+    const { data: salesData, error: salesError } = await supabase
+      .from('sales')
+      .select('product_code, description, quantity, txn_date')
+      .eq('company_id', companyId)
+      .not('product_code', 'is', null);
+
+    if (salesError || !salesData) {
+      console.error('Error fetching sales for consumables:', salesError);
+      return [];
+    }
+
+    // Group by product_code and aggregate quantities
+    const consumableMap = salesData.reduce((acc, sale) => {
+      const code = sale.product_code;
+      if (!acc[code]) {
+        acc[code] = {
+          product_code: code,
+          description: sale.description || '',
+          total_ordered: 0,
+          last_ordered: sale.txn_date
+        };
+      }
+      acc[code].total_ordered += (sale.quantity || 1);
+      // Update last_ordered if this sale is more recent
+      if (sale.txn_date && new Date(sale.txn_date) > new Date(acc[code].last_ordered)) {
+        acc[code].last_ordered = sale.txn_date;
+      }
+      return acc;
+    }, {} as Record<string, any>);
+
+    const uniqueConsumableCodes = Object.keys(consumableMap);
+
+    if (uniqueConsumableCodes.length === 0) {
+      return [];
+    }
+
+    // Fetch product details for these consumables (to check if they're consumables not tools)
+    const { data: products, error: productsError } = await supabase
+      .from('products')
+      .select('product_code, description, category, type, price')
+      .in('product_code', uniqueConsumableCodes)
+      .eq('type', 'consumable');
+
+    if (productsError) {
+      console.error('Error fetching consumable details:', productsError);
+      // Still return what we have from sales
+      return Object.values(consumableMap);
+    }
+
+    // Merge product details with sales data
+    const enrichedConsumables = (products || []).map(product => ({
+      ...product,
+      ...consumableMap[product.product_code]
+    }));
+
+    // Sort by last_ordered date (most recent first)
+    return enrichedConsumables.sort((a, b) =>
+      new Date(b.last_ordered || 0).getTime() - new Date(a.last_ordered || 0).getTime()
+    );
+  } catch (error) {
+    console.error('Error in getCompanyOrderedConsumables:', error);
     return [];
   }
 }
