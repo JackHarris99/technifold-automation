@@ -297,7 +297,8 @@ export async function getCustomerOrderHistory(companyId: string): Promise<OrderH
     }, {} as Record<string, OrderHistory>);
 
     // Sort by order_date descending (latest first)
-    return Object.values(groupedByInvoice).sort((a, b) =>
+    const orders = Object.values(groupedByInvoice) as OrderHistory[];
+    return orders.sort((a, b) =>
       new Date(b.order_date).getTime() - new Date(a.order_date).getTime()
     );
   } catch (error) {
