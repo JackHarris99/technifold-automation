@@ -544,7 +544,12 @@ export async function getCompanyOrderedConsumables(companyId: string): Promise<A
         acc[code].last_ordered = sale.txn_date;
       }
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as Record<string, {
+      product_code: string;
+      description: string;
+      total_ordered: number;
+      last_ordered: string;
+    }>);
 
     const uniqueConsumableCodes = Object.keys(consumableMap);
 
