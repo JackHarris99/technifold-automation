@@ -74,8 +74,41 @@ export async function getPayloadByToken(token: string): Promise<CompanyPayload |
 
 // Admin dashboard functions
 export async function getAllCompanies(): Promise<Company[]> {
-  // For backward compatibility, fetch all companies without category filter
-  return getCompaniesByCategory('All');
+  try {
+    const supabase = getSupabaseClient();
+
+    let allCompanies: Company[] = [];
+    let from = 0;
+    const batchSize = 1000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from('companies')
+        .select('company_id, company_name, portal_token, created_at, updated_at')
+        .order('company_name')
+        .range(from, from + batchSize - 1);
+
+      if (error) {
+        console.error('Error fetching companies:', error);
+        break;
+      }
+
+      if (data && data.length > 0) {
+        allCompanies = [...allCompanies, ...data];
+        from += batchSize;
+        hasMore = data.length === batchSize;
+      } else {
+        hasMore = false;
+      }
+    }
+
+    console.log(`Loaded ${allCompanies.length} companies from database`);
+    return allCompanies;
+  } catch (error) {
+    console.error('Error in getAllCompanies:', error);
+    return [];
+  }
 }
 
 // Get all unique categories from companies table

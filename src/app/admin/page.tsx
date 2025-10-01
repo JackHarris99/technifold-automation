@@ -1,18 +1,23 @@
-import { getCompaniesByCategory, getAllProductsWithDatasheets, getCompanyCategories } from '@/lib/supabase';
+import { getAllCompanies, getAllProductsWithDatasheets, getCompanyCategories } from '@/lib/supabase';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 
 export default async function AdminPage() {
-  // First, check what categories are available
-  const categories = await getCompanyCategories();
-  console.log('Available categories in database:', categories);
-
-  const [customers, partners, press, prospects, products] = await Promise.all([
-    getCompaniesByCategory('Customer'),  // Try singular form
-    getCompaniesByCategory('Partner'),   // Try singular form
-    getCompaniesByCategory('Press'),
-    getCompaniesByCategory('Prospect'),  // Try singular form
+  // Get all companies first to ensure we have data
+  const [allCompanies, products] = await Promise.all([
+    getAllCompanies(),
     getAllProductsWithDatasheets()
   ]);
+
+  // Check categories after we know we have companies
+  const categories = await getCompanyCategories();
+  console.log('Available categories:', categories);
+  console.log(`Fetched ${allCompanies.length} total companies`);
+
+  // For now, put all companies in customers until we fix category filtering
+  const customers = allCompanies;
+  const partners: any[] = [];
+  const press: any[] = [];
+  const prospects: any[] = [];
 
   console.log(`Admin Page Data:`, {
     availableCategories: categories,
