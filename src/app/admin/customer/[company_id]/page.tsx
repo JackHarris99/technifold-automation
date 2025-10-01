@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
-import { getCustomerProfile, getCustomerOrderHistory, getPayloadByToken } from '@/lib/supabase';
-import { CustomerProfilePage } from '@/components/admin/CustomerProfilePage';
+import { getCustomerProfile, getCustomerOrderHistory, getPayloadByToken, getCompanyOwnedTools } from '@/lib/supabase';
+import { CustomerProfilePage } from '@/components/admin/CustomerProfilePageEnhanced';
 
 interface PageProps {
   params: Promise<{ company_id: string }>;
@@ -9,9 +9,10 @@ interface PageProps {
 export default async function CustomerPage({ params }: PageProps) {
   const { company_id } = await params;
 
-  const [profile, orderHistory] = await Promise.all([
+  const [profile, orderHistory, ownedTools] = await Promise.all([
     getCustomerProfile(company_id),
     getCustomerOrderHistory(company_id),
+    getCompanyOwnedTools(company_id),
   ]);
 
   if (!profile) {
@@ -27,10 +28,11 @@ export default async function CustomerPage({ params }: PageProps) {
   }
 
   return (
-    <CustomerProfilePage 
-      profile={profile} 
+    <CustomerProfilePage
+      profile={profile}
       orderHistory={orderHistory}
       portalData={portalData}
+      ownedTools={ownedTools}
     />
   );
 }

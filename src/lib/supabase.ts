@@ -256,33 +256,92 @@ export async function getCustomerOrderHistory(companyId: string): Promise<OrderH
       .from('sales')
       .select('*')
       .eq('company_id', companyId)
-      .order('txn_date', { ascending: false })
-      .limit(50);
+      .order('txn_date', { ascending: false });
 
-    console.log('Sales query result:', { data, error, companyId });
+    console.log('Sales query result:', { count: data?.length, companyId });
 
     if (error) {
       console.error('Error fetching sales history:', error);
-      console.error('Error details:', JSON.stringify(error, null, 2));
       return [];
     }
 
-    // Transform sales data to OrderHistory format
-    return (data || []).map(sale => ({
-      order_id: sale.sale_id || sale.id || `sale-${Math.random()}`,
-      order_date: sale.txn_date,
-      total_amount: sale.sale_total || sale.total || 0,
-      status: 'completed',
-      items: [{
-        consumable_code: sale.consumable_code || '',
+    if (!data || data.length === 0) {
+      return [];
+    }
+
+    // Group sales by invoice_number
+    const groupedByInvoice = data.reduce((acc, sale) => {
+      const invoiceNum = sale.invoice_number || `ORDER-${sale.txn_date}`;
+
+      if (!acc[invoiceNum]) {
+        acc[invoiceNum] = {
+          order_id: invoiceNum,
+          order_date: sale.txn_date,
+          total_amount: 0,
+          status: 'completed',
+          items: []
+        };
+      }
+
+      acc[invoiceNum].items.push({
+        consumable_code: sale.product_code || sale.consumable_code || '',
         description: sale.description || '',
         quantity: sale.quantity || 1,
         unit_price: sale.unit_price || 0,
         total_price: sale.line_total || sale.total || 0
-      }]
-    }));
+      });
+
+      acc[invoiceNum].total_amount += (sale.line_total || sale.total || 0);
+
+      return acc;
+    }, {} as Record<string, OrderHistory>);
+
+    return Object.values(groupedByInvoice);
   } catch (error) {
     console.error('Error fetching order history:', error);
+    return [];
+  }
+}
+
+// Get all tools owned by a company based on their purchase history
+export async function getCompanyOwnedTools(companyId: string): Promise<any[]> {
+  try {
+    const supabase = getSupabaseClient();
+
+    // Get distinct product codes from sales for this company
+    const { data: salesData, error: salesError } = await supabase
+      .from('sales')
+      .select('product_code')
+      .eq('company_id', companyId)
+      .not('product_code', 'is', null);
+
+    if (salesError || !salesData) {
+      console.error('Error fetching sales for tools:', salesError);
+      return [];
+    }
+
+    // Get unique product codes
+    const uniqueProductCodes = [...new Set(salesData.map(s => s.product_code))];
+
+    if (uniqueProductCodes.length === 0) {
+      return [];
+    }
+
+    // Fetch tool details for these product codes
+    const { data: tools, error: toolsError } = await supabase
+      .from('products')
+      .select('*')
+      .in('product_code', uniqueProductCodes)
+      .eq('type', 'tool');
+
+    if (toolsError) {
+      console.error('Error fetching tool details:', toolsError);
+      return [];
+    }
+
+    return tools || [];
+  } catch (error) {
+    console.error('Error in getCompanyOwnedTools:', error);
     return [];
   }
 }
