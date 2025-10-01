@@ -304,7 +304,14 @@ export async function getCustomerOrderHistory(companyId: string): Promise<OrderH
 }
 
 // Get all tools owned by a company based on their purchase history
-export async function getCompanyOwnedTools(companyId: string): Promise<any[]> {
+export async function getCompanyOwnedTools(companyId: string): Promise<Array<{
+  product_code: string;
+  description: string;
+  category: string;
+  type: string;
+  price?: number;
+  [key: string]: unknown;
+}>> {
   try {
     const supabase = getSupabaseClient();
 
