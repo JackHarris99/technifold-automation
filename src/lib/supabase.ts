@@ -74,23 +74,36 @@ export async function getPayloadByToken(token: string): Promise<CompanyPayload |
 
 // Admin dashboard functions
 export async function getAllCompanies(): Promise<Company[]> {
+  // For backward compatibility, fetch only customer category companies
+  return getCompaniesByCategory('Customers');
+}
+
+// Fetch companies by specific category
+export async function getCompaniesByCategory(category: string): Promise<Company[]> {
   try {
     const supabase = getSupabaseClient();
-    
+
     let allCompanies: Company[] = [];
     let from = 0;
     const batchSize = 1000;
     let hasMore = true;
 
     while (hasMore) {
-      const { data, error } = await supabase
+      const query = supabase
         .from('companies')
-        .select('company_id, company_name, portal_token, created_at, updated_at')
+        .select('company_id, company_name, portal_token, created_at, updated_at, category')
         .order('company_name')
         .range(from, from + batchSize - 1);
 
+      // Only filter by category if it's specified
+      if (category && category !== 'All') {
+        query.eq('category', category);
+      }
+
+      const { data, error } = await query;
+
       if (error) {
-        console.error('Error fetching companies:', error);
+        console.error(`Error fetching ${category} companies:`, error);
         break;
       }
 
@@ -103,10 +116,10 @@ export async function getAllCompanies(): Promise<Company[]> {
       }
     }
 
-    console.log(`Loaded ${allCompanies.length} companies from database`);
+    console.log(`Loaded ${allCompanies.length} ${category} companies from database`);
     return allCompanies;
   } catch (error) {
-    console.error('Error in getAllCompanies:', error);
+    console.error(`Error in getCompaniesByCategory(${category}):`, error);
     return [];
   }
 }

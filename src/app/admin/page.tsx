@@ -1,20 +1,32 @@
-import { getAllCompanies, getAllProductsWithDatasheets } from '@/lib/supabase';
+import { getCompaniesByCategory, getAllProductsWithDatasheets } from '@/lib/supabase';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 
 export default async function AdminPage() {
-  const [companies, products] = await Promise.all([
-    getAllCompanies(),
+  const [customers, partners, press, prospects, products] = await Promise.all([
+    getCompaniesByCategory('Customers'),
+    getCompaniesByCategory('Partners'),
+    getCompaniesByCategory('Press'),
+    getCompaniesByCategory('Prospects'),
     getAllProductsWithDatasheets()
   ]);
 
   console.log(`Admin Page Data:`, {
-    companiesCount: companies.length,
-    productsCount: products.length,
-    sampleProducts: products.slice(0, 3),
-    productTypes: [...new Set(products.map(p => p.type))]
+    customersCount: customers.length,
+    partnersCount: partners.length,
+    pressCount: press.length,
+    prospectsCount: prospects.length,
+    productsCount: products.length
   });
 
-  return <AdminDashboard companies={companies} products={products} />;
+  return (
+    <AdminDashboard
+      customers={customers}
+      partners={partners}
+      press={press}
+      prospects={prospects}
+      products={products}
+    />
+  );
 }
 
 export const metadata = {
