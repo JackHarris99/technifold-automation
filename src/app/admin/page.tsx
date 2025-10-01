@@ -15,9 +15,9 @@ export default async function AdminPage() {
 
   // For now, put all companies in customers until we fix category filtering
   const customers = allCompanies;
-  const partners: any[] = [];
-  const press: any[] = [];
-  const prospects: any[] = [];
+  const partners = [] as typeof allCompanies;
+  const press = [] as typeof allCompanies;
+  const prospects = [] as typeof allCompanies;
 
   console.log(`Admin Page Data:`, {
     availableCategories: categories,
