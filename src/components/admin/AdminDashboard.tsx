@@ -15,7 +15,7 @@ interface AdminDashboardProps {
   categoryInfo?: Record<string, number>;
 }
 
-export function AdminDashboard({ customers, partners, press, prospects, products, categoryInfo }: AdminDashboardProps) {
+export function AdminDashboard({ customers, partners, press, prospects, products }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState<'customers' | 'partners' | 'press' | 'prospects' | 'datasheets'>('customers');
 
   return (

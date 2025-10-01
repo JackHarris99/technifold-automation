@@ -5,11 +5,19 @@ import { AdminHeader } from './AdminHeader';
 import { generatePortalUrl, encodeProductCodeForUrl } from '@/lib/supabase';
 import { getProductImagePath } from '@/lib/productImages';
 
+interface Tool {
+  product_code: string;
+  description: string;
+  category: string;
+  price?: number;
+  [key: string]: unknown;
+}
+
 interface CustomerProfilePageProps {
   profile: CustomerProfile;
   orderHistory: OrderHistory[];
   portalData: CompanyPayload | null;
-  ownedTools?: any[];
+  ownedTools?: Tool[];
 }
 
 export function CustomerProfilePage({ profile, orderHistory, portalData, ownedTools = [] }: CustomerProfilePageProps) {
@@ -30,12 +38,12 @@ export function CustomerProfilePage({ profile, orderHistory, portalData, ownedTo
             <div className="flex items-center gap-4 mt-2">
               <span className="text-gray-600">ID: {profile.company_id}</span>
               <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                (profile as any).category === 'customer' ? 'bg-green-100 text-green-800' :
-                (profile as any).category === 'prospect' ? 'bg-yellow-100 text-yellow-800' :
-                (profile as any).category === 'partner' ? 'bg-blue-100 text-blue-800' :
+                (profile as { category?: string }).category === 'customer' ? 'bg-green-100 text-green-800' :
+                (profile as { category?: string }).category === 'prospect' ? 'bg-yellow-100 text-yellow-800' :
+                (profile as { category?: string }).category === 'partner' ? 'bg-blue-100 text-blue-800' :
                 'bg-gray-100 text-gray-800'
               }`}>
-                {(profile as any).category || 'Unknown'}
+                {(profile as { category?: string }).category || 'Unknown'}
               </span>
             </div>
           </div>
@@ -72,11 +80,11 @@ export function CustomerProfilePage({ profile, orderHistory, portalData, ownedTo
                 </div>
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Category</dt>
-                  <dd className="mt-1 text-sm text-gray-900 capitalize">{(profile as any).category || 'Not Set'}</dd>
+                  <dd className="mt-1 text-sm text-gray-900 capitalize">{(profile as { category?: string }).category || 'Not Set'}</dd>
                 </div>
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Country</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{(profile as any).country || 'Not Set'}</dd>
+                  <dd className="mt-1 text-sm text-gray-900">{(profile as { country?: string }).country || 'Not Set'}</dd>
                 </div>
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Customer Since</dt>

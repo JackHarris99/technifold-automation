@@ -25,7 +25,6 @@ export default async function AdminPage() {
   const partners = allCompanies.filter(c => (c as { category?: string }).category === 'partner');
   const press = allCompanies.filter(c => (c as { category?: string }).category === 'press');
   const prospects = allCompanies.filter(c => (c as { category?: string }).category === 'prospect');
-  const internal = allCompanies.filter(c => (c as { category?: string }).category === 'internal');
 
   // If no categorized companies, show all in customers tab as fallback
   const uncategorized = allCompanies.filter(c => !(c as { category?: string }).category);
