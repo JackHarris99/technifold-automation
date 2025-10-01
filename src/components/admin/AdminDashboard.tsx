@@ -30,19 +30,6 @@ export function AdminDashboard({ customers, partners, press, prospects, products
           </p>
         </div>
 
-        {/* Debug Info - Temporary */}
-        {categoryInfo && (
-          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <h3 className="font-semibold text-yellow-800 mb-2">Category Debug Info:</h3>
-            <div className="text-sm text-yellow-700">
-              {Object.entries(categoryInfo).map(([cat, count]) => (
-                <div key={cat}>
-                  <strong>{cat}:</strong> {count} companies
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Tab Navigation */}
         <div className="border-b border-gray-200 mb-6">

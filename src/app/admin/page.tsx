@@ -11,7 +11,7 @@ export default async function AdminPage() {
   // Check categories after we know we have companies
   const categories = await getCompanyCategories();
   console.log('Available categories:', categories);
-  console.log(`Fetched ${allCompanies.length} total companies`);
+  console.log(`Fetched ${allCompanies.length} total companies at ${new Date().toISOString()}`);
 
   // Count companies by category for debugging
   const categoryCount: Record<string, number> = {};
@@ -25,6 +25,7 @@ export default async function AdminPage() {
   const partners = allCompanies.filter(c => (c as { category?: string }).category === 'partner');
   const press = allCompanies.filter(c => (c as { category?: string }).category === 'press');
   const prospects = allCompanies.filter(c => (c as { category?: string }).category === 'prospect');
+  const internal = allCompanies.filter(c => (c as { category?: string }).category === 'internal');
 
   // If no categorized companies, show all in customers tab as fallback
   const uncategorized = allCompanies.filter(c => !(c as { category?: string }).category);
