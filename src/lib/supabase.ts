@@ -74,8 +74,32 @@ export async function getPayloadByToken(token: string): Promise<CompanyPayload |
 
 // Admin dashboard functions
 export async function getAllCompanies(): Promise<Company[]> {
-  // For backward compatibility, fetch only customer category companies
-  return getCompaniesByCategory('Customers');
+  // For backward compatibility, fetch all companies without category filter
+  return getCompaniesByCategory('All');
+}
+
+// Get all unique categories from companies table
+export async function getCompanyCategories(): Promise<string[]> {
+  try {
+    const supabase = getSupabaseClient();
+
+    const { data, error } = await supabase
+      .from('companies')
+      .select('category')
+      .not('category', 'is', null);
+
+    if (error) {
+      console.error('Error fetching categories:', error);
+      return [];
+    }
+
+    const uniqueCategories = [...new Set(data?.map(d => d.category) || [])];
+    console.log('Available categories in database:', uniqueCategories);
+    return uniqueCategories;
+  } catch (error) {
+    console.error('Error in getCompanyCategories:', error);
+    return [];
+  }
 }
 
 // Fetch companies by specific category
@@ -98,6 +122,9 @@ export async function getCompaniesByCategory(category: string): Promise<Company[
       // Only filter by category if it's specified
       if (category && category !== 'All') {
         query.eq('category', category);
+      } else if (category === 'Uncategorized') {
+        // Handle companies with null or empty categories
+        query.or('category.is.null,category.eq.')
       }
 
       const { data, error } = await query;
