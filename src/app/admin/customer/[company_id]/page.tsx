@@ -16,6 +16,13 @@ export default async function CustomerPage({ params }: PageProps) {
     getCompanyOrderedConsumables(company_id),
   ]);
 
+  console.log(`[CustomerPage] Data for ${company_id}:`, {
+    hasProfile: !!profile,
+    orderHistoryCount: orderHistory?.length || 0,
+    ownedToolsCount: ownedTools?.length || 0,
+    orderedConsumablesCount: orderedConsumables?.length || 0
+  });
+
   if (!profile) {
     notFound();
   }

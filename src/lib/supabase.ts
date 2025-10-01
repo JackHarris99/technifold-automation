@@ -514,6 +514,7 @@ export async function getCompanyOrderedConsumables(companyId: string): Promise<A
   [key: string]: unknown;
 }>> {
   try {
+    console.log(`[getCompanyOrderedConsumables] Fetching for company: ${companyId}`);
     const supabase = getSupabaseClient();
 
     // Get all unique consumables from sales for this company
@@ -522,6 +523,12 @@ export async function getCompanyOrderedConsumables(companyId: string): Promise<A
       .select('product_code, description, quantity, txn_date')
       .eq('company_id', companyId)
       .not('product_code', 'is', null);
+
+    console.log(`[getCompanyOrderedConsumables] Sales query result:`, {
+      companyId,
+      salesCount: salesData?.length || 0,
+      error: salesError
+    });
 
     if (salesError || !salesData) {
       console.error('Error fetching sales for consumables:', salesError);
@@ -561,10 +568,14 @@ export async function getCompanyOrderedConsumables(companyId: string): Promise<A
     // Just return the sales data directly, no need to join with products table
     const enrichedConsumables = Object.values(consumableMap);
 
+    console.log(`[getCompanyOrderedConsumables] Returning ${enrichedConsumables.length} unique products for company ${companyId}`);
+
     // Sort by last_ordered date (most recent first)
-    return enrichedConsumables.sort((a, b) =>
+    const sorted = enrichedConsumables.sort((a, b) =>
       new Date(b.last_ordered || 0).getTime() - new Date(a.last_ordered || 0).getTime()
     );
+
+    return sorted;
   } catch (error) {
     console.error('Error in getCompanyOrderedConsumables:', error);
     return [];
