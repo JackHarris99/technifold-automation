@@ -159,7 +159,7 @@ export function CustomerProfilePage({ profile, orderHistory, portalData, ownedTo
           {/* Main Content Area */}
           <div className="lg:col-span-2 space-y-6">
             {/* Tools Owned */}
-            {ownedTools.length > 0 && (
+            {ownedTools && ownedTools.length > 0 && (
               <div className="bg-white shadow-sm rounded-lg">
                 <div className="px-6 py-4 border-b border-gray-200">
                   <h3 className="text-lg font-medium text-gray-900">Tools Owned</h3>
@@ -167,15 +167,16 @@ export function CustomerProfilePage({ profile, orderHistory, portalData, ownedTo
                 </div>
                 <div className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {ownedTools.map((tool) => {
-                      const imagePath = getProductImagePath(tool.product_code);
+                    {ownedTools.map((tool, index) => {
+                      const imagePath = tool.product_code ? getProductImagePath(tool.product_code) : null;
+                      const safeProductCode = tool.product_code ? encodeProductCodeForUrl(tool.product_code) : '';
                       return (
-                        <div key={tool.product_code} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                        <div key={`tool-${index}`} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                           <div className="aspect-w-16 aspect-h-9 bg-gray-100 relative h-48">
                             {imagePath ? (
                               <Image
                                 src={imagePath}
-                                alt={tool.description}
+                                alt={tool.description || 'Product'}
                                 fill
                                 className="object-contain p-4"
                                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -193,19 +194,21 @@ export function CustomerProfilePage({ profile, orderHistory, portalData, ownedTo
                             )}
                           </div>
                           <div className="p-4">
-                            <h4 className="font-semibold text-gray-900 mb-1">{tool.description}</h4>
-                            <p className="text-xs text-gray-500 font-mono mb-2">{tool.product_code}</p>
+                            <h4 className="font-semibold text-gray-900 mb-1">{tool.description || 'Unknown Product'}</h4>
+                            <p className="text-xs text-gray-500 font-mono mb-2">{tool.product_code || 'N/A'}</p>
                             <div className="flex items-center justify-between">
                               <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                                {tool.category}
+                                {tool.category || 'Tool'}
                               </span>
-                              <Link
-                                href={`/datasheet/${encodeProductCodeForUrl(tool.product_code)}`}
-                                target="_blank"
-                                className="text-xs text-blue-600 hover:text-blue-800"
-                              >
-                                View Datasheet →
-                              </Link>
+                              {safeProductCode && (
+                                <Link
+                                  href={`/datasheet/${safeProductCode}`}
+                                  target="_blank"
+                                  className="text-xs text-blue-600 hover:text-blue-800"
+                                >
+                                  View Datasheet →
+                                </Link>
+                              )}
                             </div>
                           </div>
                         </div>
