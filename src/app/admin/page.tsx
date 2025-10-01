@@ -16,18 +16,18 @@ export default async function AdminPage() {
   // Count companies by category for debugging
   const categoryCount: Record<string, number> = {};
   allCompanies.forEach(company => {
-    const cat = (company as any).category || 'No Category';
+    const cat = (company as { category?: string }).category || 'No Category';
     categoryCount[cat] = (categoryCount[cat] || 0) + 1;
   });
 
   // Split companies by category (using lowercase as in database)
-  let customers = allCompanies.filter(c => (c as any).category === 'customers');
-  const partners = allCompanies.filter(c => (c as any).category === 'partners');
-  const press = allCompanies.filter(c => (c as any).category === 'press');
-  const prospects = allCompanies.filter(c => (c as any).category === 'prospects');
+  let customers = allCompanies.filter(c => (c as { category?: string }).category === 'customers');
+  const partners = allCompanies.filter(c => (c as { category?: string }).category === 'partners');
+  const press = allCompanies.filter(c => (c as { category?: string }).category === 'press');
+  const prospects = allCompanies.filter(c => (c as { category?: string }).category === 'prospects');
 
   // If no categorized companies, show all in customers tab as fallback
-  const uncategorized = allCompanies.filter(c => !(c as any).category);
+  const uncategorized = allCompanies.filter(c => !(c as { category?: string }).category);
   if (customers.length === 0 && partners.length === 0 && press.length === 0 && prospects.length === 0) {
     // All companies are uncategorized, show them in customers tab
     customers = uncategorized;
