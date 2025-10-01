@@ -20,11 +20,11 @@ export default async function AdminPage() {
     categoryCount[cat] = (categoryCount[cat] || 0) + 1;
   });
 
-  // Split companies by category (using lowercase as in database)
-  let customers = allCompanies.filter(c => (c as { category?: string }).category === 'customers');
-  const partners = allCompanies.filter(c => (c as { category?: string }).category === 'partners');
+  // Split companies by category (using singular lowercase as in database)
+  let customers = allCompanies.filter(c => (c as { category?: string }).category === 'customer');
+  const partners = allCompanies.filter(c => (c as { category?: string }).category === 'partner');
   const press = allCompanies.filter(c => (c as { category?: string }).category === 'press');
-  const prospects = allCompanies.filter(c => (c as { category?: string }).category === 'prospects');
+  const prospects = allCompanies.filter(c => (c as { category?: string }).category === 'prospect');
 
   // If no categorized companies, show all in customers tab as fallback
   const uncategorized = allCompanies.filter(c => !(c as { category?: string }).category);
