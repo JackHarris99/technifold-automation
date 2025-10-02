@@ -519,8 +519,7 @@ export async function getCompanyContacts(companyId: string): Promise<Array<{
     const { data, error } = await supabase
       .from('contacts')
       .select('*')
-      .eq('company_id', companyId)
-      .order('name');
+      .eq('company_id', companyId);
 
     console.log(`[CONTACTS] Found ${data?.length || 0} contacts for company ${companyId}`);
 
