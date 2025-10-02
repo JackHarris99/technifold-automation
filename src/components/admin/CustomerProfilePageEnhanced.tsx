@@ -1,9 +1,7 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { CustomerProfile, OrderHistory } from '@/types';
 import { AdminHeader } from './AdminHeader';
 import { generatePortalUrl } from '@/lib/supabase';
-import { getProductImagePath } from '@/lib/productImages';
 
 interface Tool {
   product_code: string;
@@ -16,7 +14,6 @@ interface Tool {
 interface Consumable {
   product_code: string;
   description: string;
-  category: string;
   type: string;
   price?: number;
   [key: string]: unknown;
@@ -276,40 +273,29 @@ export function CustomerProfilePage({ profile, orderHistory, ownedTools = [], or
                 <div className="p-6">
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {orderedConsumables.map((consumable) => {
-                      const imagePath = getProductImagePath(consumable.product_code);
+                      const imagePath = `/product_images/${consumable.product_code}.jpg`;
                       return (
                         <div key={consumable.product_code} className="border border-gray-200 rounded-lg overflow-hidden">
-                          <div className="aspect-square bg-gray-100 relative">
-                            {imagePath ? (
-                              <Image
-                                src={imagePath}
-                                alt={consumable.description}
-                                fill
-                                className="object-contain p-2"
-                                sizes="(max-width: 768px) 50vw, 25vw"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.src = '/product-placeholder.svg';
-                                }}
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                </svg>
-                              </div>
-                            )}
+                          <div className="aspect-square bg-gray-100 relative flex items-center justify-center">
+                            <img
+                              src={imagePath}
+                              alt={consumable.description}
+                              className="w-full h-full object-contain p-2"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.onerror = null; // Prevent infinite loop
+                                target.src = '/product-placeholder.svg';
+                              }}
+                            />
                           </div>
                           <div className="p-3">
                             <h4 className="text-xs font-medium text-gray-900 truncate" title={consumable.description}>
                               {consumable.description}
                             </h4>
                             <p className="text-xs text-gray-500 font-mono mt-1">{consumable.product_code}</p>
-                            <div className="mt-2">
-                              <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                                {consumable.category || 'Consumable'}
-                              </span>
-                            </div>
+                            {consumable.price && (
+                              <p className="text-xs text-gray-600 mt-1">£{consumable.price.toFixed(2)}</p>
+                            )}
                           </div>
                         </div>
                       );
@@ -325,7 +311,7 @@ export function CustomerProfilePage({ profile, orderHistory, ownedTools = [], or
                 </div>
                 <div className="p-6">
                   <p className="text-sm text-gray-500">No consumables ordered yet or data not available.</p>
-                  <p className="text-xs text-gray-400 mt-2">Debug: {orderedConsumables ? `Array length: ${orderedConsumables.length}` : 'orderedConsumables is undefined'}</p>
+                  <p className="text-xs text-gray-400 mt-2">No consumable products found in order history</p>
                 </div>
               </div>
             )}
