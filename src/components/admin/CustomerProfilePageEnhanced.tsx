@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { CustomerProfile, OrderHistory } from '@/types';
 import { AdminHeader } from './AdminHeader';
@@ -265,44 +267,60 @@ export function CustomerProfilePage({ profile, orderHistory, ownedTools = [], or
             </div>
 
             {/* Consumables Ordered */}
-            {orderedConsumables && orderedConsumables.length > 0 ? (
-              <div className="bg-white shadow-sm rounded-lg">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h3 className="text-lg font-medium text-gray-900">Consumables Ordered</h3>
-                  <p className="text-sm text-gray-500 mt-1">All consumable products this company has purchased</p>
-                </div>
-                <div className="p-6">
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {orderedConsumables.map((consumable) => {
-                      const imagePath = `/product_images/${consumable.product_code}.jpg`;
-                      return (
-                        <div key={consumable.product_code} className="border border-gray-200 rounded-lg overflow-hidden">
-                          <div className="aspect-square bg-gray-100 relative flex items-center justify-center">
-                            <img
-                              src={imagePath}
-                              alt={consumable.description}
-                              className="w-full h-full object-contain p-2"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.onerror = null; // Prevent infinite loop
-                                target.src = '/product-placeholder.svg';
-                              }}
-                            />
-                          </div>
-                          <div className="p-3">
-                            <h4 className="text-xs font-medium text-gray-900 truncate" title={consumable.description}>
-                              {consumable.description}
-                            </h4>
-                            <p className="text-xs text-gray-500 font-mono mt-1">{consumable.product_code}</p>
-                            <div className="mt-2">
-                              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                                {consumable.category}
-                              </span>
+            {(() => {
+              try {
+                if (!orderedConsumables || orderedConsumables.length === 0) {
+                  return (
+                    <div className="bg-white shadow-sm rounded-lg">
+                      <div className="px-6 py-4 border-b border-gray-200">
+                        <h3 className="text-lg font-medium text-gray-900">Consumables Ordered</h3>
+                        <p className="text-sm text-gray-500 mt-1">Products this company has purchased</p>
+                      </div>
+                      <div className="p-6">
+                        <p className="text-sm text-gray-500">No consumables found in order history</p>
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="bg-white shadow-sm rounded-lg">
+                    <div className="px-6 py-4 border-b border-gray-200">
+                      <h3 className="text-lg font-medium text-gray-900">Consumables Ordered</h3>
+                      <p className="text-sm text-gray-500 mt-1">All consumable products this company has purchased</p>
+                    </div>
+                    <div className="p-6">
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {orderedConsumables.map((consumable) => {
+                          const imagePath = `/product_images/${consumable.product_code}.jpg`;
+                          return (
+                            <div key={consumable.product_code} className="border border-gray-200 rounded-lg overflow-hidden">
+                              <div className="aspect-square bg-gray-100 relative flex items-center justify-center">
+                                <img
+                                  src={imagePath}
+                                  alt={consumable.description || 'Product'}
+                                  className="w-full h-full object-contain p-2"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.onerror = null;
+                                    target.src = '/product-placeholder.svg';
+                                  }}
+                                />
+                              </div>
+                              <div className="p-3">
+                                <h4 className="text-xs font-medium text-gray-900 truncate" title={consumable.description}>
+                                  {consumable.description || 'Unknown Product'}
+                                </h4>
+                                <p className="text-xs text-gray-500 font-mono mt-1">{consumable.product_code || 'N/A'}</p>
+                                <div className="mt-2">
+                                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                    {consumable.category || 'Consumable'}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                          );
+                        })}
                   </div>
                 </div>
               </div>

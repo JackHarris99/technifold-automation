@@ -513,6 +513,7 @@ export async function getCompanyOrderedConsumables(companyId: string): Promise<A
   [key: string]: unknown;
 }>> {
   try {
+    console.log(`[CONSUMABLES] Starting fetch for company: ${companyId}`);
     const supabase = getSupabaseClient();
 
     // Get distinct product codes from sales for this company
@@ -522,33 +523,59 @@ export async function getCompanyOrderedConsumables(companyId: string): Promise<A
       .eq('company_id', companyId)
       .not('product_code', 'is', null);
 
+    console.log(`[CONSUMABLES] Sales query result:`, {
+      success: !salesError,
+      count: salesData?.length || 0,
+      sample: salesData?.[0]
+    });
+
     if (salesError || !salesData) {
-      console.error('Error fetching sales for consumables:', salesError);
+      console.error('[CONSUMABLES] Error fetching sales:', salesError);
       return [];
     }
 
     // Get unique product codes
     const uniqueProductCodes = [...new Set(salesData.map(s => s.product_code))];
+    console.log(`[CONSUMABLES] Unique product codes: ${uniqueProductCodes.length}`);
 
     if (uniqueProductCodes.length === 0) {
+      console.log(`[CONSUMABLES] No product codes found`);
       return [];
     }
 
     // Fetch consumable details for these product codes
     const { data: consumables, error: consumablesError } = await supabase
       .from('products')
-      .select('*')
+      .select('product_code, description, category, type, price, currency')
       .in('product_code', uniqueProductCodes)
       .eq('type', 'consumable');
 
+    console.log(`[CONSUMABLES] Products query result:`, {
+      success: !consumablesError,
+      count: consumables?.length || 0,
+      sample: consumables?.[0],
+      error: consumablesError
+    });
+
     if (consumablesError) {
-      console.error('Error fetching consumable details:', consumablesError);
+      console.error('[CONSUMABLES] Error fetching products:', consumablesError);
       return [];
     }
 
-    return consumables || [];
+    // Validate data before returning
+    const validConsumables = (consumables || []).map(c => ({
+      product_code: c.product_code || '',
+      description: c.description || '',
+      category: c.category || 'Unknown',
+      type: c.type || 'consumable',
+      price: c.price || 0,
+      currency: c.currency || 'GBP'
+    }));
+
+    console.log(`[CONSUMABLES] Returning ${validConsumables.length} consumables`);
+    return validConsumables;
   } catch (error) {
-    console.error('Error in getCompanyOrderedConsumables:', error);
+    console.error('[CONSUMABLES] Unexpected error:', error);
     return [];
   }
 }
