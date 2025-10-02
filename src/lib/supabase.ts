@@ -506,7 +506,9 @@ export async function getCompatibleConsumables(productCode: string) {
 // Get company contacts
 export async function getCompanyContacts(companyId: string): Promise<Array<{
   contact_id?: string;
-  name: string;
+  first_name?: string;
+  last_name?: string;
+  full_name?: string;
   email?: string;
   phone?: string;
   role?: string;

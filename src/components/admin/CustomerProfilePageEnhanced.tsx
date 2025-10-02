@@ -8,7 +8,9 @@ import { ToolsAndConsumablesSection } from './ToolsAndConsumablesSection';
 
 interface Contact {
   contact_id?: string;
-  name: string;
+  first_name?: string;
+  last_name?: string;
+  full_name?: string;
   email?: string;
   phone?: string;
   role?: string;
@@ -95,9 +97,8 @@ export function CustomerProfilePage({ profile, orderHistory, toolsWithConsumable
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {contacts.map((contact, index) => {
-                  // Handle different possible name fields
-                  const displayName = contact.name ||
-                                     contact.contact_name ||
+                  // Use full_name or construct from first_name/last_name
+                  const displayName = contact.full_name ||
                                      `${contact.first_name || ''} ${contact.last_name || ''}`.trim() ||
                                      'Unknown Contact';
 
