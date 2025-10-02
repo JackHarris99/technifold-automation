@@ -45,6 +45,19 @@ export function ReorderTab({ items, cart, onAddToCart, onRemoveFromCart }: Reord
     handleQuantityChange(consumableCode, newQty);
   };
 
+  // Group items by category
+  const groupedItems = items.reduce((acc, item) => {
+    const category = (item as ReorderItem & { category?: string }).category || 'Uncategorized';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(item);
+    return acc;
+  }, {} as Record<string, typeof items>);
+
+  // Sort categories alphabetically
+  const sortedCategories = Object.keys(groupedItems).sort();
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -56,11 +69,17 @@ export function ReorderTab({ items, cart, onAddToCart, onRemoveFromCart }: Reord
           No previous orders found
         </div>
       ) : (
-        <div className="space-y-2">
-          {items.map((item) => {
-            const currentQuantity = quantities[item.consumable_code] || 0;
+        <div className="space-y-6">
+          {sortedCategories.map((category) => (
+            <div key={category}>
+              <h3 className="text-lg font-semibold text-gray-800 mb-3 pb-2 border-b">
+                {category}
+              </h3>
+              <div className="space-y-2">
+                {groupedItems[category].map((item) => {
+                  const currentQuantity = quantities[item.consumable_code] || 0;
             
-            return (
+                  return (
               <div
                 key={item.consumable_code}
                 className="bg-white rounded-lg border-2 border-green-400 ring-1 ring-green-100 transition-all hover:shadow-md"
@@ -135,8 +154,11 @@ export function ReorderTab({ items, cart, onAddToCart, onRemoveFromCart }: Reord
                   </div>
                 </div>
               </div>
-            );
-          })}
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

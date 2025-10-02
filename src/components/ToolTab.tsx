@@ -61,6 +61,21 @@ export function ToolTab({
     handleQuantityChange(consumableCode, newQty);
   };
 
+  // Group items by category
+  type ItemWithCategory = typeof allItems[0] & { category?: string };
+  const groupedItems = allItems.reduce((acc, item) => {
+    const itemWithCategory = item as ItemWithCategory;
+    const category = itemWithCategory.category || 'Uncategorized';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(item);
+    return acc;
+  }, {} as Record<string, typeof allItems>);
+
+  // Sort categories alphabetically
+  const sortedCategories = Object.keys(groupedItems).sort();
+
   return (
     <div className="space-y-4">
       {/* Tool Header */}
@@ -99,11 +114,17 @@ export function ToolTab({
             No consumables found for this tool
           </div>
         ) : (
-          <div className="space-y-2">
-            {allItems.map((item) => {
-              const currentQuantity = quantities[item.consumable_code] || 0;
+          <div className="space-y-6">
+            {sortedCategories.map((category) => (
+              <div key={category}>
+                <h3 className="text-lg font-semibold text-gray-800 mb-3 pb-2 border-b">
+                  {category}
+                </h3>
+                <div className="space-y-2">
+                  {groupedItems[category].map((item) => {
+                    const currentQuantity = quantities[item.consumable_code] || 0;
 
-              return (
+                    return (
                 <div
                   key={item.consumable_code}
                   className="bg-white rounded-lg border-2 border-gray-200 transition-all hover:shadow-md hover:border-gray-300"
@@ -180,8 +201,11 @@ export function ToolTab({
                     </div>
                   </div>
                 </div>
-              );
-            })}
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
