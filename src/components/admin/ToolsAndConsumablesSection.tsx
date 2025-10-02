@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 interface ToolWithConsumables {
   tool: {
     product_code: string;
@@ -49,11 +51,12 @@ export function ToolsAndConsumablesSection({ toolsWithConsumables }: Props) {
                       </span>
                     )}
                   </div>
-                  <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-4">
-                    <img
+                  <div className="relative w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-4">
+                    <Image
                       src={`/product_images/${item.tool.product_code}.jpg`}
                       alt={item.tool.description}
-                      className="w-full h-full object-contain p-1 rounded-lg"
+                      fill
+                      className="object-contain p-1 rounded-lg"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.onerror = null;
@@ -92,11 +95,12 @@ export function ToolsAndConsumablesSection({ toolsWithConsumables }: Props) {
 
                     return (
                       <div key={consumable.product_code} className="border border-gray-200 rounded-lg overflow-hidden">
-                        <div className="aspect-square bg-gray-50">
-                          <img
+                        <div className="relative aspect-square bg-gray-50">
+                          <Image
                             src={`/product_images/${consumable.product_code}.jpg`}
                             alt={consumable.description}
-                            className="w-full h-full object-contain p-2"
+                            fill
+                            className="object-contain p-2"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.onerror = null;

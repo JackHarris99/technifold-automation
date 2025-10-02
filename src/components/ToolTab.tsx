@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { ToolTab as ToolTabType, CartItem } from '@/types';
 import { QuantityPicker } from './QuantityPicker';
 
@@ -71,11 +72,12 @@ export function ToolTab({
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="w-20 h-20 bg-gray-100 rounded-lg flex-shrink-0">
-              <img
+            <div className="relative w-20 h-20 bg-gray-100 rounded-lg flex-shrink-0">
+              <Image
                 src={`/product_images/${toolTab.tool_code}.jpg`}
                 alt={toolTab.tool_desc || toolTab.tool_code}
-                className="w-full h-full object-contain p-2 rounded-lg"
+                fill
+                className="object-contain p-2 rounded-lg"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.onerror = null;
@@ -119,11 +121,12 @@ export function ToolTab({
                   <div className="p-4">
                     <div className="flex items-center gap-4">
                       {/* Product Image */}
-                      <div className="w-24 h-24 bg-gray-50 rounded-lg flex-shrink-0">
-                        <img
+                      <div className="relative w-24 h-24 bg-gray-50 rounded-lg flex-shrink-0">
+                        <Image
                           src={`/product_images/${item.consumable_code}.jpg`}
                           alt={item.description}
-                          className="w-full h-full object-contain p-2"
+                          fill
+                          className="object-contain p-2"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.onerror = null;

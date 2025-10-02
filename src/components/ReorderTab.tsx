@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { ReorderItem, CartItem } from '@/types';
 import { QuantityPicker } from './QuantityPicker';
 
@@ -67,11 +68,12 @@ export function ReorderTab({ items, cart, onAddToCart, onRemoveFromCart }: Reord
                 <div className="p-4">
                   <div className="flex items-center gap-4">
                     {/* Product Image */}
-                    <div className="w-24 h-24 bg-gray-50 rounded-lg flex-shrink-0">
-                      <img
+                    <div className="relative w-24 h-24 bg-gray-50 rounded-lg flex-shrink-0">
+                      <Image
                         src={`/product_images/${item.consumable_code}.jpg`}
                         alt={item.description}
-                        className="w-full h-full object-contain p-2"
+                        fill
+                        className="object-contain p-2"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           target.onerror = null;
