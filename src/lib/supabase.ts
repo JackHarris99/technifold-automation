@@ -507,6 +507,7 @@ export async function getCompatibleConsumables(productCode: string) {
 export async function getCompanyOrderedConsumables(companyId: string): Promise<Array<{
   product_code: string;
   description: string;
+  category: string;
   type: string;
   price?: number;
   [key: string]: unknown;

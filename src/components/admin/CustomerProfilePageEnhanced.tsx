@@ -14,6 +14,7 @@ interface Tool {
 interface Consumable {
   product_code: string;
   description: string;
+  category: string;
   type: string;
   price?: number;
   [key: string]: unknown;
@@ -293,9 +294,11 @@ export function CustomerProfilePage({ profile, orderHistory, ownedTools = [], or
                               {consumable.description}
                             </h4>
                             <p className="text-xs text-gray-500 font-mono mt-1">{consumable.product_code}</p>
-                            {consumable.price && (
-                              <p className="text-xs text-gray-600 mt-1">£{consumable.price.toFixed(2)}</p>
-                            )}
+                            <div className="mt-2">
+                              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                {consumable.category}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       );
