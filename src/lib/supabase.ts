@@ -556,6 +556,7 @@ export async function getCompanyToolsWithConsumables(companyId: string): Promise
     description: string;
     category?: string;
     type: string;
+    last_order_date?: string;
     [key: string]: unknown;
   }>;
 }>> {
@@ -571,6 +572,35 @@ export async function getCompanyToolsWithConsumables(companyId: string): Promise
     if (consumables.length === 0 && tools.length === 0) {
       return [];
     }
+
+    // Get last order dates for each consumable
+    const { data: lastOrderDates, error: orderError } = await supabase
+      .from('sales')
+      .select('product_code, invoice_date')
+      .eq('company_id', companyId)
+      .in('product_code', consumables.map(c => c.product_code))
+      .order('invoice_date', { ascending: false });
+
+    if (orderError) {
+      console.error('Error fetching last order dates:', orderError);
+    }
+
+    // Create a map of product codes to their last order date
+    const lastOrderMap = new Map<string, string>();
+    if (lastOrderDates) {
+      // Group by product_code and get the most recent date for each
+      lastOrderDates.forEach(item => {
+        if (!lastOrderMap.has(item.product_code) || item.invoice_date > lastOrderMap.get(item.product_code)!) {
+          lastOrderMap.set(item.product_code, item.invoice_date);
+        }
+      });
+    }
+
+    // Add last order date to consumables
+    const consumablesWithDates = consumables.map(c => ({
+      ...c,
+      last_order_date: lastOrderMap.get(c.product_code) || undefined
+    }));
 
     // Get ALL tool-consumable mappings (not just for owned tools)
     const { data: allMappings, error: mapError } = await supabase
@@ -607,7 +637,7 @@ export async function getCompanyToolsWithConsumables(companyId: string): Promise
         .map(m => m.consumable_code);
 
       // Filter consumables that belong to this tool
-      const toolConsumables = consumables.filter(c => {
+      const toolConsumables = consumablesWithDates.filter(c => {
         if (toolConsumableCodes.includes(c.product_code)) {
           assignedConsumableCodes.add(c.product_code);
           return true;
@@ -623,7 +653,7 @@ export async function getCompanyToolsWithConsumables(companyId: string): Promise
 
     // Find consumables that aren't assigned to any owned tool
     // These are consumables ordered for tools not purchased from us
-    const orphanConsumables = consumables.filter(c =>
+    const orphanConsumables = consumablesWithDates.filter(c =>
       !assignedConsumableCodes.has(c.product_code)
     );
 

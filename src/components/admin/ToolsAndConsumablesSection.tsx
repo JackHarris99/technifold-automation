@@ -13,6 +13,7 @@ interface ToolWithConsumables {
     description: string;
     category?: string;
     type: string;
+    last_order_date?: string;
     [key: string]: unknown;
   }>;
 }
@@ -38,19 +39,7 @@ export function ToolsAndConsumablesSection({ toolsWithConsumables }: Props) {
             {/* Tool - or placeholder for orphan consumables */}
             {item.tool ? (
               <div className="mb-4">
-                <div className="flex items-start space-x-4">
-                  <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <img
-                      src={`/product_images/${item.tool.product_code}.jpg`}
-                      alt={item.tool.description}
-                      className="w-full h-full object-contain p-2 rounded-lg"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.onerror = null;
-                        target.src = '/product-placeholder.svg';
-                      }}
-                    />
-                  </div>
+                <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <h4 className="font-semibold text-gray-900">{item.tool.description}</h4>
                     <p className="text-sm text-gray-500 font-mono">{item.tool.product_code}</p>
@@ -59,6 +48,18 @@ export function ToolsAndConsumablesSection({ toolsWithConsumables }: Props) {
                         {item.tool.category}
                       </span>
                     )}
+                  </div>
+                  <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-4">
+                    <img
+                      src={`/product_images/${item.tool.product_code}.jpg`}
+                      alt={item.tool.description}
+                      className="w-full h-full object-contain p-1 rounded-lg"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.onerror = null;
+                        target.src = '/product-placeholder.svg';
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -76,12 +77,12 @@ export function ToolsAndConsumablesSection({ toolsWithConsumables }: Props) {
 
             {/* Consumables */}
             {item.consumables.length > 0 ? (
-              <div className={item.tool ? "ml-28" : ""}>
+              <div className={item.tool ? "ml-4" : ""}>
                 {item.tool && <p className="text-xs font-medium text-gray-700 mb-3">Compatible consumables purchased:</p>}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
                   {item.consumables.map((consumable) => (
                     <div key={consumable.product_code} className="border border-gray-200 rounded-lg p-2">
-                      <div className="aspect-square bg-gray-50 rounded mb-2">
+                      <div className="w-16 h-16 bg-gray-50 rounded mb-1 mx-auto">
                         <img
                           src={`/product_images/${consumable.product_code}.jpg`}
                           alt={consumable.description}
@@ -93,16 +94,25 @@ export function ToolsAndConsumablesSection({ toolsWithConsumables }: Props) {
                           }}
                         />
                       </div>
-                      <h5 className="text-xs font-medium text-gray-900 truncate" title={consumable.description}>
+                      <h5 className="text-xs font-medium text-gray-900 truncate text-center" title={consumable.description}>
                         {consumable.description}
                       </h5>
-                      <p className="text-xs text-gray-500 font-mono truncate">{consumable.product_code}</p>
+                      <p className="text-xs text-gray-500 font-mono truncate text-center">{consumable.product_code}</p>
+                      {consumable.last_order_date && (
+                        <p className="text-xs text-amber-600 text-center mt-1">
+                          Last: {new Date(consumable.last_order_date).toLocaleDateString('en-GB', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: '2-digit'
+                          })}
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>
               </div>
             ) : (
-              <div className="ml-28">
+              <div className="ml-4">
                 <p className="text-sm text-amber-600 italic">
                   ⚠️ No compatible consumables purchased yet
                 </p>
