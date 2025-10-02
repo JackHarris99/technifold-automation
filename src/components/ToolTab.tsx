@@ -31,11 +31,6 @@ export function ToolTab({
   // Get all consumables - either from allCompatibleConsumables or toolTab items
   const allItems = allCompatibleConsumables || toolTab.items;
 
-  // Create a set of previously ordered product codes for highlighting
-  const previouslyOrderedCodes = new Set(
-    toolTab.items.map(item => item.consumable_code)
-  );
-
   // Initialize quantities from cart
   useEffect(() => {
     const initialQuantities: Record<string, number> = {};
@@ -107,16 +102,11 @@ export function ToolTab({
           <div className="space-y-2">
             {allItems.map((item) => {
               const currentQuantity = quantities[item.consumable_code] || 0;
-              const wasOrdered = previouslyOrderedCodes.has(item.consumable_code);
 
               return (
                 <div
                   key={item.consumable_code}
-                  className={`bg-white rounded-lg border-2 transition-all hover:shadow-md ${
-                    wasOrdered
-                      ? 'border-green-400 ring-1 ring-green-100'
-                      : 'border-gray-200'
-                  }`}
+                  className="bg-white rounded-lg border-2 border-gray-200 transition-all hover:shadow-md hover:border-gray-300"
                 >
                   <div className="p-4">
                     <div className="flex items-center gap-4">
@@ -148,11 +138,6 @@ export function ToolTab({
                             {allCompatibleConsumables && 'category' in item && (item as typeof allCompatibleConsumables[0]).category && (
                               <span className="inline-block mt-2 text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
                                 {(item as typeof allCompatibleConsumables[0]).category}
-                              </span>
-                            )}
-                            {wasOrdered && (
-                              <span className="inline-block ml-2 mt-2 text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                                Previously Ordered
                               </span>
                             )}
                           </div>
