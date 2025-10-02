@@ -1,5 +1,10 @@
 import { notFound } from 'next/navigation';
-import { getCustomerProfile, getCustomerOrderHistory, getCompanyOwnedTools, getCompanyOrderedConsumables } from '@/lib/supabase';
+import {
+  getCustomerProfile,
+  getCustomerOrderHistory,
+  getCompanyToolsWithConsumables,
+  getCompanyContacts
+} from '@/lib/supabase';
 import { CustomerProfilePage } from '@/components/admin/CustomerProfilePageEnhanced';
 
 interface PageProps {
@@ -9,19 +14,12 @@ interface PageProps {
 export default async function CustomerPage({ params }: PageProps) {
   const { company_id } = await params;
 
-  const [profile, orderHistory, ownedTools, orderedConsumables] = await Promise.all([
+  const [profile, orderHistory, toolsWithConsumables, contacts] = await Promise.all([
     getCustomerProfile(company_id),
     getCustomerOrderHistory(company_id),
-    getCompanyOwnedTools(company_id),
-    getCompanyOrderedConsumables(company_id),
+    getCompanyToolsWithConsumables(company_id),
+    getCompanyContacts(company_id),
   ]);
-
-  console.log(`[CustomerPage] Data for ${company_id}:`, {
-    hasProfile: !!profile,
-    orderHistoryCount: orderHistory?.length || 0,
-    ownedToolsCount: ownedTools?.length || 0,
-    orderedConsumablesCount: orderedConsumables?.length || 0
-  });
 
   if (!profile) {
     notFound();
@@ -31,8 +29,8 @@ export default async function CustomerPage({ params }: PageProps) {
     <CustomerProfilePage
       profile={profile}
       orderHistory={orderHistory}
-      ownedTools={ownedTools}
-      orderedConsumables={orderedConsumables}
+      toolsWithConsumables={toolsWithConsumables}
+      contacts={contacts}
     />
   );
 }

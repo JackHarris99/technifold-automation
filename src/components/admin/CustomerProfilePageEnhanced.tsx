@@ -5,31 +5,40 @@ import { CustomerProfile, OrderHistory } from '@/types';
 import { AdminHeader } from './AdminHeader';
 import { generatePortalUrl } from '@/lib/supabase';
 
-interface Tool {
-  product_code: string;
-  description: string;
-  category: string;
-  price?: number;
+interface Contact {
+  contact_id?: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  role?: string;
   [key: string]: unknown;
 }
 
-interface Consumable {
-  product_code: string;
-  description: string;
-  category: string;
-  type: string;
-  price?: number;
-  [key: string]: unknown;
+interface ToolWithConsumables {
+  tool: {
+    product_code: string;
+    description: string;
+    category?: string;
+    type: string;
+    [key: string]: unknown;
+  };
+  consumables: Array<{
+    product_code: string;
+    description: string;
+    category?: string;
+    type: string;
+    [key: string]: unknown;
+  }>;
 }
 
 interface CustomerProfilePageProps {
   profile: CustomerProfile;
   orderHistory: OrderHistory[];
-  ownedTools?: Tool[];
-  orderedConsumables?: Consumable[];
+  toolsWithConsumables?: ToolWithConsumables[];
+  contacts?: Contact[];
 }
 
-export function CustomerProfilePage({ profile, orderHistory, ownedTools = [], orderedConsumables = [] }: CustomerProfilePageProps) {
+export function CustomerProfilePage({ profile, orderHistory, toolsWithConsumables = [], contacts = [] }: CustomerProfilePageProps) {
   const portalUrl = generatePortalUrl(profile.portal_token);
 
   return (
@@ -70,6 +79,38 @@ export function CustomerProfilePage({ profile, orderHistory, ownedTools = [], or
             </a>
           </div>
         </div>
+
+        {/* Contacts Section */}
+        {contacts.length > 0 && (
+          <div className="bg-white shadow-sm rounded-lg mb-6">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900">Contacts</h3>
+              <p className="text-sm text-gray-500 mt-1">People associated with this company</p>
+            </div>
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {contacts.map((contact) => (
+                  <div key={contact.contact_id || contact.name} className="border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900">{contact.name}</h4>
+                    {contact.role && (
+                      <p className="text-sm text-gray-600 mb-2">{contact.role}</p>
+                    )}
+                    {contact.email && (
+                      <a href={`mailto:${contact.email}`} className="block text-sm text-blue-600 hover:text-blue-800 mb-1">
+                        {contact.email}
+                      </a>
+                    )}
+                    {contact.phone && (
+                      <a href={`tel:${contact.phone}`} className="block text-sm text-gray-600">
+                        {contact.phone}
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Company Information */}
@@ -149,7 +190,7 @@ export function CustomerProfilePage({ profile, orderHistory, ownedTools = [], or
                   </div>
                   <div>
                     <dt className="text-sm font-medium text-gray-500">Tools Owned</dt>
-                    <dd className="mt-1 text-2xl font-semibold text-gray-900">{ownedTools.length}</dd>
+                    <dd className="mt-1 text-2xl font-semibold text-gray-900">{toolsWithConsumables.length}</dd>
                   </div>
                   <div>
                     <dt className="text-sm font-medium text-gray-500">Last Order</dt>

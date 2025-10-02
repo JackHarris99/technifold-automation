@@ -503,6 +503,101 @@ export async function getCompatibleConsumables(productCode: string) {
   }
 }
 
+// Get company contacts
+export async function getCompanyContacts(companyId: string): Promise<Array<{
+  contact_id?: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  role?: string;
+  [key: string]: unknown;
+}>> {
+  try {
+    const supabase = getSupabaseClient();
+
+    const { data, error } = await supabase
+      .from('contacts')
+      .select('*')
+      .eq('company_id', companyId)
+      .order('name');
+
+    if (error) {
+      console.error('Error fetching contacts:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Error in getCompanyContacts:', error);
+    return [];
+  }
+}
+
+// Get tools and their consumables for a company
+export async function getCompanyToolsWithConsumables(companyId: string): Promise<Array<{
+  tool: {
+    product_code: string;
+    description: string;
+    category?: string;
+    type: string;
+    [key: string]: unknown;
+  };
+  consumables: Array<{
+    product_code: string;
+    description: string;
+    category?: string;
+    type: string;
+    [key: string]: unknown;
+  }>;
+}>> {
+  try {
+    const supabase = getSupabaseClient();
+
+    // First get all tools owned by this company
+    const tools = await getCompanyOwnedTools(companyId);
+
+    if (tools.length === 0) {
+      return [];
+    }
+
+    // Get all consumables ordered by this company
+    const consumables = await getCompanyOrderedConsumables(companyId);
+
+    // Get the tool-consumable mappings
+    const { data: mappings, error: mapError } = await supabase
+      .from('tool_consumable_map')
+      .select('tool_code, consumable_code')
+      .in('tool_code', tools.map(t => t.product_code));
+
+    if (mapError) {
+      console.error('Error fetching tool-consumable mappings:', mapError);
+    }
+
+    // Build the result structure
+    const result = tools.map(tool => {
+      // Find consumables for this tool based on the mapping
+      const toolConsumableCodes = (mappings || [])
+        .filter(m => m.tool_code === tool.product_code)
+        .map(m => m.consumable_code);
+
+      // Filter consumables that belong to this tool
+      const toolConsumables = consumables.filter(c =>
+        toolConsumableCodes.includes(c.product_code)
+      );
+
+      return {
+        tool,
+        consumables: toolConsumables
+      };
+    });
+
+    return result;
+  } catch (error) {
+    console.error('Error in getCompanyToolsWithConsumables:', error);
+    return [];
+  }
+}
+
 // Get all consumables ordered by a company (same pattern as tools)
 export async function getCompanyOrderedConsumables(companyId: string): Promise<Array<{
   product_code: string;
