@@ -283,7 +283,7 @@ export function CustomerProfilePage({ profile, orderHistory, toolsWithConsumable
                   </div>
                 )}
               </div>
-            )}
+            </div>
           </div>
         </div>
       </main>
