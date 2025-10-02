@@ -16,9 +16,9 @@ interface Tool {
 interface Consumable {
   product_code: string;
   description: string;
-  category?: string;
-  total_ordered: number;
-  last_ordered?: string;
+  category: string;
+  type: string;
+  price?: number;
   [key: string]: unknown;
 }
 
@@ -305,15 +305,10 @@ export function CustomerProfilePage({ profile, orderHistory, ownedTools = [], or
                               {consumable.description}
                             </h4>
                             <p className="text-xs text-gray-500 font-mono mt-1">{consumable.product_code}</p>
-                            <div className="mt-2 space-y-1">
-                              <div className="text-xs text-gray-600">
-                                Qty: <span className="font-medium">{consumable.total_ordered}</span>
-                              </div>
-                              {consumable.last_ordered && (
-                                <div className="text-xs text-gray-500">
-                                  Last: {new Date(consumable.last_ordered).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                                </div>
-                              )}
+                            <div className="mt-2">
+                              <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                                {consumable.category || 'Consumable'}
+                              </span>
                             </div>
                           </div>
                         </div>
