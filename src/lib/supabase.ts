@@ -585,7 +585,22 @@ export async function getCompanyToolsWithConsumables(companyId: string): Promise
     const assignedConsumableCodes = new Set<string>();
 
     // Build the result structure for tools with their consumables
-    const result = tools.map(tool => {
+    const result: Array<{
+      tool: {
+        product_code: string;
+        description: string;
+        category?: string;
+        type: string;
+        [key: string]: unknown;
+      } | null;
+      consumables: Array<{
+        product_code: string;
+        description: string;
+        category?: string;
+        type: string;
+        [key: string]: unknown;
+      }>;
+    }> = tools.map(tool => {
       // Find consumables for this tool based on the mapping
       const toolConsumableCodes = (allMappings || [])
         .filter(m => m.tool_code === tool.product_code)
