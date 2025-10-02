@@ -42,6 +42,10 @@ interface CustomerProfilePageProps {
 export function CustomerProfilePage({ profile, orderHistory, toolsWithConsumables = [], contacts = [] }: CustomerProfilePageProps) {
   const portalUrl = generatePortalUrl(profile.portal_token);
 
+  // Debug logging
+  console.log('[COMPONENT] Contacts data:', contacts);
+  console.log('[COMPONENT] Contacts count:', contacts.length);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <AdminHeader />
@@ -82,7 +86,6 @@ export function CustomerProfilePage({ profile, orderHistory, toolsWithConsumable
         </div>
 
         {/* Contacts Section */}
-        {console.log('[COMPONENT] Contacts data:', contacts)}
         {contacts.length > 0 && (
           <div className="bg-white shadow-sm rounded-lg mb-6">
             <div className="px-6 py-4 border-b border-gray-200">
