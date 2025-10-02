@@ -24,7 +24,7 @@ interface ToolWithConsumables {
     category?: string;
     type: string;
     [key: string]: unknown;
-  };
+  } | null;
   consumables: Array<{
     product_code: string;
     description: string;

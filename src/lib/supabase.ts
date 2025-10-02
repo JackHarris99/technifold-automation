@@ -550,7 +550,7 @@ export async function getCompanyToolsWithConsumables(companyId: string): Promise
     category?: string;
     type: string;
     [key: string]: unknown;
-  };
+  } | null;
   consumables: Array<{
     product_code: string;
     description: string;
@@ -562,43 +562,63 @@ export async function getCompanyToolsWithConsumables(companyId: string): Promise
   try {
     const supabase = getSupabaseClient();
 
-    // First get all tools owned by this company
+    // Get all tools owned by this company
     const tools = await getCompanyOwnedTools(companyId);
-
-    if (tools.length === 0) {
-      return [];
-    }
 
     // Get all consumables ordered by this company
     const consumables = await getCompanyOrderedConsumables(companyId);
 
-    // Get the tool-consumable mappings
-    const { data: mappings, error: mapError } = await supabase
+    if (consumables.length === 0 && tools.length === 0) {
+      return [];
+    }
+
+    // Get ALL tool-consumable mappings (not just for owned tools)
+    const { data: allMappings, error: mapError } = await supabase
       .from('tool_consumable_map')
-      .select('tool_code, consumable_code')
-      .in('tool_code', tools.map(t => t.product_code));
+      .select('tool_code, consumable_code');
 
     if (mapError) {
       console.error('Error fetching tool-consumable mappings:', mapError);
     }
 
-    // Build the result structure
+    // Track which consumables have been assigned to tools
+    const assignedConsumableCodes = new Set<string>();
+
+    // Build the result structure for tools with their consumables
     const result = tools.map(tool => {
       // Find consumables for this tool based on the mapping
-      const toolConsumableCodes = (mappings || [])
+      const toolConsumableCodes = (allMappings || [])
         .filter(m => m.tool_code === tool.product_code)
         .map(m => m.consumable_code);
 
       // Filter consumables that belong to this tool
-      const toolConsumables = consumables.filter(c =>
-        toolConsumableCodes.includes(c.product_code)
-      );
+      const toolConsumables = consumables.filter(c => {
+        if (toolConsumableCodes.includes(c.product_code)) {
+          assignedConsumableCodes.add(c.product_code);
+          return true;
+        }
+        return false;
+      });
 
       return {
         tool,
         consumables: toolConsumables
       };
     });
+
+    // Find consumables that aren't assigned to any owned tool
+    // These are consumables ordered for tools not purchased from us
+    const orphanConsumables = consumables.filter(c =>
+      !assignedConsumableCodes.has(c.product_code)
+    );
+
+    // If there are orphan consumables, add them as a separate group
+    if (orphanConsumables.length > 0) {
+      result.push({
+        tool: null, // No tool associated
+        consumables: orphanConsumables
+      });
+    }
 
     return result;
   } catch (error) {
