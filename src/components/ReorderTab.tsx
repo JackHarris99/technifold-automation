@@ -47,7 +47,8 @@ export function ReorderTab({ items, cart, onAddToCart, onRemoveFromCart }: Reord
 
   // Group items by category
   const groupedItems = items.reduce((acc, item) => {
-    const category = (item as ReorderItem & { category?: string }).category || 'Uncategorized';
+    const category = item.category || 'Uncategorized';
+    console.log('Item:', item.consumable_code, 'Category:', item.category, 'Result:', category);
     if (!acc[category]) {
       acc[category] = [];
     }

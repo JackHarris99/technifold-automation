@@ -53,6 +53,12 @@ export async function getPayloadByToken(token: string): Promise<CompanyPayload |
     console.log(`Company ${payload.company_name}:`);
     console.log(`- Reorder items: ${payload.reorder_items?.length || 0}`);
     console.log(`- Tool tabs: ${payload.by_tool_tabs?.length || 0}`);
+
+    // Debug: Check if category field is present
+    if (payload.reorder_items?.length > 0) {
+      console.log('Sample reorder item:', payload.reorder_items[0]);
+      console.log('Has category field?', 'category' in payload.reorder_items[0]);
+    }
     payload.by_tool_tabs?.forEach((tab, idx) => {
       console.log(`  - Tab ${idx + 1} (${tab.tool_code}): ${tab.items?.length || 0} items`);
     });

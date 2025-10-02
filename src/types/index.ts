@@ -3,6 +3,7 @@ export type ReorderItem = {
   description: string;
   price: number | null;
   last_purchased: string | null; // 'YYYY-MM-DD'
+  category?: string;
 };
 
 export type ToolTab = {
