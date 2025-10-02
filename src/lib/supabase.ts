@@ -513,6 +513,7 @@ export async function getCompanyContacts(companyId: string): Promise<Array<{
   [key: string]: unknown;
 }>> {
   try {
+    console.log(`[CONTACTS] Fetching contacts for company: ${companyId}`);
     const supabase = getSupabaseClient();
 
     const { data, error } = await supabase
@@ -521,14 +522,21 @@ export async function getCompanyContacts(companyId: string): Promise<Array<{
       .eq('company_id', companyId)
       .order('name');
 
+    console.log(`[CONTACTS] Found ${data?.length || 0} contacts for company ${companyId}`);
+
     if (error) {
-      console.error('Error fetching contacts:', error);
+      console.error('[CONTACTS] Error fetching contacts:', error);
       return [];
+    }
+
+    // Log first contact for debugging
+    if (data && data.length > 0) {
+      console.log('[CONTACTS] Sample contact:', data[0]);
     }
 
     return data || [];
   } catch (error) {
-    console.error('Error in getCompanyContacts:', error);
+    console.error('[CONTACTS] Error in getCompanyContacts:', error);
     return [];
   }
 }
