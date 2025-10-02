@@ -79,36 +79,45 @@ export function ToolsAndConsumablesSection({ toolsWithConsumables }: Props) {
             {item.consumables.length > 0 ? (
               <div className={item.tool ? "ml-4" : ""}>
                 {item.tool && <p className="text-xs font-medium text-gray-700 mb-3">Compatible consumables purchased:</p>}
-                <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-                  {item.consumables.map((consumable) => (
-                    <div key={consumable.product_code} className="border border-gray-200 rounded-lg p-2">
-                      <div className="w-16 h-16 bg-gray-50 rounded mb-1 mx-auto">
-                        <img
-                          src={`/product_images/${consumable.product_code}.jpg`}
-                          alt={consumable.description}
-                          className="w-full h-full object-contain p-1"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.onerror = null;
-                            target.src = '/product-placeholder.svg';
-                          }}
-                        />
+                <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                  {item.consumables.map((consumable) => {
+                    // Format the last order date if available
+                    const lastOrderFormatted = consumable.last_order_date
+                      ? new Date(consumable.last_order_date).toLocaleDateString('en-GB', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: '2-digit'
+                        })
+                      : null;
+
+                    return (
+                      <div key={consumable.product_code} className="border border-gray-200 rounded-lg overflow-hidden">
+                        <div className="aspect-square bg-gray-50">
+                          <img
+                            src={`/product_images/${consumable.product_code}.jpg`}
+                            alt={consumable.description}
+                            className="w-full h-full object-contain p-2"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.onerror = null;
+                              target.src = '/product-placeholder.svg';
+                            }}
+                          />
+                        </div>
+                        <div className="p-2">
+                          <h5 className="text-xs font-medium text-gray-900 truncate" title={consumable.description}>
+                            {consumable.description}
+                          </h5>
+                          <p className="text-xs text-gray-500 font-mono truncate">{consumable.product_code}</p>
+                          {lastOrderFormatted && (
+                            <p className="text-xs text-amber-600 mt-1">
+                              Last: {lastOrderFormatted}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      <h5 className="text-xs font-medium text-gray-900 truncate text-center" title={consumable.description}>
-                        {consumable.description}
-                      </h5>
-                      <p className="text-xs text-gray-500 font-mono truncate text-center">{consumable.product_code}</p>
-                      {consumable.last_order_date && (
-                        <p className="text-xs text-amber-600 text-center mt-1">
-                          Last: {new Date(consumable.last_order_date).toLocaleDateString('en-GB', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: '2-digit'
-                          })}
-                        </p>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ) : (

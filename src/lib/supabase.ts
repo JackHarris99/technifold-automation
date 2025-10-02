@@ -602,6 +602,12 @@ export async function getCompanyToolsWithConsumables(companyId: string): Promise
       last_order_date: lastOrderMap.get(c.product_code) || undefined
     }));
 
+    console.log('[DEBUG] Last order dates:', {
+      mapSize: lastOrderMap.size,
+      sample: Array.from(lastOrderMap.entries()).slice(0, 3),
+      consumablesWithDates: consumablesWithDates.slice(0, 2)
+    });
+
     // Get ALL tool-consumable mappings (not just for owned tools)
     const { data: allMappings, error: mapError } = await supabase
       .from('tool_consumable_map')
