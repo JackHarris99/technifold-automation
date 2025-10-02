@@ -518,16 +518,21 @@ export async function getCompanyOrderedConsumables(companyId: string): Promise<A
     const supabase = getSupabaseClient();
 
     // Get all unique consumables from sales for this company
+    // Try both product_code and consumable_code columns
     const { data: salesData, error: salesError } = await supabase
       .from('sales')
-      .select('product_code, description, quantity, txn_date')
-      .eq('company_id', companyId)
-      .not('product_code', 'is', null);
+      .select('product_code, consumable_code, description, quantity, txn_date')
+      .eq('company_id', companyId);
 
     console.log(`[getCompanyOrderedConsumables] Sales query result:`, {
       companyId,
       salesCount: salesData?.length || 0,
-      error: salesError
+      error: salesError,
+      firstFewSales: salesData?.slice(0, 3).map(s => ({
+        product_code: s.product_code,
+        consumable_code: s.consumable_code,
+        desc: s.description?.substring(0, 20)
+      }))
     });
 
     if (salesError || !salesData) {
@@ -535,9 +540,16 @@ export async function getCompanyOrderedConsumables(companyId: string): Promise<A
       return [];
     }
 
-    // Group by product_code and aggregate quantities
+    if (salesData.length === 0) {
+      console.log(`[getCompanyOrderedConsumables] No sales found for company ${companyId}`);
+      return [];
+    }
+
+    // Group by product_code (or consumable_code if product_code is null) and aggregate quantities
     const consumableMap = salesData.reduce((acc, sale) => {
-      const code = sale.product_code;
+      const code = sale.product_code || sale.consumable_code;
+      if (!code) return acc; // Skip if both are null
+
       if (!acc[code]) {
         acc[code] = {
           product_code: code,
