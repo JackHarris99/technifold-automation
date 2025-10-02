@@ -576,10 +576,10 @@ export async function getCompanyToolsWithConsumables(companyId: string): Promise
     // Get last order dates for each consumable
     const { data: lastOrderDates, error: orderError } = await supabase
       .from('sales')
-      .select('product_code, invoice_date')
+      .select('product_code, txn_date')
       .eq('company_id', companyId)
       .in('product_code', consumables.map(c => c.product_code))
-      .order('invoice_date', { ascending: false });
+      .order('txn_date', { ascending: false });
 
     if (orderError) {
       console.error('Error fetching last order dates:', orderError);
@@ -590,8 +590,8 @@ export async function getCompanyToolsWithConsumables(companyId: string): Promise
     if (lastOrderDates) {
       // Group by product_code and get the most recent date for each
       lastOrderDates.forEach(item => {
-        if (!lastOrderMap.has(item.product_code) || item.invoice_date > lastOrderMap.get(item.product_code)!) {
-          lastOrderMap.set(item.product_code, item.invoice_date);
+        if (!lastOrderMap.has(item.product_code) || item.txn_date > lastOrderMap.get(item.product_code)!) {
+          lastOrderMap.set(item.product_code, item.txn_date);
         }
       });
     }
@@ -601,12 +601,6 @@ export async function getCompanyToolsWithConsumables(companyId: string): Promise
       ...c,
       last_order_date: lastOrderMap.get(c.product_code) || undefined
     }));
-
-    console.log('[DEBUG] Last order dates:', {
-      mapSize: lastOrderMap.size,
-      sample: Array.from(lastOrderMap.entries()).slice(0, 3),
-      consumablesWithDates: consumablesWithDates.slice(0, 2)
-    });
 
     // Get ALL tool-consumable mappings (not just for owned tools)
     const { data: allMappings, error: mapError } = await supabase
