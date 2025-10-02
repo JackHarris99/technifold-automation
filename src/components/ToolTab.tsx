@@ -142,9 +142,9 @@ export function ToolTab({
                             <p className="text-sm text-gray-500 mt-1">
                               Code: {item.consumable_code}
                             </p>
-                            {allCompatibleConsumables && 'category' in item && (item as any).category && (
+                            {allCompatibleConsumables && 'category' in item && (item as typeof allCompatibleConsumables[0]).category && (
                               <span className="inline-block mt-2 text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                                {(item as any).category}
+                                {(item as typeof allCompatibleConsumables[0]).category}
                               </span>
                             )}
                             {wasOrdered && (
