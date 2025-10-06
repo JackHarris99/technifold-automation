@@ -86,7 +86,7 @@ export async function ToolCategoryCards() {
         {/* Bottom CTA Section */}
         <div className="mt-20 bg-white rounded-2xl shadow-lg p-12 text-center">
           <h3 className="text-3xl font-bold text-gray-900 mb-4">
-            Can't Find What You're Looking For?
+            Can&apos;t Find What You&apos;re Looking For?
           </h3>
           <p className="text-gray-600 text-lg mb-8 max-w-2xl mx-auto">
             Our team of experts is here to help you find the perfect solution for your print finishing needs.
