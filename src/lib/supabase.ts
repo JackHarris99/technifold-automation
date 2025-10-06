@@ -16,6 +16,46 @@ function getSupabaseClient() {
   return supabaseClient;
 }
 
+export async function getToolCategories() {
+  try {
+    const supabase = getSupabaseClient();
+
+    // Get distinct categories for tools
+    const { data, error } = await supabase
+      .from('products')
+      .select('category, product_code, description')
+      .eq('type', 'tool')
+      .order('category');
+
+    if (error) {
+      console.error('Error fetching tool categories:', error);
+      return [];
+    }
+
+    // Group by category
+    const categoriesMap = new Map();
+    data?.forEach(product => {
+      const category = product.category || 'Uncategorized';
+      if (!categoriesMap.has(category)) {
+        categoriesMap.set(category, {
+          name: category,
+          tools: [],
+          exampleImage: `/product_images/${product.product_code}.jpg`
+        });
+      }
+      categoriesMap.get(category).tools.push({
+        code: product.product_code,
+        description: product.description
+      });
+    });
+
+    return Array.from(categoriesMap.values());
+  } catch (error) {
+    console.error('Error in getToolCategories:', error);
+    return [];
+  }
+}
+
 export async function getPayloadByToken(token: string): Promise<CompanyPayload | null> {
   try {
     // Validate token format (basic UUID check)

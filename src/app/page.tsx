@@ -2,8 +2,9 @@
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { ProductCategoriesMenu } from '@/components/marketing/ProductCategoriesMenu';
 import { HeroSection } from '@/components/marketing/HeroSection';
-import { ProductShowcase } from '@/components/marketing/ProductShowcase';
+import { ToolCategoryCards } from '@/components/marketing/ToolCategoryCards';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
+import { Suspense } from 'react';
 
 export default function HomePage() {
   return (
@@ -12,7 +13,9 @@ export default function HomePage() {
       <ProductCategoriesMenu />
       <main>
         <HeroSection />
-        <ProductShowcase />
+        <Suspense fallback={<div className="py-24 text-center">Loading categories...</div>}>
+          <ToolCategoryCards />
+        </Suspense>
       </main>
       <MarketingFooter />
     </div>
