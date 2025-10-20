@@ -2,7 +2,15 @@
   "functions": {
     "src/app/api/**/*.ts": {
       "maxDuration": 10
+    },
+    "src/app/api/outbox/run/route.ts": {
+      "maxDuration": 60
     }
   },
-  "crons": []
+  "crons": [
+    {
+      "path": "/api/outbox/run",
+      "schedule": "*/10 * * * *"
+    }
+  ]
 }
