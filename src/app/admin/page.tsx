@@ -1,11 +1,13 @@
-import { getAllCompanies, getAllProductsWithDatasheets, getCompanyCategories } from '@/lib/supabase';
+import { getAllCompanies, getAllProductsWithDatasheets, getCompanyCategories, getAllOrders, getAllOutboxJobs } from '@/lib/supabase';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 
 export default async function AdminPage() {
   // Get all companies first to ensure we have data
-  const [allCompanies, products] = await Promise.all([
+  const [allCompanies, products, orders, outboxJobs] = await Promise.all([
     getAllCompanies(),
-    getAllProductsWithDatasheets()
+    getAllProductsWithDatasheets(),
+    getAllOrders(),
+    getAllOutboxJobs()
   ]);
 
   // Check categories after we know we have companies
@@ -49,6 +51,8 @@ export default async function AdminPage() {
       press={press}
       prospects={prospects}
       products={products}
+      orders={orders}
+      outboxJobs={outboxJobs}
       categoryInfo={categoryCount}
     />
   );

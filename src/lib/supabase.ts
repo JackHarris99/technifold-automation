@@ -798,6 +798,93 @@ export function decodeProductCodeFromUrl(encodedCode: string): string {
   return encodedCode.replace(/--/g, '/');
 }
 
+// Get all orders for admin dashboard
+export async function getAllOrders(): Promise<Array<{
+  order_id: string;
+  company_id: string;
+  company_name?: string;
+  total_amount: number;
+  currency: string;
+  status: string;
+  created_at: string;
+  stripe_session_id?: string;
+  items_count?: number;
+}>> {
+  try {
+    const supabase = getSupabaseClient();
+
+    const { data, error } = await supabase
+      .from('orders')
+      .select(`
+        order_id,
+        company_id,
+        total_amount,
+        currency,
+        status,
+        created_at,
+        stripe_session_id,
+        companies (company_name)
+      `)
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    if (error) {
+      console.error('Error fetching orders:', error);
+      return [];
+    }
+
+    return (data || []).map(order => ({
+      order_id: order.order_id,
+      company_id: order.company_id,
+      company_name: (order.companies as any)?.company_name,
+      total_amount: order.total_amount,
+      currency: order.currency,
+      status: order.status,
+      created_at: order.created_at,
+      stripe_session_id: order.stripe_session_id,
+    }));
+  } catch (error) {
+    console.error('Error in getAllOrders:', error);
+    return [];
+  }
+}
+
+// Get all outbox jobs for admin dashboard
+export async function getAllOutboxJobs(): Promise<Array<{
+  id: string;
+  job_id: string;
+  job_type: string;
+  status: string;
+  payload: any;
+  attempts: number;
+  max_attempts: number;
+  created_at: string;
+  scheduled_for: string;
+  locked_until: string | null;
+  last_error: string | null;
+  completed_at: string | null;
+}>> {
+  try {
+    const supabase = getSupabaseClient();
+
+    const { data, error } = await supabase
+      .from('outbox')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    if (error) {
+      console.error('Error fetching outbox jobs:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Error in getAllOutboxJobs:', error);
+    return [];
+  }
+}
+
 // Export both the default name and the alias for compatibility
 export { getSupabaseClient };
 export { getSupabaseClient as supabase };
