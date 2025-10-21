@@ -6,7 +6,7 @@
  * {
  *   "crons": [{
  *     "path": "/api/outbox/run",
- *     "schedule": "*/10 * * * *"
+ *     "schedule": "0 12 * * *"
  *   }]
  * }
  */
