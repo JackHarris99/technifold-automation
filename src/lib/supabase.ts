@@ -798,4 +798,6 @@ export function decodeProductCodeFromUrl(encodedCode: string): string {
   return encodedCode.replace(/--/g, '/');
 }
 
+// Export both the default name and the alias for compatibility
+export { getSupabaseClient };
 export { getSupabaseClient as supabase };
