@@ -5,11 +5,15 @@
 
 import crypto from 'crypto';
 
-const TOKEN_HMAC_SECRET = process.env.TOKEN_HMAC_SECRET!;
 const TOKEN_TTL_HOURS = 72; // 3 days default
 
-if (!TOKEN_HMAC_SECRET) {
-  throw new Error('TOKEN_HMAC_SECRET environment variable is required');
+// Lazy-load secret to avoid build-time errors
+function getTokenSecret(): string {
+  const secret = process.env.TOKEN_HMAC_SECRET;
+  if (!secret) {
+    throw new Error('TOKEN_HMAC_SECRET environment variable is required');
+  }
+  return secret;
 }
 
 export interface TokenPayload {
@@ -36,7 +40,7 @@ export function generateToken(payload: Omit<TokenPayload, 'expires_at'>, ttlHour
   const payloadB64 = Buffer.from(payloadStr).toString('base64url');
 
   // Generate HMAC signature
-  const hmac = crypto.createHmac('sha256', TOKEN_HMAC_SECRET);
+  const hmac = crypto.createHmac('sha256', getTokenSecret());
   hmac.update(payloadB64);
   const signature = hmac.digest('base64url');
 
@@ -57,7 +61,7 @@ export function verifyToken(token: string): TokenPayload | null {
     }
 
     // Verify HMAC signature
-    const hmac = crypto.createHmac('sha256', TOKEN_HMAC_SECRET);
+    const hmac = crypto.createHmac('sha256', getTokenSecret());
     hmac.update(payloadB64);
     const expectedSignature = hmac.digest('base64url');
 

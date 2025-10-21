@@ -5,13 +5,28 @@
 import Stripe from 'stripe';
 import { getSupabaseClient } from './supabase';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY environment variable is required');
+// Lazy-load Stripe client to avoid build-time errors
+let stripeClient: Stripe | null = null;
+
+function getStripeClient(): Stripe {
+  if (!stripeClient) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('STRIPE_SECRET_KEY environment variable is required');
+    }
+    stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2024-12-18.acacia',
+      typescript: true,
+    });
+  }
+  return stripeClient;
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-12-18.acacia',
-  typescript: true,
+// Export for backwards compatibility
+export const stripe = new Proxy({} as Stripe, {
+  get: (_, prop) => {
+    const client = getStripeClient();
+    return client[prop as keyof Stripe];
+  },
 });
 
 export interface CheckoutLineItem {
