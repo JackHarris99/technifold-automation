@@ -16,19 +16,26 @@ interface Suggestion {
   action_meta: Record<string, any>;
 }
 
-export function SuggestionsPanel() {
+interface SuggestionsPanelProps {
+  companyId?: string; // Optional: filter by company
+}
+
+export function SuggestionsPanel({ companyId }: SuggestionsPanelProps = {}) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSuggestions();
-  }, []);
+  }, [companyId]);
 
   async function fetchSuggestions() {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/suggestions');
+      const params = new URLSearchParams(
+        companyId ? { company_id: companyId } : {}
+      );
+      const response = await fetch(`/api/admin/suggestions?${params}`);
       if (!response.ok) {
         throw new Error('Failed to fetch suggestions');
       }
@@ -174,3 +181,6 @@ function handleAction(suggestion: Suggestion) {
 function viewCustomer(companyId: string) {
   window.location.href = `/admin/customer/${companyId}`;
 }
+
+// Default export for compatibility
+export default SuggestionsPanel;

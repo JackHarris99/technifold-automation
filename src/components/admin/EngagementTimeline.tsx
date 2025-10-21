@@ -219,3 +219,6 @@ function formatTimestamp(timestamp: string): string {
     year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
   });
 }
+
+// Default export for compatibility
+export default EngagementTimeline;
