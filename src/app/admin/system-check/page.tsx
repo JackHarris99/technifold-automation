@@ -5,7 +5,7 @@
 
 import { getSupabaseClient } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+import { redirect, isRedirectError } from 'next/navigation';
 import SystemCheckStatus from '@/components/admin/SystemCheckStatus';
 
 export default async function SystemCheckPage() {
@@ -91,6 +91,10 @@ export default async function SystemCheckPage() {
       revalidatePath('/admin/system-check');
       redirect(`/admin/system-check?success=offer_enqueued&job_id=${result.job_id}`);
     } catch (error) {
+      // Re-throw redirect errors
+      if (isRedirectError(error)) {
+        throw error;
+      }
       redirect(`/admin/system-check?error=${encodeURIComponent(error instanceof Error ? error.message : 'Unknown error')}`);
     }
   }
@@ -115,6 +119,10 @@ export default async function SystemCheckPage() {
       revalidatePath('/admin/system-check');
       redirect(`/admin/system-check?success=outbox_run&processed=${result.processed || 0}&failed=${result.failed || 0}`);
     } catch (error) {
+      // Re-throw redirect errors
+      if (isRedirectError(error)) {
+        throw error;
+      }
       redirect(`/admin/system-check?error=${encodeURIComponent(error instanceof Error ? error.message : 'Unknown error')}`);
     }
   }
@@ -160,6 +168,10 @@ export default async function SystemCheckPage() {
       revalidatePath('/admin/system-check');
       redirect(`/admin/system-check?success=checkout_started&url=${encodeURIComponent(result.url || 'N/A')}`);
     } catch (error) {
+      // Re-throw redirect errors
+      if (isRedirectError(error)) {
+        throw error;
+      }
       redirect(`/admin/system-check?error=${encodeURIComponent(error instanceof Error ? error.message : 'Unknown error')}`);
     }
   }
