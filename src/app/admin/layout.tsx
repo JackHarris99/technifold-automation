@@ -22,7 +22,7 @@ export default async function AdminLayout({
   const adminAuth = cookieStore.get('admin_authorized');
 
   if (!adminAuth || adminAuth.value !== 'true') {
-    // Redirect to login page (create this if needed)
+    // Redirect to login page
     redirect('/admin/login');
   }
 
