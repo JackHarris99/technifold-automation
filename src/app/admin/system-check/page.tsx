@@ -65,24 +65,29 @@ export default async function SystemCheckPage() {
     }
 
     // Get contacts with consent
-    const contactIds = contactId ? [contactId] : [];
-    const { data: contacts, error: contactsError } = await supabase
+    let contactQuery = supabase
       .from('contacts')
       .select('contact_id, full_name, email, marketing_status, gdpr_consent_at, zoho_contact_id')
-      .eq('company_id', companyId)
-      .in('contact_id', contactIds.length > 0 ? contactIds : ['00000000-0000-0000-0000-000000000000']); // Dummy UUID if no contacts
+      .eq('company_id', companyId);
+
+    // If specific contact selected, filter by it
+    if (contactId) {
+      contactQuery = contactQuery.eq('contact_id', contactId);
+    }
+
+    const { data: contacts, error: contactsError } = await contactQuery;
 
     if (contactsError) {
       redirect('/admin/system-check?error=Failed+to+fetch+contacts');
     }
 
-    // Filter eligible contacts
+    // Filter eligible contacts (only subscribed with consent and Zoho sync)
     const eligibleContacts = contacts?.filter(
       (c) => c.marketing_status === 'subscribed' && c.gdpr_consent_at !== null && c.zoho_contact_id !== null
     ) || [];
 
-    if (eligibleContacts.length === 0 && contactIds.length > 0) {
-      redirect('/admin/system-check?error=No+contacts+with+active+consent');
+    if (eligibleContacts.length === 0) {
+      redirect('/admin/system-check?error=No+eligible+contacts+found+(need+subscribed+status+and+Zoho+sync)');
     }
 
     // Create outbox job
