@@ -5,8 +5,12 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { verifyAdminAuth } from '@/lib/admin-auth';
 
 export async function GET(request: NextRequest) {
+  // Verify admin authentication
+  const authError = verifyAdminAuth(request);
+  if (authError) return authError;
   try {
     const searchParams = request.nextUrl.searchParams;
     const limit = parseInt(searchParams.get('limit') || '20', 10);

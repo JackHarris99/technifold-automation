@@ -42,24 +42,53 @@ export async function POST(request: NextRequest) {
     // Process jobs until timeout
     while (Date.now() - startTime < maxDuration) {
       // Fetch and lock next job atomically using FOR UPDATE SKIP LOCKED
-      // This is done via RPC to use SQL-level locking
-      const { data: job, error: fetchError } = await supabase.rpc('claim_outbox_job', {
-        max_attempts_limit: 5,
-      }).single();
+      // Uses idx_outbox_pick index (status, locked_until, attempts)
+      const { data: jobs, error: fetchError } = await supabase
+        .from('outbox')
+        .select('job_id, job_type, payload, attempts, max_attempts')
+        .eq('status', 'pending')
+        .lt('attempts', 5)  // max_attempts default
+        .or('locked_until.is.null,locked_until.lt.' + new Date().toISOString())
+        .order('scheduled_for', { ascending: true })
+        .limit(1);
 
-      if (fetchError || !job) {
+      if (fetchError) {
+        console.error('[outbox-worker] Error fetching jobs:', fetchError);
+        break;
+      }
+
+      if (!jobs || jobs.length === 0) {
         console.log('[outbox-worker] No more jobs to process');
         break;
       }
 
-      console.log(`[outbox-worker] Claimed job ${job.id}: ${job.job_type}`);
+      const job = jobs[0];
+      const newAttempts = job.attempts + 1;
 
-      // Note: Job is already locked with status='processing' and attempts incremented
-      // by the claim_outbox_job RPC function
+      console.log(`[outbox-worker] Claiming job ${job.job_id}: ${job.job_type}`);
+
+      // Atomically claim the job by setting status='processing' and locked_until
+      const { data: claimedJob, error: claimError } = await supabase
+        .from('outbox')
+        .update({
+          status: 'processing',
+          attempts: newAttempts,
+          locked_until: new Date(Date.now() + 10 * 60 * 1000).toISOString(), // 10 minutes
+          updated_at: new Date().toISOString(),
+        })
+        .eq('job_id', job.job_id)
+        .eq('status', 'pending')  // Ensure it's still pending (race condition check)
+        .select('job_id')
+        .single();
+
+      if (claimError || !claimedJob) {
+        console.log('[outbox-worker] Job already claimed by another worker, skipping');
+        continue;
+      }
 
       // Process the job
       try {
-        console.log(`[outbox-worker] Processing job ${job.id}: ${job.job_type}`);
+        console.log(`[outbox-worker] Processing job ${job.job_id}: ${job.job_type}`);
         await processJob(job);
 
         // Mark as completed
@@ -70,18 +99,19 @@ export async function POST(request: NextRequest) {
             completed_at: new Date().toISOString(),
             locked_until: null,
           })
-          .eq('id', job.id);
+          .eq('job_id', job.job_id);
 
         processed++;
-        console.log(`[outbox-worker] Job ${job.id} completed successfully`);
+        console.log(`[outbox-worker] Job ${job.job_id} completed successfully`);
       } catch (error) {
-        console.error(`[outbox-worker] Job ${job.id} failed:`, error);
+        console.error(`[outbox-worker] Job ${job.job_id} failed:`, error);
 
         const errorMessage = error instanceof Error ? error.message : String(error);
-        const newStatus = job.attempts + 1 >= job.max_attempts ? 'dead' : 'failed';
+        const maxAttempts = job.max_attempts || 3;
+        const newStatus = newAttempts >= maxAttempts ? 'dead' : 'failed';
 
         // Calculate exponential backoff for retry
-        const retryDelayMinutes = Math.pow(2, job.attempts) * 5; // 5, 10, 20, 40, 80 minutes
+        const retryDelayMinutes = Math.pow(2, newAttempts) * 5; // 5, 10, 20, 40, 80 minutes
         const scheduledFor = new Date(Date.now() + retryDelayMinutes * 60 * 1000).toISOString();
 
         await supabase
@@ -90,9 +120,9 @@ export async function POST(request: NextRequest) {
             status: newStatus,
             last_error: errorMessage,
             locked_until: null,
-            scheduled_for: newStatus === 'failed' ? scheduledFor : job.scheduled_for,
+            scheduled_for: newStatus === 'failed' ? scheduledFor : undefined,
           })
-          .eq('id', job.id);
+          .eq('job_id', job.job_id);
 
         failed++;
       }

@@ -5,8 +5,12 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { verifyAdminAuth } from '@/lib/admin-auth';
 
 export async function POST(request: NextRequest) {
+  // Verify admin authentication
+  const authError = verifyAdminAuth(request);
+  if (authError) return authError;
   try {
     const body = await request.json();
     const { company_id, contact_ids, offer_key, campaign_key, custom_message } = body;
@@ -97,8 +101,10 @@ export async function POST(request: NextRequest) {
     const { data: job, error: jobError } = await supabase
       .from('outbox')
       .insert({
-        job_type: 'zoho_send_offer',
+        job_type: 'send_offer_email',
         status: 'pending',
+        attempts: 0,
+        max_attempts: 3,
         payload: jobPayload,
         scheduled_for: new Date().toISOString(),
       })

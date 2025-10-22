@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { verifyAdminAuth } from '@/lib/admin-auth';
 
 interface QuoteItem {
   product_code: string;
@@ -12,6 +13,9 @@ interface QuoteItem {
 }
 
 export async function POST(request: NextRequest) {
+  // Verify admin authentication
+  const authError = verifyAdminAuth(request);
+  if (authError) return authError;
   try {
     const body = await request.json();
     const { company_id, items, discount_request, notes } = body;

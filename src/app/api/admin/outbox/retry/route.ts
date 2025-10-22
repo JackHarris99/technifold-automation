@@ -5,8 +5,12 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { verifyAdminAuth } from '@/lib/admin-auth';
 
 export async function POST(request: NextRequest) {
+  // Verify admin authentication
+  const authError = verifyAdminAuth(request);
+  if (authError) return authError;
   try {
     const body = await request.json();
     const { job_id } = body;

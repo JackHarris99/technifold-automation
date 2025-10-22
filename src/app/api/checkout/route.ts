@@ -76,7 +76,8 @@ export async function POST(request: NextRequest) {
       company_id: body.company_id,
       contact_id: body.contact_id || null,
       source: 'vercel',
-      event_name: 'checkout_started',
+      event_type: 'checkout_started',  // For trigger backfill
+      event_name: 'checkout_started',  // Canonical field
       offer_key: body.offer_key || null,
       campaign_key: body.campaign_key || null,
       session_id: body.contact_id ? crypto.randomUUID() : null, // Generate session ID if we have contact

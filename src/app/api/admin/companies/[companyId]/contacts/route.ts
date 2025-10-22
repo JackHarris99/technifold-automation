@@ -5,11 +5,16 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { verifyAdminAuth } from '@/lib/admin-auth';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ companyId: string }> }
 ) {
+  // Verify admin authentication
+  const authError = verifyAdminAuth(request);
+  if (authError) return authError;
+
   try {
     const { companyId } = await params;
     const supabase = getSupabaseClient();

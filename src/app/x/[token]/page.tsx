@@ -83,7 +83,8 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
     company_id,
     contact_id: contact_id || null,
     source: 'vercel',
-    event_name: 'offer_view',
+    event_type: 'offer_view',  // For trigger backfill
+    event_name: 'offer_view',  // Canonical field
     offer_key: offer_key || null,
     campaign_key: campaign_key || null,
     session_id: sessionId,
