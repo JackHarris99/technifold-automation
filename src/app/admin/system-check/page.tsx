@@ -5,7 +5,7 @@
 
 import { getSupabaseClient } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
-import { redirect, isRedirectError } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import SystemCheckStatus from '@/components/admin/SystemCheckStatus';
 
 export default async function SystemCheckPage() {
@@ -51,106 +51,90 @@ export default async function SystemCheckPage() {
       redirect('/admin/system-check?error=missing_fields');
     }
 
-    try {
-      const supabase = getSupabaseClient();
+    const supabase = getSupabaseClient();
 
-      // Validate company exists
-      const { data: company, error: companyError } = await supabase
-        .from('companies')
-        .select('company_id, company_name')
-        .eq('company_id', companyId)
-        .single();
+    // Validate company exists
+    const { data: company, error: companyError } = await supabase
+      .from('companies')
+      .select('company_id, company_name')
+      .eq('company_id', companyId)
+      .single();
 
-      if (companyError || !company) {
-        redirect('/admin/system-check?error=Company+not+found');
-      }
-
-      // Get contacts with consent
-      const contactIds = contactId ? [contactId] : [];
-      const { data: contacts, error: contactsError } = await supabase
-        .from('contacts')
-        .select('contact_id, full_name, email, marketing_status, gdpr_consent_at, zoho_contact_id')
-        .eq('company_id', companyId)
-        .in('contact_id', contactIds.length > 0 ? contactIds : ['00000000-0000-0000-0000-000000000000']); // Dummy UUID if no contacts
-
-      if (contactsError) {
-        redirect('/admin/system-check?error=Failed+to+fetch+contacts');
-      }
-
-      // Filter eligible contacts
-      const eligibleContacts = contacts?.filter(
-        (c) => c.marketing_status === 'subscribed' && c.gdpr_consent_at !== null && c.zoho_contact_id !== null
-      ) || [];
-
-      if (eligibleContacts.length === 0 && contactIds.length > 0) {
-        redirect('/admin/system-check?error=No+contacts+with+active+consent');
-      }
-
-      // Create outbox job
-      const jobPayload = {
-        company_id: company.company_id,
-        company_name: company.company_name,
-        offer_key: offerKey,
-        campaign_key: campaignKey || `offer-${Date.now()}`,
-        recipients: eligibleContacts.map((c) => ({
-          contact_id: c.contact_id,
-          email: c.email,
-          full_name: c.full_name,
-          zoho_contact_id: c.zoho_contact_id,
-        })),
-      };
-
-      const { data: job, error: jobError } = await supabase
-        .from('outbox')
-        .insert({
-          job_type: 'send_offer_email',
-          status: 'pending',
-          attempts: 0,
-          max_attempts: 3,
-          payload: jobPayload,
-          scheduled_for: new Date().toISOString(),
-        })
-        .select('job_id')
-        .single();
-
-      if (jobError || !job) {
-        redirect('/admin/system-check?error=Failed+to+enqueue+job');
-      }
-
-      revalidatePath('/admin/system-check');
-      redirect(`/admin/system-check?success=offer_enqueued&job_id=${job.job_id}`);
-    } catch (error) {
-      // Re-throw redirect errors
-      if (isRedirectError(error)) {
-        throw error;
-      }
-      redirect(`/admin/system-check?error=${encodeURIComponent(error instanceof Error ? error.message : 'Unknown error')}`);
+    if (companyError || !company) {
+      redirect('/admin/system-check?error=Company+not+found');
     }
+
+    // Get contacts with consent
+    const contactIds = contactId ? [contactId] : [];
+    const { data: contacts, error: contactsError } = await supabase
+      .from('contacts')
+      .select('contact_id, full_name, email, marketing_status, gdpr_consent_at, zoho_contact_id')
+      .eq('company_id', companyId)
+      .in('contact_id', contactIds.length > 0 ? contactIds : ['00000000-0000-0000-0000-000000000000']); // Dummy UUID if no contacts
+
+    if (contactsError) {
+      redirect('/admin/system-check?error=Failed+to+fetch+contacts');
+    }
+
+    // Filter eligible contacts
+    const eligibleContacts = contacts?.filter(
+      (c) => c.marketing_status === 'subscribed' && c.gdpr_consent_at !== null && c.zoho_contact_id !== null
+    ) || [];
+
+    if (eligibleContacts.length === 0 && contactIds.length > 0) {
+      redirect('/admin/system-check?error=No+contacts+with+active+consent');
+    }
+
+    // Create outbox job
+    const jobPayload = {
+      company_id: company.company_id,
+      company_name: company.company_name,
+      offer_key: offerKey,
+      campaign_key: campaignKey || `offer-${Date.now()}`,
+      recipients: eligibleContacts.map((c) => ({
+        contact_id: c.contact_id,
+        email: c.email,
+        full_name: c.full_name,
+        zoho_contact_id: c.zoho_contact_id,
+      })),
+    };
+
+    const { data: job, error: jobError } = await supabase
+      .from('outbox')
+      .insert({
+        job_type: 'send_offer_email',
+        status: 'pending',
+        attempts: 0,
+        max_attempts: 3,
+        payload: jobPayload,
+        scheduled_for: new Date().toISOString(),
+      })
+      .select('job_id')
+      .single();
+
+    if (jobError || !job) {
+      redirect('/admin/system-check?error=Failed+to+enqueue+job');
+    }
+
+    revalidatePath('/admin/system-check');
+    redirect(`/admin/system-check?success=offer_enqueued&job_id=${job.job_id}`);
   }
 
   async function runOutbox(formData: FormData) {
     'use server';
 
-    try {
-      const supabase = getSupabaseClient();
+    const supabase = getSupabaseClient();
 
-      // Count pending jobs
-      const { count: pendingCount } = await supabase
-        .from('outbox')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending');
+    // Count pending jobs
+    const { count: pendingCount } = await supabase
+      .from('outbox')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending');
 
-      // In production, the outbox runs via Vercel Cron
-      // For now, just show pending job count
-      revalidatePath('/admin/system-check');
-      redirect(`/admin/system-check?success=outbox_run&processed=${pendingCount || 0}&failed=0`);
-    } catch (error) {
-      // Re-throw redirect errors
-      if (isRedirectError(error)) {
-        throw error;
-      }
-      redirect(`/admin/system-check?error=${encodeURIComponent(error instanceof Error ? error.message : 'Unknown error')}`);
-    }
+    // In production, the outbox runs via Vercel Cron
+    // For now, just show pending job count
+    revalidatePath('/admin/system-check');
+    redirect(`/admin/system-check?success=outbox_run&processed=${pendingCount || 0}&failed=0`);
   }
 
   async function startCheckout(formData: FormData) {
@@ -166,49 +150,41 @@ export default async function SystemCheckPage() {
       redirect('/admin/system-check?error=missing_checkout_fields');
     }
 
-    try {
-      const supabase = getSupabaseClient();
+    const supabase = getSupabaseClient();
 
-      // Verify company exists
-      const { data: company, error: companyError } = await supabase
-        .from('companies')
-        .select('company_id, company_name')
-        .eq('company_id', companyId)
-        .single();
+    // Verify company exists
+    const { data: company, error: companyError } = await supabase
+      .from('companies')
+      .select('company_id, company_name')
+      .eq('company_id', companyId)
+      .single();
 
-      if (companyError || !company) {
-        redirect('/admin/system-check?error=Company+not+found');
-      }
-
-      // Log checkout_started event
-      await supabase.from('engagement_events').insert({
-        company_id: companyId,
-        contact_id: null,
-        source: 'vercel',
-        event_type: 'checkout_started',
-        event_name: 'checkout_started',
-        offer_key: offerKey || null,
-        campaign_key: campaignKey || null,
-        session_id: crypto.randomUUID(),
-        meta: {
-          product_code: productCode,
-          quantity: parseInt(quantity, 10),
-          test_mode: true,
-        },
-      });
-
-      // Mock Stripe URL for testing
-      const mockUrl = `https://checkout.stripe.com/c/pay/mock_${Date.now()}`;
-
-      revalidatePath('/admin/system-check');
-      redirect(`/admin/system-check?success=checkout_started&url=${encodeURIComponent(mockUrl)}`);
-    } catch (error) {
-      // Re-throw redirect errors
-      if (isRedirectError(error)) {
-        throw error;
-      }
-      redirect(`/admin/system-check?error=${encodeURIComponent(error instanceof Error ? error.message : 'Unknown error')}`);
+    if (companyError || !company) {
+      redirect('/admin/system-check?error=Company+not+found');
     }
+
+    // Log checkout_started event
+    await supabase.from('engagement_events').insert({
+      company_id: companyId,
+      contact_id: null,
+      source: 'vercel',
+      event_type: 'checkout_started',
+      event_name: 'checkout_started',
+      offer_key: offerKey || null,
+      campaign_key: campaignKey || null,
+      session_id: crypto.randomUUID(),
+      meta: {
+        product_code: productCode,
+        quantity: parseInt(quantity, 10),
+        test_mode: true,
+      },
+    });
+
+    // Mock Stripe URL for testing
+    const mockUrl = `https://checkout.stripe.com/c/pay/mock_${Date.now()}`;
+
+    revalidatePath('/admin/system-check');
+    redirect(`/admin/system-check?success=checkout_started&url=${encodeURIComponent(mockUrl)}`);
   }
 
   return (
