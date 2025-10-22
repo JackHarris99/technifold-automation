@@ -65,10 +65,10 @@ export default async function SystemCheckPage() {
       redirect('/admin/system-check?error=Company+not+found');
     }
 
-    // Get contacts with consent
+    // Get contacts with consent (zoho_contact_id optional for testing)
     let contactQuery = supabase
       .from('contacts')
-      .select('contact_id, full_name, email, marketing_status, gdpr_consent_at, zoho_contact_id')
+      .select('contact_id, full_name, email, marketing_status, gdpr_consent_at')
       .eq('company_id', companyId);
 
     // If specific contact selected, filter by it
@@ -86,9 +86,9 @@ export default async function SystemCheckPage() {
 
     console.log('[system-check] Found contacts:', contacts?.length || 0);
 
-    // Filter eligible contacts (only subscribed with consent and Zoho sync)
+    // Filter eligible contacts (subscribed with consent - Zoho sync not required for testing)
     const eligibleContacts = contacts?.filter(
-      (c) => c.marketing_status === 'subscribed' && c.gdpr_consent_at !== null && c.zoho_contact_id !== null
+      (c) => c.marketing_status === 'subscribed' && c.gdpr_consent_at !== null
     ) || [];
 
     console.log('[system-check] Eligible contacts after filtering:', eligibleContacts.length);
@@ -98,10 +98,9 @@ export default async function SystemCheckPage() {
         name: c.full_name,
         status: c.marketing_status,
         has_consent: !!c.gdpr_consent_at,
-        has_zoho: !!c.zoho_contact_id
       }));
       console.log('[system-check] No eligible contacts. All contacts:', reasons);
-      redirect('/admin/system-check?error=No+eligible+contacts+found+(need+subscribed+status+and+Zoho+sync)');
+      redirect('/admin/system-check?error=No+eligible+contacts+found+(need+subscribed+status+and+GDPR+consent)');
     }
 
     // Create outbox job
@@ -114,7 +113,6 @@ export default async function SystemCheckPage() {
         contact_id: c.contact_id,
         email: c.email,
         full_name: c.full_name,
-        zoho_contact_id: c.zoho_contact_id,
       })),
     };
 
