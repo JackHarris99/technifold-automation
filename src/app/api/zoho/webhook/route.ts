@@ -172,7 +172,7 @@ function mapZohoEventType(zohoEventType: string): string {
     'email_opened': 'email_opened',
     'email_clicked': 'email_clicked',
     'email_bounced': 'email_bounced',
-    'email_unsubscribed': 'email_unsubscribed',
+    'email_unsubscribed': 'unsubscribe',  // Canonical event name
     'campaign_sent': 'campaign_sent',
     'form_submitted': 'form_submitted',
     'webinar_registered': 'webinar_registered',

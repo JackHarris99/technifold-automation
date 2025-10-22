@@ -7,6 +7,7 @@ import { notFound, redirect } from 'next/navigation';
 import { verifyToken } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cookies } from 'next/headers';
+import MachineSelector from '@/components/offers/MachineSelector';
 
 interface TokenPageProps {
   params: Promise<{
@@ -166,6 +167,28 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
     );
   }
 
+  // Fetch asset_models for machine picker
+  const { data: assetModels } = await supabase
+    .from('asset_models')
+    .select('*')
+    .order('level', { ascending: true })
+    .order('display_name', { ascending: true });
+
+  const families = (assetModels || []).filter((m: any) => m.level === 1);
+  const brands = (assetModels || []).filter((m: any) => m.level === 2);
+  const models = (assetModels || []).filter((m: any) => m.level === 3);
+
+  // Check if we already know this company's machine
+  const { data: existingBeliefs } = await supabase
+    .from('company_beliefs')
+    .select('*, asset_models!model_id(*)')
+    .eq('company_id', company_id)
+    .gte('confidence', 2)  // Only show confirmed beliefs
+    .order('confidence', { ascending: false })
+    .limit(1);
+
+  const knownMachine = existingBeliefs && existingBeliefs.length > 0 ? existingBeliefs[0] : null;
+
   // Full personalized offer page for consented contacts
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -213,6 +236,45 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
               </p>
             )}
           </div>
+
+          {/* Machine Selector Section */}
+          {!knownMachine && families.length > 0 && (
+            <div className="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2 text-center">
+                Tell us about your machine
+              </h2>
+              <p className="text-gray-600 text-center mb-6">
+                Help us recommend the perfect solution for your equipment
+              </p>
+              <MachineSelector
+                token={token}
+                companyId={company_id}
+                contactId={contact_id}
+                offerKey={offer_key}
+                campaignKey={campaign_key}
+                families={families}
+                brands={brands}
+                models={models}
+              />
+            </div>
+          )}
+
+          {/* Show known machine if we have it */}
+          {knownMachine && (
+            <div className="mb-10 p-6 bg-green-50 rounded-lg border border-green-200">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <h3 className="text-lg font-semibold text-green-900">
+                  We know your machine
+                </h3>
+              </div>
+              <p className="text-center text-green-800">
+                {(knownMachine.asset_models as any)?.display_name || 'Your machine'}
+              </p>
+            </div>
+          )}
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
