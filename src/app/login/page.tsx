@@ -27,7 +27,7 @@ export default function AdminLoginPage() {
       });
       redirect('/admin');
     } else {
-      redirect('/admin/login?error=invalid');
+      redirect('/login?error=invalid');
     }
   }
 

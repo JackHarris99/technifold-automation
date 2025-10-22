@@ -23,7 +23,7 @@ export default async function AdminLayout({
 
   if (!adminAuth || adminAuth.value !== 'true') {
     // Redirect to login page
-    redirect('/admin/login');
+    redirect('/login');
   }
 
   return <>{children}</>;
