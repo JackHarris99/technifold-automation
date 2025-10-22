@@ -190,7 +190,7 @@ export default function SendOfferModal({
                       type="checkbox"
                       checked={selectedContacts.includes(contact.contact_id)}
                       onChange={() => toggleContact(contact.contact_id)}
-                      disabled={contact.marketing_status === 'opted_out' || contact.marketing_status === 'unsubscribed'}
+                      disabled={contact.marketing_status === 'unsubscribed'}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                     <div className="ml-3 flex-1">
@@ -200,9 +200,9 @@ export default function SendOfferModal({
                       <div className="text-sm text-gray-500">{contact.email}</div>
                     </div>
                     <span className={`text-xs px-2 py-1 rounded ${
-                      contact.marketing_status === 'active'
+                      contact.marketing_status === 'subscribed'
                         ? 'bg-green-100 text-green-800'
-                        : contact.marketing_status === 'opted_out'
+                        : contact.marketing_status === 'unsubscribed'
                         ? 'bg-red-100 text-red-800'
                         : 'bg-gray-100 text-gray-800'
                     }`}>

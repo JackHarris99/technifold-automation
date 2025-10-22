@@ -92,84 +92,55 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Upsert company_beliefs
-    // Check if belief already exists
+    // 2. Upsert company_beliefs using greatest() and evidence merging
+    // Fetch existing belief to check confidence
     const { data: existingBelief } = await supabase
       .from('company_beliefs')
-      .select('belief_id, confidence, evidence')
+      .select('confidence, evidence')
       .eq('company_id', company_id)
       .eq('model_id', model_id)
       .single();
 
-    if (existingBelief) {
-      // Update existing belief if confidence is lower than 2
-      if (existingBelief.confidence < 2) {
-        const updatedEvidence = {
-          ...(existingBelief.evidence || {}),
-          offer_clicks: [
-            ...((existingBelief.evidence as any)?.offer_clicks || []),
-            {
-              event_id: event.event_id,
-              url,
-              campaign_key,
-              offer_key,
-              clicked_at: new Date().toISOString(),
-            },
-          ],
-        };
+    const newEvidence = {
+      event_id: event.event_id,
+      url,
+      campaign_key,
+      offer_key,
+      clicked_at: new Date().toISOString(),
+    };
 
-        await supabase
-          .from('company_beliefs')
-          .update({
-            confidence: 2,
-            source: 'offer_click',
-            contact_id: contact_id || null,
-            evidence: updatedEvidence,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('belief_id', existingBelief.belief_id);
-      } else {
-        // Just append to evidence
-        const updatedEvidence = {
-          ...(existingBelief.evidence || {}),
-          offer_clicks: [
-            ...((existingBelief.evidence as any)?.offer_clicks || []),
-            {
-              event_id: event.event_id,
-              url,
-              campaign_key,
-              offer_key,
-              clicked_at: new Date().toISOString(),
-            },
-          ],
-        };
+    const newConfidence = 2; // clicked = confidence 2
 
-        await supabase
-          .from('company_beliefs')
-          .update({
-            evidence: updatedEvidence,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('belief_id', existingBelief.belief_id);
-      }
-    } else {
-      // Create new belief
-      await supabase
-        .from('company_beliefs')
-        .insert({
-          company_id,
-          model_id,
-          confidence: 2,  // clicked = confidence 2
-          source: 'offer_click',
-          contact_id: contact_id || null,
-          evidence: {
-            event_id: event.event_id,
-            url,
-            campaign_key,
-            offer_key,
-            clicked_at: new Date().toISOString(),
-          },
-        });
+    // Use upsert with onConflict
+    const { error: beliefError } = await supabase
+      .from('company_beliefs')
+      .upsert({
+        company_id,
+        model_id,
+        // Use greatest: only increase confidence, never decrease
+        confidence: existingBelief
+          ? Math.max(existingBelief.confidence, newConfidence)
+          : newConfidence,
+        source: 'offer_click',
+        contact_id: contact_id || null,
+        // Merge evidence: append new click to existing evidence
+        evidence: existingBelief?.evidence
+          ? {
+              ...(existingBelief.evidence as any),
+              offer_clicks: [
+                ...((existingBelief.evidence as any)?.offer_clicks || []),
+                newEvidence,
+              ],
+            }
+          : { offer_clicks: [newEvidence] },
+        updated_at: new Date().toISOString(),
+      }, {
+        onConflict: 'company_id,model_id',
+      });
+
+    if (beliefError) {
+      console.error('[machine-selection] Error upserting belief:', beliefError);
+      // Don't fail the request, belief is supplementary
     }
 
     return NextResponse.json({

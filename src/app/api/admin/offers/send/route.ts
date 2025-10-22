@@ -52,10 +52,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No valid contacts found' }, { status: 404 });
     }
 
-    // Filter contacts with active consent
+    // Filter contacts with subscribed status (consent guard)
     const eligibleContacts = contacts.filter(
       contact =>
-        contact.marketing_status === 'active' &&
+        contact.marketing_status === 'subscribed' &&
         contact.gdpr_consent_at !== null &&
         contact.zoho_contact_id !== null
     );
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
         contact_id: c.contact_id,
         email: c.email,
         reason:
-          c.marketing_status !== 'active'
+          c.marketing_status !== 'subscribed'
             ? `marketing_status: ${c.marketing_status}`
             : !c.gdpr_consent_at
             ? 'no GDPR consent'

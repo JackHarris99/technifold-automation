@@ -165,6 +165,25 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   console.log('[stripe-webhook] Order created:', order.order_id);
 
+  // Insert order_items (canonical line items)
+  const orderItems = items.map((item) => ({
+    order_id: order.order_id,
+    product_code: item.product_code,
+    description: item.description,
+    quantity: item.quantity,
+    unit_price: item.unit_price,
+    total_price: item.total_price,
+  }));
+
+  const { error: itemsError } = await supabase
+    .from('order_items')
+    .insert(orderItems);
+
+  if (itemsError) {
+    console.error('[stripe-webhook] Failed to create order_items:', itemsError);
+    // Don't fail the whole process - order header is already created
+  }
+
   // Track engagement event (idempotent on source + source_event_id)
   await supabase.from('engagement_events').insert({
     company_id: companyId,

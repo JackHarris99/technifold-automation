@@ -26,12 +26,24 @@ async function updateCampaign(campaignKey: string, formData: FormData) {
 
   const supabase = getSupabaseClient();
 
+  // Fetch campaign_id by campaign_key
+  const { data: campaign } = await supabase
+    .from('campaigns')
+    .select('campaign_id')
+    .eq('campaign_key', campaignKey)
+    .single();
+
+  if (!campaign) {
+    throw new Error('Campaign not found');
+  }
+
   const name = formData.get('name') as string;
   const status = formData.get('status') as string;
   const offerKey = formData.get('offer_key') as string;
   const targetLevel = formData.get('target_level') as string;
   const targetModelId = formData.get('target_model_id') as string;
 
+  // Use campaign_id for update
   const { error } = await supabase
     .from('campaigns')
     .update({
@@ -42,7 +54,7 @@ async function updateCampaign(campaignKey: string, formData: FormData) {
       target_model_id: targetModelId || null,
       updated_at: new Date().toISOString(),
     })
-    .eq('campaign_key', campaignKey);
+    .eq('campaign_id', campaign.campaign_id);
 
   if (error) {
     console.error('Error updating campaign:', error);
@@ -57,10 +69,22 @@ async function deleteCampaign(campaignKey: string) {
 
   const supabase = getSupabaseClient();
 
+  // Fetch campaign_id by campaign_key
+  const { data: campaign } = await supabase
+    .from('campaigns')
+    .select('campaign_id')
+    .eq('campaign_key', campaignKey)
+    .single();
+
+  if (!campaign) {
+    throw new Error('Campaign not found');
+  }
+
+  // Use campaign_id for delete
   const { error } = await supabase
     .from('campaigns')
     .delete()
-    .eq('campaign_key', campaignKey);
+    .eq('campaign_id', campaign.campaign_id);
 
   if (error) {
     console.error('Error deleting campaign:', error);

@@ -288,9 +288,9 @@ export function CustomerProfilePage({ profile, orderHistory, toolsWithConsumable
                               )}
                               {contact.marketing_status && (
                                 <span className={`inline-block mt-2 px-2 py-1 text-xs rounded-full ${
-                                  contact.marketing_status === 'active'
+                                  contact.marketing_status === 'subscribed'
                                     ? 'bg-green-100 text-green-800'
-                                    : contact.marketing_status === 'opted_out'
+                                    : contact.marketing_status === 'unsubscribed'
                                     ? 'bg-red-100 text-red-800'
                                     : 'bg-gray-100 text-gray-800'
                                 }`}>

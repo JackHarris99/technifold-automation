@@ -65,12 +65,19 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
   const url = `/x/${token}`;
   const sessionId = crypto.randomUUID();
 
-  // Extract UTM parameters from search params
-  const utmSource = typeof search.utm_source === 'string' ? search.utm_source : undefined;
-  const utmMedium = typeof search.utm_medium === 'string' ? search.utm_medium : undefined;
-  const utmCampaign = typeof search.utm_campaign === 'string' ? search.utm_campaign : undefined;
-  const utmTerm = typeof search.utm_term === 'string' ? search.utm_term : undefined;
-  const utmContent = typeof search.utm_content === 'string' ? search.utm_content : undefined;
+  // Extract UTM parameters from search params and put in meta.utm
+  const utmParams = {
+    source: typeof search.utm_source === 'string' ? search.utm_source : undefined,
+    medium: typeof search.utm_medium === 'string' ? search.utm_medium : undefined,
+    campaign: typeof search.utm_campaign === 'string' ? search.utm_campaign : undefined,
+    term: typeof search.utm_term === 'string' ? search.utm_term : undefined,
+    content: typeof search.utm_content === 'string' ? search.utm_content : undefined,
+  };
+
+  // Remove undefined values
+  const utm = Object.fromEntries(
+    Object.entries(utmParams).filter(([_, v]) => v !== undefined)
+  );
 
   await supabase.from('engagement_events').insert({
     company_id,
@@ -81,11 +88,7 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
     campaign_key: campaign_key || null,
     session_id: sessionId,
     url,
-    utm_source: utmSource,
-    utm_medium: utmMedium,
-    utm_campaign: utmCampaign,
-    utm_term: utmTerm,
-    utm_content: utmContent,
+    meta: Object.keys(utm).length > 0 ? { utm } : {},
   }).catch(err => {
     console.error('[token-page] Failed to track engagement event:', err);
   });
@@ -116,7 +119,7 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
       contactMarketingStatus = contact.marketing_status || 'pending';
 
       // Check if consent is granted
-      if (contact.marketing_status === 'opted_out' || contact.marketing_status === 'unsubscribed') {
+      if (contact.marketing_status === 'unsubscribed') {
         consentGranted = false;
       }
     }
