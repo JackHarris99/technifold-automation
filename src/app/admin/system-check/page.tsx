@@ -79,15 +79,28 @@ export default async function SystemCheckPage() {
     const { data: contacts, error: contactsError } = await contactQuery;
 
     if (contactsError) {
-      redirect('/admin/system-check?error=Failed+to+fetch+contacts');
+      console.error('[system-check] Contact query error:', contactsError);
+      console.error('[system-check] Query params - companyId:', companyId, 'contactId:', contactId);
+      redirect(`/admin/system-check?error=${encodeURIComponent('Contact query failed: ' + contactsError.message)}`);
     }
+
+    console.log('[system-check] Found contacts:', contacts?.length || 0);
 
     // Filter eligible contacts (only subscribed with consent and Zoho sync)
     const eligibleContacts = contacts?.filter(
       (c) => c.marketing_status === 'subscribed' && c.gdpr_consent_at !== null && c.zoho_contact_id !== null
     ) || [];
 
+    console.log('[system-check] Eligible contacts after filtering:', eligibleContacts.length);
+
     if (eligibleContacts.length === 0) {
+      const reasons = contacts?.map(c => ({
+        name: c.full_name,
+        status: c.marketing_status,
+        has_consent: !!c.gdpr_consent_at,
+        has_zoho: !!c.zoho_contact_id
+      }));
+      console.log('[system-check] No eligible contacts. All contacts:', reasons);
       redirect('/admin/system-check?error=No+eligible+contacts+found+(need+subscribed+status+and+Zoho+sync)');
     }
 
