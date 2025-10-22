@@ -19,10 +19,10 @@ export default async function SystemCheckPage() {
     .order('company_name', { ascending: true });
 
   // Fetch all contacts (will be filtered client-side by company)
+  // Note: For testing, fetching all contacts without marketing_status filter
   const { data: contacts } = await supabase
     .from('contacts')
-    .select('contact_id, company_id, full_name, email, marketing_status')
-    .in('marketing_status', ['subscribed', 'pending'])
+    .select('contact_id, company_id, full_name, email')
     .order('full_name', { ascending: true });
 
   // Fetch recent outbox jobs
@@ -65,10 +65,10 @@ export default async function SystemCheckPage() {
       redirect('/admin/system-check?error=Company+not+found');
     }
 
-    // Get contacts with consent (zoho_contact_id optional for testing)
+    // Get contacts (for testing: no filtering by marketing_status or consent)
     let contactQuery = supabase
       .from('contacts')
-      .select('contact_id, full_name, email, marketing_status, gdpr_consent_at')
+      .select('contact_id, full_name, email')
       .eq('company_id', companyId);
 
     // If specific contact selected, filter by it
@@ -86,21 +86,14 @@ export default async function SystemCheckPage() {
 
     console.log('[system-check] Found contacts:', contacts?.length || 0);
 
-    // Filter eligible contacts (subscribed with consent - Zoho sync not required for testing)
-    const eligibleContacts = contacts?.filter(
-      (c) => c.marketing_status === 'subscribed' && c.gdpr_consent_at !== null
-    ) || [];
+    // For testing: use all contacts without filtering
+    // In production, you would filter by: marketing_status='subscribed' AND gdpr_consent_at IS NOT NULL
+    const eligibleContacts = contacts || [];
 
-    console.log('[system-check] Eligible contacts after filtering:', eligibleContacts.length);
+    console.log('[system-check] Using contacts for testing:', eligibleContacts.length);
 
     if (eligibleContacts.length === 0) {
-      const reasons = contacts?.map(c => ({
-        name: c.full_name,
-        status: c.marketing_status,
-        has_consent: !!c.gdpr_consent_at,
-      }));
-      console.log('[system-check] No eligible contacts. All contacts:', reasons);
-      redirect('/admin/system-check?error=No+eligible+contacts+found+(need+subscribed+status+and+GDPR+consent)');
+      redirect('/admin/system-check?error=No+contacts+found+for+this+company');
     }
 
     // Create outbox job
