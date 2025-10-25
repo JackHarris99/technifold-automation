@@ -20,10 +20,9 @@ export async function GET(
     const supabase = getSupabaseClient();
 
     // Fetch contacts for the company
-    // Note: For system-check testing, fetching minimal fields without marketing filters
     const { data: contacts, error } = await supabase
       .from('contacts')
-      .select('contact_id, company_id, full_name, email')
+      .select('contact_id, full_name, email, marketing_status, gdpr_consent_at, zoho_contact_id')
       .eq('company_id', companyId)
       .order('full_name', { ascending: true });
 
