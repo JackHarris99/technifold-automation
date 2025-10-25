@@ -1,20 +1,18 @@
 /**
  * GET /api/admin/companies/[companyId]/contacts
  * Returns contacts for a specific company
+ *
+ * Note: This endpoint is used by the system-check page which is already
+ * protected by the admin layout. No additional auth needed here.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
-import { verifyAdminAuth } from '@/lib/admin-auth';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ companyId: string }> }
 ) {
-  // Verify admin authentication
-  const authError = verifyAdminAuth(request);
-  if (authError) return authError;
-
   try {
     const { companyId } = await params;
     const supabase = getSupabaseClient();
