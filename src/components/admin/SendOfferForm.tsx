@@ -1,11 +1,11 @@
 /**
  * Send Offer Form - Client Component
- * Filters contacts by selected company
+ * Dynamically fetches contacts when company is selected
  */
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Contact {
   contact_id: string;
@@ -21,17 +21,47 @@ interface Company {
 
 interface SendOfferFormProps {
   companies: Company[];
-  contacts: Contact[];
   sendOfferAction: (formData: FormData) => void;
 }
 
-export default function SendOfferForm({ companies, contacts, sendOfferAction }: SendOfferFormProps) {
+export default function SendOfferForm({ companies, sendOfferAction }: SendOfferFormProps) {
   const [selectedCompany, setSelectedCompany] = useState<string>('');
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [loadingContacts, setLoadingContacts] = useState(false);
+  const [contactsError, setContactsError] = useState<string | null>(null);
 
-  // Filter contacts by selected company
-  const filteredContacts = selectedCompany
-    ? contacts.filter((c) => c.company_id === selectedCompany)
-    : [];
+  // Fetch contacts when company changes
+  useEffect(() => {
+    if (!selectedCompany) {
+      setContacts([]);
+      setContactsError(null);
+      return;
+    }
+
+    const fetchContacts = async () => {
+      setLoadingContacts(true);
+      setContactsError(null);
+
+      try {
+        const response = await fetch(`/api/admin/companies/${selectedCompany}/contacts`);
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch contacts: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setContacts(data.contacts || []);
+      } catch (error) {
+        console.error('[SendOfferForm] Error fetching contacts:', error);
+        setContactsError(error instanceof Error ? error.message : 'Failed to load contacts');
+        setContacts([]);
+      } finally {
+        setLoadingContacts(false);
+      }
+    };
+
+    fetchContacts();
+  }, [selectedCompany]);
 
   return (
     <form action={sendOfferAction} className="space-y-4">
@@ -63,18 +93,23 @@ export default function SendOfferForm({ companies, contacts, sendOfferAction }: 
         <select
           id="contact_id"
           name="contact_id"
-          disabled={!selectedCompany}
+          disabled={!selectedCompany || loadingContacts}
           className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
         >
-          <option value="">All eligible contacts</option>
-          {filteredContacts.map((c) => (
+          <option value="">
+            {loadingContacts ? 'Loading contacts...' : 'All eligible contacts'}
+          </option>
+          {contacts.map((c) => (
             <option key={c.contact_id} value={c.contact_id}>
               {c.full_name} ({c.email})
             </option>
           ))}
         </select>
-        {selectedCompany && filteredContacts.length === 0 && (
+        {selectedCompany && !loadingContacts && contacts.length === 0 && !contactsError && (
           <p className="text-xs text-gray-500 mt-1">No contacts found for this company</p>
+        )}
+        {contactsError && (
+          <p className="text-xs text-red-600 mt-1">Error: {contactsError}</p>
         )}
       </div>
 

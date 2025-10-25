@@ -18,12 +18,9 @@ export default async function SystemCheckPage() {
     .select('company_id, company_name')
     .order('company_name', { ascending: true });
 
-  // Fetch all contacts (will be filtered client-side by company)
-  // Note: For testing, fetching all contacts without marketing_status filter
-  const { data: contacts } = await supabase
-    .from('contacts')
-    .select('contact_id, company_id, full_name, email')
-    .order('full_name', { ascending: true });
+  // Contacts are now fetched dynamically by SendOfferForm when a company is selected
+  // This avoids the Supabase 1000-row pagination issue where first 1000 companies
+  // don't align with first 1000 contacts (only 20.2% overlap)
 
   // Fetch recent outbox jobs
   const { data: recentJobs } = await supabase
@@ -212,7 +209,6 @@ export default async function SystemCheckPage() {
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Send Offer (enqueue)</h2>
             <SendOfferForm
               companies={companies || []}
-              contacts={contacts || []}
               sendOfferAction={sendOffer}
             />
           </div>
