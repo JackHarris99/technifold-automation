@@ -114,7 +114,6 @@ export default async function SystemCheckPage() {
         attempts: 0,
         max_attempts: 3,
         payload: jobPayload,
-        scheduled_for: new Date().toISOString(),
       })
       .select('id')
       .single();
