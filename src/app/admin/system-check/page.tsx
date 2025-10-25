@@ -25,7 +25,7 @@ export default async function SystemCheckPage() {
   // Fetch recent outbox jobs
   const { data: recentJobs } = await supabase
     .from('outbox')
-    .select('created_at, job_type, status, attempts, company_id, job_id')
+    .select('created_at, job_type, status, attempts, company_id, id')
     .order('created_at', { ascending: false })
     .limit(10);
 
@@ -116,15 +116,17 @@ export default async function SystemCheckPage() {
         payload: jobPayload,
         scheduled_for: new Date().toISOString(),
       })
-      .select('job_id')
+      .select('id')
       .single();
 
     if (jobError || !job) {
-      redirect('/admin/system-check?error=Failed+to+enqueue+job');
+      console.error('[system-check] Failed to insert outbox job:', jobError);
+      console.error('[system-check] Job payload:', JSON.stringify(jobPayload, null, 2));
+      redirect(`/admin/system-check?error=${encodeURIComponent('Failed to enqueue job: ' + (jobError?.message || 'Unknown error'))}`);
     }
 
     revalidatePath('/admin/system-check');
-    redirect(`/admin/system-check?success=offer_enqueued&job_id=${job.job_id}`);
+    redirect(`/admin/system-check?success=offer_enqueued&job_id=${job.id}`);
   }
 
   async function runOutbox(formData: FormData) {
@@ -337,7 +339,7 @@ export default async function SystemCheckPage() {
                 <tbody className="divide-y divide-gray-200">
                   {recentJobs && recentJobs.length > 0 ? (
                     recentJobs.map((job) => (
-                      <tr key={job.job_id} className="hover:bg-gray-50">
+                      <tr key={job.id} className="hover:bg-gray-50">
                         <td className="px-4 py-3 text-gray-900">
                           {new Date(job.created_at).toLocaleString()}
                         </td>
