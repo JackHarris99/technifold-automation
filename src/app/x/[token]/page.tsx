@@ -7,7 +7,7 @@ import { notFound, redirect } from 'next/navigation';
 import { verifyToken } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cookies } from 'next/headers';
-import MachineSelector from '@/components/offers/MachineSelector';
+import TokenMachineFinder from '@/components/offers/TokenMachineFinder';
 
 interface TokenPageProps {
   params: Promise<{
@@ -171,27 +171,70 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
     );
   }
 
-  // Fetch asset_models for machine picker
-  const { data: assetModels } = await supabase
-    .from('asset_models')
-    .select('*')
-    .order('level', { ascending: true })
-    .order('display_name', { ascending: true });
-
-  const families = (assetModels || []).filter((m: any) => m.level === 1);
-  const brands = (assetModels || []).filter((m: any) => m.level === 2);
-  const models = (assetModels || []).filter((m: any) => m.level === 3);
-
-  // Check if we already know this company's machine
-  const { data: existingBeliefs } = await supabase
-    .from('company_beliefs')
-    .select('*, asset_models!model_id(*)')
+  // Check if we already know this company's machine from company_machine
+  const { data: companyMachines } = await supabase
+    .from('company_machine')
+    .select(`
+      *,
+      machines:machine_id (
+        machine_id,
+        brand,
+        model,
+        display_name,
+        slug
+      )
+    `)
     .eq('company_id', company_id)
-    .gte('confidence', 2)  // Only show confirmed beliefs
-    .order('confidence', { ascending: false })
+    .or('confirmed.eq.true,confidence_score.gte.4')  // Show confirmed or high-confidence machines
+    .order('confidence_score', { ascending: false })
     .limit(1);
 
-  const knownMachine = existingBeliefs && existingBeliefs.length > 0 ? existingBeliefs[0] : null;
+  const knownMachine = companyMachines && companyMachines.length > 0 ? companyMachines[0] : null;
+
+  // Fetch machine solutions if we know their machine
+  let machineSolutions = null;
+  if (knownMachine && knownMachine.machines) {
+    const machineSlug = (knownMachine.machines as any).slug;
+
+    if (machineSlug) {
+      const { data: solutionsData } = await supabase
+        .from('v_machine_solution_problem_full')
+        .select('*')
+        .eq('machine_slug', machineSlug)
+        .order('machine_solution_rank', { ascending: true })
+        .order('machine_solution_problem_rank', { ascending: true })
+        .limit(10);  // Limit to top 10 for token pages
+
+      if (solutionsData && solutionsData.length > 0) {
+        // Group by solution
+        const solutionsMap = new Map();
+        solutionsData.forEach((row: any) => {
+          if (!solutionsMap.has(row.solution_id)) {
+            solutionsMap.set(row.solution_id, {
+              solution_id: row.solution_id,
+              solution_name: row.solution_name,
+              solution_core_benefit: row.solution_core_benefit,
+              solution_long_description: row.solution_long_description,
+              problems: []
+            });
+          }
+          const solution = solutionsMap.get(row.solution_id);
+          solution.problems.push({
+            problem_id: row.problem_id,
+            problem_title: row.problem_title,
+            pitch_headline: row.pitch_headline,
+            pitch_detail: row.pitch_detail,
+            action_cta: row.action_cta
+          });
+        });
+
+        machineSolutions = {
+          machine: knownMachine.machines,
+          solutions: Array.from(solutionsMap.values())
+        };
+      }
+    }
+  }
 
   // Full personalized offer page for consented contacts
   return (
@@ -241,42 +284,75 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
             )}
           </div>
 
-          {/* Machine Selector Section */}
-          {!knownMachine && families.length > 0 && (
+          {/* Machine Selector Section - if we don't know their machine */}
+          {!knownMachine && (
             <div className="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200">
               <h2 className="text-2xl font-semibold text-gray-900 mb-2 text-center">
-                Tell us about your machine
+                Which machine do you run?
               </h2>
               <p className="text-gray-600 text-center mb-6">
-                Help us recommend the perfect solution for your equipment
+                Help us show you relevant solutions for your equipment
               </p>
-              <MachineSelector
+              <TokenMachineFinder
                 token={token}
                 companyId={company_id}
                 contactId={contact_id}
                 offerKey={offer_key}
                 campaignKey={campaign_key}
-                families={families}
-                brands={brands}
-                models={models}
               />
             </div>
           )}
 
-          {/* Show known machine if we have it */}
-          {knownMachine && (
-            <div className="mb-10 p-6 bg-green-50 rounded-lg border border-green-200">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <h3 className="text-lg font-semibold text-green-900">
-                  We know your machine
-                </h3>
+          {/* Show known machine and solutions if we have it */}
+          {knownMachine && knownMachine.machines && (
+            <div className="mb-10">
+              <div className="p-6 bg-green-50 rounded-lg border border-green-200 mb-6">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <h3 className="text-lg font-semibold text-green-900">
+                    Solutions for your {(knownMachine.machines as any).display_name}
+                  </h3>
+                </div>
+                <p className="text-center text-green-800 text-sm">
+                  Here's what we can fix on your machine right now
+                </p>
               </div>
-              <p className="text-center text-green-800">
-                {(knownMachine.asset_models as any)?.display_name || 'Your machine'}
-              </p>
+
+              {/* Machine-specific solutions */}
+              {machineSolutions && machineSolutions.solutions.length > 0 && (
+                <div className="space-y-6">
+                  {machineSolutions.solutions.map((solution: any) => (
+                    <div key={solution.solution_id} className="bg-white border border-gray-200 rounded-lg p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">{solution.solution_name}</h3>
+                      <p className="text-blue-600 font-semibold mb-4">{solution.solution_core_benefit}</p>
+
+                      <div className="space-y-3">
+                        {solution.problems.map((problem: any) => (
+                          <div key={problem.problem_id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition-colors">
+                            <h4 className="font-semibold text-gray-900 mb-1">{problem.pitch_headline}</h4>
+                            <p className="text-sm text-gray-600 mb-3">{problem.pitch_detail}</p>
+                            <a
+                              href="/contact"
+                              className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
+                            >
+                              {problem.action_cta || 'Get help with this'}
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* If no solutions found for their machine */}
+              {machineSolutions && machineSolutions.solutions.length === 0 && (
+                <div className="text-center py-8 text-gray-600">
+                  <p>We're updating solutions for your machine. Contact us to discuss your specific needs.</p>
+                </div>
+              )}
             </div>
           )}
 
