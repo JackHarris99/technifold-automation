@@ -19,20 +19,25 @@ export async function GET(request: NextRequest) {
 
     // Fetch machine problem cards from the view
     // Each row = ONE CARD = one (machine, solution, problem) combination
+    console.log('[machines/solutions] Querying for slug:', slug);
+
     const { data: problemCards, error } = await supabase
       .from('v_machine_solution_problem_full')
       .select('*')
       .eq('machine_slug', slug)
       .order('machine_solution_rank', { ascending: true })
-      .order('global_solution_problem_rank', { ascending: true });
+      .order('pitch_relevance_rank', { ascending: true });
+
+    console.log('[machines/solutions] Query result - cards:', problemCards?.length || 0, 'error:', error?.message || 'none');
 
     if (error) {
       console.error('[machines/solutions] Error:', error);
-      return NextResponse.json({ error: 'Failed to fetch solutions' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to fetch solutions', details: error }, { status: 500 });
     }
 
     if (!problemCards || problemCards.length === 0) {
-      return NextResponse.json({ problemCards: [] });
+      console.log('[machines/solutions] No problem cards found for slug:', slug);
+      return NextResponse.json({ problemCards: [], message: 'No solutions found for this machine' });
     }
 
     return NextResponse.json({

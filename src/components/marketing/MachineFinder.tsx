@@ -96,14 +96,25 @@ export default function MachineFinder({ onMachineSelect }: MachineFinderProps) {
 
     // Otherwise, fetch problem cards and display inline
     setLoadingSolutions(true);
+    console.log('[MachineFinder] Fetching solutions for slug:', machine.slug);
+
     try {
       const response = await fetch(`/api/machines/solutions?slug=${encodeURIComponent(machine.slug)}`);
-      if (!response.ok) throw new Error('Failed to fetch solutions');
+      console.log('[MachineFinder] API response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[MachineFinder] API error:', errorText);
+        throw new Error('Failed to fetch solutions');
+      }
 
       const data = await response.json();
+      console.log('[MachineFinder] Received data:', data);
+      console.log('[MachineFinder] Problem cards count:', data.problemCards?.length || 0);
+
       setProblemCards(data.problemCards || []);
     } catch (error) {
-      console.error('Failed to fetch solutions:', error);
+      console.error('[MachineFinder] Failed to fetch solutions:', error);
       setProblemCards([]);
     } finally {
       setLoadingSolutions(false);

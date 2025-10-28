@@ -26,7 +26,7 @@ export default async function MachinePage({ params }: MachinePageProps) {
     .select('*')
     .eq('machine_slug', slug)
     .order('machine_solution_rank', { ascending: true })
-    .order('global_solution_problem_rank', { ascending: true });
+    .order('pitch_relevance_rank', { ascending: true });
 
   if (error || !problemCards || problemCards.length === 0) {
     console.error('[machines/slug] Error or no data:', error);
