@@ -191,48 +191,22 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
 
   const knownMachine = companyMachines && companyMachines.length > 0 ? companyMachines[0] : null;
 
-  // Fetch machine solutions if we know their machine
-  let machineSolutions = null;
+  // Fetch problem cards if we know their machine
+  // Each row = ONE CARD = one (machine, solution, problem) combination
+  let problemCards = null;
   if (knownMachine && knownMachine.machines) {
     const machineSlug = (knownMachine.machines as any).slug;
 
     if (machineSlug) {
-      const { data: solutionsData } = await supabase
+      const { data } = await supabase
         .from('v_machine_solution_problem_full')
         .select('*')
         .eq('machine_slug', machineSlug)
         .order('machine_solution_rank', { ascending: true })
-        .order('machine_solution_problem_rank', { ascending: true })
+        .order('pitch_relevance_rank', { ascending: true })
         .limit(10);  // Limit to top 10 for token pages
 
-      if (solutionsData && solutionsData.length > 0) {
-        // Group by solution
-        const solutionsMap = new Map();
-        solutionsData.forEach((row: any) => {
-          if (!solutionsMap.has(row.solution_id)) {
-            solutionsMap.set(row.solution_id, {
-              solution_id: row.solution_id,
-              solution_name: row.solution_name,
-              solution_core_benefit: row.solution_core_benefit,
-              solution_long_description: row.solution_long_description,
-              problems: []
-            });
-          }
-          const solution = solutionsMap.get(row.solution_id);
-          solution.problems.push({
-            problem_id: row.problem_id,
-            problem_title: row.problem_title,
-            pitch_headline: row.pitch_headline,
-            pitch_detail: row.pitch_detail,
-            action_cta: row.action_cta
-          });
-        });
-
-        machineSolutions = {
-          machine: knownMachine.machines,
-          solutions: Array.from(solutionsMap.values())
-        };
-      }
+      problemCards = data || [];
     }
   }
 
@@ -303,52 +277,68 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
             </div>
           )}
 
-          {/* Show known machine and solutions if we have it */}
+          {/* Show known machine and problem cards - ONE CARD PER PROBLEM */}
           {knownMachine && knownMachine.machines && (
             <div className="mb-10">
-              <div className="p-6 bg-green-50 rounded-lg border border-green-200 mb-6">
+              <div className="p-6 bg-green-50 rounded-xl border-2 border-green-200 mb-8">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <h3 className="text-lg font-semibold text-green-900">
-                    Solutions for your {(knownMachine.machines as any).display_name}
+                  <h3 className="text-xl font-bold text-green-900">
+                    Problems We Fix on Your {(knownMachine.machines as any).display_name}
                   </h3>
                 </div>
-                <p className="text-center text-green-800 text-sm">
-                  Here's what we can fix on your machine right now
+                <p className="text-center text-green-700">
+                  Here's what we can solve for you right now
                 </p>
               </div>
 
-              {/* Machine-specific solutions */}
-              {machineSolutions && machineSolutions.solutions.length > 0 && (
+              {/* Problem Cards - ONE PER PROBLEM */}
+              {problemCards && problemCards.length > 0 && (
                 <div className="space-y-6">
-                  {machineSolutions.solutions.map((solution: any) => (
-                    <div key={solution.solution_id} className="bg-white border border-gray-200 rounded-lg p-6">
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">{solution.solution_name}</h3>
-                      <p className="text-blue-600 font-semibold mb-4">{solution.solution_core_benefit}</p>
+                  {problemCards.map((card: any) => (
+                    <div key={`${card.solution_id}-${card.problem_id}`} className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-blue-500 hover:shadow-lg transition-all">
+                      {/* Problem Headline */}
+                      <h3 className="text-xl font-bold text-gray-900 mb-3">
+                        {card.pitch_headline}
+                      </h3>
 
-                      <div className="space-y-3">
-                        {solution.problems.map((problem: any) => (
-                          <div key={problem.problem_id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition-colors">
-                            <h4 className="font-semibold text-gray-900 mb-1">{problem.pitch_headline}</h4>
-                            <p className="text-sm text-gray-600 mb-3">{problem.pitch_detail}</p>
-                            <a
-                              href="/contact"
-                              className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
-                            >
-                              {problem.action_cta || 'Get help with this'}
-                            </a>
-                          </div>
-                        ))}
+                      {/* Problem Detail */}
+                      <p className="text-gray-700 mb-5 leading-relaxed">
+                        {card.pitch_detail}
+                      </p>
+
+                      {/* Solution Info */}
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-5">
+                        <div className="flex items-center gap-2 mb-1">
+                          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="font-bold text-gray-900">{card.solution_name}</span>
+                        </div>
+                        <p className="text-blue-700 text-sm font-semibold ml-7">
+                          {card.solution_core_benefit}
+                        </p>
                       </div>
+
+                      {/* CTA */}
+                      <a
+                        href="/contact"
+                        className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition-colors"
+                      >
+                        {card.action_cta || 'Get help with this'}
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </a>
                     </div>
                   ))}
                 </div>
               )}
 
               {/* If no solutions found for their machine */}
-              {machineSolutions && machineSolutions.solutions.length === 0 && (
+              {problemCards && problemCards.length === 0 && (
                 <div className="text-center py-8 text-gray-600">
                   <p>We're updating solutions for your machine. Contact us to discuss your specific needs.</p>
                 </div>

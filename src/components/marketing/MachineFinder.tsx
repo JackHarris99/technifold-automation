@@ -15,19 +15,17 @@ interface Machine {
   slug: string;
 }
 
-interface Problem {
+interface ProblemCard {
+  machine_id: string;
+  solution_id: string;
+  solution_name: string;
+  solution_core_benefit: string;
+  solution_long_description: string;
   problem_id: string;
   problem_title: string;
   pitch_headline: string;
   pitch_detail: string;
   action_cta: string;
-}
-
-interface Solution {
-  solution_id: string;
-  solution_name: string;
-  solution_core_benefit: string;
-  problems: Problem[];
 }
 
 interface MachineFinderProps {
@@ -40,7 +38,7 @@ export default function MachineFinder({ onMachineSelect }: MachineFinderProps) {
   const [machines, setMachines] = useState<Machine[]>([]);
   const [selectedMachine, setSelectedMachine] = useState<string>('');
   const [selectedMachineData, setSelectedMachineData] = useState<Machine | null>(null);
-  const [solutions, setSolutions] = useState<Solution[]>([]);
+  const [problemCards, setProblemCards] = useState<ProblemCard[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingSolutions, setLoadingSolutions] = useState(false);
 
@@ -96,18 +94,17 @@ export default function MachineFinder({ onMachineSelect }: MachineFinderProps) {
       return;
     }
 
-    // Otherwise, fetch solutions and display inline
+    // Otherwise, fetch problem cards and display inline
     setLoadingSolutions(true);
     try {
-      // Fetch solutions from the view
       const response = await fetch(`/api/machines/solutions?slug=${encodeURIComponent(machine.slug)}`);
       if (!response.ok) throw new Error('Failed to fetch solutions');
 
       const data = await response.json();
-      setSolutions(data.solutions || []);
+      setProblemCards(data.problemCards || []);
     } catch (error) {
       console.error('Failed to fetch solutions:', error);
-      setSolutions([]);
+      setProblemCards([]);
     } finally {
       setLoadingSolutions(false);
     }
@@ -182,50 +179,72 @@ export default function MachineFinder({ onMachineSelect }: MachineFinderProps) {
         </div>
       </div>
 
-      {/* Solutions Display - shown inline below the finder */}
-      {!loadingSolutions && solutions.length > 0 && selectedMachineData && (
-        <div className="mt-12 space-y-8">
+      {/* Problem Cards - ONE CARD PER PROBLEM - shown inline below the finder */}
+      {!loadingSolutions && problemCards.length > 0 && selectedMachineData && (
+        <div className="mt-12 space-y-6">
           <div className="text-center mb-8">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
-              Solutions for {selectedMachineData.display_name}
+              Problems We Fix on {selectedMachineData.display_name}
             </h2>
             <p className="text-xl text-blue-100">
-              Here's what we can fix on your machine
+              Each of these is a proven retrofit solution
             </p>
           </div>
 
-          {solutions.map((solution) => (
-            <div key={solution.solution_id} className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-              {/* Solution Header */}
-              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6">
-                <h3 className="text-2xl font-bold mb-2">{solution.solution_name}</h3>
-                <p className="text-blue-100 text-lg">{solution.solution_core_benefit}</p>
+          {problemCards.map((card) => (
+            <div key={`${card.solution_id}-${card.problem_id}`} className="bg-white rounded-2xl shadow-2xl p-8 hover:shadow-3xl transition-all">
+              {/* Problem Headline */}
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                {card.pitch_headline}
+              </h3>
+
+              {/* Problem Detail */}
+              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+                {card.pitch_detail}
+              </p>
+
+              {/* Solution Info */}
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6">
+                <div className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-1">
+                      {card.solution_name}
+                    </h4>
+                    <p className="text-blue-700 font-semibold">
+                      {card.solution_core_benefit}
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              {/* Problems */}
-              <div className="p-6 space-y-4">
-                {solution.problems.map((problem) => (
-                  <div key={problem.problem_id} className="border-l-4 border-blue-600 pl-6 py-4 hover:bg-blue-50 transition-colors rounded-r-lg">
-                    <h4 className="text-lg font-bold text-gray-900 mb-2">
-                      {problem.pitch_headline}
-                    </h4>
-                    <p className="text-gray-700 mb-4 leading-relaxed">
-                      {problem.pitch_detail}
-                    </p>
-                    <a
-                      href="/contact"
-                      className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-                    >
-                      {problem.action_cta || 'Get help with this'}
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </a>
-                  </div>
-                ))}
-              </div>
+              {/* CTA */}
+              <a
+                href="/contact"
+                className="inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center"
+              >
+                {card.action_cta || 'Get help with this'}
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
             </div>
           ))}
+
+          {/* Optional: Link to full machine page */}
+          <div className="text-center mt-8">
+            <a
+              href={`/machines/${selectedMachineData.slug}`}
+              className="inline-flex items-center gap-2 text-white hover:text-blue-100 font-semibold"
+            >
+              See full details page for {selectedMachineData.display_name}
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
         </div>
       )}
     </div>
