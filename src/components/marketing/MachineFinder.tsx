@@ -67,23 +67,33 @@ export default function MachineFinder({ onMachineSelect }: MachineFinderProps) {
   // Handle machine selection
   const handleMachineSelect = (machineId: string) => {
     const machine = machines.find(m => m.machine_id === machineId);
-    if (machine && onMachineSelect) {
+    if (machine) {
       setSelectedMachine(machineId);
-      onMachineSelect(machine.slug);
+      if (onMachineSelect) {
+        onMachineSelect(machine.slug);
+      } else {
+        // Default behavior: navigate to machine page
+        window.location.href = `/machines/${machine.slug}`;
+      }
     }
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">
-        Find fixes for your machine
-      </h2>
+    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 shadow-2xl">
+      <div className="text-center mb-6">
+        <div className="inline-flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full mb-4">
+          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <span className="text-sm font-semibold text-white">Step 1 of 2</span>
+        </div>
+      </div>
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         {/* Brand dropdown */}
         <div>
-          <label htmlFor="brand" className="block text-sm font-semibold text-gray-700 mb-2">
-            Machine Brand
+          <label htmlFor="brand" className="block text-sm font-bold text-white mb-2">
+            1. Select Your Press Brand
           </label>
           <select
             id="brand"
@@ -92,9 +102,9 @@ export default function MachineFinder({ onMachineSelect }: MachineFinderProps) {
               setSelectedBrand(e.target.value);
               setSelectedMachine('');
             }}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+            className="w-full px-5 py-4 border-2 border-white/30 rounded-xl focus:ring-2 focus:ring-white focus:border-white text-gray-900 text-lg bg-white shadow-lg"
           >
-            <option value="">Select a brand...</option>
+            <option value="">Choose a brand...</option>
             {brands.map((brand) => (
               <option key={brand} value={brand}>
                 {brand}
@@ -105,18 +115,18 @@ export default function MachineFinder({ onMachineSelect }: MachineFinderProps) {
 
         {/* Model dropdown */}
         <div>
-          <label htmlFor="model" className="block text-sm font-semibold text-gray-700 mb-2">
-            Machine Model
+          <label htmlFor="model" className="block text-sm font-bold text-white mb-2">
+            2. Select Your Model
           </label>
           <select
             id="model"
             value={selectedMachine}
             onChange={(e) => handleMachineSelect(e.target.value)}
             disabled={!selectedBrand || loading}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            className="w-full px-5 py-4 border-2 border-white/30 rounded-xl focus:ring-2 focus:ring-white focus:border-white text-gray-900 text-lg bg-white shadow-lg disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <option value="">
-              {loading ? 'Loading models...' : selectedBrand ? 'Select a model...' : 'Select a brand first'}
+              {loading ? 'Loading models...' : selectedBrand ? 'Choose a model...' : 'Select a brand first'}
             </option>
             {machines.map((machine) => (
               <option key={machine.machine_id} value={machine.machine_id}>
@@ -125,6 +135,14 @@ export default function MachineFinder({ onMachineSelect }: MachineFinderProps) {
             ))}
           </select>
         </div>
+
+        {selectedMachine && (
+          <div className="bg-green-500/20 border border-green-400/50 rounded-xl p-4 text-center">
+            <p className="text-white font-semibold">
+              ✓ Redirecting to solutions for your machine...
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

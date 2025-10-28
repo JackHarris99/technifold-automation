@@ -84,12 +84,20 @@ export default async function ProspectsPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Prospects & Customers
-          </h1>
-          <p className="text-gray-600">
-            Track machine ownership, assign reps, and manage outreach
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Prospects & Machines
+              </h1>
+              <p className="text-gray-600">
+                Track which machines your customers run • Assign reps • Send targeted offers
+              </p>
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold text-blue-600">{prospectsData.length}</div>
+              <div className="text-sm text-gray-500">Total companies</div>
+            </div>
+          </div>
         </div>
 
         <ProspectsTable prospects={prospectsData} />

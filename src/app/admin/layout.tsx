@@ -1,30 +1,75 @@
 /**
- * Admin Layout - Dev-minimum authentication for admin pages
+ * Admin Layout - Auth + Navigation for admin pages
  * In development: allows access without auth
  * In production: checks for admin_authorized cookie
  */
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // In development, allow access without auth
-  if (process.env.NODE_ENV === 'development') {
-    return <>{children}</>;
-  }
-
   // In production, check for admin_authorized cookie
-  const cookieStore = await cookies();
-  const adminAuth = cookieStore.get('admin_authorized');
+  if (process.env.NODE_ENV !== 'development') {
+    const cookieStore = await cookies();
+    const adminAuth = cookieStore.get('admin_authorized');
 
-  if (!adminAuth || adminAuth.value !== 'true') {
-    // Redirect to login page
-    redirect('/login');
+    if (!adminAuth || adminAuth.value !== 'true') {
+      redirect('/login');
+    }
   }
 
-  return <>{children}</>;
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Admin Navigation */}
+      <nav className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-8">
+              <Link href="/admin" className="text-xl font-bold text-gray-900">
+                Technifold Admin
+              </Link>
+
+              <div className="flex gap-1">
+                <NavLink href="/admin" label="Dashboard" />
+                <NavLink href="/admin/prospects" label="Prospects" />
+                <NavLink href="/admin/reorder" label="Reorder" />
+                <NavLink href="/admin/system-check" label="System Check" />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <a
+                href="/"
+                className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to site
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Page Content */}
+      {children}
+    </div>
+  );
+}
+
+function NavLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+    >
+      {label}
+    </Link>
+  );
 }

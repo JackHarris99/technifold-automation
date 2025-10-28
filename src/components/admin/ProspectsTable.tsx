@@ -1,11 +1,30 @@
 /**
  * Prospects Table Component
- * Shows companies with machines, engagement, and action buttons
+ * Shows companies with machines, engagement, and action buttons - Sales-friendly UI
  */
 
 'use client';
 
 import { useState } from 'react';
+
+// Helper to format relative time
+function timeAgo(dateString: string): string {
+  const now = new Date();
+  const past = new Date(dateString);
+  const seconds = Math.floor((now.getTime() - past.getTime()) / 1000);
+
+  if (seconds < 60) return 'just now';
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  if (seconds < 2592000) return `${Math.floor(seconds / 86400)}d ago`;
+  return past.toLocaleDateString();
+}
+
+// Helper to format event names
+function formatEventName(eventName: string): string {
+  const formatted = eventName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  return formatted;
+}
 
 interface Machine {
   company_machine_id: string;
@@ -192,34 +211,54 @@ export default function ProspectsTable({ prospects: initialProspects }: Prospect
                 </td>
                 <td className="px-6 py-4">
                   {prospect.machines.length === 0 ? (
-                    <span className="text-sm text-gray-400">No machines</span>
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      <span className="text-sm">Unknown machine</span>
+                    </div>
                   ) : (
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                       {prospect.machines.map((machine) => (
-                        <div key={machine.company_machine_id} className="text-sm">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-gray-900">
-                              {machine.machines.display_name}
-                            </span>
-                            {machine.confirmed ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded">
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                                Confirmed
+                        <div key={machine.company_machine_id} className="flex items-start gap-2">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-semibold text-gray-900 text-sm">
+                                {machine.machines.display_name}
                               </span>
-                            ) : (
-                              <button
-                                onClick={() => handleConfirmMachine(machine.company_machine_id, prospect.company_id)}
-                                disabled={loading === machine.company_machine_id}
-                                className="text-xs text-blue-600 hover:text-blue-800 underline disabled:opacity-50"
-                              >
-                                {loading === machine.company_machine_id ? 'Confirming...' : 'Confirm'}
-                              </button>
-                            )}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {machine.source} · confidence: {machine.confidence_score}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {machine.confirmed ? (
+                                <span
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-semibold"
+                                  title="Sales confirmed this machine"
+                                >
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                  Confirmed
+                                </span>
+                              ) : (
+                                <>
+                                  <span
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full"
+                                    title={`Source: ${machine.source} | Confidence: ${machine.confidence_score}/5`}
+                                  >
+                                    {machine.source === 'self_report' && '🤚 Self-reported'}
+                                    {machine.source === 'inferred' && '🔍 Inferred'}
+                                    {machine.source === 'zoho_import' && '📋 Zoho'}
+                                  </span>
+                                  <button
+                                    onClick={() => handleConfirmMachine(machine.company_machine_id, prospect.company_id)}
+                                    disabled={loading === machine.company_machine_id}
+                                    className="text-xs text-blue-600 hover:text-blue-800 font-semibold disabled:opacity-50"
+                                    title="Mark as sales-confirmed"
+                                  >
+                                    {loading === machine.company_machine_id ? '...' : '✓ Confirm'}
+                                  </button>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -228,16 +267,26 @@ export default function ProspectsTable({ prospects: initialProspects }: Prospect
                 </td>
                 <td className="px-6 py-4">
                   {prospect.engagement.length === 0 ? (
-                    <span className="text-sm text-gray-400">No activity</span>
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                      </svg>
+                      <span className="text-sm">No recent activity</span>
+                    </div>
                   ) : (
-                    <div className="text-xs text-gray-600 space-y-1">
+                    <div className="space-y-1.5">
                       {prospect.engagement.slice(0, 3).map((event, idx) => (
-                        <div key={idx}>
-                          • {event.event_name} ({new Date(event.created_at).toLocaleDateString()})
+                        <div key={idx} className="flex items-center gap-2 text-xs">
+                          <span className="inline-block w-2 h-2 bg-blue-400 rounded-full"></span>
+                          <span className="text-gray-700 font-medium">{formatEventName(event.event_name)}</span>
+                          <span className="text-gray-400">·</span>
+                          <span className="text-gray-500">{timeAgo(event.created_at)}</span>
                         </div>
                       ))}
                       {prospect.engagement.length > 3 && (
-                        <div className="text-gray-400">+{prospect.engagement.length - 3} more</div>
+                        <div className="text-xs text-gray-400 pl-4">
+                          +{prospect.engagement.length - 3} more events
+                        </div>
                       )}
                     </div>
                   )}

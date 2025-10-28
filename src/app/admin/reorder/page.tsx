@@ -112,25 +112,43 @@ export default async function ReorderPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Reorder Reminders
+            Consumables Reorder Reminders
           </h1>
           <p className="text-gray-600">
-            Companies due for consumable restock - send reminders with one click
+            Companies overdue for restocking • Send reminders in one click
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <div className="text-3xl font-bold text-red-600">{(reorder90 || []).length}</div>
-            <div className="text-sm text-gray-600">Due 90+ days</div>
+        <div className="grid grid-cols-3 gap-6 mb-8">
+          <div className="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300 rounded-xl p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-sm font-bold text-red-800 uppercase tracking-wide">High Priority</div>
+              <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div className="text-4xl font-bold text-red-700 mb-1">{(reorder90 || []).length}</div>
+            <div className="text-sm text-red-600">Due 90+ days ago</div>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <div className="text-3xl font-bold text-orange-600">{(reorder180 || []).length}</div>
-            <div className="text-sm text-gray-600">Due 180+ days</div>
+          <div className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-300 rounded-xl p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-sm font-bold text-orange-800 uppercase tracking-wide">Medium</div>
+              <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="text-4xl font-bold text-orange-700 mb-1">{(reorder180 || []).length}</div>
+            <div className="text-sm text-orange-600">Due 180+ days ago</div>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <div className="text-3xl font-bold text-yellow-600">{(reorder365 || []).length}</div>
-            <div className="text-sm text-gray-600">Due 365+ days</div>
+          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-300 rounded-xl p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-sm font-bold text-yellow-800 uppercase tracking-wide">Low</div>
+              <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="text-4xl font-bold text-yellow-700 mb-1">{(reorder365 || []).length}</div>
+            <div className="text-sm text-yellow-600">Due 365+ days ago</div>
           </div>
         </div>
 
