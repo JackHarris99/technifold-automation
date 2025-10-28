@@ -203,7 +203,7 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
         .select('*')
         .eq('machine_slug', machineSlug)
         .order('machine_solution_rank', { ascending: true })
-        .order('pitch_relevance_rank', { ascending: true })
+        .order('global_solution_problem_rank', { ascending: true })
         .limit(10);  // Limit to top 10 for token pages
 
       problemCards = data || [];

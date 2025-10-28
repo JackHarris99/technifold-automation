@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       .select('*')
       .eq('machine_slug', slug)
       .order('machine_solution_rank', { ascending: true })
-      .order('pitch_relevance_rank', { ascending: true });
+      .order('global_solution_problem_rank', { ascending: true });
 
     if (error) {
       console.error('[machines/solutions] Error:', error);
