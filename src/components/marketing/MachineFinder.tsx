@@ -204,8 +204,9 @@ export default function MachineFinder({ onMachineSelect }: MachineFinderProps) {
             </p>
           </div>
 
-          {problemCards.map((card) => (
-            <div key={`${card.solution_id}-${card.problem_id}`} className="bg-white rounded-2xl shadow-2xl p-8 hover:shadow-3xl transition-all">
+          <div className="grid md:grid-cols-2 gap-6">
+            {problemCards.map((card) => (
+              <div key={`${card.solution_id}-${card.problem_id}`} className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all">
               {/* Solution Badge */}
               <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-bold mb-4">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -215,22 +216,23 @@ export default function MachineFinder({ onMachineSelect }: MachineFinderProps) {
               </div>
 
               {/* Resolved Copy (Markdown) */}
-              <div className="prose prose-lg max-w-none mb-6 text-gray-900">
+              <div className="prose max-w-none mb-6 text-gray-900">
                 <ReactMarkdown>{card.resolved_copy}</ReactMarkdown>
               </div>
 
               {/* CTA */}
               <a
                 href="/contact"
-                className="inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center"
+                className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors w-full justify-center"
               >
                 {card.action_cta || `See how this works on your ${selectedMachineData.brand} ${selectedMachineData.model}`}
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </a>
             </div>
-          ))}
+            ))}
+          </div>
 
           {/* Setup Guide - Once per page */}
           <div className="mt-8">
