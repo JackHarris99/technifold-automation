@@ -38,6 +38,8 @@ export default async function AdminLayout({
                 <NavLink href="/admin" label="Dashboard" />
                 <NavLink href="/admin/prospects" label="Prospects" />
                 <NavLink href="/admin/reorder" label="Reorder" />
+                <NavLink href="/admin/sku-explorer" label="SKU Explorer" />
+                <NavLink href="/admin/ms-problem-editor" label="Copy Editor" />
                 <NavLink href="/admin/system-check" label="System Check" />
               </div>
             </div>

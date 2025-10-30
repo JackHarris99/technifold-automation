@@ -1,4 +1,4 @@
--- Recreate v_machine_solution_problem_full with correct join structure
+-- Recreate v_machine_solution_problem_full with copy fallback chain and curated_skus
 -- Each row = ONE CARD = one (machine, solution, problem) combination
 -- CRITICAL: Do NOT group by solution - each problem gets its own card
 
@@ -26,13 +26,27 @@ SELECT
   p.title AS problem_title,
   p.description AS problem_description,
 
-  -- Marketing pitch (from solution_problem)
+  -- COPY FALLBACK CHAIN (Source of Truth)
+  COALESCE(
+    msp.problem_solution_copy,
+    sp.problem_solution_copy,
+    CONCAT(sp.pitch_headline, E'\n\n', sp.pitch_detail)
+  ) AS resolved_copy,
+
+  -- Individual copy fields (for editing/debugging)
+  msp.problem_solution_copy AS msp_copy_override,
+  sp.problem_solution_copy AS sp_copy_base,
+
+  -- Legacy fields (backward compat during transition)
   sp.pitch_headline,
   sp.pitch_detail,
   sp.action_cta,
-  sp.relevance_rank AS pitch_relevance_rank,
+
+  -- SKU CURATION (Source of Truth)
+  msp.curated_skus,
 
   -- Ranking
+  sp.relevance_rank AS pitch_relevance_rank,
   ms.relevance_rank AS machine_solution_rank,
   ms.machine_solution_id
 

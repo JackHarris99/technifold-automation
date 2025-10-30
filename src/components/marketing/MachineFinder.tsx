@@ -6,6 +6,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import SetupGuide from './SetupGuide';
 
 interface Machine {
   machine_id: string;
@@ -204,31 +206,17 @@ export default function MachineFinder({ onMachineSelect }: MachineFinderProps) {
 
           {problemCards.map((card) => (
             <div key={`${card.solution_id}-${card.problem_id}`} className="bg-white rounded-2xl shadow-2xl p-8 hover:shadow-3xl transition-all">
-              {/* Problem Headline */}
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                {card.pitch_headline}
-              </h3>
+              {/* Solution Badge */}
+              <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-bold mb-4">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {card.solution_name}
+              </div>
 
-              {/* Problem Detail */}
-              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                {card.pitch_detail}
-              </p>
-
-              {/* Solution Info */}
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6">
-                <div className="flex items-start gap-3">
-                  <svg className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <div>
-                    <h4 className="text-lg font-bold text-gray-900 mb-1">
-                      {card.solution_name}
-                    </h4>
-                    <p className="text-blue-700 font-semibold">
-                      {card.solution_core_benefit}
-                    </p>
-                  </div>
-                </div>
+              {/* Resolved Copy (Markdown) */}
+              <div className="prose prose-lg max-w-none mb-6 text-gray-900">
+                <ReactMarkdown>{card.resolved_copy}</ReactMarkdown>
               </div>
 
               {/* CTA */}
@@ -236,7 +224,7 @@ export default function MachineFinder({ onMachineSelect }: MachineFinderProps) {
                 href="/contact"
                 className="inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center"
               >
-                {card.action_cta || 'Get help with this'}
+                {card.action_cta || `See how this works on your ${selectedMachineData.brand} ${selectedMachineData.model}`}
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -244,7 +232,17 @@ export default function MachineFinder({ onMachineSelect }: MachineFinderProps) {
             </div>
           ))}
 
-          {/* Optional: Link to full machine page */}
+          {/* Setup Guide - Once per page */}
+          <div className="mt-8">
+            <SetupGuide
+              curatedSkus={problemCards[0]?.curated_skus}
+              machineId={selectedMachineData.machine_id}
+              solutionId={problemCards[0]?.solution_id}
+              machineName={selectedMachineData.display_name}
+            />
+          </div>
+
+          {/* Link to full machine page */}
           <div className="text-center mt-8">
             <a
               href={`/machines/${selectedMachineData.slug}`}

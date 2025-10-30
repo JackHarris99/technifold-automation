@@ -1,9 +1,7 @@
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { ProductCategoriesMenu } from '@/components/marketing/ProductCategoriesMenu';
-import { ToolCategoryCards } from '@/components/marketing/ToolCategoryCards';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
 import MachineFinder from '@/components/marketing/MachineFinder';
-import { Suspense } from 'react';
 
 export default function HomePage() {
   return (
@@ -102,22 +100,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Product Categories - moved down */}
-        <section className="bg-gray-50 py-16">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Browse All Products
-              </h2>
-              <p className="text-lg text-gray-600">
-                Explore our full range of tools and consumables
-              </p>
-            </div>
-            <Suspense fallback={<div className="py-12 text-center text-gray-500">Loading products...</div>}>
-              <ToolCategoryCards />
-            </Suspense>
-          </div>
-        </section>
       </main>
       <MarketingFooter />
     </div>

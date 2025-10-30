@@ -8,6 +8,8 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
 import MachineOwnershipForm from '@/components/marketing/MachineOwnershipForm';
+import SetupGuide from '@/components/marketing/SetupGuide';
+import ReactMarkdown from 'react-markdown';
 
 interface MachinePageProps {
   params: Promise<{
@@ -72,36 +74,17 @@ export default async function MachinePage({ params }: MachinePageProps) {
         <div className="grid gap-6 mb-16">
           {problemCards.map((card: any) => (
             <div key={`${card.solution_id}-${card.problem_id}`} className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-blue-500 hover:shadow-xl transition-all">
-              {/* Problem Headline */}
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">
-                {card.pitch_headline}
-              </h2>
+              {/* Solution Badge */}
+              <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-bold mb-4">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {card.solution_name}
+              </div>
 
-              {/* Problem Detail */}
-              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                {card.pitch_detail}
-              </p>
-
-              {/* Solution Info */}
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
-                <div className="flex items-start gap-3 mb-3">
-                  <svg className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-1">
-                      {card.solution_name}
-                    </h3>
-                    <p className="text-blue-700 font-semibold">
-                      {card.solution_core_benefit}
-                    </p>
-                  </div>
-                </div>
-                {card.solution_long_description && (
-                  <p className="text-gray-700 text-sm ml-9">
-                    {card.solution_long_description}
-                  </p>
-                )}
+              {/* Resolved Copy (Markdown) */}
+              <div className="prose prose-lg max-w-none mb-6">
+                <ReactMarkdown>{card.resolved_copy}</ReactMarkdown>
               </div>
 
               {/* CTA */}
@@ -109,7 +92,7 @@ export default async function MachinePage({ params }: MachinePageProps) {
                 href="/contact"
                 className="inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors"
               >
-                {card.action_cta || 'Get help with this'}
+                {card.action_cta || `See how this works on your ${machineData.machine_brand} ${machineData.machine_model}`}
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -117,6 +100,18 @@ export default async function MachinePage({ params }: MachinePageProps) {
             </div>
           ))}
         </div>
+
+        {/* Setup Guide - Once per page */}
+        {problemCards.length > 0 && (
+          <div className="mb-16">
+            <SetupGuide
+              curatedSkus={problemCards[0]?.curated_skus}
+              machineId={machineData.machine_id}
+              solutionId={problemCards[0]?.solution_id}
+              machineName={machineData.machine_display_name}
+            />
+          </div>
+        )}
 
         {/* Machine Ownership Capture */}
         <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl p-8 md:p-12">

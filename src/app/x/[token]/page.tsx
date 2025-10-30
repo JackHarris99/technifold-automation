@@ -8,6 +8,8 @@ import { verifyToken } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cookies } from 'next/headers';
 import TokenMachineFinder from '@/components/offers/TokenMachineFinder';
+import SetupGuide from '@/components/marketing/SetupGuide';
+import ReactMarkdown from 'react-markdown';
 
 interface TokenPageProps {
   params: Promise<{
@@ -194,6 +196,8 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
   // Fetch problem cards if we know their machine
   // Each row = ONE CARD = one (machine, solution, problem) combination
   let problemCards = null;
+  let introText = '';
+
   if (knownMachine && knownMachine.machines) {
     const machineSlug = (knownMachine.machines as any).slug;
 
@@ -207,6 +211,12 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
         .limit(10);  // Limit to top 10 for token pages
 
       problemCards = data || [];
+
+      // Extract intro from first card's resolved_copy (first paragraph)
+      if (problemCards.length > 0 && problemCards[0].resolved_copy) {
+        const firstParagraph = problemCards[0].resolved_copy.split('\n\n')[0];
+        introText = firstParagraph.substring(0, 200); // First 200 chars
+      }
     }
   }
 
@@ -225,38 +235,14 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
             </p>
           </div>
 
-          {/* Offer content - customize based on offer_key */}
-          <div className="space-y-6 mb-10">
-            {offer_key === 'reorder_reminder' && (
-              <>
-                <p className="text-lg text-gray-700">
-                  It's time to restock your consumables! We've noticed it's been a while since your last order.
-                </p>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                  <h3 className="font-semibold text-blue-900 mb-2">Special Offer:</h3>
-                  <p className="text-blue-800">10% off your reorder when you purchase today</p>
-                </div>
-              </>
-            )}
-
-            {offer_key === 'new_product_launch' && (
-              <>
-                <p className="text-lg text-gray-700">
-                  We're excited to introduce our latest product innovation!
-                </p>
-                <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                  <h3 className="font-semibold text-green-900 mb-2">Launch Special:</h3>
-                  <p className="text-green-800">20% off for early adopters</p>
-                </div>
-              </>
-            )}
-
-            {!offer_key && (
-              <p className="text-lg text-gray-700">
-                Browse our full range of products and consumables tailored to your needs.
+          {/* Intro from first card's resolved_copy */}
+          {introText && (
+            <div className="mb-8 text-center">
+              <p className="text-lg text-gray-700 leading-relaxed max-w-2xl mx-auto">
+                {introText}
               </p>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Machine Selector Section - if we don't know their machine */}
           {!knownMachine && (
@@ -296,45 +282,45 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
 
               {/* Problem Cards - ONE PER PROBLEM */}
               {problemCards && problemCards.length > 0 && (
-                <div className="space-y-6">
-                  {problemCards.map((card: any) => (
-                    <div key={`${card.solution_id}-${card.problem_id}`} className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-blue-500 hover:shadow-lg transition-all">
-                      {/* Problem Headline */}
-                      <h3 className="text-xl font-bold text-gray-900 mb-3">
-                        {card.pitch_headline}
-                      </h3>
-
-                      {/* Problem Detail */}
-                      <p className="text-gray-700 mb-5 leading-relaxed">
-                        {card.pitch_detail}
-                      </p>
-
-                      {/* Solution Info */}
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-5">
-                        <div className="flex items-center gap-2 mb-1">
-                          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <>
+                  <div className="space-y-6 mb-10">
+                    {problemCards.map((card: any) => (
+                      <div key={`${card.solution_id}-${card.problem_id}`} className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-blue-500 hover:shadow-lg transition-all">
+                        {/* Solution Badge */}
+                        <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-bold mb-4">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          <span className="font-bold text-gray-900">{card.solution_name}</span>
+                          {card.solution_name}
                         </div>
-                        <p className="text-blue-700 text-sm font-semibold ml-7">
-                          {card.solution_core_benefit}
-                        </p>
-                      </div>
 
-                      {/* CTA */}
-                      <a
-                        href="/contact"
-                        className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition-colors"
-                      >
-                        {card.action_cta || 'Get help with this'}
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </a>
-                    </div>
-                  ))}
-                </div>
+                        {/* Resolved Copy (Markdown) */}
+                        <div className="prose max-w-none mb-5 text-gray-900">
+                          <ReactMarkdown>{card.resolved_copy}</ReactMarkdown>
+                        </div>
+
+                        {/* CTA */}
+                        <a
+                          href="/contact"
+                          className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition-colors"
+                        >
+                          {card.action_cta || 'Get help with this'}
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Setup Guide - Once per page */}
+                  <SetupGuide
+                    curatedSkus={problemCards[0]?.curated_skus}
+                    machineId={(knownMachine.machines as any).machine_id}
+                    solutionId={problemCards[0]?.solution_id}
+                    machineName={(knownMachine.machines as any).display_name}
+                  />
+                </>
               )}
 
               {/* If no solutions found for their machine */}
