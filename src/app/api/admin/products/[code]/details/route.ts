@@ -12,6 +12,8 @@ export async function GET(
 ) {
   try {
     const { code } = await context.params;
+    console.log('[admin/products/details] Fetching details for:', code);
+
     const supabase = getSupabaseClient();
 
     // Fetch SKU details
@@ -21,8 +23,11 @@ export async function GET(
       .eq('product_code', code)
       .single();
 
+    console.log('[admin/products/details] SKU query result:', { found: !!sku, error: error?.message });
+
     if (error || !sku) {
-      return NextResponse.json({ error: 'SKU not found' }, { status: 404 });
+      console.error('[admin/products/details] SKU not found:', code, error);
+      return NextResponse.json({ error: 'SKU not found', code }, { status: 404 });
     }
 
     let relatedItems: any[] = [];
@@ -65,12 +70,19 @@ export async function GET(
       }
     }
 
+    console.log('[admin/products/details] Success - relatedItems:', relatedItems.length);
+
     return NextResponse.json({
       sku,
       relatedItems
     });
-  } catch (err) {
-    console.error('[admin/products/details] Error:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (err: any) {
+    console.error('[admin/products/details] Unexpected error:', err);
+    console.error('[admin/products/details] Stack:', err.stack);
+    return NextResponse.json({
+      error: 'Internal server error',
+      message: err.message,
+      code: await context.params.then(p => p.code)
+    }, { status: 500 });
   }
 }
