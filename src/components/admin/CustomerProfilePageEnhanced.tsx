@@ -8,6 +8,7 @@ import { ToolsAndConsumablesSection } from './ToolsAndConsumablesSection';
 import CompanyHeader from './CompanyHeader';
 import EngagementTimeline from './EngagementTimeline';
 import SuggestionsPanel from './SuggestionsPanel';
+import MarketingBuilderTab from './MarketingBuilderTab';
 
 interface Contact {
   contact_id?: string;
@@ -47,7 +48,7 @@ interface CustomerProfilePageProps {
 }
 
 export function CustomerProfilePage({ profile, orderHistory, toolsWithConsumables = [], contacts = [] }: CustomerProfilePageProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'timeline' | 'contacts'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'timeline' | 'contacts' | 'marketing'>('overview');
 
   // Format company object for CompanyHeader
   const companyForHeader = {
@@ -106,6 +107,16 @@ export function CustomerProfilePage({ profile, orderHistory, toolsWithConsumable
                 }`}
               >
                 Contacts ({contacts.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('marketing')}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'marketing'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Marketing Builder
               </button>
             </nav>
           </div>
@@ -304,6 +315,16 @@ export function CustomerProfilePage({ profile, orderHistory, toolsWithConsumable
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {activeTab === 'marketing' && (
+              <div>
+                <MarketingBuilderTab
+                  companyId={profile.company_id}
+                  companyName={profile.company_name}
+                  contacts={contacts}
+                />
               </div>
             )}
           </div>

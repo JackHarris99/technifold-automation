@@ -14,6 +14,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { getZohoBooksClient, isZohoConfigured } from '@/lib/zoho-books-client';
+import { generateOfferUrl } from '@/lib/tokens';
 
 // Verify request is from Vercel Cron
 const CRON_SECRET = process.env.CRON_SECRET;
@@ -152,6 +153,15 @@ async function processJob(job: any) {
       await processZohoSyncOrder(job);
       break;
 
+    case 'send_offer_email':
+      await processSendOfferEmail(job);
+      break;
+
+    case 'inbound_lead_alert':
+      // Stub for now - could send internal notification
+      console.log('[outbox-worker] Inbound lead alert:', job.payload);
+      break;
+
     default:
       throw new Error(`Unknown job type: ${job.job_type}`);
   }
@@ -222,4 +232,125 @@ async function processZohoSyncOrder(job: any) {
     .eq('id', job.id);
 
   console.log(`[outbox-worker] Order ${order_id} synced to Zoho successfully`);
+}
+
+/**
+ * Send offer email with tokenized landing page
+ */
+async function processSendOfferEmail(job: any) {
+  const {
+    company_id,
+    contact_ids,
+    campaign_key,
+    offer_key,
+    machine_slug,
+    selected_problem_ids,
+    curated_skus
+  } = job.payload;
+
+  if (!company_id || !contact_ids || contact_ids.length === 0) {
+    throw new Error('Invalid payload: missing company_id or contact_ids');
+  }
+
+  const supabase = getSupabaseClient();
+
+  // Generate tokenized landing URL
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://technifold-automation.vercel.app';
+  const token = generateOfferUrl(
+    baseUrl,
+    company_id,
+    offer_key || 'machine_solutions',
+    {
+      contactId: contact_ids[0],
+      campaignKey: campaign_key,
+      ttlHours: 72
+    }
+  );
+
+  const tokenUrl = `${baseUrl}/x/${token}`;
+
+  // Fetch the selected problem cards for email preview (top 2)
+  let emailCards: any[] = [];
+  let intro = '';
+
+  if (machine_slug && selected_problem_ids && selected_problem_ids.length > 0) {
+    const { data: cards } = await supabase
+      .from('v_machine_solution_problem_full')
+      .select('*')
+      .eq('machine_slug', machine_slug)
+      .in('problem_id', selected_problem_ids)
+      .order('machine_solution_rank')
+      .order('pitch_relevance_rank')
+      .limit(2);
+
+    emailCards = cards || [];
+
+    // Extract intro from first card
+    if (emailCards.length > 0 && emailCards[0].resolved_copy) {
+      intro = emailCards[0].resolved_copy.split('\n\n')[0].substring(0, 200);
+    }
+  }
+
+  // Build email HTML
+  const emailHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); padding: 30px; border-radius: 12px; margin-bottom: 30px;">
+        <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">Solutions for Your Machine</h1>
+        <p style="color: #dbeafe; margin: 0; font-size: 16px;">${intro}</p>
+      </div>
+
+      ${emailCards.map(card => `
+        <div style="background: white; border: 2px solid #e5e7eb; border-radius: 12px; padding: 24px; margin-bottom: 20px;">
+          <div style="display: inline-block; background: #dbeafe; color: #1e40af; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-bottom: 12px;">
+            ${card.solution_name}
+          </div>
+          <div style="color: #374151; font-size: 15px; line-height: 1.6;">
+            ${card.resolved_copy?.substring(0, 300).replace(/\n/g, '<br>')}${card.resolved_copy?.length > 300 ? '...' : ''}
+          </div>
+        </div>
+      `).join('')}
+
+      <div style="text-align: center; margin: 40px 0;">
+        <a href="${tokenUrl}" style="display: inline-block; background: #2563eb; color: white; padding: 16px 32px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 18px;">
+          See All Solutions for Your Machine
+        </a>
+      </div>
+
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center;">
+        <p style="color: #6b7280; font-size: 13px; margin-bottom: 5px;">
+          Direct link (copy if button doesn't work):
+        </p>
+        <p style="color: #2563eb; font-size: 12px; word-break: break-all;">
+          ${tokenUrl}
+        </p>
+      </div>
+
+      <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #9ca3af;">
+        <p>Technifold Ltd • Professional Print Finishing Solutions</p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  // TODO: Send email via your email service
+  // For now, just log it
+  console.log('[outbox-worker] Would send email to:', contact_ids);
+  console.log('[outbox-worker] Token URL:', tokenUrl);
+  console.log('[outbox-worker] Cards:', emailCards.length);
+
+  // TODO: Replace this with actual email sending
+  // Examples:
+  // - Zoho Mail API
+  // - SendGrid/Resend
+  // - AWS SES
+  // await sendEmail({ to: contact_ids, subject: '...', html: emailHtml });
+
+  // For now, mark as completed
+  console.log('[outbox-worker] Email job completed (email sending not yet implemented)');
 }
