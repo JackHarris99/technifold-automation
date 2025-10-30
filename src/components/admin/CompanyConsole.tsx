@@ -89,25 +89,10 @@ export default function CompanyConsole({
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="flex gap-2 justify-end">
-              <button
-                onClick={() => {
-                  const url = `${window.location.origin}/portal/${company.company_id}`;
-                  navigator.clipboard.writeText(url);
-                  alert('Portal URL copied!');
-                }}
-                className="text-xs px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold"
-              >
-                Copy Portal URL
-              </button>
-              <a
-                href={`/portal/${company.company_id}`}
-                target="_blank"
-                className="text-xs px-3 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg font-semibold"
-              >
-                Open Portal
-              </a>
+            {/* Quick Info */}
+            <div className="text-right text-sm text-gray-600">
+              <div className="font-semibold">{company.account_owner || 'Unassigned'}</div>
+              <div className="text-xs">Account Owner</div>
             </div>
           </div>
         </div>
