@@ -12,7 +12,7 @@ export default async function SkuExplorerPage() {
   // Fetch all SKUs for autocomplete (limit to reasonable number)
   const { data: allSkus } = await supabase
     .from('products')
-    .select('product_code, product_name')
+    .select('product_code, description')
     .order('product_code')
     .limit(1000);
 

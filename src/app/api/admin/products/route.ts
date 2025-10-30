@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabase
       .from('products')
-      .select('product_code, product_name, description, price')
+      .select('product_code, description, price, category')
       .order('product_code')
       .limit(limit);
 

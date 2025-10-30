@@ -9,15 +9,15 @@ import { useState, useEffect } from 'react';
 
 interface SkuOption {
   product_code: string;
-  product_name: string;
+  description: string;
 }
 
 interface SkuDetails {
   product_code: string;
-  product_name: string;
   description: string | null;
   price: number | null;
   category: string | null;
+  type: string | null;
 }
 
 interface CurationUsage {
@@ -44,7 +44,7 @@ export default function SkuExplorer({ allSkus }: SkuExplorerProps) {
   const filteredSkus = allSkus.filter(
     sku =>
       sku.product_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sku.product_name.toLowerCase().includes(searchTerm.toLowerCase())
+      (sku.description && sku.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   useEffect(() => {
@@ -127,7 +127,7 @@ export default function SkuExplorer({ allSkus }: SkuExplorerProps) {
                 }`}
               >
                 <div className="font-mono text-sm text-blue-600">{sku.product_code}</div>
-                <div className="text-sm text-gray-700">{sku.product_name}</div>
+                <div className="text-sm text-gray-700 truncate">{sku.description}</div>
               </button>
             ))}
             {filteredSkus.length > 50 && (

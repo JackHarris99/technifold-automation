@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     // Fetch available SKUs (from products)
     const { data: skus } = await supabase
       .from('products')
-      .select('product_code, product_name')
+      .select('product_code, description')
       .order('product_code')
       .limit(500);
 
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
       mspId: msp?.id,
       availableSkus: (skus || []).map(s => ({
         code: s.product_code,
-        name: s.product_name
+        name: s.description
       }))
     });
   } catch (err) {

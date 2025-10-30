@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     // Fetch product details
     const { data: products, error } = await supabase
       .from('products')
-      .select('product_code, product_name, description, price')
+      .select('product_code, description, price')
       .in('product_code', skuCodes);
 
     if (error) {
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     // Format response
     const skus = (products || []).map(p => ({
       code: p.product_code,
-      name: p.product_name,
+      name: p.description,
       description: p.description,
       price: p.price
     }));

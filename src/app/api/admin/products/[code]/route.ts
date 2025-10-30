@@ -18,7 +18,7 @@ export async function GET(
     // Fetch SKU details
     const { data: sku, error } = await supabase
       .from('products')
-      .select('product_code, product_name, description, price, category, type')
+      .select('product_code, description, price, category, type')
       .eq('product_code', code)
       .single();
 
