@@ -51,7 +51,9 @@ export default function SkuExplorer({ allSkus }: SkuExplorerProps) {
     async function fetchSkuDetails() {
       setLoading(true);
       try {
-        const response = await fetch(`/api/admin/products/${selectedSku}/details`);
+        // URL-encode the SKU code to handle slashes
+        const encodedSku = encodeURIComponent(selectedSku);
+        const response = await fetch(`/api/admin/products/${encodedSku}/details`);
         if (!response.ok) throw new Error('Failed to fetch');
 
         const data = await response.json();
@@ -73,7 +75,8 @@ export default function SkuExplorer({ allSkus }: SkuExplorerProps) {
 
     setSaving(true);
     try {
-      const response = await fetch(`/api/admin/products/${selectedSku}`, {
+      const encodedSku = encodeURIComponent(selectedSku);
+      const response = await fetch(`/api/admin/products/${encodedSku}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ description: editedDescription })
