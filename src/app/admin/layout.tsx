@@ -35,11 +35,13 @@ export default async function AdminLayout({
               </Link>
 
               <div className="flex gap-1">
-                <NavLink href="/admin" label="Admin Home" />
                 <NavLink href="/admin/company" label="Company Console" highlight />
-                <NavLink href="/admin/prospects" label="Prospects" />
-                <NavLink href="/admin/reorder" label="Reorder" />
                 <NavLink href="/admin/system-check" label="System Check" />
+              </div>
+
+              <div className="flex gap-1 ml-4 pl-4 border-l border-gray-300">
+                <NavLink href="/admin/prospects" label="Utilities: Prospects" small />
+                <NavLink href="/admin/reorder" label="Reorder List" small />
               </div>
             </div>
 
@@ -64,11 +66,13 @@ export default async function AdminLayout({
   );
 }
 
-function NavLink({ href, label, highlight }: { href: string; label: string; highlight?: boolean }) {
+function NavLink({ href, label, highlight, small }: { href: string; label: string; highlight?: boolean; small?: boolean }) {
   return (
     <Link
       href={href}
-      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+      className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+        small ? 'text-xs' : 'text-sm'
+      } ${
         highlight
           ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
           : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
