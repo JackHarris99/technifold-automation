@@ -8,10 +8,11 @@ import { getSupabaseClient } from '@/lib/supabase';
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ companyId: string }> }
 ) {
   try {
-    const { id } = await context.params;
+    const { companyId } = await context.params;
+    const id = companyId;
     const supabase = getSupabaseClient();
 
     const { data, error } = await supabase
