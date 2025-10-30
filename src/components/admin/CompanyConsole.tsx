@@ -12,10 +12,8 @@ import MarketingTab from './console-tabs/MarketingTab';
 import ReorderTab from './console-tabs/ReorderTab';
 import HistoryTab from './console-tabs/HistoryTab';
 import ContactsTab from './console-tabs/ContactsTab';
-import CopyEditorTab from './console-tabs/CopyEditorTab';
-import SkuExplorerTab from './console-tabs/SkuExplorerTab';
 
-type TabName = 'overview' | 'marketing' | 'reorder' | 'history' | 'contacts' | 'copy-editor' | 'sku-explorer';
+type TabName = 'overview' | 'marketing' | 'reorder' | 'history' | 'contacts';
 
 interface CompanyConsoleProps {
   company: any;
@@ -38,7 +36,7 @@ export default function CompanyConsole({
   // Load tab from URL hash on mount
   useEffect(() => {
     const hash = window.location.hash.slice(1) as TabName;
-    if (hash && ['overview', 'marketing', 'reorder', 'history', 'contacts', 'copy-editor', 'sku-explorer'].includes(hash)) {
+    if (hash && ['overview', 'marketing', 'reorder', 'history', 'contacts'].includes(hash)) {
       setActiveTab(hash);
     }
   }, []);
@@ -134,12 +132,6 @@ export default function CompanyConsole({
             <TabButton active={activeTab === 'contacts'} onClick={() => handleTabChange('contacts')}>
               Contacts & Details
             </TabButton>
-            <TabButton active={activeTab === 'copy-editor'} onClick={() => handleTabChange('copy-editor')}>
-              Copy Editor
-            </TabButton>
-            <TabButton active={activeTab === 'sku-explorer'} onClick={() => handleTabChange('sku-explorer')}>
-              SKU Explorer
-            </TabButton>
           </div>
         </div>
       </div>
@@ -186,17 +178,6 @@ export default function CompanyConsole({
             company={company}
             contacts={contacts}
           />
-        )}
-
-        {activeTab === 'copy-editor' && (
-          <CopyEditorTab
-            machines={machines}
-            selectedMachine={machines[0]?.machines?.machine_id}
-          />
-        )}
-
-        {activeTab === 'sku-explorer' && (
-          <SkuExplorerTab />
         )}
       </div>
     </div>
