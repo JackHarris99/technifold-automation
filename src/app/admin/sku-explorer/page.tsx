@@ -9,12 +9,11 @@ import SkuExplorer from '@/components/admin/SkuExplorer';
 export default async function SkuExplorerPage() {
   const supabase = getSupabaseClient();
 
-  // Fetch all SKUs for autocomplete (limit to reasonable number)
+  // Fetch ALL SKUs (no limit)
   const { data: allSkus } = await supabase
     .from('products')
-    .select('product_code, description')
-    .order('product_code')
-    .limit(1000);
+    .select('product_code, description, type')
+    .order('product_code');
 
   return (
     <div className="min-h-screen bg-gray-50">

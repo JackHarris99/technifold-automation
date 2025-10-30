@@ -17,15 +17,6 @@ export function MarketingHeader() {
 
           {/* Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/products" className="text-gray-700 hover:text-blue-600 font-medium">
-              Products
-            </Link>
-            <Link href="/tri-creaser" className="text-gray-700 hover:text-blue-600 font-medium">
-              Tri-Creaser
-            </Link>
-            <Link href="/spine-creaser" className="text-gray-700 hover:text-blue-600 font-medium">
-              Spine-Creaser
-            </Link>
             <Link href="/about" className="text-gray-700 hover:text-blue-600 font-medium">
               About
             </Link>
