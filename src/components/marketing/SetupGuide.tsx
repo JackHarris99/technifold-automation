@@ -7,12 +7,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import MediaImage from '@/components/shared/MediaImage';
 
 interface Sku {
   code: string;
   name: string;
   description: string | null;
   price: number | null;
+  image_url?: string | null;
 }
 
 interface SetupGuideProps {
@@ -96,23 +98,36 @@ export default function SetupGuide({
 
         <div className="grid md:grid-cols-2 gap-4">
           {skus.map((sku) => (
-            <div key={sku.code} className="bg-white border border-indigo-200 rounded-xl p-5 hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <div className="font-mono text-sm text-indigo-600 font-bold">{sku.code}</div>
-                  <div className="font-semibold text-gray-900">{sku.name}</div>
-                </div>
-                {sku.price && (
-                  <div className="text-lg font-bold text-gray-900">
-                    £{sku.price.toFixed(2)}
+            <div key={sku.code} className="bg-white border border-indigo-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+              {/* Product Image */}
+              <div className="relative h-32 w-full bg-gray-100">
+                <MediaImage
+                  src={sku.image_url}
+                  alt={sku.name || sku.code}
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                />
+              </div>
+
+              {/* Product Details */}
+              <div className="p-5">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <div className="font-mono text-sm text-indigo-600 font-bold">{sku.code}</div>
+                    <div className="font-semibold text-gray-900">{sku.name}</div>
                   </div>
+                  {sku.price && (
+                    <div className="text-lg font-bold text-gray-900">
+                      £{sku.price.toFixed(2)}
+                    </div>
+                  )}
+                </div>
+                {sku.description && (
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {sku.description}
+                  </p>
                 )}
               </div>
-              {sku.description && (
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  {sku.description}
-                </p>
-              )}
             </div>
           ))}
         </div>

@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     // Fetch product details
     const { data: products, error } = await supabase
       .from('products')
-      .select('product_code, description, price')
+      .select('product_code, description, price, image_url')
       .in('product_code', skuCodes);
 
     if (error) {
@@ -51,7 +51,8 @@ export async function GET(request: NextRequest) {
       code: p.product_code,
       name: p.description,
       description: p.description,
-      price: p.price
+      price: p.price,
+      image_url: p.image_url
     }));
 
     // Sort by original curated_skus order
