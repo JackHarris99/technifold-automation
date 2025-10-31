@@ -28,13 +28,19 @@ export function AdminHeader() {
               href="/admin/campaigns"
               className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
             >
-              Email Campaigns
+              Campaigns
             </Link>
             <Link
-              href="/admin/analytics"
+              href="/admin/brand-media"
               className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
             >
-              Analytics
+              Brand Media
+            </Link>
+            <Link
+              href="/admin/media-missing"
+              className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+            >
+              Missing Media
             </Link>
           </nav>
         </div>

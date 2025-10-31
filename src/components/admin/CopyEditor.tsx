@@ -7,6 +7,8 @@
 
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import MediaImage from '@/components/shared/MediaImage';
+import MediaUpload from '@/components/admin/MediaUpload';
 
 interface Machine {
   machine_id: string;
@@ -37,6 +39,13 @@ export default function CopyEditor({ machines }: CopyEditorProps) {
   const [overrideCopy, setOverrideCopy] = useState('');
   const [curatedSkus, setCuratedSkus] = useState<string[]>([]);
   const [availableSkus, setAvailableSkus] = useState<any[]>([]);
+
+  // Media URLs
+  const [baseImageUrl, setBaseImageUrl] = useState<string | null>(null);
+  const [baseVideoUrl, setBaseVideoUrl] = useState<string | null>(null);
+  const [overrideImageUrl, setOverrideImageUrl] = useState<string | null>(null);
+  const [overrideVideoUrl, setOverrideVideoUrl] = useState<string | null>(null);
+  const [machineSolutionId, setMachineSolutionId] = useState<string | null>(null);
 
   // UI state
   const [loading, setLoading] = useState(false);
@@ -125,6 +134,11 @@ export default function CopyEditor({ machines }: CopyEditorProps) {
         setOverrideCopy(data.overrideCopy || '');
         setCuratedSkus(data.curatedSkus || []);
         setMspId(data.mspId);
+        setMachineSolutionId(data.machineSolutionId);
+        setBaseImageUrl(data.baseImageUrl);
+        setBaseVideoUrl(data.baseVideoUrl);
+        setOverrideImageUrl(data.overrideImageUrl);
+        setOverrideVideoUrl(data.overrideVideoUrl);
         setAvailableSkus(data.availableSkus || []);
       } catch (error) {
         console.error('Failed to load copy:', error);
@@ -288,6 +302,90 @@ export default function CopyEditor({ machines }: CopyEditorProps) {
 
       {!loading && selectedProblem && (
         <>
+          {/* Media Management */}
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Base Media (solution_problem) */}
+            <div className="bg-white border border-gray-200 rounded-xl p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                Base Media (solution_problem)
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Default images/videos for this solution × problem pair
+              </p>
+
+              <div className="space-y-4">
+                {/* Base Image */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Base Image</label>
+                  <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                    <MediaImage
+                      src={baseImageUrl}
+                      alt="Base solution problem image"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Read-only. Edit via Missing Media page or database.
+                  </p>
+                </div>
+
+                {/* Base Video */}
+                {baseVideoUrl && (
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Base Video</label>
+                    <video src={baseVideoUrl} controls className="w-full rounded-lg" />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Override Media (machine_solution_problem) */}
+            <div className="bg-white border border-gray-200 rounded-xl p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                Override Media (machine_solution_problem)
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Machine-specific media override (takes precedence)
+              </p>
+
+              <div className="space-y-4">
+                {/* Override Image Upload */}
+                {machineSolutionId && selectedProblem && (
+                  <>
+                    <MediaUpload
+                      mediaType="machine_solution_problem"
+                      identifier={`${machineSolutionId}__${selectedProblem}`}
+                      table="machine_solution_problem"
+                      column="override_image_url"
+                      recordId={`${machineSolutionId}__${selectedProblem}`}
+                      currentUrl={overrideImageUrl}
+                      label="Override Image"
+                      type="image"
+                      machine_solution_id={machineSolutionId}
+                      problem_id={selectedProblem}
+                      onUploadSuccess={(url) => setOverrideImageUrl(url)}
+                    />
+
+                    <MediaUpload
+                      mediaType="machine_solution_problem"
+                      identifier={`${machineSolutionId}__${selectedProblem}`}
+                      table="machine_solution_problem"
+                      column="override_video_url"
+                      recordId={`${machineSolutionId}__${selectedProblem}`}
+                      currentUrl={overrideVideoUrl}
+                      label="Override Video"
+                      type="video"
+                      machine_solution_id={machineSolutionId}
+                      problem_id={selectedProblem}
+                      onUploadSuccess={(url) => setOverrideVideoUrl(url)}
+                    />
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* SKU Curation */}
           <div className="bg-white border border-gray-200 rounded-xl p-6">
             <h3 className="text-lg font-bold text-gray-900 mb-4">

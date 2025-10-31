@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     // Get base copy from solution_problem
     const { data: sp } = await supabase
       .from('solution_problem')
-      .select('problem_solution_copy')
+      .select('problem_solution_copy, default_image_url, default_video_url')
       .eq('solution_id', solutionId)
       .eq('problem_id', problemId)
       .single();
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     // Get override copy and curated SKUs from machine_solution_problem
     const { data: msp } = await supabase
       .from('machine_solution_problem')
-      .select('id, problem_solution_copy, curated_skus')
+      .select('id, problem_solution_copy, curated_skus, override_image_url, override_video_url')
       .eq('machine_solution_id', ms.machine_solution_id)
       .eq('problem_id', problemId)
       .single();
@@ -58,6 +58,13 @@ export async function GET(request: NextRequest) {
       overrideCopy: msp?.problem_solution_copy || '',
       curatedSkus: msp?.curated_skus || [],
       mspId: msp?.id,
+      machineQuestion_id: ms.machine_solution_id,
+      solutionId,
+      problemId,
+      baseImageUrl: sp?.default_image_url || null,
+      baseVideoUrl: sp?.default_video_url || null,
+      overrideImageUrl: msp?.override_image_url || null,
+      overrideVideoUrl: msp?.override_video_url || null,
       availableSkus: (skus || []).map(s => ({
         code: s.product_code,
         name: s.description
