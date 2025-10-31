@@ -38,6 +38,8 @@ export default async function AdminLayout({
                 <NavLink href="/admin/company" label="Company Console" highlight />
                 <NavLink href="/admin/sku-explorer" label="SKU Explorer" />
                 <NavLink href="/admin/ms-problem-editor" label="Copy Editor" />
+                <NavLink href="/admin/brand-media" label="Brand Media" />
+                <NavLink href="/admin/media-missing" label="Missing Media" />
               </div>
             </div>
 

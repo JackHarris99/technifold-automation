@@ -45,15 +45,15 @@ export async function GET(request: NextRequest) {
     if (!type || type === 'solutions') {
       const { data: solutions, error } = await supabase
         .from('solutions')
-        .select('solution_id, solution_name, default_image_url, default_video_url')
+        .select('solution_id, name, default_image_url, default_video_url')
         .or('default_image_url.is.null,default_video_url.is.null')
-        .order('solution_name');
+        .order('name');
 
       if (error) throw error;
 
       result.solutions = solutions?.map((s) => ({
         id: s.solution_id,
-        name: s.solution_name,
+        name: s.name,
         missing_image: !s.default_image_url,
         missing_video: !s.default_video_url,
         image_url: s.default_image_url,
@@ -65,15 +65,15 @@ export async function GET(request: NextRequest) {
     if (!type || type === 'problems') {
       const { data: problems, error } = await supabase
         .from('problems')
-        .select('problem_id, problem_name, default_image_url, default_video_url')
+        .select('problem_id, title, default_image_url, default_video_url')
         .or('default_image_url.is.null,default_video_url.is.null')
-        .order('problem_name');
+        .order('title');
 
       if (error) throw error;
 
       result.problems = problems?.map((p) => ({
         id: p.problem_id,
-        name: p.problem_name,
+        name: p.title,
         missing_image: !p.default_image_url,
         missing_video: !p.default_video_url,
         image_url: p.default_image_url,
@@ -90,8 +90,8 @@ export async function GET(request: NextRequest) {
           problem_id,
           default_image_url,
           default_video_url,
-          solutions:solution_id(solution_name),
-          problems:problem_id(problem_name)
+          solutions:solution_id(name),
+          problems:problem_id(title)
         `)
         .or('default_image_url.is.null,default_video_url.is.null')
         .order('solution_id');
@@ -102,7 +102,7 @@ export async function GET(request: NextRequest) {
         id: `${item.solution_id}__${item.problem_id}`,
         solution_id: item.solution_id,
         problem_id: item.problem_id,
-        name: `${item.solutions?.solution_name || item.solution_id} × ${item.problems?.problem_name || item.problem_id}`,
+        name: `${item.solutions?.name || item.solution_id} × ${item.problems?.title || item.problem_id}`,
         missing_image: !item.default_image_url,
         missing_video: !item.default_video_url,
         image_url: item.default_image_url,
@@ -123,9 +123,9 @@ export async function GET(request: NextRequest) {
             machine_id,
             solution_id,
             machines:machine_id(make_model),
-            solutions:solution_id(solution_name)
+            solutions:solution_id(name)
           ),
-          problems:problem_id(problem_name)
+          problems:problem_id(title)
         `)
         .or('override_image_url.is.null,override_video_url.is.null')
         .order('machine_solution_id');
@@ -135,8 +135,8 @@ export async function GET(request: NextRequest) {
       result.machine_solution_problem = msp?.map((item: any) => {
         const ms = item.machine_solutions;
         const machineName = ms?.machines?.make_model || ms?.machine_id || 'Unknown';
-        const solutionName = ms?.solutions?.solution_name || ms?.solution_id || 'Unknown';
-        const problemName = item.problems?.problem_name || item.problem_id || 'Unknown';
+        const solutionName = ms?.solutions?.name || ms?.solution_id || 'Unknown';
+        const problemName = item.problems?.title || item.problem_id || 'Unknown';
 
         return {
           id: `${item.machine_solution_id}__${item.problem_id}`,
