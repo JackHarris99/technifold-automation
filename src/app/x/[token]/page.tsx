@@ -10,6 +10,8 @@ import { cookies } from 'next/headers';
 import TokenMachineFinder from '@/components/offers/TokenMachineFinder';
 import SetupGuide from '@/components/marketing/SetupGuide';
 import ReactMarkdown from 'react-markdown';
+import MediaImage from '@/components/shared/MediaImage';
+import { resolveImageHierarchy } from '@/lib/media';
 
 interface TokenPageProps {
   params: Promise<{
@@ -284,33 +286,56 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
               {problemCards && problemCards.length > 0 && (
                 <>
                   <div className="space-y-6 mb-10">
-                    {problemCards.map((card: any) => (
-                      <div key={`${card.solution_id}-${card.problem_id}`} className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-blue-500 hover:shadow-lg transition-all">
-                        {/* Solution Badge */}
-                        <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-bold mb-4">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          {card.solution_name}
-                        </div>
+                    {problemCards.map((card: any) => {
+                      // Resolve image using hierarchy
+                      const imageUrl = resolveImageHierarchy({
+                        override_image_url: card.override_image_url,
+                        solution_problem_image_url: card.sp_default_image_url,
+                        solution_image_url: card.solution_default_image_url,
+                        problem_image_url: card.problem_default_image_url,
+                      });
 
-                        {/* Resolved Copy (Markdown) */}
-                        <div className="prose max-w-none mb-5 text-gray-900">
-                          <ReactMarkdown>{card.resolved_copy}</ReactMarkdown>
-                        </div>
+                      return (
+                        <div key={`${card.solution_id}-${card.problem_id}`} className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:border-blue-500 hover:shadow-lg transition-all">
+                          {/* Image at top */}
+                          <div className="relative h-48 w-full bg-gray-100">
+                            <MediaImage
+                              src={imageUrl}
+                              alt={`${card.solution_name} - ${card.problem_title}`}
+                              fill
+                              sizes="(max-width: 768px) 100vw, 600px"
+                            />
+                          </div>
 
-                        {/* CTA */}
-                        <a
-                          href="/contact"
-                          className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition-colors"
-                        >
-                          {card.action_cta || 'Get help with this'}
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </a>
-                      </div>
-                    ))}
+                          {/* Content below image */}
+                          <div className="p-6">
+                            {/* Solution Badge */}
+                            <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-bold mb-4">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              {card.solution_name}
+                            </div>
+
+                            {/* Resolved Copy (Markdown) */}
+                            <div className="prose max-w-none mb-5 text-gray-900">
+                              <ReactMarkdown>{card.resolved_copy}</ReactMarkdown>
+                            </div>
+
+                            {/* CTA */}
+                            <a
+                              href="/contact"
+                              className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition-colors"
+                            >
+                              {card.action_cta || 'Get help with this'}
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </a>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
 
                   {/* Setup Guide - Once per page */}
