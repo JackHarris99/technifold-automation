@@ -11,21 +11,30 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// Helper function to create slug from brand name
+function createSlug(brand: string): string {
+  return brand
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Get all unique brands from machines table
     const { data: machines, error: machinesError } = await supabase
       .from('machines')
-      .select('brand, brand_slug')
+      .select('brand')
       .order('brand');
 
     if (machinesError) throw machinesError;
 
-    // Get unique brands
+    // Get unique brands and create slugs
     const brandMap = new Map<string, string>();
     machines?.forEach((m) => {
-      if (m.brand && m.brand_slug) {
-        brandMap.set(m.brand_slug, m.brand);
+      if (m.brand) {
+        const slug = createSlug(m.brand);
+        brandMap.set(slug, m.brand);
       }
     });
 

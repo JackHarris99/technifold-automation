@@ -51,7 +51,7 @@ export async function GET(
         // Get consumable details
         const { data: consumables } = await supabase
           .from('products')
-          .select('product_code, description, price, category')
+          .select('product_code, description, price, category, image_url')
           .in('product_code', consumableCodes);
 
         // Check last purchase date for each

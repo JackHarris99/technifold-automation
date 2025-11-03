@@ -1,33 +1,30 @@
 /**
- * Company Console Landing - Select a company
+ * Company Console Landing - Redirect to first company
  */
 
+import { redirect } from 'next/navigation';
 import { getSupabaseClient } from '@/lib/supabase';
-import CompanyQuickFind from '@/components/admin/CompanyQuickFind';
 
 export default async function CompanyConsoleLanding() {
   const supabase = getSupabaseClient();
 
-  // Get recent companies for quick access
-  const { data: recentCompanies } = await supabase
+  // Get the most recent company and redirect to it
+  const { data: companies } = await supabase
     .from('companies')
-    .select('company_id, company_name, account_owner, updated_at')
+    .select('company_id')
     .order('updated_at', { ascending: false })
-    .limit(20);
+    .limit(1);
 
+  if (companies && companies.length > 0) {
+    redirect(`/admin/company/${companies[0].company_id}`);
+  }
+
+  // Fallback if no companies exist
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Company Console
-          </h1>
-          <p className="text-xl text-gray-600">
-            Select a company to manage machines, send marketing, and track engagement
-          </p>
-        </div>
-
-        <CompanyQuickFind recentCompanies={recentCompanies || []} />
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">No Companies Found</h1>
+        <p className="text-gray-600">Please add companies to the database to use the Company Console.</p>
       </div>
     </div>
   );

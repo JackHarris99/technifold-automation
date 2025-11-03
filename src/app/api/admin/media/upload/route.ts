@@ -80,20 +80,31 @@ export async function POST(request: NextRequest) {
     // Update database with public URL
     // Special handling for brand_media (might not exist yet - use upsert)
     if (table === 'brand_media') {
-      // Get brand name from machines table
-      const { data: machineData } = await supabase
-        .from('machines')
-        .select('brand')
+      // recordId is the brand_slug, we need to get the brand name
+      // Try to find existing brand_media record first
+      const { data: existingBrand } = await supabase
+        .from('brand_media')
+        .select('brand_name')
         .eq('brand_slug', recordId)
-        .limit(1)
         .single();
+
+      let brandName = existingBrand?.brand_name;
+
+      // If not found, try to derive from brand_slug
+      if (!brandName) {
+        // Convert slug back to title case (e.g., "heidelberg-stahlfolder" -> "Heidelberg Stahlfolder")
+        brandName = recordId
+          .split('-')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+      }
 
       const { error: upsertError } = await supabase
         .from('brand_media')
         .upsert(
           {
             brand_slug: recordId,
-            brand_name: machineData?.brand || recordId,
+            brand_name: brandName,
             [column]: publicUrl,
           },
           { onConflict: 'brand_slug' }

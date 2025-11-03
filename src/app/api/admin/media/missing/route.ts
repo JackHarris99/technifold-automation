@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
           machine_solutions:machine_solution_id(
             machine_id,
             solution_id,
-            machines:machine_id(make_model),
+            machines:machine_id(display_name),
             solutions:solution_id(name)
           ),
           problems:problem_id(title)
@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
 
       result.machine_solution_problem = msp?.map((item: any) => {
         const ms = item.machine_solutions;
-        const machineName = ms?.machines?.make_model || ms?.machine_id || 'Unknown';
+        const machineName = ms?.machines?.display_name || ms?.machine_id || 'Unknown';
         const solutionName = ms?.solutions?.name || ms?.solution_id || 'Unknown';
         const problemName = item.problems?.title || item.problem_id || 'Unknown';
 

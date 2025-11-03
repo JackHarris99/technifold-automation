@@ -6,6 +6,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import MediaImage from '@/components/shared/MediaImage';
 
 interface ReorderTabProps {
   companyId: string;
@@ -129,32 +130,45 @@ export default function ReorderTab({
                     </div>
                     <div className="grid md:grid-cols-2 gap-4">
                       {tool.consumables && tool.consumables.map((consumable: any) => (
-                        <div key={consumable.product_code} className="bg-white border-2 border-gray-200 rounded-xl p-5 hover:border-blue-400 hover:shadow-md transition-all">
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1">
-                              <div className="font-mono text-xs text-blue-600 font-bold mb-1">
-                                {consumable.product_code}
-                              </div>
-                              <div className="font-semibold text-gray-900 text-sm leading-tight">
-                                {consumable.description}
-                              </div>
-                            </div>
-                            {consumable.price && (
-                              <div className="text-lg font-bold text-gray-900 ml-3">
-                                £{consumable.price.toFixed(2)}
-                              </div>
-                            )}
+                        <div key={consumable.product_code} className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:border-blue-400 hover:shadow-md transition-all">
+                          {/* Product Image */}
+                          <div className="relative h-32 w-full bg-gray-100">
+                            <MediaImage
+                              src={consumable.image_url}
+                              alt={consumable.description}
+                              fill
+                              sizes="(max-width: 768px) 50vw, 25vw"
+                            />
                           </div>
 
-                          {consumable.last_purchased_at && (
-                            <div className="text-xs text-gray-500 mb-3">
-                              Last ordered: {new Date(consumable.last_purchased_at).toLocaleDateString()}
+                          {/* Product Details */}
+                          <div className="p-5">
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex-1">
+                                <div className="font-mono text-xs text-blue-600 font-bold mb-1">
+                                  {consumable.product_code}
+                                </div>
+                                <div className="font-semibold text-gray-900 text-sm leading-tight">
+                                  {consumable.description}
+                                </div>
+                              </div>
+                              {consumable.price && (
+                                <div className="text-lg font-bold text-gray-900 ml-3">
+                                  £{consumable.price.toFixed(2)}
+                                </div>
+                              )}
                             </div>
-                          )}
 
-                          <button className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">
-                            Add to Cart
-                          </button>
+                            {consumable.last_purchased_at && (
+                              <div className="text-xs text-gray-500 mb-3">
+                                Last ordered: {new Date(consumable.last_purchased_at).toLocaleDateString()}
+                              </div>
+                            )}
+
+                            <button className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">
+                              Add to Cart
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
