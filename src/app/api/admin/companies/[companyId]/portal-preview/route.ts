@@ -40,7 +40,8 @@ export async function GET(
         const { data: consumableMap } = await supabase
           .from('tool_consumable_map')
           .select('consumable_code')
-          .eq('tool_code', tool.product_code);
+          .eq('tool_code', tool.product_code)
+          .limit(500);
 
         const consumableCodes = (consumableMap || []).map(cm => cm.consumable_code);
 
@@ -52,7 +53,8 @@ export async function GET(
         const { data: consumables } = await supabase
           .from('products')
           .select('product_code, description, price, category, image_url')
-          .in('product_code', consumableCodes);
+          .in('product_code', consumableCodes)
+          .limit(500);
 
         // Check last purchase date for each
         const consumablesWithHistory = await Promise.all(

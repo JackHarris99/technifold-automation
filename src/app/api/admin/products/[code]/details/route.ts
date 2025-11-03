@@ -37,7 +37,8 @@ export async function GET(
       const { data: consumableMap } = await supabase
         .from('tool_consumable_map')
         .select('consumable_code')
-        .eq('tool_code', code);
+        .eq('tool_code', code)
+        .limit(500);
 
       if (consumableMap && consumableMap.length > 0) {
         const consumableCodes = consumableMap.map(cm => cm.consumable_code);
@@ -45,7 +46,8 @@ export async function GET(
         const { data: consumables } = await supabase
           .from('products')
           .select('product_code, description, price, category')
-          .in('product_code', consumableCodes);
+          .in('product_code', consumableCodes)
+          .limit(500);
 
         relatedItems = consumables || [];
       }
@@ -56,7 +58,8 @@ export async function GET(
       const { data: toolMap } = await supabase
         .from('tool_consumable_map')
         .select('tool_code')
-        .eq('consumable_code', code);
+        .eq('consumable_code', code)
+        .limit(500);
 
       if (toolMap && toolMap.length > 0) {
         const toolCodes = toolMap.map(tm => tm.tool_code);
@@ -64,7 +67,8 @@ export async function GET(
         const { data: tools } = await supabase
           .from('products')
           .select('product_code, description, price, category')
-          .in('product_code', toolCodes);
+          .in('product_code', toolCodes)
+          .limit(500);
 
         relatedItems = tools || [];
       }

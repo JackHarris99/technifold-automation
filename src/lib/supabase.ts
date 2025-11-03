@@ -512,10 +512,11 @@ export async function getCompatibleConsumables(productCode: string) {
     const { data, error } = await supabase
       .from('tool_consumable_map')
       .select('consumable_code')
-      .eq('tool_code', productCode);
-      
+      .eq('tool_code', productCode)
+      .limit(500);
+
     console.log(`Found ${data?.length || 0} compatible consumables for "${productCode}"`);
-    
+
     if (error || !data || data.length === 0) {
       console.error('Error or no data in tool_consumable_map:', error);
       return [];
@@ -528,7 +529,8 @@ export async function getCompatibleConsumables(productCode: string) {
     const { data: products, error: productsError } = await supabase
       .from('products')
       .select('product_code, description, price, currency, type, category')
-      .in('product_code', consumableCodes);
+      .in('product_code', consumableCodes)
+      .limit(500);
 
     if (productsError) {
       console.error('Error fetching consumable products:', productsError);
@@ -645,7 +647,8 @@ export async function getCompanyToolsWithConsumables(companyId: string): Promise
     // Get ALL tool-consumable mappings (not just for owned tools)
     const { data: allMappings, error: mapError } = await supabase
       .from('tool_consumable_map')
-      .select('tool_code, consumable_code');
+      .select('tool_code, consumable_code')
+      .limit(5000);
 
     if (mapError) {
       console.error('Error fetching tool-consumable mappings:', mapError);

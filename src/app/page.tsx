@@ -11,7 +11,8 @@ export default async function HomePage() {
     .from('solutions')
     .select('solution_id, name, core_benefit, long_description, default_image_url')
     .eq('active', true)
-    .order('name');
+    .order('name')
+    .limit(100);
 
   return (
     <div className="min-h-screen bg-white">

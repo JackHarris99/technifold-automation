@@ -42,13 +42,15 @@ export default async function CompanyConsolePage({ params }: CompanyConsolePageP
       )
     `)
     .eq('company_id', company_id)
-    .order('confidence_score', { ascending: false });
+    .order('confidence_score', { ascending: false })
+    .limit(100);
 
-  // Fetch contacts
+  // Fetch contacts (all of them - companies rarely have >1000 contacts)
   const { data: contacts } = await supabase
     .from('contacts')
     .select('*')
-    .eq('company_id', company_id);
+    .eq('company_id', company_id)
+    .limit(500);
 
   // Fetch recent engagement
   const { data: recentEngagement } = await supabase

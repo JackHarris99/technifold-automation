@@ -9,11 +9,12 @@ import SkuExplorer from '@/components/admin/SkuExplorer';
 export default async function SkuExplorerPage() {
   const supabase = getSupabaseClient();
 
-  // Fetch ALL SKUs (no limit)
+  // Fetch ALL SKUs (increase limit to 5000 for full catalog)
   const { data: allSkus } = await supabase
     .from('products')
     .select('product_code, description, type')
-    .order('product_code');
+    .order('product_code')
+    .limit(5000);
 
   return (
     <div className="min-h-screen bg-gray-50">

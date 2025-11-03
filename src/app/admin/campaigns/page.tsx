@@ -18,7 +18,8 @@ async function getCampaigns() {
   const { data, error } = await supabase
     .from('campaigns')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(500);
 
   if (error) {
     console.error('Error fetching campaigns:', error);

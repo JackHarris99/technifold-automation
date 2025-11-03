@@ -13,7 +13,8 @@ export default async function CopyEditorPage() {
   const { data: machines } = await supabase
     .from('machines')
     .select('machine_id, brand, model, display_name, slug')
-    .order('brand, model');
+    .order('brand, model')
+    .limit(2000);
 
   return (
     <div className="min-h-screen bg-gray-50">
