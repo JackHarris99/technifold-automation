@@ -25,7 +25,8 @@ export async function GET(request: NextRequest) {
         .select('product_code, description, category, type, image_url, video_url')
         .eq('active', true)
         .or('image_url.is.null,video_url.is.null')
-        .order('product_code');
+        .order('product_code')
+        .limit(5000);
 
       if (error) throw error;
 
@@ -47,7 +48,8 @@ export async function GET(request: NextRequest) {
         .from('solutions')
         .select('solution_id, name, default_image_url, default_video_url')
         .or('default_image_url.is.null,default_video_url.is.null')
-        .order('name');
+        .order('name')
+        .limit(500);
 
       if (error) throw error;
 
@@ -67,7 +69,8 @@ export async function GET(request: NextRequest) {
         .from('problems')
         .select('problem_id, title, default_image_url, default_video_url')
         .or('default_image_url.is.null,default_video_url.is.null')
-        .order('title');
+        .order('title')
+        .limit(500);
 
       if (error) throw error;
 
@@ -94,7 +97,8 @@ export async function GET(request: NextRequest) {
           problems:problem_id(title)
         `)
         .or('default_image_url.is.null,default_video_url.is.null')
-        .order('solution_id');
+        .order('solution_id')
+        .limit(2000);
 
       if (error) throw error;
 
@@ -128,7 +132,8 @@ export async function GET(request: NextRequest) {
           problems:problem_id(title)
         `)
         .or('override_image_url.is.null,override_video_url.is.null')
-        .order('machine_solution_id');
+        .order('machine_solution_id')
+        .limit(5000);
 
       if (error) throw error;
 
@@ -157,7 +162,8 @@ export async function GET(request: NextRequest) {
         .from('brand_media')
         .select('brand_slug, brand_name, logo_url, hero_url')
         .or('logo_url.is.null,hero_url.is.null')
-        .order('brand_name');
+        .order('brand_name')
+        .limit(500);
 
       if (error) throw error;
 
