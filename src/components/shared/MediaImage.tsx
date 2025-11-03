@@ -47,7 +47,7 @@ export default function MediaImage({
   }
 
   return (
-    <div className={`relative ${onClick ? 'cursor-pointer' : ''} ${className}`} onClick={onClick}>
+    <div className={`relative ${fill ? 'w-full h-full' : ''} ${onClick ? 'cursor-pointer' : ''} ${className}`} onClick={onClick}>
       {fill ? (
         <Image
           src={imageUrl}
