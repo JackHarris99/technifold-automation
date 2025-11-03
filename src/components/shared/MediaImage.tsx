@@ -41,6 +41,11 @@ export default function MediaImage({
   const imageUrl = error ? (fallback || '/placeholder.svg') : getImageUrl(src, fallback);
   const isUsingPlaceholder = isPlaceholder(imageUrl);
 
+  // Debug logging in development
+  if (process.env.NODE_ENV === 'development' && src && !isUsingPlaceholder) {
+    console.log('[MediaImage] Loading:', { src, imageUrl, error, loading });
+  }
+
   return (
     <div className={`relative ${onClick ? 'cursor-pointer' : ''} ${className}`} onClick={onClick}>
       {fill ? (
@@ -53,8 +58,15 @@ export default function MediaImage({
           className={`object-cover transition-opacity duration-300 ${loading ? 'opacity-0' : 'opacity-100'} ${
             isUsingPlaceholder ? 'opacity-30' : ''
           }`}
-          onError={() => setError(true)}
-          onLoad={() => setLoading(false)}
+          onError={(e) => {
+            console.error('[MediaImage] Error loading image:', imageUrl, e);
+            setError(true);
+            setLoading(false);
+          }}
+          onLoad={() => {
+            console.log('[MediaImage] Successfully loaded:', imageUrl);
+            setLoading(false);
+          }}
         />
       ) : (
         <Image
@@ -66,8 +78,15 @@ export default function MediaImage({
           className={`transition-opacity duration-300 ${loading ? 'opacity-0' : 'opacity-100'} ${
             isUsingPlaceholder ? 'opacity-30' : ''
           }`}
-          onError={() => setError(true)}
-          onLoad={() => setLoading(false)}
+          onError={(e) => {
+            console.error('[MediaImage] Error loading image:', imageUrl, e);
+            setError(true);
+            setLoading(false);
+          }}
+          onLoad={() => {
+            console.log('[MediaImage] Successfully loaded:', imageUrl);
+            setLoading(false);
+          }}
         />
       )}
 
