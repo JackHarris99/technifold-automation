@@ -8,7 +8,17 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    db: {
+      schema: 'public',
+    },
+    global: {
+      headers: {
+        'Prefer': 'return=representation',
+      },
+    },
+  }
 );
 
 export async function GET(request: NextRequest) {
@@ -19,18 +29,37 @@ export async function GET(request: NextRequest) {
     let result: any = {};
 
     // Products (missing image_url or video_url)
+    // Supabase has 1000-row hard limit, fetch multiple pages
     if (!type || type === 'products') {
-      const { data: products, error } = await supabase
-        .from('products')
-        .select('product_code, description, category, type, image_url, video_url')
-        .eq('active', true)
-        .or('image_url.is.null,video_url.is.null')
-        .order('product_code')
-        .limit(5000);
+      let allProducts: any[] = [];
+      let page = 0;
+      const pageSize = 1000;
+      let hasMore = true;
 
-      if (error) throw error;
+      while (hasMore) {
+        const { data: products, error } = await supabase
+          .from('products')
+          .select('product_code, description, category, type, image_url, video_url')
+          .eq('active', true)
+          .or('image_url.is.null,video_url.is.null')
+          .order('product_code')
+          .range(page * pageSize, (page + 1) * pageSize - 1);
 
-      result.products = products?.map((p) => ({
+        if (error) throw error;
+
+        if (!products || products.length === 0) {
+          hasMore = false;
+        } else {
+          allProducts = allProducts.concat(products);
+          hasMore = products.length === pageSize; // Continue if we got a full page
+          page++;
+        }
+
+        // Safety: max 10 pages (10,000 products)
+        if (page >= 10) break;
+      }
+
+      result.products = allProducts.map((p) => ({
         id: p.product_code,
         name: `${p.product_code} - ${p.description}`,
         category: p.category,
@@ -98,7 +127,7 @@ export async function GET(request: NextRequest) {
         `)
         .or('default_image_url.is.null,default_video_url.is.null')
         .order('solution_id')
-        .limit(2000);
+        .range(0, 1999); // 0-1999 = 2000 rows
 
       if (error) throw error;
 
@@ -115,29 +144,48 @@ export async function GET(request: NextRequest) {
     }
 
     // Machine × Solution × Problem (missing override_image_url or override_video_url)
+    // Supabase has 1000-row hard limit, fetch multiple pages
     if (!type || type === 'machine_solution_problem') {
-      const { data: msp, error } = await supabase
-        .from('machine_solution_problem')
-        .select(`
-          machine_solution_id,
-          problem_id,
-          override_image_url,
-          override_video_url,
-          machine_solutions:machine_solution_id(
-            machine_id,
-            solution_id,
-            machines:machine_id(display_name),
-            solutions:solution_id(name)
-          ),
-          problems:problem_id(title)
-        `)
-        .or('override_image_url.is.null,override_video_url.is.null')
-        .order('machine_solution_id')
-        .limit(5000);
+      let allMSP: any[] = [];
+      let page = 0;
+      const pageSize = 1000;
+      let hasMore = true;
 
-      if (error) throw error;
+      while (hasMore) {
+        const { data: msp, error } = await supabase
+          .from('machine_solution_problem')
+          .select(`
+            machine_solution_id,
+            problem_id,
+            override_image_url,
+            override_video_url,
+            machine_solutions:machine_solution_id(
+              machine_id,
+              solution_id,
+              machines:machine_id(display_name),
+              solutions:solution_id(name)
+            ),
+            problems:problem_id(title)
+          `)
+          .or('override_image_url.is.null,override_video_url.is.null')
+          .order('machine_solution_id')
+          .range(page * pageSize, (page + 1) * pageSize - 1);
 
-      result.machine_solution_problem = msp?.map((item: any) => {
+        if (error) throw error;
+
+        if (!msp || msp.length === 0) {
+          hasMore = false;
+        } else {
+          allMSP = allMSP.concat(msp);
+          hasMore = msp.length === pageSize;
+          page++;
+        }
+
+        // Safety: max 10 pages (10,000 records)
+        if (page >= 10) break;
+      }
+
+      result.machine_solution_problem = allMSP.map((item: any) => {
         const ms = item.machine_solutions;
         const machineName = ms?.machines?.display_name || ms?.machine_id || 'Unknown';
         const solutionName = ms?.solutions?.name || ms?.solution_id || 'Unknown';
