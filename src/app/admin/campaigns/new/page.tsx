@@ -53,7 +53,8 @@ export default async function NewCampaignPage() {
     .from('asset_models')
     .select('*')
     .order('level', { ascending: true })
-    .order('display_name', { ascending: true });
+    .order('display_name', { ascending: true })
+    .limit(1000);
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -114,7 +114,8 @@ export default async function CampaignDetailPage({ params }: CampaignPageProps) 
     .from('asset_models')
     .select('*')
     .order('level', { ascending: true })
-    .order('display_name', { ascending: true });
+    .order('display_name', { ascending: true })
+    .limit(1000);
 
   // Fetch campaign stats from v_campaign_interactions view
   const { data: interactions, count: interactionCount } = await supabase

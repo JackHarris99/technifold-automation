@@ -13,7 +13,8 @@ export async function GET() {
     const { data, error } = await supabase
       .from('machines')
       .select('machine_id, brand, model, display_name, slug, type')
-      .order('brand, model');
+      .order('brand, model')
+      .limit(2000);
 
     if (error) {
       console.error('[machines/all] Error:', error);

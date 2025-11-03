@@ -14,7 +14,8 @@ export async function GET() {
     const { data, error } = await supabase
       .from('machines')
       .select('brand')
-      .order('brand', { ascending: true });
+      .order('brand', { ascending: true })
+      .limit(2000);
 
     if (error) {
       console.error('[machines/brands] Error:', error);

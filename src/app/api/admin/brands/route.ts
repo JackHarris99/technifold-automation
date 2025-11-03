@@ -25,7 +25,8 @@ export async function GET(request: NextRequest) {
     const { data: machines, error: machinesError } = await supabase
       .from('machines')
       .select('brand')
-      .order('brand');
+      .order('brand')
+      .limit(2000);
 
     if (machinesError) throw machinesError;
 
@@ -42,7 +43,8 @@ export async function GET(request: NextRequest) {
     const { data: brandMedia, error: mediaError } = await supabase
       .from('brand_media')
       .select('*')
-      .order('brand_name');
+      .order('brand_name')
+      .limit(500);
 
     if (mediaError) throw mediaError;
 

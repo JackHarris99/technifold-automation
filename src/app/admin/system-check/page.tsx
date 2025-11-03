@@ -16,7 +16,8 @@ export default async function SystemCheckPage() {
   const { data: companies } = await supabase
     .from('companies')
     .select('company_id, company_name')
-    .order('company_name', { ascending: true });
+    .order('company_name', { ascending: true })
+    .limit(5000);
 
   // Contacts are now fetched dynamically by SendOfferForm when a company is selected
   // This avoids the Supabase 1000-row pagination issue where first 1000 companies
