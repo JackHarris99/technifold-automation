@@ -21,32 +21,33 @@ export type MediaType =
  * Get the Supabase Storage path for a given media type and identifier
  */
 export function getStoragePath(type: MediaType, identifier: string, extension: string = 'jpg'): string {
+  // Note: Do NOT include bucket name - that's specified in .from('media')
   switch (type) {
     case 'product':
-      return `media/products/${identifier}.${extension}`;
+      return `products/${identifier}.${extension}`;
 
     case 'solution':
-      return `media/solutions/${identifier}.${extension}`;
+      return `solutions/${identifier}.${extension}`;
 
     case 'problem':
-      return `media/problems/${identifier}.${extension}`;
+      return `problems/${identifier}.${extension}`;
 
     case 'solution_problem':
       // identifier should be "solution_id__problem_id"
-      return `media/ps/${identifier}.${extension}`;
+      return `ps/${identifier}.${extension}`;
 
     case 'machine_solution_problem':
       // identifier should be "machine_solution_id__problem_id"
-      return `media/msp/${identifier}.${extension}`;
+      return `msp/${identifier}.${extension}`;
 
     case 'brand_logo':
-      return `media/brands/${identifier}.png`;
+      return `brands/${identifier}.png`;
 
     case 'brand_hero':
-      return `media/machines/${identifier}.${extension}`;
+      return `machines/${identifier}.${extension}`;
 
     case 'machine_hero':
-      return `media/machines/${identifier}.${extension}`;
+      return `machines/${identifier}.${extension}`;
 
     default:
       throw new Error(`Unknown media type: ${type}`);
