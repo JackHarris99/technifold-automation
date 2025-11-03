@@ -2,13 +2,14 @@ import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
 import MachineFinder from '@/components/marketing/MachineFinder';
 import { getSupabaseClient } from '@/lib/supabase';
+import MediaImage from '@/components/shared/MediaImage';
 
 export default async function HomePage() {
   // Fetch all solutions for solution cards
   const supabase = getSupabaseClient();
   const { data: solutions } = await supabase
     .from('solutions')
-    .select('solution_id, name, core_benefit, long_description')
+    .select('solution_id, name, core_benefit, long_description, default_image_url')
     .eq('active', true)
     .order('name');
 
@@ -48,20 +49,33 @@ export default async function HomePage() {
 
             <div className="grid md:grid-cols-3 gap-6">
               {(solutions || []).map((solution) => (
-                <div key={solution.solution_id} className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-blue-400 hover:shadow-lg transition-all">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">
-                    {solution.name}
-                  </h3>
-                  {solution.core_benefit && (
-                    <p className="text-blue-600 font-semibold mb-4">
-                      {solution.core_benefit}
-                    </p>
-                  )}
-                  {solution.long_description && (
-                    <p className="text-gray-700 text-sm leading-relaxed">
-                      {solution.long_description}
-                    </p>
-                  )}
+                <div key={solution.solution_id} className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:border-blue-400 hover:shadow-lg transition-all">
+                  {/* Solution Image */}
+                  <div className="relative h-48 w-full bg-gray-100">
+                    <MediaImage
+                      src={solution.default_image_url}
+                      alt={solution.name}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                  </div>
+
+                  {/* Solution Content */}
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-3">
+                      {solution.name}
+                    </h3>
+                    {solution.core_benefit && (
+                      <p className="text-blue-600 font-semibold mb-4">
+                        {solution.core_benefit}
+                      </p>
+                    )}
+                    {solution.long_description && (
+                      <p className="text-gray-700 text-sm leading-relaxed">
+                        {solution.long_description}
+                      </p>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
