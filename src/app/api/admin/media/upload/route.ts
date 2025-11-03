@@ -56,6 +56,16 @@ export async function POST(request: NextRequest) {
     const extension = getFileExtension(file.name);
     const storagePath = getStoragePath(mediaType, identifier, extension);
 
+    console.log('[UPLOAD] Starting upload:', {
+      mediaType,
+      identifier,
+      table,
+      column,
+      storagePath,
+      fileSize: file.size,
+      fileType: file.type,
+    });
+
     // Convert file to buffer
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
@@ -69,13 +79,17 @@ export async function POST(request: NextRequest) {
       });
 
     if (uploadError) {
-      console.error('Upload error:', uploadError);
+      console.error('[UPLOAD] Upload error:', uploadError);
       return NextResponse.json({ error: 'Upload failed: ' + uploadError.message }, { status: 500 });
     }
+
+    console.log('[UPLOAD] Upload successful:', uploadData);
 
     // Get public URL
     const { data: urlData } = supabase.storage.from('media').getPublicUrl(storagePath);
     const publicUrl = urlData.publicUrl;
+
+    console.log('[UPLOAD] Generated public URL:', publicUrl);
 
     // Update database with public URL
     // Special handling for brand_media (might not exist yet - use upsert)
@@ -127,13 +141,17 @@ export async function POST(request: NextRequest) {
         query = query.eq(idColumn, recordId);
       }
 
-      const { error: updateError } = await query;
+      const { error: updateError, data: updateData } = await query.select();
 
       if (updateError) {
-        console.error('Database update error:', updateError);
+        console.error('[UPLOAD] Database update error:', updateError);
         return NextResponse.json({ error: 'Database update failed: ' + updateError.message }, { status: 500 });
       }
+
+      console.log('[UPLOAD] Database updated successfully:', updateData);
     }
+
+    console.log('[UPLOAD] Complete! Returning URL:', publicUrl);
 
     return NextResponse.json({
       success: true,
