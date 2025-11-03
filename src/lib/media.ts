@@ -21,33 +21,36 @@ export type MediaType =
  * Get the Supabase Storage path for a given media type and identifier
  */
 export function getStoragePath(type: MediaType, identifier: string, extension: string = 'jpg'): string {
-  // Note: Do NOT include bucket name - that's specified in .from('media')
+  // NOTE: Files are stored in media/ subfolder within the media bucket
+  // This creates paths like: media/products/MOULD-01.jpg
+  // Which results in URLs: /storage/v1/object/public/media/media/products/MOULD-01.jpg
+  // This is intentional to match existing folder structure
   switch (type) {
     case 'product':
-      return `products/${identifier}.${extension}`;
+      return `media/products/${identifier}.${extension}`;
 
     case 'solution':
-      return `solutions/${identifier}.${extension}`;
+      return `media/solutions/${identifier}.${extension}`;
 
     case 'problem':
-      return `problems/${identifier}.${extension}`;
+      return `media/problems/${identifier}.${extension}`;
 
     case 'solution_problem':
       // identifier should be "solution_id__problem_id"
-      return `ps/${identifier}.${extension}`;
+      return `media/ps/${identifier}.${extension}`;
 
     case 'machine_solution_problem':
       // identifier should be "machine_solution_id__problem_id"
-      return `msp/${identifier}.${extension}`;
+      return `media/msp/${identifier}.${extension}`;
 
     case 'brand_logo':
-      return `brands/${identifier}.png`;
+      return `media/brands/${identifier}.png`;
 
     case 'brand_hero':
-      return `machines/${identifier}.${extension}`;
+      return `media/machines/${identifier}.${extension}`;
 
     case 'machine_hero':
-      return `machines/${identifier}.${extension}`;
+      return `media/machines/${identifier}.${extension}`;
 
     default:
       throw new Error(`Unknown media type: ${type}`);
