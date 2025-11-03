@@ -12,8 +12,10 @@ import MarketingTab from './console-tabs/MarketingTab';
 import ReorderTab from './console-tabs/ReorderTab';
 import HistoryTab from './console-tabs/HistoryTab';
 import ContactsTab from './console-tabs/ContactsTab';
+import EngagementTab from './console-tabs/EngagementTab';
+import SettingsTab from './console-tabs/SettingsTab';
 
-type TabName = 'overview' | 'marketing' | 'reorder' | 'history' | 'contacts';
+type TabName = 'overview' | 'marketing' | 'reorder' | 'history' | 'contacts' | 'engagement' | 'settings';
 
 interface CompanyConsoleProps {
   company: any;
@@ -36,7 +38,7 @@ export default function CompanyConsole({
   // Load tab from URL hash on mount
   useEffect(() => {
     const hash = window.location.hash.slice(1) as TabName;
-    if (hash && ['overview', 'marketing', 'reorder', 'history', 'contacts'].includes(hash)) {
+    if (hash && ['overview', 'marketing', 'reorder', 'history', 'contacts', 'engagement', 'settings'].includes(hash)) {
       setActiveTab(hash);
     }
   }, []);
@@ -117,6 +119,12 @@ export default function CompanyConsole({
             <TabButton active={activeTab === 'contacts'} onClick={() => handleTabChange('contacts')}>
               Contacts & Details
             </TabButton>
+            <TabButton active={activeTab === 'engagement'} onClick={() => handleTabChange('engagement')}>
+              Engagement
+            </TabButton>
+            <TabButton active={activeTab === 'settings'} onClick={() => handleTabChange('settings')}>
+              Settings
+            </TabButton>
           </div>
         </div>
       </div>
@@ -162,6 +170,22 @@ export default function CompanyConsole({
             companyId={company.company_id}
             company={company}
             contacts={contacts}
+          />
+        )}
+
+        {activeTab === 'engagement' && (
+          <EngagementTab
+            companyId={company.company_id}
+            contacts={contacts}
+          />
+        )}
+
+        {activeTab === 'settings' && (
+          <SettingsTab
+            companyId={company.company_id}
+            company={company}
+            contacts={contacts}
+            onRefresh={() => router.refresh()}
           />
         )}
       </div>
