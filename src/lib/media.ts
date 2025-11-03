@@ -4,8 +4,8 @@
  */
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-const PLACEHOLDER_IMAGE = '/placeholder.png';
-const PLACEHOLDER_VIDEO = '/placeholder-video.png';
+const PLACEHOLDER_IMAGE = '/placeholder.svg';
+const PLACEHOLDER_VIDEO = '/placeholder-video.svg';
 
 export type MediaType =
   | 'product'

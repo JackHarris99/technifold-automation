@@ -38,7 +38,7 @@ export default function MediaImage({
   const [loading, setLoading] = useState(true);
 
   // Resolve the image URL with fallback logic
-  const imageUrl = error ? (fallback || '/placeholder.png') : getImageUrl(src, fallback);
+  const imageUrl = error ? (fallback || '/placeholder.svg') : getImageUrl(src, fallback);
   const isUsingPlaceholder = isPlaceholder(imageUrl);
 
   return (
