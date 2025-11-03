@@ -147,7 +147,8 @@ export default async function ConfirmationQueuePage() {
     .select('*')
     .in('confidence', [1, 2])
     .order('confidence', { ascending: false })
-    .order('updated_at', { ascending: true });
+    .order('updated_at', { ascending: true })
+    .limit(500);
 
   if (error) {
     console.error('Error fetching confirmation queue:', error);
