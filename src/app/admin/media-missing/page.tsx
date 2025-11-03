@@ -52,6 +52,7 @@ export default function MissingMediaPage() {
   const [data, setData] = useState<MissingMediaData>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchMissingMedia();
@@ -81,13 +82,24 @@ export default function MissingMediaPage() {
 
   const renderProductsTab = () => {
     const items = data.products || [];
-    if (items.length === 0) {
+    const filteredItems = searchTerm
+      ? items.filter(item =>
+          item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.id.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      : items;
+
+    if (filteredItems.length === 0 && searchTerm) {
+      return <div className="text-center py-12 text-gray-500">No products found matching "{searchTerm}"</div>;
+    }
+
+    if (filteredItems.length === 0) {
       return <div className="text-center py-12 text-gray-500">All products have images!</div>;
     }
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {items.map((item) => (
+        {filteredItems.map((item) => (
           <div key={item.id} className="border border-gray-300 rounded-lg p-4 bg-white">
             <h3 className="font-semibold text-sm mb-2">{item.name}</h3>
             <div className="text-xs text-gray-500 mb-3">
@@ -116,13 +128,21 @@ export default function MissingMediaPage() {
 
   const renderSolutionsTab = () => {
     const items = data.solutions || [];
-    if (items.length === 0) {
+    const filteredItems = searchTerm
+      ? items.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      : items;
+
+    if (filteredItems.length === 0 && searchTerm) {
+      return <div className="text-center py-12 text-gray-500">No solutions found matching "{searchTerm}"</div>;
+    }
+
+    if (filteredItems.length === 0) {
       return <div className="text-center py-12 text-gray-500">All solutions have images!</div>;
     }
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {items.map((item) => (
+        {filteredItems.map((item) => (
           <div key={item.id} className="border border-gray-300 rounded-lg p-4 bg-white">
             <h3 className="font-semibold text-sm mb-3">{item.name}</h3>
 
@@ -148,13 +168,21 @@ export default function MissingMediaPage() {
 
   const renderProblemsTab = () => {
     const items = data.problems || [];
-    if (items.length === 0) {
+    const filteredItems = searchTerm
+      ? items.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      : items;
+
+    if (filteredItems.length === 0 && searchTerm) {
+      return <div className="text-center py-12 text-gray-500">No problems found matching "{searchTerm}"</div>;
+    }
+
+    if (filteredItems.length === 0) {
       return <div className="text-center py-12 text-gray-500">All problems have images!</div>;
     }
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {items.map((item) => (
+        {filteredItems.map((item) => (
           <div key={item.id} className="border border-gray-300 rounded-lg p-4 bg-white">
             <h3 className="font-semibold text-sm mb-3">{item.name}</h3>
 
@@ -180,13 +208,21 @@ export default function MissingMediaPage() {
 
   const renderSolutionProblemTab = () => {
     const items = data.solution_problem || [];
-    if (items.length === 0) {
+    const filteredItems = searchTerm
+      ? items.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      : items;
+
+    if (filteredItems.length === 0 && searchTerm) {
+      return <div className="text-center py-12 text-gray-500">No solution × problem pairs found matching "{searchTerm}"</div>;
+    }
+
+    if (filteredItems.length === 0) {
       return <div className="text-center py-12 text-gray-500">All solution × problem pairs have images!</div>;
     }
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {items.map((item) => (
+        {filteredItems.map((item) => (
           <div key={item.id} className="border border-gray-300 rounded-lg p-4 bg-white">
             <h3 className="font-semibold text-sm mb-3">{item.name}</h3>
 
@@ -213,13 +249,21 @@ export default function MissingMediaPage() {
 
   const renderMachineSolutionProblemTab = () => {
     const items = data.machine_solution_problem || [];
-    if (items.length === 0) {
+    const filteredItems = searchTerm
+      ? items.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      : items;
+
+    if (filteredItems.length === 0 && searchTerm) {
+      return <div className="text-center py-12 text-gray-500">No machine × solution × problem records found matching "{searchTerm}"</div>;
+    }
+
+    if (filteredItems.length === 0) {
       return <div className="text-center py-12 text-gray-500">All machine × solution × problem records have images!</div>;
     }
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {items.map((item) => (
+        {filteredItems.map((item) => (
           <div key={item.id} className="border border-gray-300 rounded-lg p-4 bg-white">
             <h3 className="font-semibold text-sm mb-3">{item.name}</h3>
 
@@ -246,13 +290,21 @@ export default function MissingMediaPage() {
 
   const renderBrandsTab = () => {
     const items = data.brands || [];
-    if (items.length === 0) {
+    const filteredItems = searchTerm
+      ? items.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      : items;
+
+    if (filteredItems.length === 0 && searchTerm) {
+      return <div className="text-center py-12 text-gray-500">No brands found matching "{searchTerm}"</div>;
+    }
+
+    if (filteredItems.length === 0) {
       return <div className="text-center py-12 text-gray-500">All brands have images!</div>;
     }
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {items.map((item) => (
+        {filteredItems.map((item) => (
           <div key={item.id} className="border border-gray-300 rounded-lg p-4 bg-white">
             <h3 className="font-semibold text-sm mb-3">{item.name}</h3>
 
@@ -314,7 +366,13 @@ export default function MissingMediaPage() {
 
   const getTabCount = (tabId: TabType): number => {
     const items = data[tabId] || [];
-    return items.length;
+    if (!searchTerm) return items.length;
+
+    // Show filtered count when searching
+    return items.filter((item: MissingMediaItem) =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.id?.toLowerCase().includes(searchTerm.toLowerCase())
+    ).length;
   };
 
   if (loading) {
@@ -345,6 +403,23 @@ export default function MissingMediaPage() {
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-2">Missing Image Upload</h1>
           <p className="text-gray-600">Upload images for records that are still using placeholders</p>
+        </div>
+
+        {/* Search Bar */}
+        <div className="bg-white border border-gray-300 rounded-xl p-4 mb-6">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by product code, name, solution, problem, or machine..."
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            autoFocus
+          />
+          {searchTerm && (
+            <div className="mt-2 text-sm text-gray-600">
+              Press Escape to clear search
+            </div>
+          )}
         </div>
 
         {/* Tabs */}
