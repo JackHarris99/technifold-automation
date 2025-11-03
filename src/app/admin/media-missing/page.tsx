@@ -82,7 +82,7 @@ export default function MissingMediaPage() {
   const renderProductsTab = () => {
     const items = data.products || [];
     if (items.length === 0) {
-      return <div className="text-center py-12 text-gray-500">All products have media!</div>;
+      return <div className="text-center py-12 text-gray-500">All products have images!</div>;
     }
 
     return (
@@ -94,37 +94,20 @@ export default function MissingMediaPage() {
               {item.category} • {item.type}
             </div>
 
-            <div className="space-y-3">
-              {item.missing_image && (
-                <MediaUpload
-                  mediaType="product"
-                  identifier={item.id}
-                  table="products"
-                  column="image_url"
-                  recordId={item.id}
-                  idColumn="product_code"
-                  currentUrl={item.image_url}
-                  label="Product Image"
-                  type="image"
-                  onUploadSuccess={handleUploadSuccess}
-                />
-              )}
-
-              {item.missing_video && (
-                <MediaUpload
-                  mediaType="product"
-                  identifier={item.id}
-                  table="products"
-                  column="video_url"
-                  recordId={item.id}
-                  idColumn="product_code"
-                  currentUrl={item.video_url}
-                  label="Product Video"
-                  type="video"
-                  onUploadSuccess={handleUploadSuccess}
-                />
-              )}
-            </div>
+            {item.missing_image && (
+              <MediaUpload
+                mediaType="product"
+                identifier={item.id}
+                table="products"
+                column="image_url"
+                recordId={item.id}
+                idColumn="product_code"
+                currentUrl={item.image_url}
+                label="Product Image"
+                type="image"
+                onUploadSuccess={handleUploadSuccess}
+              />
+            )}
           </div>
         ))}
       </div>
@@ -134,7 +117,7 @@ export default function MissingMediaPage() {
   const renderSolutionsTab = () => {
     const items = data.solutions || [];
     if (items.length === 0) {
-      return <div className="text-center py-12 text-gray-500">All solutions have media!</div>;
+      return <div className="text-center py-12 text-gray-500">All solutions have images!</div>;
     }
 
     return (
@@ -143,37 +126,20 @@ export default function MissingMediaPage() {
           <div key={item.id} className="border border-gray-300 rounded-lg p-4 bg-white">
             <h3 className="font-semibold text-sm mb-3">{item.name}</h3>
 
-            <div className="space-y-3">
-              {item.missing_image && (
-                <MediaUpload
-                  mediaType="solution"
-                  identifier={item.id}
-                  table="solutions"
-                  column="default_image_url"
-                  recordId={item.id}
-                  idColumn="solution_id"
-                  currentUrl={item.image_url}
-                  label="Solution Image"
-                  type="image"
-                  onUploadSuccess={handleUploadSuccess}
-                />
-              )}
-
-              {item.missing_video && (
-                <MediaUpload
-                  mediaType="solution"
-                  identifier={item.id}
-                  table="solutions"
-                  column="default_video_url"
-                  recordId={item.id}
-                  idColumn="solution_id"
-                  currentUrl={item.video_url}
-                  label="Solution Video"
-                  type="video"
-                  onUploadSuccess={handleUploadSuccess}
-                />
-              )}
-            </div>
+            {item.missing_image && (
+              <MediaUpload
+                mediaType="solution"
+                identifier={item.id}
+                table="solutions"
+                column="default_image_url"
+                recordId={item.id}
+                idColumn="solution_id"
+                currentUrl={item.image_url}
+                label="Solution Image"
+                type="image"
+                onUploadSuccess={handleUploadSuccess}
+              />
+            )}
           </div>
         ))}
       </div>
@@ -183,7 +149,7 @@ export default function MissingMediaPage() {
   const renderProblemsTab = () => {
     const items = data.problems || [];
     if (items.length === 0) {
-      return <div className="text-center py-12 text-gray-500">All problems have media!</div>;
+      return <div className="text-center py-12 text-gray-500">All problems have images!</div>;
     }
 
     return (
@@ -192,37 +158,20 @@ export default function MissingMediaPage() {
           <div key={item.id} className="border border-gray-300 rounded-lg p-4 bg-white">
             <h3 className="font-semibold text-sm mb-3">{item.name}</h3>
 
-            <div className="space-y-3">
-              {item.missing_image && (
-                <MediaUpload
-                  mediaType="problem"
-                  identifier={item.id}
-                  table="problems"
-                  column="default_image_url"
-                  recordId={item.id}
-                  idColumn="problem_id"
-                  currentUrl={item.image_url}
-                  label="Problem Image"
-                  type="image"
-                  onUploadSuccess={handleUploadSuccess}
-                />
-              )}
-
-              {item.missing_video && (
-                <MediaUpload
-                  mediaType="problem"
-                  identifier={item.id}
-                  table="problems"
-                  column="default_video_url"
-                  recordId={item.id}
-                  idColumn="problem_id"
-                  currentUrl={item.video_url}
-                  label="Problem Video"
-                  type="video"
-                  onUploadSuccess={handleUploadSuccess}
-                />
-              )}
-            </div>
+            {item.missing_image && (
+              <MediaUpload
+                mediaType="problem"
+                identifier={item.id}
+                table="problems"
+                column="default_image_url"
+                recordId={item.id}
+                idColumn="problem_id"
+                currentUrl={item.image_url}
+                label="Problem Image"
+                type="image"
+                onUploadSuccess={handleUploadSuccess}
+              />
+            )}
           </div>
         ))}
       </div>
@@ -232,7 +181,7 @@ export default function MissingMediaPage() {
   const renderSolutionProblemTab = () => {
     const items = data.solution_problem || [];
     if (items.length === 0) {
-      return <div className="text-center py-12 text-gray-500">All solution × problem pairs have media!</div>;
+      return <div className="text-center py-12 text-gray-500">All solution × problem pairs have images!</div>;
     }
 
     return (
@@ -241,39 +190,21 @@ export default function MissingMediaPage() {
           <div key={item.id} className="border border-gray-300 rounded-lg p-4 bg-white">
             <h3 className="font-semibold text-sm mb-3">{item.name}</h3>
 
-            <div className="space-y-3">
-              {item.missing_image && (
-                <MediaUpload
-                  mediaType="solution_problem"
-                  identifier={item.id}
-                  table="solution_problem"
-                  column="default_image_url"
-                  recordId={item.id}
-                  currentUrl={item.image_url}
-                  label="Image"
-                  type="image"
-                  solution_id={item.solution_id}
-                  problem_id={item.problem_id}
-                  onUploadSuccess={handleUploadSuccess}
-                />
-              )}
-
-              {item.missing_video && (
-                <MediaUpload
-                  mediaType="solution_problem"
-                  identifier={item.id}
-                  table="solution_problem"
-                  column="default_video_url"
-                  recordId={item.id}
-                  currentUrl={item.video_url}
-                  label="Video"
-                  type="video"
-                  solution_id={item.solution_id}
-                  problem_id={item.problem_id}
-                  onUploadSuccess={handleUploadSuccess}
-                />
-              )}
-            </div>
+            {item.missing_image && (
+              <MediaUpload
+                mediaType="solution_problem"
+                identifier={item.id}
+                table="solution_problem"
+                column="default_image_url"
+                recordId={item.id}
+                currentUrl={item.image_url}
+                label="Image"
+                type="image"
+                solution_id={item.solution_id}
+                problem_id={item.problem_id}
+                onUploadSuccess={handleUploadSuccess}
+              />
+            )}
           </div>
         ))}
       </div>
@@ -283,7 +214,7 @@ export default function MissingMediaPage() {
   const renderMachineSolutionProblemTab = () => {
     const items = data.machine_solution_problem || [];
     if (items.length === 0) {
-      return <div className="text-center py-12 text-gray-500">All machine × solution × problem records have media!</div>;
+      return <div className="text-center py-12 text-gray-500">All machine × solution × problem records have images!</div>;
     }
 
     return (
@@ -292,39 +223,21 @@ export default function MissingMediaPage() {
           <div key={item.id} className="border border-gray-300 rounded-lg p-4 bg-white">
             <h3 className="font-semibold text-sm mb-3">{item.name}</h3>
 
-            <div className="space-y-3">
-              {item.missing_image && (
-                <MediaUpload
-                  mediaType="machine_solution_problem"
-                  identifier={item.id}
-                  table="machine_solution_problem"
-                  column="override_image_url"
-                  recordId={item.id}
-                  currentUrl={item.image_url}
-                  label="Override Image"
-                  type="image"
-                  machine_solution_id={item.machine_solution_id}
-                  problem_id={item.problem_id}
-                  onUploadSuccess={handleUploadSuccess}
-                />
-              )}
-
-              {item.missing_video && (
-                <MediaUpload
-                  mediaType="machine_solution_problem"
-                  identifier={item.id}
-                  table="machine_solution_problem"
-                  column="override_video_url"
-                  recordId={item.id}
-                  currentUrl={item.video_url}
-                  label="Override Video"
-                  type="video"
-                  machine_solution_id={item.machine_solution_id}
-                  problem_id={item.problem_id}
-                  onUploadSuccess={handleUploadSuccess}
-                />
-              )}
-            </div>
+            {item.missing_image && (
+              <MediaUpload
+                mediaType="machine_solution_problem"
+                identifier={item.id}
+                table="machine_solution_problem"
+                column="override_image_url"
+                recordId={item.id}
+                currentUrl={item.image_url}
+                label="Override Image"
+                type="image"
+                machine_solution_id={item.machine_solution_id}
+                problem_id={item.problem_id}
+                onUploadSuccess={handleUploadSuccess}
+              />
+            )}
           </div>
         ))}
       </div>
@@ -334,7 +247,7 @@ export default function MissingMediaPage() {
   const renderBrandsTab = () => {
     const items = data.brands || [];
     if (items.length === 0) {
-      return <div className="text-center py-12 text-gray-500">All brands have media!</div>;
+      return <div className="text-center py-12 text-gray-500">All brands have images!</div>;
     }
 
     return (
@@ -430,8 +343,8 @@ export default function MissingMediaPage() {
     <div className="p-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Missing Media Upload</h1>
-          <p className="text-gray-600">Upload images and videos for records that are still using placeholders</p>
+          <h1 className="text-3xl font-bold mb-2">Missing Image Upload</h1>
+          <p className="text-gray-600">Upload images for records that are still using placeholders</p>
         </div>
 
         {/* Tabs */}
