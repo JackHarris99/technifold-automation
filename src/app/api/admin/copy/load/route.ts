@@ -1,5 +1,5 @@
 /**
- * GET /api/admin/copy/load?machine_id=X&solution_id=Y&problem_id=Z
+ * GET /api/admin/copy/load?machine_id=X&problem_solution_id=Y
  * Load copy data for editing
  */
 
@@ -9,41 +9,31 @@ import { getSupabaseClient } from '@/lib/supabase';
 export async function GET(request: NextRequest) {
   try {
     const machineId = request.nextUrl.searchParams.get('machine_id');
-    const solutionId = request.nextUrl.searchParams.get('solution_id');
-    const problemId = request.nextUrl.searchParams.get('problem_id');
+    const problemSolutionId = request.nextUrl.searchParams.get('problem_solution_id');
 
-    if (!machineId || !solutionId || !problemId) {
-      return NextResponse.json({ error: 'machine_id, solution_id, and problem_id required' }, { status: 400 });
+    if (!machineId || !problemSolutionId) {
+      return NextResponse.json({ error: 'machine_id and problem_solution_id required' }, { status: 400 });
     }
 
     const supabase = getSupabaseClient();
 
-    // Get base copy from solution_problem
-    const { data: sp } = await supabase
-      .from('solution_problem')
-      .select('problem_solution_copy, default_image_url, default_video_url')
-      .eq('solution_id', solutionId)
-      .eq('problem_id', problemId)
+    // Get base copy from problem_solution
+    const { data: ps, error: psError } = await supabase
+      .from('problem_solution')
+      .select('*')
+      .eq('id', problemSolutionId)
       .single();
 
-    // Get machine_solution_id
-    const { data: ms } = await supabase
-      .from('machine_solution')
-      .select('machine_solution_id')
-      .eq('machine_id', machineId)
-      .eq('solution_id', solutionId)
-      .single();
-
-    if (!ms) {
-      return NextResponse.json({ error: 'Machine/solution combination not found' }, { status: 404 });
+    if (psError || !ps) {
+      return NextResponse.json({ error: 'Problem/solution not found' }, { status: 404 });
     }
 
-    // Get override copy and curated SKUs from machine_solution_problem
-    const { data: msp } = await supabase
-      .from('machine_solution_problem')
-      .select('id, problem_solution_copy, curated_skus, override_image_url, override_video_url')
-      .eq('machine_solution_id', ms.machine_solution_id)
-      .eq('problem_id', problemId)
+    // Get machine-specific override from problem_solution_machine
+    const { data: psm } = await supabase
+      .from('problem_solution_machine')
+      .select('*')
+      .eq('machine_id', machineId)
+      .eq('problem_solution_id', problemSolutionId)
       .single();
 
     // Fetch available SKUs (from products)
@@ -54,17 +44,33 @@ export async function GET(request: NextRequest) {
       .limit(500);
 
     return NextResponse.json({
-      baseCopy: sp?.problem_solution_copy || '',
-      overrideCopy: msp?.problem_solution_copy || '',
-      curatedSkus: msp?.curated_skus || [],
-      mspId: msp?.id,
-      machineQuestion_id: ms.machine_solution_id,
-      solutionId,
-      problemId,
-      baseImageUrl: sp?.default_image_url || null,
-      baseVideoUrl: sp?.default_video_url || null,
-      overrideImageUrl: msp?.override_image_url || null,
-      overrideVideoUrl: msp?.override_video_url || null,
+      // Base copy fields
+      baseCopy: ps.marketing_copy || '',
+      baseTitle: ps.title || '',
+      baseSubtitle: ps.subtitle || '',
+      baseHeadline: ps.pitch_headline || '',
+      baseCta: ps.action_cta || '',
+      baseImageUrl: ps.image_url || null,
+      baseVideoUrl: ps.video_url || null,
+
+      // Override copy fields
+      overrideCopy: psm?.marketing_copy || '',
+      overrideTitle: psm?.title || '',
+      overrideSubtitle: psm?.subtitle || '',
+      overrideHeadline: psm?.pitch_headline || '',
+      overrideCta: psm?.action_cta || '',
+      overrideImageUrl: psm?.image_url || null,
+      overrideVideoUrl: psm?.video_url || null,
+
+      // SKU curation
+      curatedSkus: psm?.curated_skus || [],
+
+      // IDs for updates
+      psmId: psm?.id,
+      problemSolutionId,
+      machineId,
+
+      // Available SKUs dropdown
       availableSkus: (skus || []).map(s => ({
         code: s.product_code,
         name: s.description

@@ -20,7 +20,7 @@ interface Sku {
 interface SetupGuideProps {
   curatedSkus?: string[] | null;
   machineId?: string;
-  solutionId?: string;
+  problemSolutionId?: string;
   machineName?: string;
   title?: string;
 }
@@ -28,7 +28,7 @@ interface SetupGuideProps {
 export default function SetupGuide({
   curatedSkus,
   machineId,
-  solutionId,
+  problemSolutionId,
   machineName,
   title
 }: SetupGuideProps) {
@@ -42,9 +42,9 @@ export default function SetupGuide({
 
         if (curatedSkus && curatedSkus.length > 0) {
           params.set('curated_skus', curatedSkus.join(','));
-        } else if (machineId && solutionId) {
+        } else if (machineId && problemSolutionId) {
           params.set('machine_id', machineId);
-          params.set('solution_id', solutionId);
+          params.set('problem_solution_id', problemSolutionId);
         } else {
           setLoading(false);
           return;
@@ -64,7 +64,7 @@ export default function SetupGuide({
     }
 
     fetchSkus();
-  }, [curatedSkus, machineId, solutionId]);
+  }, [curatedSkus, machineId, problemSolutionId]);
 
   if (loading) {
     return (

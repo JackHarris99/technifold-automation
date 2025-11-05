@@ -1,6 +1,6 @@
 /**
  * POST /api/admin/copy/update
- * Save override copy and curated SKUs
+ * Save override copy and curated SKUs for a machine-specific problem/solution
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -9,22 +9,34 @@ import { getSupabaseClient } from '@/lib/supabase';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { msp_id, override_copy, curated_skus } = body;
+    const {
+      psm_id,
+      override_copy,
+      override_title,
+      override_subtitle,
+      override_headline,
+      override_cta,
+      curated_skus
+    } = body;
 
-    if (!msp_id) {
-      return NextResponse.json({ error: 'msp_id required' }, { status: 400 });
+    if (!psm_id) {
+      return NextResponse.json({ error: 'psm_id required' }, { status: 400 });
     }
 
     const supabase = getSupabaseClient();
 
-    // Update machine_solution_problem
+    // Update problem_solution_machine
     const { error } = await supabase
-      .from('machine_solution_problem')
+      .from('problem_solution_machine')
       .update({
-        problem_solution_copy: override_copy || null,
+        marketing_copy: override_copy || null,
+        title: override_title || null,
+        subtitle: override_subtitle || null,
+        pitch_headline: override_headline || null,
+        action_cta: override_cta || null,
         curated_skus: curated_skus || []
       })
-      .eq('id', msp_id);
+      .eq('id', psm_id);
 
     if (error) {
       console.error('[admin/copy/update] Error:', error);

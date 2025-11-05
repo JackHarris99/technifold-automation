@@ -34,10 +34,7 @@ export async function POST(request: NextRequest) {
     const recordId = formData.get('recordId') as string;
     const idColumn = (formData.get('idColumn') as string) || 'id';
 
-    // Support for composite keys
-    const solution_id = formData.get('solution_id') as string | null;
-    const problem_id = formData.get('problem_id') as string | null;
-    const machine_solution_id = formData.get('machine_solution_id') as string | null;
+    // No longer need composite keys - new schema uses simple UUIDs
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -129,19 +126,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Database upsert failed: ' + upsertError.message }, { status: 500 });
       }
     } else {
-      // Standard update for other tables
-      let query = supabase.from(table).update({ [column]: publicUrl });
-
-      // Handle composite keys for solution_problem and machine_solution_problem
-      if (table === 'solution_problem' && solution_id && problem_id) {
-        query = query.eq('solution_id', solution_id).eq('problem_id', problem_id);
-      } else if (table === 'machine_solution_problem' && machine_solution_id && problem_id) {
-        query = query.eq('machine_solution_id', machine_solution_id).eq('problem_id', problem_id);
-      } else {
-        query = query.eq(idColumn, recordId);
-      }
-
-      const { error: updateError, data: updateData } = await query.select();
+      // Standard update for all other tables (now all use simple UUIDs)
+      const { error: updateError, data: updateData } = await supabase
+        .from(table)
+        .update({ [column]: publicUrl })
+        .eq(idColumn, recordId)
+        .select();
 
       if (updateError) {
         console.error('[UPLOAD] Database update error:', updateError);

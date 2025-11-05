@@ -11,7 +11,6 @@ import MachineOwnershipForm from '@/components/marketing/MachineOwnershipForm';
 import SetupGuide from '@/components/marketing/SetupGuide';
 import ReactMarkdown from 'react-markdown';
 import MediaImage from '@/components/shared/MediaImage';
-import { resolveImageHierarchy } from '@/lib/media';
 
 interface MachinePageProps {
   params: Promise<{
@@ -23,14 +22,14 @@ export default async function MachinePage({ params }: MachinePageProps) {
   const { slug } = await params;
   const supabase = getSupabaseClient();
 
-  // Fetch machine data from v_machine_solution_problem_full
-  // Each row = ONE CARD = one (machine, solution, problem) combination
+  // Fetch machine data from v_problem_solution_machine
+  // Each row = ONE CARD = one (machine, problem/solution) combination
   const { data: problemCards, error } = await supabase
-    .from('v_machine_solution_problem_full')
+    .from('v_problem_solution_machine')
     .select('*')
-    .eq('machine_slug', slug)
-    .order('machine_solution_rank', { ascending: true })
-    .order('pitch_relevance_rank', { ascending: true })
+    .eq('slug', slug)
+    .order('machine_relevance_rank', { ascending: true })
+    .order('global_relevance_rank', { ascending: true })
     .limit(500);
 
   if (error || !problemCards || problemCards.length === 0) {
@@ -41,9 +40,9 @@ export default async function MachinePage({ params }: MachinePageProps) {
   // Extract machine info from first row
   const machineData = {
     machine_id: problemCards[0].machine_id,
-    machine_brand: problemCards[0].machine_brand,
-    machine_model: problemCards[0].machine_model,
-    machine_display_name: problemCards[0].machine_display_name,
+    brand: problemCards[0].brand,
+    model: problemCards[0].model,
+    display_name: problemCards[0].display_name,
   };
 
   // Each row is already a card - no grouping needed!
@@ -64,10 +63,10 @@ export default async function MachinePage({ params }: MachinePageProps) {
             <span className="text-blue-200 text-sm">Back to machine finder</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Solutions for {machineData.machine_display_name}
+            Solutions for {machineData.display_name}
           </h1>
           <p className="text-xl text-blue-100">
-            {machineData.machine_brand} {machineData.machine_model} • Production-proven retrofits
+            {machineData.brand} {machineData.model} • Production-proven retrofits
           </p>
         </div>
       </div>
@@ -76,21 +75,16 @@ export default async function MachinePage({ params }: MachinePageProps) {
         {/* Problem Cards - ONE CARD PER PROBLEM */}
         <div className="grid gap-6 mb-16">
           {problemCards.map((card: any) => {
-            // Resolve image using hierarchy: override → sp → solution/problem → placeholder
-            const imageUrl = resolveImageHierarchy({
-              override_image_url: card.override_image_url,
-              solution_problem_image_url: card.sp_default_image_url,
-              solution_image_url: card.solution_default_image_url,
-              problem_image_url: card.problem_default_image_url,
-            });
+            // Image URL is already resolved by the view (machine override → base)
+            const imageUrl = card.resolved_image_url || '/placeholder-machine.jpg';
 
             return (
-              <div key={`${card.solution_id}-${card.problem_id}`} className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden hover:border-blue-500 hover:shadow-xl transition-all">
+              <div key={card.problem_solution_id} className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden hover:border-blue-500 hover:shadow-xl transition-all">
                 {/* Image at top */}
                 <div className="relative h-64 w-full bg-gray-100">
                   <MediaImage
                     src={imageUrl}
-                    alt={`${card.solution_name} - ${card.problem_title}`}
+                    alt={`${card.solution_name} - ${card.resolved_title}`}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
@@ -108,7 +102,7 @@ export default async function MachinePage({ params }: MachinePageProps) {
 
                   {/* Resolved Copy (Markdown) */}
                   <div className="prose prose-lg max-w-none mb-6">
-                    <ReactMarkdown>{card.resolved_copy}</ReactMarkdown>
+                    <ReactMarkdown>{card.resolved_card_copy}</ReactMarkdown>
                   </div>
 
                   {/* CTA */}
@@ -116,7 +110,7 @@ export default async function MachinePage({ params }: MachinePageProps) {
                     href="/contact"
                     className="inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors"
                   >
-                    {card.action_cta || `See how this works on your ${machineData.machine_brand} ${machineData.machine_model}`}
+                    {card.resolved_cta || `See how this works on your ${machineData.brand} ${machineData.model}`}
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
@@ -133,7 +127,7 @@ export default async function MachinePage({ params }: MachinePageProps) {
             <SetupGuide
               curatedSkus={problemCards[0]?.curated_skus}
               machineId={machineData.machine_id}
-              solutionId={problemCards[0]?.solution_id}
+              problemSolutionId={problemCards[0]?.problem_solution_id}
               machineName={machineData.machine_display_name}
             />
           </div>
@@ -152,14 +146,14 @@ export default async function MachinePage({ params }: MachinePageProps) {
                 Do you run this machine?
               </h2>
               <p className="text-lg text-gray-700">
-                Let us know and we'll send you tailored recommendations for your {machineData.machine_display_name}
+                Let us know and we'll send you tailored recommendations for your {machineData.display_name}
               </p>
             </div>
 
             <MachineOwnershipForm
               machineId={machineData.machine_id}
               machineSlug={slug}
-              machineName={machineData.machine_display_name}
+              machineName={machineData.display_name}
             />
           </div>
         </div>

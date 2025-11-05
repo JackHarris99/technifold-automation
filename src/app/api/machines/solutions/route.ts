@@ -18,15 +18,15 @@ export async function GET(request: NextRequest) {
     const supabase = getSupabaseClient();
 
     // Fetch machine problem cards from the view
-    // Each row = ONE CARD = one (machine, solution, problem) combination
+    // Each row = ONE CARD = one (machine, problem/solution) combination
     console.log('[machines/solutions] Querying for slug:', slug);
 
     const { data: problemCards, error } = await supabase
-      .from('v_machine_solution_problem_full')
+      .from('v_problem_solution_machine')
       .select('*')
-      .eq('machine_slug', slug)
-      .order('machine_solution_rank', { ascending: true })
-      .order('pitch_relevance_rank', { ascending: true });
+      .eq('slug', slug)
+      .order('machine_relevance_rank', { ascending: true })
+      .order('global_relevance_rank', { ascending: true });
 
     console.log('[machines/solutions] Query result - cards:', problemCards?.length || 0, 'error:', error?.message || 'none');
 
@@ -43,9 +43,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       machine: {
         machine_id: problemCards[0].machine_id,
-        machine_brand: problemCards[0].machine_brand,
-        machine_model: problemCards[0].machine_model,
-        machine_display_name: problemCards[0].machine_display_name
+        brand: problemCards[0].brand,
+        model: problemCards[0].model,
+        display_name: problemCards[0].display_name
       },
       problemCards  // Return as-is, no grouping
     });

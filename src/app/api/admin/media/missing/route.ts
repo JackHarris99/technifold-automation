@@ -71,113 +71,59 @@ export async function GET(request: NextRequest) {
       }));
     }
 
-    // Solutions (missing default_image_url or default_video_url)
-    if (!type || type === 'solutions') {
-      const { data: solutions, error } = await supabase
-        .from('solutions')
-        .select('solution_id, name, default_image_url, default_video_url')
-        .or('default_image_url.is.null,default_video_url.is.null')
-        .order('name')
-        .limit(500);
-
-      if (error) throw error;
-
-      result.solutions = solutions?.map((s) => ({
-        id: s.solution_id,
-        name: s.name,
-        missing_image: !s.default_image_url,
-        missing_video: !s.default_video_url,
-        image_url: s.default_image_url,
-        video_url: s.default_video_url,
-      }));
-    }
-
-    // Problems (missing default_image_url or default_video_url)
-    if (!type || type === 'problems') {
-      const { data: problems, error } = await supabase
-        .from('problems')
-        .select('problem_id, title, default_image_url, default_video_url')
-        .or('default_image_url.is.null,default_video_url.is.null')
+    // Problem/Solutions (missing image_url or video_url)
+    if (!type || type === 'problem_solution') {
+      const { data: ps, error } = await supabase
+        .from('problem_solution')
+        .select('id, title, solution_name, image_url, video_url')
+        .or('image_url.is.null,video_url.is.null')
+        .eq('active', true)
         .order('title')
-        .limit(500);
-
-      if (error) throw error;
-
-      result.problems = problems?.map((p) => ({
-        id: p.problem_id,
-        name: p.title,
-        missing_image: !p.default_image_url,
-        missing_video: !p.default_video_url,
-        image_url: p.default_image_url,
-        video_url: p.default_video_url,
-      }));
-    }
-
-    // Solution × Problem (missing default_image_url or default_video_url)
-    if (!type || type === 'solution_problem') {
-      const { data: sp, error } = await supabase
-        .from('solution_problem')
-        .select(`
-          solution_id,
-          problem_id,
-          default_image_url,
-          default_video_url,
-          solutions:solution_id(name),
-          problems:problem_id(title)
-        `)
-        .or('default_image_url.is.null,default_video_url.is.null')
-        .order('solution_id')
         .range(0, 1999); // 0-1999 = 2000 rows
 
       if (error) throw error;
 
-      result.solution_problem = sp?.map((item: any) => ({
-        id: `${item.solution_id}__${item.problem_id}`,
-        solution_id: item.solution_id,
-        problem_id: item.problem_id,
-        name: `${item.solutions?.name || item.solution_id} × ${item.problems?.title || item.problem_id}`,
-        missing_image: !item.default_image_url,
-        missing_video: !item.default_video_url,
-        image_url: item.default_image_url,
-        video_url: item.default_video_url,
+      result.problem_solution = ps?.map((item: any) => ({
+        id: item.id,
+        name: `${item.solution_name} - ${item.title}`,
+        missing_image: !item.image_url,
+        missing_video: !item.video_url,
+        image_url: item.image_url,
+        video_url: item.video_url,
       }));
     }
 
-    // Machine × Solution × Problem (missing override_image_url or override_video_url)
+    // Problem/Solution × Machine (missing override image_url or video_url)
     // Supabase has 1000-row hard limit, fetch multiple pages
-    if (!type || type === 'machine_solution_problem') {
-      let allMSP: any[] = [];
+    if (!type || type === 'problem_solution_machine') {
+      let allPSM: any[] = [];
       let page = 0;
       const pageSize = 1000;
       let hasMore = true;
 
       while (hasMore) {
-        const { data: msp, error } = await supabase
-          .from('machine_solution_problem')
+        const { data: psm, error } = await supabase
+          .from('problem_solution_machine')
           .select(`
-            machine_solution_id,
-            problem_id,
-            override_image_url,
-            override_video_url,
-            machine_solutions:machine_solution_id(
-              machine_id,
-              solution_id,
-              machines:machine_id(display_name),
-              solutions:solution_id(name)
-            ),
-            problems:problem_id(title)
+            id,
+            problem_solution_id,
+            machine_id,
+            image_url,
+            video_url,
+            problem_solution:problem_solution_id(title, solution_name),
+            machines:machine_id(display_name)
           `)
-          .or('override_image_url.is.null,override_video_url.is.null')
-          .order('machine_solution_id')
+          .or('image_url.is.null,video_url.is.null')
+          .order('machine_id')
           .range(page * pageSize, (page + 1) * pageSize - 1);
 
         if (error) throw error;
 
-        if (!msp || msp.length === 0) {
+        if (!psm || psm.length === 0) {
           hasMore = false;
         } else {
-          allMSP = allMSP.concat(msp);
-          hasMore = msp.length === pageSize;
+          allPSM = allPSM.concat(psm);
+          hasMore = psm.length === pageSize;
           page++;
         }
 
@@ -185,21 +131,21 @@ export async function GET(request: NextRequest) {
         if (page >= 10) break;
       }
 
-      result.machine_solution_problem = allMSP.map((item: any) => {
-        const ms = item.machine_solutions;
-        const machineName = ms?.machines?.display_name || ms?.machine_id || 'Unknown';
-        const solutionName = ms?.solutions?.name || ms?.solution_id || 'Unknown';
-        const problemName = item.problems?.title || item.problem_id || 'Unknown';
+      result.problem_solution_machine = allPSM.map((item: any) => {
+        const ps = item.problem_solution;
+        const machineName = item.machines?.display_name || item.machine_id || 'Unknown';
+        const solutionName = ps?.solution_name || 'Unknown';
+        const problemTitle = ps?.title || 'Unknown';
 
         return {
-          id: `${item.machine_solution_id}__${item.problem_id}`,
-          machine_solution_id: item.machine_solution_id,
-          problem_id: item.problem_id,
-          name: `${machineName} → ${solutionName} × ${problemName}`,
-          missing_image: !item.override_image_url,
-          missing_video: !item.override_video_url,
-          image_url: item.override_image_url,
-          video_url: item.override_video_url,
+          id: item.id,
+          problem_solution_id: item.problem_solution_id,
+          machine_id: item.machine_id,
+          name: `${machineName} → ${solutionName} - ${problemTitle}`,
+          missing_image: !item.image_url,
+          missing_video: !item.video_url,
+          image_url: item.image_url,
+          video_url: item.video_url,
         };
       });
     }

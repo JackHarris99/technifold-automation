@@ -9,10 +9,8 @@ const PLACEHOLDER_VIDEO = '/placeholder-video.svg';
 
 export type MediaType =
   | 'product'
-  | 'solution'
-  | 'problem'
-  | 'solution_problem'
-  | 'machine_solution_problem'
+  | 'problem_solution'
+  | 'problem_solution_machine'
   | 'brand_logo'
   | 'brand_hero'
   | 'machine_hero';
@@ -29,19 +27,13 @@ export function getStoragePath(type: MediaType, identifier: string, extension: s
     case 'product':
       return `media/products/${identifier}.${extension}`;
 
-    case 'solution':
-      return `media/solutions/${identifier}.${extension}`;
-
-    case 'problem':
-      return `media/problems/${identifier}.${extension}`;
-
-    case 'solution_problem':
-      // identifier should be "solution_id__problem_id"
+    case 'problem_solution':
+      // identifier should be problem_solution UUID
       return `media/ps/${identifier}.${extension}`;
 
-    case 'machine_solution_problem':
-      // identifier should be "machine_solution_id__problem_id"
-      return `media/msp/${identifier}.${extension}`;
+    case 'problem_solution_machine':
+      // identifier should be problem_solution_machine UUID
+      return `media/psm/${identifier}.${extension}`;
 
     case 'brand_logo':
       return `media/brands/${identifier}.png`;
