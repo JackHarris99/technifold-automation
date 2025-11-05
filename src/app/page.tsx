@@ -5,14 +5,25 @@ import { getSupabaseClient } from '@/lib/supabase';
 import MediaImage from '@/components/shared/MediaImage';
 
 export default async function HomePage() {
-  // Fetch all solutions for solution cards
+  // Fetch one card per solution (using the highest ranked problem for each solution)
   const supabase = getSupabaseClient();
-  const { data: solutions } = await supabase
-    .from('solutions')
-    .select('solution_id, name, core_benefit, long_description, default_image_url')
+
+  // Get distinct solutions with their best-ranked problem
+  const { data: allProblems } = await supabase
+    .from('problem_solution')
+    .select('solution_name, card_preview_copy, image_url')
     .eq('active', true)
-    .order('name')
-    .limit(100);
+    .order('solution_name')
+    .order('relevance_rank', { ascending: true });
+
+  // Get unique solutions (one card per solution, using first/best ranked)
+  const solutionMap = new Map();
+  allProblems?.forEach(problem => {
+    if (!solutionMap.has(problem.solution_name)) {
+      solutionMap.set(problem.solution_name, problem);
+    }
+  });
+  const solutions = Array.from(solutionMap.values());
 
   return (
     <div className="min-h-screen bg-white">
@@ -50,30 +61,33 @@ export default async function HomePage() {
 
             <div className="grid md:grid-cols-3 gap-6">
               {(solutions || []).map((solution) => (
-                <div key={solution.solution_id} className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:border-blue-400 hover:shadow-lg transition-all">
+                <div key={solution.solution_name} className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:border-blue-400 hover:shadow-lg transition-all">
                   {/* Solution Image */}
-                  <div className="relative h-48 w-full bg-gray-100">
-                    <MediaImage
-                      src={solution.default_image_url}
-                      alt={solution.name}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
+                  <div className="relative h-48 w-full bg-gray-100 flex items-center justify-center">
+                    {solution.image_url ? (
+                      <MediaImage
+                        src={solution.image_url}
+                        alt={solution.solution_name}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      />
+                    ) : (
+                      <div className="text-gray-400">
+                        <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
                   </div>
 
                   {/* Solution Content */}
                   <div className="p-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-3">
-                      {solution.name}
+                      {solution.solution_name}
                     </h3>
-                    {solution.core_benefit && (
-                      <p className="text-blue-600 font-semibold mb-4">
-                        {solution.core_benefit}
-                      </p>
-                    )}
-                    {solution.long_description && (
-                      <p className="text-gray-700 text-sm leading-relaxed">
-                        {solution.long_description}
+                    {solution.card_preview_copy && (
+                      <p className="text-gray-700 text-sm leading-relaxed line-clamp-4">
+                        {solution.card_preview_copy.replace(/[#*_`]/g, '').substring(0, 200)}...
                       </p>
                     )}
                   </div>

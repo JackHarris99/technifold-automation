@@ -19,15 +19,12 @@ interface Machine {
 
 interface ProblemCard {
   machine_id: string;
-  solution_id: string;
+  problem_solution_id: string;
   solution_name: string;
-  solution_core_benefit: string;
-  solution_long_description: string;
-  problem_id: string;
-  problem_title: string;
-  pitch_headline: string;
-  pitch_detail: string;
-  action_cta: string;
+  resolved_card_copy: string;
+  resolved_cta: string;
+  resolved_image_url?: string;
+  curated_skus?: string[];
 }
 
 interface MachineFinderProps {
@@ -147,7 +144,7 @@ export default function MachineFinder({ onMachineSelect }: MachineFinderProps) {
               onChange={(e) => {
                 setSelectedBrand(e.target.value);
                 setSelectedMachine('');
-                setSolutions([]);
+                setProblemCards([]);
                 setSelectedMachineData(null);
               }}
               className="w-full px-5 py-4 border-2 border-white/30 rounded-xl focus:ring-2 focus:ring-white focus:border-white text-gray-900 text-lg bg-white shadow-lg"
@@ -205,31 +202,50 @@ export default function MachineFinder({ onMachineSelect }: MachineFinderProps) {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            {problemCards.map((card) => (
-              <div key={`${card.solution_id}-${card.problem_id}`} className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all">
-              {/* Solution Badge */}
-              <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-bold mb-4">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {card.solution_name}
+            {problemCards.map((card, index) => (
+              <div key={`${card.problem_solution_id}-${index}`} className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all">
+              {/* Image */}
+              <div className="relative h-48 w-full bg-gray-100 flex items-center justify-center">
+                {card.resolved_image_url ? (
+                  <img
+                    src={card.resolved_image_url}
+                    alt={card.solution_name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="text-gray-400">
+                    <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                )}
               </div>
 
-              {/* Resolved Copy (Markdown) */}
-              <div className="prose max-w-none mb-6 text-gray-900">
-                <ReactMarkdown>{card.resolved_copy}</ReactMarkdown>
-              </div>
+              <div className="p-6">
+                {/* Solution Badge */}
+                <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-bold mb-4">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {card.solution_name}
+                </div>
 
-              {/* CTA */}
-              <a
-                href="/contact"
-                className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors w-full justify-center"
-              >
-                {card.action_cta || `See how this works on your ${selectedMachineData.brand} ${selectedMachineData.model}`}
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </a>
+                {/* Resolved Copy (Markdown) */}
+                <div className="prose max-w-none mb-6 text-gray-900">
+                  <ReactMarkdown>{card.resolved_card_copy}</ReactMarkdown>
+                </div>
+
+                {/* CTA */}
+                <a
+                  href="/contact"
+                  className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors w-full justify-center"
+                >
+                  {card.resolved_cta || `See how this works on your ${selectedMachineData.brand} ${selectedMachineData.model}`}
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
+              </div>
             </div>
             ))}
           </div>
@@ -239,7 +255,7 @@ export default function MachineFinder({ onMachineSelect }: MachineFinderProps) {
             <SetupGuide
               curatedSkus={problemCards[0]?.curated_skus}
               machineId={selectedMachineData.machine_id}
-              solutionId={problemCards[0]?.solution_id}
+              problemSolutionId={problemCards[0]?.problem_solution_id}
               machineName={selectedMachineData.display_name}
             />
           </div>
