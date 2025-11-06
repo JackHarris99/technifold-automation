@@ -59,17 +59,31 @@ export async function GET(
         // Check last purchase date for each
         const consumablesWithHistory = await Promise.all(
           (consumables || []).map(async (cons) => {
-            const { data: sales } = await supabase
-              .from('sales')
-              .select('txn_date')
-              .eq('company_id', companyId)
+            const { data: orderItems } = await supabase
+              .from('order_items')
+              .select('order_id')
               .eq('product_code', cons.product_code)
-              .order('txn_date', { ascending: false })
+              .limit(1);
+
+            if (!orderItems || orderItems.length === 0) {
+              return {
+                ...cons,
+                last_purchased_at: null
+              };
+            }
+
+            const { data: orders } = await supabase
+              .from('orders')
+              .select('created_at')
+              .eq('company_id', companyId)
+              .eq('order_id', orderItems[0].order_id)
+              .eq('payment_status', 'paid')
+              .order('created_at', { ascending: false })
               .limit(1);
 
             return {
               ...cons,
-              last_purchased_at: sales && sales[0] ? sales[0].txn_date : null
+              last_purchased_at: orders && orders[0] ? orders[0].created_at : null
             };
           })
         );
