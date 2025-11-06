@@ -110,3 +110,22 @@ export function generateOfferUrl(
 
   return `${baseUrl}/x/${token}`;
 }
+
+/**
+ * Generate a tokenized URL for reorder portal
+ */
+export function generateReorderUrl(
+  baseUrl: string,
+  companyId: string,
+  contactId: string,
+  options: {
+    ttlHours?: number;
+  } = {}
+): string {
+  const token = generateToken({
+    company_id: companyId,
+    contact_id: contactId,
+  }, options.ttlHours || 720); // 30 days default for reorder links
+
+  return `${baseUrl}/r/${token}`;
+}
