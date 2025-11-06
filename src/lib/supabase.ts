@@ -89,26 +89,29 @@ export async function getPayloadByToken(token: string): Promise<CompanyPayload |
       // Use cached payload
       console.log(`✓ Using cached payload for ${companyData.company_name} (age: ${Math.round(payloadAge / 1000 / 60)} minutes)`);
       payload = companyData.portal_payload as CompanyPayload;
-    } else {
-      // Generate fresh payload from view
-      console.log(`⟳ Generating fresh payload for ${companyData.company_name}...`);
+    } else if (companyData.portal_payload) {
+      // Use stale cache rather than timeout
+      console.log(`⚠ Using stale cache for ${companyData.company_name} (age: ${Math.round(payloadAge / 1000 / 60 / 60)} hours)`);
+      payload = companyData.portal_payload as CompanyPayload;
 
-      const { data: viewData, error: viewError } = await supabase
-        .from('vw_company_consumable_payload')
-        .select('*')
-        .eq('company_id', companyData.company_id)
-        .single();
-
-      if (viewError || !viewData) {
-        return null;
-      }
-
-      payload = viewData as CompanyPayload;
-
-      // Cache it for next time (fire and forget - don't wait)
+      // Regenerate async in background (don't wait)
       supabase.rpc('regenerate_company_payload', { p_company_id: companyData.company_id })
-        .then(() => console.log(`✓ Cached payload for ${companyData.company_name}`))
-        .catch(err => console.error(`✗ Failed to cache payload:`, err));
+        .then(() => console.log(`✓ Refreshed cache for ${companyData.company_name}`))
+        .catch(err => console.error(`✗ Refresh failed:`, err));
+    } else {
+      // No cache at all - return empty portal to avoid timeout
+      console.log(`⚠ No cache for ${companyData.company_name} - returning empty portal`);
+      payload = {
+        company_id: companyData.company_id,
+        company_name: companyData.company_name,
+        reorder_items: [],
+        by_tool_tabs: []
+      };
+
+      // Generate cache async (don't block page load)
+      supabase.rpc('regenerate_company_payload', { p_company_id: companyData.company_id })
+        .then(() => console.log(`✓ Generated initial cache for ${companyData.company_name}`))
+        .catch(err => console.error(`✗ Generation failed:`, err));
     }
 
     // Log stats
