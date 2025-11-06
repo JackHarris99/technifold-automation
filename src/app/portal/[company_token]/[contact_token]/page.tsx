@@ -87,8 +87,8 @@ export default async function DoubleTokenPortalPage({ params }: PortalPageProps)
       .catch(err => console.error(`[Portal] Cache failed:`, err));
   }
 
-  // 4. Track portal view interaction
-  await supabase
+  // 4. Track portal view interaction (don't await - fire and forget to avoid blocking)
+  supabase
     .from('contact_interactions')
     .insert({
       contact_id: contact.contact_id,
@@ -103,10 +103,8 @@ export default async function DoubleTokenPortalPage({ params }: PortalPageProps)
       },
       sales_rep_id: contact.sales_rep_id
     })
-    .select()
-    .single();
-
-  console.log(`[Portal] Tracked view by ${contact.full_name} (${contact.email})`);
+    .then(() => console.log(`[Portal] Tracked view by ${contact.full_name} (${contact.email})`))
+    .catch(err => console.error('[Portal] Tracking failed:', err));
 
   // 5. Render portal with contact context
   return <PortalPage payload={payload} contact={contact} />;
