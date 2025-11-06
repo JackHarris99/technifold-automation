@@ -66,10 +66,10 @@ export async function getPayloadByToken(token: string): Promise<CompanyPayload |
 
     const supabase = getSupabaseClient();
 
-    // First, get the company_id from the portal token
+    // Get company with cached payload
     const { data: companyData, error: companyError } = await supabase
       .from('companies')
-      .select('company_id, company_name')
+      .select('company_id, company_name, portal_payload, payload_generated_at')
       .eq('portal_token', token)
       .single();
 
@@ -77,33 +77,44 @@ export async function getPayloadByToken(token: string): Promise<CompanyPayload |
       return null;
     }
 
-    // Then get the payload from the view
-    const { data, error } = await supabase
-      .from('vw_company_consumable_payload')
-      .select('*')
-      .eq('company_id', companyData.company_id)
-      .single();
+    // Check if cached payload is fresh (< 24 hours old)
+    const payloadAge = companyData.payload_generated_at
+      ? Date.now() - new Date(companyData.payload_generated_at).getTime()
+      : Infinity;
+    const isFresh = payloadAge < 24 * 60 * 60 * 1000; // 24 hours in ms
 
-    if (error || !data) {
-      return null;
+    let payload: CompanyPayload;
+
+    if (companyData.portal_payload && isFresh) {
+      // Use cached payload
+      console.log(`✓ Using cached payload for ${companyData.company_name} (age: ${Math.round(payloadAge / 1000 / 60)} minutes)`);
+      payload = companyData.portal_payload as CompanyPayload;
+    } else {
+      // Generate fresh payload from view
+      console.log(`⟳ Generating fresh payload for ${companyData.company_name}...`);
+
+      const { data: viewData, error: viewError } = await supabase
+        .from('vw_company_consumable_payload')
+        .select('*')
+        .eq('company_id', companyData.company_id)
+        .single();
+
+      if (viewError || !viewData) {
+        return null;
+      }
+
+      payload = viewData as CompanyPayload;
+
+      // Cache it for next time (fire and forget - don't wait)
+      supabase.rpc('regenerate_company_payload', { p_company_id: companyData.company_id })
+        .then(() => console.log(`✓ Cached payload for ${companyData.company_name}`))
+        .catch(err => console.error(`✗ Failed to cache payload:`, err));
     }
 
-    // Log data completeness to check for potential 1000-row limits
-    const payload = data as CompanyPayload;
+    // Log stats
     console.log(`Company ${payload.company_name}:`);
     console.log(`- Reorder items: ${payload.reorder_items?.length || 0}`);
     console.log(`- Tool tabs: ${payload.by_tool_tabs?.length || 0}`);
-    payload.by_tool_tabs?.forEach((tab, idx) => {
-      console.log(`  - Tab ${idx + 1} (${tab.tool_code}): ${tab.items?.length || 0} items`);
-    });
-    
-    // Warning if we hit suspicious round numbers (possible truncation)
-    const totalItems = (payload.reorder_items?.length || 0) + 
-      (payload.by_tool_tabs?.reduce((sum, tab) => sum + (tab.items?.length || 0), 0) || 0);
-    
-    if (totalItems >= 1000 || payload.reorder_items?.length === 1000) {
-      console.warn(`⚠️  POTENTIAL DATA TRUNCATION: Company ${payload.company_name} has exactly ${totalItems} total items. This might indicate a 1000-row limit in the view.`);
-    }
 
     return payload;
   } catch (error) {

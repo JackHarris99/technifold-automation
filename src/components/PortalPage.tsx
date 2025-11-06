@@ -53,7 +53,7 @@ export function PortalPage({ payload }: PortalPageProps) {
 
   const tabs = [
     { id: 'reorder', label: 'Previously Ordered', code: '' },
-    ...payload.by_tool_tabs.map(tab => ({
+    ...(payload.by_tool_tabs || []).map(tab => ({
       id: tab.tool_code,
       label: tab.tool_desc || tab.tool_code,
       code: tab.tool_code
