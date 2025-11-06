@@ -44,14 +44,9 @@ export async function POST(request: NextRequest) {
         max_attempts: 3,
         payload: {
           company_id,
+          contact_ids: contact_ids,  // Outbox processor expects contact_ids
           offer_key: offer_key || 'reorder_reminder',
-          campaign_key: campaign_key || `reorder_${new Date().toISOString().split('T')[0]}`,
-          recipients: contacts.map(c => ({
-            contact_id: c.contact_id,
-            email: c.email,
-            first_name: c.first_name,
-            last_name: c.last_name
-          }))
+          campaign_key: campaign_key || `reorder_${new Date().toISOString().split('T')[0]}`
         }
       })
       .select('job_id')
