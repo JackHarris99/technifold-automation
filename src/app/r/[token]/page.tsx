@@ -47,7 +47,7 @@ export default async function ReorderPortalPage({ params }: ReorderPortalProps) 
   // 2. Fetch company with cached portal payload
   const { data: company, error: companyError } = await supabase
     .from('companies')
-    .select('company_id, company_name, company_uuid, portal_payload, payload_generated_at')
+    .select('company_id, company_name, portal_payload')
     .eq('company_id', company_id)
     .single();
 
@@ -61,38 +61,25 @@ export default async function ReorderPortalPage({ params }: ReorderPortalProps) 
   if (contact_id) {
     const { data: contactData } = await supabase
       .from('contacts')
-      .select('contact_id, full_name, email, company_uuid, sales_rep_id')
+      .select('contact_id, full_name, email, company_id, sales_rep_id')
       .eq('contact_id', contact_id)
       .single();
 
     // Verify contact belongs to company
-    if (contactData && contactData.company_uuid === company.company_uuid) {
+    if (contactData && contactData.company_id === company.company_id) {
       contact = contactData;
     } else {
       console.warn('[Reorder] Contact/company mismatch or contact not found');
     }
   }
 
-  // 4. Get portal payload (use cache or generate)
+  // 4. Get portal payload
   let portalPayload: CompanyPayload;
 
-  const payloadAge = company.payload_generated_at
-    ? Date.now() - new Date(company.payload_generated_at).getTime()
-    : Infinity;
-  const isFresh = payloadAge < 24 * 60 * 60 * 1000;
-
-  if (company.portal_payload && isFresh) {
-    // Use cached
+  if (company.portal_payload) {
+    // Use cached payload
     console.log(`[Reorder] Using cached payload for ${company.company_name}`);
     portalPayload = company.portal_payload as CompanyPayload;
-  } else if (company.portal_payload) {
-    // Use stale cache
-    console.log(`[Reorder] Using stale cache for ${company.company_name}`);
-    portalPayload = company.portal_payload as CompanyPayload;
-
-    // Refresh in background
-    supabase.rpc('regenerate_company_payload', { p_company_id: company.company_id })
-      .catch(err => console.error('[Reorder] Cache refresh failed:', err));
   } else {
     // No cache - return empty portal
     console.log(`[Reorder] No cache for ${company.company_name} - empty portal`);
@@ -114,7 +101,7 @@ export default async function ReorderPortalPage({ params }: ReorderPortalProps) 
       .from('contact_interactions')
       .insert({
         contact_id: contact.contact_id,
-        company_uuid: company.company_uuid,
+        company_id: company.company_id,
         interaction_type: 'portal_view',
         url: `/r/${token}`,
         metadata: {
