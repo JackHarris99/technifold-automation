@@ -8,9 +8,15 @@ import { CartBar } from './CartBar';
 
 interface PortalPageProps {
   payload: CompanyPayload;
+  contact?: {
+    contact_id: string;
+    full_name: string;
+    email: string;
+    sales_rep_id?: string;
+  };
 }
 
-export function PortalPage({ payload }: PortalPageProps) {
+export function PortalPage({ payload, contact }: PortalPageProps) {
   const [activeTab, setActiveTab] = useState<string>('reorder');
   const [cart, setCart] = useState<CartItem[]>([]);
 
