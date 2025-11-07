@@ -15,6 +15,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { getZohoBooksClient, isZohoConfigured } from '@/lib/zoho-books-client';
 import { generateOfferUrl, generateReorderUrl, generateToken } from '@/lib/tokens';
+import { sendMarketingEmail, isResendConfigured } from '@/lib/resend-client';
 
 // Verify request is from Vercel Cron
 const CRON_SECRET = process.env.CRON_SECRET;
@@ -357,19 +358,55 @@ async function processSendOfferEmail(job: any) {
     </html>
   `;
 
-  // TODO: Send email via your email service
-  // For now, just log it
-  console.log('[outbox-worker] Would send email to:', contact_ids);
-  console.log('[outbox-worker] Token URL:', tokenUrl);
-  console.log('[outbox-worker] Cards:', emailCards.length);
+  // Send email via Resend
+  if (!isResendConfigured()) {
+    console.warn('[outbox-worker] Resend not configured - email not sent');
+    console.log('[outbox-worker] Token URL:', tokenUrl);
+    return; // Skip if Resend not set up
+  }
 
-  // TODO: Replace this with actual email sending
-  // Examples:
-  // - Zoho Mail API
-  // - SendGrid/Resend
-  // - AWS SES
-  // await sendEmail({ to: contact_ids, subject: '...', html: emailHtml });
+  // Get contact details for email
+  const { data: contacts } = await supabase
+    .from('contacts')
+    .select('contact_id, email, full_name, first_name')
+    .in('contact_id', contact_ids);
 
-  // For now, mark as completed
-  console.log('[outbox-worker] Email job completed (email sending not yet implemented)');
+  if (!contacts || contacts.length === 0) {
+    throw new Error('No valid contacts found');
+  }
+
+  // Send email to each contact
+  for (const contact of contacts) {
+    const result = await sendMarketingEmail({
+      to: contact.email,
+      contactName: contact.full_name || contact.first_name || '',
+      companyName: company_id, // We'll fetch company name in the function
+      tokenUrl,
+      subject: isReorder
+        ? 'Time to Reorder Consumables for Your Technifold Tools'
+        : 'Personalized Solutions for Your Printing Equipment',
+      preview: intro || 'We have solutions for your printing challenges'
+    });
+
+    if (result.success) {
+      console.log(`[outbox-worker] Email sent to ${contact.email}`);
+
+      // Track email sent
+      await supabase.from('contact_interactions').insert({
+        contact_id: contact.contact_id,
+        company_id,
+        interaction_type: 'email_sent',
+        url: tokenUrl,
+        metadata: {
+          email_type: isReorder ? 'reorder' : 'marketing',
+          message_id: result.messageId
+        }
+      });
+    } else {
+      console.error(`[outbox-worker] Email failed for ${contact.email}:`, result.error);
+      throw new Error(`Email send failed: ${result.error}`);
+    }
+  }
+
+  console.log(`[outbox-worker] Sent ${contacts.length} email(s) successfully`);
 }
