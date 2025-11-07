@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
           domain: emailDomain,
           type: 'prospect',
           source: 'website_form',
-          category: 'New Lead'
+          category: 'prospect'
         });
 
       if (companyError) {
