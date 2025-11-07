@@ -19,20 +19,32 @@ interface MarketingPageProps {
 }
 
 // Placeholder replacement function
-function replacePlaceholders(text: string, data: {
+function replacePlaceholders(text: string, machineData?: {
   brand?: string;
   model?: string;
-  company?: string;
-}): string {
+  display_name?: string;
+  type?: string;
+}, companyName?: string): string {
   if (!text) return '';
 
+  const brand = machineData?.brand || '';
+  const model = machineData?.model || '';
+  const displayName = machineData?.display_name || '';
+  const type = machineData?.type?.replace('_', ' ') || '';
+
   return text
-    .replace(/\{brand\|([^}]+)\}/gi, data.brand || '$1')
-    .replace(/\{model\|([^}]+)\}/gi, data.model || '$1')
-    .replace(/\{company\|([^}]+)\}/gi, data.company || '$1')
-    .replace(/\{brand\}/gi, data.brand || 'your')
-    .replace(/\{model\}/gi, data.model || 'machine')
-    .replace(/\{company\}/gi, data.company || 'your company');
+    // With fallback: {brand|your} → brand or "your"
+    .replace(/\{brand\|([^}]+)\}/gi, brand || '$1')
+    .replace(/\{model\|([^}]+)\}/gi, model || '$1')
+    .replace(/\{display_name\|([^}]+)\}/gi, displayName || '$1')
+    .replace(/\{type\|([^}]+)\}/gi, type || '$1')
+    .replace(/\{company\|([^}]+)\}/gi, companyName || '$1')
+    // Without fallback: {brand} → brand or "your"
+    .replace(/\{brand\}/gi, brand || 'your')
+    .replace(/\{model\}/gi, model || 'machine')
+    .replace(/\{display_name\}/gi, displayName || 'your machine')
+    .replace(/\{type\}/gi, type || 'machine')
+    .replace(/\{company\}/gi, companyName || 'your company');
 }
 
 export default async function MarketingPage({ params }: MarketingPageProps) {
@@ -150,11 +162,8 @@ export default async function MarketingPage({ params }: MarketingPageProps) {
             // Replace placeholders
             const personalizedCopy = replacePlaceholders(
               ps.full_solution_copy || '',
-              {
-                brand: machine?.brand,
-                model: machine?.model,
-                company: company.company_name
-              }
+              machine,
+              company.company_name
             );
 
             return (
