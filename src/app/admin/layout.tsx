@@ -35,7 +35,9 @@ export default async function AdminLayout({
               </Link>
 
               <div className="flex gap-1">
-                <NavLink href="/admin/company" label="Company Console" highlight />
+                <NavLink href="/admin/add-lead" label="+ Add Lead" highlight />
+                <NavLink href="/admin/company" label="Companies" />
+                <NavLink href="/admin/categorize" label="Categorize" />
                 <NavLink href="/admin/sku-explorer" label="SKU Explorer" />
                 <NavLink href="/admin/ms-problem-editor" label="Copy Editor" />
                 <NavLink href="/admin/brand-media" label="Brand Media" />

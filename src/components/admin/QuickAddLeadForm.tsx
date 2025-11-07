@@ -20,12 +20,15 @@ export default function QuickAddLeadForm() {
   const [phone, setPhone] = useState('');
   const [jobTitle, setJobTitle] = useState('');
 
-  // Machine
-  const [machines, setMachines] = useState<any[]>([]);
-  const [selectedMachine, setSelectedMachine] = useState('');
+  // Machines (multi-select)
+  const [brands, setBrands] = useState<string[]>([]);
+  const [selectedBrand, setSelectedBrand] = useState('');
+  const [machinesForBrand, setMachinesForBrand] = useState<any[]>([]);
+  const [selectedMachines, setSelectedMachines] = useState<Set<string>>(new Set());
 
   // Tools (they already own from elsewhere)
   const [tools, setTools] = useState<any[]>([]);
+  const [toolSearch, setToolSearch] = useState('');
   const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
 
   // Interests (problems/solutions)
@@ -36,15 +39,15 @@ export default function QuickAddLeadForm() {
   const [source, setSource] = useState('phone_call');
   const [notes, setNotes] = useState('');
 
-  // Fetch machines on load
+  // Fetch brands on load
   useEffect(() => {
-    async function fetchMachines() {
+    async function fetchBrands() {
       try {
-        const res = await fetch('/api/machines/all');
+        const res = await fetch('/api/machines/brands');
         const data = await res.json();
-        setMachines(data.machines || []);
+        setBrands(data.brands || []);
       } catch (err) {
-        console.error('Failed to fetch machines:', err);
+        console.error('Failed to fetch brands:', err);
       }
     }
 
@@ -68,10 +71,29 @@ export default function QuickAddLeadForm() {
       }
     }
 
-    fetchMachines();
+    fetchBrands();
     fetchTools();
     fetchSolutions();
   }, []);
+
+  // Fetch machines when brand selected
+  useEffect(() => {
+    if (!selectedBrand) {
+      setMachinesForBrand([]);
+      return;
+    }
+
+    async function fetchMachines() {
+      try {
+        const res = await fetch(`/api/machines/by-brand?brand=${encodeURIComponent(selectedBrand)}`);
+        const data = await res.json();
+        setMachinesForBrand(data.machines || []);
+      } catch (err) {
+        console.error('Failed to fetch machines:', err);
+      }
+    }
+    fetchMachines();
+  }, [selectedBrand]);
 
   const toggleTool = (toolCode: string) => {
     setSelectedTools(prev => {
@@ -84,6 +106,24 @@ export default function QuickAddLeadForm() {
       return next;
     });
   };
+
+  const toggleMachine = (machineId: string) => {
+    setSelectedMachines(prev => {
+      const next = new Set(prev);
+      if (next.has(machineId)) {
+        next.delete(machineId);
+      } else {
+        next.add(machineId);
+      }
+      return next;
+    });
+  };
+
+  const filteredTools = tools.filter(t =>
+    toolSearch === '' ||
+    t.product_code.toLowerCase().includes(toolSearch.toLowerCase()) ||
+    t.description.toLowerCase().includes(toolSearch.toLowerCase())
+  );
 
   const toggleInterest = (problemId: string) => {
     setSelectedInterests(prev => {
@@ -117,7 +157,7 @@ export default function QuickAddLeadForm() {
           email,
           phone,
           job_title: jobTitle,
-          machine_id: selectedMachine || null,
+          machine_ids: Array.from(selectedMachines),
           tool_codes: Array.from(selectedTools),
           problem_solution_ids: Array.from(selectedInterests),
           source,
@@ -141,7 +181,9 @@ export default function QuickAddLeadForm() {
       setEmail('');
       setPhone('');
       setJobTitle('');
-      setSelectedMachine('');
+      setSelectedBrand('');
+      setSelectedMachines(new Set());
+      setToolSearch('');
       setSelectedTools(new Set());
       setSelectedInterests(new Set());
       setNotes('');
@@ -247,21 +289,44 @@ export default function QuickAddLeadForm() {
         </div>
       </section>
 
-      {/* Machine */}
+      {/* Machines (Multi-Select) */}
       <section>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Machine (Optional)</h2>
-        <select
-          value={selectedMachine}
-          onChange={(e) => setSelectedMachine(e.target.value)}
-          className="w-full px-4 py-2 border rounded-lg"
-        >
-          <option value="">No machine selected</option>
-          {machines.map(m => (
-            <option key={m.machine_id} value={m.machine_id}>
-              {m.display_name}
-            </option>
-          ))}
-        </select>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">
+          Machines (Optional)
+        </h2>
+        <p className="text-sm text-gray-600 mb-3">Select all machines they mentioned</p>
+
+        {/* Brand Selector */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Brand</label>
+          <select
+            value={selectedBrand}
+            onChange={(e) => setSelectedBrand(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg"
+          >
+            <option value="">Select brand...</option>
+            {brands.map(brand => (
+              <option key={brand} value={brand}>{brand}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Machine Checkboxes */}
+        {machinesForBrand.length > 0 && (
+          <div className="border rounded-lg p-4 max-h-64 overflow-y-auto">
+            {machinesForBrand.map(m => (
+              <label key={m.machine_id} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectedMachines.has(m.machine_id)}
+                  onChange={() => toggleMachine(m.machine_id)}
+                  className="h-4 w-4 text-blue-600 rounded"
+                />
+                <span className="text-sm">{m.display_name}</span>
+              </label>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Tools They Own */}
@@ -270,21 +335,37 @@ export default function QuickAddLeadForm() {
           Tools They Own (Optional)
         </h2>
         <p className="text-sm text-gray-600 mb-3">
-          Select tools they mentioned having (triggers reorder marketing)
+          Search by SKU and select tools they mentioned
         </p>
-        <div className="grid md:grid-cols-3 gap-2 max-h-64 overflow-y-auto border rounded-lg p-4">
-          {tools.map(tool => (
-            <label key={tool.product_code} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+
+        {/* SKU Search */}
+        <input
+          type="text"
+          value={toolSearch}
+          onChange={(e) => setToolSearch(e.target.value)}
+          placeholder="Search by SKU or description..."
+          className="w-full px-4 py-2 border rounded-lg mb-3"
+        />
+
+        <div className="border rounded-lg p-4 max-h-64 overflow-y-auto">
+          {filteredTools.map(tool => (
+            <label key={tool.product_code} className="flex items-start gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
               <input
                 type="checkbox"
                 checked={selectedTools.has(tool.product_code)}
                 onChange={() => toggleTool(tool.product_code)}
-                className="h-4 w-4 text-blue-600 rounded"
+                className="mt-1 h-4 w-4 text-blue-600 rounded"
               />
-              <span className="text-sm">{tool.description}</span>
+              <div className="flex-1">
+                <div className="text-sm font-semibold">{tool.product_code}</div>
+                <div className="text-xs text-gray-600">{tool.description}</div>
+              </div>
             </label>
           ))}
         </div>
+        {filteredTools.length === 0 && toolSearch && (
+          <p className="text-sm text-gray-500 text-center py-4">No tools match "{toolSearch}"</p>
+        )}
       </section>
 
       {/* Interests */}

@@ -111,14 +111,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Contact creation failed' }, { status: 500 });
     }
 
-    // Add machine if provided
-    if (machine_id) {
-      await supabase.from('company_machine').insert({
+    // Add machines if provided (multi-select)
+    if (machine_ids && machine_ids.length > 0) {
+      const machineInserts = machine_ids.map((machine_id: string) => ({
         company_id,
         machine_id,
         verified: true,  // Manual entry = verified
         source: 'sales_team_entry'
-      });
+      }));
+
+      await supabase.from('company_machine').insert(machineInserts);
     }
 
     // Add tools if provided
