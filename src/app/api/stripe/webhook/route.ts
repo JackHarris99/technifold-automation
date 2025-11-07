@@ -184,6 +184,61 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     // Don't fail the whole process - order header is already created
   }
 
+  // Update company_tool for any tools purchased
+  const toolPurchases = items.filter(item => {
+    // Check if this product is a tool
+    return item.product_code && item.quantity > 0;
+  });
+
+  for (const toolItem of toolPurchases) {
+    // Check if it's a tool
+    const { data: product } = await supabase
+      .from('products')
+      .select('type')
+      .eq('product_code', toolItem.product_code)
+      .single();
+
+    if (product?.type === 'tool') {
+      // Upsert to company_tool
+      await supabase
+        .from('company_tool')
+        .upsert({
+          company_id: companyId,
+          tool_code: toolItem.product_code,
+          total_units: toolItem.quantity,
+          first_seen_at: new Date().toISOString().split('T')[0],
+          last_seen_at: new Date().toISOString().split('T')[0]
+        }, {
+          onConflict: 'company_id,tool_code',
+          ignoreDuplicates: false
+        })
+        .then(() => console.log(`[stripe-webhook] Updated company_tool: ${toolItem.product_code}`))
+        .catch(err => console.error('[stripe-webhook] company_tool update failed:', err));
+    }
+  }
+
+  // Regenerate portal cache for this company
+  await supabase
+    .rpc('regenerate_company_payload', { p_company_id: companyId })
+    .then(() => console.log(`[stripe-webhook] Regenerated portal cache for ${companyId}`))
+    .catch(err => console.error('[stripe-webhook] Cache regeneration failed:', err));
+
+  // Track purchase interaction
+  if (contactId) {
+    await supabase.from('contact_interactions').insert({
+      contact_id: contactId,
+      company_id: companyId,
+      interaction_type: 'portal_purchase',
+      url: `/checkout`,
+      metadata: {
+        order_id: order.order_id,
+        total_amount: total,
+        currency,
+        item_count: items.length
+      }
+    }).catch(err => console.error('[stripe-webhook] Purchase tracking failed:', err));
+  }
+
   // Track engagement event (idempotent on source + source_event_id)
   await supabase.from('engagement_events').insert({
     company_id: companyId,
