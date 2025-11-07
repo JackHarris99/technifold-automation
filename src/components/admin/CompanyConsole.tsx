@@ -19,6 +19,7 @@ type TabName = 'overview' | 'marketing' | 'reorder' | 'history' | 'contacts' | '
 
 interface CompanyConsoleProps {
   company: any;
+  salesRep?: { rep_name: string; email: string } | null;
   machines: any[];
   contacts: any[];
   recentEngagement: any[];
@@ -27,6 +28,7 @@ interface CompanyConsoleProps {
 
 export default function CompanyConsole({
   company,
+  salesRep,
   machines,
   contacts,
   recentEngagement,
@@ -93,7 +95,7 @@ export default function CompanyConsole({
 
             {/* Quick Info */}
             <div className="text-right text-sm text-gray-600">
-              <div className="font-semibold">{company.account_owner || 'Unassigned'}</div>
+              <div className="font-semibold">{salesRep?.rep_name || 'Unassigned'}</div>
               <div className="text-xs">Account Owner</div>
             </div>
           </div>
