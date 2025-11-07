@@ -17,18 +17,23 @@ export default async function CompanyConsolePage({ params }: CompanyConsolePageP
   const { company_id } = await params;
   const supabase = getSupabaseClient();
 
-  // Fetch company details with sales rep name
+  // Fetch company details
   const { data: company, error } = await supabase
     .from('companies')
-    .select(`
-      *,
-      sales_rep:sales_rep_id (
-        rep_name,
-        email
-      )
-    `)
+    .select('*')
     .eq('company_id', company_id)
     .single();
+
+  // Fetch sales rep separately if assigned
+  let salesRep = null;
+  if (company && company.sales_rep_id) {
+    const { data: rep } = await supabase
+      .from('sales_reps')
+      .select('rep_name, email')
+      .eq('rep_id', company.sales_rep_id)
+      .single();
+    salesRep = rep;
+  }
 
   if (error || !company) {
     notFound();
@@ -77,6 +82,7 @@ export default async function CompanyConsolePage({ params }: CompanyConsolePageP
   return (
     <CompanyConsole
       company={company}
+      salesRep={salesRep}
       machines={machines || []}
       contacts={contacts || []}
       recentEngagement={recentEngagement || []}
