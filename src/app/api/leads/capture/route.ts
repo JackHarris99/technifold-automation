@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
 
     // 3. Record machine ownership
     if (machine_id) {
-      await supabase
+      const { error: machineError } = await supabase
         .from('company_machine')
         .upsert({
           company_id,
@@ -149,11 +149,15 @@ export async function POST(request: NextRequest) {
           onConflict: 'company_id,machine_id',
           ignoreDuplicates: false
         });
+
+      if (machineError) {
+        console.error('[leads/capture] Machine upsert error:', machineError);
+      }
     }
 
     // 4. Record problem/solution interests
     for (const problem_solution_id of problem_solution_ids) {
-      await supabase
+      const { error: interestError } = await supabase
         .from('company_interests')
         .upsert({
           company_id,
@@ -165,6 +169,10 @@ export async function POST(request: NextRequest) {
           onConflict: 'company_id,problem_solution_id',
           ignoreDuplicates: true
         });
+
+      if (interestError) {
+        console.error('[leads/capture] Interest upsert error:', interestError);
+      }
     }
 
     // 5. Track the form submission
