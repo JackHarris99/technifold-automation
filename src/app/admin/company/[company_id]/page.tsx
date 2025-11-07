@@ -17,10 +17,16 @@ export default async function CompanyConsolePage({ params }: CompanyConsolePageP
   const { company_id } = await params;
   const supabase = getSupabaseClient();
 
-  // Fetch company details
+  // Fetch company details with sales rep name
   const { data: company, error } = await supabase
     .from('companies')
-    .select('*')
+    .select(`
+      *,
+      sales_rep:sales_rep_id (
+        rep_name,
+        email
+      )
+    `)
     .eq('company_id', company_id)
     .single();
 
