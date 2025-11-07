@@ -105,7 +105,7 @@ export default async function MarketingPage({ params }: MarketingPageProps) {
 
   // 5. Track marketing page view
   if (contact_id) {
-    supabase
+    const { error: trackingError } = await supabase
       .from('contact_interactions')
       .insert({
         contact_id,
@@ -116,8 +116,11 @@ export default async function MarketingPage({ params }: MarketingPageProps) {
           solution_count: interests?.length || 0,
           has_machine: !!machine
         }
-      })
-      .catch(err => console.error('[Marketing] Tracking failed:', err));
+      });
+
+    if (trackingError) {
+      console.error('[Marketing] Tracking failed:', trackingError);
+    }
   }
 
   // 6. Render full marketing content
