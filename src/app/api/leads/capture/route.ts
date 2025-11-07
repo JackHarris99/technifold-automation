@@ -122,10 +122,7 @@ export async function POST(request: NextRequest) {
           role: job_title || null,
           source: 'website_form',
           status: 'active',
-          marketing_status: 'subscribed',
-          receives_marketing: true,
-          receives_transactional: true,
-          receives_portal: true
+          marketing_status: 'subscribed'
         })
         .select('contact_id')
         .single();
