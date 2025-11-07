@@ -14,7 +14,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { getZohoBooksClient, isZohoConfigured } from '@/lib/zoho-books-client';
-import { generateOfferUrl, generateReorderUrl } from '@/lib/tokens';
+import { generateOfferUrl, generateReorderUrl, generateToken } from '@/lib/tokens';
 
 // Verify request is from Vercel Cron
 const CRON_SECRET = process.env.CRON_SECRET;
@@ -257,15 +257,24 @@ async function processSendOfferEmail(job: any) {
   // Generate tokenized landing URL
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://technifold-automation.vercel.app';
 
-  // Check if this is a reorder job
+  // Determine URL type based on offer_key
   const isReorder = offer_key?.startsWith('reorder');
+  const isWebsiteCapture = campaign_key === 'website_lead_capture';
 
   let tokenUrl: string;
+
   if (isReorder) {
-    // Generate /r/ reorder URL
+    // /r/ for reorder portal
     tokenUrl = generateReorderUrl(baseUrl, company_id, contact_ids[0]);
+  } else if (isWebsiteCapture) {
+    // /m/ for marketing pages (shows their interests)
+    const token = generateToken({
+      company_id,
+      contact_id: contact_ids[0]
+    }, 720); // 30 days
+    tokenUrl = `${baseUrl}/m/${token}`;
   } else {
-    // Generate /x/ offer URL
+    // /x/ for campaign offers
     const token = generateOfferUrl(
       baseUrl,
       company_id,
