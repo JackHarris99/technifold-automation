@@ -92,7 +92,9 @@ export default async function ReorderPortalPage({ params }: ReorderPortalProps) 
 
     // Generate in background
     supabase.rpc('regenerate_company_payload', { p_company_id: company.company_id })
-      .catch(err => console.error('[Reorder] Generation failed:', err));
+      .then(({ error }) => {
+        if (error) console.error('[Reorder] Generation failed:', error);
+      });
   }
 
   // 5. Track reorder portal view

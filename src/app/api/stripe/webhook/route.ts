@@ -212,20 +212,29 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
           onConflict: 'company_id,tool_code',
           ignoreDuplicates: false
         })
-        .then(() => console.log(`[stripe-webhook] Updated company_tool: ${toolItem.product_code}`))
-        .catch(err => console.error('[stripe-webhook] company_tool update failed:', err));
+        .then(({ error }) => {
+          if (error) {
+            console.error('[stripe-webhook] company_tool update failed:', error);
+          } else {
+            console.log(`[stripe-webhook] Updated company_tool: ${toolItem.product_code}`);
+          }
+        });
     }
   }
 
   // Regenerate portal cache for this company
-  await supabase
-    .rpc('regenerate_company_payload', { p_company_id: companyId })
-    .then(() => console.log(`[stripe-webhook] Regenerated portal cache for ${companyId}`))
-    .catch(err => console.error('[stripe-webhook] Cache regeneration failed:', err));
+  const { error: cacheError } = await supabase
+    .rpc('regenerate_company_payload', { p_company_id: companyId });
+
+  if (cacheError) {
+    console.error('[stripe-webhook] Cache regeneration failed:', cacheError);
+  } else {
+    console.log(`[stripe-webhook] Regenerated portal cache for ${companyId}`);
+  }
 
   // Track purchase interaction
   if (contactId) {
-    await supabase.from('contact_interactions').insert({
+    const { error: trackError } = await supabase.from('contact_interactions').insert({
       contact_id: contactId,
       company_id: companyId,
       interaction_type: 'portal_purchase',
@@ -236,7 +245,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         currency,
         item_count: items.length
       }
-    }).catch(err => console.error('[stripe-webhook] Purchase tracking failed:', err));
+    });
+
+    if (trackError) {
+      console.error('[stripe-webhook] Purchase tracking failed:', trackError);
+    }
   }
 
   // Track engagement event (idempotent on source + source_event_id)
