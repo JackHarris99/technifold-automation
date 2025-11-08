@@ -7,6 +7,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { isDirector } from '@/lib/auth';
 
 export default async function AdminLayout({
   children,
@@ -19,9 +20,11 @@ export default async function AdminLayout({
     const adminAuth = cookieStore.get('admin_authorized');
 
     if (!adminAuth || adminAuth.value !== 'true') {
-      redirect('/login');
+      redirect('/admin/login');
     }
   }
+
+  const isDir = await isDirector();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -37,11 +40,11 @@ export default async function AdminLayout({
               <div className="flex gap-1">
                 <NavLink href="/admin/add-lead" label="+ Add Lead" highlight />
                 <NavLink href="/admin/company" label="Companies" />
-                <NavLink href="/admin/categorize" label="Categorize" />
-                <NavLink href="/admin/sku-explorer" label="SKU Explorer" />
-                <NavLink href="/admin/ms-problem-editor" label="Copy Editor" />
-                <NavLink href="/admin/brand-media" label="Brand Media" />
-                <NavLink href="/admin/media-missing" label="Missing Media" />
+                {isDir && <NavLink href="/admin/categorize" label="Categorize" />}
+                {isDir && <NavLink href="/admin/sku-explorer" label="SKU Explorer" />}
+                {isDir && <NavLink href="/admin/ms-problem-editor" label="Copy Editor" />}
+                {isDir && <NavLink href="/admin/brand-media" label="Brand Media" />}
+                {isDir && <NavLink href="/admin/media-missing" label="Missing Media" />}
               </div>
             </div>
 
