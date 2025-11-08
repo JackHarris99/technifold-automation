@@ -1,36 +1,44 @@
 /**
- * GET /api/admin/companies/search?q=searchTerm
- * Search companies by name
+ * GET /api/admin/companies/search?q=searchterm
+ * Search companies (filtered by sales rep territory)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { getUserRepFilter } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    const q = request.nextUrl.searchParams.get('q');
+    const searchParams = request.nextUrl.searchParams;
+    const q = searchParams.get('q');
 
     if (!q || q.length < 2) {
       return NextResponse.json({ companies: [] });
     }
 
     const supabase = getSupabaseClient();
+    const repFilter = await getUserRepFilter();
 
-    const { data, error } = await supabase
+    // Build query with territory filter
+    let query = supabase
       .from('companies')
-      .select('company_id, company_name, account_owner')
+      .select('company_id, company_name, sales_rep_id')
       .ilike('company_name', `%${q}%`)
       .order('company_name')
       .limit(20);
 
+    if (repFilter) {
+      query = query.eq('sales_rep_id', repFilter);
+    }
+
+    const { data, error } = await query;
+
     if (error) {
-      console.error('[admin/companies/search] Error:', error);
       return NextResponse.json({ error: 'Search failed' }, { status: 500 });
     }
 
     return NextResponse.json({ companies: data || [] });
   } catch (err) {
-    console.error('[admin/companies/search] Unexpected error:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
