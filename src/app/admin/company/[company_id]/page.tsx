@@ -67,13 +67,34 @@ export default async function CompanyConsolePage({ params }: CompanyConsolePageP
     .order('occurred_at', { ascending: false })
     .limit(50);
 
-  // Fetch orders
-  const { data: orders } = await supabase
+  // Fetch orders with items from order_items table
+  const { data: ordersRaw } = await supabase
     .from('orders')
-    .select('*')
+    .select(`
+      *,
+      order_items (
+        order_item_id,
+        product_code,
+        quantity,
+        unit_price,
+        line_total,
+        product_description
+      )
+    `)
     .eq('company_id', company_id)
     .order('created_at', { ascending: false })
     .limit(50);
+
+  // Transform orders to include items array
+  const orders = (ordersRaw || []).map(order => ({
+    ...order,
+    items: (order.order_items || []).map((item: any) => ({
+      product_code: item.product_code,
+      quantity: item.quantity,
+      price: item.unit_price,
+      description: item.product_description
+    }))
+  }));
 
   // Get permissions for this company
   const permissions = await getCompanyPermissions(company);

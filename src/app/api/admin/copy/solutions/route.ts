@@ -1,6 +1,7 @@
 /**
  * GET /api/admin/copy/solutions?machine_id=X
  * Get solutions for a specific machine (for marketing tab)
+ * Uses the v_machine_solution_problem_full view
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -16,36 +17,33 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
-    // Get solutions for this machine from machine_solution + solutions join
+    // Get unique solutions for this machine from the view
     const { data, error } = await supabase
-      .from('machine_solution')
-      .select(`
-        machine_solution_id,
-        solution_id,
-        solutions:solution_id(
-          solution_id,
-          name,
-          core_benefit,
-          active
-        )
-      `)
-      .eq('machine_id', machineId)
-      .eq('solutions.active', true)
-      .order('relevance_rank', { ascending: true });
+      .from('v_machine_solution_problem_full')
+      .select('solution_id, solution_name, solution_core_benefit, machine_solution_id')
+      .eq('machine_id', machineId);
 
     if (error) {
       console.error('[admin/copy/solutions] Error:', error);
       return NextResponse.json({ error: 'Failed to fetch solutions' }, { status: 500 });
     }
 
-    const solutions = (data || [])
-      .filter((row: any) => row.solutions) // Filter out nulls
-      .map((row: any) => ({
-        solution_id: row.solutions.solution_id,
-        machine_solution_id: row.machine_solution_id,
-        name: row.solutions.name,
-        core_benefit: row.solutions.core_benefit
-      }));
+    // Get unique solutions (view returns one row per problem, so we need to dedupe)
+    const solutionsMap = new Map();
+    (data || []).forEach(row => {
+      if (!solutionsMap.has(row.solution_id)) {
+        solutionsMap.set(row.solution_id, {
+          solution_id: row.solution_id,
+          machine_solution_id: row.machine_solution_id,
+          name: row.solution_name,
+          core_benefit: row.solution_core_benefit
+        });
+      }
+    });
+
+    const solutions = Array.from(solutionsMap.values());
+
+    console.log(`[admin/copy/solutions] Found ${solutions.length} solutions for machine ${machineId}`);
 
     return NextResponse.json({ solutions });
   } catch (err) {
