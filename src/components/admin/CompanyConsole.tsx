@@ -26,6 +26,14 @@ interface CompanyConsoleProps {
   orders: any[];
 }
 
+// Color scheme for account owners
+const OWNER_COLORS: Record<string, { border: string; bg: string; text: string }> = {
+  'Lee': { border: 'border-red-500', bg: 'bg-red-50', text: 'text-red-700' },
+  'Callum': { border: 'border-blue-500', bg: 'bg-blue-50', text: 'text-blue-700' },
+  'Steve': { border: 'border-green-500', bg: 'bg-green-50', text: 'text-green-700' },
+  'jack_harris': { border: 'border-purple-500', bg: 'bg-purple-50', text: 'text-purple-700' },
+};
+
 export default function CompanyConsole({
   company,
   salesRep,
@@ -36,6 +44,13 @@ export default function CompanyConsole({
 }: CompanyConsoleProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabName>('overview');
+
+  // Get color scheme for this company's owner
+  const ownerColors = OWNER_COLORS[company.account_owner || ''] || {
+    border: 'border-gray-300',
+    bg: 'bg-gray-50',
+    text: 'text-gray-700'
+  };
 
   // Load tab from URL hash on mount
   useEffect(() => {
@@ -62,8 +77,8 @@ export default function CompanyConsole({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Top Bar - Sticky */}
-      <div className="bg-white border-b-2 border-gray-200 sticky top-0 z-30 shadow-sm">
+      {/* Top Bar - Sticky with color-coded border */}
+      <div className={`bg-white border-b-4 ${ownerColors.border} sticky top-0 z-30 shadow-sm`}>
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="grid md:grid-cols-3 gap-4 items-center">
             {/* Company Selector */}
@@ -93,10 +108,12 @@ export default function CompanyConsole({
               </div>
             </div>
 
-            {/* Quick Info */}
-            <div className="text-right text-sm text-gray-600">
-              <div className="font-semibold">{salesRep?.rep_name || 'Unassigned'}</div>
-              <div className="text-xs">Account Owner</div>
+            {/* Quick Info with color badge */}
+            <div className="text-right text-sm">
+              <div className={`inline-block px-4 py-2 rounded-lg ${ownerColors.bg} ${ownerColors.border} border-2`}>
+                <div className={`font-bold ${ownerColors.text}`}>{salesRep?.rep_name || 'Unassigned'}</div>
+                <div className="text-xs text-gray-600">Account Owner</div>
+              </div>
             </div>
           </div>
         </div>

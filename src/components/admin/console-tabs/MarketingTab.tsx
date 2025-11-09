@@ -67,6 +67,7 @@ export default function MarketingTab({
   useEffect(() => {
     if (!selectedMachine) {
       setSolutions([]);
+      setSelectedSolution('');
       return;
     }
 
@@ -82,6 +83,7 @@ export default function MarketingTab({
   useEffect(() => {
     if (!selectedSolution || !selectedMachine) {
       setProblems([]);
+      setSelectedProblem('');
       return;
     }
 

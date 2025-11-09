@@ -17,21 +17,14 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = getSupabaseClient();
-    const repFilter = await getUserRepFilter();
 
-    // Build query with territory filter
-    let query = supabase
+    // All users can see all companies (no territory filter on search)
+    const { data, error } = await supabase
       .from('companies')
       .select('company_id, company_name, account_owner')
       .ilike('company_name', `%${q}%`)
       .order('company_name')
       .limit(20);
-
-    if (repFilter) {
-      query = query.eq('account_owner', repFilter);
-    }
-
-    const { data, error } = await query;
 
     if (error) {
       return NextResponse.json({ error: 'Search failed' }, { status: 500 });

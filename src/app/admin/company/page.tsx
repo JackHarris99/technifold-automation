@@ -8,19 +8,13 @@ import { getUserRepFilter } from '@/lib/auth';
 
 export default async function CompanyConsoleLanding() {
   const supabase = getSupabaseClient();
-  const repFilter = await getUserRepFilter();
 
-  // Get the most recent company (filtered by rep if not director)
-  let query = supabase
+  // Get the most recent company (all users see all companies)
+  const { data: companies } = await supabase
     .from('companies')
     .select('company_id')
-    .order('updated_at', { ascending: false });
-
-  if (repFilter) {
-    query = query.eq('account_owner', repFilter);
-  }
-
-  const { data: companies } = await query.limit(1);
+    .order('updated_at', { ascending: false })
+    .limit(1);
 
   if (companies && companies.length > 0) {
     redirect(`/admin/company/${companies[0].company_id}`);
