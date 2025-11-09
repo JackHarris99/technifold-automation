@@ -11,10 +11,18 @@ interface SettingsTabProps {
   companyId: string;
   company: any;
   contacts: any[];
+  permissions: {
+    canSendMarketing: boolean;
+    canCreateQuote: boolean;
+    canEditContacts: boolean;
+    canViewDetails: boolean;
+    canChangeAccountOwner: boolean;
+    canChangeCompanyType: boolean;
+  };
   onRefresh?: () => void;
 }
 
-export default function SettingsTab({ companyId, company, contacts, onRefresh }: SettingsTabProps) {
+export default function SettingsTab({ companyId, company, contacts, permissions, onRefresh }: SettingsTabProps) {
   const [editingCompany, setEditingCompany] = useState(false);
   const [companyData, setCompanyData] = useState({
     company_name: company.company_name || '',
@@ -131,13 +139,16 @@ export default function SettingsTab({ companyId, company, contacts, onRefresh }:
       <div className="bg-white border border-gray-200 rounded-xl p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Company Settings</h2>
-          {!editingCompany && (
+          {!editingCompany && permissions.canEditContacts && (
             <button
               onClick={() => setEditingCompany(true)}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700"
             >
               Edit Company
             </button>
+          )}
+          {!permissions.canEditContacts && (
+            <span className="text-sm text-yellow-600 font-semibold">⚠️ View only</span>
           )}
         </div>
 
@@ -154,22 +165,30 @@ export default function SettingsTab({ companyId, company, contacts, onRefresh }:
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Account Owner</label>
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Account Owner
+                {!permissions.canChangeAccountOwner && <span className="text-xs text-yellow-600 ml-2">(Directors only)</span>}
+              </label>
               <input
                 type="text"
                 value={companyData.account_owner}
                 onChange={(e) => setCompanyData({ ...companyData, account_owner: e.target.value })}
                 placeholder="Sales rep name"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                disabled={!permissions.canChangeAccountOwner}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Category</label>
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Category
+                {!permissions.canChangeCompanyType && <span className="text-xs text-yellow-600 ml-2">(Directors only)</span>}
+              </label>
               <select
                 value={companyData.category}
                 onChange={(e) => setCompanyData({ ...companyData, category: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                disabled={!permissions.canChangeCompanyType}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
                 <option value="">Select category...</option>
                 <option value="customer">Customer</option>

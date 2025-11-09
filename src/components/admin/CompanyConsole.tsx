@@ -24,6 +24,14 @@ interface CompanyConsoleProps {
   contacts: any[];
   recentEngagement: any[];
   orders: any[];
+  permissions: {
+    canSendMarketing: boolean;
+    canCreateQuote: boolean;
+    canEditContacts: boolean;
+    canViewDetails: boolean;
+    canChangeAccountOwner: boolean;
+    canChangeCompanyType: boolean;
+  };
 }
 
 // Color scheme for account owners
@@ -40,7 +48,8 @@ export default function CompanyConsole({
   machines,
   contacts,
   recentEngagement,
-  orders
+  orders,
+  permissions
 }: CompanyConsoleProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabName>('overview');
@@ -51,6 +60,8 @@ export default function CompanyConsole({
     bg: 'bg-gray-50',
     text: 'text-gray-700'
   };
+
+  const canAct = permissions.canSendMarketing; // Shorthand for any action
 
   // Load tab from URL hash on mount
   useEffect(() => {
@@ -119,6 +130,20 @@ export default function CompanyConsole({
         </div>
       </div>
 
+      {/* Permission Warning */}
+      {!canAct && (
+        <div className="bg-yellow-50 border-b-2 border-yellow-200">
+          <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="flex items-center gap-2 text-yellow-800">
+              <span className="text-xl">⚠️</span>
+              <span className="text-sm font-semibold">
+                View-only access: You cannot perform actions on this company (owned by {salesRep?.rep_name || 'another rep'})
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Tabs Navigation */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4">
@@ -180,7 +205,6 @@ export default function CompanyConsole({
           <HistoryTab
             companyId={company.company_id}
             orders={orders}
-            machines={machines}
           />
         )}
 
@@ -204,6 +228,7 @@ export default function CompanyConsole({
             companyId={company.company_id}
             company={company}
             contacts={contacts}
+            permissions={permissions}
             onRefresh={() => router.refresh()}
           />
         )}

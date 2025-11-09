@@ -42,6 +42,7 @@ export default async function AdminLayout({
                 <NavLink href="/admin/add-lead" label="+ Add Lead" highlight />
                 <NavLink href="/admin/companies" label="Company List" />
                 <NavLink href="/admin/company" label="Company Console" />
+                <NavLink href="/admin/engagements" label="Engagements" />
                 {isDir && <NavLink href="/admin/categorize" label="Categorize" />}
                 {isDir && <NavLink href="/admin/sku-explorer" label="SKU Explorer" />}
                 {isDir && <NavLink href="/admin/ms-problem-editor" label="Copy Editor" />}

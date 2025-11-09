@@ -6,6 +6,7 @@
 import { getSupabaseClient } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
 import CompanyConsole from '@/components/admin/CompanyConsole';
+import { getCompanyPermissions } from '@/lib/permissions';
 
 interface CompanyConsolePageProps {
   params: Promise<{
@@ -74,6 +75,9 @@ export default async function CompanyConsolePage({ params }: CompanyConsolePageP
     .order('created_at', { ascending: false })
     .limit(50);
 
+  // Get permissions for this company
+  const permissions = await getCompanyPermissions(company);
+
   return (
     <CompanyConsole
       company={company}
@@ -82,6 +86,7 @@ export default async function CompanyConsolePage({ params }: CompanyConsolePageP
       contacts={contacts || []}
       recentEngagement={recentEngagement || []}
       orders={orders || []}
+      permissions={permissions}
     />
   );
 }
