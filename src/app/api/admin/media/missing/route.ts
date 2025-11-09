@@ -171,6 +171,28 @@ export async function GET(request: NextRequest) {
       }));
     }
 
+    // Site Logos (company branding - Technifold, Technicrease, CreaseStream)
+    if (!type || type === 'site_logos') {
+      const { data: siteLogos, error } = await supabase
+        .from('site_branding')
+        .select('brand_key, brand_name, logo_url')
+        .or('logo_url.is.null')
+        .order('brand_key')
+        .limit(10);
+
+      if (error) {
+        console.warn('[missing-media] site_branding table not found, skipping:', error.message);
+        result.site_logos = [];
+      } else {
+        result.site_logos = siteLogos?.map((s) => ({
+          id: s.brand_key,
+          name: s.brand_name,
+          missing_logo: !s.logo_url,
+          logo_url: s.logo_url,
+        })) || [];
+      }
+    }
+
     return NextResponse.json(result);
   } catch (error: any) {
     console.error('Fetch missing media error:', error);

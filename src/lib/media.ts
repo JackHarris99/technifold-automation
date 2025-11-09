@@ -13,7 +13,8 @@ export type MediaType =
   | 'problem_solution_machine'
   | 'brand_logo'
   | 'brand_hero'
-  | 'machine_hero';
+  | 'machine_hero'
+  | 'site_logo';  // Company branding logos (Technifold, Technicrease, CreaseStream)
 
 /**
  * Get the Supabase Storage path for a given media type and identifier
@@ -43,6 +44,10 @@ export function getStoragePath(type: MediaType, identifier: string, extension: s
 
     case 'machine_hero':
       return `media/machines/${identifier}.${extension}`;
+
+    case 'site_logo':
+      // identifier should be 'technifold', 'technicrease', or 'creasestream'
+      return `media/site/${identifier}.png`;
 
     default:
       throw new Error(`Unknown media type: ${type}`);
