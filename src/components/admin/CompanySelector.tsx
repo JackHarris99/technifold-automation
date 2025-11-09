@@ -9,7 +9,7 @@ import { useState, useEffect, useRef } from 'react';
 interface Company {
   company_id: string;
   company_name: string;
-  account_owner: string | null;
+  sales_rep_id: string | null;
 }
 
 interface CompanySelectorProps {
