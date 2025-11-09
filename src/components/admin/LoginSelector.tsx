@@ -7,11 +7,10 @@
 
 export default function LoginSelector() {
   const users = [
-    { rep_id: 'rep_001', rep_name: 'Lee', email: 'lee@technifold.com', role: 'sales_rep' as const, color: 'red' },
-    { rep_id: 'rep_002', rep_name: 'Callum', email: 'callum@technifold.com', role: 'sales_rep' as const, color: 'blue' },
-    { rep_id: 'rep_003', rep_name: 'Steve', email: 'steve@technifold.com', role: 'sales_rep' as const, color: 'green' },
-    { rep_id: 'director_001', rep_name: 'Jack (Director)', email: 'jack@technifold.com', role: 'director' as const, color: 'purple' },
-    { rep_id: 'director_002', rep_name: 'Director 2', email: 'director2@technifold.com', role: 'director' as const, color: 'orange' },
+    { rep_id: 'Lee', rep_name: 'Lee', email: 'lee@technifold.com', role: 'sales_rep' as const, color: 'red' },
+    { rep_id: 'Callum', rep_name: 'Callum', email: 'callum@technifold.com', role: 'sales_rep' as const, color: 'blue' },
+    { rep_id: 'Steve', rep_name: 'Steve', email: 'steve@technifold.com', role: 'sales_rep' as const, color: 'green' },
+    { rep_id: 'jack_harris', rep_name: 'Jack Harris (Director)', email: 'jack@technifold.com', role: 'director' as const, color: 'purple' },
   ];
 
   const handleLogin = async (user: typeof users[0]) => {

@@ -7,7 +7,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { isDirector } from '@/lib/auth';
+import { isDirector, getCurrentUser } from '@/lib/auth';
 
 export default async function AdminLayout({
   children,
@@ -25,6 +25,7 @@ export default async function AdminLayout({
   }
 
   const isDir = await isDirector();
+  const currentUser = await getCurrentUser();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -50,6 +51,17 @@ export default async function AdminLayout({
             </div>
 
             <div className="flex items-center gap-4">
+              {currentUser && (
+                <div className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                  {currentUser.rep_name} {currentUser.role === 'director' ? '👑' : ''}
+                </div>
+              )}
+              <a
+                href="/admin/login"
+                className="text-sm text-gray-600 hover:text-gray-900"
+              >
+                Switch User
+              </a>
               <a
                 href="/"
                 className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-2"
