@@ -97,20 +97,31 @@ export default function MarketingTab({
 
   // Load preview when problem selected
   useEffect(() => {
+    console.log('[MarketingTab] Preview effect triggered', { selectedProblem, selectedMachine });
+
     if (!selectedProblem || !selectedMachine) {
+      console.log('[MarketingTab] Missing selection, clearing preview');
       setPreviewCard(null);
       return;
     }
 
     async function loadPreview() {
       const machine = allMachines.find(m => m.machine_id === selectedMachine);
-      if (!machine?.slug) return;
+      console.log('[MarketingTab] Found machine:', machine);
 
+      if (!machine?.slug) {
+        console.warn('[MarketingTab] Machine has no slug, cannot load preview');
+        return;
+      }
+
+      console.log('[MarketingTab] Fetching preview for slug:', machine.slug);
       const response = await fetch(`/api/machines/solutions?slug=${machine.slug}`);
       const data = await response.json();
+      console.log('[MarketingTab] API returned cards:', data.problemCards?.length || 0);
 
       // Match by problem_solution_id (which we sent as problem_id from the problems API)
       const card = (data.problemCards || []).find((c: any) => c.problem_solution_id === selectedProblem);
+      console.log('[MarketingTab] Matched card:', card ? 'FOUND' : 'NOT FOUND', { selectedProblem, card });
       setPreviewCard(card);
     }
     loadPreview();
