@@ -17,10 +17,10 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
-    // Fetch products with image metadata
+    // Fetch products with image_url column (same as reorder portal)
     const { data: products, error } = await supabase
       .from('products')
-      .select('product_code, extra')
+      .select('product_code, image_url')
       .in('product_code', product_codes);
 
     if (error) {
@@ -28,26 +28,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
     }
 
-    // Extract image URLs from extra.image_url or extra.images[0]
-    const productsWithImages = (products || []).map(p => {
-      let imageUrl = null;
-
-      if (p.extra) {
-        // Check extra.image_url first
-        if (p.extra.image_url) {
-          imageUrl = p.extra.image_url;
-        }
-        // Fallback to extra.images array
-        else if (p.extra.images && Array.isArray(p.extra.images) && p.extra.images.length > 0) {
-          imageUrl = p.extra.images[0];
-        }
-      }
-
-      return {
-        product_code: p.product_code,
-        image_url: imageUrl
-      };
-    });
+    // Return products with image_url directly
+    const productsWithImages = (products || []).map(p => ({
+      product_code: p.product_code,
+      image_url: p.image_url || null
+    }));
 
     return NextResponse.json({ products: productsWithImages });
   } catch (err) {
