@@ -4,15 +4,53 @@ export function MarketingHeader() {
   return (
     <header className="bg-white border-b border-gray-200">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">T</span>
+        <div className="flex justify-between items-center h-20">
+          {/* Three Brand Logos */}
+          <div className="flex items-center gap-8">
+            <Link href="/" className="flex items-center">
+              <img
+                src="/media/technifold-logo.png"
+                alt="Technifold"
+                className="h-12 w-auto object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+              <div className="hidden h-12 w-32 bg-gray-100 rounded flex items-center justify-center">
+                <span className="text-sm text-gray-400">Technifold</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">Technifold</span>
             </Link>
+
+            <div className="flex items-center">
+              <img
+                src="/media/technicrease-logo.png"
+                alt="Technicrease"
+                className="h-10 w-auto object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+              <div className="hidden h-10 w-32 bg-gray-100 rounded flex items-center justify-center">
+                <span className="text-sm text-gray-400">Technicrease</span>
+              </div>
+            </div>
+
+            <div className="flex items-center">
+              <img
+                src="/media/creasestream-logo.png"
+                alt="CreaseStream"
+                className="h-10 w-auto object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+              <div className="hidden h-10 w-32 bg-gray-100 rounded flex items-center justify-center">
+                <span className="text-sm text-gray-400">CreaseStream</span>
+              </div>
+            </div>
           </div>
 
           {/* Navigation */}

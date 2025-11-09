@@ -1,13 +1,11 @@
 /**
  * Machine Finder Component
- * Allows users to select their machine and see solutions/problems inline
+ * Allows users to select their machine and see a list of problems with CTA to full page
  */
 
 'use client';
 
 import { useState, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
-import SetupGuide from './SetupGuide';
 
 interface Machine {
   machine_id: string;
@@ -189,88 +187,54 @@ export default function MachineFinder({ onMachineSelect }: MachineFinderProps) {
         </div>
       </div>
 
-      {/* Problem Cards - ONE CARD PER PROBLEM - shown inline below the finder */}
+      {/* Problem List - Simple view with link to full page */}
       {!loadingSolutions && problemCards.length > 0 && selectedMachineData && (
-        <div className="mt-12 space-y-6">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
-              Problems We Fix on {selectedMachineData.display_name}
-            </h2>
-            <p className="text-xl text-blue-100">
-              Each of these is a proven retrofit solution
-            </p>
-          </div>
+        <div className="mt-12">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 shadow-2xl">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+                Problems We Can Fix on Your {selectedMachineData.display_name}
+              </h2>
+              <p className="text-lg text-blue-100">
+                {problemCards.length} proven solutions available
+              </p>
+            </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {problemCards.map((card, index) => (
-              <div key={`${card.problem_solution_id}-${index}`} className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all">
-              {/* Image */}
-              <div className="relative h-48 w-full bg-gray-100 flex items-center justify-center">
-                {card.resolved_image_url ? (
-                  <img
-                    src={card.resolved_image_url}
-                    alt={card.solution_name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="text-gray-400">
-                    <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            {/* Problem List */}
+            <div className="space-y-3 mb-6">
+              {problemCards.map((card, index) => (
+                <div key={`${card.problem_solution_id}-${index}`} className="bg-white/90 rounded-lg p-4 flex items-center gap-3 hover:bg-white transition-colors">
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                )}
-              </div>
-
-              <div className="p-6">
-                {/* Solution Badge */}
-                <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-bold mb-4">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  {card.solution_name}
+                  <div className="flex-1">
+                    <span className="text-sm font-semibold text-blue-600">{card.solution_name}</span>
+                    <p className="text-gray-900 font-medium">
+                      {/* Extract first sentence from card copy */}
+                      {card.resolved_card_copy
+                        ?.replace(/[#*_`]/g, '')
+                        .split(/[.!?]/)[0]
+                        .substring(0, 100)}...
+                    </p>
+                  </div>
                 </div>
-
-                {/* Resolved Copy (Markdown) */}
-                <div className="prose max-w-none mb-6 text-gray-900">
-                  <ReactMarkdown>{card.resolved_card_copy}</ReactMarkdown>
-                </div>
-
-                {/* CTA */}
-                <a
-                  href="/contact"
-                  className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors w-full justify-center"
-                >
-                  {card.resolved_cta || `See how this works on your ${selectedMachineData.brand} ${selectedMachineData.model}`}
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </a>
-              </div>
+              ))}
             </div>
-            ))}
-          </div>
 
-          {/* Setup Guide - Once per page */}
-          <div className="mt-8">
-            <SetupGuide
-              curatedSkus={problemCards[0]?.curated_skus}
-              machineId={selectedMachineData.machine_id}
-              problemSolutionId={problemCards[0]?.problem_solution_id}
-              machineName={selectedMachineData.display_name}
-            />
-          </div>
-
-          {/* Link to full machine page */}
-          <div className="text-center mt-8">
-            <a
-              href={`/machines/${selectedMachineData.slug}`}
-              className="inline-flex items-center gap-2 text-white hover:text-blue-100 font-semibold"
-            >
-              See full details page for {selectedMachineData.display_name}
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </a>
+            {/* Big CTA to machine page */}
+            <div className="text-center">
+              <a
+                href={`/machines/${selectedMachineData.slug}`}
+                className="inline-flex items-center gap-3 bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-colors shadow-lg"
+              >
+                See How We Solve These Problems on {selectedMachineData.brand} {selectedMachineData.model}
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </a>
+            </div>
           </div>
         </div>
       )}
