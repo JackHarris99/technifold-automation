@@ -19,7 +19,7 @@ export async function GET() {
     while (hasMore) {
       const { data, error } = await supabase
         .from('companies')
-        .select('company_id, company_name, category, first_invoice_at, last_invoice_at')
+        .select('company_id, company_name, category, account_owner, first_invoice_at, last_invoice_at')
         .range(from, from + batchSize - 1);
 
       if (error || !data || data.length === 0) {

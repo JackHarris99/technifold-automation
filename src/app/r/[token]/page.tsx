@@ -61,7 +61,7 @@ export default async function ReorderPortalPage({ params }: ReorderPortalProps) 
   if (contact_id) {
     const { data: contactData } = await supabase
       .from('contacts')
-      .select('contact_id, full_name, email, company_id, sales_rep_id')
+      .select('contact_id, full_name, email, company_id')
       .eq('contact_id', contact_id)
       .single();
 
@@ -100,20 +100,21 @@ export default async function ReorderPortalPage({ params }: ReorderPortalProps) 
   // 5. Track reorder portal view
   if (contact) {
     supabase
-      .from('contact_interactions')
+      .from('engagement_events')
       .insert({
         contact_id: contact.contact_id,
         company_id: company.company_id,
-        interaction_type: 'portal_view',
+        event_type: 'portal_view',
+        event_name: 'reorder_page_view',
+        source: 'vercel',
         url: `/r/${token}`,
-        metadata: {
+        meta: {
           contact_name: contact.full_name,
           company_name: company.company_name,
           reorder_items_count: portalPayload.reorder_items?.length || 0,
           tool_tabs_count: portalPayload.by_tool_tabs?.length || 0,
           token_type: 'reorder'
-        },
-        sales_rep_id: contact.sales_rep_id
+        }
       })
       .then(() => console.log(`[Reorder] Tracked view by ${contact.full_name}`))
       .catch(err => console.error('[Reorder] Tracking failed:', err));

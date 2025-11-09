@@ -8,10 +8,11 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-const REP_COLORS = {
-  'rep_001': 'border-red-500 bg-red-50',      // Lee
-  'rep_002': 'border-blue-500 bg-blue-50',    // Callum
-  'rep_003': 'border-green-500 bg-green-50',  // Steve
+const REP_COLORS: Record<string, string> = {
+  'Lee': 'border-red-500 bg-red-50',
+  'Callum': 'border-blue-500 bg-blue-50',
+  'Steve': 'border-green-500 bg-green-50',
+  'jack_harris': 'border-purple-500 bg-purple-50',
 };
 
 export default function CompanyListTable() {
@@ -40,7 +41,7 @@ export default function CompanyListTable() {
 
   const filtered = companies.filter(c => {
     if (filter === 'all') return true;
-    return c.sales_rep_id === filter;
+    return c.account_owner === filter;
   });
 
   const sorted = [...filtered].sort((a, b) => {
@@ -83,9 +84,10 @@ export default function CompanyListTable() {
           className="px-4 py-2 border rounded-lg"
         >
           <option value="all">All Reps ({companies.length})</option>
-          <option value="rep_001">🔴 Lee</option>
-          <option value="rep_002">🔵 Callum</option>
-          <option value="rep_003">🟢 Steve</option>
+          <option value="Lee">🔴 Lee</option>
+          <option value="Callum">🔵 Callum</option>
+          <option value="Steve">🟢 Steve</option>
+          <option value="jack_harris">🟣 Jack Harris</option>
         </select>
 
         <select
@@ -110,10 +112,8 @@ export default function CompanyListTable() {
       {/* Table */}
       <div className="space-y-2">
         {sorted.map((company) => {
-          const colorClass = REP_COLORS[company.sales_rep_id as keyof typeof REP_COLORS] || 'border-gray-300';
-          const repName = company.sales_rep_id === 'rep_001' ? 'Lee' :
-                         company.sales_rep_id === 'rep_002' ? 'Callum' :
-                         company.sales_rep_id === 'rep_003' ? 'Steve' : 'Unassigned';
+          const colorClass = REP_COLORS[company.account_owner || ''] || 'border-gray-300';
+          const repName = company.account_owner || 'Unassigned';
 
           return (
             <Link

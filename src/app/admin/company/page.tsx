@@ -17,7 +17,7 @@ export default async function CompanyConsoleLanding() {
     .order('updated_at', { ascending: false });
 
   if (repFilter) {
-    query = query.eq('sales_rep_id', repFilter);
+    query = query.eq('account_owner', repFilter);
   }
 
   const { data: companies } = await query.limit(1);

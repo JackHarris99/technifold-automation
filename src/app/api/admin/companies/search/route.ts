@@ -22,13 +22,13 @@ export async function GET(request: NextRequest) {
     // Build query with territory filter
     let query = supabase
       .from('companies')
-      .select('company_id, company_name, sales_rep_id')
+      .select('company_id, company_name, account_owner')
       .ilike('company_name', `%${q}%`)
       .order('company_name')
       .limit(20);
 
     if (repFilter) {
-      query = query.eq('sales_rep_id', repFilter);
+      query = query.eq('account_owner', repFilter);
     }
 
     const { data, error } = await query;

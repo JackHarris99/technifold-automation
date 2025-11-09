@@ -9,7 +9,7 @@ import { useState, useEffect, useRef } from 'react';
 interface Company {
   company_id: string;
   company_name: string;
-  sales_rep_id: string | null;
+  account_owner: string | null;
 }
 
 interface CompanySelectorProps {
@@ -97,13 +97,11 @@ export default function CompanySelector({
               <div className="font-semibold text-gray-900">{comp.company_name}</div>
               <div className="text-sm text-gray-500 flex items-center gap-2">
                 <span>{comp.company_id}</span>
-                {comp.sales_rep_id && (
+                {comp.account_owner && (
                   <>
                     <span>•</span>
                     <span className="text-blue-600">
-                      {comp.sales_rep_id === 'rep_001' ? 'Lee' :
-                       comp.sales_rep_id === 'rep_002' ? 'Callum' :
-                       comp.sales_rep_id === 'rep_003' ? 'Steve' : comp.sales_rep_id}
+                      {comp.account_owner}
                     </span>
                   </>
                 )}

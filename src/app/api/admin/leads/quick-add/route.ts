@@ -50,23 +50,23 @@ export async function POST(request: NextRequest) {
 
     const company_id = `${prefix}${String(nextNum).padStart(3, '0')}`;
 
-    // Auto-assign sales rep using counter function
-    const { data: assignedRep, error: repError } = await supabase
-      .rpc('assign_next_sales_rep');
+    // Auto-assign sales rep using fair distribution
+    const SALES_REPS = ['Lee', 'Callum', 'Steve', 'jack_harris'];
 
-    if (repError || !assignedRep) {
-      console.error('[quick-add] Rep assignment failed:', repError);
-      return NextResponse.json({ error: 'Failed to assign rep' }, { status: 500 });
-    }
+    // Count existing assignments
+    const repCounts = await Promise.all(
+      SALES_REPS.map(async (rep) => {
+        const { count } = await supabase
+          .from('companies')
+          .select('*', { count: 'exact', head: true })
+          .eq('account_owner', rep);
+        return { rep, count: count || 0 };
+      })
+    );
 
-    const sales_rep_id = assignedRep as string;
-
-    // Get rep name for response
-    const { data: rep } = await supabase
-      .from('sales_reps')
-      .select('rep_name')
-      .eq('rep_id', sales_rep_id)
-      .single();
+    // Assign to rep with fewest companies
+    repCounts.sort((a, b) => a.count - b.count);
+    const account_owner = repCounts[0].rep;
 
     // Create company
     const domain = email.split('@')[1]?.toLowerCase();
@@ -80,8 +80,7 @@ export async function POST(request: NextRequest) {
         category: 'customer',
         type: 'prospect',
         source: source || 'manual_entry',
-        sales_rep_id,
-        sales_rep_assigned_at: new Date().toISOString()
+        account_owner
       });
 
     if (companyError) {
@@ -100,8 +99,7 @@ export async function POST(request: NextRequest) {
         role: job_title || null,
         source: source || 'manual_entry',
         status: 'active',
-        marketing_status: 'subscribed',
-        sales_rep_id
+        marketing_status: 'subscribed'
       })
       .select('contact_id')
       .single();
@@ -149,26 +147,27 @@ export async function POST(request: NextRequest) {
       await supabase.from('company_interests').insert(interestInserts);
     }
 
-    // Track the manual entry
-    await supabase.from('contact_interactions').insert({
-      contact_id: contact.contact_id,
+    // Track engagement event
+    await supabase.from('engagement_events').insert({
       company_id,
-      interaction_type: source === 'phone_call' ? 'phone_call' : 'trade_show_meeting',
-      metadata: {
+      contact_id: contact.contact_id,
+      event_type: 'lead_captured',
+      event_name: source === 'phone_call' ? 'phone_call' : 'manual_entry',
+      source: 'admin',
+      meta: {
         added_by: 'sales_team',
         notes: notes || null,
         tools_count: tool_codes?.length || 0,
         interests_count: problem_solution_ids?.length || 0
-      },
-      sales_rep_id
+      }
     });
 
     return NextResponse.json({
       success: true,
       company_id,
       contact_id: contact.contact_id,
-      sales_rep_id,
-      sales_rep_name: rep?.rep_name || 'Unknown'
+      account_owner,
+      sales_rep_name: account_owner
     });
 
   } catch (err) {

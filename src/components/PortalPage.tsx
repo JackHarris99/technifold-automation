@@ -12,7 +12,6 @@ interface PortalPageProps {
     contact_id: string;
     full_name: string;
     email: string;
-    sales_rep_id?: string;
   };
 }
 

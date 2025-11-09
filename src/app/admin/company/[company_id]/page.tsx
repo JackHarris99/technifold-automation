@@ -24,20 +24,15 @@ export default async function CompanyConsolePage({ params }: CompanyConsolePageP
     .eq('company_id', company_id)
     .single();
 
-  // Fetch sales rep separately if assigned
-  let salesRep = null;
-  if (company && company.sales_rep_id) {
-    const { data: rep } = await supabase
-      .from('sales_reps')
-      .select('rep_name, email')
-      .eq('rep_id', company.sales_rep_id)
-      .single();
-    salesRep = rep;
-  }
-
   if (error || !company) {
     notFound();
   }
+
+  // Sales rep info comes from account_owner column directly
+  const salesRep = company.account_owner ? {
+    rep_name: company.account_owner,
+    email: null // Email not stored in simplified structure
+  } : null;
 
   // Fetch company machines
   const { data: machines } = await supabase
