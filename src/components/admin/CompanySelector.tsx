@@ -97,10 +97,14 @@ export default function CompanySelector({
               <div className="font-semibold text-gray-900">{comp.company_name}</div>
               <div className="text-sm text-gray-500 flex items-center gap-2">
                 <span>{comp.company_id}</span>
-                {comp.account_owner && (
+                {comp.sales_rep_id && (
                   <>
                     <span>•</span>
-                    <span className="text-blue-600">{comp.account_owner}</span>
+                    <span className="text-blue-600">
+                      {comp.sales_rep_id === 'rep_001' ? 'Lee' :
+                       comp.sales_rep_id === 'rep_002' ? 'Callum' :
+                       comp.sales_rep_id === 'rep_003' ? 'Steve' : comp.sales_rep_id}
+                    </span>
                   </>
                 )}
               </div>

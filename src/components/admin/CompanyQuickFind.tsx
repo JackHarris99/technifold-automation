@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 interface Company {
   company_id: string;
   company_name: string;
-  account_owner: string | null;
+  sales_rep_id: string | null;
 }
 
 export default function CompanyQuickFind({ recentCompanies }: { recentCompanies: Company[] }) {
@@ -96,9 +96,11 @@ export default function CompanyQuickFind({ recentCompanies }: { recentCompanies:
                     <div className="font-semibold text-gray-900 text-lg">{company.company_name}</div>
                     <div className="text-sm text-gray-500 mt-1">{company.company_id}</div>
                   </div>
-                  {company.account_owner && (
+                  {company.sales_rep_id && (
                     <div className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
-                      {company.account_owner}
+                      {company.sales_rep_id === 'rep_001' ? 'Lee' :
+                       company.sales_rep_id === 'rep_002' ? 'Callum' :
+                       company.sales_rep_id === 'rep_003' ? 'Steve' : company.sales_rep_id}
                     </div>
                   )}
                 </div>
