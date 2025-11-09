@@ -8,6 +8,7 @@ import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import CaptureModal from './CaptureModal';
 import MediaImage from '@/components/shared/MediaImage';
+import { replacePlaceholders } from '@/lib/textUtils';
 
 interface Problem {
   problem_solution_id: string;
@@ -40,6 +41,24 @@ export default function MachinePageClient({
         {problemCards.map((card: any) => {
           const imageUrl = card.resolved_image_url || '/placeholder-machine.jpg';
 
+          // Replace placeholders in card copy and CTA
+          const cardCopy = replacePlaceholders(card.resolved_card_copy, {
+            brand: machineData.brand,
+            model: machineData.model,
+            display_name: machineData.display_name,
+            type: undefined
+          });
+
+          const ctaText = replacePlaceholders(
+            card.resolved_cta || `See how this works on your ${machineData.brand} ${machineData.model}`,
+            {
+              brand: machineData.brand,
+              model: machineData.model,
+              display_name: machineData.display_name,
+              type: undefined
+            }
+          );
+
           return (
             <div key={card.problem_solution_id} className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden hover:border-blue-500 hover:shadow-xl transition-all">
               {/* Image */}
@@ -64,7 +83,7 @@ export default function MachinePageClient({
 
                 {/* Copy */}
                 <div className="prose prose-lg max-w-none mb-6">
-                  <ReactMarkdown>{card.resolved_card_copy}</ReactMarkdown>
+                  <ReactMarkdown>{cardCopy}</ReactMarkdown>
                 </div>
 
                 {/* CTA Button */}
@@ -72,7 +91,7 @@ export default function MachinePageClient({
                   onClick={() => setModalOpen(true)}
                   className="inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors"
                 >
-                  {card.resolved_cta || `See how this works on your ${machineData.brand} ${machineData.model}`}
+                  {ctaText}
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>

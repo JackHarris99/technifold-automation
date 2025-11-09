@@ -6,6 +6,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { replacePlaceholders } from '@/lib/textUtils';
 
 interface Machine {
   machine_id: string;
@@ -19,6 +20,7 @@ interface ProblemCard {
   machine_id: string;
   problem_solution_id: string;
   solution_name: string;
+  title: string;
   resolved_card_copy: string;
   resolved_cta: string;
   resolved_image_url?: string;
@@ -202,25 +204,28 @@ export default function MachineFinder({ onMachineSelect }: MachineFinderProps) {
 
             {/* Problem List */}
             <div className="space-y-3 mb-6">
-              {problemCards.map((card, index) => (
-                <div key={`${card.problem_solution_id}-${index}`} className="bg-white/90 rounded-lg p-4 flex items-center gap-3 hover:bg-white transition-colors">
-                  <div className="flex-shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
+              {problemCards.map((card, index) => {
+                const problemTitle = replacePlaceholders(card.title, {
+                  brand: selectedMachineData?.brand,
+                  model: selectedMachineData?.model,
+                  display_name: selectedMachineData?.display_name,
+                  type: selectedMachineData?.type
+                });
+
+                return (
+                  <div key={`${card.problem_solution_id}-${index}`} className="bg-white/90 rounded-lg p-4 flex items-center gap-3 hover:bg-white transition-colors">
+                    <div className="flex-shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-sm font-semibold text-blue-600">{card.solution_name}</span>
+                      <p className="text-gray-900 font-medium">{problemTitle}</p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <span className="text-sm font-semibold text-blue-600">{card.solution_name}</span>
-                    <p className="text-gray-900 font-medium">
-                      {/* Extract first sentence from card copy */}
-                      {card.resolved_card_copy
-                        ?.replace(/[#*_`]/g, '')
-                        .split(/[.!?]/)[0]
-                        .substring(0, 100)}...
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Big CTA to machine page */}

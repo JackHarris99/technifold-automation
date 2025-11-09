@@ -9,6 +9,7 @@ import { verifyToken } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
+import { replacePlaceholders } from '@/lib/textUtils';
 import ReactMarkdown from 'react-markdown';
 import MediaImage from '@/components/shared/MediaImage';
 
@@ -16,35 +17,6 @@ interface MarketingPageProps {
   params: Promise<{
     token: string;
   }>;
-}
-
-// Placeholder replacement function
-function replacePlaceholders(text: string, machineData?: {
-  brand?: string;
-  model?: string;
-  display_name?: string;
-  type?: string;
-}, companyName?: string): string {
-  if (!text) return '';
-
-  const brand = machineData?.brand || '';
-  const model = machineData?.model || '';
-  const displayName = machineData?.display_name || '';
-  const type = machineData?.type?.replace('_', ' ') || '';
-
-  return text
-    // With fallback: {brand|your} → brand or "your"
-    .replace(/\{brand\|([^}]+)\}/gi, brand || '$1')
-    .replace(/\{model\|([^}]+)\}/gi, model || '$1')
-    .replace(/\{display_name\|([^}]+)\}/gi, displayName || '$1')
-    .replace(/\{type\|([^}]+)\}/gi, type || '$1')
-    .replace(/\{company\|([^}]+)\}/gi, companyName || '$1')
-    // Without fallback: {brand} → brand or "your"
-    .replace(/\{brand\}/gi, brand || 'your')
-    .replace(/\{model\}/gi, model || 'machine')
-    .replace(/\{display_name\}/gi, displayName || 'your machine')
-    .replace(/\{type\}/gi, type || 'machine')
-    .replace(/\{company\}/gi, companyName || 'your company');
 }
 
 export default async function MarketingPage({ params }: MarketingPageProps) {
