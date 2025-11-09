@@ -11,7 +11,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('machines')
-    .select('machine_id, brand, model, display_name, type')
+    .select('machine_id, brand, model, display_name, type, slug')
     .order('display_name');
 
   if (error) {
