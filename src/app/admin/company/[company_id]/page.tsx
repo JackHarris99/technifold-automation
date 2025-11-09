@@ -73,12 +73,11 @@ export default async function CompanyConsolePage({ params }: CompanyConsolePageP
     .select(`
       *,
       order_items (
-        order_item_id,
         product_code,
-        quantity,
+        description,
+        qty,
         unit_price,
-        line_total,
-        product_description
+        line_total
       )
     `)
     .eq('company_id', company_id)
@@ -90,9 +89,9 @@ export default async function CompanyConsolePage({ params }: CompanyConsolePageP
     ...order,
     items: (order.order_items || []).map((item: any) => ({
       product_code: item.product_code,
-      quantity: item.quantity,
+      quantity: item.qty,
       price: item.unit_price,
-      description: item.product_description
+      description: item.description
     }))
   }));
 

@@ -1,7 +1,7 @@
 /**
  * GET /api/admin/copy/solutions?machine_id=X
  * Get solutions for a specific machine (for marketing tab)
- * Uses the v_machine_solution_problem_full view
+ * Uses the v_problem_solution_machine view
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -19,8 +19,8 @@ export async function GET(request: NextRequest) {
 
     // Get unique solutions for this machine from the view
     const { data, error } = await supabase
-      .from('v_machine_solution_problem_full')
-      .select('solution_id, solution_name, solution_core_benefit, machine_solution_id')
+      .from('v_problem_solution_machine')
+      .select('solution_name')
       .eq('machine_id', machineId);
 
     if (error) {
@@ -31,12 +31,10 @@ export async function GET(request: NextRequest) {
     // Get unique solutions (view returns one row per problem, so we need to dedupe)
     const solutionsMap = new Map();
     (data || []).forEach(row => {
-      if (!solutionsMap.has(row.solution_id)) {
-        solutionsMap.set(row.solution_id, {
-          solution_id: row.solution_id,
-          machine_solution_id: row.machine_solution_id,
-          name: row.solution_name,
-          core_benefit: row.solution_core_benefit
+      if (!solutionsMap.has(row.solution_name)) {
+        solutionsMap.set(row.solution_name, {
+          solution_id: row.solution_name, // Use solution_name as ID
+          name: row.solution_name
         });
       }
     });
