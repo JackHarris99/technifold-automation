@@ -44,16 +44,49 @@ export default async function MachinePage({ params }: MachinePageProps) {
     display_name: problemCards[0].display_name,
   };
 
+  // Fetch brand media (logo + hero image) for the brand
+  const brandSlug = machineData.brand?.toLowerCase().replace(/\s+/g, '-');
+  const { data: brandMedia } = await supabase
+    .from('brand_media')
+    .select('logo_url, hero_url')
+    .eq('brand_slug', brandSlug)
+    .single();
+
+  // Collect all unique product codes from curated_skus across all cards
+  const allProductCodes = new Set<string>();
+  problemCards.forEach(card => {
+    if (card.curated_skus && Array.isArray(card.curated_skus)) {
+      card.curated_skus.forEach((sku: string) => allProductCodes.add(sku));
+    }
+  });
+
+  // Fetch product data for all curated SKUs
+  const { data: products } = await supabase
+    .from('products')
+    .select('product_code, description, image_url, category')
+    .in('product_code', Array.from(allProductCodes))
+    .eq('active', true);
+
+  // Convert to plain object for serialization (can't pass Map to Client Component)
+  const productData = products || [];
+
   // Each row is already a card - no grouping needed!
 
   return (
     <div className="min-h-screen bg-white">
       <MarketingHeader />
 
-      {/* Hero Section */}
-      <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white py-16">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="flex items-center gap-3 mb-4">
+      {/* Hero Section with Brand Logo and Background */}
+      <div
+        className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white py-20"
+        style={brandMedia?.hero_url ? {
+          backgroundImage: `linear-gradient(to bottom right, rgba(37, 99, 235, 0.9), rgba(79, 70, 229, 0.9)), url(${brandMedia.hero_url})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        } : undefined}
+      >
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center gap-3 mb-6">
             <a href="/" className="text-blue-200 hover:text-white transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -61,20 +94,35 @@ export default async function MachinePage({ params }: MachinePageProps) {
             </a>
             <span className="text-blue-200 text-sm">Back to machine finder</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Solutions for {machineData.display_name}
-          </h1>
-          <p className="text-xl text-blue-100">
-            {machineData.brand} {machineData.model} • Production-proven retrofits
-          </p>
+
+          <div className="flex items-center gap-8 mb-6">
+            {brandMedia?.logo_url && (
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                <img
+                  src={brandMedia.logo_url}
+                  alt={machineData.brand}
+                  className="h-16 w-auto object-contain"
+                />
+              </div>
+            )}
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold mb-2">
+                {machineData.display_name}
+              </h1>
+              <p className="text-xl text-blue-100">
+                Production-proven solutions for your press
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <main className="max-w-5xl mx-auto px-4 py-12">
-        {/* Problem Cards with CaptureModal */}
+      <main className="max-w-7xl mx-auto px-4 py-12">
+        {/* Problem Cards with 2-Column Layout */}
         <MachinePageClient
           machineData={machineData}
           problemCards={problemCards}
+          products={productData}
         />
 
         {/* Setup Guide - Once per page */}
