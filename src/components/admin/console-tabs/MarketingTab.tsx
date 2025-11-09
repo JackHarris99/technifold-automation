@@ -109,7 +109,8 @@ export default function MarketingTab({
       const response = await fetch(`/api/machines/solutions?slug=${machine.slug}`);
       const data = await response.json();
 
-      const card = (data.problemCards || []).find((c: any) => c.problem_id === selectedProblem);
+      // Match by problem_solution_id (which we sent as problem_id from the problems API)
+      const card = (data.problemCards || []).find((c: any) => c.problem_solution_id === selectedProblem);
       setPreviewCard(card);
     }
     loadPreview();
@@ -249,7 +250,7 @@ export default function MarketingTab({
               Exclusive Offer for {companyName}
             </h4>
             <p className="text-gray-700">
-              {previewCard.resolved_copy?.split('\n\n')[0].substring(0, 150)}...
+              {previewCard.resolved_full_copy?.split('\n\n')[0].substring(0, 150)}...
             </p>
           </div>
 
@@ -258,7 +259,7 @@ export default function MarketingTab({
               {previewCard.solution_name}
             </div>
             <div className="prose max-w-none">
-              <ReactMarkdown>{previewCard.resolved_copy}</ReactMarkdown>
+              <ReactMarkdown>{previewCard.resolved_full_copy || 'No copy available'}</ReactMarkdown>
             </div>
           </div>
 

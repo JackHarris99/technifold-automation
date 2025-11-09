@@ -5,7 +5,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import MediaImage from '@/components/shared/MediaImage';
 
 interface OrderItem {
   product_code: string;
@@ -22,6 +22,7 @@ interface Order {
   status: string;
   items: OrderItem[];
   stripe_checkout_session_id?: string;
+  books_invoice_id?: string;
 }
 
 interface ProductImage {
@@ -109,7 +110,7 @@ export default function HistoryTab({ companyId, orders }: { companyId: string; o
                   <div>
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-lg font-bold text-gray-900">
-                        Order #{order.order_id.split('-')[0].toUpperCase()}
+                        {order.books_invoice_id ? `Invoice #${order.books_invoice_id}` : `Order #${order.order_id.split('-')[0].toUpperCase()}`}
                       </h3>
                       {getStatusBadge(order.status, order.payment_status)}
                     </div>
@@ -149,17 +150,13 @@ export default function HistoryTab({ companyId, orders }: { companyId: string; o
                       <div key={idx} className="flex items-center gap-4 bg-gray-50 rounded-lg p-4">
                         {/* Product Image */}
                         <div className="flex-shrink-0 w-20 h-20 bg-white rounded-lg border-2 border-gray-200 flex items-center justify-center overflow-hidden">
-                          {imageUrl ? (
-                            <Image
-                              src={imageUrl}
-                              alt={item.description}
-                              width={80}
-                              height={80}
-                              className="object-contain"
-                            />
-                          ) : (
-                            <div className="text-gray-300 text-3xl">📦</div>
-                          )}
+                          <MediaImage
+                            src={imageUrl}
+                            alt={item.description}
+                            width={80}
+                            height={80}
+                            className="object-contain"
+                          />
                         </div>
 
                         {/* Product Details */}
