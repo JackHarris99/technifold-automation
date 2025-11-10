@@ -53,14 +53,26 @@ export default function MachinePageClient({
     products.map(p => [p.product_code, p])
   );
 
+  // Group problem cards by solution_name
+  const solutionGroups = problemCards.reduce((acc, card) => {
+    const key = card.solution_name;
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(card);
+    return acc;
+  }, {} as Record<string, Problem[]>);
+
   return (
     <>
       <div className="space-y-12 mb-16">
-        {problemCards.map((card: any) => {
-          const imageUrl = card.resolved_image_url || '/placeholder-machine.jpg';
+        {Object.entries(solutionGroups).map(([solutionName, cards]) => {
+          // Use the primary problem's data, or the first one
+          const primaryCard = cards.find(c => (c as any).is_primary_pitch) || cards[0];
+          const imageUrl = primaryCard.resolved_image_url || '/placeholder-machine.jpg';
 
-          // Replace placeholders in card copy and CTA
-          const cardCopy = replacePlaceholders(card.resolved_card_copy, {
+          // Replace placeholders in primary card copy and CTA
+          const cardCopy = replacePlaceholders(primaryCard.resolved_card_copy, {
             brand: machineData.brand,
             model: machineData.model,
             display_name: machineData.display_name,
@@ -68,7 +80,7 @@ export default function MachinePageClient({
           });
 
           const ctaText = replacePlaceholders(
-            card.resolved_cta || `See how this works on your ${machineData.brand} ${machineData.model}`,
+            primaryCard.resolved_cta || `See how this works on your ${machineData.brand} ${machineData.model}`,
             {
               brand: machineData.brand,
               model: machineData.model,
@@ -77,13 +89,17 @@ export default function MachinePageClient({
             }
           );
 
-          // Get curated products for this solution
-          const curatedProducts = (card.curated_skus || [])
+          // Merge curated products from all problems in this solution
+          const allSkus = new Set<string>();
+          cards.forEach(card => {
+            (card.curated_skus || []).forEach(sku => allSkus.add(sku));
+          });
+          const curatedProducts = Array.from(allSkus)
             .map((sku: string) => productMap.get(sku))
             .filter((p): p is Product => p !== undefined);
 
           return (
-            <div key={card.problem_solution_id} className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden hover:border-blue-500 hover:shadow-xl transition-all">
+            <div key={solutionName} className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden hover:border-blue-500 hover:shadow-xl transition-all">
               {/* 2-Column Grid */}
               <div className="grid lg:grid-cols-2 gap-0">
                 {/* LEFT COLUMN: Solution Marketing Content */}
@@ -93,7 +109,7 @@ export default function MachinePageClient({
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    {card.solution_name}
+                    {solutionName}
                   </div>
 
                   {/* Solution Image (if available) */}
@@ -101,10 +117,32 @@ export default function MachinePageClient({
                     <div className="relative h-48 w-full bg-gray-100 rounded-xl overflow-hidden mb-6">
                       <MediaImage
                         src={imageUrl}
-                        alt={`${card.solution_name} - ${card.title}`}
+                        alt={`${solutionName} solution`}
                         fill
                         sizes="(max-width: 768px) 100vw, 50vw"
                       />
+                    </div>
+                  )}
+
+                  {/* Problems this solution solves */}
+                  {cards.length > 1 && (
+                    <div className="mb-6 bg-green-50 border-2 border-green-200 rounded-xl p-4">
+                      <h4 className="font-bold text-green-900 mb-3 flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Solves {cards.length} Problems:
+                      </h4>
+                      <ul className="space-y-2">
+                        {cards.map((card) => (
+                          <li key={card.problem_solution_id} className="flex items-start gap-2">
+                            <svg className="w-4 h-4 text-green-600 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span className="text-sm text-green-900 font-medium">{card.title}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   )}
 
@@ -128,14 +166,14 @@ export default function MachinePageClient({
                 {/* RIGHT COLUMN: Solution Showcase (Before/After/Product Images) */}
                 <div className="bg-gradient-to-br from-gray-50 to-blue-50 p-8 lg:p-12 border-l-2 border-gray-200 flex flex-col gap-6">
                   {/* Before Image */}
-                  {card.resolved_before_image_url && (
+                  {primaryCard.resolved_before_image_url && (
                     <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
                       <div className="bg-red-50 px-4 py-2 border-b border-gray-200">
                         <h4 className="text-sm font-bold text-red-800">Before</h4>
                       </div>
                       <div className="relative h-48 w-full bg-gray-100">
                         <MediaImage
-                          src={card.resolved_before_image_url}
+                          src={primaryCard.resolved_before_image_url}
                           alt="Before using solution"
                           fill
                           sizes="(max-width: 768px) 100vw, 50vw"
@@ -146,14 +184,14 @@ export default function MachinePageClient({
                   )}
 
                   {/* After Image */}
-                  {card.resolved_after_image_url && (
+                  {primaryCard.resolved_after_image_url && (
                     <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
                       <div className="bg-green-50 px-4 py-2 border-b border-gray-200">
                         <h4 className="text-sm font-bold text-green-800">After</h4>
                       </div>
                       <div className="relative h-48 w-full bg-gray-100">
                         <MediaImage
-                          src={card.resolved_after_image_url}
+                          src={primaryCard.resolved_after_image_url}
                           alt="After using solution"
                           fill
                           sizes="(max-width: 768px) 100vw, 50vw"
@@ -164,15 +202,15 @@ export default function MachinePageClient({
                   )}
 
                   {/* Product Image */}
-                  {card.resolved_product_image_url && (
+                  {primaryCard.resolved_product_image_url && (
                     <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
                       <div className="bg-blue-50 px-4 py-2 border-b border-gray-200">
                         <h4 className="text-sm font-bold text-blue-800">Solution Tool</h4>
                       </div>
                       <div className="relative h-64 w-full bg-white p-4">
                         <MediaImage
-                          src={card.resolved_product_image_url}
-                          alt={`${card.solution_name} product`}
+                          src={primaryCard.resolved_product_image_url}
+                          alt={`${solutionName} product`}
                           fill
                           sizes="(max-width: 768px) 100vw, 50vw"
                           className="object-contain"
@@ -182,7 +220,7 @@ export default function MachinePageClient({
                   )}
 
                   {/* Fallback if no images available */}
-                  {!card.resolved_before_image_url && !card.resolved_after_image_url && !card.resolved_product_image_url && (
+                  {!primaryCard.resolved_before_image_url && !primaryCard.resolved_after_image_url && !primaryCard.resolved_product_image_url && (
                     <div className="flex-1 flex items-center justify-center text-center py-8 text-gray-500">
                       <div>
                         <svg className="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
