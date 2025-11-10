@@ -1,58 +1,85 @@
-'use client';
-
 import Link from 'next/link';
+import { getSupabaseClient } from '@/lib/supabase';
+import MediaImage from '../shared/MediaImage';
 
-export function MarketingHeader() {
+export async function MarketingHeader() {
+  // Fetch brand logos from database
+  const supabase = getSupabaseClient();
+  const { data: brands } = await supabase
+    .from('site_branding')
+    .select('brand_key, brand_name, logo_url')
+    .order('brand_key');
+
+  // Create a map for easy lookup
+  const brandMap = new Map(
+    (brands || []).map(b => [b.brand_key, b])
+  );
+
+  const technifold = brandMap.get('technifold');
+  const technicrease = brandMap.get('technicrease');
+  const creasestream = brandMap.get('creasestream');
+
   return (
     <header className="bg-white border-b border-gray-200">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Three Brand Logos */}
           <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center">
-              <img
-                src="/media/technifold-logo.png"
-                alt="Technifold"
-                className="h-12 w-auto object-contain"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                }}
-              />
-              <div className="hidden h-12 w-32 bg-gray-100 rounded flex items-center justify-center">
-                <span className="text-sm text-gray-400">Technifold</span>
-              </div>
-            </Link>
+            {technifold?.logo_url ? (
+              <Link href="/" className="flex items-center">
+                <div className="relative h-12 w-auto">
+                  <MediaImage
+                    src={technifold.logo_url}
+                    alt="Technifold"
+                    width={150}
+                    height={48}
+                    className="h-12 w-auto object-contain"
+                  />
+                </div>
+              </Link>
+            ) : (
+              <Link href="/" className="flex items-center">
+                <div className="h-12 w-32 bg-gray-100 rounded flex items-center justify-center">
+                  <span className="text-sm text-gray-400">Technifold</span>
+                </div>
+              </Link>
+            )}
 
-            <div className="flex items-center">
-              <img
-                src="/media/technicrease-logo.png"
-                alt="Technicrease"
-                className="h-10 w-auto object-contain"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                }}
-              />
-              <div className="hidden h-10 w-32 bg-gray-100 rounded flex items-center justify-center">
+            {technicrease?.logo_url ? (
+              <div className="flex items-center">
+                <div className="relative h-10 w-auto">
+                  <MediaImage
+                    src={technicrease.logo_url}
+                    alt="Technicrease"
+                    width={150}
+                    height={40}
+                    className="h-10 w-auto object-contain"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="h-10 w-32 bg-gray-100 rounded flex items-center justify-center">
                 <span className="text-sm text-gray-400">Technicrease</span>
               </div>
-            </div>
+            )}
 
-            <div className="flex items-center">
-              <img
-                src="/media/creasestream-logo.png"
-                alt="CreaseStream"
-                className="h-10 w-auto object-contain"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                }}
-              />
-              <div className="hidden h-10 w-32 bg-gray-100 rounded flex items-center justify-center">
+            {creasestream?.logo_url ? (
+              <div className="flex items-center">
+                <div className="relative h-10 w-auto">
+                  <MediaImage
+                    src={creasestream.logo_url}
+                    alt="CreaseStream"
+                    width={150}
+                    height={40}
+                    className="h-10 w-auto object-contain"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="h-10 w-32 bg-gray-100 rounded flex items-center justify-center">
                 <span className="text-sm text-gray-400">CreaseStream</span>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Navigation */}
