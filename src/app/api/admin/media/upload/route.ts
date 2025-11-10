@@ -51,7 +51,19 @@ export async function POST(request: NextRequest) {
 
     // Get file extension and storage path
     const extension = getFileExtension(file.name);
-    const storagePath = getStoragePath(mediaType, identifier, extension);
+
+    // Generate unique path based on column to avoid overwrites
+    // For multiple image types (before/after/product), include column in filename
+    let pathIdentifier = identifier;
+    if (column === 'before_image_url') {
+      pathIdentifier = `${identifier}_before`;
+    } else if (column === 'after_image_url') {
+      pathIdentifier = `${identifier}_after`;
+    } else if (column === 'product_image_url') {
+      pathIdentifier = `${identifier}_product`;
+    }
+
+    const storagePath = getStoragePath(mediaType, pathIdentifier, extension);
 
     console.log('[UPLOAD] Starting upload:', {
       mediaType,
