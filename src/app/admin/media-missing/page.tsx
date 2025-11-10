@@ -151,7 +151,7 @@ export default function MissingMediaPage() {
                 table="problem_solution"
                 column="image_url"
                 recordId={item.id}
-                idColumn="problem_solution_id"
+                idColumn="id"
                 currentUrl={item.image_url}
                 label="Generic Image"
                 type="image"
@@ -191,7 +191,7 @@ export default function MissingMediaPage() {
                 table="problem_solution_machine"
                 column="image_url"
                 recordId={item.id}
-                idColumn="problem_solution_machine_id"
+                idColumn="id"
                 currentUrl={item.image_url}
                 label="Machine-Specific Image"
                 type="image"

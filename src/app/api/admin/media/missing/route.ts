@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
     if (!type || type === 'problem_solution') {
       const { data: ps, error } = await supabase
         .from('problem_solution')
-        .select('problem_solution_id, title, solution_name, image_url')
+        .select('id, title, solution_name, image_url')
         .is('image_url', null)
         .eq('active', true)
         .order('title')
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
         result.problem_solution = [];
       } else {
         result.problem_solution = ps?.map((item: any) => ({
-          id: item.problem_solution_id,
+          id: item.id,
           name: `${item.solution_name} - ${item.title}`,
           missing_image: true,
           image_url: null,
@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
         const { data: psm, error } = await supabase
           .from('problem_solution_machine')
           .select(`
-            problem_solution_machine_id,
+            id,
             problem_solution_id,
             machine_id,
             image_url,
@@ -141,7 +141,7 @@ export async function GET(request: NextRequest) {
         const problemTitle = ps?.title || 'Unknown';
 
         return {
-          id: item.problem_solution_machine_id,
+          id: item.id,
           problem_solution_id: item.problem_solution_id,
           machine_id: item.machine_id,
           name: `${machineName} → ${solutionName} - ${problemTitle}`,
