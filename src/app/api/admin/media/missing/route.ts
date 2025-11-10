@@ -71,29 +71,30 @@ export async function GET(request: NextRequest) {
       }));
     }
 
-    // Problem/Solutions (missing image_url or video_url)
+    // Problem/Solutions (missing image_url)
     if (!type || type === 'problem_solution') {
       const { data: ps, error } = await supabase
         .from('problem_solution')
-        .select('id, title, solution_name, image_url, video_url')
-        .or('image_url.is.null,video_url.is.null')
+        .select('problem_solution_id, title, solution_name, image_url')
+        .is('image_url', null)
         .eq('active', true)
         .order('title')
-        .range(0, 1999); // 0-1999 = 2000 rows
+        .limit(2000);
 
-      if (error) throw error;
-
-      result.problem_solution = ps?.map((item: any) => ({
-        id: item.id,
-        name: `${item.solution_name} - ${item.title}`,
-        missing_image: !item.image_url,
-        missing_video: !item.video_url,
-        image_url: item.image_url,
-        video_url: item.video_url,
-      }));
+      if (error) {
+        console.warn('[missing-media] problem_solution query error:', error);
+        result.problem_solution = [];
+      } else {
+        result.problem_solution = ps?.map((item: any) => ({
+          id: item.problem_solution_id,
+          name: `${item.solution_name} - ${item.title}`,
+          missing_image: true,
+          image_url: null,
+        })) || [];
+      }
     }
 
-    // Problem/Solution × Machine (missing override image_url or video_url)
+    // Problem/Solution × Machine (missing override image_url)
     // Supabase has 1000-row hard limit, fetch multiple pages
     if (!type || type === 'problem_solution_machine') {
       let allPSM: any[] = [];
@@ -105,19 +106,21 @@ export async function GET(request: NextRequest) {
         const { data: psm, error } = await supabase
           .from('problem_solution_machine')
           .select(`
-            id,
+            problem_solution_machine_id,
             problem_solution_id,
             machine_id,
             image_url,
-            video_url,
             problem_solution:problem_solution_id(title, solution_name),
             machines:machine_id(display_name)
           `)
-          .or('image_url.is.null,video_url.is.null')
+          .is('image_url', null)
           .order('machine_id')
           .range(page * pageSize, (page + 1) * pageSize - 1);
 
-        if (error) throw error;
+        if (error) {
+          console.warn('[missing-media] problem_solution_machine query error:', error);
+          break;
+        }
 
         if (!psm || psm.length === 0) {
           hasMore = false;
@@ -138,14 +141,12 @@ export async function GET(request: NextRequest) {
         const problemTitle = ps?.title || 'Unknown';
 
         return {
-          id: item.id,
+          id: item.problem_solution_machine_id,
           problem_solution_id: item.problem_solution_id,
           machine_id: item.machine_id,
           name: `${machineName} → ${solutionName} - ${problemTitle}`,
-          missing_image: !item.image_url,
-          missing_video: !item.video_url,
-          image_url: item.image_url,
-          video_url: item.video_url,
+          missing_image: true,
+          image_url: null,
         };
       });
     }

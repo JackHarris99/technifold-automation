@@ -29,23 +29,19 @@ interface MissingMediaItem {
 
 interface MissingMediaData {
   products?: MissingMediaItem[];
-  solutions?: MissingMediaItem[];
-  problems?: MissingMediaItem[];
-  solution_problem?: MissingMediaItem[];
-  machine_solution_problem?: MissingMediaItem[];
+  problem_solution?: MissingMediaItem[];
+  problem_solution_machine?: MissingMediaItem[];
   brands?: MissingMediaItem[];
   site_logos?: MissingMediaItem[];
 }
 
-type TabType = 'products' | 'solutions' | 'problems' | 'solution_problem' | 'machine_solution_problem' | 'brands' | 'site_logos';
+type TabType = 'products' | 'problem_solution' | 'problem_solution_machine' | 'brands' | 'site_logos';
 
 const TABS: { id: TabType; label: string }[] = [
   { id: 'site_logos', label: 'Site Logos' },
   { id: 'products', label: 'Products' },
-  { id: 'solutions', label: 'Solutions' },
-  { id: 'problems', label: 'Problems' },
-  { id: 'solution_problem', label: 'Solution × Problem' },
-  { id: 'machine_solution_problem', label: 'Machine × Solution × Problem' },
+  { id: 'problem_solution', label: 'Problem/Solution (Generic)' },
+  { id: 'problem_solution_machine', label: 'Problem/Solution (Machine-Specific)' },
   { id: 'brands', label: 'Machine Brands' },
 ];
 
@@ -128,18 +124,18 @@ export default function MissingMediaPage() {
     );
   };
 
-  const renderSolutionsTab = () => {
-    const items = data.solutions || [];
+  const renderProblemSolutionTab = () => {
+    const items = data.problem_solution || [];
     const filteredItems = searchTerm
       ? items.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
       : items;
 
     if (filteredItems.length === 0 && searchTerm) {
-      return <div className="text-center py-12 text-gray-500">No solutions found matching "{searchTerm}"</div>;
+      return <div className="text-center py-12 text-gray-500">No problem/solutions found matching "{searchTerm}"</div>;
     }
 
     if (filteredItems.length === 0) {
-      return <div className="text-center py-12 text-gray-500">All solutions have images!</div>;
+      return <div className="text-center py-12 text-gray-500">All problem/solutions have images!</div>;
     }
 
     return (
@@ -150,14 +146,14 @@ export default function MissingMediaPage() {
 
             {item.missing_image && (
               <MediaUpload
-                mediaType="solution"
+                mediaType="problem_solution"
                 identifier={item.id}
-                table="solutions"
-                column="default_image_url"
+                table="problem_solution"
+                column="image_url"
                 recordId={item.id}
-                idColumn="solution_id"
+                idColumn="problem_solution_id"
                 currentUrl={item.image_url}
-                label="Solution Image"
+                label="Generic Image"
                 type="image"
                 onUploadSuccess={handleUploadSuccess}
               />
@@ -168,18 +164,18 @@ export default function MissingMediaPage() {
     );
   };
 
-  const renderProblemsTab = () => {
-    const items = data.problems || [];
+  const renderProblemSolutionMachineTab = () => {
+    const items = data.problem_solution_machine || [];
     const filteredItems = searchTerm
       ? items.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
       : items;
 
     if (filteredItems.length === 0 && searchTerm) {
-      return <div className="text-center py-12 text-gray-500">No problems found matching "{searchTerm}"</div>;
+      return <div className="text-center py-12 text-gray-500">No machine-specific problem/solutions found matching "{searchTerm}"</div>;
     }
 
     if (filteredItems.length === 0) {
-      return <div className="text-center py-12 text-gray-500">All problems have images!</div>;
+      return <div className="text-center py-12 text-gray-500">All machine-specific problem/solutions have images!</div>;
     }
 
     return (
@@ -190,97 +186,15 @@ export default function MissingMediaPage() {
 
             {item.missing_image && (
               <MediaUpload
-                mediaType="problem"
+                mediaType="problem_solution_machine"
                 identifier={item.id}
-                table="problems"
-                column="default_image_url"
+                table="problem_solution_machine"
+                column="image_url"
                 recordId={item.id}
-                idColumn="problem_id"
+                idColumn="problem_solution_machine_id"
                 currentUrl={item.image_url}
-                label="Problem Image"
+                label="Machine-Specific Image"
                 type="image"
-                onUploadSuccess={handleUploadSuccess}
-              />
-            )}
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const renderSolutionProblemTab = () => {
-    const items = data.solution_problem || [];
-    const filteredItems = searchTerm
-      ? items.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
-      : items;
-
-    if (filteredItems.length === 0 && searchTerm) {
-      return <div className="text-center py-12 text-gray-500">No solution × problem pairs found matching "{searchTerm}"</div>;
-    }
-
-    if (filteredItems.length === 0) {
-      return <div className="text-center py-12 text-gray-500">All solution × problem pairs have images!</div>;
-    }
-
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredItems.map((item) => (
-          <div key={item.id} className="border border-gray-300 rounded-lg p-4 bg-white">
-            <h3 className="font-semibold text-sm mb-3">{item.name}</h3>
-
-            {item.missing_image && (
-              <MediaUpload
-                mediaType="solution_problem"
-                identifier={item.id}
-                table="solution_problem"
-                column="default_image_url"
-                recordId={item.id}
-                currentUrl={item.image_url}
-                label="Image"
-                type="image"
-                solution_id={item.solution_id}
-                problem_id={item.problem_id}
-                onUploadSuccess={handleUploadSuccess}
-              />
-            )}
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const renderMachineSolutionProblemTab = () => {
-    const items = data.machine_solution_problem || [];
-    const filteredItems = searchTerm
-      ? items.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
-      : items;
-
-    if (filteredItems.length === 0 && searchTerm) {
-      return <div className="text-center py-12 text-gray-500">No machine × solution × problem records found matching "{searchTerm}"</div>;
-    }
-
-    if (filteredItems.length === 0) {
-      return <div className="text-center py-12 text-gray-500">All machine × solution × problem records have images!</div>;
-    }
-
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredItems.map((item) => (
-          <div key={item.id} className="border border-gray-300 rounded-lg p-4 bg-white">
-            <h3 className="font-semibold text-sm mb-3">{item.name}</h3>
-
-            {item.missing_image && (
-              <MediaUpload
-                mediaType="machine_solution_problem"
-                identifier={item.id}
-                table="machine_solution_problem"
-                column="override_image_url"
-                recordId={item.id}
-                currentUrl={item.image_url}
-                label="Override Image"
-                type="image"
-                machine_solution_id={item.machine_solution_id}
-                problem_id={item.problem_id}
                 onUploadSuccess={handleUploadSuccess}
               />
             )}
@@ -418,14 +332,10 @@ export default function MissingMediaPage() {
         return renderSiteLogosTab();
       case 'products':
         return renderProductsTab();
-      case 'solutions':
-        return renderSolutionsTab();
-      case 'problems':
-        return renderProblemsTab();
-      case 'solution_problem':
-        return renderSolutionProblemTab();
-      case 'machine_solution_problem':
-        return renderMachineSolutionProblemTab();
+      case 'problem_solution':
+        return renderProblemSolutionTab();
+      case 'problem_solution_machine':
+        return renderProblemSolutionMachineTab();
       case 'brands':
         return renderBrandsTab();
       default:
