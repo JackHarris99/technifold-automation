@@ -26,9 +26,9 @@ export default async function MachinePage({ params }: MachinePageProps) {
   const { data: problemCards, error } = await supabase
     .from('v_problem_solution_machine')
     .select('*')
-    .eq('slug', slug)
+    .eq('machine_slug', slug)
     .order('machine_relevance_rank', { ascending: true })
-    .order('global_relevance_rank', { ascending: true })
+    .order('generic_relevance_rank', { ascending: true })
     .limit(500);
 
   if (error || !problemCards || problemCards.length === 0) {

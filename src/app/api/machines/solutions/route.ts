@@ -24,9 +24,9 @@ export async function GET(request: NextRequest) {
     const { data: problemCards, error } = await supabase
       .from('v_problem_solution_machine')
       .select('*')
-      .eq('slug', slug)
+      .eq('machine_slug', slug)
       .order('machine_relevance_rank', { ascending: true })
-      .order('global_relevance_rank', { ascending: true });
+      .order('generic_relevance_rank', { ascending: true });
 
     console.log('[machines/solutions] Query result - cards:', problemCards?.length || 0, 'error:', error?.message || 'none');
 
