@@ -261,34 +261,85 @@ export default function MarketingBuilderTab({
           </div>
 
           {/* Preview */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Preview</h3>
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-6">Preview</h3>
 
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-6 rounded-xl mb-4">
-              <h4 className="text-2xl font-bold text-gray-900 mb-2">
-                Exclusive Offer for {companyName}
+            {/* Hero Preview */}
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl p-8 mb-6 text-center">
+              <h4 className="text-3xl font-bold mb-2">
+                Solutions for {companyName}
               </h4>
-              {selectedCardsArray.length > 0 && selectedCardsArray[0].resolved_copy && (
-                <p className="text-gray-700">
-                  {selectedCardsArray[0].resolved_copy.split('\n\n')[0].substring(0, 150)}...
-                </p>
-              )}
+              <p className="text-blue-100 text-lg">
+                Personalized recommendations for your equipment
+              </p>
             </div>
 
-            <div className="space-y-4 mb-6">
-              {selectedCardsArray.slice(0, 2).map((card) => (
-                <div key={card.problem_id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                  <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-bold mb-2">
-                    {card.solution_name}
-                  </div>
-                  <div className="prose prose-sm max-w-none text-gray-900">
-                    <ReactMarkdown>{card.resolved_copy?.substring(0, 300)}...</ReactMarkdown>
-                  </div>
-                </div>
-              ))}
-              {selectedCardsArray.length > 2 && (
-                <div className="text-sm text-gray-500 text-center">
-                  +{selectedCardsArray.length - 2} more cards (shown on landing page)
+            {/* Grouped Cards Preview */}
+            <div className="space-y-8 mb-6">
+              {(() => {
+                // Group cards by solution_name
+                const solutionGroups = selectedCardsArray.reduce((acc: Record<string, any[]>, card: any) => {
+                  const key = card.solution_name;
+                  if (!acc[key]) {
+                    acc[key] = [];
+                  }
+                  acc[key].push(card);
+                  return acc;
+                }, {});
+
+                return Object.entries(solutionGroups).slice(0, 2).map(([solutionName, cards]) => {
+                  const primaryCard = (cards as any[]).find((c: any) => c.is_primary_pitch) || cards[0];
+
+                  return (
+                    <div key={solutionName} className="bg-white rounded-xl shadow-sm overflow-hidden">
+                      <div className="p-6">
+                        {/* Solution Badge */}
+                        <div className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-semibold mb-4">
+                          {solutionName}
+                        </div>
+
+                        {/* Problems this solution solves */}
+                        {(cards as any[]).length > 1 && (
+                          <div className="mb-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg p-4">
+                            <h4 className="font-bold text-green-900 mb-2 text-sm">
+                              Solves {(cards as any[]).length} Problems:
+                            </h4>
+                            <ul className="space-y-1">
+                              {(cards as any[]).map((card: any) => (
+                                <li key={card.problem_id} className="flex items-start gap-2">
+                                  <svg className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                  <span className="text-sm text-green-900">{card.title}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Marketing Copy Preview */}
+                        <div className="prose prose-sm max-w-none text-gray-700">
+                          <ReactMarkdown>{primaryCard.resolved_copy?.substring(0, 400)}...</ReactMarkdown>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
+
+              {Object.keys(selectedCardsArray.reduce((acc: Record<string, any[]>, card: any) => {
+                const key = card.solution_name;
+                if (!acc[key]) acc[key] = [];
+                acc[key].push(card);
+                return acc;
+              }, {})).length > 2 && (
+                <div className="text-sm text-gray-500 text-center bg-white rounded-lg p-4">
+                  +{Object.keys(selectedCardsArray.reduce((acc: Record<string, any[]>, card: any) => {
+                    const key = card.solution_name;
+                    if (!acc[key]) acc[key] = [];
+                    acc[key].push(card);
+                    return acc;
+                  }, {})).length - 2} more solution(s) (shown on landing page)
                 </div>
               )}
             </div>
