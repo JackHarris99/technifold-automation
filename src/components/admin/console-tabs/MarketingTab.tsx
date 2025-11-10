@@ -30,13 +30,11 @@ export default function MarketingTab({
   const [selectedBrand, setSelectedBrand] = useState('');
   const [selectedMachine, setSelectedMachine] = useState('');
   const [selectedSolution, setSelectedSolution] = useState('');
-  const [selectedProblem, setSelectedProblem] = useState('');
 
   // Data
   const [machinesFiltered, setMachinesFiltered] = useState<any[]>([]);
   const [solutions, setSolutions] = useState<any[]>([]);
-  const [problems, setProblems] = useState<any[]>([]);
-  const [previewCard, setPreviewCard] = useState<any>(null);
+  const [problemCards, setProblemCards] = useState<any[]>([]);
 
   // Contact selection
   const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
@@ -81,53 +79,33 @@ export default function MarketingTab({
     fetchSolutions();
   }, [selectedMachine]);
 
-  // Fetch problems for solution
+  // Load ALL problem cards when solution selected
   useEffect(() => {
     if (!selectedSolution || !selectedMachine) {
-      setProblems([]);
-      setSelectedProblem('');
+      setProblemCards([]);
       return;
     }
 
-    async function fetchProblems() {
-      const response = await fetch(`/api/admin/copy/problems?machine_id=${selectedMachine}&solution_id=${selectedSolution}`);
-      const data = await response.json();
-      setProblems(data.problems || []);
-    }
-    fetchProblems();
-  }, [selectedSolution, selectedMachine]);
-
-  // Load preview when problem selected
-  useEffect(() => {
-    console.log('[MarketingTab] Preview effect triggered', { selectedProblem, selectedMachine });
-
-    if (!selectedProblem || !selectedMachine) {
-      console.log('[MarketingTab] Missing selection, clearing preview');
-      setPreviewCard(null);
-      return;
-    }
-
-    async function loadPreview() {
+    async function loadProblemsForSolution() {
       const machine = allMachines.find(m => m.machine_id === selectedMachine);
-      console.log('[MarketingTab] Found machine:', machine);
+      if (!machine?.slug) return;
 
-      if (!machine?.slug) {
-        console.warn('[MarketingTab] Machine has no slug, cannot load preview');
-        return;
-      }
-
-      console.log('[MarketingTab] Fetching preview for slug:', machine.slug);
+      // Get all problem cards for this machine
       const response = await fetch(`/api/machines/solutions?slug=${machine.slug}`);
       const data = await response.json();
-      console.log('[MarketingTab] API returned cards:', data.problemCards?.length || 0);
 
-      // Match by problem_solution_id (which we sent as problem_id from the problems API)
-      const card = (data.problemCards || []).find((c: any) => c.problem_solution_id === selectedProblem);
-      console.log('[MarketingTab] Matched card:', card ? 'FOUND' : 'NOT FOUND', { selectedProblem, card });
-      setPreviewCard(card);
+      // Get solution name from the solutions list
+      const solution = solutions.find(s => s.solution_id === selectedSolution);
+
+      // Filter cards that match this solution
+      const cardsForSolution = (data.problemCards || []).filter(
+        (card: any) => card.solution_name === solution?.name
+      );
+
+      setProblemCards(cardsForSolution);
     }
-    loadPreview();
-  }, [selectedProblem, selectedMachine, allMachines]);
+    loadProblemsForSolution();
+  }, [selectedSolution, selectedMachine, allMachines, solutions]);
 
   const handleSend = async () => {
     if (selectedContacts.size === 0) {
@@ -135,12 +113,16 @@ export default function MarketingTab({
       return;
     }
 
-    if (!selectedMachine || !selectedProblem) {
-      alert('Please select a machine and problem first');
+    if (!selectedMachine || !selectedSolution || problemCards.length === 0) {
+      alert('Please select a machine and solution first');
       return;
     }
 
     const machine = allMachines.find(m => m.machine_id === selectedMachine);
+
+    // Collect all problem IDs and curated SKUs from all cards
+    const allProblemIds = problemCards.map(card => card.problem_solution_id);
+    const allCuratedSkus = [...new Set(problemCards.flatMap(card => card.curated_skus || []))];
 
     setSending(true);
     try {
@@ -151,8 +133,8 @@ export default function MarketingTab({
           company_id: companyId,
           contact_ids: Array.from(selectedContacts),
           machine_slug: machine.slug,
-          selected_problem_ids: [selectedProblem],
-          curated_skus: previewCard?.curated_skus || [],
+          selected_problem_ids: allProblemIds,
+          curated_skus: allCuratedSkus,
           campaign_key: `manual_${new Date().toISOString().split('T')[0]}`,
           offer_key: `solution_${selectedSolution?.substring(0, 15)}`
         })
@@ -191,7 +173,7 @@ export default function MarketingTab({
       {/* Cascading Selects */}
       <div className="bg-white border border-gray-200 rounded-xl p-6">
         <h3 className="font-bold text-gray-900 mb-4">Select What to Market</h3>
-        <div className="grid md:grid-cols-4 gap-4">
+        <div className="grid md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-bold text-gray-900 mb-2">Brand</label>
             <select
@@ -235,32 +217,18 @@ export default function MarketingTab({
               ))}
             </select>
           </div>
-
-          <div>
-            <label className="block text-sm font-bold text-gray-900 mb-2">Problem</label>
-            <select
-              value={selectedProblem}
-              onChange={(e) => setSelectedProblem(e.target.value)}
-              disabled={!selectedSolution}
-              className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg disabled:bg-gray-100"
-            >
-              <option value="">Select problem...</option>
-              {problems.map(p => (
-                <option key={p.problem_id} value={p.problem_id}>{p.title}</option>
-              ))}
-            </select>
-          </div>
         </div>
       </div>
 
       {/* Preview */}
-      {previewCard && (() => {
-        // Get the selected machine data for placeholder replacement
+      {problemCards.length > 0 && (() => {
         const selectedMachineData = allMachines.find(m => m.machine_id === selectedMachine);
+        const solution = solutions.find(s => s.solution_id === selectedSolution);
+        const primaryCard = problemCards.find((c: any) => c.is_primary_pitch) || problemCards[0];
 
-        // Replace placeholders with actual machine data
+        // Replace placeholders in primary card
         const personalizedCopy = replacePlaceholders(
-          previewCard.resolved_full_copy || previewCard.resolved_card_copy || '',
+          primaryCard.resolved_full_copy || primaryCard.resolved_card_copy || '',
           {
             brand: selectedMachineData?.brand,
             model: selectedMachineData?.model,
@@ -270,110 +238,116 @@ export default function MarketingTab({
           companyName
         );
 
-        const previewExcerpt = personalizedCopy.split('\n\n')[0].substring(0, 150);
-
         return (
-          <div className="bg-white border border-gray-200 rounded-xl p-6">
-            <h3 className="font-bold text-gray-900 mb-4">Marketing Preview - What Customer Will See</h3>
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
+            <h3 className="font-bold text-gray-900 mb-6">Marketing Preview - What Customer Will See</h3>
 
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-8 rounded-xl mb-6">
-              <h4 className="text-2xl font-bold text-gray-900 mb-2">
-                Exclusive Offer for {companyName}
+            {/* Hero Preview */}
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl p-8 mb-6 text-center">
+              <h4 className="text-3xl font-bold mb-2">
+                Solutions for {companyName}
               </h4>
-              <p className="text-gray-700">
-                {previewExcerpt}...
+              <p className="text-blue-100 text-lg">
+                Personalized for {selectedMachineData?.display_name}
               </p>
             </div>
 
-            {/* 2-Column Preview matching actual marketing page */}
-            <div className="border-2 border-gray-200 rounded-xl overflow-hidden mb-6">
-              <div className="grid lg:grid-cols-2 gap-0">
-                {/* LEFT: Marketing Copy */}
-                <div className="p-6">
-                  <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-bold mb-4">
-                    {previewCard.solution_name}
-                  </div>
-                  <div className="prose max-w-none">
-                    <ReactMarkdown>{personalizedCopy || 'No copy available'}</ReactMarkdown>
-                  </div>
+            {/* Solution Card Preview */}
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+              <div className="p-8">
+                {/* Solution Badge */}
+                <div className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-semibold mb-6">
+                  {solution?.name}
                 </div>
 
-                {/* RIGHT: Before/After/Product Images */}
-                <div className="bg-gradient-to-br from-gray-50 to-blue-50 p-6 border-l-2 border-gray-200 flex flex-col gap-4">
-                  {/* Before Image */}
-                  {previewCard.resolved_before_image_url && (
-                    <div className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden">
-                      <div className="bg-red-50 px-3 py-1 border-b border-gray-200">
-                        <h4 className="text-xs font-bold text-red-800">Before</h4>
-                      </div>
-                      <div className="relative h-32 w-full bg-gray-100">
-                        <MediaImage
-                          src={previewCard.resolved_before_image_url}
-                          alt="Before"
-                          fill
-                          sizes="300px"
-                          className="object-cover"
-                        />
-                      </div>
-                    </div>
-                  )}
+                {/* Problems this solution solves */}
+                {problemCards.length > 1 && (
+                  <div className="mb-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg p-6">
+                    <h4 className="font-bold text-green-900 mb-3">
+                      Solves {problemCards.length} Problems:
+                    </h4>
+                    <ul className="space-y-2">
+                      {problemCards.map((card: any) => (
+                        <li key={card.problem_solution_id} className="flex items-start gap-3">
+                          <svg className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span className="text-green-900">{card.title}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
-                  {/* After Image */}
-                  {previewCard.resolved_after_image_url && (
-                    <div className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden">
-                      <div className="bg-green-50 px-3 py-1 border-b border-gray-200">
-                        <h4 className="text-xs font-bold text-green-800">After</h4>
-                      </div>
-                      <div className="relative h-32 w-full bg-gray-100">
-                        <MediaImage
-                          src={previewCard.resolved_after_image_url}
-                          alt="After"
-                          fill
-                          sizes="300px"
-                          className="object-cover"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Product Image */}
-                  {previewCard.resolved_product_image_url && (
-                    <div className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden">
-                      <div className="bg-blue-50 px-3 py-1 border-b border-gray-200">
-                        <h4 className="text-xs font-bold text-blue-800">Solution Tool</h4>
-                      </div>
-                      <div className="relative h-40 w-full bg-white p-2">
-                        <MediaImage
-                          src={previewCard.resolved_product_image_url}
-                          alt="Product"
-                          fill
-                          sizes="300px"
-                          className="object-contain"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Fallback if no images */}
-                  {!previewCard.resolved_before_image_url && !previewCard.resolved_after_image_url && !previewCard.resolved_product_image_url && (
-                    <div className="flex-1 flex items-center justify-center text-center py-8 text-gray-500">
-                      <div>
-                        <svg className="w-10 h-10 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <p className="text-xs">
-                          No images uploaded yet
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                {/* Marketing Copy */}
+                <div className="prose prose-lg max-w-none mb-8">
+                  <ReactMarkdown>{personalizedCopy}</ReactMarkdown>
                 </div>
+
+                {/* Before/After Images Side by Side */}
+                {(primaryCard.resolved_before_image_url || primaryCard.resolved_after_image_url) && (
+                  <div className="mb-8">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">See The Difference</h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {primaryCard.resolved_before_image_url && (
+                        <div className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden">
+                          <div className="bg-red-50 px-4 py-2 border-b-2 border-red-200">
+                            <h4 className="font-bold text-red-800 text-sm">Before</h4>
+                          </div>
+                          <div className="relative h-48 w-full bg-gray-50">
+                            <MediaImage
+                              src={primaryCard.resolved_before_image_url}
+                              alt="Before"
+                              fill
+                              sizes="400px"
+                              className="object-cover"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {primaryCard.resolved_after_image_url && (
+                        <div className="bg-white rounded-lg border-2 border-green-200 overflow-hidden">
+                          <div className="bg-green-50 px-4 py-2 border-b-2 border-green-200">
+                            <h4 className="font-bold text-green-800 text-sm">After</h4>
+                          </div>
+                          <div className="relative h-48 w-full bg-gray-50">
+                            <MediaImage
+                              src={primaryCard.resolved_after_image_url}
+                              alt="After"
+                              fill
+                              sizes="400px"
+                              className="object-cover"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Product Image */}
+                {primaryCard.resolved_product_image_url && (
+                  <div className="mb-8 bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">The Solution</h3>
+                    <div className="relative h-64 w-full bg-white rounded-lg p-6">
+                      <MediaImage
+                        src={primaryCard.resolved_product_image_url}
+                        alt="Product"
+                        fill
+                        sizes="600px"
+                        className="object-contain"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
-            {previewCard.curated_skus && previewCard.curated_skus.length > 0 && (
+            {/* Setup Guide if curated SKUs exist */}
+            {primaryCard.curated_skus && primaryCard.curated_skus.length > 0 && (
               <SetupGuide
-                curatedSkus={previewCard.curated_skus}
+                curatedSkus={primaryCard.curated_skus}
                 machineId={selectedMachine}
                 machineName={selectedMachineData?.display_name}
               />
@@ -383,7 +357,7 @@ export default function MarketingTab({
       })()}
 
       {/* Contact Selection */}
-      {previewCard && (
+      {problemCards.length > 0 && (
         <div className="bg-white border border-gray-200 rounded-xl p-6">
           <h3 className="font-bold text-gray-900 mb-4">Select Contacts to Send To</h3>
 
@@ -424,7 +398,7 @@ export default function MarketingTab({
           <div className="flex justify-end mt-6">
             <button
               onClick={handleSend}
-              disabled={sending || selectedContacts.size === 0 || !previewCard}
+              disabled={sending || selectedContacts.size === 0 || problemCards.length === 0}
               className="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 disabled:bg-gray-400"
             >
               {sending ? 'Sending...' : `Send to ${selectedContacts.size} Contact(s)`}
@@ -433,9 +407,9 @@ export default function MarketingTab({
         </div>
       )}
 
-      {!previewCard && (
+      {problemCards.length === 0 && (
         <div className="bg-white border border-gray-200 rounded-xl p-12 text-center text-gray-500">
-          Select a machine, solution, and problem to preview marketing content
+          Select a brand, model, and solution to preview marketing content
         </div>
       )}
     </div>
