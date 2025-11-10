@@ -9,6 +9,7 @@
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import SetupGuide from '../../marketing/SetupGuide';
+import MediaImage from '../../shared/MediaImage';
 import { replacePlaceholders } from '@/lib/textUtils';
 
 interface MarketingTabProps {
@@ -284,12 +285,89 @@ export default function MarketingTab({
               </p>
             </div>
 
-            <div className="border-2 border-gray-200 rounded-xl p-6 mb-6">
-              <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-bold mb-4">
-                {previewCard.solution_name}
-              </div>
-              <div className="prose max-w-none">
-                <ReactMarkdown>{personalizedCopy || 'No copy available'}</ReactMarkdown>
+            {/* 2-Column Preview matching actual marketing page */}
+            <div className="border-2 border-gray-200 rounded-xl overflow-hidden mb-6">
+              <div className="grid lg:grid-cols-2 gap-0">
+                {/* LEFT: Marketing Copy */}
+                <div className="p-6">
+                  <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-bold mb-4">
+                    {previewCard.solution_name}
+                  </div>
+                  <div className="prose max-w-none">
+                    <ReactMarkdown>{personalizedCopy || 'No copy available'}</ReactMarkdown>
+                  </div>
+                </div>
+
+                {/* RIGHT: Before/After/Product Images */}
+                <div className="bg-gradient-to-br from-gray-50 to-blue-50 p-6 border-l-2 border-gray-200 flex flex-col gap-4">
+                  {/* Before Image */}
+                  {previewCard.resolved_before_image_url && (
+                    <div className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden">
+                      <div className="bg-red-50 px-3 py-1 border-b border-gray-200">
+                        <h4 className="text-xs font-bold text-red-800">Before</h4>
+                      </div>
+                      <div className="relative h-32 w-full bg-gray-100">
+                        <MediaImage
+                          src={previewCard.resolved_before_image_url}
+                          alt="Before"
+                          fill
+                          sizes="300px"
+                          className="object-cover"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* After Image */}
+                  {previewCard.resolved_after_image_url && (
+                    <div className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden">
+                      <div className="bg-green-50 px-3 py-1 border-b border-gray-200">
+                        <h4 className="text-xs font-bold text-green-800">After</h4>
+                      </div>
+                      <div className="relative h-32 w-full bg-gray-100">
+                        <MediaImage
+                          src={previewCard.resolved_after_image_url}
+                          alt="After"
+                          fill
+                          sizes="300px"
+                          className="object-cover"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Product Image */}
+                  {previewCard.resolved_product_image_url && (
+                    <div className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden">
+                      <div className="bg-blue-50 px-3 py-1 border-b border-gray-200">
+                        <h4 className="text-xs font-bold text-blue-800">Solution Tool</h4>
+                      </div>
+                      <div className="relative h-40 w-full bg-white p-2">
+                        <MediaImage
+                          src={previewCard.resolved_product_image_url}
+                          alt="Product"
+                          fill
+                          sizes="300px"
+                          className="object-contain"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Fallback if no images */}
+                  {!previewCard.resolved_before_image_url && !previewCard.resolved_after_image_url && !previewCard.resolved_product_image_url && (
+                    <div className="flex-1 flex items-center justify-center text-center py-8 text-gray-500">
+                      <div>
+                        <svg className="w-10 h-10 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p className="text-xs">
+                          No images uploaded yet
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 

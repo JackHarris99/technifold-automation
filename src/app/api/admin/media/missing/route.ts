@@ -71,12 +71,12 @@ export async function GET(request: NextRequest) {
       }));
     }
 
-    // Problem/Solutions (missing image_url)
+    // Problem/Solutions (missing any image)
     if (!type || type === 'problem_solution') {
       const { data: ps, error } = await supabase
         .from('problem_solution')
-        .select('id, title, solution_name, image_url')
-        .is('image_url', null)
+        .select('id, title, solution_name, image_url, before_image_url, after_image_url, product_image_url')
+        .or('image_url.is.null,before_image_url.is.null,after_image_url.is.null,product_image_url.is.null')
         .eq('active', true)
         .order('title')
         .limit(2000);
@@ -88,8 +88,14 @@ export async function GET(request: NextRequest) {
         result.problem_solution = ps?.map((item: any) => ({
           id: item.id,
           name: `${item.solution_name} - ${item.title}`,
-          missing_image: true,
-          image_url: null,
+          missing_image: !item.image_url,
+          missing_before: !item.before_image_url,
+          missing_after: !item.after_image_url,
+          missing_product: !item.product_image_url,
+          image_url: item.image_url,
+          before_image_url: item.before_image_url,
+          after_image_url: item.after_image_url,
+          product_image_url: item.product_image_url,
         })) || [];
       }
     }
@@ -110,10 +116,13 @@ export async function GET(request: NextRequest) {
             problem_solution_id,
             machine_id,
             image_url,
+            before_image_url,
+            after_image_url,
+            product_image_url,
             problem_solution:problem_solution_id(title, solution_name),
             machines:machine_id(display_name)
           `)
-          .is('image_url', null)
+          .or('image_url.is.null,before_image_url.is.null,after_image_url.is.null,product_image_url.is.null')
           .order('machine_id')
           .range(page * pageSize, (page + 1) * pageSize - 1);
 
@@ -145,8 +154,14 @@ export async function GET(request: NextRequest) {
           problem_solution_id: item.problem_solution_id,
           machine_id: item.machine_id,
           name: `${machineName} → ${solutionName} - ${problemTitle}`,
-          missing_image: true,
-          image_url: null,
+          missing_image: !item.image_url,
+          missing_before: !item.before_image_url,
+          missing_after: !item.after_image_url,
+          missing_product: !item.product_image_url,
+          image_url: item.image_url,
+          before_image_url: item.before_image_url,
+          after_image_url: item.after_image_url,
+          product_image_url: item.product_image_url,
         };
       });
     }

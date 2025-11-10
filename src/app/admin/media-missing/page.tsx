@@ -16,10 +16,16 @@ interface MissingMediaItem {
   missing_video?: boolean;
   missing_logo?: boolean;
   missing_hero?: boolean;
+  missing_before?: boolean;
+  missing_after?: boolean;
+  missing_product?: boolean;
   image_url?: string | null;
   video_url?: string | null;
   logo_url?: string | null;
   hero_url?: string | null;
+  before_image_url?: string | null;
+  after_image_url?: string | null;
+  product_image_url?: string | null;
   solution_id?: string;
   problem_id?: string;
   machine_solution_id?: string;
@@ -144,20 +150,67 @@ export default function MissingMediaPage() {
           <div key={item.id} className="border border-gray-300 rounded-lg p-4 bg-white">
             <h3 className="font-semibold text-sm mb-3">{item.name}</h3>
 
-            {item.missing_image && (
-              <MediaUpload
-                mediaType="problem_solution"
-                identifier={item.id}
-                table="problem_solution"
-                column="image_url"
-                recordId={item.id}
-                idColumn="id"
-                currentUrl={item.image_url}
-                label="Generic Image"
-                type="image"
-                onUploadSuccess={handleUploadSuccess}
-              />
-            )}
+            <div className="space-y-3">
+              {item.missing_image && (
+                <MediaUpload
+                  mediaType="problem_solution"
+                  identifier={item.id}
+                  table="problem_solution"
+                  column="image_url"
+                  recordId={item.id}
+                  idColumn="id"
+                  currentUrl={item.image_url}
+                  label="Hero Image"
+                  type="image"
+                  onUploadSuccess={handleUploadSuccess}
+                />
+              )}
+
+              {item.missing_before && (
+                <MediaUpload
+                  mediaType="problem_solution"
+                  identifier={item.id}
+                  table="problem_solution"
+                  column="before_image_url"
+                  recordId={item.id}
+                  idColumn="id"
+                  currentUrl={item.before_image_url}
+                  label="Before Image"
+                  type="image"
+                  onUploadSuccess={handleUploadSuccess}
+                />
+              )}
+
+              {item.missing_after && (
+                <MediaUpload
+                  mediaType="problem_solution"
+                  identifier={item.id}
+                  table="problem_solution"
+                  column="after_image_url"
+                  recordId={item.id}
+                  idColumn="id"
+                  currentUrl={item.after_image_url}
+                  label="After Image"
+                  type="image"
+                  onUploadSuccess={handleUploadSuccess}
+                />
+              )}
+
+              {item.missing_product && (
+                <MediaUpload
+                  mediaType="problem_solution"
+                  identifier={item.id}
+                  table="problem_solution"
+                  column="product_image_url"
+                  recordId={item.id}
+                  idColumn="id"
+                  currentUrl={item.product_image_url}
+                  label="Product Image"
+                  type="image"
+                  onUploadSuccess={handleUploadSuccess}
+                />
+              )}
+            </div>
           </div>
         ))}
       </div>
@@ -184,20 +237,67 @@ export default function MissingMediaPage() {
           <div key={item.id} className="border border-gray-300 rounded-lg p-4 bg-white">
             <h3 className="font-semibold text-sm mb-3">{item.name}</h3>
 
-            {item.missing_image && (
-              <MediaUpload
-                mediaType="problem_solution_machine"
-                identifier={item.id}
-                table="problem_solution_machine"
-                column="image_url"
-                recordId={item.id}
-                idColumn="id"
-                currentUrl={item.image_url}
-                label="Machine-Specific Image"
-                type="image"
-                onUploadSuccess={handleUploadSuccess}
-              />
-            )}
+            <div className="space-y-3">
+              {item.missing_image && (
+                <MediaUpload
+                  mediaType="problem_solution_machine"
+                  identifier={item.id}
+                  table="problem_solution_machine"
+                  column="image_url"
+                  recordId={item.id}
+                  idColumn="id"
+                  currentUrl={item.image_url}
+                  label="Machine-Specific Hero Image"
+                  type="image"
+                  onUploadSuccess={handleUploadSuccess}
+                />
+              )}
+
+              {item.missing_before && (
+                <MediaUpload
+                  mediaType="problem_solution_machine"
+                  identifier={item.id}
+                  table="problem_solution_machine"
+                  column="before_image_url"
+                  recordId={item.id}
+                  idColumn="id"
+                  currentUrl={item.before_image_url}
+                  label="Machine-Specific Before Image"
+                  type="image"
+                  onUploadSuccess={handleUploadSuccess}
+                />
+              )}
+
+              {item.missing_after && (
+                <MediaUpload
+                  mediaType="problem_solution_machine"
+                  identifier={item.id}
+                  table="problem_solution_machine"
+                  column="after_image_url"
+                  recordId={item.id}
+                  idColumn="id"
+                  currentUrl={item.after_image_url}
+                  label="Machine-Specific After Image"
+                  type="image"
+                  onUploadSuccess={handleUploadSuccess}
+                />
+              )}
+
+              {item.missing_product && (
+                <MediaUpload
+                  mediaType="problem_solution_machine"
+                  identifier={item.id}
+                  table="problem_solution_machine"
+                  column="product_image_url"
+                  recordId={item.id}
+                  idColumn="id"
+                  currentUrl={item.product_image_url}
+                  label="Machine-Specific Product Image"
+                  type="image"
+                  onUploadSuccess={handleUploadSuccess}
+                />
+              )}
+            </div>
           </div>
         ))}
       </div>
