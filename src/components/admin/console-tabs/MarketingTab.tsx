@@ -9,6 +9,7 @@
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import SetupGuide from '../../marketing/SetupGuide';
+import { replacePlaceholders } from '@/lib/textUtils';
 
 interface MarketingTabProps {
   companyId: string;
@@ -252,37 +253,56 @@ export default function MarketingTab({
       </div>
 
       {/* Preview */}
-      {previewCard && (
-        <div className="bg-white border border-gray-200 rounded-xl p-6">
-          <h3 className="font-bold text-gray-900 mb-4">Marketing Preview - What Customer Will See</h3>
+      {previewCard && (() => {
+        // Get the selected machine data for placeholder replacement
+        const selectedMachineData = allMachines.find(m => m.machine_id === selectedMachine);
 
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-8 rounded-xl mb-6">
-            <h4 className="text-2xl font-bold text-gray-900 mb-2">
-              Exclusive Offer for {companyName}
-            </h4>
-            <p className="text-gray-700">
-              {previewCard.resolved_full_copy?.split('\n\n')[0].substring(0, 150)}...
-            </p>
-          </div>
+        // Replace placeholders with actual machine data
+        const personalizedCopy = replacePlaceholders(
+          previewCard.resolved_full_copy || previewCard.resolved_card_copy || '',
+          {
+            brand: selectedMachineData?.brand,
+            model: selectedMachineData?.model,
+            display_name: selectedMachineData?.display_name,
+            type: selectedMachineData?.type
+          },
+          companyName
+        );
 
-          <div className="border-2 border-gray-200 rounded-xl p-6 mb-6">
-            <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-bold mb-4">
-              {previewCard.solution_name}
+        const previewExcerpt = personalizedCopy.split('\n\n')[0].substring(0, 150);
+
+        return (
+          <div className="bg-white border border-gray-200 rounded-xl p-6">
+            <h3 className="font-bold text-gray-900 mb-4">Marketing Preview - What Customer Will See</h3>
+
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-8 rounded-xl mb-6">
+              <h4 className="text-2xl font-bold text-gray-900 mb-2">
+                Exclusive Offer for {companyName}
+              </h4>
+              <p className="text-gray-700">
+                {previewExcerpt}...
+              </p>
             </div>
-            <div className="prose max-w-none">
-              <ReactMarkdown>{previewCard.resolved_full_copy || 'No copy available'}</ReactMarkdown>
-            </div>
-          </div>
 
-          {previewCard.curated_skus && previewCard.curated_skus.length > 0 && (
-            <SetupGuide
-              curatedSkus={previewCard.curated_skus}
-              machineId={selectedMachine}
-              machineName={allMachines.find(m => m.machine_id === selectedMachine)?.display_name}
-            />
-          )}
-        </div>
-      )}
+            <div className="border-2 border-gray-200 rounded-xl p-6 mb-6">
+              <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-bold mb-4">
+                {previewCard.solution_name}
+              </div>
+              <div className="prose max-w-none">
+                <ReactMarkdown>{personalizedCopy || 'No copy available'}</ReactMarkdown>
+              </div>
+            </div>
+
+            {previewCard.curated_skus && previewCard.curated_skus.length > 0 && (
+              <SetupGuide
+                curatedSkus={previewCard.curated_skus}
+                machineId={selectedMachine}
+                machineName={selectedMachineData?.display_name}
+              />
+            )}
+          </div>
+        );
+      })()}
 
       {/* Contact Selection */}
       {previewCard && (
