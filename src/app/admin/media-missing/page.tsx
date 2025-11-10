@@ -57,17 +57,19 @@ export default function MissingMediaPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     fetchMissingMedia();
-  }, []);
+  }, [showAll]);
 
   const fetchMissingMedia = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/media/missing');
+      const url = showAll ? '/api/admin/media/missing?show_all=true' : '/api/admin/media/missing';
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch missing media');
 
       const result = await response.json();
@@ -151,7 +153,7 @@ export default function MissingMediaPage() {
             <h3 className="font-semibold text-sm mb-3">{item.name}</h3>
 
             <div className="space-y-3">
-              {item.missing_image && (
+              {(item.missing_image || showAll) && (
                 <MediaUpload
                   mediaType="problem_solution"
                   identifier={item.id}
@@ -166,7 +168,7 @@ export default function MissingMediaPage() {
                 />
               )}
 
-              {item.missing_before && (
+              {(item.missing_before || showAll) && (
                 <MediaUpload
                   mediaType="problem_solution"
                   identifier={item.id}
@@ -181,7 +183,7 @@ export default function MissingMediaPage() {
                 />
               )}
 
-              {item.missing_after && (
+              {(item.missing_after || showAll) && (
                 <MediaUpload
                   mediaType="problem_solution"
                   identifier={item.id}
@@ -196,7 +198,7 @@ export default function MissingMediaPage() {
                 />
               )}
 
-              {item.missing_product && (
+              {(item.missing_product || showAll) && (
                 <MediaUpload
                   mediaType="problem_solution"
                   identifier={item.id}
@@ -238,7 +240,7 @@ export default function MissingMediaPage() {
             <h3 className="font-semibold text-sm mb-3">{item.name}</h3>
 
             <div className="space-y-3">
-              {item.missing_image && (
+              {(item.missing_image || showAll) && (
                 <MediaUpload
                   mediaType="problem_solution_machine"
                   identifier={item.id}
@@ -253,7 +255,7 @@ export default function MissingMediaPage() {
                 />
               )}
 
-              {item.missing_before && (
+              {(item.missing_before || showAll) && (
                 <MediaUpload
                   mediaType="problem_solution_machine"
                   identifier={item.id}
@@ -268,7 +270,7 @@ export default function MissingMediaPage() {
                 />
               )}
 
-              {item.missing_after && (
+              {(item.missing_after || showAll) && (
                 <MediaUpload
                   mediaType="problem_solution_machine"
                   identifier={item.id}
@@ -283,7 +285,7 @@ export default function MissingMediaPage() {
                 />
               )}
 
-              {item.missing_product && (
+              {(item.missing_product || showAll) && (
                 <MediaUpload
                   mediaType="problem_solution_machine"
                   identifier={item.id}
@@ -484,18 +486,29 @@ export default function MissingMediaPage() {
           <p className="text-gray-600">Upload images for records that are still using placeholders</p>
         </div>
 
-        {/* Search Bar */}
+        {/* Search Bar and Filter */}
         <div className="bg-white border border-gray-300 rounded-xl p-4 mb-6">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by product code, name, solution, problem, or machine..."
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            autoFocus
-          />
+          <div className="flex gap-4 items-center mb-3">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by product code, name, solution, problem, or machine..."
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              autoFocus
+            />
+            <label className="flex items-center gap-2 cursor-pointer bg-blue-50 px-4 py-3 rounded-lg border-2 border-blue-200 hover:bg-blue-100 transition-colors">
+              <input
+                type="checkbox"
+                checked={showAll}
+                onChange={(e) => setShowAll(e.target.checked)}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm font-semibold text-blue-900 whitespace-nowrap">Show All (not just missing)</span>
+            </label>
+          </div>
           {searchTerm && (
-            <div className="mt-2 text-sm text-gray-600">
+            <div className="text-sm text-gray-600">
               Press Escape to clear search
             </div>
           )}

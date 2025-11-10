@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
+    const showAll = searchParams.get('show_all') === 'true';
 
     let result: any = {};
 
@@ -71,15 +72,21 @@ export async function GET(request: NextRequest) {
       }));
     }
 
-    // Problem/Solutions (missing any image)
+    // Problem/Solutions (missing any image, or all if showAll is true)
     if (!type || type === 'problem_solution') {
-      const { data: ps, error } = await supabase
+      let query = supabase
         .from('problem_solution')
         .select('id, title, solution_name, image_url, before_image_url, after_image_url, product_image_url')
-        .or('image_url.is.null,before_image_url.is.null,after_image_url.is.null,product_image_url.is.null')
         .eq('active', true)
         .order('title')
         .limit(2000);
+
+      // Only filter for missing images if showAll is false
+      if (!showAll) {
+        query = query.or('image_url.is.null,before_image_url.is.null,after_image_url.is.null,product_image_url.is.null');
+      }
+
+      const { data: ps, error } = await query;
 
       if (error) {
         console.warn('[missing-media] problem_solution query error:', error);
@@ -109,7 +116,7 @@ export async function GET(request: NextRequest) {
       let hasMore = true;
 
       while (hasMore) {
-        const { data: psm, error } = await supabase
+        let query = supabase
           .from('problem_solution_machine')
           .select(`
             id,
@@ -122,9 +129,15 @@ export async function GET(request: NextRequest) {
             problem_solution:problem_solution_id(title, solution_name),
             machines:machine_id(display_name)
           `)
-          .or('image_url.is.null,before_image_url.is.null,after_image_url.is.null,product_image_url.is.null')
           .order('machine_id')
           .range(page * pageSize, (page + 1) * pageSize - 1);
+
+        // Only filter for missing images if showAll is false
+        if (!showAll) {
+          query = query.or('image_url.is.null,before_image_url.is.null,after_image_url.is.null,product_image_url.is.null');
+        }
+
+        const { data: psm, error } = await query;
 
         if (error) {
           console.warn('[missing-media] problem_solution_machine query error:', error);
