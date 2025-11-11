@@ -114,7 +114,7 @@ export default function MachinePageClient({
 
                   {/* Solution Image (if available) */}
                   {imageUrl && imageUrl !== '/placeholder-machine.jpg' && (
-                    <div className="relative h-48 w-full bg-gray-100 rounded-xl overflow-hidden mb-6">
+                    <div className="relative w-full aspect-video bg-gray-100 rounded-xl overflow-hidden mb-6">
                       <MediaImage
                         src={imageUrl}
                         alt={`${solutionName} solution`}
@@ -177,7 +177,7 @@ export default function MachinePageClient({
                       <div className="bg-red-50 px-4 py-2 border-b border-gray-200">
                         <h4 className="text-sm font-bold text-red-800">Before</h4>
                       </div>
-                      <div className="relative h-64 w-full bg-gray-100">
+                      <div className="relative w-full aspect-[4/3] bg-gray-100">
                         <MediaImage
                           src={primaryCard.resolved_before_image_url}
                           alt="Before using solution"
@@ -195,7 +195,7 @@ export default function MachinePageClient({
                       <div className="bg-green-50 px-4 py-2 border-b border-gray-200">
                         <h4 className="text-sm font-bold text-green-800">After</h4>
                       </div>
-                      <div className="relative h-64 w-full bg-gray-100">
+                      <div className="relative w-full aspect-[4/3] bg-gray-100">
                         <MediaImage
                           src={primaryCard.resolved_after_image_url}
                           alt="After using solution"
@@ -213,7 +213,7 @@ export default function MachinePageClient({
                       <div className="bg-blue-50 px-4 py-2 border-b border-gray-200">
                         <h4 className="text-sm font-bold text-blue-800">Solution Tool</h4>
                       </div>
-                      <div className="relative h-80 w-full bg-white p-4">
+                      <div className="relative w-full aspect-square bg-white p-4">
                         <MediaImage
                           src={primaryCard.resolved_product_image_url}
                           alt={`${solutionName} product`}
