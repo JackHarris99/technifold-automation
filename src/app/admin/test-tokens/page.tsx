@@ -5,18 +5,90 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { generateToken } from '@/lib/tokens';
 
+interface Company {
+  company_id: string;
+  company_name: string;
+}
+
+interface Contact {
+  contact_id: string;
+  email: string;
+  full_name: string;
+  first_name: string;
+  last_name: string;
+}
+
 export default function TestTokensPage() {
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [loadingCompanies, setLoadingCompanies] = useState(true);
+  const [loadingContacts, setLoadingContacts] = useState(false);
+
   const [companyId, setCompanyId] = useState('');
   const [contactId, setContactId] = useState('');
+  const [companySearch, setCompanySearch] = useState('');
+  const [contactSearch, setContactSearch] = useState('');
+
   const [generatedLinks, setGeneratedLinks] = useState<{
     marketing: string;
     quote: string;
     reorder: string;
     token: string;
   } | null>(null);
+
+  // Load companies on mount
+  useEffect(() => {
+    async function loadCompanies() {
+      try {
+        const res = await fetch('/api/admin/test-tokens/companies');
+        const data = await res.json();
+        setCompanies(data.companies || []);
+      } catch (err) {
+        console.error('Failed to load companies:', err);
+      } finally {
+        setLoadingCompanies(false);
+      }
+    }
+    loadCompanies();
+  }, []);
+
+  // Load contacts when company changes
+  useEffect(() => {
+    if (!companyId) {
+      setContacts([]);
+      setContactId('');
+      return;
+    }
+
+    async function loadContacts() {
+      setLoadingContacts(true);
+      try {
+        const res = await fetch(`/api/admin/test-tokens/contacts?company_id=${companyId}`);
+        const data = await res.json();
+        setContacts(data.contacts || []);
+        setContactId(''); // Reset contact selection
+      } catch (err) {
+        console.error('Failed to load contacts:', err);
+      } finally {
+        setLoadingContacts(false);
+      }
+    }
+    loadContacts();
+  }, [companyId]);
+
+  const filteredCompanies = companies.filter(c =>
+    c.company_name.toLowerCase().includes(companySearch.toLowerCase()) ||
+    c.company_id.toLowerCase().includes(companySearch.toLowerCase())
+  );
+
+  const filteredContacts = contacts.filter(c =>
+    c.email.toLowerCase().includes(contactSearch.toLowerCase()) ||
+    c.full_name?.toLowerCase().includes(contactSearch.toLowerCase()) ||
+    c.first_name?.toLowerCase().includes(contactSearch.toLowerCase())
+  );
 
   const handleGenerate = () => {
     if (!companyId || !contactId) {
@@ -50,37 +122,84 @@ export default function TestTokensPage() {
           <h2 className="text-lg font-bold text-gray-900 mb-4">Generate Links</h2>
 
           <div className="space-y-4">
+            {/* Company Selector */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Company ID <span className="text-red-600">*</span>
+                Company <span className="text-red-600">*</span>
               </label>
-              <input
-                type="text"
-                value={companyId}
-                onChange={(e) => setCompanyId(e.target.value)}
-                placeholder="e.g., C001 or COMP12345"
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-              />
-              <p className="text-xs text-gray-500 mt-1">Get this from the Companies table in Supabase</p>
+              {loadingCompanies ? (
+                <div className="text-sm text-gray-500">Loading companies...</div>
+              ) : (
+                <>
+                  <input
+                    type="text"
+                    value={companySearch}
+                    onChange={(e) => setCompanySearch(e.target.value)}
+                    placeholder="Search companies..."
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none mb-2"
+                  />
+                  <select
+                    value={companyId}
+                    onChange={(e) => setCompanyId(e.target.value)}
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                  >
+                    <option value="">Select a company...</option>
+                    {filteredCompanies.map((company) => (
+                      <option key={company.company_id} value={company.company_id}>
+                        {company.company_name} ({company.company_id})
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {filteredCompanies.length} of {companies.length} companies shown
+                  </p>
+                </>
+              )}
             </div>
 
+            {/* Contact Selector */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Contact ID (UUID) <span className="text-red-600">*</span>
+                Contact <span className="text-red-600">*</span>
               </label>
-              <input
-                type="text"
-                value={contactId}
-                onChange={(e) => setContactId(e.target.value)}
-                placeholder="e.g., 123e4567-e89b-12d3-a456-426614174000"
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-              />
-              <p className="text-xs text-gray-500 mt-1">Get this from the Contacts table in Supabase</p>
+              {!companyId ? (
+                <div className="text-sm text-gray-500">Select a company first</div>
+              ) : loadingContacts ? (
+                <div className="text-sm text-gray-500">Loading contacts...</div>
+              ) : contacts.length === 0 ? (
+                <div className="text-sm text-yellow-600">No contacts found for this company</div>
+              ) : (
+                <>
+                  <input
+                    type="text"
+                    value={contactSearch}
+                    onChange={(e) => setContactSearch(e.target.value)}
+                    placeholder="Search contacts..."
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none mb-2"
+                  />
+                  <select
+                    value={contactId}
+                    onChange={(e) => setContactId(e.target.value)}
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                  >
+                    <option value="">Select a contact...</option>
+                    {filteredContacts.map((contact) => (
+                      <option key={contact.contact_id} value={contact.contact_id}>
+                        {contact.full_name || contact.first_name || 'Unnamed'} - {contact.email}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {filteredContacts.length} of {contacts.length} contacts shown
+                  </p>
+                </>
+              )}
             </div>
 
             <button
               onClick={handleGenerate}
-              className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              disabled={!companyId || !contactId}
+              className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               Generate Test Links
             </button>
@@ -221,11 +340,11 @@ export default function TestTokensPage() {
               <ul className="space-y-2 text-sm text-gray-700">
                 <li className="flex items-start gap-2">
                   <span className="text-blue-600 font-bold">1.</span>
-                  <span>Pick any company_id and contact_id from Supabase tables</span>
+                  <span>Select a company and contact from the dropdowns above</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-blue-600 font-bold">2.</span>
-                  <span>Generate the links above</span>
+                  <span>Click "Generate Test Links" to create tokenized URLs</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-blue-600 font-bold">3.</span>
