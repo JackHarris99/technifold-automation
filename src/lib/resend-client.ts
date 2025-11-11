@@ -49,8 +49,11 @@ export async function sendMarketingEmail({
   }
 
   try {
+    // Use test mode if domain not verified
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+
     const { data, error } = await resend.emails.send({
-      from: 'Technifold Solutions <solutions@technifold.com>',
+      from: fromEmail,
       to: [to],
       subject,
       html: `
