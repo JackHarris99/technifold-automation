@@ -124,9 +124,9 @@ export default function MachinePageClient({
                     </div>
                   )}
 
-                  {/* Marketing Copy - ALL problems shown */}
-                  <div className="flex-1 mb-8">
-                    {cards.map((card) => {
+                  {/* Marketing Copy - ALL problems shown in styled boxes */}
+                  <div className="flex-1 mb-8 space-y-6">
+                    {cards.map((card, index) => {
                       const problemCopy = replacePlaceholders(card.resolved_card_copy, {
                         brand: machineData.brand,
                         model: machineData.model,
@@ -135,9 +135,17 @@ export default function MachinePageClient({
                       });
 
                       return (
-                        <div key={card.problem_solution_id} className="mb-8">
+                        <div
+                          key={card.problem_solution_id}
+                          className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border-2 border-gray-200 hover:border-blue-300 transition-colors shadow-sm"
+                        >
                           {cards.length > 1 && (
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">{card.title}</h3>
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                                {index + 1}
+                              </div>
+                              <h3 className="text-xl font-bold text-gray-900">{card.title}</h3>
+                            </div>
                           )}
                           <div className="prose prose-lg max-w-none">
                             <ReactMarkdown>{problemCopy}</ReactMarkdown>

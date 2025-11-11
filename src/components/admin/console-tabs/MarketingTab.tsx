@@ -310,30 +310,40 @@ export default function MarketingTab({
                 </div>
               )}
 
-              {/* Marketing Copy - ALL problems shown */}
-              {problemCards.map((card: any) => {
-                const cardCopy = replacePlaceholders(
-                  card.resolved_full_copy || card.resolved_card_copy || '',
-                  {
-                    brand: selectedMachineData?.brand,
-                    model: selectedMachineData?.model,
-                    display_name: selectedMachineData?.display_name,
-                    type: selectedMachineData?.type
-                  },
-                  companyName
-                );
+              {/* Marketing Copy - ALL problems shown in styled boxes */}
+              <div className="space-y-6">
+                {problemCards.map((card: any, index: number) => {
+                  const cardCopy = replacePlaceholders(
+                    card.resolved_full_copy || card.resolved_card_copy || '',
+                    {
+                      brand: selectedMachineData?.brand,
+                      model: selectedMachineData?.model,
+                      display_name: selectedMachineData?.display_name,
+                      type: selectedMachineData?.type
+                    },
+                    companyName
+                  );
 
-                return (
-                  <div key={card.problem_solution_id} className="mb-12">
-                    {problemCards.length > 1 && (
-                      <h2 className="text-2xl font-bold text-gray-900 mb-4">{card.title}</h2>
-                    )}
-                    <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
-                      <ReactMarkdown>{cardCopy}</ReactMarkdown>
+                  return (
+                    <div
+                      key={card.problem_solution_id}
+                      className="bg-gradient-to-br from-gray-50 to-slate-50 rounded-2xl p-8 border-2 border-gray-200 hover:border-blue-300 transition-colors shadow-sm"
+                    >
+                      {problemCards.length > 1 && (
+                        <div className="flex items-center gap-3 mb-6">
+                          <div className="flex-shrink-0 w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center text-lg font-bold">
+                            {index + 1}
+                          </div>
+                          <h2 className="text-2xl font-bold text-gray-900">{card.title}</h2>
+                        </div>
+                      )}
+                      <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+                        <ReactMarkdown>{cardCopy}</ReactMarkdown>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
 
               {/* Before/After Comparison - clean side by side */}
               {(primaryCard.resolved_before_image_url || primaryCard.resolved_after_image_url) && (
