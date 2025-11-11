@@ -357,7 +357,7 @@ export default async function MarketingPage({ params }: MarketingPageProps) {
                         {curatedProducts.map((product: any) => (
                           <div key={product.product_code} className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
                             {/* Product Image */}
-                            <div className="relative h-32 w-full bg-gray-50 rounded-lg overflow-hidden mb-3">
+                            <div className="relative w-full aspect-square bg-gray-50 rounded-lg overflow-hidden mb-3">
                               <MediaImage
                                 src={product.image_url || '/placeholder.svg'}
                                 alt={product.description}
