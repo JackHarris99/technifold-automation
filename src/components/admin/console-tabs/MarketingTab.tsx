@@ -249,18 +249,6 @@ export default function MarketingTab({
                 {solution?.name}
               </h1>
 
-              {/* Problems this solution solves - subtle list */}
-              {problemCards.length > 1 && (
-                <div className="mb-8 text-gray-600">
-                  <p className="font-semibold mb-2">Addresses {problemCards.length} key challenges:</p>
-                  <ul className="list-disc list-inside space-y-1">
-                    {problemCards.map((card: any) => (
-                      <li key={card.problem_solution_id}>{card.title}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
               {/* Product Image - hero style */}
               {primaryCard.resolved_product_image_url && (
                 <div className="my-12 bg-gray-50 rounded-lg p-8">
@@ -276,10 +264,30 @@ export default function MarketingTab({
                 </div>
               )}
 
-              {/* Marketing Copy - flowing content */}
-              <div className="prose prose-lg max-w-none mb-12 text-gray-700 leading-relaxed">
-                <ReactMarkdown>{personalizedCopy}</ReactMarkdown>
-              </div>
+              {/* Marketing Copy - ALL problems shown */}
+              {problemCards.map((card: any) => {
+                const cardCopy = replacePlaceholders(
+                  card.resolved_full_copy || card.resolved_card_copy || '',
+                  {
+                    brand: selectedMachineData?.brand,
+                    model: selectedMachineData?.model,
+                    display_name: selectedMachineData?.display_name,
+                    type: selectedMachineData?.type
+                  },
+                  companyName
+                );
+
+                return (
+                  <div key={card.problem_solution_id} className="mb-12">
+                    {problemCards.length > 1 && (
+                      <h2 className="text-2xl font-bold text-gray-900 mb-4">{card.title}</h2>
+                    )}
+                    <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+                      <ReactMarkdown>{cardCopy}</ReactMarkdown>
+                    </div>
+                  </div>
+                );
+              })}
 
               {/* Before/After Comparison - clean side by side */}
               {(primaryCard.resolved_before_image_url || primaryCard.resolved_after_image_url) && (
