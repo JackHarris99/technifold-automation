@@ -403,16 +403,16 @@ export default async function MarketingPage({ params }: MarketingPageProps) {
             </div>
             <div className="p-8 md:p-12 text-center">
               <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
-                Let's discuss how these solutions can improve quality and efficiency for {company.company_name}
+                Start your 30-day free trial or purchase outright. Get {company.company_name} running better, faster.
               </p>
               <a
-                href="/contact"
+                href={`/q/${token}`}
                 className="inline-block bg-blue-600 text-white px-10 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 hover:shadow-lg transition-all"
               >
                 Get Your Custom Quote
               </a>
               <p className="text-sm text-gray-500 mt-4">
-                Response within 2 hours • 100% Money-Back Guarantee
+                30-Day Free Trial • £50/month or £1,500 Purchase • Free Shipping
               </p>
             </div>
           </div>

@@ -40,6 +40,12 @@ export default function MarketingTab({
   const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
   const [sending, setSending] = useState(false);
 
+  // Preview state
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState('');
+  const [previewSubject, setPreviewSubject] = useState('');
+  const [previewUrl, setPreviewUrl] = useState('');
+
   // Fetch all machines on mount
   useEffect(() => {
     async function fetchMachines() {
@@ -159,6 +165,82 @@ export default function MarketingTab({
       alert(`Marketing email queued!\nJob ID: ${result.job_id}`);
     } catch (error) {
       alert('Failed to send');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handlePreviewEmail = async () => {
+    if (!selectedMachine || contacts.length === 0) {
+      alert('Please select a machine and ensure contacts exist');
+      return;
+    }
+
+    const machine = allMachines.find(m => m.machine_id === selectedMachine);
+    const firstContact = contacts[0]; // Use first contact for preview
+
+    try {
+      const response = await fetch('/api/admin/marketing/preview-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company_id: companyId,
+          contact_id: firstContact.contact_id,
+          machine_slug: machine.slug
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to generate preview');
+
+      const data = await response.json();
+      setPreviewHtml(data.html);
+      setPreviewSubject(data.subject);
+      setPreviewUrl(data.tokenUrl);
+      setShowPreview(true);
+    } catch (error) {
+      alert('Failed to generate preview');
+    }
+  };
+
+  const handleSendTestEmail = async () => {
+    const testEmail = prompt('Enter your email address to receive a test:');
+    if (!testEmail) return;
+
+    if (!selectedMachine) {
+      alert('Please select a machine first');
+      return;
+    }
+
+    // Find or create a test contact
+    let testContact = contacts.find(c => c.email === testEmail);
+    if (!testContact) {
+      alert('Please add your email as a contact first, then try again');
+      return;
+    }
+
+    const machine = allMachines.find(m => m.machine_id === selectedMachine);
+
+    setSending(true);
+    try {
+      const response = await fetch('/api/admin/marketing/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company_id: companyId,
+          contact_ids: [testContact.contact_id],
+          machine_slug: machine.slug,
+          selected_problem_ids: problemCards.map(c => c.problem_solution_id),
+          curated_skus: [...new Set(problemCards.flatMap(card => card.curated_skus || []))],
+          campaign_key: 'test',
+          offer_key: 'test'
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed');
+
+      alert(`Test email sent to ${testEmail}!\nCheck your inbox.`);
+    } catch (error) {
+      alert('Failed to send test email');
     } finally {
       setSending(false);
     }
@@ -511,13 +593,27 @@ export default function MarketingTab({
             </div>
           )}
 
-          <div className="flex justify-end mt-6">
+          <div className="flex flex-wrap gap-3 justify-end mt-6">
+            <button
+              onClick={handlePreviewEmail}
+              disabled={!selectedMachine || contacts.length === 0}
+              className="border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-bold hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"
+            >
+              👁️ Preview Email
+            </button>
+            <button
+              onClick={handleSendTestEmail}
+              disabled={sending || !selectedMachine || problemCards.length === 0}
+              className="border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-bold hover:bg-blue-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300"
+            >
+              📧 Send Test Email
+            </button>
             <button
               onClick={handleSend}
               disabled={sending || selectedContacts.size === 0 || problemCards.length === 0}
               className="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 disabled:bg-gray-400"
             >
-              {sending ? 'Sending...' : `Send to ${selectedContacts.size} Contact(s)`}
+              {sending ? 'Sending...' : `✉️ Send to ${selectedContacts.size} Contact(s)`}
             </button>
           </div>
         </div>
@@ -526,6 +622,57 @@ export default function MarketingTab({
       {problemCards.length === 0 && (
         <div className="bg-white border border-gray-200 rounded-xl p-12 text-center text-gray-500">
           Select a brand, model, and solution to preview marketing content
+        </div>
+      )}
+
+      {/* Email Preview Modal */}
+      {showPreview && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setShowPreview(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold mb-2">📧 Email Preview</h2>
+                  <p className="text-sm opacity-90"><strong>Subject:</strong> {previewSubject}</p>
+                  <p className="text-sm opacity-90 mt-1"><strong>Link:</strong> <a href={previewUrl} target="_blank" className="underline">{previewUrl}</a></p>
+                </div>
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-2 transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-y-auto max-h-[calc(90vh-120px)] p-6">
+              <div className="bg-gray-50 border-2 border-blue-200 rounded-lg p-4 mb-4">
+                <p className="text-sm text-blue-900">
+                  <strong>📱 Tip:</strong> This is how the email will appear in your customer's inbox.
+                  Click the "View Your Solutions" button to see where it leads.
+                </p>
+              </div>
+
+              <div dangerouslySetInnerHTML={{ __html: previewHtml }} />
+            </div>
+
+            <div className="border-t border-gray-200 p-4 bg-gray-50 flex justify-end gap-3">
+              <button
+                onClick={() => setShowPreview(false)}
+                className="px-6 py-2 border-2 border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-100"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  window.open(previewUrl, '_blank');
+                }}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
+              >
+                Open Landing Page →
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
