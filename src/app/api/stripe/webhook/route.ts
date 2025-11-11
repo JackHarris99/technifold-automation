@@ -48,6 +48,18 @@ export async function POST(request: NextRequest) {
         await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
         break;
 
+      case 'customer.subscription.created':
+        await handleSubscriptionCreated(event.data.object as Stripe.Subscription);
+        break;
+
+      case 'customer.subscription.updated':
+        await handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
+        break;
+
+      case 'customer.subscription.deleted':
+        await handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
+        break;
+
       case 'payment_intent.succeeded':
         await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent);
         break;
@@ -91,6 +103,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const contactId = session.metadata?.contact_id || null;
   const offerKey = session.metadata?.offer_key || null;
   const campaignKey = session.metadata?.campaign_key || null;
+  const purchaseType = session.metadata?.purchase_type || null;
+  const shippingAddressId = session.metadata?.shipping_address_id || null;
   const productCodes = session.metadata?.product_codes
     ? JSON.parse(session.metadata.product_codes)
     : [];
@@ -136,6 +150,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
+  // Determine order type
+  let orderType = 'consumables_reorder'; // Default
+  if (purchaseType === 'purchase') {
+    orderType = 'tool_purchase';
+  } else if (purchaseType === 'rental') {
+    // Rentals handled by subscription webhook - this shouldn't happen
+    orderType = 'tool_rental_payment';
+  }
+
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert({
@@ -144,6 +167,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       stripe_checkout_session_id: session.id,
       stripe_payment_intent_id: session.payment_intent as string,
       stripe_customer_id: session.customer as string,
+      shipping_address_id: shippingAddressId,
+      order_type: orderType,
       offer_key: offerKey,
       campaign_key: campaignKey,
       items,
@@ -470,4 +495,213 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
   });
 
   console.log('[stripe-webhook] Order refund processed:', order.order_id);
+}
+
+/**
+ * Handle subscription creation (for tool rentals)
+ */
+async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
+  const supabase = getSupabaseClient();
+
+  console.log('[stripe-webhook] Processing customer.subscription.created:', subscription.id);
+
+  const metadata = subscription.metadata || {};
+  const companyId = metadata.company_id;
+  const contactId = metadata.contact_id || null;
+  const purchaseType = metadata.purchase_type;
+  const shippingAddressId = metadata.shipping_address_id;
+
+  if (!companyId || purchaseType !== 'rental') {
+    console.log('[stripe-webhook] Skipping non-rental subscription:', subscription.id);
+    return;
+  }
+
+  // Get product information from subscription items
+  const firstItem = subscription.items.data[0];
+  if (!firstItem) {
+    console.error('[stripe-webhook] No subscription items found');
+    return;
+  }
+
+  const product = await stripe.products.retrieve(firstItem.price.product as string);
+  const productCode = product.metadata?.product_code || 'UNKNOWN';
+  const monthlyPrice = (firstItem.price.unit_amount || 0) / 100;
+
+  const trialEnd = subscription.trial_end ? new Date(subscription.trial_end * 1000) : null;
+
+  // Create rental agreement (auto-generates serial number via trigger)
+  const { data: rental, error: rentalError } = await supabase
+    .from('rental_agreements')
+    .insert({
+      company_id: companyId,
+      contact_id: contactId,
+      product_code: productCode,
+      stripe_subscription_id: subscription.id,
+      stripe_customer_id: subscription.customer as string,
+      monthly_price: monthlyPrice,
+      currency: (firstItem.price.currency || 'gbp').toUpperCase(),
+      start_date: new Date(subscription.created * 1000).toISOString(),
+      trial_end_date: trialEnd?.toISOString(),
+      contract_signed_at: new Date().toISOString(),
+      status: subscription.trial_end ? 'trial' : 'active',
+    })
+    .select('rental_id, serial_number')
+    .single();
+
+  if (rentalError) {
+    console.error('[stripe-webhook] Failed to create rental_agreement:', rentalError);
+    return;
+  }
+
+  console.log('[stripe-webhook] Rental agreement created:', rental.serial_number);
+
+  // Create order record for the rental setup
+  const { error: orderError } = await supabase
+    .from('orders')
+    .insert({
+      company_id: companyId,
+      contact_id: contactId,
+      stripe_customer_id: subscription.customer as string,
+      shipping_address_id: shippingAddressId,
+      rental_agreement_id: rental.rental_id,
+      order_type: 'tool_rental_setup',
+      items: [{
+        product_code: productCode,
+        description: product.name,
+        quantity: 1,
+        unit_price: monthlyPrice,
+        total_price: 0 // Trial period
+      }],
+      subtotal: 0,
+      tax_amount: 0,
+      total_amount: 0,
+      currency: (firstItem.price.currency || 'gbp').toUpperCase(),
+      status: 'completed',
+      payment_status: 'paid', // Trial doesn't require payment
+    });
+
+  if (orderError) {
+    console.error('[stripe-webhook] Failed to create rental setup order:', orderError);
+  }
+
+  // Track rental started event
+  await supabase.from('engagement_events').insert({
+    company_id: companyId,
+    contact_id: contactId,
+    source: 'stripe',
+    source_event_id: subscription.id,
+    event_name: 'rental_started',
+    value: monthlyPrice,
+    currency: (firstItem.price.currency || 'gbp').toUpperCase(),
+    meta: {
+      rental_id: rental.rental_id,
+      serial_number: rental.serial_number,
+      product_code: productCode,
+      has_trial: !!subscription.trial_end,
+    },
+  }).catch(err => {
+    if (!err.message?.includes('duplicate') && err.code !== '23505') {
+      console.error('[stripe-webhook] Failed to track rental_started event:', err);
+    }
+  });
+}
+
+/**
+ * Handle subscription updates (status changes, payment failures)
+ */
+async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
+  const supabase = getSupabaseClient();
+
+  console.log('[stripe-webhook] Processing customer.subscription.updated:', subscription.id);
+
+  // Find rental agreement
+  const { data: rental } = await supabase
+    .from('rental_agreements')
+    .select('rental_id, status')
+    .eq('stripe_subscription_id', subscription.id)
+    .single();
+
+  if (!rental) {
+    console.log('[stripe-webhook] No rental found for subscription:', subscription.id);
+    return;
+  }
+
+  // Map Stripe status to our status
+  let newStatus: string = rental.status;
+
+  switch (subscription.status) {
+    case 'trialing':
+      newStatus = 'trial';
+      break;
+    case 'active':
+      newStatus = 'active';
+      break;
+    case 'past_due':
+      newStatus = 'past_due';
+      break;
+    case 'canceled':
+    case 'unpaid':
+      newStatus = 'cancelled';
+      break;
+  }
+
+  // Update rental agreement status
+  if (newStatus !== rental.status) {
+    await supabase
+      .from('rental_agreements')
+      .update({ status: newStatus })
+      .eq('rental_id', rental.rental_id);
+
+    console.log(`[stripe-webhook] Rental status updated: ${rental.status} -> ${newStatus}`);
+  }
+}
+
+/**
+ * Handle subscription cancellation
+ */
+async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
+  const supabase = getSupabaseClient();
+
+  console.log('[stripe-webhook] Processing customer.subscription.deleted:', subscription.id);
+
+  // Find and update rental agreement
+  const { data: rental } = await supabase
+    .from('rental_agreements')
+    .select('rental_id, company_id, contact_id')
+    .eq('stripe_subscription_id', subscription.id)
+    .single();
+
+  if (!rental) {
+    console.log('[stripe-webhook] No rental found for deleted subscription:', subscription.id);
+    return;
+  }
+
+  // Update rental to cancelled
+  await supabase
+    .from('rental_agreements')
+    .update({
+      status: 'cancelled',
+      cancelled_at: new Date().toISOString(),
+      cancellation_reason: subscription.cancellation_details?.reason || 'Subscription cancelled',
+    })
+    .eq('rental_id', rental.rental_id);
+
+  console.log('[stripe-webhook] Rental cancelled:', rental.rental_id);
+
+  // Track cancellation event
+  await supabase.from('engagement_events').insert({
+    company_id: rental.company_id,
+    contact_id: rental.contact_id,
+    source: 'stripe',
+    source_event_id: subscription.id,
+    event_name: 'rental_cancelled',
+    meta: {
+      rental_id: rental.rental_id,
+      reason: subscription.cancellation_details?.reason,
+    },
+  }).catch(err => {
+    if (!err.message?.includes('duplicate') && err.code !== '23505') {
+      console.error('[stripe-webhook] Failed to track rental_cancelled event:', err);
+    }
+  });
 }
