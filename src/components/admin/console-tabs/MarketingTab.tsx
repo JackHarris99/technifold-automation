@@ -348,7 +348,15 @@ export default function MarketingTab({
                           <h2 className="text-2xl font-bold text-gray-900">{card.title}</h2>
                         </div>
                       )}
-                      <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+                      <div className="prose prose-lg max-w-none
+                        prose-headings:font-bold
+                        prose-h2:text-3xl prose-h2:text-gray-900 prose-h2:mb-6 prose-h2:mt-8 prose-h2:border-l-4 prose-h2:border-blue-600 prose-h2:pl-4
+                        prose-h3:text-xl prose-h3:text-blue-700 prose-h3:mb-4 prose-h3:mt-6 prose-h3:font-bold
+                        prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-4 prose-p:text-base
+                        prose-ul:my-6 prose-li:text-gray-700 prose-li:mb-2 prose-li:leading-relaxed
+                        prose-strong:text-gray-900 prose-strong:font-bold
+                        prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+                      ">
                         <ReactMarkdown>{cardCopy}</ReactMarkdown>
                       </div>
                     </div>
