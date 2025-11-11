@@ -310,7 +310,7 @@ export default function MarketingTab({
 
               {/* Hero/Main Image (if available) */}
               {primaryCard.resolved_image_url && primaryCard.resolved_image_url !== '/placeholder-machine.jpg' && (
-                <div className="relative w-full bg-gray-100 rounded-xl overflow-hidden mb-8 min-h-[200px] max-h-[500px] aspect-auto">
+                <div className="relative h-80 w-full bg-gray-100 rounded-xl overflow-hidden mb-8">
                   <MediaImage
                     src={primaryCard.resolved_image_url}
                     alt={`${solution?.name} solution`}
@@ -367,7 +367,7 @@ export default function MarketingTab({
                         <div className="bg-red-50 px-4 py-3 border-b-2 border-red-200">
                           <h4 className="font-bold text-red-800">Before</h4>
                         </div>
-                        <div className="relative w-full bg-gray-50 min-h-[200px] max-h-[400px] aspect-auto">
+                        <div className="relative h-64 w-full bg-gray-50">
                           <MediaImage
                             src={primaryCard.resolved_before_image_url}
                             alt="Before using solution"
@@ -384,7 +384,7 @@ export default function MarketingTab({
                         <div className="bg-green-50 px-4 py-3 border-b-2 border-green-200">
                           <h4 className="font-bold text-green-800">After</h4>
                         </div>
-                        <div className="relative w-full bg-gray-50 min-h-[200px] max-h-[400px] aspect-auto">
+                        <div className="relative h-64 w-full bg-gray-50">
                           <MediaImage
                             src={primaryCard.resolved_after_image_url}
                             alt="After using solution"
@@ -403,7 +403,7 @@ export default function MarketingTab({
               {primaryCard.resolved_product_image_url && (
                 <div className="mb-12 bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-8">
                   <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">The Solution</h3>
-                  <div className="relative w-full bg-white rounded-lg p-8 min-h-[200px] max-h-[500px] aspect-auto">
+                  <div className="relative h-80 w-full bg-white rounded-lg p-8">
                     <MediaImage
                       src={primaryCard.resolved_product_image_url}
                       alt={`${solution?.name} product`}
