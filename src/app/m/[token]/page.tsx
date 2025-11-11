@@ -247,7 +247,7 @@ export default async function MarketingPage({ params }: MarketingPageProps) {
                           alt={`${solutionName} solution`}
                           fill
                           sizes="(max-width: 1024px) 100vw, 896px"
-                          className="object-cover"
+                          className="object-contain"
                         />
                       </div>
                     )}

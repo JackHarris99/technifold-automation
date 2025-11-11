@@ -120,6 +120,7 @@ export default function MachinePageClient({
                         alt={`${solutionName} solution`}
                         fill
                         sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-contain"
                       />
                     </div>
                   )}
