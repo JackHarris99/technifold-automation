@@ -3,6 +3,8 @@
  * Shown when user cancels Stripe checkout
  */
 
+'use client';
+
 import Link from 'next/link';
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
@@ -60,8 +62,3 @@ export default function QuoteCancelledPage() {
     </div>
   );
 }
-
-export const metadata = {
-  title: 'Checkout Cancelled - Technifold',
-  description: 'Return to your quote',
-};
