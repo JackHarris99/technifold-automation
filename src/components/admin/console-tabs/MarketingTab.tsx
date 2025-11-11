@@ -8,7 +8,6 @@
 
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import SetupGuide from '../../marketing/SetupGuide';
 import MediaImage from '../../shared/MediaImage';
 import { replacePlaceholders } from '@/lib/textUtils';
 
@@ -240,17 +239,12 @@ export default function MarketingTab({
         const solution = solutions.find(s => s.solution_id === selectedSolution);
         const primaryCard = problemCards.find((c: any) => c.is_primary_pitch) || problemCards[0];
 
-        // Replace placeholders in primary card
-        const personalizedCopy = replacePlaceholders(
-          primaryCard.resolved_full_copy || primaryCard.resolved_card_copy || '',
-          {
-            brand: selectedMachineData?.brand,
-            model: selectedMachineData?.model,
-            display_name: selectedMachineData?.display_name,
-            type: selectedMachineData?.type
-          },
-          companyName
-        );
+        // Merge curated products from all problems in this solution
+        const allSkus = new Set<string>();
+        problemCards.forEach((card: any) => {
+          (card.curated_skus || []).forEach((sku: string) => allSkus.add(sku));
+        });
+        // Note: In real implementation, fetch product details for these SKUs
 
         return (
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
@@ -290,23 +284,40 @@ export default function MarketingTab({
 
             {/* Clean editorial-style layout */}
             <div className="max-w-4xl mx-auto p-8">
-              {/* Title */}
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              {/* Solution Badge */}
+              <div className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-semibold mb-8">
                 {solution?.name}
-              </h1>
+              </div>
 
-              {/* Product Image - hero style */}
-              {primaryCard.resolved_product_image_url && (
-                <div className="my-12 bg-gray-50 rounded-lg p-8">
-                  <div className="relative h-96 w-full">
-                    <MediaImage
-                      src={primaryCard.resolved_product_image_url}
-                      alt="Product"
-                      fill
-                      sizes="800px"
-                      className="object-contain"
-                    />
-                  </div>
+              {/* Problems this solution solves */}
+              {problemCards.length > 1 && (
+                <div className="mb-8 bg-green-50 border-l-4 border-green-500 rounded-r-lg p-6">
+                  <h4 className="font-bold text-green-900 mb-3">
+                    Solves {problemCards.length} Problems:
+                  </h4>
+                  <ul className="space-y-2">
+                    {problemCards.map((card: any) => (
+                      <li key={card.problem_solution_id} className="flex items-start gap-3">
+                        <svg className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span className="text-green-900">{card.title}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Hero/Main Image (if available) */}
+              {primaryCard.resolved_image_url && primaryCard.resolved_image_url !== '/placeholder-machine.jpg' && (
+                <div className="relative h-80 w-full bg-gray-100 rounded-xl overflow-hidden mb-8">
+                  <MediaImage
+                    src={primaryCard.resolved_image_url}
+                    alt={`${solution?.name} solution`}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 896px"
+                    className="object-cover"
+                  />
                 </div>
               )}
 
@@ -345,19 +356,22 @@ export default function MarketingTab({
                 })}
               </div>
 
-              {/* Before/After Comparison - clean side by side */}
+              {/* Before/After Comparison - Side by Side */}
               {(primaryCard.resolved_before_image_url || primaryCard.resolved_after_image_url) && (
-                <div className="my-12">
-                  <div className="grid md:grid-cols-2 gap-8">
+                <div className="mb-12">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6">See The Difference</h3>
+                  <div className="grid md:grid-cols-2 gap-6">
                     {primaryCard.resolved_before_image_url && (
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-3">Before</h3>
-                        <div className="relative h-64 w-full bg-gray-100 rounded-lg overflow-hidden">
+                      <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
+                        <div className="bg-red-50 px-4 py-3 border-b-2 border-red-200">
+                          <h4 className="font-bold text-red-800">Before</h4>
+                        </div>
+                        <div className="relative h-64 w-full bg-gray-50">
                           <MediaImage
                             src={primaryCard.resolved_before_image_url}
-                            alt="Before"
+                            alt="Before using solution"
                             fill
-                            sizes="400px"
+                            sizes="(max-width: 768px) 100vw, 448px"
                             className="object-cover"
                           />
                         </div>
@@ -365,14 +379,16 @@ export default function MarketingTab({
                     )}
 
                     {primaryCard.resolved_after_image_url && (
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-3">After</h3>
-                        <div className="relative h-64 w-full bg-gray-100 rounded-lg overflow-hidden">
+                      <div className="bg-white rounded-xl border-2 border-green-200 overflow-hidden">
+                        <div className="bg-green-50 px-4 py-3 border-b-2 border-green-200">
+                          <h4 className="font-bold text-green-800">After</h4>
+                        </div>
+                        <div className="relative h-64 w-full bg-gray-50">
                           <MediaImage
                             src={primaryCard.resolved_after_image_url}
-                            alt="After"
+                            alt="After using solution"
                             fill
-                            sizes="400px"
+                            sizes="(max-width: 768px) 100vw, 448px"
                             className="object-cover"
                           />
                         </div>
@@ -382,16 +398,70 @@ export default function MarketingTab({
                 </div>
               )}
 
-              {/* Setup Guide */}
-              {primaryCard.curated_skus && primaryCard.curated_skus.length > 0 && (
-                <div className="mt-12 pt-12 border-t border-gray-200">
-                  <SetupGuide
-                    curatedSkus={primaryCard.curated_skus}
-                    machineId={selectedMachine}
-                    machineName={selectedMachineData?.display_name}
-                  />
+              {/* Product Showcase */}
+              {primaryCard.resolved_product_image_url && (
+                <div className="mb-12 bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-8">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">The Solution</h3>
+                  <div className="relative h-80 w-full bg-white rounded-lg p-8">
+                    <MediaImage
+                      src={primaryCard.resolved_product_image_url}
+                      alt={`${solution?.name} product`}
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 832px"
+                      className="object-contain"
+                    />
+                  </div>
                 </div>
               )}
+
+            </div>
+
+            {/* Curated Products Section */}
+            {allSkus.size > 0 && (
+              <div className="border-t border-gray-200 bg-gray-50 p-8 lg:p-12">
+                <div className="max-w-4xl mx-auto">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                    Recommended Consumables
+                  </h3>
+                  <p className="text-gray-600 mb-8">
+                    {selectedMachineData ? `Precision-engineered for your ${selectedMachineData.brand} ${selectedMachineData.model}` : 'Professional solutions for your equipment'}
+                  </p>
+
+                  <div className="bg-white rounded-lg p-6 border border-gray-200">
+                    <p className="text-sm text-gray-600 text-center">
+                      {allSkus.size} curated product{allSkus.size !== 1 ? 's' : ''} will be displayed here
+                    </p>
+                    <p className="text-xs text-gray-500 text-center mt-2">
+                      SKUs: {Array.from(allSkus).join(', ')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* CTA Section */}
+            <div className="max-w-4xl mx-auto px-8 py-12">
+              <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6">
+                  <h2 className="text-3xl md:text-4xl font-bold text-white text-center">
+                    Ready to Transform Your Production?
+                  </h2>
+                </div>
+                <div className="p-8 md:p-12 text-center">
+                  <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
+                    Let's discuss how these solutions can improve quality and efficiency for {companyName}
+                  </p>
+                  <a
+                    href="/contact"
+                    className="inline-block bg-blue-600 text-white px-10 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 hover:shadow-lg transition-all"
+                  >
+                    Get Your Custom Quote
+                  </a>
+                  <p className="text-sm text-gray-500 mt-4">
+                    Response within 2 hours • 100% Money-Back Guarantee
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         );
