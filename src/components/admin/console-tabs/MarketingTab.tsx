@@ -35,6 +35,7 @@ export default function MarketingTab({
   const [machinesFiltered, setMachinesFiltered] = useState<any[]>([]);
   const [solutions, setSolutions] = useState<any[]>([]);
   const [problemCards, setProblemCards] = useState<any[]>([]);
+  const [brandMedia, setBrandMedia] = useState<any>(null);
 
   // Contact selection
   const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
@@ -63,11 +64,12 @@ export default function MarketingTab({
     setSelectedMachine('');
   }, [selectedBrand, allMachines]);
 
-  // Fetch solutions for machine
+  // Fetch solutions and brand media for machine
   useEffect(() => {
     if (!selectedMachine) {
       setSolutions([]);
       setSelectedSolution('');
+      setBrandMedia(null);
       return;
     }
 
@@ -76,8 +78,20 @@ export default function MarketingTab({
       const data = await response.json();
       setSolutions(data.solutions || []);
     }
+
+    async function fetchBrandMedia() {
+      const machine = allMachines.find(m => m.machine_id === selectedMachine);
+      if (!machine?.brand) return;
+
+      const brandSlug = machine.brand.toLowerCase().replace(/\s+/g, '-');
+      const response = await fetch(`/api/brand-media?slug=${brandSlug}`);
+      const data = await response.json();
+      setBrandMedia(data.brandMedia || null);
+    }
+
     fetchSolutions();
-  }, [selectedMachine]);
+    fetchBrandMedia();
+  }, [selectedMachine, allMachines]);
 
   // Load ALL problem cards when solution selected
   useEffect(() => {
@@ -239,11 +253,43 @@ export default function MarketingTab({
         );
 
         return (
-          <div className="bg-white border border-gray-200 rounded-xl p-8">
-            <h3 className="text-sm font-semibold text-gray-500 mb-6 uppercase tracking-wide">Marketing Preview</h3>
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <h3 className="text-sm font-semibold text-gray-500 px-8 pt-8 pb-4 uppercase tracking-wide">Marketing Preview</h3>
+
+            {/* Hero Section with Brand Logo and Background */}
+            <div
+              className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white py-12 px-8"
+              style={brandMedia?.hero_url ? {
+                backgroundImage: `linear-gradient(to bottom right, rgba(37, 99, 235, 0.9), rgba(79, 70, 229, 0.9)), url(${brandMedia.hero_url})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              } : undefined}
+            >
+              <div className="max-w-4xl mx-auto">
+                <div className="flex items-center gap-8 mb-4">
+                  {brandMedia?.logo_url && (
+                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                      <img
+                        src={brandMedia.logo_url}
+                        alt={selectedMachineData?.brand}
+                        className="h-16 w-auto object-contain"
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <h1 className="text-3xl md:text-4xl font-bold mb-2">
+                      {selectedMachineData?.display_name}
+                    </h1>
+                    <p className="text-xl text-blue-100">
+                      Production-proven solutions for {companyName}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* Clean editorial-style layout */}
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-4xl mx-auto p-8">
               {/* Title */}
               <h1 className="text-4xl font-bold text-gray-900 mb-4">
                 {solution?.name}
