@@ -239,119 +239,96 @@ export default function MarketingTab({
         );
 
         return (
-          <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
-            <h3 className="font-bold text-gray-900 mb-6">Marketing Preview - What Customer Will See</h3>
+          <div className="bg-white border border-gray-200 rounded-xl p-8">
+            <h3 className="text-sm font-semibold text-gray-500 mb-6 uppercase tracking-wide">Marketing Preview</h3>
 
-            {/* Hero Preview */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl p-8 mb-6 text-center">
-              <h4 className="text-3xl font-bold mb-2">
-                Solutions for {companyName}
-              </h4>
-              <p className="text-blue-100 text-lg">
-                Personalized for {selectedMachineData?.display_name}
-              </p>
-            </div>
+            {/* Clean editorial-style layout */}
+            <div className="max-w-4xl mx-auto">
+              {/* Title */}
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                {solution?.name}
+              </h1>
 
-            {/* Solution Card Preview */}
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-              <div className="p-8">
-                {/* Solution Badge */}
-                <div className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-semibold mb-6">
-                  {solution?.name}
+              {/* Problems this solution solves - subtle list */}
+              {problemCards.length > 1 && (
+                <div className="mb-8 text-gray-600">
+                  <p className="font-semibold mb-2">Addresses {problemCards.length} key challenges:</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    {problemCards.map((card: any) => (
+                      <li key={card.problem_solution_id}>{card.title}</li>
+                    ))}
+                  </ul>
                 </div>
+              )}
 
-                {/* Problems this solution solves */}
-                {problemCards.length > 1 && (
-                  <div className="mb-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg p-6">
-                    <h4 className="font-bold text-green-900 mb-3">
-                      Solves {problemCards.length} Problems:
-                    </h4>
-                    <ul className="space-y-2">
-                      {problemCards.map((card: any) => (
-                        <li key={card.problem_solution_id} className="flex items-start gap-3">
-                          <svg className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          <span className="text-green-900">{card.title}</span>
-                        </li>
-                      ))}
-                    </ul>
+              {/* Product Image - hero style */}
+              {primaryCard.resolved_product_image_url && (
+                <div className="my-12 bg-gray-50 rounded-lg p-8">
+                  <div className="relative h-96 w-full">
+                    <MediaImage
+                      src={primaryCard.resolved_product_image_url}
+                      alt="Product"
+                      fill
+                      sizes="800px"
+                      className="object-contain"
+                    />
                   </div>
-                )}
-
-                {/* Marketing Copy */}
-                <div className="prose prose-lg max-w-none mb-8">
-                  <ReactMarkdown>{personalizedCopy}</ReactMarkdown>
                 </div>
+              )}
 
-                {/* Before/After Images Side by Side */}
-                {(primaryCard.resolved_before_image_url || primaryCard.resolved_after_image_url) && (
-                  <div className="mb-8">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">See The Difference</h3>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      {primaryCard.resolved_before_image_url && (
-                        <div className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden">
-                          <div className="bg-red-50 px-4 py-2 border-b-2 border-red-200">
-                            <h4 className="font-bold text-red-800 text-sm">Before</h4>
-                          </div>
-                          <div className="relative h-48 w-full bg-gray-50">
-                            <MediaImage
-                              src={primaryCard.resolved_before_image_url}
-                              alt="Before"
-                              fill
-                              sizes="400px"
-                              className="object-cover"
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      {primaryCard.resolved_after_image_url && (
-                        <div className="bg-white rounded-lg border-2 border-green-200 overflow-hidden">
-                          <div className="bg-green-50 px-4 py-2 border-b-2 border-green-200">
-                            <h4 className="font-bold text-green-800 text-sm">After</h4>
-                          </div>
-                          <div className="relative h-48 w-full bg-gray-50">
-                            <MediaImage
-                              src={primaryCard.resolved_after_image_url}
-                              alt="After"
-                              fill
-                              sizes="400px"
-                              className="object-cover"
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Product Image */}
-                {primaryCard.resolved_product_image_url && (
-                  <div className="mb-8 bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">The Solution</h3>
-                    <div className="relative h-64 w-full bg-white rounded-lg p-6">
-                      <MediaImage
-                        src={primaryCard.resolved_product_image_url}
-                        alt="Product"
-                        fill
-                        sizes="600px"
-                        className="object-contain"
-                      />
-                    </div>
-                  </div>
-                )}
+              {/* Marketing Copy - flowing content */}
+              <div className="prose prose-lg max-w-none mb-12 text-gray-700 leading-relaxed">
+                <ReactMarkdown>{personalizedCopy}</ReactMarkdown>
               </div>
-            </div>
 
-            {/* Setup Guide if curated SKUs exist */}
-            {primaryCard.curated_skus && primaryCard.curated_skus.length > 0 && (
-              <SetupGuide
-                curatedSkus={primaryCard.curated_skus}
-                machineId={selectedMachine}
-                machineName={selectedMachineData?.display_name}
-              />
-            )}
+              {/* Before/After Comparison - clean side by side */}
+              {(primaryCard.resolved_before_image_url || primaryCard.resolved_after_image_url) && (
+                <div className="my-12">
+                  <div className="grid md:grid-cols-2 gap-8">
+                    {primaryCard.resolved_before_image_url && (
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-3">Before</h3>
+                        <div className="relative h-64 w-full bg-gray-100 rounded-lg overflow-hidden">
+                          <MediaImage
+                            src={primaryCard.resolved_before_image_url}
+                            alt="Before"
+                            fill
+                            sizes="400px"
+                            className="object-cover"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {primaryCard.resolved_after_image_url && (
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-3">After</h3>
+                        <div className="relative h-64 w-full bg-gray-100 rounded-lg overflow-hidden">
+                          <MediaImage
+                            src={primaryCard.resolved_after_image_url}
+                            alt="After"
+                            fill
+                            sizes="400px"
+                            className="object-cover"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Setup Guide */}
+              {primaryCard.curated_skus && primaryCard.curated_skus.length > 0 && (
+                <div className="mt-12 pt-12 border-t border-gray-200">
+                  <SetupGuide
+                    curatedSkus={primaryCard.curated_skus}
+                    machineId={selectedMachine}
+                    machineName={selectedMachineData?.display_name}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         );
       })()}
