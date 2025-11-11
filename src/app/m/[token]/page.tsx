@@ -202,13 +202,6 @@ export default async function MarketingPage({ params }: MarketingPageProps) {
               const primaryCard = cards.find((c: any) => c.is_primary_pitch) || cards[0];
               const imageUrl = primaryCard.resolved_image_url || '/placeholder-machine.jpg';
 
-              // Replace placeholders in marketing copy
-              const personalizedCopy = replacePlaceholders(
-                primaryCard.resolved_full_copy || primaryCard.resolved_card_copy || '',
-                machine,
-                company.company_name
-              );
-
               // Merge curated products from all problems in this solution
               const allSkus = new Set<string>();
               cards.forEach((card: any) => {
@@ -259,10 +252,25 @@ export default async function MarketingPage({ params }: MarketingPageProps) {
                       </div>
                     )}
 
-                    {/* Marketing Copy with integrated styling */}
-                    <div className="prose prose-lg prose-headings:font-bold prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-li:text-gray-700 max-w-none mb-12">
-                      <ReactMarkdown>{personalizedCopy}</ReactMarkdown>
-                    </div>
+                    {/* Marketing Copy - ALL problems shown */}
+                    {cards.map((card: any) => {
+                      const cardCopy = replacePlaceholders(
+                        card.resolved_full_copy || card.resolved_card_copy || '',
+                        machine,
+                        company.company_name
+                      );
+
+                      return (
+                        <div key={card.problem_solution_id} className="mb-12">
+                          {cards.length > 1 && (
+                            <h2 className="text-2xl font-bold text-gray-900 mb-4">{card.title}</h2>
+                          )}
+                          <div className="prose prose-lg prose-headings:font-bold prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-li:text-gray-700 max-w-none">
+                            <ReactMarkdown>{cardCopy}</ReactMarkdown>
+                          </div>
+                        </div>
+                      );
+                    })}
 
                     {/* Before/After Comparison - Side by Side */}
                     {(primaryCard.resolved_before_image_url || primaryCard.resolved_after_image_url) && (

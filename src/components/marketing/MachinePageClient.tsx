@@ -124,31 +124,27 @@ export default function MachinePageClient({
                     </div>
                   )}
 
-                  {/* Problems this solution solves */}
-                  {cards.length > 1 && (
-                    <div className="mb-6 bg-green-50 border-2 border-green-200 rounded-xl p-4">
-                      <h4 className="font-bold text-green-900 mb-3 flex items-center gap-2">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Solves {cards.length} Problems:
-                      </h4>
-                      <ul className="space-y-2">
-                        {cards.map((card) => (
-                          <li key={card.problem_solution_id} className="flex items-start gap-2">
-                            <svg className="w-4 h-4 text-green-600 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span className="text-sm text-green-900 font-medium">{card.title}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                  {/* Marketing Copy - ALL problems shown */}
+                  <div className="flex-1 mb-8">
+                    {cards.map((card) => {
+                      const problemCopy = replacePlaceholders(card.resolved_card_copy, {
+                        brand: machineData.brand,
+                        model: machineData.model,
+                        display_name: machineData.display_name,
+                        type: undefined
+                      });
 
-                  {/* Marketing Copy */}
-                  <div className="prose prose-lg max-w-none mb-8 flex-1">
-                    <ReactMarkdown>{cardCopy}</ReactMarkdown>
+                      return (
+                        <div key={card.problem_solution_id} className="mb-8">
+                          {cards.length > 1 && (
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">{card.title}</h3>
+                          )}
+                          <div className="prose prose-lg max-w-none">
+                            <ReactMarkdown>{problemCopy}</ReactMarkdown>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
 
                   {/* CTA Button */}
