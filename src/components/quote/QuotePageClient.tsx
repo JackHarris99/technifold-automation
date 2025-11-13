@@ -70,23 +70,29 @@ export default function QuotePageClient({
     country: existingAddress?.country || company.country || 'GB',
   });
 
-  // Calculate totals (simple for now - will add complex pricing logic later)
+  // Calculate pricing from products table
   const calculatePrice = () => {
     if (products.length === 0) return { amount: 0, period: '' };
 
-    // For demo: assuming first product is the tool
-    const basePrice = products[0]?.price || 0;
+    // Find the tool product (category = 'tool') or use first product
+    const toolProduct = products.find((p: any) => p.category === 'tool') || products[0];
+
+    if (!toolProduct) {
+      return { amount: 0, period: '' };
+    }
 
     if (purchaseType === 'rental') {
+      const rentalPrice = toolProduct.rental_price_monthly || 50; // Fallback to £50 if not set
       return {
-        amount: 50, // £50/month rental
+        amount: rentalPrice,
         period: '/month',
         setup: 0,
         trial: '30-day free trial'
       };
     } else {
+      const purchasePrice = toolProduct.price || 1500; // Fallback to £1500 if not set
       return {
-        amount: basePrice || 1500, // Full purchase price
+        amount: purchasePrice,
         period: ' one-time',
         setup: 0
       };

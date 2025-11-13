@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     // 2. Get product pricing
     const { data: products } = await supabase
       .from('products')
-      .select('product_code, description, price, currency')
+      .select('product_code, description, price, rental_price_monthly, currency, category')
       .in('product_code', body.products.map(p => p.product_code))
       .eq('active', true);
 
@@ -133,7 +133,9 @@ export async function POST(request: NextRequest) {
 
     if (body.purchase_type === 'rental') {
       // RENTAL: Create subscription checkout with trial
-      const monthlyPrice = 50; // £50/month - will pull from products table later
+      // Find the tool product or use first product
+      const toolProduct = products.find(p => p.category === 'tool') || products[0];
+      const monthlyPrice = toolProduct.rental_price_monthly || 50; // Fallback to £50
 
       session = await stripe.checkout.sessions.create({
         customer: stripeCustomerId,
