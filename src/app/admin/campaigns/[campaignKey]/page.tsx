@@ -3,7 +3,6 @@
  * Update existing campaign in public.campaigns
  */
 
-import { AdminHeader } from '@/components/admin/AdminHeader';
 import { notFound, redirect } from 'next/navigation';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -146,7 +145,7 @@ export default async function CampaignDetailPage({ params }: CampaignPageProps) 
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <AdminHeader />
+      
 
       <main className="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="mb-8">

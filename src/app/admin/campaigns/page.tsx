@@ -35,7 +35,7 @@ export default async function CampaignsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <AdminHeader />
+      
 
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="mb-8 flex items-center justify-between">

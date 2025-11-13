@@ -1,7 +1,5 @@
 /**
- * Admin Layout - Auth + Navigation for admin pages
- * In development: allows access without auth
- * In production: checks for admin_authorized cookie
+ * Admin Layout - Auth + Left Sidebar Navigation
  */
 
 import { cookies } from 'next/headers';
@@ -26,78 +24,110 @@ export default async function AdminLayout({
   const currentUser = await getCurrentUser();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Admin Navigation */}
-      <nav className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-8">
-              <Link href="/admin" className="text-xl font-bold text-gray-900">
-                Technifold Admin
-              </Link>
-
-              <div className="flex gap-1">
-                <NavLink href="/admin/add-lead" label="+ Add Lead" highlight />
-                <NavLink href="/admin/quote-requests" label="Quote Requests" highlight />
-                <NavLink href="/admin/quote-builder-v2" label="Build Quote" />
-                <NavLink href="/admin/orders" label="Orders" />
-                <NavLink href="/admin/companies" label="Company List" />
-                <NavLink href="/admin/company" label="Company Console" />
-                <NavLink href="/admin/engagements" label="Engagements" />
-                {isDir && <NavLink href="/admin/users" label="Users" />}
-                {isDir && <NavLink href="/admin/categorize" label="Categorize" />}
-                {isDir && <NavLink href="/admin/sku-explorer" label="SKU Explorer" />}
-                {isDir && <NavLink href="/admin/ms-problem-editor" label="Copy Editor" />}
-                {isDir && <NavLink href="/admin/brand-media" label="Brand Media" />}
-                {isDir && <NavLink href="/admin/media-missing" label="Missing Media" />}
-              </div>
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
+      {/* Left Sidebar */}
+      <aside className="w-64 bg-gradient-to-b from-blue-600 to-indigo-700 shadow-xl flex flex-col">
+        {/* Logo/Header */}
+        <div className="p-6 border-b border-blue-500/30">
+          <Link href="/admin/company" className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+              <span className="text-blue-600 font-bold text-xl">T</span>
             </div>
+            <div>
+              <h1 className="text-white font-bold text-lg">Technifold</h1>
+              <p className="text-blue-200 text-xs">Sales Console</p>
+            </div>
+          </Link>
+        </div>
 
-            <div className="flex items-center gap-4">
-              {currentUser && (
-                <div className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-                  {currentUser.full_name} {currentUser.role === 'director' ? '👑' : ''}
-                </div>
-              )}
-              <a
-                href="/login"
-                className="text-sm text-gray-600 hover:text-gray-900"
-              >
-                Logout
-              </a>
-              <a
-                href="/"
-                className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-2"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Back to site
-              </a>
+        {/* Main Navigation */}
+        <nav className="flex-1 overflow-y-auto py-4">
+          <div className="px-3 mb-2">
+            <div className="text-blue-200 text-xs uppercase font-semibold tracking-wider px-3">
+              Sales
             </div>
           </div>
-        </div>
-      </nav>
 
-      {/* Page Content */}
-      {children}
+          <SidebarLink href="/admin/company" icon="🏢" label="Companies" />
+          <SidebarLink href="/admin/quote-requests" icon="📋" label="Leads" />
+          <SidebarLink href="/admin/add-lead" icon="➕" label="Add Lead" />
+          <SidebarLink href="/admin/quote-builder-v2" icon="📄" label="Build Quote" />
+          <SidebarLink href="/admin/orders" icon="✅" label="Orders" />
+          <SidebarLink href="/admin/rentals" icon="🔄" label="Rentals" />
+          <SidebarLink href="/admin/campaigns" icon="📧" label="Campaigns" />
+          <SidebarLink href="/admin/engagements" icon="📊" label="Engagement" />
+
+          {isDir && (
+            <>
+              <div className="px-3 mt-6 mb-2">
+                <div className="text-blue-200 text-xs uppercase font-semibold tracking-wider px-3">
+                  Admin Tools
+                </div>
+              </div>
+              <SidebarLink href="/admin/users" icon="👥" label="Users" />
+              <SidebarLink href="/admin/companies" icon="📑" label="Company List" />
+              <SidebarLink href="/admin/categorize" icon="🏷️" label="Categorize" />
+              <SidebarLink href="/admin/sku-explorer" icon="📦" label="SKU Explorer" />
+              <SidebarLink href="/admin/ms-problem-editor" icon="✏️" label="Copy Editor" />
+              <SidebarLink href="/admin/brand-media" icon="🎨" label="Brand Media" />
+              <SidebarLink href="/admin/media-missing" icon="🖼️" label="Missing Media" />
+            </>
+          )}
+        </nav>
+
+        {/* User Info & Actions */}
+        <div className="p-4 border-t border-blue-500/30 space-y-2">
+          {currentUser && (
+            <div className="flex items-center space-x-3 text-white px-2 py-2 bg-white/10 rounded-lg">
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                <span className="text-sm">{currentUser.role === 'director' ? '👑' : '👤'}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{currentUser.full_name}</p>
+                <p className="text-xs text-blue-200 capitalize">{currentUser.role?.replace('_', ' ')}</p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <a
+              href="/"
+              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-blue-100 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Site
+            </a>
+            <a
+              href="/login"
+              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-blue-100 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Logout
+            </a>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="flex-1 overflow-auto">
+        {children}
+      </main>
     </div>
   );
 }
 
-function NavLink({ href, label, highlight, small }: { href: string; label: string; highlight?: boolean; small?: boolean }) {
+function SidebarLink({ href, icon, label }: { href: string; icon: string; label: string }) {
   return (
     <Link
       href={href}
-      className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-        small ? 'text-xs' : 'text-sm'
-      } ${
-        highlight
-          ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-          : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-      }`}
+      className="flex items-center space-x-3 px-6 py-3 text-blue-100 hover:bg-white/10 transition-all"
     >
-      {label}
+      <span className="text-xl">{icon}</span>
+      <span className="font-medium text-sm">{label}</span>
     </Link>
   );
 }
