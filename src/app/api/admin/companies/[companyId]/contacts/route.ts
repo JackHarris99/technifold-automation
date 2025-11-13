@@ -26,22 +26,35 @@ export async function GET(
     const { companyId } = await params;
     const supabaseGet = getSupabaseClient();
 
-    // Fetch contacts for the company
-    // Note: For system-check testing, fetching minimal fields without marketing filters
-    // Removing 1000 row limit to fetch ALL contacts for this company
-    const { data: contacts, error } = await supabaseGet
-      .from('contacts')
-      .select('contact_id, company_id, full_name, email')
-      .eq('company_id', companyId)
-      .order('full_name', { ascending: true })
-      .range(0, 9999); // Fetch up to 10,000 contacts per company
+    // Fetch ALL contacts for the company in batches (Supabase 1000 row limit)
+    let allContacts: any[] = [];
+    let start = 0;
+    const batchSize = 1000;
+    let hasMore = true;
 
-    if (error) {
-      console.error('[contacts-api] Error fetching contacts:', error);
-      return NextResponse.json({ error: 'Failed to fetch contacts' }, { status: 500 });
+    while (hasMore) {
+      const { data: batch, error } = await supabaseGet
+        .from('contacts')
+        .select('contact_id, company_id, full_name, email')
+        .eq('company_id', companyId)
+        .order('full_name', { ascending: true })
+        .range(start, start + batchSize - 1);
+
+      if (error) {
+        console.error('[contacts-api] Error fetching contacts:', error);
+        return NextResponse.json({ error: 'Failed to fetch contacts' }, { status: 500 });
+      }
+
+      if (batch && batch.length > 0) {
+        allContacts = allContacts.concat(batch);
+        start += batchSize;
+        hasMore = batch.length === batchSize;
+      } else {
+        hasMore = false;
+      }
     }
 
-    return NextResponse.json({ contacts: contacts || [] });
+    return NextResponse.json({ contacts: allContacts });
   } catch (err) {
     console.error('[contacts-api] Unexpected error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

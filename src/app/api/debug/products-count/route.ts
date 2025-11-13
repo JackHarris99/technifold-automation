@@ -32,22 +32,49 @@ export async function GET() {
       typeCounts[type] = (typeCounts[type] || 0) + 1;
     });
 
-    // Test actual API query
-    const { data: apiProducts, error: apiError } = await supabase
-      .from('products')
-      .select('product_code, description, price, rental_price_monthly, currency, type, category, image_url')
-      .eq('active', true)
-      .order('type')
-      .order('product_code')
-      .range(0, 9999);
+    // Test actual API query with batch fetching
+    let apiProducts: any[] = [];
+    let start = 0;
+    const batchSize = 1000;
+    let hasMore = true;
+    let apiError = null;
+
+    while (hasMore) {
+      const { data: batch, error } = await supabase
+        .from('products')
+        .select('product_code, description, price, rental_price_monthly, currency, type, category, image_url')
+        .eq('active', true)
+        .order('type')
+        .order('product_code')
+        .range(start, start + batchSize - 1);
+
+      if (error) {
+        apiError = error;
+        break;
+      }
+
+      if (batch && batch.length > 0) {
+        apiProducts = apiProducts.concat(batch);
+        start += batchSize;
+        hasMore = batch.length === batchSize;
+      } else {
+        hasMore = false;
+      }
+    }
 
     return NextResponse.json({
       total_products: total,
       active_products: active,
       products_by_type: typeCounts,
-      api_query_returned: apiProducts?.length || 0,
+      api_query_returned: apiProducts.length,
       api_query_error: apiError,
-      sample_products: apiProducts?.slice(0, 5).map((p: any) => ({
+      batches_fetched: Math.ceil(apiProducts.length / batchSize),
+      sample_products: apiProducts.slice(0, 5).map((p: any) => ({
+        code: p.product_code,
+        type: p.type,
+        description: p.description?.substring(0, 50)
+      })),
+      last_5_products: apiProducts.slice(-5).map((p: any) => ({
         code: p.product_code,
         type: p.type,
         description: p.description?.substring(0, 50)
