@@ -107,25 +107,8 @@ export async function POST(request: NextRequest) {
         error: result.error,
       });
 
-      // Track marketing send
+      // Track engagement event
       if (result.success) {
-        await supabase.from('marketing_sends').insert({
-          company_id,
-          contact_id: contact.contact_id,
-          machine_slug,
-          problem_solution_ids: selected_problem_ids,
-          curated_skus,
-          campaign_key,
-          offer_key,
-          status: 'sent',
-          sent_at: new Date().toISOString(),
-          metadata: {
-            token,
-            message_id: result.messageId,
-          },
-        });
-
-        // Track engagement event
         await supabase.from('engagement_events').insert({
           company_id,
           contact_id: contact.contact_id,
