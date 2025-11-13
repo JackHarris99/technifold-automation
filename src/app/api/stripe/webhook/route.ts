@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyWebhookSignature, stripe } from '@/lib/stripe-client';
 import { getSupabaseClient } from '@/lib/supabase';
+import { sendOrderConfirmation } from '@/lib/resend-client';
 import Stripe from 'stripe';
 
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -189,6 +190,57 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   console.log('[stripe-webhook] Order created:', order.order_id);
+
+  // Send order confirmation email
+  try {
+    // Fetch company details
+    const { data: company } = await supabase
+      .from('companies')
+      .select('company_name')
+      .eq('company_id', companyId)
+      .single();
+
+    // Fetch contact details
+    const { data: contact } = await supabase
+      .from('contacts')
+      .select('full_name, email')
+      .eq('contact_id', contactId)
+      .single();
+
+    // Fetch shipping address
+    const { data: shippingAddress } = await supabase
+      .from('shipping_addresses')
+      .select('address_line_1, address_line_2, city, postal_code, country')
+      .eq('address_id', shippingAddressId)
+      .single();
+
+    if (company && contact && shippingAddress) {
+      const emailResult = await sendOrderConfirmation({
+        to: contact.email,
+        contactName: contact.full_name,
+        companyName: company.company_name,
+        orderId: order.order_id,
+        orderItems: items,
+        subtotal,
+        taxAmount,
+        totalAmount: total,
+        currency,
+        shippingAddress,
+        isRental: purchaseType === 'rental',
+      });
+
+      if (emailResult.success) {
+        console.log('[stripe-webhook] Order confirmation email sent:', emailResult.messageId);
+      } else {
+        console.error('[stripe-webhook] Failed to send order confirmation:', emailResult.error);
+      }
+    } else {
+      console.error('[stripe-webhook] Missing data for order confirmation email');
+    }
+  } catch (emailError) {
+    console.error('[stripe-webhook] Error sending order confirmation:', emailError);
+    // Don't fail the webhook if email fails
+  }
 
   // Insert order_items (canonical line items)
   const orderItems = items.map((item) => ({
