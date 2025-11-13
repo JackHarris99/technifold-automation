@@ -312,9 +312,9 @@ function UserModal({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             >
               <option value="">None (Directors)</option>
-              <option value="rep_a">Rep A</option>
-              <option value="rep_b">Rep B</option>
-              <option value="rep_c">Rep C</option>
+              <option value="Callum">Callum</option>
+              <option value="Lee">Lee</option>
+              <option value="Steve">Steve</option>
             </select>
           </div>
 
