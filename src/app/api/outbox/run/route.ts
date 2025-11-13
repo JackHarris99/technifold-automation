@@ -13,7 +13,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
-import { getZohoBooksClient, isZohoConfigured } from '@/lib/zoho-books-client';
 import { generateOfferUrl, generateReorderUrl, generateToken } from '@/lib/tokens';
 import { sendMarketingEmail, isResendConfigured } from '@/lib/resend-client';
 
@@ -150,10 +149,6 @@ export async function POST(request: NextRequest) {
  */
 async function processJob(job: any) {
   switch (job.job_type) {
-    case 'zoho_sync_order':
-      await processZohoSyncOrder(job);
-      break;
-
     case 'send_offer_email':
       await processSendOfferEmail(job);
       break;
@@ -166,73 +161,6 @@ async function processJob(job: any) {
     default:
       throw new Error(`Unknown job type: ${job.job_type}`);
   }
-}
-
-/**
- * Sync order to Zoho Books (create invoice + record payment)
- */
-async function processZohoSyncOrder(job: any) {
-  if (!isZohoConfigured()) {
-    console.log('[outbox-worker] Zoho not configured, skipping sync');
-    return; // Silently skip if Zoho not configured
-  }
-
-  const { order_id, company_id, items, total, currency, payment_reference } = job.payload;
-
-  if (!order_id || !company_id || !items) {
-    throw new Error('Invalid job payload: missing required fields');
-  }
-
-  const supabase = getSupabaseClient();
-  const zoho = getZohoBooksClient();
-
-  // Create invoice in Zoho Books
-  console.log(`[outbox-worker] Creating Zoho invoice for order ${order_id}`);
-  const invoice = await zoho.createInvoice({
-    companyId: company_id,
-    orderId: order_id,
-    items: items.map((item: any) => ({
-      product_code: item.product_code,
-      description: item.description,
-      quantity: item.quantity,
-      rate: item.unit_price,
-    })),
-    reference_number: order_id,
-  });
-
-  // Record payment
-  console.log(`[outbox-worker] Recording payment for invoice ${invoice.invoice_id}`);
-  const payment = await zoho.recordPayment({
-    invoiceId: invoice.invoice_id,
-    amount: total,
-    paymentDate: new Date().toISOString().split('T')[0], // YYYY-MM-DD
-    paymentMode: 'stripe',
-    reference: payment_reference,
-  });
-
-  // Update order with Zoho IDs
-  await supabase
-    .from('orders')
-    .update({
-      zoho_invoice_id: invoice.invoice_id,
-      zoho_payment_id: payment.payment_id,
-      zoho_synced_at: new Date().toISOString(),
-    })
-    .eq('order_id', order_id);
-
-  // Store result in outbox
-  await supabase
-    .from('outbox')
-    .update({
-      result: {
-        zoho_invoice_id: invoice.invoice_id,
-        zoho_invoice_number: invoice.invoice_number,
-        zoho_payment_id: payment.payment_id,
-      },
-    })
-    .eq('id', job.id);
-
-  console.log(`[outbox-worker] Order ${order_id} synced to Zoho successfully`);
 }
 
 /**
