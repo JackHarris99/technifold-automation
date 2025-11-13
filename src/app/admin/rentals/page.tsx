@@ -3,8 +3,9 @@
  * View all tool rental subscriptions
  */
 
-import { AdminHeader } from '@/components/admin/AdminHeader';
+import AdminLayout from '@/components/admin/AdminLayout';
 import { getSupabaseClient } from '@/lib/supabase';
+import { getCurrentUser } from '@/lib/auth';
 import Link from 'next/link';
 
 export const metadata = {
@@ -14,6 +15,8 @@ export const metadata = {
 
 export default async function RentalsPage() {
   const supabase = getSupabaseClient();
+  const user = await getCurrentUser();
+  const userRole = user?.role === 'director' ? 'director' : 'sales_rep';
 
   // Fetch all rentals with company details
   const { data: rentals } = await supabase
@@ -39,11 +42,9 @@ export default async function RentalsPage() {
   const cancelledRentals = rentals?.filter(r => r.status === 'cancelled') || [];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <AdminHeader />
-
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
+    <AdminLayout userRole={userRole}>
+      <div className="h-full flex flex-col overflow-auto bg-gray-50">
+        <div className="px-6 py-6 bg-white border-b border-gray-200">
           <h1 className="text-3xl font-bold text-gray-900">Tool Rentals</h1>
           <p className="mt-2 text-gray-600">
             Manage tool rental subscriptions
@@ -205,7 +206,11 @@ export default async function RentalsPage() {
             </div>
           </div>
         )}
-      </main>
-    </div>
+
+        <div className="px-6 py-6">
+          {/* Content padding */}
+        </div>
+      </div>
+    </AdminLayout>
   );
 }

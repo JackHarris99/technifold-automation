@@ -7,6 +7,8 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
 import CompanyConsole from '@/components/admin/CompanyConsole';
 import { getCompanyPermissions } from '@/lib/permissions';
+import AdminLayout from '@/components/admin/AdminLayout';
+import { getCurrentUser } from '@/lib/auth';
 
 interface CompanyConsolePageProps {
   params: Promise<{
@@ -98,15 +100,21 @@ export default async function CompanyConsolePage({ params }: CompanyConsolePageP
   // Get permissions for this company
   const permissions = await getCompanyPermissions(company);
 
+  // Get current user for layout
+  const user = await getCurrentUser();
+  const userRole = user?.role === 'director' ? 'director' : 'sales_rep';
+
   return (
-    <CompanyConsole
-      company={company}
-      salesRep={salesRep}
-      machines={machines || []}
-      contacts={contacts || []}
-      recentEngagement={recentEngagement || []}
-      orders={orders || []}
-      permissions={permissions}
-    />
+    <AdminLayout userRole={userRole}>
+      <CompanyConsole
+        company={company}
+        salesRep={salesRep}
+        machines={machines || []}
+        contacts={contacts || []}
+        recentEngagement={recentEngagement || []}
+        orders={orders || []}
+        permissions={permissions}
+      />
+    </AdminLayout>
   );
 }

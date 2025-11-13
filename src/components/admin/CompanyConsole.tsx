@@ -87,13 +87,13 @@ export default function CompanyConsole({
   const totalRevenue = orders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-full flex flex-col">
       {/* Top Bar - Sticky with color-coded border */}
-      <div className={`bg-white border-b-4 ${ownerColors.border} sticky top-0 z-30 shadow-sm`}>
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="grid md:grid-cols-3 gap-4 items-center">
+      <div className={`bg-white border-l-4 ${ownerColors.border} shadow-sm`}>
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between gap-6">
             {/* Company Selector */}
-            <div>
+            <div className="flex-1 max-w-md">
               <CompanySelector
                 currentCompanyId={company.company_id}
                 currentCompanyName={company.company_name}
@@ -102,57 +102,27 @@ export default function CompanyConsole({
             </div>
 
             {/* Quick Stats */}
-            <div className="flex gap-6 justify-center text-sm">
+            <div className="flex gap-8 text-sm">
               <div>
-                <div className="text-gray-500">Machines</div>
-                <div className="font-bold text-lg">{machines.length}</div>
+                <div className="text-gray-500 text-xs uppercase">Machines</div>
+                <div className="font-bold text-xl text-gray-900">{machines.length}</div>
               </div>
               <div>
-                <div className="text-gray-500">Last Order</div>
-                <div className="font-bold text-lg">
+                <div className="text-gray-500 text-xs uppercase">Last Order</div>
+                <div className="font-bold text-xl text-gray-900">
                   {lastOrder ? new Date(lastOrder.created_at).toLocaleDateString() : 'Never'}
                 </div>
               </div>
               <div>
-                <div className="text-gray-500">Total Revenue</div>
-                <div className="font-bold text-lg">£{totalRevenue.toFixed(0)}</div>
+                <div className="text-gray-500 text-xs uppercase">Revenue</div>
+                <div className="font-bold text-xl text-gray-900">£{totalRevenue.toFixed(0)}</div>
               </div>
             </div>
 
-            {/* Quick Info with color badge + Admin Tools */}
-            <div className="text-right">
-              <div className="flex gap-3 justify-end items-center">
-                <div className="flex gap-2">
-                  <a
-                    href="/admin/orders"
-                    className="px-3 py-1.5 text-xs font-semibold text-purple-600 border border-purple-600 rounded hover:bg-purple-50 transition-colors"
-                  >
-                    Orders
-                  </a>
-                  <a
-                    href="/admin/rentals"
-                    className="px-3 py-1.5 text-xs font-semibold text-orange-600 border border-orange-600 rounded hover:bg-orange-50 transition-colors"
-                  >
-                    Rentals
-                  </a>
-                  <a
-                    href="/admin/quote-requests"
-                    className="px-3 py-1.5 text-xs font-semibold text-blue-600 border border-blue-600 rounded hover:bg-blue-50 transition-colors"
-                  >
-                    Quote Requests
-                  </a>
-                  <a
-                    href="/admin/quote-builder-v2"
-                    className="px-3 py-1.5 text-xs font-semibold text-green-600 border border-green-600 rounded hover:bg-green-50 transition-colors"
-                  >
-                    Build Quote
-                  </a>
-                </div>
-                <div className={`px-4 py-2 rounded-lg ${ownerColors.bg} ${ownerColors.border} border-2 text-sm`}>
-                  <div className={`font-bold ${ownerColors.text}`}>{salesRep?.rep_name || 'Unassigned'}</div>
-                  <div className="text-xs text-gray-600">Account Owner</div>
-                </div>
-              </div>
+            {/* Account Owner Badge */}
+            <div className={`px-6 py-3 rounded-lg ${ownerColors.bg} ${ownerColors.border} border-2`}>
+              <div className={`font-bold ${ownerColors.text} text-lg`}>{salesRep?.rep_name || 'Unassigned'}</div>
+              <div className="text-xs text-gray-600 uppercase tracking-wide">Account Owner</div>
             </div>
           </div>
         </div>
@@ -160,49 +130,45 @@ export default function CompanyConsole({
 
       {/* Permission Warning */}
       {!canAct && (
-        <div className="bg-yellow-50 border-b-2 border-yellow-200">
-          <div className="max-w-7xl mx-auto px-4 py-3">
-            <div className="flex items-center gap-2 text-yellow-800">
-              <span className="text-xl">⚠️</span>
-              <span className="text-sm font-semibold">
-                View-only access: You cannot perform actions on this company (owned by {salesRep?.rep_name || 'another rep'})
-              </span>
-            </div>
+        <div className="bg-yellow-50 border-b-2 border-yellow-200 px-6 py-3">
+          <div className="flex items-center gap-2 text-yellow-800">
+            <span className="text-xl">⚠️</span>
+            <span className="text-sm font-semibold">
+              View-only access: You cannot perform actions on this company (owned by {salesRep?.rep_name || 'another rep'})
+            </span>
           </div>
         </div>
       )}
 
       {/* Tabs Navigation */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex gap-1 overflow-x-auto">
-            <TabButton active={activeTab === 'overview'} onClick={() => handleTabChange('overview')}>
-              Overview
-            </TabButton>
-            <TabButton active={activeTab === 'marketing'} onClick={() => handleTabChange('marketing')}>
-              Marketing
-            </TabButton>
-            <TabButton active={activeTab === 'reorder'} onClick={() => handleTabChange('reorder')}>
-              Reorder
-            </TabButton>
-            <TabButton active={activeTab === 'history'} onClick={() => handleTabChange('history')}>
-              History
-            </TabButton>
-            <TabButton active={activeTab === 'contacts'} onClick={() => handleTabChange('contacts')}>
-              Contacts & Details
-            </TabButton>
-            <TabButton active={activeTab === 'engagement'} onClick={() => handleTabChange('engagement')}>
-              Engagement
-            </TabButton>
-            <TabButton active={activeTab === 'settings'} onClick={() => handleTabChange('settings')}>
-              Settings
-            </TabButton>
-          </div>
+      <div className="bg-white border-b border-gray-200 px-6">
+        <div className="flex gap-1 overflow-x-auto">
+          <TabButton active={activeTab === 'overview'} onClick={() => handleTabChange('overview')}>
+            Overview
+          </TabButton>
+          <TabButton active={activeTab === 'marketing'} onClick={() => handleTabChange('marketing')}>
+            Marketing
+          </TabButton>
+          <TabButton active={activeTab === 'reorder'} onClick={() => handleTabChange('reorder')}>
+            Reorder
+          </TabButton>
+          <TabButton active={activeTab === 'history'} onClick={() => handleTabChange('history')}>
+            History
+          </TabButton>
+          <TabButton active={activeTab === 'contacts'} onClick={() => handleTabChange('contacts')}>
+            Contacts & Details
+          </TabButton>
+          <TabButton active={activeTab === 'engagement'} onClick={() => handleTabChange('engagement')}>
+            Engagement
+          </TabButton>
+          <TabButton active={activeTab === 'settings'} onClick={() => handleTabChange('settings')}>
+            Settings
+          </TabButton>
         </div>
       </div>
 
       {/* Tab Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="flex-1 overflow-auto px-6 py-8 bg-gray-50">
         {activeTab === 'overview' && (
           <OverviewTab
             company={company}

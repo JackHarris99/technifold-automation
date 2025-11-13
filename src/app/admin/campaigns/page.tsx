@@ -3,7 +3,8 @@
  * CRUD interface for public.campaigns table
  */
 
-import { AdminHeader } from '@/components/admin/AdminHeader';
+import AdminLayout from '@/components/admin/AdminLayout';
+import { getCurrentUser } from '@/lib/auth';
 import Link from 'next/link';
 import { getSupabaseClient } from '@/lib/supabase';
 
