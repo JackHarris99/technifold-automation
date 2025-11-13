@@ -1,117 +1,278 @@
 /**
  * Orders Table Component
- * Displays recent orders with company details
+ * Displays orders with filtering, search, and management features
  */
 
 'use client';
 
-import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { formatDistanceToNow } from 'date-fns';
 
 interface Order {
   order_id: string;
   company_id: string;
-  company_name?: string;
+  company_name: string;
+  contact_name: string;
+  contact_email: string | null;
+  items: any[];
+  subtotal: number;
+  tax_amount: number;
   total_amount: number;
   currency: string;
   status: string;
+  payment_status: string;
   created_at: string;
-  stripe_session_id?: string;
+  paid_at: string | null;
+  completed_at: string | null;
+  stripe_payment_intent_id: string | null;
+  zoho_invoice_id: string | null;
 }
 
-interface OrdersTableProps {
-  orders: Order[];
-}
+export default function OrdersTable() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<'all' | 'paid' | 'processing' | 'completed'>('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
-export default function OrdersTable({ orders }: OrdersTableProps) {
-  if (orders.length === 0) {
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch('/api/admin/orders');
+      const data = await response.json();
+
+      if (response.ok) {
+        setOrders(data.orders);
+      } else {
+        setError(data.error || 'Failed to load orders');
+      }
+    } catch (err) {
+      setError('Failed to load orders');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredOrders = orders.filter(order => {
+    const matchesFilter = filter === 'all' || order.status === filter;
+    const matchesSearch = searchTerm === '' ||
+      order.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.contact_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.order_id.toLowerCase().includes(searchTerm.toLowerCase());
+
+    return matchesFilter && matchesSearch;
+  });
+
+  const getStatusBadge = (status: string) => {
+    const styles = {
+      pending: 'bg-yellow-100 text-yellow-800',
+      paid: 'bg-green-100 text-green-800',
+      processing: 'bg-blue-100 text-blue-800',
+      completed: 'bg-gray-100 text-gray-800',
+      cancelled: 'bg-red-100 text-red-800',
+      refunded: 'bg-purple-100 text-purple-800',
+    };
+
     return (
-      <div className="bg-white shadow rounded-lg p-12 text-center">
-        <p className="text-gray-500">No orders found</p>
+      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${styles[status as keyof typeof styles] || 'bg-gray-100 text-gray-800'}`}>
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </span>
+    );
+  };
+
+  const getTotalItems = (items: any[]) => {
+    return items.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-500">Loading orders...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <p className="text-red-800">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Order ID
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Company
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Amount
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Status
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Created
-            </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {orders.map((order) => (
-            <tr key={order.order_id} className="hover:bg-gray-50">
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm font-mono text-gray-900">
-                  {order.order_id}
-                </div>
-                {order.stripe_session_id && (
-                  <div className="text-xs text-gray-500 mt-1">
-                    Stripe: {order.stripe_session_id.substring(0, 20)}...
-                  </div>
-                )}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <Link
-                  href={`/admin/customer/${order.company_id}`}
-                  className="text-sm text-blue-600 hover:text-blue-900"
-                >
-                  {order.company_name || order.company_id}
-                </Link>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm font-semibold text-gray-900">
-                  {order.currency} {order.total_amount.toFixed(2)}
-                </div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span
-                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    order.status === 'completed'
-                      ? 'bg-green-100 text-green-800'
-                      : order.status === 'pending'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : order.status === 'processing'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-red-100 text-red-800'
-                  }`}
-                >
-                  {order.status}
-                </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {new Date(order.created_at).toLocaleString()}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <Link
-                  href={`/admin/customer/${order.company_id}`}
-                  className="text-blue-600 hover:text-blue-900"
-                >
-                  View Customer
-                </Link>
-              </td>
+    <div className="bg-white rounded-lg shadow">
+      {/* Filters */}
+      <div className="p-6 border-b border-gray-200">
+        <div className="flex flex-col sm:flex-row gap-4">
+          {/* Search */}
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Search by company, contact, or order ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* Status Filter */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setFilter('all')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                filter === 'all'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              All ({orders.length})
+            </button>
+            <button
+              onClick={() => setFilter('paid')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                filter === 'paid'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Paid ({orders.filter(o => o.status === 'paid').length})
+            </button>
+            <button
+              onClick={() => setFilter('processing')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                filter === 'processing'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Processing ({orders.filter(o => o.status === 'processing').length})
+            </button>
+            <button
+              onClick={() => setFilter('completed')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                filter === 'completed'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Completed ({orders.filter(o => o.status === 'completed').length})
+            </button>
+          </div>
+        </div>
+
+        {/* Results count */}
+        <div className="mt-4 text-sm text-gray-600">
+          Showing {filteredOrders.length} of {orders.length} orders
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Order ID
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Company / Contact
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Items
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Total
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Date
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {filteredOrders.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                  No orders found
+                </td>
+              </tr>
+            ) : (
+              filteredOrders.map((order) => (
+                <tr key={order.order_id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-mono text-gray-900">
+                      {order.order_id.slice(0, 8)}...
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm font-medium text-gray-900">{order.company_name}</div>
+                    <div className="text-sm text-gray-500">{order.contact_name}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{getTotalItems(order.items)} items</div>
+                    <div className="text-xs text-gray-500">
+                      {order.items[0]?.product_code || 'N/A'}
+                      {order.items.length > 1 && ` +${order.items.length - 1} more`}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-semibold text-gray-900">
+                      {order.currency === 'GBP' ? '£' : order.currency}
+                      {order.total_amount.toFixed(2)}
+                    </div>
+                    {order.tax_amount > 0 && (
+                      <div className="text-xs text-gray-500">
+                        +£{order.tax_amount.toFixed(2)} VAT
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {getStatusBadge(order.status)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                      {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {new Date(order.created_at).toLocaleDateString()}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <div className="flex gap-2">
+                      <a
+                        href={`/admin/companies/${order.company_id}`}
+                        className="text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        View
+                      </a>
+                      {order.stripe_payment_intent_id && (
+                        <a
+                          href={`https://dashboard.stripe.com/payments/${order.stripe_payment_intent_id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-purple-600 hover:text-purple-800 font-medium"
+                        >
+                          Stripe
+                        </a>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
