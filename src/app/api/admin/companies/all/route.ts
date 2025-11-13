@@ -10,10 +10,12 @@ export async function GET() {
   try {
     const supabase = getSupabaseClient();
 
+    // Fetch ALL companies by removing the default 1000 row limit
     const { data: companies, error } = await supabase
       .from('companies')
       .select('company_id, company_name')
-      .order('company_name');
+      .order('company_name')
+      .range(0, 9999); // Fetch up to 10,000 companies
 
     if (error) {
       console.error('[companies/all] Error:', error);

@@ -10,12 +10,14 @@ export async function GET() {
   try {
     const supabase = getSupabaseClient();
 
+    // Fetch ALL products by removing the default 1000 row limit
     const { data: products, error } = await supabase
       .from('products')
       .select('product_code, description, price, rental_price_monthly, currency, type, category, image_url')
       .eq('active', true)
       .order('type')
-      .order('product_code');
+      .order('product_code')
+      .range(0, 9999); // Fetch up to 10,000 products
 
     if (error) {
       console.error('[products/all] Error:', error);

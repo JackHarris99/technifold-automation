@@ -28,11 +28,13 @@ export async function GET(
 
     // Fetch contacts for the company
     // Note: For system-check testing, fetching minimal fields without marketing filters
+    // Removing 1000 row limit to fetch ALL contacts for this company
     const { data: contacts, error } = await supabaseGet
       .from('contacts')
       .select('contact_id, company_id, full_name, email')
       .eq('company_id', companyId)
-      .order('full_name', { ascending: true });
+      .order('full_name', { ascending: true })
+      .range(0, 9999); // Fetch up to 10,000 contacts per company
 
     if (error) {
       console.error('[contacts-api] Error fetching contacts:', error);
