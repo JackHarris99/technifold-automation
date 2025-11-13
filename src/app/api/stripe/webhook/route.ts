@@ -191,6 +191,64 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   console.log('[stripe-webhook] Order created:', order.order_id);
 
+  // Create Stripe invoice for accounting/tax purposes
+  try {
+    const stripeCustomerId = session.customer as string;
+
+    // Create invoice
+    const invoice = await stripe.invoices.create({
+      customer: stripeCustomerId,
+      auto_advance: false, // We'll finalize it manually
+      collection_method: 'charge_automatically',
+      metadata: {
+        order_id: order.order_id,
+        company_id: companyId,
+      },
+    });
+
+    // Add line items to invoice
+    for (const item of items) {
+      await stripe.invoiceItems.create({
+        customer: stripeCustomerId,
+        invoice: invoice.id,
+        description: `${item.product_code} - ${item.description}`,
+        quantity: item.quantity,
+        unit_amount: Math.round(item.unit_price * 100), // Convert to cents
+        currency: currency.toLowerCase(),
+      });
+    }
+
+    // Add tax as separate line item if applicable
+    if (taxAmount > 0) {
+      await stripe.invoiceItems.create({
+        customer: stripeCustomerId,
+        invoice: invoice.id,
+        description: 'VAT',
+        amount: Math.round(taxAmount * 100),
+        currency: currency.toLowerCase(),
+      });
+    }
+
+    // Finalize the invoice
+    const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id);
+
+    // Mark as paid (payment already happened via checkout)
+    await stripe.invoices.pay(finalizedInvoice.id, {
+      paid_out_of_band: true, // Payment happened outside this invoice
+    });
+
+    // Update order with invoice ID
+    await supabase
+      .from('orders')
+      .update({ stripe_invoice_id: finalizedInvoice.id })
+      .eq('order_id', order.order_id);
+
+    console.log('[stripe-webhook] Stripe invoice created:', finalizedInvoice.id);
+  } catch (invoiceError) {
+    console.error('[stripe-webhook] Failed to create Stripe invoice:', invoiceError);
+    // Don't fail the webhook if invoice creation fails - order is already created
+  }
+
   // Send order confirmation email
   try {
     // Fetch company details
@@ -352,22 +410,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     }
   });
 
-  // Enqueue Zoho sync job (create invoice + record payment)
-  await supabase.from('outbox').insert({
-    job_type: 'zoho_sync_order',
-    payload: {
-      order_id: order.order_id,
-      company_id: companyId,
-      items,
-      total,
-      currency,
-      payment_reference: session.payment_intent,
-    },
-    company_id: companyId,
-    order_id: order.order_id,
-  });
-
-  console.log('[stripe-webhook] Zoho sync job enqueued for order:', order.order_id);
+  // Note: Zoho integration removed - using Stripe invoices only
 }
 
 /**
