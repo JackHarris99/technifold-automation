@@ -14,14 +14,12 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // In production, check for admin_authorized cookie
-  if (process.env.NODE_ENV !== 'development') {
-    const cookieStore = await cookies();
-    const adminAuth = cookieStore.get('admin_authorized');
+  // Check for admin_authorized cookie
+  const cookieStore = await cookies();
+  const adminAuth = cookieStore.get('admin_authorized');
 
-    if (!adminAuth || adminAuth.value !== 'true') {
-      redirect('/admin/login');
-    }
+  if (!adminAuth || adminAuth.value !== 'true') {
+    redirect('/login');
   }
 
   const isDir = await isDirector();
@@ -57,14 +55,14 @@ export default async function AdminLayout({
             <div className="flex items-center gap-4">
               {currentUser && (
                 <div className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-                  {currentUser.rep_name} {currentUser.role === 'director' ? '👑' : ''}
+                  {currentUser.full_name} {currentUser.role === 'director' ? '👑' : ''}
                 </div>
               )}
               <a
-                href="/admin/login"
+                href="/login"
                 className="text-sm text-gray-600 hover:text-gray-900"
               >
-                Switch User
+                Logout
               </a>
               <a
                 href="/"
