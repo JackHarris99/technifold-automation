@@ -21,6 +21,7 @@ export interface TokenPayload {
   contact_id?: string;
   offer_key?: string;
   campaign_key?: string;
+  products?: string[]; // Product codes to include in quote
   expires_at: number; // Unix timestamp
 }
 

@@ -36,7 +36,7 @@ export default async function QuotePage({ params }: QuotePageProps) {
     );
   }
 
-  const { company_id, contact_id } = payload;
+  const { company_id, contact_id, products: tokenProducts } = payload;
   const supabase = getSupabaseClient();
 
   // 2. Get company details
@@ -57,42 +57,52 @@ export default async function QuotePage({ params }: QuotePageProps) {
     .eq('contact_id', contact_id)
     .single();
 
-  // 4. Get company's interested solutions
-  const { data: interests } = await supabase
-    .from('company_interests')
-    .select('problem_solution_id')
-    .eq('company_id', company_id)
-    .eq('status', 'interested');
-
-  const interestedProblemSolutionIds = (interests || []).map(i => i.problem_solution_id);
-
-  // 5. Get problem/solution data to identify products
+  // 4. Determine which products to show
+  let allProductCodes = new Set<string>();
   let solutionCards: any[] = [];
-  if (interestedProblemSolutionIds.length > 0) {
-    const { data: cards } = await supabase
-      .from('v_problem_solution_machine')
-      .select('*')
-      .in('problem_solution_id', interestedProblemSolutionIds);
 
-    solutionCards = cards || [];
+  // If token contains specific products (from Quote Builder), use those
+  if (tokenProducts && tokenProducts.length > 0) {
+    tokenProducts.forEach((code: string) => allProductCodes.add(code));
+  } else {
+    // Otherwise, fall back to company_interests logic
+    const { data: interests } = await supabase
+      .from('company_interests')
+      .select('problem_solution_id')
+      .eq('company_id', company_id)
+      .eq('status', 'interested');
+
+    const interestedProblemSolutionIds = (interests || []).map(i => i.problem_solution_id);
+
+    // 5. Get problem/solution data to identify products
+    if (interestedProblemSolutionIds.length > 0) {
+      const { data: cards } = await supabase
+        .from('v_problem_solution_machine')
+        .select('*')
+        .in('problem_solution_id', interestedProblemSolutionIds);
+
+      solutionCards = cards || [];
+    }
+
+    // 6. Collect all unique product codes from curated_skus
+    solutionCards.forEach(card => {
+      if (card.curated_skus && Array.isArray(card.curated_skus)) {
+        card.curated_skus.forEach((sku: string) => allProductCodes.add(sku));
+      }
+    });
   }
 
-  // 6. Collect all unique product codes from curated_skus
-  const allProductCodes = new Set<string>();
-  solutionCards.forEach(card => {
-    if (card.curated_skus && Array.isArray(card.curated_skus)) {
-      card.curated_skus.forEach((sku: string) => allProductCodes.add(sku));
-    }
-  });
-
   // 7. Fetch product data with pricing (including rental pricing)
-  const { data: products } = await supabase
-    .from('products')
-    .select('product_code, description, image_url, type, price, rental_price_monthly, currency, active')
-    .in('product_code', Array.from(allProductCodes))
-    .eq('active', true);
+  let productData: any[] = [];
+  if (allProductCodes.size > 0) {
+    const { data: products } = await supabase
+      .from('products')
+      .select('product_code, description, image_url, type, price, rental_price_monthly, currency, active')
+      .in('product_code', Array.from(allProductCodes))
+      .eq('active', true);
 
-  const productData = products || [];
+    productData = products || [];
+  }
 
   // 8. Get existing shipping address if any
   const { data: addresses } = await supabase

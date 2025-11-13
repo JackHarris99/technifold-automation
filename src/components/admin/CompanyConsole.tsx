@@ -119,11 +119,27 @@ export default function CompanyConsole({
               </div>
             </div>
 
-            {/* Quick Info with color badge */}
-            <div className="text-right text-sm">
-              <div className={`inline-block px-4 py-2 rounded-lg ${ownerColors.bg} ${ownerColors.border} border-2`}>
-                <div className={`font-bold ${ownerColors.text}`}>{salesRep?.rep_name || 'Unassigned'}</div>
-                <div className="text-xs text-gray-600">Account Owner</div>
+            {/* Quick Info with color badge + Admin Tools */}
+            <div className="text-right">
+              <div className="flex gap-3 justify-end items-center">
+                <div className="flex gap-2">
+                  <a
+                    href="/admin/quote-requests"
+                    className="px-3 py-1.5 text-xs font-semibold text-blue-600 border border-blue-600 rounded hover:bg-blue-50 transition-colors"
+                  >
+                    Quote Requests
+                  </a>
+                  <a
+                    href="/admin/quote-builder"
+                    className="px-3 py-1.5 text-xs font-semibold text-green-600 border border-green-600 rounded hover:bg-green-50 transition-colors"
+                  >
+                    Build Quote
+                  </a>
+                </div>
+                <div className={`px-4 py-2 rounded-lg ${ownerColors.bg} ${ownerColors.border} border-2 text-sm`}>
+                  <div className={`font-bold ${ownerColors.text}`}>{salesRep?.rep_name || 'Unassigned'}</div>
+                  <div className="text-xs text-gray-600">Account Owner</div>
+                </div>
               </div>
             </div>
           </div>

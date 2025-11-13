@@ -12,6 +12,7 @@ import { MarketingFooter } from '@/components/marketing/MarketingFooter';
 import { replacePlaceholders } from '@/lib/textUtils';
 import SmartCopyRenderer from '@/components/marketing/SmartCopyRenderer';
 import MediaImage from '@/components/shared/MediaImage';
+import RequestQuoteButton from '@/components/marketing/RequestQuoteButton';
 
 interface MarketingPageProps {
   params: Promise<{
@@ -63,7 +64,8 @@ export default async function MarketingPage({ params }: MarketingPageProps) {
       machines:machine_id (
         brand,
         model,
-        display_name
+        display_name,
+        slug
       )
     `)
     .eq('company_id', company_id)
@@ -72,6 +74,7 @@ export default async function MarketingPage({ params }: MarketingPageProps) {
 
   const machine = companyMachines?.[0]?.machines as any;
   const machineId = companyMachines?.[0]?.machine_id;
+  const machineSlug = machine?.slug;
 
   // 4. Get company's interested problem_solution_ids
   const { data: interests } = await supabase
@@ -403,16 +406,11 @@ export default async function MarketingPage({ params }: MarketingPageProps) {
             </div>
             <div className="p-8 md:p-12 text-center">
               <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
-                Start your 30-day free trial or purchase outright. Get {company.company_name} running better, faster.
+                Request a personalized quote for {company.company_name}. See pricing for rental or purchase options.
               </p>
-              <a
-                href={`/q/${token}`}
-                className="inline-block bg-blue-600 text-white px-10 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 hover:shadow-lg transition-all"
-              >
-                Get Your Custom Quote
-              </a>
+              <RequestQuoteButton token={token} machineSlug={machineSlug} />
               <p className="text-sm text-gray-500 mt-4">
-                30-Day Free Trial • £50/month or £1,500 Purchase • Free Shipping
+                30-Day Free Trial • Flexible Rental or Purchase • Free Shipping
               </p>
             </div>
           </div>
