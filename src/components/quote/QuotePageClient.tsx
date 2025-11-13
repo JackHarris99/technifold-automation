@@ -74,8 +74,8 @@ export default function QuotePageClient({
   const calculatePrice = () => {
     if (products.length === 0) return { amount: 0, period: '' };
 
-    // Find the tool product (category = 'tool') or use first product
-    const toolProduct = products.find((p: any) => p.category === 'tool') || products[0];
+    // Find the tool product (type = 'tool') or use first product
+    const toolProduct = products.find((p: any) => p.type === 'tool') || products[0];
 
     if (!toolProduct) {
       return { amount: 0, period: '' };

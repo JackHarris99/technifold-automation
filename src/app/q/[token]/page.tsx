@@ -88,7 +88,7 @@ export default async function QuotePage({ params }: QuotePageProps) {
   // 7. Fetch product data with pricing (including rental pricing)
   const { data: products } = await supabase
     .from('products')
-    .select('product_code, description, image_url, category, price, rental_price_monthly, currency, active')
+    .select('product_code, description, image_url, type, price, rental_price_monthly, currency, active')
     .in('product_code', Array.from(allProductCodes))
     .eq('active', true);
 
