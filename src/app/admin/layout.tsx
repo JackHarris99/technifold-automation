@@ -42,6 +42,7 @@ export default async function AdminLayout({
                 <NavLink href="/admin/add-lead" label="+ Add Lead" highlight />
                 <NavLink href="/admin/quote-requests" label="Quote Requests" highlight />
                 <NavLink href="/admin/quote-builder-v2" label="Build Quote" />
+                <NavLink href="/admin/orders" label="Orders" />
                 <NavLink href="/admin/companies" label="Company List" />
                 <NavLink href="/admin/company" label="Company Console" />
                 <NavLink href="/admin/engagements" label="Engagements" />
