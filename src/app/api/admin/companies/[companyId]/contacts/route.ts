@@ -69,6 +69,16 @@ export async function POST(
     const { companyId } = await context.params;
     const body = await request.json();
 
+    // Check territory permission
+    const { canActOnCompany } = await import('@/lib/auth');
+    const permission = await canActOnCompany(companyId);
+    if (!permission.allowed) {
+      return NextResponse.json(
+        { error: permission.error },
+        { status: 403 }
+      );
+    }
+
     const { first_name, last_name, full_name, email, role, marketing_status } = body;
 
     if (!email) {

@@ -19,6 +19,16 @@ export async function PATCH(
     const { companyId } = await context.params;
     const body = await request.json();
 
+    // Check territory permission
+    const { canActOnCompany } = await import('@/lib/auth');
+    const permission = await canActOnCompany(companyId);
+    if (!permission.allowed) {
+      return NextResponse.json(
+        { error: permission.error },
+        { status: 403 }
+      );
+    }
+
     const { company_name, account_owner, category } = body;
 
     const updateData: any = {

@@ -28,6 +28,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check territory permission
+    const { canActOnCompany } = await import('@/lib/auth');
+    const permission = await canActOnCompany(company_id);
+    if (!permission.allowed) {
+      return NextResponse.json(
+        { error: permission.error },
+        { status: 403 }
+      );
+    }
+
     const supabase = getSupabaseClient();
 
     // Validate company exists

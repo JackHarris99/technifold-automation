@@ -19,8 +19,18 @@ export async function PATCH(
   context: { params: Promise<{ companyId: string; contactId: string }> }
 ) {
   try {
-    const { contactId } = await context.params;
+    const { companyId, contactId } = await context.params;
     const body = await request.json();
+
+    // Check territory permission
+    const { canActOnCompany } = await import('@/lib/auth');
+    const permission = await canActOnCompany(companyId);
+    if (!permission.allowed) {
+      return NextResponse.json(
+        { error: permission.error },
+        { status: 403 }
+      );
+    }
 
     const updateData: any = {};
 
@@ -72,7 +82,17 @@ export async function DELETE(
   context: { params: Promise<{ companyId: string; contactId: string }> }
 ) {
   try {
-    const { contactId } = await context.params;
+    const { companyId, contactId } = await context.params;
+
+    // Check territory permission
+    const { canActOnCompany } = await import('@/lib/auth');
+    const permission = await canActOnCompany(companyId);
+    if (!permission.allowed) {
+      return NextResponse.json(
+        { error: permission.error },
+        { status: 403 }
+      );
+    }
 
     const { error } = await supabase
       .from('contacts')
