@@ -25,22 +25,22 @@ export function AdminHeader() {
               Companies
             </Link>
             <Link
+              href="/admin/orders"
+              className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+            >
+              Orders
+            </Link>
+            <Link
+              href="/admin/rentals"
+              className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+            >
+              Rentals
+            </Link>
+            <Link
               href="/admin/campaigns"
               className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
             >
               Campaigns
-            </Link>
-            <Link
-              href="/admin/brand-media"
-              className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Brand Media
-            </Link>
-            <Link
-              href="/admin/media-missing"
-              className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Missing Media
             </Link>
           </nav>
         </div>

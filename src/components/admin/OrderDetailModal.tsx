@@ -120,6 +120,24 @@ export default function OrderDetailModal({ orderId, onClose, onUpdate }: OrderDe
             </div>
           </div>
 
+          {/* Shipping Address */}
+          {order.shipping_address && (
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-3">Shipping Address</h3>
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <p className="font-semibold">{order.shipping_address.name}</p>
+                <p className="text-sm text-gray-700 mt-1">{order.shipping_address.line1}</p>
+                {order.shipping_address.line2 && (
+                  <p className="text-sm text-gray-700">{order.shipping_address.line2}</p>
+                )}
+                <p className="text-sm text-gray-700">
+                  {order.shipping_address.city}, {order.shipping_address.state} {order.shipping_address.postal_code}
+                </p>
+                <p className="text-sm text-gray-700">{order.shipping_address.country}</p>
+              </div>
+            </div>
+          )}
+
           {/* Items */}
           <div>
             <h3 className="text-lg font-bold text-gray-900 mb-3">Order Items</h3>
