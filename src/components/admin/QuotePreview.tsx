@@ -67,7 +67,7 @@ export default function QuotePreview({
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [editMode, setEditMode] = useState(false); // Toggle between customer view and editing
 
-  // Update quantity for a product (0 = exclude from quote)
+  // Update quantity for a product (can go to 0)
   const updateQuantity = (productCode: string, quantity: number) => {
     setProductSelections(items =>
       items.map(item =>
@@ -89,12 +89,9 @@ export default function QuotePreview({
     );
   };
 
-  // Get selected products (quantity > 0)
-  const selectedProducts = productSelections.filter(p => p.quantity > 0);
-
-  // Calculate line item pricing for each product
+  // Calculate line item pricing for ALL products (including quantity 0)
   const calculateLineItems = () => {
-    return selectedProducts.map(product => {
+    return productSelections.map(product => {
       const rentalBase = (product.rental_price_monthly || 0) * product.quantity;
       const purchaseBase = (product.price || 0) * product.quantity;
 
@@ -135,6 +132,9 @@ export default function QuotePreview({
 
   const totals = calculateTotals();
 
+  // Count items with quantity > 0 for display
+  const itemsInQuote = productSelections.filter(p => p.quantity > 0).length;
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Admin Control Bar - Sticky at top */}
@@ -166,7 +166,7 @@ export default function QuotePreview({
               </button>
               <button
                 onClick={() => {
-                  const items = selectedProducts.map(p => ({
+                  const items = productSelections.filter(p => p.quantity > 0).map(p => ({
                     product: {
                       product_code: p.product_code,
                       description: p.description,
@@ -182,10 +182,10 @@ export default function QuotePreview({
                   }));
                   onGenerateQuote(items, globalDiscount);
                 }}
-                disabled={selectedProducts.length === 0}
+                disabled={itemsInQuote === 0}
                 className="px-6 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-bold text-sm"
               >
-                ✓ Generate Quote Link
+                ✓ Generate Quote Link ({itemsInQuote} item{itemsInQuote !== 1 ? 's' : ''})
               </button>
             </div>
           </div>
@@ -294,7 +294,11 @@ export default function QuotePreview({
 
           <div className="space-y-4">
             {lineItems.map((item) => (
-              <div key={item.product.product_code} className="border-2 border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+              <div key={item.product.product_code} className={`border-2 rounded-lg p-4 transition-colors ${
+                item.product.quantity === 0
+                  ? 'border-gray-300 bg-gray-50 opacity-60'
+                  : 'border-gray-200 hover:border-blue-300'
+              }`}>
                 <div className="flex gap-4">
                   {/* Product Image */}
                   {item.product.image_url && (
@@ -360,22 +364,30 @@ export default function QuotePreview({
                     </div>
 
                     {/* Line Total */}
-                    <div className="pt-3 border-t border-gray-200 grid grid-cols-2 gap-4">
-                      <div className="bg-blue-50 rounded p-2">
-                        <p className="text-xs text-blue-700 font-semibold">Line Total (Rental)</p>
-                        <p className="text-xl font-bold text-blue-900">£{item.rentalSubtotal.toFixed(2)}/mo</p>
-                        {item.rentalDiscount > 0 && (
-                          <p className="text-xs text-green-600">Saved £{item.rentalDiscount.toFixed(2)}</p>
-                        )}
+                    {item.product.quantity === 0 ? (
+                      <div className="pt-3 border-t border-gray-200">
+                        <p className="text-sm text-gray-500 italic text-center py-2">
+                          Not included in quote (quantity is 0)
+                        </p>
                       </div>
-                      <div className="bg-gray-50 rounded p-2">
-                        <p className="text-xs text-gray-700 font-semibold">Line Total (Purchase)</p>
-                        <p className="text-xl font-bold text-gray-900">£{item.purchaseSubtotal.toFixed(2)}</p>
-                        {item.purchaseDiscount > 0 && (
-                          <p className="text-xs text-green-600">Saved £{item.purchaseDiscount.toFixed(2)}</p>
-                        )}
+                    ) : (
+                      <div className="pt-3 border-t border-gray-200 grid grid-cols-2 gap-4">
+                        <div className="bg-blue-50 rounded p-2">
+                          <p className="text-xs text-blue-700 font-semibold">Line Total (Rental)</p>
+                          <p className="text-xl font-bold text-blue-900">£{item.rentalSubtotal.toFixed(2)}/mo</p>
+                          {item.rentalDiscount > 0 && (
+                            <p className="text-xs text-green-600">Saved £{item.rentalDiscount.toFixed(2)}</p>
+                          )}
+                        </div>
+                        <div className="bg-gray-50 rounded p-2">
+                          <p className="text-xs text-gray-700 font-semibold">Line Total (Purchase)</p>
+                          <p className="text-xl font-bold text-gray-900">£{item.purchaseSubtotal.toFixed(2)}</p>
+                          {item.purchaseDiscount > 0 && (
+                            <p className="text-xs text-green-600">Saved £{item.purchaseDiscount.toFixed(2)}</p>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -414,7 +426,7 @@ export default function QuotePreview({
                 £{totals.rentalTotal.toFixed(2)}
                 <span className="text-2xl text-gray-600">/month</span>
               </div>
-              <p className="text-sm text-gray-600 mb-4">Total for all {selectedProducts.length} item{selectedProducts.length !== 1 ? 's' : ''}</p>
+              <p className="text-sm text-gray-600 mb-4">Total for all {itemsInQuote} item{itemsInQuote !== 1 ? 's' : ''}</p>
 
               <ul className="space-y-3">
                 <li className="flex items-start gap-2">
@@ -466,7 +478,7 @@ export default function QuotePreview({
                 £{totals.purchaseTotal.toFixed(2)}
                 <span className="text-2xl text-gray-500"> once</span>
               </div>
-              <p className="text-sm text-gray-600 mb-4">Total for all {selectedProducts.length} item{selectedProducts.length !== 1 ? 's' : ''}</p>
+              <p className="text-sm text-gray-600 mb-4">Total for all {itemsInQuote} item{itemsInQuote !== 1 ? 's' : ''}</p>
 
               <ul className="space-y-3">
                 <li className="flex items-start gap-2">
@@ -598,12 +610,12 @@ export default function QuotePreview({
             {purchaseType === 'rental' ? (
               <>
                 🎉 Start 30-Day Free Trial
-                <div className="text-sm font-normal mt-1">Then £{totals.rentalTotal.toFixed(2)}/month for {selectedProducts.length} item{selectedProducts.length !== 1 ? 's' : ''}</div>
+                <div className="text-sm font-normal mt-1">Then £{totals.rentalTotal.toFixed(2)}/month for {itemsInQuote} item{itemsInQuote !== 1 ? 's' : ''}</div>
               </>
             ) : (
               <>
                 💳 Pay £{totals.purchaseTotal.toFixed(2)} Now
-                <div className="text-sm font-normal mt-1">One-time payment for {selectedProducts.length} item{selectedProducts.length !== 1 ? 's' : ''}</div>
+                <div className="text-sm font-normal mt-1">One-time payment for {itemsInQuote} item{itemsInQuote !== 1 ? 's' : ''}</div>
               </>
             )}
           </button>
