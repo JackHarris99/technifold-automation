@@ -124,6 +124,18 @@ export default function CompanyConsole({
               <div className="flex gap-3 justify-end items-center">
                 <div className="flex gap-2">
                   <a
+                    href="/admin/orders"
+                    className="px-3 py-1.5 text-xs font-semibold text-purple-600 border border-purple-600 rounded hover:bg-purple-50 transition-colors"
+                  >
+                    Orders
+                  </a>
+                  <a
+                    href="/admin/rentals"
+                    className="px-3 py-1.5 text-xs font-semibold text-orange-600 border border-orange-600 rounded hover:bg-orange-50 transition-colors"
+                  >
+                    Rentals
+                  </a>
+                  <a
                     href="/admin/quote-requests"
                     className="px-3 py-1.5 text-xs font-semibold text-blue-600 border border-blue-600 rounded hover:bg-blue-50 transition-colors"
                   >
