@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react';
 import { generateToken } from '@/lib/tokens';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import QuotePreview from '@/components/admin/QuotePreview';
 
 interface Company {
   company_id: string;
@@ -53,6 +54,8 @@ export default function QuoteBuilderPage() {
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   const [generatedLink, setGeneratedLink] = useState('');
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [selectedProductDetails, setSelectedProductDetails] = useState<Product[]>([]);
 
   // Load companies
   useEffect(() => {
@@ -140,7 +143,7 @@ export default function QuoteBuilderPage() {
     setSelectedProducts(newSelected);
   };
 
-  const handleGenerate = async () => {
+  const handlePreview = () => {
     if (!companyId || !contactId) {
       alert('Please select both company and contact');
       return;
@@ -151,10 +154,17 @@ export default function QuoteBuilderPage() {
       return;
     }
 
+    // Get full product details for preview
+    const productDetails = products.filter(p => selectedProducts.has(p.product_code));
+    setSelectedProductDetails(productDetails);
+    setShowPreview(true);
+  };
+
+  const handleGenerateFromPreview = async (quoteItems: any[], globalDiscount: number) => {
     const token = generateToken({
       company_id: companyId,
       contact_id: contactId,
-      products: Array.from(selectedProducts),
+      products: quoteItems.map(item => item.product.product_code),
     });
 
     const baseUrl = window.location.origin;
@@ -178,6 +188,7 @@ export default function QuoteBuilderPage() {
     }
 
     setGeneratedLink(quoteLink);
+    setShowPreview(false);
   };
 
   const copyToClipboard = () => {
@@ -218,6 +229,28 @@ export default function QuoteBuilderPage() {
       setSendingEmail(false);
     }
   };
+
+  // If showing preview, render preview component
+  if (showPreview && selectedProductDetails.length > 0) {
+    const company = companies.find(c => c.company_id === companyId);
+    const contact = contacts.find(c => c.contact_id === contactId);
+
+    if (!company || !contact) return null;
+
+    return (
+      <div className="min-h-screen bg-gray-50 p-8">
+        <div className="max-w-6xl mx-auto">
+          <QuotePreview
+            company={company}
+            contact={contact}
+            products={selectedProductDetails}
+            onGenerateQuote={handleGenerateFromPreview}
+            onBack={() => setShowPreview(false)}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -378,15 +411,18 @@ export default function QuoteBuilderPage() {
           </div>
         </div>
 
-        {/* Generate Button */}
+        {/* Preview Button */}
         <div className="mt-6">
           <button
-            onClick={handleGenerate}
+            onClick={handlePreview}
             disabled={!companyId || !contactId || selectedProducts.size === 0}
             className="w-full bg-blue-600 text-white px-6 py-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed text-lg"
           >
-            Generate Quote Link
+            Preview Quote →
           </button>
+          <p className="text-xs text-gray-500 text-center mt-2">
+            Review pricing, quantities, and terms before sending
+          </p>
         </div>
 
         {/* Generated Link */}
