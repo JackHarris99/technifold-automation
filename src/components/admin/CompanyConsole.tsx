@@ -130,7 +130,7 @@ export default function CompanyConsole({
                     Quote Requests
                   </a>
                   <a
-                    href="/admin/quote-builder"
+                    href="/admin/quote-builder-v2"
                     className="px-3 py-1.5 text-xs font-semibold text-green-600 border border-green-600 rounded hover:bg-green-50 transition-colors"
                   >
                     Build Quote

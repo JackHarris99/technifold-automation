@@ -58,7 +58,6 @@ export default function QuotePreview({
   );
 
   const [globalDiscount, setGlobalDiscount] = useState(0);
-  const [viewMode, setViewMode] = useState<'rental' | 'purchase'>('rental');
 
   // Update quantity for a product
   const updateQuantity = (productCode: string, quantity: number) => {
@@ -87,14 +86,13 @@ export default function QuotePreview({
     setQuoteItems(items => items.filter(item => item.product.product_code !== productCode));
   };
 
-  // Calculate pricing
+  // Calculate pricing (for rental)
   const calculateTotals = () => {
     const toolItem = quoteItems.find(item => item.product.type === 'tool');
     if (!toolItem) return { subtotal: 0, discount: 0, total: 0 };
 
-    const basePrice = viewMode === 'rental'
-      ? (toolItem.product.rental_price_monthly || 50) * toolItem.quantity
-      : (toolItem.product.price || 1500) * toolItem.quantity;
+    // Calculate rental pricing
+    const basePrice = (toolItem.product.rental_price_monthly || 50) * toolItem.quantity;
 
     const itemDiscount = (basePrice * toolItem.discount_percent) / 100;
     const subtotalAfterItemDiscount = basePrice - itemDiscount;
@@ -138,32 +136,77 @@ export default function QuotePreview({
         </div>
       </div>
 
-      {/* View Mode Toggle */}
+      {/* Pricing Comparison - Side by Side */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <label className="block text-sm font-semibold text-gray-700 mb-3">
-          Preview As:
-        </label>
-        <div className="flex gap-4">
-          <button
-            onClick={() => setViewMode('rental')}
-            className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
-              viewMode === 'rental'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Monthly Rental
-          </button>
-          <button
-            onClick={() => setViewMode('purchase')}
-            className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
-              viewMode === 'purchase'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            One-Time Purchase
-          </button>
+        <h3 className="text-lg font-bold text-gray-900 mb-4">Pricing Options</h3>
+        <div className="grid grid-cols-2 gap-6">
+          {/* Rental Option */}
+          <div className="border-2 border-blue-500 rounded-lg p-6 bg-blue-50">
+            <div className="text-center mb-4">
+              <div className="inline-block bg-blue-600 text-white px-4 py-1 rounded-full text-xs font-bold mb-3">
+                RECOMMENDED
+              </div>
+              <h4 className="text-2xl font-bold text-gray-900">Monthly Rental</h4>
+            </div>
+            <div className="text-center mb-6">
+              <div className="text-4xl font-bold text-blue-600">
+                £{totals.total.toFixed(2)}
+                <span className="text-xl text-gray-600">/month</span>
+              </div>
+              <div className="text-sm text-gray-600 mt-2">after {toolItem?.quantity || 1} × 30-day free trial</div>
+            </div>
+            <ul className="space-y-2 text-sm text-gray-700">
+              <li className="flex items-start gap-2">
+                <span className="text-green-600 font-bold">✓</span>
+                <span>30-day free trial period</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-green-600 font-bold">✓</span>
+                <span>24-month minimum term</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-green-600 font-bold">✓</span>
+                <span>No large upfront cost</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-green-600 font-bold">✓</span>
+                <span>Equipment remains property of Technifold</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Purchase Option */}
+          <div className="border-2 border-gray-300 rounded-lg p-6 bg-gray-50">
+            <div className="text-center mb-4">
+              <div className="h-7 mb-3"></div>
+              <h4 className="text-2xl font-bold text-gray-900">One-Time Purchase</h4>
+            </div>
+            <div className="text-center mb-6">
+              <div className="text-4xl font-bold text-gray-900">
+                £{((toolItem?.product.price || 1500) * (toolItem?.quantity || 1)).toFixed(2)}
+                <span className="text-xl text-gray-600"> once</span>
+              </div>
+              <div className="text-sm text-gray-600 mt-2">Full ownership</div>
+            </div>
+            <ul className="space-y-2 text-sm text-gray-700">
+              <li className="flex items-start gap-2">
+                <span className="text-green-600 font-bold">✓</span>
+                <span>One-time payment</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-green-600 font-bold">✓</span>
+                <span>Ownership transferred on delivery</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-green-600 font-bold">✓</span>
+                <span>Standard warranty included</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-green-600 font-bold">✓</span>
+                <span>Free shipping</span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -240,12 +283,10 @@ export default function QuotePreview({
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-gray-600 mb-1">
-                        {viewMode === 'rental' ? 'Price/Month' : 'Price'}
+                        Rental Price/Month
                       </label>
                       <div className="px-3 py-2 bg-gray-50 rounded-lg font-bold text-gray-900">
-                        £{viewMode === 'rental'
-                          ? (item.product.rental_price_monthly || 50)
-                          : (item.product.price || 1500)}
+                        £{item.product.rental_price_monthly || 50}
                       </div>
                     </div>
                   </div>
@@ -274,57 +315,39 @@ export default function QuotePreview({
         </div>
       </div>
 
-      {/* Pricing Summary */}
-      <div className="bg-white rounded-xl border-2 border-blue-500 p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">Customer Will See</h3>
+      {/* Discount Breakdown */}
+      {(toolItem?.discount_percent > 0 || globalDiscount > 0) && (
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Discount Breakdown (Rental)</h3>
 
-        <div className="space-y-3">
-          <div className="flex justify-between text-gray-700">
-            <span>Subtotal:</span>
-            <span className="font-semibold">£{totals.subtotal.toFixed(2)}{viewMode === 'rental' ? '/month' : ''}</span>
+          <div className="space-y-3">
+            <div className="flex justify-between text-gray-700">
+              <span>Base Rental Price:</span>
+              <span className="font-semibold">£{totals.subtotal.toFixed(2)}/month</span>
+            </div>
+            {toolItem && toolItem.discount_percent > 0 && (
+              <div className="flex justify-between text-green-600">
+                <span>Product Discount ({toolItem.discount_percent}%):</span>
+                <span className="font-semibold">-£{totals.itemDiscount.toFixed(2)}</span>
+              </div>
+            )}
+            {globalDiscount > 0 && (
+              <div className="flex justify-between text-green-600">
+                <span>Additional Discount ({globalDiscount}%):</span>
+                <span className="font-semibold">-£{totals.globalDiscountAmount.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="pt-3 border-t-2 border-gray-300 flex justify-between text-xl font-bold text-gray-900">
+              <span>Final Rental Price:</span>
+              <span className="text-blue-600">£{totals.total.toFixed(2)}/month</span>
+            </div>
           </div>
-          {toolItem && toolItem.discount_percent > 0 && (
-            <div className="flex justify-between text-green-600">
-              <span>Product Discount ({toolItem.discount_percent}%):</span>
-              <span className="font-semibold">-£{totals.itemDiscount.toFixed(2)}</span>
-            </div>
-          )}
-          {globalDiscount > 0 && (
-            <div className="flex justify-between text-green-600">
-              <span>Additional Discount ({globalDiscount}%):</span>
-              <span className="font-semibold">-£{totals.globalDiscountAmount.toFixed(2)}</span>
-            </div>
-          )}
-          <div className="pt-3 border-t-2 border-gray-300 flex justify-between text-xl font-bold text-gray-900">
-            <span>Total:</span>
-            <span className="text-blue-600">£{totals.total.toFixed(2)}{viewMode === 'rental' ? '/month' : ''}</span>
+
+          <div className="mt-4 text-xs text-gray-600">
+            Note: Purchase price will also reflect these discounts proportionally
           </div>
         </div>
-
-        {viewMode === 'rental' && (
-          <div className="mt-6 pt-6 border-t border-gray-200 bg-blue-50 rounded-lg p-4">
-            <p className="text-sm font-bold text-blue-900 mb-2">Rental Terms Customer Will Accept:</p>
-            <ul className="text-xs text-blue-800 space-y-1">
-              <li>✓ 30-day free trial period</li>
-              <li>✓ 24-month minimum rental term</li>
-              <li>✓ Billing begins after trial period</li>
-              <li>✓ Equipment remains property of Technifold</li>
-            </ul>
-          </div>
-        )}
-
-        {viewMode === 'purchase' && (
-          <div className="mt-6 pt-6 border-t border-gray-200 bg-green-50 rounded-lg p-4">
-            <p className="text-sm font-bold text-green-900 mb-2">Purchase Terms:</p>
-            <ul className="text-xs text-green-800 space-y-1">
-              <li>✓ One-time payment</li>
-              <li>✓ Full ownership transferred on delivery</li>
-              <li>✓ Standard warranty included</li>
-              <li>✓ Free shipping</li>
-            </ul>
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Generate Quote Button */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">

@@ -46,16 +46,15 @@ export default function QuoteBuilderPage() {
   const [loadingProducts, setLoadingProducts] = useState(false);
 
   const [companyId, setCompanyId] = useState('');
-  const [contactId, setContactId] = useState('');
+  const [selectedContactIds, setSelectedContactIds] = useState<Set<string>>(new Set());
   const [companySearch, setCompanySearch] = useState('');
   const [contactSearch, setContactSearch] = useState('');
   const [productSearch, setProductSearch] = useState('');
 
-  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
+  const [selectedProducts, setSelectedProducts] = useState<Map<string, Product>>(new Map());
   const [generatedLink, setGeneratedLink] = useState('');
   const [sendingEmail, setSendingEmail] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [selectedProductDetails, setSelectedProductDetails] = useState<Product[]>([]);
 
   // Load companies
   useEffect(() => {
@@ -77,7 +76,7 @@ export default function QuoteBuilderPage() {
   useEffect(() => {
     if (!companyId) {
       setContacts([]);
-      setContactId('');
+      setSelectedContactIds(new Set());
       return;
     }
 
@@ -87,7 +86,7 @@ export default function QuoteBuilderPage() {
         const res = await fetch(`/api/admin/companies/${companyId}/contacts`);
         const data = await res.json();
         setContacts(data.contacts || []);
-        setContactId('');
+        setSelectedContactIds(new Set());
       } catch (err) {
         console.error('Failed to load contacts:', err);
       } finally {

@@ -185,7 +185,7 @@ export default function QuoteRequestsTable({ initialData }: QuoteRequestsTablePr
                     <div className="flex gap-2">
                       {request.status === 'requested' && (
                         <Link
-                          href={`/admin/quote-builder?request_id=${request.quote_request_id}`}
+                          href={`/admin/quote-builder-v2?request_id=${request.quote_request_id}`}
                           className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
                         >
                           Build Quote
