@@ -6,10 +6,11 @@
 import { cookies } from 'next/headers';
 
 export interface User {
-  rep_id: string;
-  rep_name: string;
+  user_id: string;
   email: string;
+  full_name: string;
   role: 'director' | 'sales_rep';
+  sales_rep_id?: string | null;
 }
 
 /**
@@ -39,7 +40,7 @@ export async function isDirector(): Promise<boolean> {
 }
 
 /**
- * Get user's rep_id for filtering
+ * Get user's sales_rep_id for filtering
  * Returns null if director (sees all)
  */
 export async function getUserRepFilter(): Promise<string | null> {
@@ -48,5 +49,5 @@ export async function getUserRepFilter(): Promise<string | null> {
   if (!user) return null;
   if (user.role === 'director') return null;  // Directors see all
 
-  return user.rep_id;  // Sales reps see only theirs
+  return user.sales_rep_id || null;  // Sales reps see only theirs
 }
