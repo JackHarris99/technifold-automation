@@ -239,6 +239,13 @@ export async function sendOrderConfirmation({
                 <p style="margin: 4px 0 0 0; color: #666;">${shippingAddress.country}</p>
               </div>
 
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${process.env.NEXT_PUBLIC_BASE_URL}/track-order" style="background: #3b82f6; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">
+                  Track Your Order
+                </a>
+                <p style="font-size: 12px; color: #666; margin-top: 8px;">Order ID: ${orderId}</p>
+              </div>
+
               <h2 style="font-size: 18px; margin-top: 30px; margin-bottom: 16px;">What's Next?</h2>
 
               <ol style="padding-left: 20px; color: #666;">
