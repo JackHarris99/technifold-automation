@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
+import OrderDetailModal from './OrderDetailModal';
 
 interface Order {
   order_id: string;
@@ -34,6 +35,7 @@ export default function OrdersTable() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'paid' | 'processing' | 'completed'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchOrders();
@@ -208,7 +210,11 @@ export default function OrdersTable() {
               </tr>
             ) : (
               filteredOrders.map((order) => (
-                <tr key={order.order_id} className="hover:bg-gray-50 transition-colors">
+                <tr
+                  key={order.order_id}
+                  onClick={() => setSelectedOrderId(order.order_id)}
+                  className="hover:bg-gray-50 transition-colors cursor-pointer"
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-mono text-gray-900">
                       {order.order_id.slice(0, 8)}...
@@ -247,14 +253,14 @@ export default function OrdersTable() {
                       {new Date(order.created_at).toLocaleDateString()}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm" onClick={(e) => e.stopPropagation()}>
                     <div className="flex gap-2">
-                      <a
-                        href={`/admin/companies/${order.company_id}`}
+                      <button
+                        onClick={() => setSelectedOrderId(order.order_id)}
                         className="text-blue-600 hover:text-blue-800 font-medium"
                       >
-                        View
-                      </a>
+                        Manage
+                      </button>
                       {order.stripe_payment_intent_id && (
                         <a
                           href={`https://dashboard.stripe.com/payments/${order.stripe_payment_intent_id}`}
@@ -273,6 +279,18 @@ export default function OrdersTable() {
           </tbody>
         </table>
       </div>
+
+      {/* Order Detail Modal */}
+      {selectedOrderId && (
+        <OrderDetailModal
+          orderId={selectedOrderId}
+          onClose={() => setSelectedOrderId(null)}
+          onUpdate={() => {
+            setSelectedOrderId(null);
+            fetchOrders();
+          }}
+        />
+      )}
     </div>
   );
 }
