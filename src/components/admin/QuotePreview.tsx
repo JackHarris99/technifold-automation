@@ -92,37 +92,48 @@ export default function QuotePreview({
   // Get selected products (quantity > 0)
   const selectedProducts = productSelections.filter(p => p.quantity > 0);
 
-  // Calculate pricing
-  const calculatePricing = () => {
-    const toolProduct = selectedProducts.find(p => p.type === 'tool');
-    if (!toolProduct) return { rental: 0, purchase: 0, rentalBase: 0, purchaseBase: 0, itemDiscount: 0, globalDiscountAmount: 0 };
+  // Calculate line item pricing for each product
+  const calculateLineItems = () => {
+    return selectedProducts.map(product => {
+      const rentalBase = (product.rental_price_monthly || 0) * product.quantity;
+      const purchaseBase = (product.price || 0) * product.quantity;
 
-    // Base prices
-    const rentalBase = (toolProduct.rental_price_monthly || 50) * toolProduct.quantity;
-    const purchaseBase = (toolProduct.price || 1500) * toolProduct.quantity;
+      const rentalDiscount = (rentalBase * product.discount_percent) / 100;
+      const purchaseDiscount = (purchaseBase * product.discount_percent) / 100;
 
-    // Apply product discount
-    const rentalItemDiscount = (rentalBase * toolProduct.discount_percent) / 100;
-    const purchaseItemDiscount = (purchaseBase * toolProduct.discount_percent) / 100;
+      return {
+        product,
+        rentalBase,
+        purchaseBase,
+        rentalDiscount,
+        purchaseDiscount,
+        rentalSubtotal: rentalBase - rentalDiscount,
+        purchaseSubtotal: purchaseBase - purchaseDiscount,
+      };
+    });
+  };
 
-    const rentalAfterItemDiscount = rentalBase - rentalItemDiscount;
-    const purchaseAfterItemDiscount = purchaseBase - purchaseItemDiscount;
+  const lineItems = calculateLineItems();
 
-    // Apply global discount
-    const rentalGlobalDiscount = (rentalAfterItemDiscount * globalDiscount) / 100;
-    const purchaseGlobalDiscount = (purchaseAfterItemDiscount * globalDiscount) / 100;
+  // Calculate totals
+  const calculateTotals = () => {
+    const rentalSubtotal = lineItems.reduce((sum, item) => sum + item.rentalSubtotal, 0);
+    const purchaseSubtotal = lineItems.reduce((sum, item) => sum + item.purchaseSubtotal, 0);
+
+    const rentalGlobalDiscount = (rentalSubtotal * globalDiscount) / 100;
+    const purchaseGlobalDiscount = (purchaseSubtotal * globalDiscount) / 100;
 
     return {
-      rental: rentalAfterItemDiscount - rentalGlobalDiscount,
-      purchase: purchaseAfterItemDiscount - purchaseGlobalDiscount,
-      rentalBase,
-      purchaseBase,
-      itemDiscount: purchaseType === 'rental' ? rentalItemDiscount : purchaseItemDiscount,
-      globalDiscountAmount: purchaseType === 'rental' ? rentalGlobalDiscount : purchaseGlobalDiscount,
+      rentalSubtotal,
+      purchaseSubtotal,
+      rentalGlobalDiscount,
+      purchaseGlobalDiscount,
+      rentalTotal: rentalSubtotal - rentalGlobalDiscount,
+      purchaseTotal: purchaseSubtotal - purchaseGlobalDiscount,
     };
   };
 
-  const pricing = calculatePricing();
+  const totals = calculateTotals();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -276,31 +287,95 @@ export default function QuotePreview({
           </div>
         )}
 
-        {/* Products Section - Customer View */}
+        {/* Itemized Quote Table - Customer Can Adjust Quantities */}
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Solutions Included in Your Quote</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {selectedProducts.map(product => (
-              <div key={product.product_code} className="border-2 border-gray-200 rounded-xl overflow-hidden hover:border-blue-400 transition-colors">
-                {product.image_url && (
-                  <div className="w-full bg-gray-50 p-4 h-40 flex items-center justify-center">
-                    <MediaImage
-                      src={product.image_url}
-                      alt={product.description}
-                      width={150}
-                      height={150}
-                      className="max-h-full w-auto object-contain"
-                    />
-                  </div>
-                )}
-                <div className="p-4 bg-white">
-                  <p className="text-sm font-bold text-blue-600 mb-1">{product.product_code}</p>
-                  <p className="text-xs text-gray-600 line-clamp-3">{product.description}</p>
-                  <div className="mt-3 pt-3 border-t border-gray-200">
-                    <p className="text-xs text-gray-500">Quantity: <span className="font-bold text-gray-900">{product.quantity}</span></p>
-                    {product.discount_percent > 0 && (
-                      <p className="text-xs text-green-600 font-semibold">{product.discount_percent}% discount applied</p>
-                    )}
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Itemized Quote</h2>
+          <p className="text-sm text-gray-600 mb-6">Adjust quantities below to see live pricing updates</p>
+
+          <div className="space-y-4">
+            {lineItems.map((item) => (
+              <div key={item.product.product_code} className="border-2 border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+                <div className="flex gap-4">
+                  {/* Product Image */}
+                  {item.product.image_url && (
+                    <div className="w-24 h-24 bg-gray-50 rounded-lg p-2 flex-shrink-0">
+                      <MediaImage
+                        src={item.product.image_url}
+                        alt={item.product.description}
+                        width={96}
+                        height={96}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  )}
+
+                  {/* Product Details & Pricing */}
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 className="font-bold text-gray-900 text-lg">{item.product.product_code}</h3>
+                        <p className="text-sm text-gray-600">{item.product.description}</p>
+                        {item.product.type && (
+                          <span className="inline-block mt-1 px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-semibold">
+                            {item.product.type}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Quantity Control */}
+                    <div className="grid grid-cols-3 gap-4 mb-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Quantity</label>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => updateQuantity(item.product.product_code, item.product.quantity - 1)}
+                            className="w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded font-bold text-gray-700"
+                          >
+                            -
+                          </button>
+                          <input
+                            type="number"
+                            min="1"
+                            value={item.product.quantity}
+                            onChange={(e) => updateQuantity(item.product.product_code, parseInt(e.target.value) || 1)}
+                            className="w-16 px-2 py-1 border-2 border-gray-300 rounded text-center font-bold"
+                          />
+                          <button
+                            onClick={() => updateQuantity(item.product.product_code, item.product.quantity + 1)}
+                            className="w-8 h-8 bg-blue-600 hover:bg-blue-700 rounded font-bold text-white"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Unit Price (Rental)</label>
+                        <p className="text-lg font-bold text-gray-900">£{(item.product.rental_price_monthly || 0).toFixed(2)}/mo</p>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Unit Price (Purchase)</label>
+                        <p className="text-lg font-bold text-gray-900">£{(item.product.price || 0).toFixed(2)}</p>
+                      </div>
+                    </div>
+
+                    {/* Line Total */}
+                    <div className="pt-3 border-t border-gray-200 grid grid-cols-2 gap-4">
+                      <div className="bg-blue-50 rounded p-2">
+                        <p className="text-xs text-blue-700 font-semibold">Line Total (Rental)</p>
+                        <p className="text-xl font-bold text-blue-900">£{item.rentalSubtotal.toFixed(2)}/mo</p>
+                        {item.rentalDiscount > 0 && (
+                          <p className="text-xs text-green-600">Saved £{item.rentalDiscount.toFixed(2)}</p>
+                        )}
+                      </div>
+                      <div className="bg-gray-50 rounded p-2">
+                        <p className="text-xs text-gray-700 font-semibold">Line Total (Purchase)</p>
+                        <p className="text-xl font-bold text-gray-900">£{item.purchaseSubtotal.toFixed(2)}</p>
+                        {item.purchaseDiscount > 0 && (
+                          <p className="text-xs text-green-600">Saved £{item.purchaseDiscount.toFixed(2)}</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -310,8 +385,8 @@ export default function QuotePreview({
 
         {/* Pricing Summary - Both Options Visible */}
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Choose Your Payment Option</h2>
-          <p className="text-gray-600 mb-6">Select rental or purchase below. Final pricing shown at checkout.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Total Pricing</h2>
+          <p className="text-gray-600 mb-6">Both rental and purchase options shown below - choose your preferred option at checkout</p>
 
           <div className="grid md:grid-cols-2 gap-8 mb-8">
             {/* Rental Option */}
@@ -336,9 +411,10 @@ export default function QuotePreview({
 
               <h3 className="text-3xl font-bold text-gray-900 mb-2">Monthly Rental</h3>
               <div className="text-5xl font-bold text-blue-600 mb-6">
-                £{pricing.rental.toFixed(2)}
+                £{totals.rentalTotal.toFixed(2)}
                 <span className="text-2xl text-gray-600">/month</span>
               </div>
+              <p className="text-sm text-gray-600 mb-4">Total for all {selectedProducts.length} item{selectedProducts.length !== 1 ? 's' : ''}</p>
 
               <ul className="space-y-3">
                 <li className="flex items-start gap-2">
@@ -387,9 +463,10 @@ export default function QuotePreview({
 
               <h3 className="text-3xl font-bold text-gray-900 mb-2">Purchase Outright</h3>
               <div className="text-5xl font-bold text-gray-600 mb-6">
-                £{pricing.purchase.toFixed(2)}
+                £{totals.purchaseTotal.toFixed(2)}
                 <span className="text-2xl text-gray-500"> once</span>
               </div>
+              <p className="text-sm text-gray-600 mb-4">Total for all {selectedProducts.length} item{selectedProducts.length !== 1 ? 's' : ''}</p>
 
               <ul className="space-y-3">
                 <li className="flex items-start gap-2">
@@ -421,29 +498,39 @@ export default function QuotePreview({
           </div>
 
           {/* Discount Breakdown (if applicable) */}
-          {(globalDiscount > 0 || selectedProducts.some(p => p.discount_percent > 0)) && (
+          {globalDiscount > 0 && (
             <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6">
-              <h3 className="text-lg font-bold text-blue-900 mb-4">Your Discounts Applied</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span>Base Price ({purchaseType === 'rental' ? 'Monthly Rental' : 'Purchase'}):</span>
-                  <span className="font-semibold">£{(purchaseType === 'rental' ? pricing.rentalBase : pricing.purchaseBase).toFixed(2)}</span>
+              <h3 className="text-lg font-bold text-blue-900 mb-4">Global Discount Applied</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-2 text-sm">
+                  <p className="font-semibold text-blue-900">Rental Pricing:</p>
+                  <div className="flex justify-between">
+                    <span>Subtotal:</span>
+                    <span className="font-semibold">£{totals.rentalSubtotal.toFixed(2)}/mo</span>
+                  </div>
+                  <div className="flex justify-between text-green-700">
+                    <span>Global Discount ({globalDiscount}%):</span>
+                    <span className="font-semibold">-£{totals.rentalGlobalDiscount.toFixed(2)}</span>
+                  </div>
+                  <div className="pt-2 border-t-2 border-blue-300 flex justify-between text-lg font-bold text-blue-900">
+                    <span>Final Total:</span>
+                    <span>£{totals.rentalTotal.toFixed(2)}/mo</span>
+                  </div>
                 </div>
-                {selectedProducts.some(p => p.discount_percent > 0) && (
-                  <div className="flex justify-between text-green-700">
-                    <span>Product Discount:</span>
-                    <span className="font-semibold">-£{pricing.itemDiscount.toFixed(2)}</span>
+                <div className="space-y-2 text-sm">
+                  <p className="font-semibold text-gray-900">Purchase Pricing:</p>
+                  <div className="flex justify-between">
+                    <span>Subtotal:</span>
+                    <span className="font-semibold">£{totals.purchaseSubtotal.toFixed(2)}</span>
                   </div>
-                )}
-                {globalDiscount > 0 && (
                   <div className="flex justify-between text-green-700">
-                    <span>Additional Discount ({globalDiscount}%):</span>
-                    <span className="font-semibold">-£{pricing.globalDiscountAmount.toFixed(2)}</span>
+                    <span>Global Discount ({globalDiscount}%):</span>
+                    <span className="font-semibold">-£{totals.purchaseGlobalDiscount.toFixed(2)}</span>
                   </div>
-                )}
-                <div className="pt-3 border-t-2 border-blue-300 flex justify-between text-lg font-bold text-blue-900">
-                  <span>Final Price:</span>
-                  <span>£{(purchaseType === 'rental' ? pricing.rental : pricing.purchase).toFixed(2)}{purchaseType === 'rental' ? '/mo' : ''}</span>
+                  <div className="pt-2 border-t-2 border-gray-300 flex justify-between text-lg font-bold text-gray-900">
+                    <span>Final Total:</span>
+                    <span>£{totals.purchaseTotal.toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -476,7 +563,7 @@ export default function QuotePreview({
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-blue-600 font-bold">•</span>
-                      <span>Monthly payments of £{pricing.rental.toFixed(2)} begin after the trial period</span>
+                      <span>Monthly payments of £{totals.rentalTotal.toFixed(2)} begin after the trial period</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-blue-600 font-bold">•</span>
@@ -511,12 +598,12 @@ export default function QuotePreview({
             {purchaseType === 'rental' ? (
               <>
                 🎉 Start 30-Day Free Trial
-                <div className="text-sm font-normal mt-1">Then £{pricing.rental.toFixed(2)}/month</div>
+                <div className="text-sm font-normal mt-1">Then £{totals.rentalTotal.toFixed(2)}/month for {selectedProducts.length} item{selectedProducts.length !== 1 ? 's' : ''}</div>
               </>
             ) : (
               <>
-                💳 Pay £{pricing.purchase.toFixed(2)} Now
-                <div className="text-sm font-normal mt-1">One-time payment for full ownership</div>
+                💳 Pay £{totals.purchaseTotal.toFixed(2)} Now
+                <div className="text-sm font-normal mt-1">One-time payment for {selectedProducts.length} item{selectedProducts.length !== 1 ? 's' : ''}</div>
               </>
             )}
           </button>
