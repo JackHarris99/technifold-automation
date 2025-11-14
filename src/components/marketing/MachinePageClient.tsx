@@ -100,124 +100,74 @@ export default function MachinePageClient({
 
           return (
             <div key={solutionName} className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden hover:border-blue-500 hover:shadow-xl transition-all">
-              {/* 2-Column Grid */}
-              <div className="grid lg:grid-cols-2 gap-0">
-                {/* LEFT COLUMN: Solution Marketing Content */}
-                <div className="p-8 lg:p-12 flex flex-col">
-                  {/* Solution Badge */}
-                  <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-bold mb-6 self-start">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    {solutionName}
-                  </div>
-
-                  {/* Solution Image (if available) */}
-                  {imageUrl && imageUrl !== '/placeholder-machine.jpg' && (
-                    <div className="w-full bg-gray-100 rounded-xl overflow-hidden mb-6 p-4">
-                      <MediaImage
-                        src={imageUrl}
-                        alt={`${solutionName} solution`}
-                        width={1200}
-                        height={800}
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        className="w-full h-auto object-contain"
-                      />
-                    </div>
-                  )}
-
-                  {/* Marketing Copy - ALL problems shown in styled boxes */}
-                  <div className="flex-1 mb-8 space-y-6">
-                    {cards.map((card, index) => {
-                      const problemCopy = replacePlaceholders(card.resolved_card_copy, {
-                        brand: machineData.brand,
-                        model: machineData.model,
-                        display_name: machineData.display_name,
-                        type: undefined
-                      });
-
-                      return (
-                        <div
-                          key={card.problem_solution_id}
-                          className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border-2 border-gray-200 hover:border-blue-300 transition-colors shadow-sm"
-                        >
-                          {cards.length > 1 && (
-                            <div className="flex items-center gap-3 mb-4">
-                              <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                                {index + 1}
-                              </div>
-                              <h3 className="text-xl font-bold text-gray-900">{card.title}</h3>
-                            </div>
-                          )}
-                          <SmartCopyRenderer
-                            content={problemCopy}
-                            problemTitle={card.title}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* CTA Button */}
-                  <button
-                    onClick={() => setModalOpen(true)}
-                    className="inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors self-start"
-                  >
-                    {ctaText}
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
+              {/* Solution Badge - Full Width */}
+              <div className="px-8 pt-8">
+                <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-bold mb-6">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {solutionName}
                 </div>
+              </div>
 
-                {/* RIGHT COLUMN: Solution Showcase (Before/After/Product Images) */}
-                <div className="bg-gradient-to-br from-gray-50 to-blue-50 p-8 lg:p-12 border-l-2 border-gray-200 flex flex-col gap-6">
-                  {/* Before/After Images - Side by Side */}
-                  {(primaryCard.resolved_before_image_url || primaryCard.resolved_after_image_url) && (
+              {/* Marketing Copy - Full Width Top Section */}
+              <div className="px-8 pb-6">
+                <div className="space-y-6">
+                  {cards.map((card, index) => {
+                    const problemCopy = replacePlaceholders(card.resolved_card_copy, {
+                      brand: machineData.brand,
+                      model: machineData.model,
+                      display_name: machineData.display_name,
+                      type: undefined
+                    });
+
+                    return (
+                      <div
+                        key={card.problem_solution_id}
+                        className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border-2 border-gray-200 hover:border-blue-300 transition-colors shadow-sm"
+                      >
+                        {cards.length > 1 && (
+                          <div className="flex items-center gap-3 mb-4">
+                            <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                              {index + 1}
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900">{card.title}</h3>
+                          </div>
+                        )}
+                        <SmartCopyRenderer
+                          content={problemCopy}
+                          problemTitle={card.title}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 2-Column Grid for Images */}
+              <div className="grid lg:grid-cols-2 gap-6 px-8 pb-8">
+                {/* LEFT COLUMN: Product Image + Solution Tool */}
+                <div className="flex flex-col gap-6">
+                  {/* Product Image (resolved_image_url) */}
+                  {imageUrl && imageUrl !== '/placeholder-machine.jpg' && (
                     <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
-                      <div className="grid grid-cols-2 gap-0">
-                        {/* Before Image */}
-                        {primaryCard.resolved_before_image_url && (
-                          <div className="border-r border-gray-200">
-                            <div className="bg-red-50 px-3 py-2 border-b border-gray-200">
-                              <h4 className="text-xs font-bold text-red-800">Before</h4>
-                            </div>
-                            <div className="bg-gray-100 p-3 h-40 flex items-center justify-center">
-                              <MediaImage
-                                src={primaryCard.resolved_before_image_url}
-                                alt="Before using solution"
-                                width={400}
-                                height={300}
-                                sizes="25vw"
-                                className="w-full h-full object-contain"
-                              />
-                            </div>
-                          </div>
-                        )}
-
-                        {/* After Image */}
-                        {primaryCard.resolved_after_image_url && (
-                          <div>
-                            <div className="bg-green-50 px-3 py-2 border-b border-gray-200">
-                              <h4 className="text-xs font-bold text-green-800">After</h4>
-                            </div>
-                            <div className="bg-gray-100 p-3 h-40 flex items-center justify-center">
-                              <MediaImage
-                                src={primaryCard.resolved_after_image_url}
-                                alt="After using solution"
-                                width={400}
-                                height={300}
-                                sizes="25vw"
-                                className="w-full h-full object-contain"
-                              />
-                            </div>
-                          </div>
-                        )}
+                      <div className="bg-purple-50 px-4 py-2 border-b border-gray-200">
+                        <h4 className="text-sm font-bold text-purple-800">Product</h4>
+                      </div>
+                      <div className="w-full bg-gray-100 p-4">
+                        <MediaImage
+                          src={imageUrl}
+                          alt={`${solutionName} solution`}
+                          width={1200}
+                          height={800}
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          className="w-full h-auto object-contain"
+                        />
                       </div>
                     </div>
                   )}
 
-                  {/* Product Image */}
+                  {/* Solution Tool Image */}
                   {primaryCard.resolved_product_image_url && (
                     <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
                       <div className="bg-blue-50 px-4 py-2 border-b border-gray-200">
@@ -226,7 +176,7 @@ export default function MachinePageClient({
                       <div className="w-full bg-white p-4">
                         <MediaImage
                           src={primaryCard.resolved_product_image_url}
-                          alt={`${solutionName} product`}
+                          alt={`${solutionName} tool`}
                           width={1000}
                           height={1000}
                           sizes="(max-width: 768px) 100vw, 50vw"
@@ -235,23 +185,61 @@ export default function MachinePageClient({
                       </div>
                     </div>
                   )}
+                </div>
 
-                  {/* Fallback if no images available */}
-                  {!primaryCard.resolved_before_image_url && !primaryCard.resolved_after_image_url && !primaryCard.resolved_product_image_url && (
+                {/* RIGHT COLUMN: Before + After */}
+                <div className="flex flex-col gap-6">
+                  {/* Before Image */}
+                  {primaryCard.resolved_before_image_url && (
                     <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
-                      <div className="flex items-center justify-center text-center py-12 text-gray-500">
-                        <div>
-                          <svg className="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          <p className="text-sm">
-                            Images coming soon
-                          </p>
-                        </div>
+                      <div className="bg-red-50 px-4 py-2 border-b border-gray-200">
+                        <h4 className="text-sm font-bold text-red-800">Before</h4>
+                      </div>
+                      <div className="w-full bg-gray-100 p-4">
+                        <MediaImage
+                          src={primaryCard.resolved_before_image_url}
+                          alt="Before using solution"
+                          width={800}
+                          height={600}
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          className="w-full h-auto object-contain"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* After Image */}
+                  {primaryCard.resolved_after_image_url && (
+                    <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
+                      <div className="bg-green-50 px-4 py-2 border-b border-gray-200">
+                        <h4 className="text-sm font-bold text-green-800">After</h4>
+                      </div>
+                      <div className="w-full bg-gray-100 p-4">
+                        <MediaImage
+                          src={primaryCard.resolved_after_image_url}
+                          alt="After using solution"
+                          width={800}
+                          height={600}
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          className="w-full h-auto object-contain"
+                        />
                       </div>
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* CTA Button - Full Width Bottom */}
+              <div className="px-8 pb-8">
+                <button
+                  onClick={() => setModalOpen(true)}
+                  className="inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors"
+                >
+                  {ctaText}
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
               </div>
             </div>
           );
