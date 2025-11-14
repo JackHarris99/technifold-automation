@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { MediaType, formatFileSize, isValidImageFile, isValidVideoFile } from '@/lib/media';
 import MediaImage from '@/components/shared/MediaImage';
 
@@ -47,6 +47,11 @@ export default function MediaUpload({
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(currentUrl || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sync preview with currentUrl when it changes (e.g., after parent refetch)
+  useEffect(() => {
+    setPreview(currentUrl || null);
+  }, [currentUrl]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -108,7 +113,9 @@ export default function MediaUpload({
         throw new Error(data.error || 'Upload failed');
       }
 
-      setPreview(data.url);
+      // Add cache-busting timestamp to force browser to reload new image
+      const cacheBustedUrl = data.url + '?t=' + Date.now();
+      setPreview(cacheBustedUrl);
       if (onUploadSuccess) {
         onUploadSuccess(data.url);
       }
