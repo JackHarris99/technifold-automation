@@ -172,40 +172,47 @@ export default function MachinePageClient({
 
                 {/* RIGHT COLUMN: Solution Showcase (Before/After/Product Images) */}
                 <div className="bg-gradient-to-br from-gray-50 to-blue-50 p-8 lg:p-12 border-l-2 border-gray-200 flex flex-col gap-6">
-                  {/* Before Image */}
-                  {primaryCard.resolved_before_image_url && (
+                  {/* Before/After Images - Side by Side */}
+                  {(primaryCard.resolved_before_image_url || primaryCard.resolved_after_image_url) && (
                     <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
-                      <div className="bg-red-50 px-4 py-2 border-b border-gray-200">
-                        <h4 className="text-sm font-bold text-red-800">Before</h4>
-                      </div>
-                      <div className="w-full bg-gray-100 p-4">
-                        <MediaImage
-                          src={primaryCard.resolved_before_image_url}
-                          alt="Before using solution"
-                          width={800}
-                          height={600}
-                          sizes="(max-width: 768px) 100vw, 50vw"
-                          className="w-full h-auto object-contain"
-                        />
-                      </div>
-                    </div>
-                  )}
+                      <div className="grid grid-cols-2 gap-0">
+                        {/* Before Image */}
+                        {primaryCard.resolved_before_image_url && (
+                          <div className="border-r border-gray-200">
+                            <div className="bg-red-50 px-3 py-2 border-b border-gray-200">
+                              <h4 className="text-xs font-bold text-red-800">Before</h4>
+                            </div>
+                            <div className="bg-gray-100 p-3 h-40 flex items-center justify-center">
+                              <MediaImage
+                                src={primaryCard.resolved_before_image_url}
+                                alt="Before using solution"
+                                width={400}
+                                height={300}
+                                sizes="25vw"
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
+                          </div>
+                        )}
 
-                  {/* After Image */}
-                  {primaryCard.resolved_after_image_url && (
-                    <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
-                      <div className="bg-green-50 px-4 py-2 border-b border-gray-200">
-                        <h4 className="text-sm font-bold text-green-800">After</h4>
-                      </div>
-                      <div className="w-full bg-gray-100 p-4">
-                        <MediaImage
-                          src={primaryCard.resolved_after_image_url}
-                          alt="After using solution"
-                          width={800}
-                          height={600}
-                          sizes="(max-width: 768px) 100vw, 50vw"
-                          className="w-full h-auto object-contain"
-                        />
+                        {/* After Image */}
+                        {primaryCard.resolved_after_image_url && (
+                          <div>
+                            <div className="bg-green-50 px-3 py-2 border-b border-gray-200">
+                              <h4 className="text-xs font-bold text-green-800">After</h4>
+                            </div>
+                            <div className="bg-gray-100 p-3 h-40 flex items-center justify-center">
+                              <MediaImage
+                                src={primaryCard.resolved_after_image_url}
+                                alt="After using solution"
+                                width={400}
+                                height={300}
+                                sizes="25vw"
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -231,14 +238,16 @@ export default function MachinePageClient({
 
                   {/* Fallback if no images available */}
                   {!primaryCard.resolved_before_image_url && !primaryCard.resolved_after_image_url && !primaryCard.resolved_product_image_url && (
-                    <div className="flex-1 flex items-center justify-center text-center py-8 text-gray-500">
-                      <div>
-                        <svg className="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <p className="text-sm">
-                          Images coming soon
-                        </p>
+                    <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
+                      <div className="flex items-center justify-center text-center py-12 text-gray-500">
+                        <div>
+                          <svg className="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <p className="text-sm">
+                            Images coming soon
+                          </p>
+                        </div>
                       </div>
                     </div>
                   )}
