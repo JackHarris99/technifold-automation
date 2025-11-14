@@ -6,7 +6,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getImageUrl, isPlaceholder } from '@/lib/media';
 
 interface MediaImageProps {
@@ -36,6 +36,12 @@ export default function MediaImage({
 }: MediaImageProps) {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Reset error and loading states when src changes
+  useEffect(() => {
+    setError(false);
+    setLoading(true);
+  }, [src]);
 
   // Resolve the image URL with fallback logic
   const imageUrl = error ? (fallback || '/placeholder.svg') : getImageUrl(src, fallback);

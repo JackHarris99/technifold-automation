@@ -49,8 +49,13 @@ export default function MediaUpload({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Sync preview with currentUrl when it changes (e.g., after parent refetch)
+  // Always add cache-busting to prevent browser from showing cached images
   useEffect(() => {
-    setPreview(currentUrl || null);
+    if (currentUrl) {
+      setPreview(currentUrl + '?t=' + Date.now());
+    } else {
+      setPreview(null);
+    }
   }, [currentUrl]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
