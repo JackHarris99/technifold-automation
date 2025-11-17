@@ -28,27 +28,36 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
-    // Get company details to find account owner
-    const { data: company } = await supabase
-      .from('companies')
-      .select('account_owner')
+    // Get company and first contact for the quote request
+    const { data: contacts } = await supabase
+      .from('contacts')
+      .select('contact_id')
       .eq('company_id', company_id)
-      .single();
+      .limit(1);
+
+    const contact_id = contacts && contacts.length > 0 ? contacts[0].contact_id : null;
+
+    // Get machine slug if machine_id provided
+    let machine_slug = null;
+    if (machine_id) {
+      const { data: machine } = await supabase
+        .from('machines')
+        .select('slug')
+        .eq('machine_id', machine_id)
+        .single();
+      machine_slug = machine?.slug || null;
+    }
 
     // Create quote request entry
     const { data: quoteRequest, error } = await supabase
       .from('quote_requests')
       .insert({
         company_id,
-        company_name,
-        machine_id: machine_id || null,
-        machine_name: machine_name || null,
-        solution_interest: solution_name || null,
-        notes: notes || `Interest via Marketing Tab: ${solution_name || 'General inquiry'}`,
-        status: 'new',
+        contact_id,
+        machine_slug,
+        status: 'requested',
         source: 'marketing_tab',
-        assigned_to: company?.account_owner || null,
-        created_at: new Date().toISOString(),
+        marketing_token: null,
       })
       .select()
       .single();
