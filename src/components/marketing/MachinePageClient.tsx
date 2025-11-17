@@ -152,14 +152,14 @@ export default function MachinePageClient({
                     <div className="bg-purple-50 px-4 py-2 border-b border-gray-200">
                       <h4 className="text-sm font-bold text-purple-800">Product</h4>
                     </div>
-                    <div className="w-full bg-gray-100 p-4">
+                    <div className="w-full h-80 bg-gray-100 p-4 flex items-center justify-center">
                       <MediaImage
                         src={imageUrl}
                         alt={`${solutionName} solution`}
                         width={800}
                         height={600}
                         sizes="(max-width: 768px) 100vw, 33vw"
-                        className="w-full h-auto object-contain"
+                        className="max-w-full max-h-full object-contain"
                       />
                     </div>
                   </div>
@@ -171,14 +171,14 @@ export default function MachinePageClient({
                     <div className="bg-red-50 px-4 py-2 border-b border-gray-200">
                       <h4 className="text-sm font-bold text-red-800">Before</h4>
                     </div>
-                    <div className="w-full bg-gray-100 p-4">
+                    <div className="w-full h-80 bg-gray-100 p-4 flex items-center justify-center">
                       <MediaImage
                         src={primaryCard.resolved_before_image_url}
                         alt="Before using solution"
                         width={800}
                         height={600}
                         sizes="(max-width: 768px) 100vw, 33vw"
-                        className="w-full h-auto object-contain"
+                        className="max-w-full max-h-full object-contain"
                       />
                     </div>
                   </div>
@@ -190,14 +190,14 @@ export default function MachinePageClient({
                     <div className="bg-green-50 px-4 py-2 border-b border-gray-200">
                       <h4 className="text-sm font-bold text-green-800">After</h4>
                     </div>
-                    <div className="w-full bg-gray-100 p-4">
+                    <div className="w-full h-80 bg-gray-100 p-4 flex items-center justify-center">
                       <MediaImage
                         src={primaryCard.resolved_after_image_url}
                         alt="After using solution"
                         width={800}
                         height={600}
                         sizes="(max-width: 768px) 100vw, 33vw"
-                        className="w-full h-auto object-contain"
+                        className="max-w-full max-h-full object-contain"
                       />
                     </div>
                   </div>
