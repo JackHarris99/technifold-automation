@@ -144,89 +144,64 @@ export default function MachinePageClient({
                 </div>
               </div>
 
-              {/* 2-Column Grid for Images */}
-              <div className="grid lg:grid-cols-2 gap-6 px-8 pb-8">
-                {/* LEFT COLUMN: Product Image + Solution Tool */}
-                <div className="flex flex-col gap-6">
-                  {/* Product Image (resolved_image_url) */}
-                  {imageUrl && imageUrl !== '/placeholder-machine.jpg' && (
-                    <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
-                      <div className="bg-purple-50 px-4 py-2 border-b border-gray-200">
-                        <h4 className="text-sm font-bold text-purple-800">Product</h4>
-                      </div>
-                      <div className="w-full bg-gray-100 p-4">
-                        <MediaImage
-                          src={imageUrl}
-                          alt={`${solutionName} solution`}
-                          width={1200}
-                          height={800}
-                          sizes="(max-width: 768px) 100vw, 50vw"
-                          className="w-full h-auto object-contain"
-                        />
-                      </div>
+              {/* 3 Images in a Row */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-8 pb-8">
+                {/* Product Image */}
+                {imageUrl && imageUrl !== '/placeholder-machine.jpg' && (
+                  <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
+                    <div className="bg-purple-50 px-4 py-2 border-b border-gray-200">
+                      <h4 className="text-sm font-bold text-purple-800">Product</h4>
                     </div>
-                  )}
+                    <div className="w-full bg-gray-100 p-4">
+                      <MediaImage
+                        src={imageUrl}
+                        alt={`${solutionName} solution`}
+                        width={800}
+                        height={600}
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className="w-full h-auto object-contain"
+                      />
+                    </div>
+                  </div>
+                )}
 
-                  {/* Solution Tool Image */}
-                  {primaryCard.resolved_product_image_url && (
-                    <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
-                      <div className="bg-blue-50 px-4 py-2 border-b border-gray-200">
-                        <h4 className="text-sm font-bold text-blue-800">Solution Tool</h4>
-                      </div>
-                      <div className="w-full bg-white p-4">
-                        <MediaImage
-                          src={primaryCard.resolved_product_image_url}
-                          alt={`${solutionName} tool`}
-                          width={1000}
-                          height={1000}
-                          sizes="(max-width: 768px) 100vw, 50vw"
-                          className="w-full h-auto object-contain"
-                        />
-                      </div>
+                {/* Before Image */}
+                {primaryCard.resolved_before_image_url && (
+                  <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
+                    <div className="bg-red-50 px-4 py-2 border-b border-gray-200">
+                      <h4 className="text-sm font-bold text-red-800">Before</h4>
                     </div>
-                  )}
-                </div>
+                    <div className="w-full bg-gray-100 p-4">
+                      <MediaImage
+                        src={primaryCard.resolved_before_image_url}
+                        alt="Before using solution"
+                        width={800}
+                        height={600}
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className="w-full h-auto object-contain"
+                      />
+                    </div>
+                  </div>
+                )}
 
-                {/* RIGHT COLUMN: Before + After */}
-                <div className="flex flex-col gap-6">
-                  {/* Before Image */}
-                  {primaryCard.resolved_before_image_url && (
-                    <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
-                      <div className="bg-red-50 px-4 py-2 border-b border-gray-200">
-                        <h4 className="text-sm font-bold text-red-800">Before</h4>
-                      </div>
-                      <div className="w-full bg-gray-100 p-4">
-                        <MediaImage
-                          src={primaryCard.resolved_before_image_url}
-                          alt="Before using solution"
-                          width={800}
-                          height={600}
-                          sizes="(max-width: 768px) 100vw, 50vw"
-                          className="w-full h-auto object-contain"
-                        />
-                      </div>
+                {/* After Image */}
+                {primaryCard.resolved_after_image_url && (
+                  <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
+                    <div className="bg-green-50 px-4 py-2 border-b border-gray-200">
+                      <h4 className="text-sm font-bold text-green-800">After</h4>
                     </div>
-                  )}
-
-                  {/* After Image */}
-                  {primaryCard.resolved_after_image_url && (
-                    <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
-                      <div className="bg-green-50 px-4 py-2 border-b border-gray-200">
-                        <h4 className="text-sm font-bold text-green-800">After</h4>
-                      </div>
-                      <div className="w-full bg-gray-100 p-4">
-                        <MediaImage
-                          src={primaryCard.resolved_after_image_url}
-                          alt="After using solution"
-                          width={800}
-                          height={600}
-                          sizes="(max-width: 768px) 100vw, 50vw"
-                          className="w-full h-auto object-contain"
-                        />
-                      </div>
+                    <div className="w-full bg-gray-100 p-4">
+                      <MediaImage
+                        src={primaryCard.resolved_after_image_url}
+                        alt="After using solution"
+                        width={800}
+                        height={600}
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className="w-full h-auto object-contain"
+                      />
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
 
               {/* CTA Button - Full Width Bottom */}
