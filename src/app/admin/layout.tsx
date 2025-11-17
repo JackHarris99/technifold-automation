@@ -56,6 +56,8 @@ export default async function AdminLayout({
           <SidebarLink href="/admin/rentals" icon="🔄" label="Rentals" />
           <SidebarLink href="/admin/campaigns" icon="📧" label="Campaigns" />
           <SidebarLink href="/admin/engagements" icon="📊" label="Engagement" />
+          <SidebarLink href="/admin/companies" icon="📑" label="Company List" />
+          <SidebarLink href="/admin/sku-explorer" icon="📦" label="SKU Explorer" />
 
           {isDir && (
             <>
@@ -65,9 +67,7 @@ export default async function AdminLayout({
                 </div>
               </div>
               <SidebarLink href="/admin/users" icon="👥" label="Users" />
-              <SidebarLink href="/admin/companies" icon="📑" label="Company List" />
               <SidebarLink href="/admin/categorize" icon="🏷️" label="Categorize" />
-              <SidebarLink href="/admin/sku-explorer" icon="📦" label="SKU Explorer" />
               <SidebarLink href="/admin/ms-problem-editor" icon="✏️" label="Copy Editor" />
               <SidebarLink href="/admin/brand-media" icon="🎨" label="Brand Media" />
               <SidebarLink href="/admin/media-missing" icon="🖼️" label="Missing Media" />
