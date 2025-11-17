@@ -538,12 +538,36 @@ export default function MarketingTab({
                   <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
                     Let's discuss how these solutions can improve quality and efficiency for {companyName}
                   </p>
-                  <a
-                    href="/contact"
-                    className="inline-block bg-blue-600 text-white px-10 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 hover:shadow-lg transition-all"
+                  <button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('/api/admin/leads/create-from-marketing', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            company_id: companyId,
+                            company_name: companyName,
+                            machine_id: selectedMachine,
+                            machine_name: selectedMachineData?.display_name,
+                            solution_id: selectedSolution,
+                            solution_name: solution?.name,
+                            notes: `Marketing interest: ${solution?.name} for ${selectedMachineData?.display_name}`,
+                          })
+                        });
+
+                        if (response.ok) {
+                          alert('✅ Quote request created!\n\nThe assigned sales rep has been notified and will build a custom quote for this customer.');
+                        } else {
+                          throw new Error('Failed to create quote request');
+                        }
+                      } catch (error) {
+                        alert('❌ Failed to create quote request. Please try again.');
+                      }
+                    }}
+                    className="inline-block bg-blue-600 text-white px-10 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 hover:shadow-lg transition-all cursor-pointer"
                   >
                     Get Your Custom Quote
-                  </a>
+                  </button>
                   <p className="text-sm text-gray-500 mt-4">
                     Response within 2 hours • 100% Money-Back Guarantee
                   </p>
