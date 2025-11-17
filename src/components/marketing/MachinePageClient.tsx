@@ -110,6 +110,22 @@ export default function MachinePageClient({
                 </div>
               </div>
 
+              {/* Hero/Main Image - Prominent Display */}
+              {imageUrl && imageUrl !== '/placeholder-machine.jpg' && (
+                <div className="px-8 pb-6">
+                  <div className="w-full bg-gray-100 rounded-xl overflow-hidden p-4">
+                    <MediaImage
+                      src={imageUrl}
+                      alt={`${solutionName} solution`}
+                      width={1200}
+                      height={800}
+                      sizes="(max-width: 768px) 100vw, 896px"
+                      className="w-full h-auto object-contain"
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Marketing Copy - Full Width Top Section */}
               <div className="px-8 pb-6">
                 <div className="space-y-6">
@@ -144,26 +160,8 @@ export default function MachinePageClient({
                 </div>
               </div>
 
-              {/* 3 Images in a Row */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-8 pb-8">
-                {/* Product Image */}
-                {imageUrl && imageUrl !== '/placeholder-machine.jpg' && (
-                  <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
-                    <div className="bg-purple-50 px-4 py-2 border-b border-gray-200">
-                      <h4 className="text-sm font-bold text-purple-800">Product</h4>
-                    </div>
-                    <div className="w-full h-80 bg-gray-100 p-4 flex items-center justify-center">
-                      <MediaImage
-                        src={imageUrl}
-                        alt={`${solutionName} solution`}
-                        width={800}
-                        height={600}
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                        className="max-w-full max-h-full object-contain"
-                      />
-                    </div>
-                  </div>
-                )}
+              {/* 2 Images in a Row - Before/After Only */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-8 pb-8">
 
                 {/* Before Image */}
                 {primaryCard.resolved_before_image_url && (
