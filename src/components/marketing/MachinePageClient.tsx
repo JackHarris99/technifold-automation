@@ -113,13 +113,13 @@ export default function MachinePageClient({
               {/* Hero/Main Image - Prominent Display */}
               {imageUrl && imageUrl !== '/placeholder-machine.jpg' && (
                 <div className="px-8 pb-6">
-                  <div className="w-full bg-gray-100 rounded-xl overflow-hidden p-4">
+                  <div className="max-w-3xl mx-auto bg-gray-100 rounded-xl overflow-hidden p-4">
                     <MediaImage
                       src={imageUrl}
                       alt={`${solutionName} solution`}
-                      width={1200}
-                      height={800}
-                      sizes="(max-width: 768px) 100vw, 896px"
+                      width={800}
+                      height={600}
+                      sizes="(max-width: 768px) 100vw, 768px"
                       className="w-full h-auto object-contain"
                     />
                   </div>
