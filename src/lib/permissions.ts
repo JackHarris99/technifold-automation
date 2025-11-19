@@ -24,7 +24,7 @@ export async function canActOnCompany(company: Company): Promise<boolean> {
   if (user.role === 'director') return true;
 
   // Sales reps can only act on companies they own
-  return company.account_owner === user.rep_id;
+  return company.account_owner === user.sales_rep_id;
 }
 
 /**
