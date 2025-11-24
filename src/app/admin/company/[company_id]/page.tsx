@@ -5,7 +5,7 @@
 
 import { getSupabaseClient } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
-import CompanyConsole from '@/components/admin/CompanyConsole';
+import CompanyDetailUnified from '@/components/admin/CompanyDetailUnified';
 import { getCompanyPermissions } from '@/lib/permissions';
 
 interface CompanyConsolePageProps {
@@ -99,7 +99,7 @@ export default async function CompanyConsolePage({ params }: CompanyConsolePageP
   const permissions = await getCompanyPermissions(company);
 
   return (
-    <CompanyConsole
+    <CompanyDetailUnified
       company={company}
       salesRep={salesRep}
       machines={machines || []}
