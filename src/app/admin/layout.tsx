@@ -63,6 +63,7 @@ export default async function AdminLayout({
           <SidebarLink href="/admin/orders" icon="✅" label="Orders" />
           <SidebarLink href="/admin/rentals" icon="🔄" label="Rentals" />
           <SidebarLink href="/admin/campaigns" icon="📧" label="Campaigns" />
+          <SidebarLink href="/admin/campaigns/configure" icon="⚙️" label="Configure Campaign" />
           <SidebarLink href="/admin/campaigns/send" icon="📤" label="Send Campaign" />
           <SidebarLink href="/admin/engagements" icon="📊" label="Engagement" />
           <SidebarLink href="/admin/companies" icon="📑" label="Company List" />

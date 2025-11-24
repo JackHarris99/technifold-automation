@@ -90,12 +90,13 @@ export async function POST(request: NextRequest) {
     for (const contact of allowedContacts) {
       try {
         // Generate tokenized link for this contact
+        // The campaign_key tells /m/[token] which campaign config to load
         const token = generateToken({
           company_id: contact.company_id,
           contact_id: contact.contact_id,
           campaign_key,
           offer_key: campaign_key, // Use campaign key as offer key
-        });
+        }, 720); // 30 days for marketing campaigns
 
         const tokenUrl = `${baseUrl}/m/${token}`;
 

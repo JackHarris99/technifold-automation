@@ -42,7 +42,7 @@ export default async function MarketingPage({ params }: MarketingPageProps) {
     );
   }
 
-  const { company_id, contact_id } = payload;
+  const { company_id, contact_id, campaign_key } = payload;
   const supabase = getSupabaseClient();
 
   // 2. Get company details
@@ -56,34 +56,76 @@ export default async function MarketingPage({ params }: MarketingPageProps) {
     notFound();
   }
 
-  // 3. Get company's machine (highest confidence)
-  const { data: companyMachines } = await supabase
-    .from('company_machine')
-    .select(`
-      machine_id,
-      machines:machine_id (
-        brand,
-        model,
-        display_name,
-        slug
-      )
-    `)
-    .eq('company_id', company_id)
-    .order('verified', { ascending: false })
-    .limit(1);
+  // 2b. Check if this is a campaign-driven marketing page
+  let campaignConfig: any = null;
+  if (campaign_key) {
+    const { data: campaign } = await supabase
+      .from('campaigns')
+      .select('machine_slug, problem_solution_ids, curated_skus')
+      .eq('campaign_key', campaign_key)
+      .single();
 
-  const machine = companyMachines?.[0]?.machines as any;
-  const machineId = companyMachines?.[0]?.machine_id;
-  const machineSlug = machine?.slug;
+    if (campaign) {
+      campaignConfig = campaign;
+    }
+  }
 
-  // 4. Get company's interested problem_solution_ids
-  const { data: interests } = await supabase
-    .from('company_interests')
-    .select('problem_solution_id')
-    .eq('company_id', company_id)
-    .eq('status', 'interested');
+  // 3. Determine machine to use
+  let machine: any = null;
+  let machineId: string | null = null;
+  let machineSlug: string | null = null;
 
-  const interestedProblemSolutionIds = (interests || []).map(i => i.problem_solution_id);
+  if (campaignConfig?.machine_slug) {
+    // Use campaign-configured machine
+    const { data: campaignMachine } = await supabase
+      .from('machines')
+      .select('machine_id, brand, model, display_name, slug')
+      .eq('slug', campaignConfig.machine_slug)
+      .single();
+
+    if (campaignMachine) {
+      machine = campaignMachine;
+      machineId = campaignMachine.machine_id;
+      machineSlug = campaignMachine.slug;
+    }
+  } else {
+    // Fallback to company's machine (highest confidence)
+    const { data: companyMachines } = await supabase
+      .from('company_machine')
+      .select(`
+        machine_id,
+        machines:machine_id (
+          brand,
+          model,
+          display_name,
+          slug
+        )
+      `)
+      .eq('company_id', company_id)
+      .order('verified', { ascending: false })
+      .limit(1);
+
+    machine = companyMachines?.[0]?.machines as any;
+    machineId = companyMachines?.[0]?.machine_id;
+    machineSlug = machine?.slug;
+  }
+
+  // 4. Determine which problem_solution_ids to show
+  let interestedProblemSolutionIds: string[] = [];
+
+  if (campaignConfig?.problem_solution_ids && Array.isArray(campaignConfig.problem_solution_ids)) {
+    // Use campaign-configured problems
+    interestedProblemSolutionIds = campaignConfig.problem_solution_ids;
+  } else {
+    // Fallback to company interests
+    const { data: interests } = await supabase
+      .from('company_interests')
+      .select('problem_solution_id')
+      .eq('company_id', company_id)
+      .eq('status', 'interested');
+
+    interestedProblemSolutionIds = (interests || []).map(i => i.problem_solution_id);
+  }
 
   // 5. Get machine-specific problem/solution data with curated_skus
   let solutionCards: any[] = [];
@@ -111,6 +153,13 @@ export default async function MarketingPage({ params }: MarketingPageProps) {
 
   // 7. Collect all unique product codes from curated_skus
   const allProductCodes = new Set<string>();
+
+  // Add campaign-configured products first
+  if (campaignConfig?.curated_skus && Array.isArray(campaignConfig.curated_skus)) {
+    campaignConfig.curated_skus.forEach((sku: string) => allProductCodes.add(sku));
+  }
+
+  // Then add products from solution cards
   solutionCards.forEach(card => {
     if (card.curated_skus && Array.isArray(card.curated_skus)) {
       card.curated_skus.forEach((sku: string) => allProductCodes.add(sku));
