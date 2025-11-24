@@ -44,24 +44,22 @@ export default async function AdminLayout({
         <nav className="flex-1 overflow-y-auto py-4">
           <div className="px-3 mb-2">
             <div className="text-blue-200 text-xs uppercase font-semibold tracking-wider px-3">
-              Overview
+              Sales Pipeline
             </div>
           </div>
 
-          <SidebarLink href="/admin/dashboard" icon="📊" label="Dashboard" />
+          <SidebarLink href="/admin/pipeline" icon="📊" label="Pipeline" />
+          <SidebarLink href="/admin/sales-history" icon="📈" label="Sales History" />
 
           <div className="px-3 mt-6 mb-2">
             <div className="text-blue-200 text-xs uppercase font-semibold tracking-wider px-3">
-              Sales
+              Sales Tools
             </div>
           </div>
 
           <SidebarLink href="/admin/companies" icon="🏢" label="All Companies" />
-          <SidebarLink href="/admin/quote-requests" icon="📋" label="Leads" />
           <SidebarLink href="/admin/quote-builder-v2" icon="📄" label="Create Quote" />
           <SidebarLink href="/admin/campaigns" icon="📧" label="Campaigns" />
-          <SidebarLink href="/admin/orders" icon="📦" label="Orders" />
-          <SidebarLink href="/admin/rentals" icon="🔄" label="Rentals" />
           <SidebarLink href="/admin/engagements" icon="📊" label="Engagement" />
           <SidebarLink href="/admin/sku-explorer" icon="📦" label="SKU Explorer" />
 
