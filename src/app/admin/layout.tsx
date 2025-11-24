@@ -56,18 +56,13 @@ export default async function AdminLayout({
             </div>
           </div>
 
-          <SidebarLink href="/admin/company" icon="🏢" label="Companies" />
+          <SidebarLink href="/admin/companies" icon="🏢" label="Companies" />
           <SidebarLink href="/admin/quote-requests" icon="📋" label="Leads" />
-          <SidebarLink href="/admin/add-lead" icon="➕" label="Add Lead" />
-          <SidebarLink href="/admin/quote-builder-v2" icon="📄" label="Build Quote" />
-          <SidebarLink href="/admin/orders" icon="✅" label="Orders" />
-          <SidebarLink href="/admin/rentals" icon="🔄" label="Rentals" />
+          <SidebarLink href="/admin/quote-builder-v2" icon="📄" label="Create Quote" />
           <SidebarLink href="/admin/campaigns" icon="📧" label="Campaigns" />
-          <SidebarLink href="/admin/campaigns/configure" icon="⚙️" label="Configure Campaign" />
-          <SidebarLink href="/admin/campaigns/send" icon="📤" label="Send Campaign" />
+          <SidebarLink href="/admin/orders" icon="📦" label="Orders" />
+          <SidebarLink href="/admin/rentals" icon="🔄" label="Rentals" />
           <SidebarLink href="/admin/engagements" icon="📊" label="Engagement" />
-          <SidebarLink href="/admin/companies" icon="📑" label="Company List" />
-          <SidebarLink href="/admin/sku-explorer" icon="📦" label="SKU Explorer" />
 
           {isDir && (
             <>
