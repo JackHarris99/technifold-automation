@@ -26,13 +26,6 @@ interface ProblemSolution {
   card_copy: string;
 }
 
-interface Product {
-  product_code: string;
-  description: string;
-  category: string;
-  image_url?: string;
-}
-
 export default function ConfigureCampaignPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -41,12 +34,10 @@ export default function ConfigureCampaignPage() {
   // Data
   const [machines, setMachines] = useState<Machine[]>([]);
   const [problemSolutions, setProblemSolutions] = useState<ProblemSolution[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
 
   // Selections
   const [selectedMachine, setSelectedMachine] = useState('');
   const [selectedProblems, setSelectedProblems] = useState<Set<string>>(new Set());
-  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
 
   // Campaign details
   const [campaignKey, setCampaignKey] = useState('');
@@ -64,13 +55,6 @@ export default function ConfigureCampaignPage() {
       loadProblemSolutions(selectedMachine);
     }
   }, [selectedMachine]);
-
-  // Load products when problems selected
-  useEffect(() => {
-    if (selectedProblems.size > 0) {
-      loadProducts(Array.from(selectedProblems));
-    }
-  }, [selectedProblems]);
 
   const loadMachines = async () => {
     try {
@@ -95,23 +79,6 @@ export default function ConfigureCampaignPage() {
     }
   };
 
-  const loadProducts = async (problemIds: string[]) => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/admin/campaigns/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ problem_solution_ids: problemIds }),
-      });
-      const data = await res.json();
-      setProducts(data.products || []);
-    } catch (err) {
-      console.error('Error loading products:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleToggleProblem = (problemId: string) => {
     const newSelected = new Set(selectedProblems);
     if (newSelected.has(problemId)) {
@@ -120,16 +87,6 @@ export default function ConfigureCampaignPage() {
       newSelected.add(problemId);
     }
     setSelectedProblems(newSelected);
-  };
-
-  const handleToggleProduct = (productCode: string) => {
-    const newSelected = new Set(selectedProducts);
-    if (newSelected.has(productCode)) {
-      newSelected.delete(productCode);
-    } else {
-      newSelected.add(productCode);
-    }
-    setSelectedProducts(newSelected);
   };
 
   const handleSaveAndContinue = async () => {
@@ -150,7 +107,6 @@ export default function ConfigureCampaignPage() {
           subject,
           machine_slug: selectedMachine,
           problem_solution_ids: Array.from(selectedProblems),
-          curated_skus: Array.from(selectedProducts),
         }),
       });
 
@@ -271,9 +227,14 @@ export default function ConfigureCampaignPage() {
         {/* Step 2: Select Problems/Solutions */}
         {selectedMachine && (
           <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              ⚠️ Step 2: Select Problems/Solutions * ({selectedProblems.size} selected)
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900">
+                ⚠️ Step 2: Select Problems/Solutions * ({selectedProblems.size} selected)
+              </h2>
+              <p className="text-sm text-gray-600">
+                Products are mentioned in the copy - quote building happens after they request
+              </p>
+            </div>
 
             {loading ? (
               <p className="text-gray-500">Loading problems...</p>
@@ -305,53 +266,6 @@ export default function ConfigureCampaignPage() {
                           {ps.solution_name}
                         </span>
                       </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Step 3: Select Products (Optional) */}
-        {selectedProblems.size > 0 && (
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              📦 Step 3: Select Products (Optional) ({selectedProducts.size} selected)
-            </h2>
-
-            {loading ? (
-              <p className="text-gray-500">Loading recommended products...</p>
-            ) : products.length === 0 ? (
-              <p className="text-gray-500">No products found</p>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {products.map(p => (
-                  <div
-                    key={p.product_code}
-                    onClick={() => handleToggleProduct(p.product_code)}
-                    className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                      selectedProducts.has(p.product_code)
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        checked={selectedProducts.has(p.product_code)}
-                        onChange={() => {}}
-                        className="absolute top-0 right-0 w-4 h-4 text-blue-600"
-                      />
-                      {p.image_url && (
-                        <img
-                          src={p.image_url}
-                          alt={p.description}
-                          className="w-full h-24 object-contain mb-2"
-                        />
-                      )}
-                      <p className="text-xs font-semibold text-blue-600">{p.product_code}</p>
-                      <p className="text-xs text-gray-600 line-clamp-2 mt-1">{p.description}</p>
                     </div>
                   </div>
                 ))}
