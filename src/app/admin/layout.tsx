@@ -44,6 +44,14 @@ export default async function AdminLayout({
         <nav className="flex-1 overflow-y-auto py-4">
           <div className="px-3 mb-2">
             <div className="text-blue-200 text-xs uppercase font-semibold tracking-wider px-3">
+              Overview
+            </div>
+          </div>
+
+          <SidebarLink href="/admin/dashboard" icon="📊" label="Dashboard" />
+
+          <div className="px-3 mt-6 mb-2">
+            <div className="text-blue-200 text-xs uppercase font-semibold tracking-wider px-3">
               Sales
             </div>
           </div>
@@ -55,6 +63,7 @@ export default async function AdminLayout({
           <SidebarLink href="/admin/orders" icon="✅" label="Orders" />
           <SidebarLink href="/admin/rentals" icon="🔄" label="Rentals" />
           <SidebarLink href="/admin/campaigns" icon="📧" label="Campaigns" />
+          <SidebarLink href="/admin/campaigns/send" icon="📤" label="Send Campaign" />
           <SidebarLink href="/admin/engagements" icon="📊" label="Engagement" />
           <SidebarLink href="/admin/companies" icon="📑" label="Company List" />
           <SidebarLink href="/admin/sku-explorer" icon="📦" label="SKU Explorer" />
