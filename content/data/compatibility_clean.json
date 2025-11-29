@@ -1,0 +1,3114 @@
+[
+  {
+    "product_code": "CP-AP-QC/36-FP",
+    "manufacturer": "Agor",
+    "shaft_specs": {
+      "shaft_size_mm": 36.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "EF-AG/28-FP",
+    "manufacturer": "Agor",
+    "shaft_specs": {
+      "shaft_size_mm": 28.0,
+      "outer_diameter_mm": 37.8
+    }
+  },
+  {
+    "product_code": "QC-GB-01",
+    "manufacturer": "Agor",
+    "shaft_specs": {
+      "shaft_size_mm": 36.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-36-FIX",
+    "manufacturer": "Agor",
+    "shaft_specs": {
+      "shaft_size_mm": 36.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-36-FP",
+    "manufacturer": "Agor",
+    "shaft_specs": {
+      "shaft_size_mm": 36.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "PD-DEL-QC/36-FP",
+    "manufacturer": "Agor",
+    "shaft_specs": {
+      "shaft_size_mm": 36.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "SHC-ADJ/03-FP",
+    "manufacturer": "Agor",
+    "shaft_specs": {
+      "shaft_size_mm": 36.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "SHC-STA-ADJ/03-FP",
+    "manufacturer": "Agor",
+    "shaft_specs": {
+      "shaft_size_mm": 36.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-CR/36-CAS",
+    "manufacturer": "Agor",
+    "shaft_specs": {
+      "shaft_size_mm": 36.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-36-DSF-SV",
+    "manufacturer": "Agor",
+    "shaft_specs": {
+      "shaft_size_mm": 36.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "EF-BAC-FP",
+    "manufacturer": "Bacciottini",
+    "shaft_specs": {
+      "shaft_size_mm": 59.5,
+      "outer_diameter_mm": 94.5
+    }
+  },
+  {
+    "product_code": "CP-AP-BF/22-FP",
+    "manufacturer": "Baumfolder",
+    "shaft_specs": {
+      "shaft_size_mm": 22.24,
+      "outer_diameter_mm": 45.0
+    }
+  },
+  {
+    "product_code": "CP-AP-BF/28-FP",
+    "manufacturer": "Baumfolder",
+    "shaft_specs": {
+      "shaft_size_mm": 28.58,
+      "outer_diameter_mm": 55.87
+    }
+  },
+  {
+    "product_code": "EF-BF/22-FP",
+    "manufacturer": "Baumfolder",
+    "shaft_specs": {
+      "shaft_size_mm": 22.24,
+      "outer_diameter_mm": 45.0
+    }
+  },
+  {
+    "product_code": "EF-BF/28-FP",
+    "manufacturer": "Baumfolder",
+    "shaft_specs": {
+      "shaft_size_mm": 28.58,
+      "outer_diameter_mm": 55.87
+    }
+  },
+  {
+    "product_code": "GB-BF/22",
+    "manufacturer": "Baumfolder",
+    "shaft_specs": {
+      "shaft_size_mm": 22.24,
+      "outer_diameter_mm": 45.0
+    }
+  },
+  {
+    "product_code": "FF-BF/22-ECO",
+    "manufacturer": "Baumfolder",
+    "shaft_specs": {
+      "shaft_size_mm": 22.24,
+      "outer_diameter_mm": 45.0
+    }
+  },
+  {
+    "product_code": "FF-BF/22-FP",
+    "manufacturer": "Baumfolder",
+    "shaft_specs": {
+      "shaft_size_mm": 22.24,
+      "outer_diameter_mm": 45.0
+    }
+  },
+  {
+    "product_code": "FF-BF/22-FP-01",
+    "manufacturer": "Baumfolder",
+    "shaft_specs": {
+      "shaft_size_mm": 22.24,
+      "outer_diameter_mm": 45.0
+    }
+  },
+  {
+    "product_code": "FF-BF/28-FP",
+    "manufacturer": "Baumfolder",
+    "shaft_specs": {
+      "shaft_size_mm": 28.58,
+      "outer_diameter_mm": 55.87
+    }
+  },
+  {
+    "product_code": "FF-BF/28-FP-01",
+    "manufacturer": "Baumfolder",
+    "shaft_specs": {
+      "shaft_size_mm": 28.58,
+      "outer_diameter_mm": 55.87
+    }
+  },
+  {
+    "product_code": "MT-BF/28/CUTTING-OPTION-2",
+    "manufacturer": "Baumfolder",
+    "shaft_specs": {
+      "shaft_size_mm": 28.58,
+      "outer_diameter_mm": 55.87
+    }
+  },
+  {
+    "product_code": "MT-BF/COMBO-28-01",
+    "manufacturer": "Baumfolder",
+    "shaft_specs": {
+      "shaft_size_mm": 28.58,
+      "outer_diameter_mm": 55.87
+    }
+  },
+  {
+    "product_code": "MT-BF/COMBO-28",
+    "manufacturer": "Baumfolder",
+    "shaft_specs": {
+      "shaft_size_mm": 28.58,
+      "outer_diameter_mm": 55.87
+    }
+  },
+  {
+    "product_code": "MT-BF/28",
+    "manufacturer": "Baumfolder",
+    "shaft_specs": {
+      "shaft_size_mm": 28.58,
+      "outer_diameter_mm": 55.87
+    }
+  },
+  {
+    "product_code": "EF-DM/30-FP",
+    "manufacturer": "Dick Moll",
+    "shaft_specs": {
+      "shaft_size_mm": 29.62,
+      "outer_diameter_mm": 50.29
+    }
+  },
+  {
+    "product_code": "FF-DM-FIX-01",
+    "manufacturer": "Dick Moll",
+    "shaft_specs": {
+      "shaft_size_mm": 29.62,
+      "outer_diameter_mm": 50.8
+    }
+  },
+  {
+    "product_code": "FF-DM-FP-01",
+    "manufacturer": "Dick Moll",
+    "shaft_specs": {
+      "shaft_size_mm": 29.62,
+      "outer_diameter_mm": 50.8
+    }
+  },
+  {
+    "product_code": "PD-DEL-DM/30-FP",
+    "manufacturer": "Dick Moll",
+    "shaft_specs": {
+      "shaft_size_mm": 29.62,
+      "outer_diameter_mm": 50.8
+    }
+  },
+  {
+    "product_code": "FF-DM-DSF-01-B",
+    "manufacturer": "Dick Moll",
+    "shaft_specs": {
+      "shaft_size_mm": 29.62,
+      "outer_diameter_mm": 50.8
+    }
+  },
+  {
+    "product_code": "FF-DU/DSF-FP-01",
+    "manufacturer": "Duplo",
+    "shaft_specs": {
+      "shaft_size_mm": null,
+      "outer_diameter_male_mm": 29.8,
+      "outer_diameter_female_mm": 19.59
+    }
+  },
+  {
+    "product_code": "FF-DU/DSF-FP-04",
+    "manufacturer": "Duplo",
+    "shaft_specs": null
+  },
+  {
+    "product_code": "SC-DU-01",
+    "manufacturer": "Duplo",
+    "shaft_specs": {
+      "shaft_size_mm": 26.0,
+      "outer_diameter_mm": 58.45
+    }
+  },
+  {
+    "product_code": "FF-EC-FP",
+    "manufacturer": "EconoCrease/Kluge",
+    "shaft_specs": {
+      "shaft_size_mm": 31.78,
+      "outer_diameter_male_mm": 49.92,
+      "outer_diameter_female_mm": 51.52
+    }
+  },
+  {
+    "product_code": "TC-DEL-FI/40-FP",
+    "manufacturer": "Fidia",
+    "shaft_specs": {
+      "shaft_size_mm": 40.0,
+      "outer_diameter_mm": 60.0
+    }
+  },
+  {
+    "product_code": "TC-DEL-FI/64-FP",
+    "manufacturer": "Fidia",
+    "shaft_specs": {
+      "shaft_size_mm": 64.0,
+      "outer_diameter_mm": 92.0
+    }
+  },
+  {
+    "product_code": "TC-DEL-GA/01-FP",
+    "manufacturer": "Ga-Vehren",
+    "shaft_specs": {
+      "shaft_size_mm": 25.41,
+      "outer_diameter_mm": 50.62
+    }
+  },
+  {
+    "product_code": "FF-GA/01-FP-01",
+    "manufacturer": "Ga-Vehren",
+    "shaft_specs": {
+      "shaft_size_mm": 25.41,
+      "outer_diameter_mm": 50.24
+    }
+  },
+  {
+    "product_code": "FF-GW-FP-01-B",
+    "manufacturer": "Graphic Wizard",
+    "shaft_specs": {
+      "top": {
+        "shaft_size_mm": 4.74,
+        "outer_diameter_mm": 30.0
+      },
+      "bottom": {
+        "shaft_size_mm": 19.05,
+        "outer_diameter_mm": 31.74
+      }
+    }
+  },
+  {
+    "product_code": "CP-AP-HH/35-FP",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.25
+    }
+  },
+  {
+    "product_code": "CP-AP-SM/35-FP-GUK",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 59.4
+    }
+  },
+  {
+    "product_code": "EF-GU/35-FIX",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 59.4
+    }
+  },
+  {
+    "product_code": "EF-GU/35-FP",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 59.4
+    }
+  },
+  {
+    "product_code": "EF-HH/35-FP",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.25
+    }
+  },
+  {
+    "product_code": "EF-MB/20-FP",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "EF-ST/25-FP",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "FF-GU/35-FIX-01",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 59.4
+    }
+  },
+  {
+    "product_code": "FF-GU/35-FP-01",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 59.4
+    }
+  },
+  {
+    "product_code": "FF-HH/35-FP",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.25
+    }
+  },
+  {
+    "product_code": "FF-HH/35-FP-01",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.25
+    }
+  },
+  {
+    "product_code": "FF-MB/20-FP",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "FF-MB/20-FP-01",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "FF-ST/25-FP",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "FF-ST/25-FP-01",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "FF-ST/25-FP-01-B",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "PD-DEL-GU/35-FP",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 59.4
+    }
+  },
+  {
+    "product_code": "PD-DEL-HH/35-FP",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.25
+    }
+  },
+  {
+    "product_code": "PD-DEL-MB/20-FP",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "PD-DEL-ST/25-FP",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "SHC-GUK",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 59.4
+    }
+  },
+  {
+    "product_code": "MT-03/PERF-OPTION-1",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "MT-GUK/35/PERF-OPTION-1",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 59.4
+    }
+  },
+  {
+    "product_code": "MT-HH/35/PERF-OPTION-1",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.27
+    }
+  },
+  {
+    "product_code": "MT-HH/35/PERF-OPTION-1",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.27
+    }
+  },
+  {
+    "product_code": "MT-MB/PERF-OPTION-1",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "MT-03/CUTTING-OPTION-2",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "MT-HH/35/CUTTING-OPTION-2",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.27
+    }
+  },
+  {
+    "product_code": "MT-MB/CUTTING-OPTION-2",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "MT-03/COMBO",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "MT-03/COMBO-01",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "MT-GUK/COMBO",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 59.4
+    }
+  },
+  {
+    "product_code": "MT-GUK/COMBO-01",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 59.4
+    }
+  },
+  {
+    "product_code": "MT-03",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "MT-03",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "MT-GUK/35",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 59.4
+    }
+  },
+  {
+    "product_code": "MT-HH/35",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.27
+    }
+  },
+  {
+    "product_code": "MT-HH/35",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.25
+    }
+  },
+  {
+    "product_code": "MT-MB",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "MT-CR/25-CAS",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "MT-CR/25-CAS-01",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "MT-CR/GU-CAS",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 59.4
+    }
+  },
+  {
+    "product_code": "EF-ST/25-DSF",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "EF-ST/25-FP-DSF-01-B",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "FF-GU/35-DSF",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 59.4
+    }
+  },
+  {
+    "product_code": "FF-GU/35-FP-DSF-01-B",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 59.4
+    }
+  },
+  {
+    "product_code": "FF-ST/25-DSF",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "FF-ST/25-FP-DSF-01-B",
+    "manufacturer": "GUK",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "QC-DEL-UB/6-FP",
+    "manufacturer": "Harris",
+    "shaft_specs": null
+  },
+  {
+    "product_code": "QC-DEL-UB/6-FP-01",
+    "manufacturer": "Harris",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 75.84
+    }
+  },
+  {
+    "product_code": "QC-DEL-GO/6-FP",
+    "manufacturer": "Harris/Goss",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 75.25
+    }
+  },
+  {
+    "product_code": "SC-HD-01",
+    "manufacturer": "Heidelberg",
+    "shaft_specs": {
+      "shaft_size_mm": 10.0,
+      "outer_diameter_mm": 53.0
+    }
+  },
+  {
+    "product_code": "SC-HD-03",
+    "manufacturer": "Heidelberg",
+    "shaft_specs": {
+      "shaft_size_mm": 17.0,
+      "outer_diameter_mm": 60.0
+    }
+  },
+  {
+    "product_code": "SC-HD-02",
+    "manufacturer": "Heidelberg",
+    "shaft_specs": null
+  },
+  {
+    "product_code": "SC-HD-04",
+    "manufacturer": "Heidelberg",
+    "shaft_specs": null
+  },
+  {
+    "product_code": "SC-SH-01",
+    "manufacturer": "Heidelberg",
+    "shaft_specs": null
+  },
+  {
+    "product_code": "CP-AP-SM/35-FP",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "CP-AP-ST/25-FP",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "EF-MB/20-FP",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "EF-ST/20-FP",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 36.0
+    }
+  },
+  {
+    "product_code": "EF-ST/25-FP",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "EF-ST/45-FP",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 45.0,
+      "outer_diameter_mm": 75.0
+    }
+  },
+  {
+    "product_code": "EF-ST/50-FP",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 50.0,
+      "outer_diameter_mm": 75.0
+    }
+  },
+  {
+    "product_code": "GB-SM/35-FP",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "GB-ST/25-FP",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "FF-MB/20-FP",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "FF-MB/20-FP-01",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "FF-SM/35-DSF",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-SM/35-FIX",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-SM/35-FIX-01",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-SM/35-FP",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-SM/35-FP-01",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-ST/25-FIX-01",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "FF-ST/25-FIX-01-B",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "FF-ST/25-FP",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "FF-ST/25-FP-01",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "FF-ST/25-FP-01-B",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "PD-DEL-MB/20-FP",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "PD-DEL-SM/35-FP",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "PD-DEL-ST/25-FP",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "PD-DEL-ST/50-FP",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 50.0,
+      "outer_diameter_mm": 75.0
+    }
+  },
+  {
+    "product_code": "PD-ST/MAILER-FP",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 8.0,
+      "outer_diameter_mm": 48.0
+    }
+  },
+  {
+    "product_code": "SHC-04",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "SHC-ADJ/04-FP",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "SHC-STA-ADJ/04-FP",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "SHC-ST/25-01",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "MT-02/PERF-OPTION-1",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-02/PERF-OPTION-1",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-03/PERF-OPTION-1",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "MT-03/PERF-OPTION-1",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "MT-MB/PERF-OPTION-1",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "MT-02/CUTTING-OPTION-2",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-03/CUTTING-OPTION-2",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "MT-MB/CUTTING-OPTION-2",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "MT-02/COMBO",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-02/COMBO-FIX",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-02/COMBO-01",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-02/COMBO-FIX-01",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-03/COMBO",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "MT-03/COMBO-01",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "MT-02",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-03",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "MT-MB",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "MT-CR/25-CAS",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "MT-CR/25-CAS-01",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "MT-CR/35-CAS",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-CR/35-CAS-FIX",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-CR/35-CAS-01",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "EF-SM/35-DSF",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "EF-SM/35-FP-DSF-01-B",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "EF-ST/25-DSF",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "EF-ST/25-FP-DSF-01-B",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "FF-SM/35-DSF",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-SM/35-FP-DSF-01-B",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-SM/35-LG-DSF",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-ST/25-DSF",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "FF-ST/25-FP-DSF-01-B",
+    "manufacturer": "Heidelberg/Stahl",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "CP-AP-HH/35-FP",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.25
+    }
+  },
+  {
+    "product_code": "EF-HH/67.5-FP",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 50.0,
+      "outer_diameter_mm": 67.5
+    }
+  },
+  {
+    "product_code": "EF-HH/67.5-FP-01",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 45.0,
+      "outer_diameter_mm": 67.5
+    }
+  },
+  {
+    "product_code": "EF-HH/67.5-FP-02",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 45.0,
+      "outer_diameter_mm": 67.5
+    }
+  },
+  {
+    "product_code": "EF-HH/25-FP",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 36.56
+    }
+  },
+  {
+    "product_code": "EF-HH/30-FIX",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 46.0
+    }
+  },
+  {
+    "product_code": "EF-HH/35-FP",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.27
+    }
+  },
+  {
+    "product_code": "FF-HH/20-FIX",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 32.0
+    }
+  },
+  {
+    "product_code": "FF-HH/25-FIX-01-B",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 36.56
+    }
+  },
+  {
+    "product_code": "FF-HH/30-FIX-01",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 46.0
+    }
+  },
+  {
+    "product_code": "FF-HH/35-FP-01",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.25
+    }
+  },
+  {
+    "product_code": "FF-HH/40-FIX",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 40.0,
+      "outer_diameter_mm": 58.25
+    }
+  },
+  {
+    "product_code": "FF-HH/46-FIX",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 46.0
+    }
+  },
+  {
+    "product_code": "PD-DEL-HH/30-FP",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 46.0
+    }
+  },
+  {
+    "product_code": "PD-DEL-HH/35-FP",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.27
+    }
+  },
+  {
+    "product_code": "MT-HH/30/PERF-OPTION-1",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 46.0
+    }
+  },
+  {
+    "product_code": "MT-HH/30/PERF-OPTION-1",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 46.0
+    }
+  },
+  {
+    "product_code": "MT-HH/35/PERF-OPTION-1",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.27
+    }
+  },
+  {
+    "product_code": "MT-HH/35/PERF-OPTION-1",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.27
+    }
+  },
+  {
+    "product_code": "MT-HH/30/CUTTING-OPTION-2",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 46.0
+    }
+  },
+  {
+    "product_code": "MT-HH/35/CUTTING-OPTION-2",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.25
+    }
+  },
+  {
+    "product_code": "MT-HH/45/CUTTING-OPTION-2",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 45.0,
+      "outer_diameter_mm": 67.47
+    }
+  },
+  {
+    "product_code": "MT-HH/30",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 46.0
+    }
+  },
+  {
+    "product_code": "MT-HH/30",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 46.0
+    }
+  },
+  {
+    "product_code": "MT-HH/35",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.27
+    }
+  },
+  {
+    "product_code": "MT-HH/35",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.25
+    }
+  },
+  {
+    "product_code": "FF-HH/35-DSF",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.27
+    }
+  },
+  {
+    "product_code": "FF-HH/35-FP-DSF-01-B",
+    "manufacturer": "Herzog & Heymann",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.27
+    }
+  },
+  {
+    "product_code": "SC-HO-01",
+    "manufacturer": "Hohner",
+    "shaft_specs": null
+  },
+  {
+    "product_code": "SC-HO-02",
+    "manufacturer": "Hohner",
+    "shaft_specs": null
+  },
+  {
+    "product_code": "CP-AP-HO/20-FP",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "CP-AP-MF/30-FP",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "EF-HO/25-FP",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 24.81,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "EF-HO/30-FP",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 48.0
+    }
+  },
+  {
+    "product_code": "EF-HO/50-FP",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "EF-HO/65-FP",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 29.84,
+      "outer_diameter_mm": 65.0
+    }
+  },
+  {
+    "product_code": "EF-MF/30-FP",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "HO-GB-01",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "GB-MF/30-FP",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "FF-HO/40.2-FP-01",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 24.8,
+      "outer_diameter_mm": 40.2
+    }
+  },
+  {
+    "product_code": "FF-HO/50-FP",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": null
+    }
+  },
+  {
+    "product_code": "FF-HO/50-FP-B",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": null
+    }
+  },
+  {
+    "product_code": "FF-HO/65-FP",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 29.84,
+      "outer_diameter_mm": 65.0
+    }
+  },
+  {
+    "product_code": "FF-MF/30-FP-01",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "PD-DEL-HO/20-FP",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "PD-DEL-MF/30-FP",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "SHC-ADJ-MF/30-FP",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "SHC-MF/30-01",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "SC-HOR/25-FP-DSF-01",
+    "manufacturer": "Horizon",
+    "shaft_specs": null
+  },
+  {
+    "product_code": "SC-HOR/25-FP",
+    "manufacturer": "Horizon",
+    "shaft_specs": null
+  },
+  {
+    "product_code": "QC-DEL-MPB/30-FP-5",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "QC-HO-2S/25-FP-6",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 25.0,
+      "outer_diameter_mm": 44.0
+    }
+  },
+  {
+    "product_code": "MT-04/PERF-OPTION-1",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-04/PERF-OPTION-1",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-HO/PERF-OPTION-1",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-04/CUTTING-OPTION-2",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-HO/CUTTING-OPTION-2",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-04/COMBO",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-04/COMBO-01",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-HO/COMBO",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-04",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-04",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-HO",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-HO/65",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 29.84,
+      "outer_diameter_mm": 65.0
+    }
+  },
+  {
+    "product_code": "MT-CR/30-CAS-01",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "EF-MF/30-DSF",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "EF-MF/30-FP-DSF-01-B",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "FF-HO/20-DSF",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "FF-HO/20-FP-DSF-01-B",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_male_mm": 51.0,
+      "outer_diameter_female_mm": 50.0
+    }
+  },
+  {
+    "product_code": "FF-MF/30-DSF",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "FF-MF/30-FP-DSF-01-B",
+    "manufacturer": "Horizon",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "FF-EC-FP",
+    "manufacturer": "Kluge",
+    "shaft_specs": {
+      "shaft_size_mm": 31.75,
+      "outer_diameter_male_mm": 49.92,
+      "outer_diameter_female_mm": 51.52
+    }
+  },
+  {
+    "product_code": "QC-ADJ-KB/94-FP-01",
+    "manufacturer": "Kolbus",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 94.0
+    }
+  },
+  {
+    "product_code": "QC-ADJ-KB/94-FP-01",
+    "manufacturer": "Kolbus",
+    "shaft_specs": {
+      "shaft_size_mm": 40.0,
+      "outer_diameter_mm": 94.0
+    }
+  },
+  {
+    "product_code": "QC-DEL-KB/26-6C-FP",
+    "manufacturer": "Kolbus",
+    "shaft_specs": {
+      "shaft_size_mm": 26.0,
+      "outer_diameter_mm": 60.0
+    }
+  },
+  {
+    "product_code": "QC-DEL-KB/26-6C-FP-01",
+    "manufacturer": "Kolbus",
+    "shaft_specs": {
+      "shaft_size_mm": 26.0,
+      "outer_diameter_mm": 60.0
+    }
+  },
+  {
+    "product_code": "QC-DEL-KB/26-FP-5-01",
+    "manufacturer": "Kolbus",
+    "shaft_specs": {
+      "shaft_size_mm": 26.0,
+      "outer_diameter_mm": 60.0
+    }
+  },
+  {
+    "product_code": "QC-DEL-KB/26-FP-6-01",
+    "manufacturer": "Kolbus",
+    "shaft_specs": {
+      "shaft_size_mm": 26.0,
+      "outer_diameter_mm": 60.0
+    }
+  },
+  {
+    "product_code": "QC-DEL-KB/26-FP-6",
+    "manufacturer": "Kolbus",
+    "shaft_specs": {
+      "shaft_size_mm": 26.0,
+      "outer_diameter_mm": 60.0
+    }
+  },
+  {
+    "product_code": "QC-DEL-KB/26-FP-6",
+    "manufacturer": "Kolbus",
+    "shaft_specs": {
+      "shaft_size_mm": 26.0,
+      "outer_diameter_mm": 60.0
+    }
+  },
+  {
+    "product_code": "QC-DEL-KB/114-FP-6",
+    "manufacturer": "Kolbus",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 114.0
+    }
+  },
+  {
+    "product_code": "QC-DEL-KB/94-FP-6",
+    "manufacturer": "Kolbus",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 94.0
+    }
+  },
+  {
+    "product_code": "FF-LO-01",
+    "manufacturer": "Longford",
+    "shaft_specs": {
+      "shaft_size_mm": null,
+      "outer_diameter_male_mm": 45.0,
+      "outer_diameter_female_mm": 50.1
+    }
+  },
+  {
+    "product_code": "PD-MU/BR-FP",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": null
+  },
+  {
+    "product_code": "CC-MU-01",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": null
+  },
+  {
+    "product_code": "CC-MU-01-A",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": null
+  },
+  {
+    "product_code": "SC-MU-02",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": null
+  },
+  {
+    "product_code": "SC-MU-03",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": null
+  },
+  {
+    "product_code": "SC-MU-04",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": null
+  },
+  {
+    "product_code": "SC-MU-05",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": null
+  },
+  {
+    "product_code": "SC-MU-06",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": null
+  },
+  {
+    "product_code": "TRI-WEB-04",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": {
+      "large": {
+        "shaft_size_mm": 45.0,
+        "outer_diameter_mm": 104.45
+      },
+      "small": {
+        "shaft_size_mm": 45.0,
+        "outer_diameter_mm": 76.65
+      }
+    }
+  },
+  {
+    "product_code": "QC-DEL-MPB/30-FP-5",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "QC-MPB-2S/30-FP-6",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "QC-MU/ALE-FP-6",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": {
+      "shaft_size_mm": 48.0,
+      "outer_diameter_mm": 96.0
+    }
+  },
+  {
+    "product_code": "QC-MU/PA-FP-6-01-DC",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": {
+      "top": {
+        "shaft_size_mm": 30.0,
+        "outer_diameter_mm": 80.0
+      },
+      "bottom": {
+        "shaft_size_mm": 30.0,
+        "outer_diameter_mm": 80.0
+      }
+    }
+  },
+  {
+    "product_code": "QC-MU/PA-FP-6-01",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": {
+      "top": {
+        "shaft_size_mm": 30.0,
+        "outer_diameter_mm": 80.0
+      },
+      "bottom": {
+        "shaft_size_mm": 30.0,
+        "outer_diameter_mm": 80.0
+      }
+    }
+  },
+  {
+    "product_code": "QC-MU/PA-FP-6",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": {
+      "top": {
+        "shaft_size_mm": 5.0,
+        "outer_diameter_mm": 25.0
+      },
+      "bottom": {
+        "shaft_size_mm": 30.0,
+        "outer_diameter_mm": 80.0
+      }
+    }
+  },
+  {
+    "product_code": "QC-MU/PAN-FP-6",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 85.0
+    }
+  },
+  {
+    "product_code": "QC-MU/PO-FP-6",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": {
+      "top": {
+        "shaft_size_mm": 16.0,
+        "outer_diameter_mm": 25.0
+      },
+      "bottom": {
+        "shaft_size_mm": 30.0,
+        "outer_diameter_mm": 80.0
+      }
+    }
+  },
+  {
+    "product_code": "QC-MU/SIG-FP-6",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": {
+      "top": {
+        "shaft_size_mm": 30.0,
+        "outer_diameter_mm": 50.0
+      },
+      "bottom": {
+        "shaft_size_mm": 30.0,
+        "outer_diameter_mm": 80.0
+      }
+    }
+  },
+  {
+    "product_code": "QC-MU/TRE-FP-6",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": {
+      "shaft_size_mm": 45.0,
+      "outer_diameter_mm": 110.0
+    }
+  },
+  {
+    "product_code": "SC-MU/ADJ-FP-01",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "SC-MU/ADJ-6C-FP",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "SC-MU/ADJ-LF-4C-FP",
+    "manufacturer": "M\u00fcller Martini",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "EF-MB/20-FP",
+    "manufacturer": "MB",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "FF-MB/20-FP",
+    "manufacturer": "MB",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "FF-MB/20-FP-01",
+    "manufacturer": "MB",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "PD-DEL-MB/20-FP",
+    "manufacturer": "MB",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "MT-MB/PERF-OPTION-1",
+    "manufacturer": "MB",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "MT-MB/CUTTING-OPTION-2",
+    "manufacturer": "MB",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "MT-MB",
+    "manufacturer": "MB",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 40.0
+    }
+  },
+  {
+    "product_code": "CP-AP-MF/30-FP",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "CP-AP-SM/35-FP",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "CP-AP-MF/40-FP",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 40.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "EF-MF/30-FP",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "EF-MF/40-FIX",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 40.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "EF-SM/35-FIX",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "EF-SM/35-FP",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "TC-DEL-MF/60-FP",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 60.0,
+      "outer_diameter_mm": 96.0
+    }
+  },
+  {
+    "product_code": "GB-MF/30-FP",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "GB-SM/35-FP",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-MF/30-FP",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "FF-MF/30-FP-01",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "FF-MF/40-FIX-01",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 40.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-SM/35-FIX",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-SM/35-FIX-01",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-SM/35-FP",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-SM/35-FP-01",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "PD-DEL-MF/30-FP",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "PD-DEL-MF/40-FP",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 40.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "PD-DEL-SM/35-FP",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "SHC-04",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "SHC-ADJ/04-FP",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "SHC-ADJ-MF/30-FP",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "SHC-MF/30-01",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "SHC-STA-ADJ/04-FP",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "SHC-STA-ADJ/30-FP",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-02/PERF-OPTION-1",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-02/PERF-OPTION-1",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-04/PERF-OPTION-1",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-04/PERF-OPTION-1",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-02/CUTTING-OPTION-2",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-04/CUTTING-OPTION-2",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-02/COMBO",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-02/COMBO-FIX",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-02/COMBO-01",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-02/COMBO-FIX-01",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-04/COMBO",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-04/COMBO-01",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-02",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-02",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-04",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-04",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-MF/40",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 40.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-CR/30-CAS",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-CR/30-CAS-01",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "MT-CR/35-CAS",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-CR/35-CAS-FIX",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-CR/35-CAS-01",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "EF-MF/30-DSF",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "EF-MF/30-FP-DSF-01-B",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "EF-SM/35-DSF",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "EF-SM/35-FP-DSF-01-B",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-MF/30-DSF",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "FF-MF/30-FP-DSF-01-B",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "FF-MF/40-DSF",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 40.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-MF/40-FP-DSF-01-B",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 40.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-SM/35-DSF",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-SM/35-FP-DSF-01-B",
+    "manufacturer": "MBO",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "SC-MC-01",
+    "manufacturer": "McCain",
+    "shaft_specs": null
+  },
+  {
+    "product_code": "EF-36-FIXED",
+    "manufacturer": "MCM / DCM",
+    "shaft_specs": {
+      "shaft_size_mm": 36.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "QC-03",
+    "manufacturer": "MCM / DCM",
+    "shaft_specs": {
+      "shaft_size_mm": 36.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "QC-GB-01",
+    "manufacturer": "MCM / DCM",
+    "shaft_specs": {
+      "shaft_size_mm": 36.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "PD-DEL-QC/36-FP",
+    "manufacturer": "MCM / DCM",
+    "shaft_specs": {
+      "shaft_size_mm": 36.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "SHC-03",
+    "manufacturer": "MCM / DCM",
+    "shaft_specs": {
+      "shaft_size_mm": 36.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "CP-AP-QC/36-FP",
+    "manufacturer": "MCM/DCM",
+    "shaft_specs": {
+      "shaft_size_mm": 36.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-01/PERF-OPTION-1",
+    "manufacturer": "MCM/DCM",
+    "shaft_specs": {
+      "shaft_size_mm": 36.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "MT-01/CUTTING-OPTION-2",
+    "manufacturer": "MCM/DCM",
+    "shaft_specs": {
+      "shaft_size_mm": 36.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-36-DSF-SV",
+    "manufacturer": "MCM/DCM",
+    "shaft_specs": {
+      "shaft_size_mm": 36.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "FF-SH/15-FP-01-B",
+    "manufacturer": "Morgana",
+    "shaft_specs": {
+      "shaft_size_mm": 15.0,
+      "outer_diameter_mm": 30.0
+    }
+  },
+  {
+    "product_code": "FF-SH/15-FP-01-B-PACK",
+    "manufacturer": "Morgana",
+    "shaft_specs": {
+      "shaft_size_mm": 15.0,
+      "outer_diameter_mm": 30.0
+    }
+  },
+  {
+    "product_code": "PD-DEL-MO/15-FP-PACK",
+    "manufacturer": "Morgana",
+    "shaft_specs": {
+      "shaft_size_mm": 15.0,
+      "outer_diameter_mm": 30.0
+    }
+  },
+  {
+    "product_code": "SC-OS-01",
+    "manufacturer": "Osako",
+    "shaft_specs": null
+  },
+  {
+    "product_code": "SC-OS-02",
+    "manufacturer": "Osako",
+    "shaft_specs": null
+  },
+  {
+    "product_code": "PD-PAL/MAILER-FP",
+    "manufacturer": "Palamides",
+    "shaft_specs": {
+      "shaft_size_mm": 8.0,
+      "outer_diameter_mm": 48.0
+    }
+  },
+  {
+    "product_code": "TC-DEL-FI/40-FP",
+    "manufacturer": "Petratto",
+    "shaft_specs": {
+      "shaft_size_mm": 40.0,
+      "outer_diameter_mm": 60.0
+    }
+  },
+  {
+    "product_code": "GB-PET/40-FP",
+    "manufacturer": "Petratto",
+    "shaft_specs": {
+      "shaft_size_mm": 40.0,
+      "outer_diameter_mm": 60.0
+    }
+  },
+  {
+    "product_code": "PD-DEL-PET/40-FP",
+    "manufacturer": "Petratto",
+    "shaft_specs": {
+      "shaft_size_mm": 40.0,
+      "outer_diameter_mm": 60.0
+    }
+  },
+  {
+    "product_code": "FF-PET/40-FP-DSF-01-B",
+    "manufacturer": "Petratto",
+    "shaft_specs": {
+      "shaft_size_mm": 40.0,
+      "outer_diameter_mm": 60.0
+    }
+  },
+  {
+    "product_code": "EF-DEL-PE/26-FP",
+    "manufacturer": "Pierce",
+    "shaft_specs": {
+      "shaft_size_mm": 27.0,
+      "outer_diameter_male_mm": 63.5,
+      "outer_diameter_female_mm": 61.97
+    }
+  },
+  {
+    "product_code": "FF-PI/27-FIX-01",
+    "manufacturer": "Pierce",
+    "shaft_specs": {
+      "shaft_size_mm": 27.0,
+      "outer_diameter_male_mm": 63.7,
+      "outer_diameter_female_mm": 61.97
+    }
+  },
+  {
+    "product_code": "EF-PIV/32-FIX",
+    "manufacturer": "Pivano GT",
+    "shaft_specs": {
+      "shaft_size_mm": 32.0,
+      "outer_diameter_mm": 46.0
+    }
+  },
+  {
+    "product_code": "EF-RO/20-FP",
+    "manufacturer": "Rollem",
+    "shaft_specs": {
+      "shaft_size_mm": 25.43,
+      "outer_diameter_male_mm": 61.0,
+      "outer_diameter_female_mm": 63.5
+    }
+  },
+  {
+    "product_code": "EF-RO/20-REV",
+    "manufacturer": "Rollem",
+    "shaft_specs": {
+      "shaft_size_mm": 25.43,
+      "outer_diameter_male_mm": 62.35,
+      "outer_diameter_female_mm": 62.0
+    }
+  },
+  {
+    "product_code": "GB-RO",
+    "manufacturer": "Rollem",
+    "shaft_specs": {
+      "shaft_size_mm": 25.43,
+      "outer_diameter_mm": 64.0
+    }
+  },
+  {
+    "product_code": "FF-RO/25-FP-01",
+    "manufacturer": "Rollem",
+    "shaft_specs": {
+      "shaft_size_mm": 25.43,
+      "outer_diameter_male_mm": 61.0,
+      "outer_diameter_female_mm": 63.5
+    }
+  },
+  {
+    "product_code": "PD-DEL-RO/20-FP",
+    "manufacturer": "Rollem",
+    "shaft_specs": {
+      "shaft_size_mm": 25.43,
+      "outer_diameter_male_mm": 61.0,
+      "outer_diameter_female_mm": 64.0
+    }
+  },
+  {
+    "product_code": "SHC-RO",
+    "manufacturer": "Rollem",
+    "shaft_specs": {
+      "shaft_size_mm": 25.43,
+      "outer_diameter_mm": 64.0
+    }
+  },
+  {
+    "product_code": "FF-RO/25-DSF",
+    "manufacturer": "Rollem",
+    "shaft_specs": {
+      "shaft_size_mm": 25.43,
+      "outer_diameter_mm": 63.5
+    }
+  },
+  {
+    "product_code": "FF-RO/25-FP-DSF-01-B",
+    "manufacturer": "Rollem",
+    "shaft_specs": {
+      "shaft_size_mm": 25.43,
+      "outer_diameter_male_mm": 61.0,
+      "outer_diameter_female_mm": 63.5
+    }
+  },
+  {
+    "product_code": "EF-ROS/25-FP",
+    "manufacturer": "Rosback",
+    "shaft_specs": {
+      "shaft_size_mm": 25.43,
+      "outer_diameter_male_mm": 63.0,
+      "outer_diameter_female_mm": 62.34
+    }
+  },
+  {
+    "product_code": "FF-ROS/25-FP",
+    "manufacturer": "Rosback",
+    "shaft_specs": {
+      "shaft_size_mm": 25.43,
+      "outer_diameter_mm": 63.0
+    }
+  },
+  {
+    "product_code": "FF-ROS/25-FP-01",
+    "manufacturer": "Rosback",
+    "shaft_specs": {
+      "shaft_size_mm": 25.43,
+      "outer_diameter_male_mm": 63.0,
+      "outer_diameter_female_mm": 62.34
+    }
+  },
+  {
+    "product_code": "PD-DEL-ROS-BA/25-FP",
+    "manufacturer": "Rosback",
+    "shaft_specs": {
+      "shaft_size_mm": 25.43,
+      "outer_diameter_mm": 63.0
+    }
+  },
+  {
+    "product_code": "FF-RS-FP-01",
+    "manufacturer": "Roto-Score",
+    "shaft_specs": {
+      "shaft_size_mm": 28.58,
+      "outer_diameter_mm": 50.24
+    }
+  },
+  {
+    "product_code": "EF-SH/35-FP",
+    "manufacturer": "Shoei",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 65.0
+    }
+  },
+  {
+    "product_code": "FF-SH/15-FP-01-B",
+    "manufacturer": "Shoei",
+    "shaft_specs": {
+      "shaft_size_mm": 15.0,
+      "outer_diameter_mm": 30.0
+    }
+  },
+  {
+    "product_code": "FF-SH/55-FP",
+    "manufacturer": "Shoei",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 55.0
+    }
+  },
+  {
+    "product_code": "FF-SH/65-45-FP",
+    "manufacturer": "Shoei",
+    "shaft_specs": {
+      "shaft_size_mm": 45.0,
+      "outer_diameter_mm": 65.0
+    }
+  },
+  {
+    "product_code": "FF-SH/65-FP",
+    "manufacturer": "Shoei",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 65.0
+    }
+  },
+  {
+    "product_code": "PD-DEL-MO/15-FP-PACK",
+    "manufacturer": "Shoei",
+    "shaft_specs": {
+      "shaft_size_mm": 15.0,
+      "outer_diameter_mm": 30.0
+    }
+  },
+  {
+    "product_code": "MT-SH/65/PERF-OPTION-1",
+    "manufacturer": "Shoei",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 65.0
+    }
+  },
+  {
+    "product_code": "MT-SH/55/CUTTING-OPTION-2",
+    "manufacturer": "Shoei",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 55.0
+    }
+  },
+  {
+    "product_code": "MT-SH/65/CUTTING-OPTION-2",
+    "manufacturer": "Shoei",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 65.0
+    }
+  },
+  {
+    "product_code": "MT-SH/COMBO-65",
+    "manufacturer": "Shoei",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 65.0
+    }
+  },
+  {
+    "product_code": "MT-SH/55",
+    "manufacturer": "Shoei",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 55.0
+    }
+  },
+  {
+    "product_code": "MT-SH/65",
+    "manufacturer": "Shoei",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 65.0
+    }
+  },
+  {
+    "product_code": "MT-CR/SH-65-CAS",
+    "manufacturer": "Shoei",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 65.0
+    }
+  },
+  {
+    "product_code": "QC-MU/PO-FP-6",
+    "manufacturer": "Sigloch",
+    "shaft_specs": {
+      "top": {
+        "shaft_size_mm": 16.0,
+        "outer_diameter_mm": 25.0
+      },
+      "bottom": {
+        "shaft_size_mm": 30.0,
+        "outer_diameter_mm": 80.0
+      }
+    }
+  },
+  {
+    "product_code": "FF-SMY/30-FP-01",
+    "manufacturer": "Smyth",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 64.0
+    }
+  },
+  {
+    "product_code": "EF-SM/35-FIX",
+    "manufacturer": "Stahl/Heidelberg",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "EF-SM/35-FP",
+    "manufacturer": "Stahl/Heidelberg",
+    "shaft_specs": {
+      "shaft_size_mm": 35.0,
+      "outer_diameter_mm": 58.0
+    }
+  },
+  {
+    "product_code": "PD-WEB",
+    "manufacturer": "Web-Presses",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 125.0
+    }
+  },
+  {
+    "product_code": "TRI-WEB-01",
+    "manufacturer": "Web-Presses",
+    "shaft_specs": {
+      "top": {
+        "shaft_size_mm": 20.0,
+        "outer_diameter_mm": 125.0
+      },
+      "bottom": {
+        "shaft_size_mm": 101.6,
+        "outer_diameter_mm": 124.64
+      }
+    }
+  },
+  {
+    "product_code": "TRI-WEB-02",
+    "manufacturer": "Web-Presses",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 125.0
+    }
+  },
+  {
+    "product_code": "TRI-WEB-03",
+    "manufacturer": "Web-Presses",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 100.0
+    }
+  },
+  {
+    "product_code": "TRI-WEB-05",
+    "manufacturer": "Web-Presses",
+    "shaft_specs": {
+      "shaft_size_mm": 20.0,
+      "outer_diameter_mm": 125.0
+    }
+  },
+  {
+    "product_code": "QC-DEL-MPB/30-FP-5",
+    "manufacturer": "Wohlenberg",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  },
+  {
+    "product_code": "QC-DEL-WO/98-ENDFLAP-FP",
+    "manufacturer": "Wohlenberg",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 98.0
+    }
+  },
+  {
+    "product_code": "QC-DEL-WO/98-FP-6",
+    "manufacturer": "Wohlenberg",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 98.0
+    }
+  },
+  {
+    "product_code": "SC-MU/ADJ-FP-01",
+    "manufacturer": "Wohlenberg",
+    "shaft_specs": {
+      "shaft_size_mm": 30.0,
+      "outer_diameter_mm": 50.0
+    }
+  }
+]

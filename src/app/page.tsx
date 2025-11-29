@@ -1,6 +1,6 @@
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
-import MachineFinder from '@/components/marketing/MachineFinder';
+import SolutionFinder from '@/components/solutions/SolutionFinder';
 import { getSupabaseClient } from '@/lib/supabase';
 import MediaImage from '@/components/shared/MediaImage';
 
@@ -43,7 +43,7 @@ export default async function HomePage() {
                 Get instant access to production-proven solutions for your specific press
               </p>
             </div>
-            <MachineFinder />
+            <SolutionFinder />
           </div>
         </section>
 

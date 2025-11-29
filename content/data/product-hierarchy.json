@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "description": "Product hierarchy and variant rules for Technifold solutions",
+    "purpose": "Used to determine which product variant to show when multiple options exist",
+    "lastUpdated": "2024-11-27"
+  },
+  "hierarchies": {
+    "tri-creaser": {
+      "displayName": "Tri-Creaser",
+      "machineType": "folders",
+      "variants": [
+        {
+          "name": "Tri-Creaser Advance",
+          "rank": 1,
+          "status": "current",
+          "usp": "First solution to prevent fibre-cracking AND inside-fold toner flaking simultaneously",
+          "targetMarket": "Digital print operations, laminated stocks, toner-based output",
+          "keyFeature": "Two-way creasing with specially profiled female receiver ring"
+        },
+        {
+          "name": "Tri-Creaser Fast-Fit",
+          "rank": 2,
+          "status": "flagship",
+          "usp": "Split-ring technology allows crease changes in SECONDS without removing from machine",
+          "targetMarket": "High-volume commercial folders",
+          "keyFeature": "Patented split creasing ribs lock into hub mechanism",
+          "installations": "40,000+ worldwide"
+        },
+        {
+          "name": "Tri-Creaser Easy-Fit",
+          "rank": 3,
+          "status": "previous-gen",
+          "usp": "Push-fit side-loading system",
+          "targetMarket": "Budget-conscious buyers",
+          "keyFeature": "Colour-coded gripper creases with side-loading"
+        },
+        {
+          "name": "Tri-Creaser Deluxe",
+          "rank": 4,
+          "status": "legacy",
+          "notes": "Consumables only, minimal marketing priority"
+        }
+      ],
+      "rule": "Show highest available version only. Never show multiple variants for same machine."
+    },
+    "quad-creaser": {
+      "displayName": "Quad-Creaser",
+      "machineType": "binders",
+      "variants": [
+        {
+          "name": "Fully Adjustable Quad-Creaser",
+          "rank": 1,
+          "features": ["Adjustable spine width", "Adjustable hinge width", "Adjustable female channel width"],
+          "notes": "Premium option, maximum flexibility"
+        },
+        {
+          "name": "Standard Quad-Creaser",
+          "rank": 2,
+          "features": ["Adjustable spine width", "Fixed hinge width (typically 6mm)", "Fixed female channel width"],
+          "notes": "More affordable, covers most common requirements"
+        }
+      ],
+      "rule": "Show both in quotes with comparison if both available for machine"
+    }
+  },
+  "machineTypeMapping": {
+    "folders": {
+      "solutions": ["tri-creaser", "section-scorer", "micro-perforator", "multi-tool", "cp-applicator", "spine-and-hinge-creaser", "gripper-boss"],
+      "brands": ["MBO", "Stahl", "Heidelberg", "Horizon", "GUK", "Morgana", "Baum", "Shoei", "MB", "Eurofold", "Rollem", "Bremmer", "Herzog & Heymann"]
+    },
+    "binders": {
+      "solutions": ["quad-creaser", "gripper-boss"],
+      "brands": ["Horizon BQ", "Muller Martini", "Kolbus", "Wohlenberg"]
+    },
+    "stitchers": {
+      "solutions": ["spine-creaser", "gripper-boss"],
+      "brands": ["Heidelberg ST", "Muller", "Horizon StitchLiner", "Harris", "Osaka", "Hohner", "McCain", "Duplo"]
+    }
+  },
+  "relatedProducts": {
+    "spine-creaser": {
+      "relatedTo": ["quad-creaser", "spine-and-hinge-creaser"],
+      "relationship": "Same spine-cracking problem, different machine types"
+    },
+    "quad-creaser": {
+      "relatedTo": ["spine-creaser", "spine-and-hinge-creaser"],
+      "relationship": "Same 4-crease pattern, inline on binders vs spine-creaser (stitchers) or spine-and-hinge (folders)"
+    },
+    "spine-and-hinge-creaser": {
+      "relatedTo": ["quad-creaser"],
+      "relationship": "Same 4-crease pattern but for folders/offline workflows"
+    },
+    "micro-perforator": {
+      "relatedTo": ["multi-tool", "cp-applicator"],
+      "upgradesTo": "multi-tool",
+      "relationship": "Perforation-only vs combination finishing"
+    },
+    "cp-applicator": {
+      "relatedTo": ["micro-perforator"],
+      "uniqueFeature": "PATENTED - only solution for perfs/creases as close as 5mm apart"
+    }
+  }
+}

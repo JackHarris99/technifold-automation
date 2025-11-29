@@ -1,0 +1,113 @@
+{
+  "metadata": {
+    "description": "Consumable longevity data for Technifold products",
+    "source": "Extracted from company documentation and Excel files",
+    "lastUpdated": "2024-11-27",
+    "notes": "Life expectancy varies based on stock weight, machine speed, and operating conditions"
+  },
+  "creasingRibs": {
+    "folders_35mm": {
+      "description": "Creasing ribs for 35mm shaft folding machines",
+      "variants": {
+        "orange": {
+          "stockRange": "85-200gsm",
+          "standardLife": 1000000,
+          "enduraCreaseLife": 1300000,
+          "unit": "sheets"
+        },
+        "blue": {
+          "stockRange": "200-270gsm",
+          "standardLife": 600000,
+          "enduraCreaseLife": 780000,
+          "unit": "sheets"
+        },
+        "yellow": {
+          "stockRange": "250-350gsm",
+          "standardLife": 300000,
+          "enduraCreaseLife": 390000,
+          "unit": "sheets"
+        }
+      },
+      "notes": "25mm shaft devices have approximately 40% shorter life"
+    },
+    "folders_25mm": {
+      "description": "Creasing ribs for 25mm shaft folding machines",
+      "lifeFactor": 0.6,
+      "notes": "Approximately 60% of 35mm shaft life"
+    },
+    "perfectBinders": {
+      "description": "Split creasing ribs for perfect binders (Quad-Creaser)",
+      "variants": {
+        "orange": {
+          "stockType": "Thin stock",
+          "lifeMin": 900000,
+          "lifeMax": 1200000,
+          "unit": "sheets"
+        },
+        "blue": {
+          "stockType": "Medium stock",
+          "lifeMin": 659000,
+          "lifeMax": 1000000,
+          "unit": "sheets"
+        },
+        "yellow": {
+          "stockType": "Heavy stock",
+          "lifeMin": 300000,
+          "lifeMax": 900000,
+          "unit": "sheets"
+        }
+      }
+    }
+  },
+  "perforationBlades": {
+    "description": "Micro-perforation blades for Multi-Tool and Micro-Perforator",
+    "lifeExpectancy": 8000000,
+    "unit": "sheets",
+    "options": [
+      {"tpi": 12, "application": "Very heavy stock", "availability": "On request"},
+      {"tpi": 17, "application": "Heavy stock", "availability": "Standard"},
+      {"tpi": 25, "application": "Medium weight", "availability": "Standard"},
+      {"tpi": 52, "application": "Lightweight (nearly invisible)", "availability": "Standard"},
+      {"tpi": 72, "application": "Ultra-fine", "availability": "On request"}
+    ]
+  },
+  "cuttingBlades": {
+    "description": "Cutting blades for Multi-Tool",
+    "lifeExpectancy": 8000000,
+    "unit": "sheets",
+    "notes": "5-7x longer than competitor blades"
+  },
+  "kissCuttingBlades": {
+    "description": "Kiss-cutting blades for Multi-Tool",
+    "lifeExpectancy": 4000000,
+    "unit": "sheets"
+  },
+  "nylonSleeves": {
+    "description": "Nylon sleeve for Micro-Perforator female collar",
+    "lifeExpectancy": 1000000,
+    "unit": "sheets",
+    "maintenance": "Move over 0.5mm after approximately 100,000 copies due to wear"
+  },
+  "gripperBands": {
+    "description": "Replacement gripper bands for Gripper Boss system",
+    "variants": {
+      "M-88_black": {
+        "application": "Standard applications",
+        "lifeExpectancy": "Varies by usage"
+      }
+    },
+    "notes": "Replacement takes seconds vs days/weeks for OEM re-gripping"
+  },
+  "rentalPricingGuidelines": {
+    "description": "Guidelines for consumable-based rental pricing models",
+    "approach": "Price per 1000 sheets based on consumable life",
+    "factors": [
+      "Consumable cost",
+      "Expected life in sheets",
+      "Stock weight (heavier = shorter life)",
+      "Machine speed",
+      "Margin requirements"
+    ],
+    "formula": "Cost per 1000 = (Consumable cost / Life in sheets) * 1000 * (1 + margin)"
+  }
+}

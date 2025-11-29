@@ -1,0 +1,181 @@
+{
+  "metadata": {
+    "description": "Customer testimonials extracted from Technifold marketing materials",
+    "source": "Various PDFs, brochures, and marketing documents",
+    "lastUpdated": "2024-11-27"
+  },
+  "testimonials": [
+    {
+      "id": "t001",
+      "customer": "Martin Jones",
+      "company": "W O Jones (Printers) Limited",
+      "location": "Llangefni, Anglesey, Wales",
+      "quote": "We can't believe how easy it is to set and the productivity gains we are getting in such a short time.",
+      "products": ["Tri-Creaser"],
+      "tags": ["easy-setup", "productivity", "folders"]
+    },
+    {
+      "id": "t002",
+      "customer": "Martin Jones",
+      "company": "W O Jones (Printers) Limited",
+      "location": "Llangefni, Anglesey, Wales",
+      "quote": "We thought the Tri-Creaser couldn't be improved but the Easy Fit version really does give maximum creasing depth on all stocks. We ran off 30,000 leaflets the other day, printed in solid black and there wasn't even a hint of cracking from the first copy to the last.",
+      "products": ["Tri-Creaser Easy-Fit"],
+      "tags": ["quality", "no-cracking", "folders"]
+    },
+    {
+      "id": "t003",
+      "customer": "Bert Verhuever",
+      "company": "Wifac bv",
+      "location": "Holland",
+      "role": "Leading Dutch MBO Agents",
+      "quote": "Easy setup, anyone can score with this device. Even the non experienced operator. From all the available devices in the world, this is the best one. It's a big hit in Holland.",
+      "products": ["Tri-Creaser"],
+      "tags": ["easy-setup", "best-in-class", "distributor", "folders"]
+    },
+    {
+      "id": "t004",
+      "customer": "Larry Smith",
+      "company": "Economy Printing Company Inc",
+      "location": "Maryland, USA",
+      "quote": "Solved the cracking problem that plagued us for years.",
+      "products": ["Tri-Creaser"],
+      "tags": ["problem-solved", "cracking", "folders"]
+    },
+    {
+      "id": "t005",
+      "customer": "Bob Humphrys",
+      "company": "Wessex Binding Services",
+      "location": "Wimbourne, UK",
+      "quote": "Savings paid for Tri-creaser on the first job.",
+      "products": ["Tri-Creaser"],
+      "tags": ["roi", "fast-payback", "folders"]
+    },
+    {
+      "id": "t006",
+      "customer": "Lisa Anthoney",
+      "company": "RCS PLC",
+      "location": "Nottingham, UK",
+      "quote": "Paid for itself at least twice over in 3 months.",
+      "products": ["Tri-Creaser"],
+      "tags": ["roi", "fast-payback", "folders"]
+    },
+    {
+      "id": "t007",
+      "customer": "Andy Coles",
+      "company": "Wyndeham Westway",
+      "location": "Luton, UK",
+      "quote": "We purchased the Tri-creaser Easy Fit in August and it has only taken us four weeks to recover our investment. The device is incredibly versatile with 8 settings to choose from, it is so simple to use and operator friendly. The Tri-creaser Easy Fit's all round ability and performance has exceeded our expectations. I have no hesitation in recommending the Tri-creaser Easy Fit to any company that wants to avoid outsourcing their creasing work and save literally thousands of pounds in the process.",
+      "savings": "£20,000 estimated in next 12 months",
+      "products": ["Tri-Creaser Easy-Fit"],
+      "tags": ["roi", "versatility", "recommendation", "folders"]
+    },
+    {
+      "id": "t008",
+      "customer": "Ian Whitworth",
+      "company": "Scorpio Print Finishers",
+      "location": "UK",
+      "quote": "Cheaper, much better and more practical.",
+      "products": ["Quad-Creaser"],
+      "context": "Comparing to alternatives",
+      "tags": ["value", "practical", "binders"]
+    },
+    {
+      "id": "t009",
+      "customer": "Phil Fredericks",
+      "company": "Wood Mitchell Printers",
+      "location": "UK",
+      "quote": "Recovered cost on second job with Micro-perforator.",
+      "products": ["Micro-Perforator"],
+      "tags": ["roi", "fast-payback", "folders"]
+    },
+    {
+      "id": "t010",
+      "customer": "Tony Morgan",
+      "company": "Bezier Corporate Print",
+      "location": "Dorset, UK",
+      "role": "Bindery Manager",
+      "quote": "The quality of cut is as good as a guillotine.",
+      "products": ["Multi-Tool"],
+      "tags": ["quality", "cutting", "folders"]
+    },
+    {
+      "id": "t011",
+      "customer": "Joe Doran",
+      "company": "Typecraft Ltd",
+      "location": "Ireland",
+      "quote": "The CP-Applicator was brilliant for us.",
+      "products": ["CP Applicator"],
+      "tags": ["quality", "folders"]
+    },
+    {
+      "id": "t012",
+      "customer": "Andre Palko",
+      "company": "Technifold USA",
+      "location": "USA",
+      "role": "Distributor",
+      "quote": "In the first year we've sold over 500 Tri-Creaser's worth $515,000 and were only just getting started. This is an amazing business. The results will astound you!",
+      "context": "First year sales exceeded $500,000, second year more than doubled",
+      "products": ["Tri-Creaser"],
+      "tags": ["distributor-success", "business-growth"]
+    },
+    {
+      "id": "t013",
+      "customer": "Ray Randall",
+      "company": "Portswood Colour Press",
+      "location": "UK",
+      "quote": "Even the rubber lasts for 500,000 copies, which is more than we anticipated.",
+      "context": "Solved cracking problems on book spines with Muller Martini cover-feeder. Company grew from 7 staff to 45 staff.",
+      "products": ["Spine-Creaser"],
+      "tags": ["longevity", "problem-solved", "stitchers"]
+    },
+    {
+      "id": "t014",
+      "customer": "Jonathan Ellis",
+      "company": "Printed Easy",
+      "location": "UK",
+      "quote": "We had to score thicker covers offline, and now we can do it inline. It has increased productivity, but it is more about the quality of the finished product. I would definitely put your product forward to other print houses.",
+      "products": ["Quad-Creaser"],
+      "tags": ["inline", "productivity", "quality", "recommendation", "binders"]
+    },
+    {
+      "id": "t015",
+      "customer": "Glenn Felton",
+      "company": "FMP",
+      "location": "UK",
+      "quote": "What a change the Tri-Creaser Fast Fit is making for our business, the quality of the crease is excellent and is a great cost saving for our company.",
+      "products": ["Tri-Creaser Fast-Fit"],
+      "tags": ["quality", "cost-saving", "folders"]
+    },
+    {
+      "id": "t016",
+      "customer": "Jake Whitford",
+      "company": "Pepper Communications Ltd",
+      "location": "UK",
+      "quote": "We have used the Tech-ni-Fold Tri-Creaser in-line on our folders for a number of years, it is a very quick system to make ready and the results are equal to a cylinder crease. Because we can crease in-line, we are able to achieve speeds of up to 30k sheets per hour on our Heidelberg Stahl folders, eliminating all cracking across a multitude of stock types.",
+      "products": ["Tri-Creaser Easy-Fit"],
+      "tags": ["speed", "quality", "inline", "folders"]
+    },
+    {
+      "id": "t017",
+      "customer": "Eugen Mayer",
+      "company": "Kosel",
+      "location": "Germany",
+      "quote": "When a new creasing tool was needed for the cover feeder of our Muller Martini binding machine, we turned to Tech-ni-Fold. We were utterly amazed when we tried the adjustable version of the Quad Creaser...it had colour coded ribs that corresponded to different crease styles, and it further improved the quality of covers. Not only does the system eliminate fibre-cracking, but it also minimises the reset force of the cover. The Quad Creaser has allowed Kosel to raise its own quality standards for bound products.",
+      "products": ["Quad-Creaser"],
+      "tags": ["quality", "colour-coding", "binders"]
+    }
+  ],
+  "thirdPartyValidation": [
+    {
+      "source": "Sappi Paper Engineering Report",
+      "quote": "The quality of this creasing is comparable with that produced in letterpress printing.",
+      "findings": [
+        "Conventional creasing 'not satisfactory' on high basis weights",
+        "Tri-Creaser achieved 'optimal result' even on 350 g/m² HannoArt Matt"
+      ],
+      "products": ["Tri-Creaser"],
+      "tags": ["third-party", "validation", "quality"]
+    }
+  ]
+}
