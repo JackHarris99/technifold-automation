@@ -10,7 +10,6 @@
 
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import Link from 'link';
 import { createServerClient } from '@/lib/supabase-server';
 import MachinePageClient from './MachinePageClient';
 
@@ -71,25 +70,28 @@ export default async function MachinePage({ params }: { params: { slug: string }
     notFound();
   }
 
+  // Normalize machine type for template lookup
+  const normalizedType = normalizeMachineType(machine.type);
+
   // Fetch page template for this machine type
   const { data: template } = await supabase
     .from('machine_page_templates')
     .select('*')
-    .eq('machine_type', machine.type)
+    .eq('machine_type', normalizedType)
     .eq('active', true)
     .single();
 
   // Fallback to default template if none found
-  const pageTemplate = template || getDefaultTemplate(machine.type);
+  const pageTemplate = template || getDefaultTemplate(normalizedType);
 
   // Determine base pricing
-  const basePricing = getMachinePricing(machine.type);
+  const basePricing = getMachinePricing(normalizedType);
 
   // Personalization data
   const personalization = {
     brand: machine.brand || 'your',
     model: machine.model || 'machine',
-    machine_type: getMachineTypeName(machine.type),
+    machine_type: getMachineTypeName(normalizedType),
     monthly_price: basePricing.display,
     typical_range: basePricing.typicalRange,
   };
@@ -133,6 +135,19 @@ export default async function MachinePage({ params }: { params: { slug: string }
 }
 
 // Helper Functions
+
+function normalizeMachineType(type: string): string {
+  // Convert database format (folding_machine) to template format (folding-machines)
+  const typeMap: Record<string, string> = {
+    'folding_machine': 'folding-machines',
+    'folder': 'folding-machines',
+    'perfect_binder': 'perfect-binders',
+    'saddle_stitcher': 'saddle-stitchers',
+    'booklet_maker': 'saddle-stitchers',
+  };
+
+  return typeMap[type] || type;
+}
 
 function getMachinePricing(type: string) {
   const pricing = {
