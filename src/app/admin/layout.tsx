@@ -59,8 +59,8 @@ export default async function AdminLayout({
           </div>
 
           <SidebarLink href="/admin/companies" icon="🏢" label="All Companies" />
-          <SidebarLink href="/admin/quote-builder-v2" icon="📄" label="Create Quote" />
-          <SidebarLink href="/admin/campaigns-unified" icon="📧" label="Campaigns" />
+          <SidebarLink href="/admin/quote-builder" icon="📄" label="Create Quote" />
+          <SidebarLink href="/admin/campaigns" icon="📧" label="Campaigns" />
           <SidebarLink href="/admin/engagements" icon="📊" label="Engagement" />
           <SidebarLink href="/admin/sku-explorer" icon="📦" label="SKU Explorer" />
 
@@ -73,9 +73,8 @@ export default async function AdminLayout({
               </div>
               <SidebarLink href="/admin/users" icon="👥" label="Users" />
               <SidebarLink href="/admin/categorize" icon="🏷️" label="Categorize" />
-              <SidebarLink href="/admin/ms-problem-editor" icon="✏️" label="Copy Editor" />
               <SidebarLink href="/admin/brand-media" icon="🎨" label="Brand Media" />
-              <SidebarLink href="/admin/media-missing" icon="🖼️" label="Missing Media" />
+              <SidebarLink href="/admin/content-blocks" icon="📝" label="Content Blocks" />
             </>
           )}
         </nav>
