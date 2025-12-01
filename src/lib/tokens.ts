@@ -22,6 +22,9 @@ export interface TokenPayload {
   offer_key?: string;
   campaign_key?: string;
   products?: string[]; // Product codes to include in quote
+  machine_slug?: string; // For trial links
+  offer_price?: number; // For trial links
+  email?: string; // For trial links
   expires_at: number; // Unix timestamp
 }
 
@@ -129,4 +132,24 @@ export function generateReorderUrl(
   }, options.ttlHours || 720); // 30 days default for reorder links
 
   return `${baseUrl}/r/${token}`;
+}
+
+/**
+ * Generate a token for trial signup
+ * Returns just the token (URL built separately)
+ */
+export function generateTrialToken(data: {
+  company_id: string;
+  contact_id: string;
+  machine_slug: string;
+  offer_price: number;
+  email: string;
+}): string {
+  return generateToken({
+    company_id: data.company_id,
+    contact_id: data.contact_id,
+    machine_slug: data.machine_slug,
+    offer_price: data.offer_price,
+    email: data.email,
+  }, 168); // 7 days TTL for trial links
 }
