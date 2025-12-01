@@ -1,7 +1,7 @@
 /**
  * GET /api/solutions/shafts
  * Returns available shaft size options for a brand
- * Queries tool_brand_compatibility for unique shaft configurations
+ * Queries NEW schema: brand_shaft_configurations + shaft_configurations
  *
  * Display logic:
  * - Shows just "35mm" when there's only one OD for that shaft size
@@ -14,9 +14,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
-interface ShaftSpec {
-  shaft_size_mm: number;
-  outer_diameter_mm: number;
+interface ShaftConfig {
+  id: number;
+  config_data: {
+    shaft_size_mm?: number;
+    outer_diameter_mm?: number;
+    top?: { shaft_size_mm: number; outer_diameter_mm: number };
+    bottom?: { shaft_size_mm: number; outer_diameter_mm: number };
+    outer_diameter_male_mm?: number;
+    outer_diameter_female_mm?: number;
+  };
+  display_name: string;
 }
 
 export async function GET(request: NextRequest) {
@@ -30,46 +38,93 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
-    // Get all compatibility records for this brand
-    const { data: records, error } = await supabase
-      .from('tool_brand_compatibility')
-      .select('shaft_specs')
-      .eq('brand', brand)
-      .not('shaft_specs', 'is', null);
+    // Get shaft configurations for this brand (NEW SCHEMA)
+    const { data: brandConfigs, error } = await supabase
+      .from('brand_shaft_configurations')
+      .select(`
+        shaft_config_id,
+        shaft_configurations (
+          id,
+          config_data,
+          display_name
+        )
+      `)
+      .eq('brand', brand);
 
     if (error) {
       console.error('[solutions/shafts] Error:', error);
       return NextResponse.json({ error: 'Failed to fetch shaft options' }, { status: 500 });
     }
 
-    // Extract unique shaft configurations
-    const uniqueSpecs = new Map<string, ShaftSpec>();
+    if (!brandConfigs || brandConfigs.length === 0) {
+      return NextResponse.json({
+        brand,
+        shafts: []
+      });
+    }
 
-    (records || []).forEach(record => {
-      const specs = record.shaft_specs as ShaftSpec;
-      if (specs?.shaft_size_mm && specs?.outer_diameter_mm) {
-        const key = `${specs.shaft_size_mm}-${specs.outer_diameter_mm}`;
-        if (!uniqueSpecs.has(key)) {
-          uniqueSpecs.set(key, specs);
-        }
+    // Extract shaft configs (handle join structure)
+    const shaftConfigs = brandConfigs
+      .map(bc => bc.shaft_configurations)
+      .filter(Boolean) as unknown as ShaftConfig[];
+
+    // Extract simple shaft specs for grouping
+    const simplifiedSpecs = shaftConfigs.map(config => {
+      const data = config.config_data;
+
+      // Handle simple case
+      if (data.shaft_size_mm && data.outer_diameter_mm) {
+        return {
+          id: config.id,
+          shaft_size_mm: data.shaft_size_mm,
+          outer_diameter_mm: data.outer_diameter_mm,
+          display_name: config.display_name
+        };
       }
-    });
+
+      // Handle top/bottom (use top for grouping)
+      if (data.top) {
+        return {
+          id: config.id,
+          shaft_size_mm: data.top.shaft_size_mm,
+          outer_diameter_mm: data.top.outer_diameter_mm,
+          display_name: config.display_name
+        };
+      }
+
+      // Handle male/female (use average or display as-is)
+      if (data.outer_diameter_male_mm || data.outer_diameter_female_mm) {
+        return {
+          id: config.id,
+          shaft_size_mm: data.shaft_size_mm || 0,
+          outer_diameter_mm: data.outer_diameter_male_mm || data.outer_diameter_female_mm || 0,
+          display_name: config.display_name
+        };
+      }
+
+      return null;
+    }).filter(Boolean);
 
     // Group by shaft size to detect when OD disambiguation is needed
-    const byShaftSize = new Map<number, ShaftSpec[]>();
-    uniqueSpecs.forEach(spec => {
+    const byShaftSize = new Map<number, typeof simplifiedSpecs>();
+    simplifiedSpecs.forEach(spec => {
+      if (!spec) return;
       const existing = byShaftSize.get(spec.shaft_size_mm) || [];
       existing.push(spec);
       byShaftSize.set(spec.shaft_size_mm, existing);
     });
 
     // Build response with smart display labels
-    const shafts = Array.from(uniqueSpecs.values())
+    const shafts = simplifiedSpecs
+      .filter(Boolean)
       .map(spec => {
+        if (!spec) return null;
+
         const sameShaftSpecs = byShaftSize.get(spec.shaft_size_mm) || [];
         const needsOdDisambiguation = sameShaftSpecs.length > 1;
 
         // Display label: "35mm" or "20mm (36mm OD)" if ambiguous
+        // Use provided display_name if complex, otherwise generate
         const displayLabel = needsOdDisambiguation
           ? `${spec.shaft_size_mm}mm (${spec.outer_diameter_mm}mm OD)`
           : `${spec.shaft_size_mm}mm`;
@@ -79,9 +134,11 @@ export async function GET(request: NextRequest) {
           display: displayLabel,
           shaft_size_mm: spec.shaft_size_mm,
           outer_diameter_mm: spec.outer_diameter_mm,
+          shaft_config_id: spec.id
         };
       })
-      .sort((a, b) => a.shaft_size_mm - b.shaft_size_mm);
+      .filter(Boolean)
+      .sort((a, b) => (a?.shaft_size_mm || 0) - (b?.shaft_size_mm || 0));
 
     return NextResponse.json({
       brand,

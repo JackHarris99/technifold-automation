@@ -180,6 +180,7 @@ export async function createCheckoutSession(params: {
   // Create checkout session
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
+    payment_method_types: ['card', 'bacs_debit'], // Support both card and BACS Direct Debit
     customer: customerId,
     automatic_tax: { enabled: true },
     line_items: lineItems.map(item => ({

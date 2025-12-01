@@ -1,30 +1,19 @@
 /**
  * GET /api/compatibility
  * Returns all compatible Technifold products for a machine based on brand + shaft_specs
+ * Uses NEW schema: product_compatibility + shaft_configurations
  *
  * Query params:
  *   - brand: Machine brand (e.g., "MBO", "Heidelberg/Stahl")
  *   - shaft_size_mm: Shaft size in mm (e.g., 30, 35)
  *   - outer_diameter_mm: Outer diameter in mm (e.g., 50, 58)
+ *   - shaft_config_id: (Alternative) Direct shaft config ID
  *
  * Returns products grouped by solution type with hierarchy ranking
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
-
-interface CompatibilityRecord {
-  product_code: string;
-  brand: string;
-  shaft_specs: {
-    shaft_size_mm?: number;
-    outer_diameter_mm?: number;
-    outer_diameter_male_mm?: number;
-    outer_diameter_female_mm?: number;
-    top?: { shaft_size_mm: number; outer_diameter_mm: number };
-    bottom?: { shaft_size_mm: number; outer_diameter_mm: number };
-  };
-}
 
 interface Product {
   product_code: string;
@@ -89,6 +78,7 @@ export async function GET(request: NextRequest) {
     const brand = searchParams.get('brand');
     const shaftSizeMm = searchParams.get('shaft_size_mm');
     const outerDiameterMm = searchParams.get('outer_diameter_mm');
+    const shaftConfigIdParam = searchParams.get('shaft_config_id');
 
     if (!brand) {
       return NextResponse.json({ error: 'brand parameter required' }, { status: 400 });
@@ -96,11 +86,64 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
-    // Fetch all compatibility records for this brand
-    const { data: compatRecords, error: compatError } = await supabase
-      .from('tool_brand_compatibility')
-      .select('product_code, brand, shaft_specs')
+    let shaftConfigId: number | null = null;
+
+    // If shaft_config_id provided directly, use it
+    if (shaftConfigIdParam) {
+      shaftConfigId = parseInt(shaftConfigIdParam);
+    }
+    // Otherwise, lookup shaft_config_id from shaft_size + OD
+    else if (shaftSizeMm && outerDiameterMm) {
+      const targetShaft = parseFloat(shaftSizeMm);
+      const targetOD = parseFloat(outerDiameterMm);
+
+      // Find the shaft_config_id that matches these specs for this brand
+      const { data: brandConfigs, error: lookupError } = await supabase
+        .from('brand_shaft_configurations')
+        .select(`
+          shaft_config_id,
+          shaft_configurations!inner (
+            id,
+            config_data
+          )
+        `)
+        .eq('brand', brand);
+
+      if (lookupError) {
+        console.error('[compatibility] Error looking up shaft config:', lookupError);
+      } else if (brandConfigs) {
+        // Find matching config
+        for (const bc of brandConfigs) {
+          const config = (bc.shaft_configurations as any);
+          const data = config?.config_data;
+
+          if (data?.shaft_size_mm === targetShaft && data?.outer_diameter_mm === targetOD) {
+            shaftConfigId = bc.shaft_config_id;
+            break;
+          }
+        }
+      }
+    }
+
+    // Query product_compatibility (NEW SCHEMA)
+    let query = supabase
+      .from('product_compatibility')
+      .select(`
+        product_code,
+        shaft_config_id,
+        shaft_configurations (
+          config_data,
+          display_name
+        )
+      `)
       .eq('brand', brand);
+
+    // Filter by shaft_config_id if known
+    if (shaftConfigId) {
+      query = query.eq('shaft_config_id', shaftConfigId);
+    }
+
+    const { data: compatRecords, error: compatError } = await query;
 
     if (compatError) {
       console.error('[compatibility] Error fetching compatibility:', compatError);
@@ -110,41 +153,20 @@ export async function GET(request: NextRequest) {
     if (!compatRecords || compatRecords.length === 0) {
       return NextResponse.json({
         brand,
+        shaft_specs: shaftSizeMm && outerDiameterMm ? {
+          shaft_size_mm: parseFloat(shaftSizeMm),
+          outer_diameter_mm: parseFloat(outerDiameterMm)
+        } : null,
+        total_compatible_products: 0,
         products: [],
         solutions: {},
-        message: 'No compatible products found for this brand'
-      });
-    }
-
-    // Filter by shaft specs if provided
-    let filteredRecords = compatRecords as CompatibilityRecord[];
-
-    if (shaftSizeMm && outerDiameterMm) {
-      const targetShaft = parseFloat(shaftSizeMm);
-      const targetOD = parseFloat(outerDiameterMm);
-
-      filteredRecords = compatRecords.filter((record: CompatibilityRecord) => {
-        const specs = record.shaft_specs;
-        if (!specs) return false;
-
-        // Simple case
-        if (specs.shaft_size_mm && specs.outer_diameter_mm) {
-          return specs.shaft_size_mm === targetShaft && specs.outer_diameter_mm === targetOD;
-        }
-
-        // Male/female OD case - check if either matches
-        if (specs.shaft_size_mm && (specs.outer_diameter_male_mm || specs.outer_diameter_female_mm)) {
-          const shaftMatch = specs.shaft_size_mm === targetShaft;
-          const odMatch = specs.outer_diameter_male_mm === targetOD || specs.outer_diameter_female_mm === targetOD;
-          return shaftMatch && odMatch;
-        }
-
-        return false;
+        best_products: [],
+        message: 'No compatible products found for this brand' + (shaftConfigId ? ' and shaft configuration' : '')
       });
     }
 
     // Get product details for matched product codes
-    const productCodes = filteredRecords.map(r => r.product_code);
+    const productCodes = compatRecords.map(r => r.product_code);
 
     const { data: products, error: productError } = await supabase
       .from('products')
@@ -176,7 +198,7 @@ export async function GET(request: NextRequest) {
       }>;
     }> = {};
 
-    filteredRecords.forEach(record => {
+    compatRecords.forEach(record => {
       const product = productMap.get(record.product_code);
       if (!product) return;
 
@@ -184,6 +206,7 @@ export async function GET(request: NextRequest) {
       if (!classification) return;
 
       const { solution, variant, rank } = classification;
+      const shaftConfig = (record.shaft_configurations as any);
 
       if (!solutionGroups[solution]) {
         solutionGroups[solution] = {
@@ -206,7 +229,7 @@ export async function GET(request: NextRequest) {
         rank,
         description: product.description,
         image_url: product.image_url,
-        shaft_specs: record.shaft_specs
+        shaft_specs: shaftConfig?.config_data || null
       });
     });
 
@@ -230,7 +253,8 @@ export async function GET(request: NextRequest) {
         shaft_size_mm: parseFloat(shaftSizeMm),
         outer_diameter_mm: parseFloat(outerDiameterMm)
       } : null,
-      total_compatible_products: filteredRecords.length,
+      shaft_config_id: shaftConfigId,
+      total_compatible_products: compatRecords.length,
       solutions: solutionGroups,
       best_products: bestProducts
     });

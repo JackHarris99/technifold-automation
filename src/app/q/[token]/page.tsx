@@ -1,20 +1,19 @@
 /**
- * Quote Page Route
- * /q/[token] - Tool purchase/rental quote with Stripe checkout
+ * Quote Viewer Route
+ * /q/[token] - HMAC-signed token for viewing custom quotes
  */
 
 import { notFound } from 'next/navigation';
 import { verifyToken } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
-import QuotePageClient from '@/components/quote/QuotePageClient';
 
-interface QuotePageProps {
+interface QuoteViewerProps {
   params: Promise<{
     token: string;
   }>;
 }
 
-export default async function QuotePage({ params }: QuotePageProps) {
+export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
   const { token } = await params;
 
   // 1. Verify HMAC token
@@ -23,12 +22,15 @@ export default async function QuotePage({ params }: QuotePageProps) {
   if (!payload) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
+        <div className="text-center max-w-md">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Invalid or Expired Link</h1>
           <p className="text-gray-600 mb-8">
-            This quote link is no longer valid. Please contact us for assistance.
+            This quote link is no longer valid. Please contact us for an updated quote.
           </p>
-          <a href="/contact" className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700">
+          <a
+            href="/contact"
+            className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700"
+          >
             Contact Us
           </a>
         </div>
@@ -36,13 +38,13 @@ export default async function QuotePage({ params }: QuotePageProps) {
     );
   }
 
-  const { company_id, contact_id, products: tokenProducts } = payload;
+  const { company_id, contact_id, products = [] } = payload;
   const supabase = getSupabaseClient();
 
-  // 2. Get company details
+  // 2. Fetch company
   const { data: company } = await supabase
     .from('companies')
-    .select('company_id, company_name, country')
+    .select('company_id, company_name')
     .eq('company_id', company_id)
     .single();
 
@@ -50,107 +52,142 @@ export default async function QuotePage({ params }: QuotePageProps) {
     notFound();
   }
 
-  // 3. Get contact details
-  const { data: contact } = await supabase
-    .from('contacts')
-    .select('contact_id, full_name, email, first_name, last_name')
-    .eq('contact_id', contact_id)
-    .single();
-
-  // 4. Determine which products to show
-  let allProductCodes = new Set<string>();
-  let solutionCards: any[] = [];
-
-  // If token contains specific products (from Quote Builder), use those
-  if (tokenProducts && tokenProducts.length > 0) {
-    tokenProducts.forEach((code: string) => allProductCodes.add(code));
-  } else {
-    // Otherwise, fall back to company_interests logic
-    const { data: interests } = await supabase
-      .from('company_interests')
-      .select('problem_solution_id')
-      .eq('company_id', company_id)
-      .eq('status', 'interested');
-
-    const interestedProblemSolutionIds = (interests || []).map(i => i.problem_solution_id);
-
-    // 5. Get problem/solution data to identify products
-    if (interestedProblemSolutionIds.length > 0) {
-      const { data: cards } = await supabase
-        .from('v_problem_solution_machine')
-        .select('*')
-        .in('problem_solution_id', interestedProblemSolutionIds);
-
-      solutionCards = cards || [];
-    }
-
-    // 6. Collect all unique product codes from curated_skus
-    solutionCards.forEach(card => {
-      if (card.curated_skus && Array.isArray(card.curated_skus)) {
-        card.curated_skus.forEach((sku: string) => allProductCodes.add(sku));
-      }
-    });
-  }
-
-  // 7. Fetch product data with pricing (including rental pricing)
-  let productData: any[] = [];
-  if (allProductCodes.size > 0) {
-    const { data: products } = await supabase
-      .from('products')
-      .select('product_code, description, image_url, type, price, rental_price_monthly, currency, active')
-      .in('product_code', Array.from(allProductCodes))
-      .eq('active', true);
-
-    productData = products || [];
-  }
-
-  // 8. Get existing shipping address if any
-  const { data: addresses } = await supabase
-    .from('shipping_addresses')
-    .select('*')
-    .eq('company_id', company_id)
-    .order('is_default', { ascending: false })
-    .limit(1);
-
-  const existingAddress = addresses?.[0] || null;
-
-  // 9. Track quote page view
+  // 3. Fetch contact
+  let contact = null;
   if (contact_id) {
-    await supabase
+    const { data } = await supabase
+      .from('contacts')
+      .select('contact_id, full_name, email')
+      .eq('contact_id', contact_id)
+      .single();
+    contact = data;
+  }
+
+  // 4. Fetch products from payload
+  const productCodes = Array.isArray(products) ? products : [];
+  let quoteProducts: any[] = [];
+
+  if (productCodes.length > 0) {
+    const { data } = await supabase
+      .from('products')
+      .select('product_code, description, price, rental_price_monthly, currency, type, category')
+      .in('product_code', productCodes);
+
+    quoteProducts = data || [];
+  }
+
+  // 5. Track quote view
+  if (contact) {
+    supabase
       .from('engagement_events')
       .insert({
-        contact_id,
-        company_id,
-        event_type: 'quote_page_view',
+        contact_id: contact.contact_id,
+        company_id: company.company_id,
+        event_type: 'quote_view',
         event_name: 'quote_page_view',
         source: 'vercel',
         url: `/q/${token}`,
         meta: {
-          product_count: productData.length,
-          solution_count: solutionCards.length
+          contact_name: contact.full_name,
+          company_name: company.company_name,
+          product_count: quoteProducts.length
         }
-      });
+      })
+      .then(() => console.log(`[Quote] Tracked view by ${contact.full_name}`))
+      .catch(err => console.error('[Quote] Tracking failed:', err));
   }
 
-  // 10. Render quote page
+  // 6. Calculate totals
+  const subtotal = quoteProducts.reduce((sum, p) => sum + (p.rental_price_monthly || p.price || 0), 0);
+  const currency = quoteProducts[0]?.currency || 'GBP';
+
   return (
-    <QuotePageClient
-      company={company}
-      contact={contact}
-      products={productData}
-      solutionCards={solutionCards}
-      existingAddress={existingAddress}
-      token={token}
-    />
+    <div className="min-h-screen bg-gray-50 py-12">
+      <div className="max-w-4xl mx-auto px-4">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
+          <div className="flex justify-between items-start mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Quote</h1>
+              <p className="text-gray-600">For {company.company_name}</p>
+              {contact && <p className="text-gray-500 text-sm">Attn: {contact.full_name}</p>}
+            </div>
+            <div className="text-right">
+              <div className="text-sm text-gray-500">Valid for 7 days</div>
+              <div className="text-sm text-gray-500">{new Date().toLocaleDateString()}</div>
+            </div>
+          </div>
+
+          {/* Products */}
+          <div className="border-t border-gray-200 pt-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Items</h2>
+
+            {quoteProducts.length === 0 ? (
+              <p className="text-gray-500 py-8 text-center">No products in this quote</p>
+            ) : (
+              <div className="space-y-4">
+                {quoteProducts.map((product) => (
+                  <div key={product.product_code} className="flex justify-between py-3 border-b border-gray-100">
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900">{product.description}</div>
+                      <div className="text-sm text-gray-500">Code: {product.product_code}</div>
+                      {product.type === 'tool' && product.rental_price_monthly && (
+                        <div className="text-sm text-blue-600 font-medium mt-1">Monthly Rental</div>
+                      )}
+                    </div>
+                    <div className="text-right ml-4">
+                      <div className="font-semibold text-gray-900">
+                        {currency} {(product.rental_price_monthly || product.price || 0).toFixed(2)}
+                        {product.rental_price_monthly && <span className="text-sm font-normal">/mo</span>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Total */}
+            {quoteProducts.length > 0 && (
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="flex justify-between text-lg font-bold">
+                  <span>Total</span>
+                  <span>{currency} {subtotal.toFixed(2)}{quoteProducts.some(p => p.rental_price_monthly) && '/mo'}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* CTA */}
+          {quoteProducts.length > 0 && (
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <a
+                href="/contact"
+                className="w-full block text-center bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition"
+              >
+                Accept Quote & Start Order
+              </a>
+              <p className="text-center text-sm text-gray-500 mt-3">
+                Or contact us to discuss further
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="text-center text-sm text-gray-500">
+          <p>Tech-ni-Fold Ltd • World-Leading Print Finishing Solutions</p>
+        </div>
+      </div>
+    </div>
   );
 }
 
-export async function generateMetadata({ params }: QuotePageProps) {
+export async function generateMetadata({ params }: QuoteViewerProps) {
   const { token } = await params;
   const payload = verifyToken(token);
 
   if (!payload) {
-    return { title: 'Invalid Link' };
+    return { title: 'Invalid Quote' };
   }
 
   const supabase = getSupabaseClient();
@@ -161,7 +198,7 @@ export async function generateMetadata({ params }: QuotePageProps) {
     .single();
 
   return {
-    title: `Quote for ${company?.company_name || 'Your Company'}`,
-    description: 'Start your free trial or purchase Technifold solutions',
+    title: `Quote for ${company?.company_name || 'Your Company'} - Technifold`,
+    description: 'View your custom quote from Technifold',
   };
 }

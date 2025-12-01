@@ -217,27 +217,9 @@ async function processSendOfferEmail(job: any) {
     tokenUrl = `${baseUrl}/x/${token}`;
   }
 
-  // Fetch the selected problem cards for email preview (top 2)
-  let emailCards: any[] = [];
-  let intro = '';
-
-  if (machine_slug && selected_problem_ids && selected_problem_ids.length > 0) {
-    const { data: cards } = await supabase
-      .from('v_machine_solution_problem_full')
-      .select('*')
-      .eq('machine_slug', machine_slug)
-      .in('problem_id', selected_problem_ids)
-      .order('machine_solution_rank')
-      .order('pitch_relevance_rank')
-      .limit(2);
-
-    emailCards = cards || [];
-
-    // Extract intro from first card
-    if (emailCards.length > 0 && emailCards[0].resolved_copy) {
-      intro = emailCards[0].resolved_copy.split('\n\n')[0].substring(0, 200);
-    }
-  }
+  // Simplified email - no problem cards (abandoned schema removed)
+  // Just send simple intro text
+  let intro = 'Transform your print finishing with Technifold solutions. Eliminate fiber cracking, reduce waste, and increase productivity.';
 
   // Build email HTML
   const emailHtml = `
@@ -249,20 +231,22 @@ async function processSendOfferEmail(job: any) {
     </head>
     <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); padding: 30px; border-radius: 12px; margin-bottom: 30px;">
-        <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">Solutions for Your Machine</h1>
+        <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">Exclusive Offer from Technifold</h1>
         <p style="color: #dbeafe; margin: 0; font-size: 16px;">${intro}</p>
       </div>
 
-      ${emailCards.map(card => `
-        <div style="background: white; border: 2px solid #e5e7eb; border-radius: 12px; padding: 24px; margin-bottom: 20px;">
-          <div style="display: inline-block; background: #dbeafe; color: #1e40af; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-bottom: 12px;">
-            ${card.solution_name}
-          </div>
-          <div style="color: #374151; font-size: 15px; line-height: 1.6;">
-            ${card.resolved_copy?.substring(0, 300).replace(/\n/g, '<br>')}${card.resolved_copy?.length > 300 ? '...' : ''}
-          </div>
-        </div>
-      `).join('')}
+      <div style="background: white; border: 2px solid #e5e7eb; border-radius: 12px; padding: 24px; margin-bottom: 20px;">
+        <h2 style="color: #1f2937; font-size: 20px; margin: 0 0 12px 0;">Transform Your Print Finishing</h2>
+        <p style="color: #374151; font-size: 15px; line-height: 1.6; margin-bottom: 16px;">
+          Discover precision finishing tools that eliminate fiber cracking, reduce waste, and increase productivity. Over 40,000 installations worldwide.
+        </p>
+        <ul style="color: #374151; font-size: 15px; line-height: 1.8; margin: 0; padding-left: 20px;">
+          <li>Tri-Creaser: Eliminate fiber cracking completely</li>
+          <li>Quad-Creaser: Perfect bound book finishing</li>
+          <li>Spine-Creaser: Saddle stitcher transformation</li>
+          <li>Multi-Tool: 6-in-1 modular finishing system</li>
+        </ul>
+      </div>
 
       <div style="text-align: center; margin: 40px 0;">
         <a href="${tokenUrl}" style="display: inline-block; background: #2563eb; color: white; padding: 16px 32px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 18px;">

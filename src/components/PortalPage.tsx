@@ -56,6 +56,38 @@ export function PortalPage({ payload, contact }: PortalPageProps) {
     return cart.reduce((total, item) => total + item.quantity, 0);
   };
 
+  const handleCheckout = async () => {
+    if (cart.length === 0) return;
+
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company_id: payload.company_id,
+          contact_id: contact?.contact_id,
+          items: cart.map(item => ({
+            product_code: item.consumable_code,
+            quantity: item.quantity,
+          })),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(`Checkout failed: ${data.error}`);
+        return;
+      }
+
+      // Redirect to Stripe checkout
+      window.location.href = data.url;
+    } catch (error) {
+      console.error('[PortalPage] Checkout error:', error);
+      alert('Failed to start checkout. Please try again.');
+    }
+  };
+
   const tabs = [
     { id: 'reorder', label: 'Previously Ordered', code: '' },
     ...(payload.by_tool_tabs || []).map(tab => ({
@@ -153,6 +185,7 @@ export function PortalPage({ payload, contact }: PortalPageProps) {
         itemCount={getCartQuantity()}
         totalPrice={getTotalPrice()}
         cart={cart}
+        onCheckout={handleCheckout}
       />
     </div>
   );

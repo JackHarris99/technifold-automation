@@ -50,6 +50,7 @@ export default async function AdminLayout({
 
           <SidebarLink href="/admin/pipeline" icon="📊" label="Pipeline" />
           <SidebarLink href="/admin/sales-history" icon="📈" label="Sales History" />
+          <SidebarLink href="/admin/subscriptions" icon="💳" label="Subscriptions" />
 
           <div className="px-3 mt-6 mb-2">
             <div className="text-blue-200 text-xs uppercase font-semibold tracking-wider px-3">
@@ -59,7 +60,7 @@ export default async function AdminLayout({
 
           <SidebarLink href="/admin/companies" icon="🏢" label="All Companies" />
           <SidebarLink href="/admin/quote-builder-v2" icon="📄" label="Create Quote" />
-          <SidebarLink href="/admin/campaigns" icon="📧" label="Campaigns" />
+          <SidebarLink href="/admin/campaigns-unified" icon="📧" label="Campaigns" />
           <SidebarLink href="/admin/engagements" icon="📊" label="Engagement" />
           <SidebarLink href="/admin/sku-explorer" icon="📦" label="SKU Explorer" />
 

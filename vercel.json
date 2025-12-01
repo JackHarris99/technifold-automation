@@ -9,6 +9,14 @@
   },
   "crons": [
     {
+      "path": "/api/cron/update-rfm-scores",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/generate-reorder-reminders",
+      "schedule": "0 10 * * *"
+    },
+    {
       "path": "/api/outbox/run",
       "schedule": "0 12 * * *"
     }

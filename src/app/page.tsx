@@ -2,97 +2,270 @@ import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
 import SolutionFinder from '@/components/solutions/SolutionFinder';
 import { getSupabaseClient } from '@/lib/supabase';
-import MediaImage from '@/components/shared/MediaImage';
+
+export const metadata = {
+  title: 'Technifold International - Print Finishing Solutions',
+  description: 'World-leading manufacturer of Tri-Creaser, Quad-Creaser, and Spine-Creaser systems. Eliminate cracking, reduce waste, increase profits.',
+};
 
 export default async function HomePage() {
-  // Fetch one card per solution (using the highest ranked problem for each solution)
   const supabase = getSupabaseClient();
 
-  // Get distinct solutions with their best-ranked problem
-  const { data: allProblems } = await supabase
-    .from('problem_solution')
-    .select('solution_name, card_preview_copy, image_url')
-    .eq('active', true)
-    .order('solution_name')
-    .order('relevance_rank', { ascending: true });
-
-  // Get unique solutions (one card per solution, using first/best ranked)
-  const solutionMap = new Map();
-  allProblems?.forEach(problem => {
-    if (!solutionMap.has(problem.solution_name)) {
-      solutionMap.set(problem.solution_name, problem);
-    }
-  });
-  const solutions = Array.from(solutionMap.values());
+  // Get featured solutions for the grid
+  const solutions = [
+    {
+      slug: 'tri-creaser',
+      name: 'Tri-Creaser',
+      category: 'Rotary Creasing Systems',
+      description: 'The world standard for rotary creasing. Patented reverse-crease method eliminates fiber cracking on digital stocks, laminated sheets, and heavy substrates.',
+      applications: ['Digital Printing', 'Offset', 'Laminated Stocks'],
+      stats: ['40,000+ installations', '100% crack elimination', '1-3 jobs to ROI'],
+    },
+    {
+      slug: 'quad-creaser',
+      name: 'Quad-Creaser',
+      category: 'Multi-Crease Systems',
+      description: 'Four independent creasing ribs for complex folding applications. Perfect parallel creases for greeting cards, invitations, and multi-panel work.',
+      applications: ['Greeting Cards', 'Invitations', 'Complex Packaging'],
+      stats: ['±0.1mm accuracy', '4 creases/pass', 'Any stock weight'],
+    },
+    {
+      slug: 'spine-creaser',
+      name: 'Spine Creaser',
+      category: 'Binding Solutions',
+      description: 'Pre-crease covers before perfect binding. Eliminates spine cracking on thick covers and achieves professional booklet finishing.',
+      applications: ['Perfect Binding', 'Saddle Stitching', 'Booklet Making'],
+      stats: ['Zero spine cracking', '15-second setup', '95% waste reduction'],
+    },
+    {
+      slug: 'spine-and-hinge-creaser',
+      name: 'Spine & Hinge Creaser',
+      category: 'Binding Solutions',
+      description: 'Dual-crease system creates spine and hinge creases for 180° lay-flat opening. Essential for premium catalogs and manuals.',
+      applications: ['Catalogs', 'Technical Manuals', 'Coffee Table Books'],
+      stats: ['180° lay-flat', '2 creases/pass', 'Premium quality'],
+    },
+    {
+      slug: 'multi-tool',
+      name: 'Multi-Tool',
+      category: 'Specialty Systems',
+      description: 'Versatile solution for irregular stocks, thick substrates, and specialty applications that standard folders cannot handle.',
+      applications: ['Irregular Stocks', 'Heavy Board', 'Specialty Work'],
+      stats: ['400gsm+ capacity', 'Irregular material', 'Custom solutions'],
+    },
+    {
+      slug: 'micro-perforator',
+      name: 'Micro-Perforator',
+      category: 'Specialty Systems',
+      description: 'Add clean tear-off sections to any folded product. Professional perforations for tickets, coupons, and reply cards.',
+      applications: ['Reply Cards', 'Tickets', 'Coupons'],
+      stats: ['Clean separation', 'No ragged edges', 'Easy tear-off'],
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-white">
       <MarketingHeader />
       <main>
-        {/* Hero: Machine Finder - 30% shorter */}
-        <section className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white py-14 md:py-22">
-          <div className="max-w-5xl mx-auto px-4">
-            <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-6xl font-bold mb-6">
-                Fix Your Print Finishing Problems
-              </h1>
-              <p className="text-xl md:text-2xl text-blue-100 mb-4">
-                Tell us which machine you're running
-              </p>
-              <p className="text-lg text-blue-200 max-w-2xl mx-auto">
-                Get instant access to production-proven solutions for your specific press
-              </p>
+        {/* Compact Hero with Machine Finder */}
+        <section className="bg-slate-900 text-white py-12 border-b-4 border-orange-500">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <div className="inline-block bg-orange-500 text-white px-3 py-1 text-xs font-bold uppercase tracking-wide mb-3">
+                  Trusted by 30,000+ Companies Worldwide
+                </div>
+                <h1 className="text-3xl font-bold mb-3 leading-tight">
+                  Professional Print Finishing Solutions
+                </h1>
+                <p className="text-lg text-gray-300 mb-6">
+                  Eliminate fiber cracking, reduce waste, and handle jobs you couldn't touch before. Production-proven systems engineered for your exact machine.
+                </p>
+                <div className="grid grid-cols-3 gap-4 text-center mb-6">
+                  <div className="bg-white/10 border border-white/20 px-3 py-2 rounded">
+                    <div className="text-xl font-bold">30%</div>
+                    <div className="text-xs text-gray-400">Less Waste</div>
+                  </div>
+                  <div className="bg-white/10 border border-white/20 px-3 py-2 rounded">
+                    <div className="text-xl font-bold">90%</div>
+                    <div className="text-xs text-gray-400">Faster Setup</div>
+                  </div>
+                  <div className="bg-white/10 border border-white/20 px-3 py-2 rounded">
+                    <div className="text-xl font-bold">£40k+</div>
+                    <div className="text-xs text-gray-400">Annual Savings</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white/5 border border-white/10 rounded-lg p-6">
+                <h2 className="text-lg font-bold mb-3">Find Solutions for Your Machine</h2>
+                <SolutionFinder />
+              </div>
             </div>
-            <SolutionFinder />
           </div>
         </section>
 
-        {/* Solution Cards */}
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                Our Solutions
-              </h2>
-              <p className="text-xl text-gray-600">
-                Professional print finishing systems for every challenge
-              </p>
+        {/* Dense Product Catalog Grid */}
+        <section className="py-12 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="flex items-center justify-between mb-6 pb-3 border-b-2 border-gray-300">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Product Catalog</h2>
+                <p className="text-sm text-gray-600 mt-1">Precision-engineered systems for professional print finishing</p>
+              </div>
+              <a href="/contact" className="bg-orange-500 text-white px-6 py-2 text-sm font-bold hover:bg-orange-600 transition-colors">
+                Request Quote
+              </a>
             </div>
 
             <div className="grid md:grid-cols-3 gap-6">
-              {(solutions || []).map((solution) => (
-                <div key={solution.solution_name} className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:border-blue-400 hover:shadow-lg transition-all">
-                  {/* Solution Image */}
-                  <div className="relative h-48 w-full bg-gray-100 flex items-center justify-center">
-                    {solution.image_url ? (
-                      <MediaImage
-                        src={solution.image_url}
-                        alt={solution.solution_name}
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      />
-                    ) : (
-                      <div className="text-gray-400">
-                        <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                    )}
+              {solutions.map((solution) => (
+                <a
+                  key={solution.slug}
+                  href={`/tools/${solution.slug}`}
+                  className="bg-white border-2 border-gray-200 hover:border-orange-500 transition-all group"
+                >
+                  {/* Product Image Placeholder */}
+                  <div className="h-48 bg-gradient-to-br from-slate-100 to-slate-200 border-b-2 border-gray-200 flex items-center justify-center">
+                    <div className="text-slate-400 text-center">
+                      <svg className="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      <div className="text-xs text-slate-500">Product Image</div>
+                    </div>
                   </div>
 
-                  {/* Solution Content */}
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-3">
-                      {solution.solution_name}
+                  <div className="p-5">
+                    <div className="text-xs font-bold text-orange-600 uppercase tracking-wide mb-1">
+                      {solution.category}
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">
+                      {solution.name}
                     </h3>
-                    {solution.card_preview_copy && (
-                      <p className="text-gray-700 text-sm leading-relaxed line-clamp-4">
-                        {solution.card_preview_copy.replace(/[#*_`]/g, '').substring(0, 200)}...
-                      </p>
-                    )}
+                    <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                      {solution.description}
+                    </p>
+
+                    {/* Applications */}
+                    <div className="mb-3">
+                      <div className="text-xs font-bold text-gray-700 mb-1">Applications:</div>
+                      <div className="flex flex-wrap gap-1">
+                        {solution.applications.map((app, idx) => (
+                          <span key={idx} className="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded">
+                            {app}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="border-t border-gray-200 pt-3">
+                      {solution.stats.map((stat, idx) => (
+                        <div key={idx} className="flex items-center gap-2 text-xs text-gray-600 mb-1">
+                          <span className="text-green-600">✓</span>
+                          <span>{stat}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ROI Information - Compact */}
+        <section className="py-10 bg-white border-t border-b border-gray-300">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="grid md:grid-cols-4 gap-6">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Typical First-Year ROI</h3>
+                <p className="text-sm text-gray-600">Based on average print shop operations</p>
+              </div>
+              <div className="text-center border-l border-gray-200 pl-6">
+                <div className="text-3xl font-bold text-gray-900 mb-1">£10,000</div>
+                <div className="text-xs text-gray-600">Eliminated Waste</div>
+              </div>
+              <div className="text-center border-l border-gray-200 pl-6">
+                <div className="text-3xl font-bold text-gray-900 mb-1">£12,000</div>
+                <div className="text-xs text-gray-600">Reduced Setup Time</div>
+              </div>
+              <div className="text-center border-l border-gray-200 pl-6">
+                <div className="text-3xl font-bold text-gray-900 mb-1">£18,000</div>
+                <div className="text-xs text-gray-600">New Job Capability</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Technical Validation - Compact */}
+        <section className="py-10 bg-slate-900 text-white">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <div className="inline-block bg-orange-500/20 border border-orange-500/30 px-3 py-1 text-xs font-bold uppercase tracking-wide mb-3 text-orange-300">
+                  Third-Party Validation
+                </div>
+                <h3 className="text-xl font-bold mb-3">
+                  "Comparable to Letterpress Quality"
+                </h3>
+                <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+                  Sappi Paper Engineering conducted independent laboratory testing of Tri-Creaser technology against traditional scoring methods.
+                </p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-start gap-2">
+                    <span className="text-orange-500">✓</span>
+                    <span className="text-gray-300">Zero fiber cracking on coated stocks</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-orange-500">✓</span>
+                    <span className="text-gray-300">3x deeper crease penetration without damage</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-orange-500">✓</span>
+                    <span className="text-gray-300">Digital-friendly rubber eliminates toner flaking</span>
                   </div>
                 </div>
-              ))}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white/10 border border-white/20 p-4 text-center">
+                  <div className="text-3xl font-bold mb-1">30,000+</div>
+                  <div className="text-xs text-gray-400">Companies Worldwide</div>
+                </div>
+                <div className="bg-white/10 border border-white/20 p-4 text-center">
+                  <div className="text-3xl font-bold mb-1">40,000+</div>
+                  <div className="text-xs text-gray-400">Installations</div>
+                </div>
+                <div className="bg-white/10 border border-white/20 p-4 text-center">
+                  <div className="text-3xl font-bold mb-1">25+</div>
+                  <div className="text-xs text-gray-400">Years Innovation</div>
+                </div>
+                <div className="bg-white/10 border border-white/20 p-4 text-center">
+                  <div className="text-3xl font-bold mb-1">100%</div>
+                  <div className="text-xs text-gray-400">Quality Guarantee</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA - Compact */}
+        <section className="py-10 bg-orange-500 text-white border-t-4 border-orange-600">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div>
+                <h2 className="text-2xl font-bold mb-2">Request Your Free Trial</h2>
+                <p className="text-orange-100">
+                  See the transformation yourself. Zero commitment. Most companies keep the full system.
+                </p>
+              </div>
+              <a
+                href="/contact"
+                className="bg-slate-900 text-white px-8 py-3 font-bold hover:bg-slate-800 transition-colors whitespace-nowrap"
+              >
+                Get Started →
+              </a>
             </div>
           </div>
         </section>
@@ -102,8 +275,3 @@ export default async function HomePage() {
     </div>
   );
 }
-
-export const metadata = {
-  title: 'Technifold - Professional Print Finishing Solutions',
-  description: 'Leading manufacturer of Tri-Creaser and Spine-Creaser systems. Professional print finishing tools and consumables for the graphic arts industry.',
-};

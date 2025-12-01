@@ -105,29 +105,27 @@ export default function SolutionFinder() {
   };
 
   return (
-    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 shadow-2xl">
-      <div className="text-center mb-6">
-        <div className="inline-flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full mb-4">
-          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <span className="text-sm font-semibold text-white">Find Your Solutions</span>
+    <div className="bg-white border-2 border-gray-300 p-6">
+      <div className="mb-4 pb-3 border-b-2 border-gray-300">
+        <div className="inline-block bg-orange-500 text-white px-3 py-1 text-xs font-bold uppercase tracking-wide mb-2">
+          Compatibility Finder
         </div>
+        <h2 className="text-xl font-bold text-gray-900">Find Compatible Products</h2>
       </div>
 
-      <div className="space-y-5">
+      <div className="space-y-4">
         {/* Step 1: Brand */}
         <div>
-          <label htmlFor="brand" className="block text-sm font-bold text-white mb-2">
-            1. Select Your Machine Brand
+          <label htmlFor="brand" className="block text-sm font-bold text-gray-900 mb-2">
+            1. Machine Brand
           </label>
           <select
             id="brand"
             value={selectedBrand}
             onChange={(e) => handleBrandChange(e.target.value)}
-            className="w-full px-5 py-4 border-2 border-white/30 rounded-xl focus:ring-2 focus:ring-white focus:border-white text-gray-900 text-lg bg-white shadow-lg"
+            className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900 bg-white"
           >
-            <option value="">Choose a brand...</option>
+            <option value="">Select brand...</option>
             {brands.map((brand) => (
               <option key={brand} value={brand}>
                 {brand}
@@ -139,12 +137,12 @@ export default function SolutionFinder() {
         {/* Step 2: Shaft Size - always show after brand selected */}
         {selectedBrand && (
           <div>
-            <label htmlFor="shaft" className="block text-sm font-bold text-white mb-2">
-              2. Select Your Shaft Size
+            <label htmlFor="shaft" className="block text-sm font-bold text-gray-900 mb-2">
+              2. Shaft Size
             </label>
             {loading ? (
-              <div className="text-center py-4">
-                <p className="text-white">Loading shaft options...</p>
+              <div className="bg-gray-100 border border-gray-300 p-4 text-center">
+                <p className="text-gray-700 text-sm">Loading shaft options...</p>
               </div>
             ) : (
               <>
@@ -152,9 +150,9 @@ export default function SolutionFinder() {
                   id="shaft"
                   value={selectedShaft}
                   onChange={(e) => handleShaftChange(e.target.value)}
-                  className="w-full px-5 py-4 border-2 border-white/30 rounded-xl focus:ring-2 focus:ring-white focus:border-white text-gray-900 text-lg bg-white shadow-lg"
+                  className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900 bg-white"
                 >
-                  <option value="">Choose shaft size...</option>
+                  <option value="">Select shaft size...</option>
                   {shaftOptions.map((shaft) => (
                     <option key={shaft.key} value={shaft.key}>
                       {shaft.display}
@@ -162,7 +160,7 @@ export default function SolutionFinder() {
                   ))}
                 </select>
                 {shaftOptions.length === 0 && !loading && (
-                  <p className="text-white/70 text-sm mt-2">
+                  <p className="text-gray-600 text-sm mt-2">
                     No shaft configurations found for {selectedBrand}. Contact us for compatibility information.
                   </p>
                 )}
@@ -173,9 +171,9 @@ export default function SolutionFinder() {
 
         {/* Product Count */}
         {productCount !== null && productCount > 0 && (
-          <div className="bg-green-500/20 border border-green-400/30 rounded-xl p-4 text-center">
-            <p className="text-white font-bold text-lg">
-              {productCount} compatible solutions found
+          <div className="bg-green-50 border-2 border-green-500 p-4 text-center">
+            <p className="text-gray-900 font-bold text-base">
+              {productCount} compatible {productCount === 1 ? 'solution' : 'solutions'} found
             </p>
           </div>
         )}
@@ -185,12 +183,9 @@ export default function SolutionFinder() {
           <button
             type="button"
             onClick={handleViewSolutions}
-            className="w-full bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-colors shadow-lg flex items-center justify-center gap-3"
+            className="w-full bg-orange-500 text-white px-6 py-3 font-bold hover:bg-orange-600 transition-colors flex items-center justify-center gap-2"
           >
-            View Compatible Solutions
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
+            View Compatible Solutions →
           </button>
         )}
 

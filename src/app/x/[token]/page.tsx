@@ -1,17 +1,16 @@
 /**
- * Token Resolver Route - Tokenized Offer Pages
- * /x/[token] - Verify HMAC token, track engagement, render offer page
+ * Token Resolver Route - Tokenized Marketing Pages
+ * /x/[token] - Verify HMAC token, track engagement, show personalized offer
+ *
+ * SIMPLIFIED VERSION - Removed abandoned content_blocks schema
+ * TODO: Rebuild with proper machine-specific longform copy approach
  */
 
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { verifyToken } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
-import { cookies } from 'next/headers';
-import TokenMachineFinder from '@/components/offers/TokenMachineFinder';
-import SetupGuide from '@/components/marketing/SetupGuide';
-import ReactMarkdown from 'react-markdown';
-import MediaImage from '@/components/shared/MediaImage';
-import { resolveImageHierarchy } from '@/lib/media';
+import { MarketingHeader } from '@/components/marketing/MarketingHeader';
+import { MarketingFooter } from '@/components/marketing/MarketingFooter';
 
 interface TokenPageProps {
   params: Promise<{
@@ -26,7 +25,7 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
   const { token } = await params;
   const search = await searchParams;
 
-  // Verify and decode token
+  // 1. VERIFY TOKEN
   const payload = verifyToken(token);
 
   if (!payload) {
@@ -50,26 +49,12 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
 
   const { company_id, contact_id, offer_key, campaign_key } = payload;
 
-  // Set session cookie (httpOnly)
-  const cookieStore = await cookies();
-  cookieStore.set('offer_session', JSON.stringify({
-    company_id,
-    contact_id,
-    offer_key,
-    campaign_key,
-  }), {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 60 * 60 * 24 * 3, // 3 days
-  });
-
-  // Track engagement event
+  // 2. TRACK ENGAGEMENT EVENT
   const supabase = getSupabaseClient();
   const url = `/x/${token}`;
   const sessionId = crypto.randomUUID();
 
-  // Extract UTM parameters from search params and put in meta.utm
+  // Extract UTM parameters
   const utmParams = {
     source: typeof search.utm_source === 'string' ? search.utm_source : undefined,
     medium: typeof search.utm_medium === 'string' ? search.utm_medium : undefined,
@@ -78,27 +63,28 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
     content: typeof search.utm_content === 'string' ? search.utm_content : undefined,
   };
 
-  // Remove undefined values
   const utm = Object.fromEntries(
     Object.entries(utmParams).filter(([_, v]) => v !== undefined)
   );
 
-  await supabase.from('engagement_events').insert({
-    company_id,
-    contact_id: contact_id || null,
-    source: 'vercel',
-    event_type: 'offer_view',  // For trigger backfill
-    event_name: 'offer_view',  // Canonical field
-    offer_key: offer_key || null,
-    campaign_key: campaign_key || null,
-    session_id: sessionId,
-    url,
-    meta: Object.keys(utm).length > 0 ? { utm } : {},
-  }).catch(err => {
+  try {
+    await supabase.from('engagement_events').insert({
+      company_id,
+      contact_id: contact_id || null,
+      source: 'vercel',
+      event_type: 'offer_view',
+      event_name: 'offer_view',
+      offer_key: offer_key || null,
+      campaign_key: campaign_key || null,
+      session_id: sessionId,
+      url,
+      meta: Object.keys(utm).length > 0 ? { utm } : {},
+    });
+  } catch (err) {
     console.error('[token-page] Failed to track engagement event:', err);
-  });
+  }
 
-  // Fetch company details
+  // 3. FETCH COMPANY DETAILS
   const { data: company } = await supabase
     .from('companies')
     .select('company_id, company_name')
@@ -109,34 +95,33 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
     notFound();
   }
 
-  // Check consent if contact_id provided
+  // 4. FETCH COMPANY MACHINES (for future machine-specific offers)
+  const { data: companyMachines } = await supabase
+    .from('company_machine')
+    .select('machine_id, machines(brand, model, display_name)')
+    .eq('company_id', company_id);
+
+  // 5. CHECK CONSENT
   let consentGranted = true;
-  let contactMarketingStatus = 'unknown';
 
   if (contact_id) {
     const { data: contact } = await supabase
       .from('contacts')
-      .select('marketing_status, gdpr_consent_at')
+      .select('marketing_status')
       .eq('contact_id', contact_id)
       .single();
 
-    if (contact) {
-      contactMarketingStatus = contact.marketing_status || 'pending';
-
-      // Check if consent is granted
-      if (contact.marketing_status === 'unsubscribed') {
-        consentGranted = false;
-      }
+    if (contact?.marketing_status === 'unsubscribed') {
+      consentGranted = false;
     }
   }
 
-  // Render offer page (customize based on offer_key)
-  // If consent not granted, show limited version
   if (!consentGranted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="min-h-screen bg-gray-50">
+        <MarketingHeader />
         <div className="max-w-4xl mx-auto px-4 py-16">
-          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
+          <div className="bg-white rounded-lg shadow-lg p-8 md:p-12">
             <div className="text-center mb-8">
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                 Technifold Products
@@ -152,233 +137,137 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="/products"
-                className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors text-center"
-              >
+              <a href="/products" className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors text-center">
                 Browse Products
               </a>
-              <a
-                href="/contact"
-                className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-lg font-semibold text-lg hover:border-gray-400 hover:bg-gray-50 transition-colors text-center"
-              >
+              <a href="/contact" className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-lg font-semibold text-lg hover:border-gray-400 hover:bg-gray-50 transition-colors text-center">
                 Contact Us
               </a>
             </div>
-
-            <div className="mt-8 text-center text-sm text-gray-500">
-              <p>Want to receive offers again? <a href="/preferences" className="text-blue-600 hover:underline">Manage your preferences</a></p>
-            </div>
           </div>
         </div>
+        <MarketingFooter />
       </div>
     );
   }
 
-  // Check if we already know this company's machine from company_machine
-  const { data: companyMachines } = await supabase
-    .from('company_machine')
-    .select(`
-      *,
-      machines:machine_id (
-        machine_id,
-        brand,
-        model,
-        display_name,
-        slug
-      )
-    `)
-    .eq('company_id', company_id)
-    .or('confirmed.eq.true,confidence_score.gte.4')  // Show confirmed or high-confidence machines
-    .order('confidence_score', { ascending: false })
-    .limit(1);
-
-  const knownMachine = companyMachines && companyMachines.length > 0 ? companyMachines[0] : null;
-
-  // Fetch problem cards if we know their machine
-  // Each row = ONE CARD = one (machine, solution, problem) combination
-  let problemCards = null;
-  let introText = '';
-
-  if (knownMachine && knownMachine.machines) {
-    const machineSlug = (knownMachine.machines as any).slug;
-
-    if (machineSlug) {
-      const { data } = await supabase
-        .from('v_machine_solution_problem_full')
-        .select('*')
-        .eq('machine_slug', machineSlug)
-        .order('machine_solution_rank', { ascending: true })
-        .order('pitch_relevance_rank', { ascending: true })
-        .limit(10);  // Limit to top 10 for token pages
-
-      problemCards = data || [];
-
-      // Extract intro from first card's resolved_copy (first paragraph)
-      if (problemCards.length > 0 && problemCards[0].resolved_copy) {
-        const firstParagraph = problemCards[0].resolved_copy.split('\n\n')[0];
-        introText = firstParagraph.substring(0, 200); // First 200 chars
-      }
-    }
-  }
-
-  // Full personalized offer page for consented contacts
+  // 6. RENDER SIMPLIFIED OFFER PAGE
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* No global nav - clean offer page */}
-      <div className="max-w-4xl mx-auto px-4 py-16">
-        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Exclusive Offer for {company.company_name}
-            </h1>
-            <p className="text-xl text-gray-600">
-              We've prepared a special offer just for you
-            </p>
+    <div className="min-h-screen bg-white">
+      <MarketingHeader />
+
+      {/* Hero */}
+      <section className="bg-slate-900 text-white py-16 border-b-4 border-orange-500">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="inline-block bg-orange-500/20 border border-orange-500/30 px-3 py-1 text-xs font-bold mb-4 text-orange-300">
+            Exclusive Offer for {company.company_name}
           </div>
 
-          {/* Intro from first card's resolved_copy */}
-          {introText && (
-            <div className="mb-8 text-center">
-              <p className="text-lg text-gray-700 leading-relaxed max-w-2xl mx-auto">
-                {introText}
-              </p>
-            </div>
-          )}
+          <h1 className="text-4xl font-bold mb-6 leading-tight">
+            Transform Your Print Finishing
+          </h1>
 
-          {/* Machine Selector Section - if we don't know their machine */}
-          {!knownMachine && (
-            <div className="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2 text-center">
-                Which machine do you run?
-              </h2>
-              <p className="text-gray-600 text-center mb-6">
-                Help us show you relevant solutions for your equipment
-              </p>
-              <TokenMachineFinder
-                token={token}
-                companyId={company_id}
-                contactId={contact_id}
-                offerKey={offer_key}
-                campaignKey={campaign_key}
-              />
-            </div>
-          )}
+          <p className="text-lg text-gray-300 mb-8 max-w-3xl">
+            Eliminate fiber cracking, reduce waste, and increase productivity with Technifold's
+            precision finishing tools. Over 40,000 installations worldwide.
+          </p>
 
-          {/* Show known machine and problem cards - ONE CARD PER PROBLEM */}
-          {knownMachine && knownMachine.machines && (
-            <div className="mb-10">
-              <div className="p-6 bg-green-50 rounded-xl border-2 border-green-200 mb-8">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <h3 className="text-xl font-bold text-green-900">
-                    Problems We Fix on Your {(knownMachine.machines as any).display_name}
+          <a
+            href="/contact"
+            className="inline-block bg-orange-500 text-white px-8 py-3 text-base font-bold hover:bg-orange-600 transition-colors"
+          >
+            Request Free Trial →
+          </a>
+        </div>
+      </section>
+
+      {/* Machine Context (if known) */}
+      {companyMachines && companyMachines.length > 0 && (
+        <section className="py-12 bg-gray-50 border-t border-gray-300">
+          <div className="max-w-4xl mx-auto px-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Equipment</h2>
+            <div className="space-y-4">
+              {companyMachines.map((cm: any) => (
+                <div key={cm.machine_id} className="bg-white border-2 border-gray-200 p-4">
+                  <h3 className="text-lg font-bold text-gray-900">
+                    {cm.machines?.brand} {cm.machines?.model}
                   </h3>
+                  <p className="text-sm text-gray-600">
+                    Compatible solutions available
+                  </p>
                 </div>
-                <p className="text-center text-green-700">
-                  Here's what we can solve for you right now
-                </p>
-              </div>
-
-              {/* Problem Cards - ONE PER PROBLEM */}
-              {problemCards && problemCards.length > 0 && (
-                <>
-                  <div className="space-y-6 mb-10">
-                    {problemCards.map((card: any) => {
-                      // Resolve image using hierarchy
-                      const imageUrl = resolveImageHierarchy({
-                        override_image_url: card.override_image_url,
-                        solution_problem_image_url: card.sp_default_image_url,
-                        solution_image_url: card.solution_default_image_url,
-                        problem_image_url: card.problem_default_image_url,
-                      });
-
-                      return (
-                        <div key={`${card.solution_id}-${card.problem_id}`} className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:border-blue-500 hover:shadow-lg transition-all">
-                          {/* Image at top */}
-                          <div className="relative h-48 w-full bg-gray-100">
-                            <MediaImage
-                              src={imageUrl}
-                              alt={`${card.solution_name} - ${card.problem_title}`}
-                              fill
-                              sizes="(max-width: 768px) 100vw, 600px"
-                            />
-                          </div>
-
-                          {/* Content below image */}
-                          <div className="p-6">
-                            {/* Solution Badge */}
-                            <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-bold mb-4">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                              {card.solution_name}
-                            </div>
-
-                            {/* Resolved Copy (Markdown) */}
-                            <div className="prose max-w-none mb-5 text-gray-900">
-                              <ReactMarkdown>{card.resolved_copy}</ReactMarkdown>
-                            </div>
-
-                            {/* CTA */}
-                            <a
-                              href="/contact"
-                              className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition-colors"
-                            >
-                              {card.action_cta || 'Get help with this'}
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                              </svg>
-                            </a>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Setup Guide - Once per page */}
-                  <SetupGuide
-                    curatedSkus={problemCards[0]?.curated_skus}
-                    machineId={(knownMachine.machines as any).machine_id}
-                    solutionId={problemCards[0]?.solution_id}
-                    machineName={(knownMachine.machines as any).display_name}
-                  />
-                </>
-              )}
-
-              {/* If no solutions found for their machine */}
-              {problemCards && problemCards.length === 0 && (
-                <div className="text-center py-8 text-gray-600">
-                  <p>We're updating solutions for your machine. Contact us to discuss your specific needs.</p>
-                </div>
-              )}
+              ))}
             </div>
-          )}
-
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href={`/portal/${company_id}`}
-              className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors text-center"
-            >
-              View Your Portal
-            </a>
-            <a
-              href="/products"
-              className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-lg font-semibold text-lg hover:border-gray-400 hover:bg-gray-50 transition-colors text-center"
-            >
-              Browse Products
-            </a>
           </div>
+        </section>
+      )}
 
-          <div className="mt-8 text-center text-sm text-gray-500">
-            <p>Questions? <a href="/contact" className="text-blue-600 hover:underline">Contact us</a></p>
-            <p className="mt-2"><a href="/preferences" className="text-gray-500 hover:underline">Manage your preferences</a></p>
+      {/* Solutions Grid */}
+      <section className="py-16 bg-white">
+        <div className="max-w-4xl mx-auto px-6">
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">Our Solutions</h2>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <a href="/tools/tri-creaser" className="bg-slate-50 border-2 border-gray-200 p-6 hover:border-orange-500 transition-colors group">
+              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600">
+                Tri-Creaser
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Eliminate fiber cracking completely. 40,000+ installations worldwide.
+              </p>
+              <span className="text-orange-600 font-semibold">Learn more →</span>
+            </a>
+
+            <a href="/tools/quad-creaser" className="bg-slate-50 border-2 border-gray-200 p-6 hover:border-orange-500 transition-colors group">
+              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600">
+                Quad-Creaser
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Perfect bound book finishing. Four creases inline. Zero flaking.
+              </p>
+              <span className="text-orange-600 font-semibold">Learn more →</span>
+            </a>
+
+            <a href="/tools/spine-creaser" className="bg-slate-50 border-2 border-gray-200 p-6 hover:border-orange-500 transition-colors group">
+              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600">
+                Spine-Creaser
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Saddle stitcher transformation. Deep crease at 20,000 BPH.
+              </p>
+              <span className="text-orange-600 font-semibold">Learn more →</span>
+            </a>
+
+            <a href="/tools/multi-tool" className="bg-slate-50 border-2 border-gray-200 p-6 hover:border-orange-500 transition-colors group">
+              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600">
+                Multi-Tool
+              </h3>
+              <p className="text-gray-600 mb-4">
+                6-in-1 modular system. Crease, perf, cut, matrix removal inline.
+              </p>
+              <span className="text-orange-600 font-semibold">Learn more →</span>
+            </a>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-12 bg-orange-500 text-white border-t-4 border-orange-600">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Finishing?</h2>
+          <p className="text-lg text-orange-100 mb-6">
+            Request a free 30-day trial. Zero risk, zero commitment.
+          </p>
+          <a
+            href="/contact"
+            className="inline-block bg-slate-900 text-white px-8 py-3 text-base font-bold hover:bg-slate-800 transition-colors"
+          >
+            Request Free Trial →
+          </a>
+        </div>
+      </section>
+
+      <MarketingFooter />
     </div>
   );
 }

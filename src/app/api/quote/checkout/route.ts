@@ -140,6 +140,7 @@ export async function POST(request: NextRequest) {
       session = await stripe.checkout.sessions.create({
         customer: stripeCustomerId,
         mode: 'subscription',
+        payment_method_types: ['card', 'bacs_debit'], // Support both card and BACS for subscriptions
         line_items: [
           {
             price_data: {
@@ -185,6 +186,7 @@ export async function POST(request: NextRequest) {
       session = await stripe.checkout.sessions.create({
         customer: stripeCustomerId,
         mode: 'payment',
+        payment_method_types: ['card', 'bacs_debit'], // Support both card and BACS for one-time purchase
         line_items: [
           {
             price_data: {
