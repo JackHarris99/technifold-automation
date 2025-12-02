@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       email,
     });
 
-    const trialLink = `${process.env.NEXT_PUBLIC_BASE_URL}/r/${token}`;
+    const trialLink = `${process.env.NEXT_PUBLIC_BASE_URL}/t/${token}`;
 
     // Queue email via outbox
     await supabase.from('outbox').insert({
