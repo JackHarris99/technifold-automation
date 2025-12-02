@@ -74,7 +74,12 @@ export async function POST(request: NextRequest) {
 
     if (companyError || !company) {
       console.error('Company creation error:', companyError);
-      return NextResponse.json({ error: 'Failed to create company' }, { status: 500 });
+      console.error('Company name attempted:', company_name);
+      return NextResponse.json({
+        error: 'Failed to create company',
+        details: companyError?.message || 'No company returned',
+        code: companyError?.code
+      }, { status: 500 });
     }
 
     // Create or get contact
