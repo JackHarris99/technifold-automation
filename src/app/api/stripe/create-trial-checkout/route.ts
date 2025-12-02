@@ -1,10 +1,16 @@
 /**
  * Create Stripe Checkout Session for Trial Signup
  *
- * ONE Stripe product model:
- * - Product: "Technifold Subscription"
- * - Variable prices: £69, £89, £99, £149, £179
- * - Metadata stores machine + tools info
+ * DYNAMIC PRICING MODEL:
+ * - ONE Stripe product: "Technifold Equipment Subscription"
+ * - Price set dynamically at checkout (any amount)
+ * - Enables AI-driven pricing, A/B testing, market-specific rates
+ * - Metadata stores machine + tools for our internal tracking
+ *
+ * RATCHET SUBSCRIPTION:
+ * - Customers can upgrade (add tools) anytime
+ * - Downgrades require manual intervention (call us)
+ * - Stripe handles one monthly charge, we track itemization
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -27,27 +33,25 @@ export async function POST(request: NextRequest) {
       token // HMAC token if from email
     } = await request.json();
 
+    // Validate offer_price
+    const priceInPence = Math.round((offer_price || 99) * 100);
+    if (priceInPence < 100 || priceInPence > 100000) {
+      return NextResponse.json({ error: 'Invalid price' }, { status: 400 });
+    }
+
     const supabase = createServerClient();
 
     // Get machine details
     const { data: machine } = await supabase
       .from('machines')
-      .select('*, category')
-      .eq('machine_slug', machine_slug)
+      .select('*')
+      .eq('slug', machine_slug)
       .single();
 
-    if (!machine) {
-      return NextResponse.json({ error: 'Machine not found' }, { status: 404 });
-    }
-
-    // Get compatible products for this machine (base trial kit)
-    const { data: compatibility } = await supabase
-      .from('product_machine_compatibility')
-      .select('product_code')
-      .eq('machine_slug', machine_slug)
-      .limit(5); // Base trial kit - not full capability
-
-    const baseTools = compatibility?.map(c => c.product_code) || [];
+    // Machine is optional - allow generic trials
+    const machineName = machine
+      ? `${machine.brand} ${machine.model}`
+      : 'Your Equipment';
 
     // Create or get company in database
     const { data: company, error: companyError } = await supabase
@@ -84,16 +88,43 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
 
-    // Determine Stripe price ID based on offer_price
-    const priceId = getPriceId(offer_price);
+    // Get or create Stripe customer
+    let stripeCustomerId = company.stripe_customer_id;
 
-    // Create Stripe checkout session
+    if (!stripeCustomerId) {
+      const customer = await stripe.customers.create({
+        email,
+        name: company_name,
+        phone,
+        metadata: {
+          company_id: company.company_id,
+          contact_id: contact?.contact_id || '',
+          source: 'trial_signup'
+        }
+      });
+      stripeCustomerId = customer.id;
+
+      // Save Stripe customer ID to company
+      await supabase
+        .from('companies')
+        .update({ stripe_customer_id: stripeCustomerId })
+        .eq('company_id', company.company_id);
+    }
+
+    // Create Stripe checkout session with DYNAMIC pricing
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
-      customer_email: email,
+      customer: stripeCustomerId,
       line_items: [
         {
-          price: priceId,
+          price_data: {
+            currency: 'gbp',
+            product: process.env.STRIPE_PRODUCT_ID!, // ONE product for all subscriptions
+            unit_amount: priceInPence,
+            recurring: {
+              interval: 'month'
+            }
+          },
           quantity: 1,
         },
       ],
@@ -102,37 +133,46 @@ export async function POST(request: NextRequest) {
         metadata: {
           company_id: company.company_id,
           contact_id: contact?.contact_id || '',
-          machine_slug: machine_slug,
-          machine_name: `${machine.manufacturer} ${machine.model}`,
-          machine_category: machine.category,
-          base_tools: JSON.stringify(baseTools),
-          offer_tier: 'starter',
+          machine_slug: machine_slug || '',
+          machine_name: machineName,
+          monthly_price_gbp: offer_price.toString(),
           source: token ? 'email_campaign' : 'website',
-          hmac_token: token || ''
         }
       },
       metadata: {
         company_id: company.company_id,
-        machine_slug: machine_slug,
-        offer_price: offer_price.toString()
+        contact_id: contact?.contact_id || '',
+        machine_slug: machine_slug || '',
+        offer_price: offer_price.toString(),
+        type: 'trial_subscription'
       },
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/trial/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/trial?machine=${machine_slug}&offer=${offer_price}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/trial?machine=${machine_slug || ''}&offer=${offer_price}`,
       allow_promotion_codes: true,
       billing_address_collection: 'required',
+      phone_number_collection: {
+        enabled: true
+      },
+      custom_text: {
+        submit: {
+          message: `Start your 30-day free trial for ${machineName}. Your card will not be charged until the trial ends.`
+        }
+      }
     });
 
     // Log trial signup event
     await supabase.from('engagement_events').insert({
       company_id: company.company_id,
       contact_id: contact?.contact_id,
-      event_type: 'trial_signup_initiated',
-      event_data: {
+      event_type: 'trial_checkout_created',
+      event_name: 'trial_checkout_created',
+      source: token ? 'email_campaign' : 'website',
+      meta: {
         machine_slug,
-        machine_name: `${machine.manufacturer} ${machine.model}`,
+        machine_name: machineName,
         offer_price,
         stripe_session_id: session.id,
-        source: token ? 'email_campaign' : 'website'
+        stripe_customer_id: stripeCustomerId
       }
     });
 
@@ -148,19 +188,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-function getPriceId(offerPrice: number): string {
-  // TODO: Create these price IDs in Stripe dashboard first
-  // All prices belong to ONE product: "Technifold Subscription"
-
-  const priceMap: Record<number, string> = {
-    69: process.env.STRIPE_PRICE_69 || 'price_69_placeholder',
-    89: process.env.STRIPE_PRICE_89 || 'price_89_placeholder',
-    99: process.env.STRIPE_PRICE_99 || 'price_99_placeholder',
-    149: process.env.STRIPE_PRICE_149 || 'price_149_placeholder',
-    179: process.env.STRIPE_PRICE_179 || 'price_179_placeholder',
-  };
-
-  return priceMap[offerPrice] || priceMap[99]; // Default to £99
 }
