@@ -25,44 +25,64 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServerClient();
 
-    // Create or update company
-    const { data: company, error: companyError } = await supabase
+    // Check if company already exists by name
+    const { data: existingCompany } = await supabase
       .from('companies')
-      .upsert({
-        company_name,
-        source: 'trial_request',
-        category: 'prospect',
-      }, {
-        onConflict: 'company_name',
-        ignoreDuplicates: false
-      })
-      .select()
+      .select('*')
+      .eq('company_name', company_name.trim())
       .single();
 
-    if (companyError || !company) {
-      console.error('Company creation error:', companyError);
-      return NextResponse.json({ error: 'Failed to create company' }, { status: 500 });
+    let company = existingCompany;
+
+    if (!company) {
+      // Generate unique company_id (TRL + timestamp + random)
+      const companyId = `TRL${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
+
+      const { data: newCompany, error: companyError } = await supabase
+        .from('companies')
+        .insert({
+          company_id: companyId,
+          company_name: company_name.trim(),
+          source: 'trial_request',
+          category: 'prospect'
+        })
+        .select()
+        .single();
+
+      if (companyError || !newCompany) {
+        console.error('Company creation error:', companyError);
+        return NextResponse.json({ error: 'Failed to create company' }, { status: 500 });
+      }
+      company = newCompany;
     }
 
-    // Create or update contact
-    const { data: contact, error: contactError } = await supabase
+    // Check if contact already exists by email
+    const { data: existingContact } = await supabase
       .from('contacts')
-      .upsert({
-        company_id: company.company_id,
-        full_name: contact_name,
-        email,
-        phone,
-        marketing_status: 'subscribed'
-      }, {
-        onConflict: 'email',
-        ignoreDuplicates: false
-      })
-      .select()
+      .select('*')
+      .eq('email', email)
       .single();
 
-    if (contactError || !contact) {
-      console.error('Contact creation error:', contactError);
-      return NextResponse.json({ error: 'Failed to create contact' }, { status: 500 });
+    let contact = existingContact;
+
+    if (!contact) {
+      const { data: newContact, error: contactError } = await supabase
+        .from('contacts')
+        .insert({
+          company_id: company.company_id,
+          full_name: contact_name,
+          email,
+          phone,
+          marketing_status: 'subscribed'
+        })
+        .select()
+        .single();
+
+      if (contactError || !newContact) {
+        console.error('Contact creation error:', contactError);
+        return NextResponse.json({ error: 'Failed to create contact' }, { status: 500 });
+      }
+      contact = newContact;
     }
 
     // Get machine details

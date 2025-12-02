@@ -58,45 +58,64 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Company name is required' }, { status: 400 });
     }
 
-    // Create or get company in database
-    const { data: company, error: companyError } = await supabase
+    // Check if company already exists by name
+    const { data: existingCompany } = await supabase
       .from('companies')
-      .upsert({
-        company_name: company_name.trim(),
-        source: 'trial_signup',
-        category: 'prospect'
-      }, {
-        onConflict: 'company_name',
-        ignoreDuplicates: false
-      })
-      .select()
+      .select('*')
+      .eq('company_name', company_name.trim())
       .single();
 
-    if (companyError || !company) {
-      console.error('Company creation error:', companyError);
-      console.error('Company name attempted:', company_name);
-      return NextResponse.json({
-        error: 'Failed to create company',
-        details: companyError?.message || 'No company returned',
-        code: companyError?.code
-      }, { status: 500 });
+    let company = existingCompany;
+
+    if (!company) {
+      // Generate unique company_id (TRL + timestamp + random)
+      const companyId = `TRL${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
+
+      const { data: newCompany, error: companyError } = await supabase
+        .from('companies')
+        .insert({
+          company_id: companyId,
+          company_name: company_name.trim(),
+          source: 'trial_signup',
+          category: 'prospect'
+        })
+        .select()
+        .single();
+
+      if (companyError || !newCompany) {
+        console.error('Company creation error:', companyError);
+        return NextResponse.json({
+          error: 'Failed to create company',
+          details: companyError?.message || 'No company returned',
+          code: companyError?.code
+        }, { status: 500 });
+      }
+      company = newCompany;
     }
 
-    // Create or get contact
-    const { data: contact } = await supabase
+    // Check if contact already exists by email
+    const { data: existingContact } = await supabase
       .from('contacts')
-      .upsert({
-        company_id: company.company_id,
-        full_name: contact_name,
-        email,
-        phone,
-        marketing_status: 'subscribed'
-      }, {
-        onConflict: 'email',
-        ignoreDuplicates: false
-      })
-      .select()
+      .select('*')
+      .eq('email', email)
       .single();
+
+    let contact = existingContact;
+
+    if (!contact) {
+      const { data: newContact } = await supabase
+        .from('contacts')
+        .insert({
+          company_id: company.company_id,
+          full_name: contact_name,
+          email,
+          phone,
+          marketing_status: 'subscribed'
+        })
+        .select()
+        .single();
+      contact = newContact;
+    }
 
     // Get or create Stripe customer
     let stripeCustomerId = company.stripe_customer_id;
