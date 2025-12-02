@@ -53,11 +53,16 @@ export async function POST(request: NextRequest) {
       ? `${machine.brand} ${machine.model}`
       : 'Your Equipment';
 
+    // Validate we have a company name
+    if (!company_name || company_name.trim() === '') {
+      return NextResponse.json({ error: 'Company name is required' }, { status: 400 });
+    }
+
     // Create or get company in database
     const { data: company, error: companyError } = await supabase
       .from('companies')
       .upsert({
-        company_name,
+        company_name: company_name.trim(),
         source: 'trial_signup',
         category: 'prospect'
       }, {

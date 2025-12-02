@@ -79,6 +79,8 @@ export async function POST(request: NextRequest) {
       machine_slug,
       offer_price,
       email,
+      company_name,
+      contact_name,
     });
 
     const trialLink = `${process.env.NEXT_PUBLIC_BASE_URL}/t/${token}`;

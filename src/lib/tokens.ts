@@ -25,6 +25,8 @@ export interface TokenPayload {
   machine_slug?: string; // For trial links
   offer_price?: number; // For trial links
   email?: string; // For trial links
+  company_name?: string; // For trial links
+  contact_name?: string; // For trial links
   expires_at: number; // Unix timestamp
 }
 
@@ -144,6 +146,8 @@ export function generateTrialToken(data: {
   machine_slug: string;
   offer_price: number;
   email: string;
+  company_name: string;
+  contact_name: string;
 }): string {
   return generateToken({
     company_id: data.company_id,
@@ -151,5 +155,7 @@ export function generateTrialToken(data: {
     machine_slug: data.machine_slug,
     offer_price: data.offer_price,
     email: data.email,
+    company_name: data.company_name,
+    contact_name: data.contact_name,
   }, 168); // 7 days TTL for trial links
 }

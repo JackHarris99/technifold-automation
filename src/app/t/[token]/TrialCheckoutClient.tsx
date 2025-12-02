@@ -179,7 +179,7 @@ export default function TrialCheckoutClient({
         {/* Trust Signals */}
         <div className="text-center text-gray-500 text-sm">
           <p className="mb-2">Secure checkout powered by Stripe</p>
-          <p>Questions? Call 01onal707 275 114</p>
+          <p>Questions? Call +44 (0)1455 55 44 91</p>
         </div>
       </div>
     </div>

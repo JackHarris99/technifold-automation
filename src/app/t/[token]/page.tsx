@@ -45,10 +45,10 @@ export default async function TrialCheckoutPage({ params }: TrialCheckoutProps) 
     );
   }
 
-  const { company_id, contact_id, machine_slug, offer_price, email } = payload;
+  const { company_id, contact_id, machine_slug, offer_price, email, company_name, contact_name } = payload;
   const supabase = getSupabaseClient();
 
-  // 2. Fetch machine details
+  // 2. Fetch machine details for display name
   let machine = null;
   if (machine_slug) {
     const { data } = await supabase
@@ -59,30 +59,8 @@ export default async function TrialCheckoutPage({ params }: TrialCheckoutProps) 
     machine = data;
   }
 
-  // 3. Fetch company details
-  let company = null;
-  if (company_id) {
-    const { data } = await supabase
-      .from('companies')
-      .select('company_id, company_name')
-      .eq('company_id', company_id)
-      .single();
-    company = data;
-  }
-
-  // 4. Fetch contact details
-  let contact = null;
-  if (contact_id) {
-    const { data } = await supabase
-      .from('contacts')
-      .select('contact_id, full_name, email')
-      .eq('contact_id', contact_id)
-      .single();
-    contact = data;
-  }
-
-  // 5. Track page view
-  await supabase.from('engagement_events').insert({
+  // 3. Track page view (don't await - fire and forget)
+  supabase.from('engagement_events').insert({
     company_id: company_id || null,
     contact_id: contact_id || null,
     event_type: 'trial_checkout_view',
@@ -99,15 +77,16 @@ export default async function TrialCheckoutPage({ params }: TrialCheckoutProps) 
     ? `${machine.brand} ${machine.model}`
     : 'Your Equipment';
 
+  // Use names from token payload (set when trial was requested)
   return (
     <TrialCheckoutClient
       token={token}
       machineName={machineName}
       machineSlug={machine_slug || ''}
       offerPrice={offer_price || 99}
-      companyName={company?.company_name || ''}
-      contactName={contact?.full_name || ''}
-      email={email || contact?.email || ''}
+      companyName={company_name || ''}
+      contactName={contact_name || ''}
+      email={email || ''}
     />
   );
 }
