@@ -45,7 +45,11 @@ export default function TrialCheckoutClient({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create checkout');
+        // Show full error details for debugging
+        const errorMsg = data.details
+          ? `${data.error}: ${data.details} (${data.code || 'no code'})`
+          : data.error || 'Failed to create checkout';
+        throw new Error(errorMsg);
       }
 
       // Redirect to Stripe checkout
