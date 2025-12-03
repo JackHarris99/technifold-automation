@@ -1,9 +1,10 @@
 /**
  * GET /api/machines/types
  * Returns all machine types with counts
+ * Optional: ?brand=MBO to filter by brand
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 const TYPE_DISPLAY: Record<string, string> = {
@@ -22,12 +23,21 @@ const TYPE_SLUGS: Record<string, string> = {
   'cover_feeder': 'cover-feeder',
 };
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const supabase = getSupabaseClient();
+  const { searchParams } = new URL(request.url);
+  const brandFilter = searchParams.get('brand');
 
-  const { data: machines, error } = await supabase
+  let query = supabase
     .from('machines')
-    .select('type');
+    .select('type')
+    .limit(2000);
+
+  if (brandFilter) {
+    query = query.eq('brand', brandFilter);
+  }
+
+  const { data: machines, error } = await query;
 
   if (error) {
     return NextResponse.json({ error: 'Failed to fetch types' }, { status: 500 });

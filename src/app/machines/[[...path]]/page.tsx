@@ -5,6 +5,7 @@
  * - /machines                     → Machine finder/index page
  * - /machines/folder              → Fallback: "your folding machine"
  * - /machines/folder/mbo          → Fallback: "your MBO folding machine"
+ * - /machines/brand/mbo           → Fallback: "your MBO machine" (brand-only)
  * - /machines/mbo-k-55            → Specific: "your MBO K 55"
  */
 
@@ -52,7 +53,7 @@ function normalizeBrandSlug(brand: string): string {
     .replace(/^-|-$/g, '');
 }
 
-type RouteType = 'index' | 'type' | 'type-brand' | 'model';
+type RouteType = 'index' | 'type' | 'type-brand' | 'brand' | 'model';
 
 function parseRoute(path: string[] | undefined): { type: RouteType; typeSlug?: string; brandSlug?: string; machineSlug?: string } {
   if (!path || path.length === 0) {
@@ -60,6 +61,11 @@ function parseRoute(path: string[] | undefined): { type: RouteType; typeSlug?: s
   }
 
   const firstSegment = path[0];
+
+  // Check for brand-only route: /machines/brand/[slug]
+  if (firstSegment === 'brand' && path.length === 2) {
+    return { type: 'brand', brandSlug: path[1] };
+  }
 
   // Check if first segment is a type
   if (TYPE_MAP[firstSegment]) {
@@ -104,6 +110,15 @@ export async function generateMetadata({ params }: { params: Promise<{ path?: st
     return {
       title: `Creasing Solutions for ${brandName} ${typeName}s | Technifold`,
       description: `Eliminate fiber cracking on your ${brandName} ${typeName}. From £69/month. 30-day free trial.`,
+    };
+  }
+
+  // Brand-only - /machines/brand/mbo
+  if (route.type === 'brand' && route.brandSlug) {
+    const brandName = route.brandSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    return {
+      title: `Creasing Solutions for ${brandName} Machines | Technifold`,
+      description: `Eliminate fiber cracking on your ${brandName} equipment. From £69/month. 30-day free trial.`,
     };
   }
 
@@ -211,6 +226,56 @@ export default async function MachinesPage({ params }: { params: Promise<{ path?
       brand: `${brandName} `,
       model: typeName,
       machine_type: typeName,
+      monthly_price: basePricing.display,
+      typical_range: basePricing.typicalRange,
+    };
+
+    const pageTemplate = getDefaultTemplate(normalizedType);
+    const renderedCopy = replacePlaceholders(pageTemplate.copy_sections, personalization);
+
+    return (
+      <MachinePageClient
+        machine={virtualMachine}
+        renderedCopy={renderedCopy}
+        basePricing={basePricing}
+        personalization={personalization}
+      />
+    );
+  }
+
+  // BRAND-ONLY PAGE - /machines/brand/mbo (fallback with brand, no type)
+  if (route.type === 'brand' && route.brandSlug) {
+    // Look up the actual brand name from any machine with this brand
+    const { data: sampleMachine } = await supabase
+      .from('machines')
+      .select('brand, type')
+      .limit(500);
+
+    const matchingBrand = sampleMachine?.find(m => normalizeBrandSlug(m.brand) === route.brandSlug);
+    const brandName = matchingBrand?.brand || route.brandSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+    if (!matchingBrand) {
+      notFound();
+    }
+
+    // Create a "virtual" machine for the template
+    const virtualMachine = {
+      machine_id: 'brand-fallback',
+      brand: brandName,
+      model: 'Machine',
+      display_name: `${brandName} Machine`,
+      type: matchingBrand.type || 'folder', // Use first matching type for pricing
+      slug: `brand/${route.brandSlug}`,
+    };
+
+    // Use the first type found for this brand for pricing
+    const normalizedType = normalizeMachineType(matchingBrand.type || 'folder');
+    const basePricing = getMachinePricing(normalizedType);
+
+    const personalization = {
+      brand: `${brandName} `,
+      model: 'Machine',
+      machine_type: 'machine',
       monthly_price: basePricing.display,
       typical_range: basePricing.typicalRange,
     };

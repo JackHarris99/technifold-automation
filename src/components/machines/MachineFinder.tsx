@@ -1,11 +1,11 @@
 /**
  * MachineFinder Component
  *
- * Single-step instant selector on homepage:
- * - Three dropdowns: Type → Brand → Model (each filters the next)
- * - "Find Your Machine" button takes user directly to the page
- * - Works with partial selection (type only, type+brand, or full)
- * - All pages use slugs: /machines/[slug]
+ * Flexible cross-filtering machine selector:
+ * - Type, Brand, Model dropdowns can be selected in any order
+ * - Each selection filters the other dropdowns
+ * - Model requires at least Type OR Brand selected
+ * - Supports partial selection for fallback pages
  */
 
 'use client';
@@ -23,7 +23,20 @@ interface MachineType {
 interface Brand {
   brand: string;
   slug: string;
-  modelCount: number;
+  count: number;
+  types: string[];
+}
+
+interface Model {
+  model: string;
+  slug: string;
+  type?: string;
+  brand?: string;
+}
+
+interface ModelGroup {
+  type: string;
+  displayName: string;
   models: Array<{ model: string; slug: string }>;
 }
 
@@ -40,12 +53,21 @@ interface SearchResult {
 export default function MachineFinder() {
   const router = useRouter();
 
-  // Selection state - all on one page
-  const [types, setTypes] = useState<MachineType[]>([]);
+  // All available options (unfiltered)
+  const [allTypes, setAllTypes] = useState<MachineType[]>([]);
+  const [allBrands, setAllBrands] = useState<Brand[]>([]);
+
+  // Filtered options based on selections
+  const [filteredTypes, setFilteredTypes] = useState<MachineType[]>([]);
+  const [filteredBrands, setFilteredBrands] = useState<Brand[]>([]);
+  const [models, setModels] = useState<Model[]>([]);
+  const [modelGroups, setModelGroups] = useState<ModelGroup[]>([]);
+  const [isModelsGrouped, setIsModelsGrouped] = useState(false);
+
+  // Selections
   const [selectedType, setSelectedType] = useState<MachineType | null>(null);
-  const [brands, setBrands] = useState<Brand[]>([]);
   const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
-  const [selectedModel, setSelectedModel] = useState<{ model: string; slug: string } | null>(null);
+  const [selectedModel, setSelectedModel] = useState<Model | null>(null);
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -53,52 +75,112 @@ export default function MachineFinder() {
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  // Loading
-  const [loading, setLoading] = useState(false);
+  // Loading states
+  const [loadingTypes, setLoadingTypes] = useState(false);
+  const [loadingBrands, setLoadingBrands] = useState(false);
+  const [loadingModels, setLoadingModels] = useState(false);
 
-  // Fetch types on mount
+  // Fetch all types and brands on mount
   useEffect(() => {
-    async function fetchTypes() {
+    async function fetchInitialData() {
+      setLoadingTypes(true);
+      setLoadingBrands(true);
       try {
-        const response = await fetch('/api/machines/types');
-        const data = await response.json();
-        setTypes(data.types || []);
+        const [typesRes, brandsRes] = await Promise.all([
+          fetch('/api/machines/types'),
+          fetch('/api/machines/brands'),
+        ]);
+        const typesData = await typesRes.json();
+        const brandsData = await brandsRes.json();
+
+        setAllTypes(typesData.types || []);
+        setFilteredTypes(typesData.types || []);
+        setAllBrands(brandsData.brands || []);
+        setFilteredBrands(brandsData.brands || []);
       } catch (error) {
-        console.error('Failed to fetch types:', error);
+        console.error('Failed to fetch initial data:', error);
+      } finally {
+        setLoadingTypes(false);
+        setLoadingBrands(false);
       }
     }
-    fetchTypes();
+    fetchInitialData();
   }, []);
 
-  // Fetch brands when type selected
+  // Update filtered types when brand changes
+  useEffect(() => {
+    if (!selectedBrand) {
+      setFilteredTypes(allTypes);
+      return;
+    }
+
+    // Filter types to only those that have this brand
+    const brandTypes = selectedBrand.types;
+    const filtered = allTypes.filter(t => brandTypes.includes(t.type));
+    setFilteredTypes(filtered);
+
+    // If current type selection is not in filtered list, clear it
+    if (selectedType && !brandTypes.includes(selectedType.type)) {
+      setSelectedType(null);
+    }
+  }, [selectedBrand, allTypes]);
+
+  // Update filtered brands when type changes
   useEffect(() => {
     if (!selectedType) {
-      setBrands([]);
+      setFilteredBrands(allBrands);
+      return;
+    }
+
+    // Filter brands to only those that have this type
+    const filtered = allBrands.filter(b => b.types.includes(selectedType.type));
+    setFilteredBrands(filtered);
+
+    // If current brand selection is not in filtered list, clear it
+    if (selectedBrand && !selectedBrand.types.includes(selectedType.type)) {
       setSelectedBrand(null);
+    }
+  }, [selectedType, allBrands]);
+
+  // Fetch models when type or brand is selected
+  useEffect(() => {
+    // Clear models if nothing selected
+    if (!selectedType && !selectedBrand) {
+      setModels([]);
+      setModelGroups([]);
       setSelectedModel(null);
       return;
     }
 
-    async function fetchBrands() {
-      setLoading(true);
+    async function fetchModels() {
+      setLoadingModels(true);
       try {
-        const response = await fetch(`/api/machines/by-type?type=${selectedType.type}`);
+        const params = new URLSearchParams();
+        if (selectedType) params.set('type', selectedType.type);
+        if (selectedBrand) params.set('brand', selectedBrand.brand);
+
+        const response = await fetch(`/api/machines/models?${params}`);
         const data = await response.json();
-        setBrands(data.brands || []);
+
+        if (data.grouped) {
+          setModelGroups(data.modelGroups || []);
+          setModels([]);
+          setIsModelsGrouped(true);
+        } else {
+          setModels(data.models || []);
+          setModelGroups([]);
+          setIsModelsGrouped(false);
+        }
       } catch (error) {
-        console.error('Failed to fetch brands:', error);
+        console.error('Failed to fetch models:', error);
       } finally {
-        setLoading(false);
+        setLoadingModels(false);
       }
     }
 
-    fetchBrands();
-  }, [selectedType]);
-
-  // Reset model when brand changes
-  useEffect(() => {
+    fetchModels();
     setSelectedModel(null);
-  }, [selectedBrand]);
+  }, [selectedType, selectedBrand]);
 
   // Search debounce
   useEffect(() => {
@@ -133,22 +215,37 @@ export default function MachineFinder() {
   }, []);
 
   const handleTypeSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const type = types.find(t => t.type === e.target.value);
+    const type = filteredTypes.find(t => t.type === e.target.value);
     setSelectedType(type || null);
-    setSelectedBrand(null);
     setSelectedModel(null);
   };
 
   const handleBrandSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const brand = brands.find(b => b.brand === e.target.value);
+    const brand = filteredBrands.find(b => b.brand === e.target.value);
     setSelectedBrand(brand || null);
     setSelectedModel(null);
   };
 
   const handleModelSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    if (!selectedBrand) return;
-    const model = selectedBrand.models.find(m => m.slug === e.target.value);
-    setSelectedModel(model || null);
+    const slug = e.target.value;
+    if (!slug) {
+      setSelectedModel(null);
+      return;
+    }
+
+    // Find in flat list or grouped
+    if (isModelsGrouped) {
+      for (const group of modelGroups) {
+        const found = group.models.find(m => m.slug === slug);
+        if (found) {
+          setSelectedModel({ ...found, type: group.type });
+          return;
+        }
+      }
+    } else {
+      const found = models.find(m => m.slug === slug);
+      setSelectedModel(found || null);
+    }
   };
 
   const handleSearchSelect = (result: SearchResult) => {
@@ -167,10 +264,31 @@ export default function MachineFinder() {
     } else if (selectedType) {
       // Type only - go to type fallback page
       router.push(`/machines/${selectedType.slug}`);
+    } else if (selectedBrand) {
+      // Brand only - go to brand fallback page
+      router.push(`/machines/brand/${selectedBrand.slug}`);
     }
   };
 
-  const canSearch = selectedType !== null;
+  const canProceed = selectedType !== null || selectedBrand !== null;
+  const canSelectModel = selectedType !== null || selectedBrand !== null;
+
+  // Generate button text
+  const getButtonText = () => {
+    if (selectedModel) {
+      return `View ${selectedModel.model} Solutions`;
+    }
+    if (selectedType && selectedBrand) {
+      return `View ${selectedBrand.brand} ${selectedType.displayName} Solutions`;
+    }
+    if (selectedBrand) {
+      return `View All ${selectedBrand.brand} Solutions`;
+    }
+    if (selectedType) {
+      return `View All ${selectedType.displayName} Solutions`;
+    }
+    return 'Select Your Machine';
+  };
 
   return (
     <div className="space-y-4">
@@ -202,18 +320,21 @@ export default function MachineFinder() {
         )}
       </div>
 
-      <div className="text-xs text-gray-400 text-center">or select below</div>
+      <div className="text-xs text-gray-400 text-center">or select below (any order)</div>
 
-      {/* Three Dropdowns - All Visible */}
+      {/* Three Dropdowns - All Independently Selectable */}
       <div className="space-y-3">
         {/* Type Dropdown */}
         <select
           value={selectedType?.type || ''}
           onChange={handleTypeSelect}
-          className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+          disabled={loadingTypes}
+          className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:opacity-50"
         >
-          <option value="" className="text-gray-900">Select machine type...</option>
-          {types.map((type) => (
+          <option value="" className="text-gray-900">
+            {loadingTypes ? 'Loading...' : 'Select machine type...'}
+          </option>
+          {filteredTypes.map((type) => (
             <option key={type.type} value={type.type} className="text-gray-900">
               {type.displayName} ({type.count})
             </option>
@@ -224,15 +345,15 @@ export default function MachineFinder() {
         <select
           value={selectedBrand?.brand || ''}
           onChange={handleBrandSelect}
-          disabled={!selectedType || loading}
-          className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={loadingBrands}
+          className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:opacity-50"
         >
           <option value="" className="text-gray-900">
-            {!selectedType ? 'Select type first...' : loading ? 'Loading brands...' : 'Select brand...'}
+            {loadingBrands ? 'Loading...' : 'Select brand...'}
           </option>
-          {brands.map((brand) => (
+          {filteredBrands.map((brand) => (
             <option key={brand.brand} value={brand.brand} className="text-gray-900">
-              {brand.brand} ({brand.modelCount})
+              {brand.brand} ({brand.count})
             </option>
           ))}
         </select>
@@ -241,39 +362,51 @@ export default function MachineFinder() {
         <select
           value={selectedModel?.slug || ''}
           onChange={handleModelSelect}
-          disabled={!selectedBrand}
+          disabled={!canSelectModel || loadingModels}
           className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <option value="" className="text-gray-900">
-            {!selectedBrand ? 'Select brand first...' : 'Select model...'}
+            {!canSelectModel
+              ? 'Select type or brand first...'
+              : loadingModels
+              ? 'Loading models...'
+              : 'Select model...'}
           </option>
-          {selectedBrand?.models.map((model) => (
-            <option key={model.slug} value={model.slug} className="text-gray-900">
-              {model.model}
-            </option>
-          ))}
+          {isModelsGrouped ? (
+            // Grouped by type (when brand-only selected)
+            modelGroups.map((group) => (
+              <optgroup key={group.type} label={group.displayName} className="text-gray-900">
+                {group.models.map((model) => (
+                  <option key={model.slug} value={model.slug} className="text-gray-900">
+                    {model.model}
+                  </option>
+                ))}
+              </optgroup>
+            ))
+          ) : (
+            // Flat list
+            models.map((model) => (
+              <option key={model.slug} value={model.slug} className="text-gray-900">
+                {model.model}
+              </option>
+            ))
+          )}
         </select>
       </div>
 
       {/* Find Machine Button */}
       <button
         onClick={handleFindMachine}
-        disabled={!canSearch}
+        disabled={!canProceed}
         className="w-full py-3 bg-orange-500 text-white font-bold rounded hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {selectedModel
-          ? `View ${selectedModel.model} Solutions`
-          : selectedBrand
-          ? `View All ${selectedBrand.brand} Solutions`
-          : selectedType
-          ? `View All ${selectedType.displayName} Solutions`
-          : 'Select Your Machine'}
+        {getButtonText()}
       </button>
 
       {/* Helper text */}
-      {selectedType && !selectedModel && (
+      {(selectedType || selectedBrand) && !selectedModel && (
         <p className="text-xs text-gray-400 text-center">
-          Don't know your exact model? Just select type {selectedBrand ? 'or brand ' : ''}and we'll show you all options.
+          Don't know your exact model? We'll show you all compatible solutions.
         </p>
       )}
     </div>
