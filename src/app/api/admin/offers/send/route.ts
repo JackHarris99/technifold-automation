@@ -1,6 +1,7 @@
 /**
  * POST /api/admin/offers/send
- * Sends marketing offers via Zoho Campaigns with consent verification
+ * Sends marketing offers to contacts via outbox queue
+ * Simplified: No Zoho dependency, just marketing_status check
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -11,6 +12,7 @@ export async function POST(request: NextRequest) {
   // Verify admin authentication
   const authError = verifyAdminAuth(request);
   if (authError) return authError;
+
   try {
     const body = await request.json();
     const { company_id, contact_ids, offer_key, campaign_key, custom_message } = body;
@@ -40,10 +42,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Company not found' }, { status: 404 });
     }
 
-    // Fetch contacts with consent status
+    // Fetch contacts with marketing status
     const { data: contacts, error: contactsError } = await supabase
       .from('contacts')
-      .select('contact_id, full_name, email, marketing_status, gdpr_consent_at, zoho_contact_id')
+      .select('contact_id, full_name, email, marketing_status')
       .eq('company_id', company_id)
       .in('contact_id', contact_ids);
 
@@ -56,34 +58,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No valid contacts found' }, { status: 404 });
     }
 
-    // Filter contacts with subscribed status (consent guard)
+    // Filter contacts with subscribed status only
     const eligibleContacts = contacts.filter(
-      contact =>
-        contact.marketing_status === 'subscribed' &&
-        contact.gdpr_consent_at !== null &&
-        contact.zoho_contact_id !== null
+      contact => contact.marketing_status === 'subscribed'
     );
 
     if (eligibleContacts.length === 0) {
       return NextResponse.json(
-        { error: 'No contacts with active consent and Zoho sync found' },
+        { error: 'No contacts with subscribed marketing status found' },
         { status: 400 }
       );
     }
 
-    // Filter contacts without consent (for logging)
+    // Track ineligible contacts
     const ineligibleContacts = contacts.filter(
-      contact => !eligibleContacts.some(ec => ec.contact_id === contact.contact_id)
+      contact => contact.marketing_status !== 'subscribed'
     );
 
     if (ineligibleContacts.length > 0) {
       console.warn(
-        `[offers-send] ${ineligibleContacts.length} contacts excluded due to missing consent or Zoho sync:`,
-        ineligibleContacts.map(c => c.contact_id)
+        `[offers-send] ${ineligibleContacts.length} contacts excluded (not subscribed):`,
+        ineligibleContacts.map(c => c.email)
       );
     }
 
-    // Create outbox job for Zoho Campaigns send
+    // Create outbox job for email send
     const jobPayload = {
       company_id: company.company_id,
       company_name: company.company_name,
@@ -94,7 +93,6 @@ export async function POST(request: NextRequest) {
         contact_id: c.contact_id,
         email: c.email,
         full_name: c.full_name,
-        zoho_contact_id: c.zoho_contact_id,
       })),
     };
 
@@ -127,12 +125,7 @@ export async function POST(request: NextRequest) {
       ineligible_reasons: ineligibleContacts.map(c => ({
         contact_id: c.contact_id,
         email: c.email,
-        reason:
-          c.marketing_status !== 'subscribed'
-            ? `marketing_status: ${c.marketing_status}`
-            : !c.gdpr_consent_at
-            ? 'no GDPR consent'
-            : 'not synced to Zoho',
+        reason: `marketing_status: ${c.marketing_status}`,
       })),
     });
   } catch (err) {

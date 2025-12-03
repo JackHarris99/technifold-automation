@@ -33,7 +33,8 @@ export async function sendMarketingEmail({
   companyName,
   tokenUrl,
   subject,
-  preview
+  preview,
+  unsubscribeUrl
 }: {
   to: string;
   contactName: string;
@@ -41,6 +42,7 @@ export async function sendMarketingEmail({
   tokenUrl: string;
   subject: string;
   preview: string;
+  unsubscribeUrl?: string;
 }): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const resend = getResendClient();
 
@@ -93,6 +95,12 @@ export async function sendMarketingEmail({
                 Lutterworth, Leicestershire, LE17 4HB, UK<br>
                 <a href="https://technifold.com" style="color: #2563eb;">technifold.com</a>
               </p>
+
+              ${unsubscribeUrl ? `
+                <p style="font-size: 11px; color: #999; margin-top: 16px; text-align: center;">
+                  <a href="${unsubscribeUrl}" style="color: #999;">Unsubscribe from marketing emails</a>
+                </p>
+              ` : ''}
             </div>
           </body>
         </html>

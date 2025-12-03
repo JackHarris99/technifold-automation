@@ -13,7 +13,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
-import { generateOfferUrl, generateReorderUrl, generateToken } from '@/lib/tokens';
+import { generateOfferUrl, generateReorderUrl, generateToken, generateUnsubscribeUrl } from '@/lib/tokens';
 import { sendMarketingEmail, isResendConfigured } from '@/lib/resend-client';
 
 // Verify request is from Vercel Cron
@@ -297,6 +297,14 @@ async function processSendOfferEmail(job: any) {
 
   // Send email to each contact
   for (const contact of contacts) {
+    // Generate unsubscribe URL for this contact
+    const unsubscribeUrl = generateUnsubscribeUrl(
+      baseUrl,
+      contact.contact_id,
+      contact.email,
+      company_id
+    );
+
     const result = await sendMarketingEmail({
       to: contact.email,
       contactName: contact.full_name || contact.first_name || '',
@@ -305,7 +313,8 @@ async function processSendOfferEmail(job: any) {
       subject: isReorder
         ? 'Time to Reorder Consumables for Your Technifold Tools'
         : 'Personalized Solutions for Your Printing Equipment',
-      preview: intro || 'We have solutions for your printing challenges'
+      preview: intro || 'We have solutions for your printing challenges',
+      unsubscribeUrl
     });
 
     if (result.success) {
@@ -436,13 +445,26 @@ async function processSendTrialEmail(job: any) {
     throw new Error('Resend client not available');
   }
 
+  // Generate unsubscribe URL for this contact
+  const unsubscribeUrl = contact_id
+    ? generateUnsubscribeUrl(baseUrl, contact_id, email, job.payload.company_id)
+    : null;
+
+  // Add unsubscribe link to email HTML
+  const emailWithUnsubscribe = unsubscribeUrl
+    ? emailHtml.replace(
+        '</body>',
+        `<div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;"><p style="font-size: 11px; color: #999;"><a href="${unsubscribeUrl}" style="color: #999;">Unsubscribe from marketing emails</a></p></div></body>`
+      )
+    : emailHtml;
+
   const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
 
   const { data, error } = await resend.emails.send({
     from: fromEmail,
     to: [email],
     subject: `Your Free Trial for ${machine_name || 'Technifold Tools'} is Ready`,
-    html: emailHtml
+    html: emailWithUnsubscribe
   });
 
   if (error) {
@@ -567,9 +589,6 @@ async function processSendReorderReminder(job: any) {
 
         <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #9ca3af;">
           <p>Technifold Ltd • Professional Print Finishing Solutions</p>
-          <p style="margin-top: 8px;">
-            <a href="${baseUrl}/unsubscribe" style="color: #9ca3af;">Unsubscribe</a>
-          </p>
         </div>
       </div>
     </body>
@@ -604,11 +623,25 @@ async function processSendReorderReminder(job: any) {
 
   // Send to each contact
   for (const contact of contacts) {
+    // Generate personalized unsubscribe URL for this contact
+    const unsubscribeUrl = generateUnsubscribeUrl(
+      baseUrl,
+      contact.contact_id,
+      contact.email,
+      company_id
+    );
+
+    // Add unsubscribe link to email
+    const emailWithUnsubscribe = emailHtml.replace(
+      '</body>',
+      `<div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;"><p style="font-size: 11px; color: #999;"><a href="${unsubscribeUrl}" style="color: #999;">Unsubscribe from marketing emails</a></p></div></body>`
+    );
+
     const { data, error } = await resend.emails.send({
       from: fromEmail,
       to: [contact.email],
       subject: `Time to Reorder Your Technifold Consumables?`,
-      html: emailHtml
+      html: emailWithUnsubscribe
     });
 
     if (error) {

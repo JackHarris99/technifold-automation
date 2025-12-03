@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category');
     const hasMachine = searchParams.get('has_machine');
     const lastOrderDays = searchParams.get('last_order_days');
-    const consentOnly = searchParams.get('consent_only') === 'true';
+    const subscribedOnly = searchParams.get('subscribed_only') === 'true' || searchParams.get('consent_only') === 'true';
 
     // Territory filter (sales reps see only their companies)
     const repFilter = await getUserRepFilter();
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
         first_name,
         last_name,
         company_id,
-        marketing_consent,
+        marketing_status,
         companies!inner (
           company_id,
           company_name,
@@ -52,9 +52,9 @@ export async function GET(request: NextRequest) {
       query = query.eq('companies.account_owner', repFilter);
     }
 
-    // Apply consent filter
-    if (consentOnly) {
-      query = query.eq('marketing_consent', true);
+    // Apply subscription status filter (only send to 'subscribed' contacts)
+    if (subscribedOnly) {
+      query = query.eq('marketing_status', 'subscribed');
     }
 
     // Apply category filter
@@ -73,18 +73,19 @@ export async function GET(request: NextRequest) {
     // Now filter by machine and last order (need separate queries)
     let contacts = contactsData || [];
 
-    // Filter by machine status
+    // Get company IDs for machine lookup
+    const allCompanyIds = contacts.map(c => c.company_id);
+    const { data: companiesWithMachines } = await supabase
+      .from('company_machine')
+      .select('company_id')
+      .in('company_id', allCompanyIds);
+
+    const companiesWithMachineSet = new Set(
+      companiesWithMachines?.map(cm => cm.company_id) || []
+    );
+
+    // Filter by machine status if specified
     if (hasMachine === 'true' || hasMachine === 'false') {
-      const companyIds = contacts.map(c => c.company_id);
-      const { data: companiesWithMachines } = await supabase
-        .from('company_machine')
-        .select('company_id')
-        .in('company_id', companyIds);
-
-      const companiesWithMachineSet = new Set(
-        companiesWithMachines?.map(cm => cm.company_id) || []
-      );
-
       contacts = contacts.filter(c => {
         const hasMachineValue = companiesWithMachineSet.has(c.company_id);
         return hasMachine === 'true' ? hasMachineValue : !hasMachineValue;
@@ -119,8 +120,9 @@ export async function GET(request: NextRequest) {
       company_id: c.company_id,
       company_name: (c.companies as any)?.company_name,
       company_category: (c.companies as any)?.category,
-      has_machine: false, // Will be set by machine filter above
-      marketing_consent: c.marketing_consent || false,
+      has_machine: companiesWithMachineSet.has(c.company_id),
+      marketing_status: c.marketing_status || 'unknown',
+      is_subscribed: c.marketing_status === 'subscribed',
     }));
 
     return NextResponse.json({

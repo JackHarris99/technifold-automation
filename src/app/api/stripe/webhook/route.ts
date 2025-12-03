@@ -699,6 +699,63 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
       console.error('[stripe-webhook] Failed to track rental_started event:', err);
     }
   });
+
+  // Send rental/trial confirmation email
+  try {
+    // Fetch company details
+    const { data: company } = await supabase
+      .from('companies')
+      .select('company_name')
+      .eq('company_id', companyId)
+      .single();
+
+    // Fetch contact details
+    const { data: contact } = await supabase
+      .from('contacts')
+      .select('full_name, email')
+      .eq('contact_id', contactId)
+      .single();
+
+    // Fetch shipping address
+    const { data: shippingAddress } = await supabase
+      .from('shipping_addresses')
+      .select('address_line_1, address_line_2, city, postal_code, country')
+      .eq('address_id', shippingAddressId)
+      .single();
+
+    if (company && contact && shippingAddress) {
+      const emailResult = await sendOrderConfirmation({
+        to: contact.email,
+        contactName: contact.full_name,
+        companyName: company.company_name,
+        orderId: rental.serial_number,
+        orderItems: [{
+          product_code: productCode,
+          description: product.name,
+          quantity: 1,
+          unit_price: monthlyPrice,
+          total_price: 0, // Trial period is free
+        }],
+        subtotal: 0,
+        taxAmount: 0,
+        totalAmount: 0,
+        currency: (firstItem.price.currency || 'gbp').toUpperCase(),
+        shippingAddress,
+        isRental: true,
+      });
+
+      if (emailResult.success) {
+        console.log('[stripe-webhook] Rental confirmation email sent:', emailResult.messageId);
+      } else {
+        console.error('[stripe-webhook] Failed to send rental confirmation:', emailResult.error);
+      }
+    } else {
+      console.error('[stripe-webhook] Missing data for rental confirmation email');
+    }
+  } catch (emailError) {
+    console.error('[stripe-webhook] Error sending rental confirmation:', emailError);
+    // Don't fail the webhook if email fails
+  }
 }
 
 /**

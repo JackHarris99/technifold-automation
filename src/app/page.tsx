@@ -1,6 +1,6 @@
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
-import SolutionFinder from '@/components/solutions/SolutionFinder';
+import MachineFinder from '@/components/machines/MachineFinder';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export const metadata = {
@@ -98,8 +98,8 @@ export default async function HomePage() {
               </div>
 
               <div className="bg-white/5 border border-white/10 rounded-lg p-6">
-                <h2 className="text-lg font-bold mb-3">Find Solutions for Your Machine</h2>
-                <SolutionFinder />
+                <h2 className="text-lg font-bold mb-3">Find Your Machine</h2>
+                <MachineFinder />
               </div>
             </div>
           </div>

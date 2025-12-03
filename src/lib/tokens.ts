@@ -159,3 +159,22 @@ export function generateTrialToken(data: {
     contact_name: data.contact_name,
   }, 168); // 7 days TTL for trial links
 }
+
+/**
+ * Generate unsubscribe URL for marketing emails
+ * Long TTL (365 days) since unsubscribe links should remain valid
+ */
+export function generateUnsubscribeUrl(
+  baseUrl: string,
+  contactId: string,
+  email: string,
+  companyId?: string
+): string {
+  const token = generateToken({
+    company_id: companyId || '',
+    contact_id: contactId,
+    email: email,
+  }, 8760); // 365 days TTL for unsubscribe links
+
+  return `${baseUrl}/u/${token}`;
+}

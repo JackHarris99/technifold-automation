@@ -1,6 +1,6 @@
 /**
  * Send Offer Modal
- * Choose offer template + contacts, enqueue Zoho send job
+ * Choose offer template + contacts, enqueue email send job
  */
 
 'use client';
