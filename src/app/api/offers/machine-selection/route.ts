@@ -5,7 +5,7 @@
  *
  * Actions:
  * 1. Insert engagement_events (event_name='machine_selected')
- * 2. Upsert company_beliefs (confidence=2, source='offer_click')
+ * 2. Upsert company_machine (confidence=2, source='campaign_click')
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       token,
       company_id,
       contact_id,
-      model_id,
+      machine_id,
       brand,
       model,
       offer_key,
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Validation
-    if (!token || !company_id || !model_id) {
+    if (!token || !company_id || !machine_id) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
         campaign_key: campaign_key || null,
         url,
         meta: {
-          model_id,
+          machine_id,
           brand,
           model,
           selection_source: 'offer_picker',
@@ -92,13 +92,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Upsert company_beliefs using greatest() and evidence merging
-    // Fetch existing belief to check confidence
-    const { data: existingBelief } = await supabase
-      .from('company_beliefs')
-      .select('confidence, evidence')
+    // 2. Upsert company_machine with confidence scoring
+    // Fetch existing record to check confidence
+    const { data: existing } = await supabase
+      .from('company_machine')
+      .select('id, confidence, evidence')
       .eq('company_id', company_id)
-      .eq('model_id', model_id)
+      .eq('machine_id', machine_id)
       .single();
 
     const newEvidence = {
@@ -109,38 +109,49 @@ export async function POST(request: NextRequest) {
       clicked_at: new Date().toISOString(),
     };
 
-    const newConfidence = 2; // clicked = confidence 2
+    const clickConfidence = 2; // clicked in campaign = confidence 2
 
-    // Use upsert with onConflict
-    const { error: beliefError } = await supabase
-      .from('company_beliefs')
-      .upsert({
-        company_id,
-        model_id,
-        // Use greatest: only increase confidence, never decrease
-        confidence: existingBelief
-          ? Math.max(existingBelief.confidence, newConfidence)
-          : newConfidence,
-        source: 'offer_click',
-        contact_id: contact_id || null,
-        // Merge evidence: append new click to existing evidence
-        evidence: existingBelief?.evidence
-          ? {
-              ...(existingBelief.evidence as any),
-              offer_clicks: [
-                ...((existingBelief.evidence as any)?.offer_clicks || []),
-                newEvidence,
-              ],
-            }
-          : { offer_clicks: [newEvidence] },
-        updated_at: new Date().toISOString(),
-      }, {
-        onConflict: 'company_id,model_id',
-      });
+    if (existing) {
+      // Update existing - only increase confidence, never decrease
+      const newConfidence = Math.max(existing.confidence || 1, clickConfidence);
+      const mergedEvidence = existing.evidence
+        ? {
+            ...(existing.evidence as any),
+            campaign_clicks: [
+              ...((existing.evidence as any)?.campaign_clicks || []),
+              newEvidence,
+            ],
+          }
+        : { campaign_clicks: [newEvidence] };
 
-    if (beliefError) {
-      console.error('[machine-selection] Error upserting belief:', beliefError);
-      // Don't fail the request, belief is supplementary
+      const { error: updateError } = await supabase
+        .from('company_machine')
+        .update({
+          confidence: newConfidence,
+          source: 'campaign_click',
+          evidence: mergedEvidence,
+        })
+        .eq('id', existing.id);
+
+      if (updateError) {
+        console.error('[machine-selection] Error updating company_machine:', updateError);
+      }
+    } else {
+      // Insert new record
+      const { error: insertError } = await supabase
+        .from('company_machine')
+        .insert({
+          company_id,
+          machine_id,
+          confidence: clickConfidence,
+          source: 'campaign_click',
+          verified: false,
+          evidence: { campaign_clicks: [newEvidence] },
+        });
+
+      if (insertError) {
+        console.error('[machine-selection] Error inserting company_machine:', insertError);
+      }
     }
 
     return NextResponse.json({
