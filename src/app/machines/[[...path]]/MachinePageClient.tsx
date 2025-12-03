@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
@@ -45,6 +48,54 @@ export default function MachinePageClient({
   basePricing,
   personalization,
 }: MachinePageClientProps) {
+  const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [formData, setFormData] = useState({
+    company_name: '',
+    contact_name: '',
+    email: '',
+    phone: ''
+  });
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/trial/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          machine_slug: machine.slug,
+          machine_name: `${machine.brand} ${machine.model}`,
+          offer_price: basePricing.amount,
+          company_name: formData.company_name,
+          contact_name: formData.contact_name,
+          email: formData.email,
+          phone: formData.phone,
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit request');
+      }
+
+      setSubmitted(true);
+    } catch (error) {
+      console.error('Trial request error:', error);
+      alert('Something went wrong. Please try again or contact us at sales@technifold.co.uk');
+      setLoading(false);
+    }
+  }
+
+  const scrollToForm = () => {
+    setShowForm(true);
+    setTimeout(() => {
+      document.getElementById('trial-form')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <MarketingHeader />
@@ -64,12 +115,12 @@ export default function MachinePageClient({
             {renderedCopy.hero_subheading}
           </p>
           <div className="flex flex-wrap gap-4">
-            <Link
-              href={`/trial?machine=${machine.slug}`}
+            <button
+              onClick={scrollToForm}
               className="inline-block bg-orange-500 text-white px-8 py-3 font-bold hover:bg-orange-600 transition-colors"
             >
               {renderedCopy.cta_primary}
-            </Link>
+            </button>
             <Link
               href="#solution"
               className="inline-block bg-white/10 border border-white/20 text-white px-8 py-3 font-medium hover:bg-white/20 transition-colors"
@@ -143,8 +194,8 @@ export default function MachinePageClient({
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section className="py-16 bg-gray-50">
+      {/* Pricing Section with Inline Form */}
+      <section id="trial-form" className="py-16 bg-gray-50">
         <div className="max-w-6xl mx-auto px-6 text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
             {renderedCopy.pricing_title}
@@ -152,38 +203,147 @@ export default function MachinePageClient({
           <p className="text-gray-600 mb-8">
             {renderedCopy.pricing_subheading}
           </p>
-          <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200 max-w-md mx-auto">
-            <div className="text-5xl font-bold text-gray-900 mb-2">
-              {basePricing.display}
-              <span className="text-lg text-gray-500 font-normal">/month</span>
+
+          <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200 max-w-lg mx-auto">
+            {/* Machine Context */}
+            <div className="bg-slate-900 text-white -mx-8 -mt-8 px-8 py-4 rounded-t-lg mb-6">
+              <div className="text-sm text-gray-400">Free trial for your</div>
+              <div className="text-xl font-bold">{machine.brand} {machine.model}</div>
             </div>
-            <p className="text-gray-600 mb-6">
-              Typical systems: {basePricing.typicalRange}/month
-            </p>
-            <ul className="text-left space-y-3 mb-8">
-              <li className="flex items-center gap-2">
-                <span className="text-green-600">✓</span>
-                <span className="text-gray-700">30-day free trial</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-green-600">✓</span>
-                <span className="text-gray-700">Full installation support</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-green-600">✓</span>
-                <span className="text-gray-700">Training included</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-green-600">✓</span>
-                <span className="text-gray-700">Cancel anytime</span>
-              </li>
-            </ul>
-            <Link
-              href={`/trial?machine=${machine.slug}`}
-              className="block w-full bg-orange-500 text-white py-3 font-bold hover:bg-orange-600 transition-colors text-center"
-            >
-              Start Free Trial
-            </Link>
+
+            {submitted ? (
+              /* Success State */
+              <div className="text-center py-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Request Received!</h3>
+                <p className="text-gray-600 mb-4">
+                  Check your email for your personalized trial link.
+                </p>
+                <div className="text-sm text-gray-500">
+                  Didn't get it? Check spam or call <strong>01707 275 114</strong>
+                </div>
+              </div>
+            ) : !showForm ? (
+              /* Initial State - Pricing + Button */
+              <>
+                <div className="text-5xl font-bold text-gray-900 mb-2">
+                  {basePricing.display}
+                  <span className="text-lg text-gray-500 font-normal">/month</span>
+                </div>
+                <p className="text-gray-600 mb-6">
+                  Typical systems: {basePricing.typicalRange}/month
+                </p>
+                <ul className="text-left space-y-3 mb-8">
+                  <li className="flex items-center gap-2">
+                    <span className="text-green-600">✓</span>
+                    <span className="text-gray-700">30-day free trial</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-green-600">✓</span>
+                    <span className="text-gray-700">Full installation support</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-green-600">✓</span>
+                    <span className="text-gray-700">Training included</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-green-600">✓</span>
+                    <span className="text-gray-700">Cancel anytime</span>
+                  </li>
+                </ul>
+                <button
+                  onClick={() => setShowForm(true)}
+                  className="block w-full bg-orange-500 text-white py-3 font-bold hover:bg-orange-600 transition-colors text-center"
+                >
+                  Start Free Trial
+                </button>
+              </>
+            ) : (
+              /* Form State */
+              <>
+                <div className="text-left mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-2xl font-bold text-gray-900">{basePricing.display}/month</span>
+                    <span className="text-sm text-green-600 font-medium">30 days free</span>
+                  </div>
+                  <p className="text-sm text-gray-500">Card required after trial. Cancel anytime.</p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4 text-left">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Company Name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.company_name}
+                      onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                      placeholder="ABC Printing Ltd"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Your Name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.contact_name}
+                      onChange={(e) => setFormData({ ...formData, contact_name: e.target.value })}
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                      placeholder="John Smith"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                      placeholder="john@abcprinting.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Phone
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                      placeholder="+44 1234 567890"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-orange-500 text-white font-bold py-3 rounded hover:bg-orange-600 transition-colors disabled:bg-gray-400"
+                  >
+                    {loading ? 'Sending...' : 'Request Trial'}
+                  </button>
+
+                  <p className="text-xs text-center text-gray-500">
+                    We'll email you a secure link to complete your trial signup.
+                  </p>
+                </form>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -211,12 +371,12 @@ export default function MachinePageClient({
           <p className="text-orange-100 mb-6">
             See the difference professional finishing makes. 30-day free trial, no commitment.
           </p>
-          <Link
-            href={`/trial?machine=${machine.slug}`}
+          <button
+            onClick={scrollToForm}
             className="inline-block bg-slate-900 text-white px-8 py-3 font-bold hover:bg-slate-800 transition-colors"
           >
             Request Free Trial
-          </Link>
+          </button>
         </div>
       </section>
 
