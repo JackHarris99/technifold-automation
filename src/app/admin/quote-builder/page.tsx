@@ -73,20 +73,20 @@ export default function QuoteBuilderV2Page() {
     loadCompanies();
   }, []);
 
-  // Load all products on mount
+  // Load tools on mount
   useEffect(() => {
-    async function loadAllProducts() {
+    async function loadTools() {
       try {
-        const res = await fetch('/api/admin/products/all');
+        const res = await fetch('/api/products/tools');
         const data = await res.json();
-        setAllProducts(data.products || []);
+        setAllProducts(data.tools || []);
       } catch (err) {
-        console.error('Failed to load products:', err);
+        console.error('Failed to load tools:', err);
       } finally {
         setLoadingProducts(false);
       }
     }
-    loadAllProducts();
+    loadTools();
   }, []);
 
   // Load contacts when company changes
