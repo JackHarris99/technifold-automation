@@ -65,7 +65,7 @@ export default function MachinePageClient({
           </p>
           <div className="flex flex-wrap gap-4">
             <Link
-              href="/contact?trial=true"
+              href={`/trial?machine=${machine.slug}`}
               className="inline-block bg-orange-500 text-white px-8 py-3 font-bold hover:bg-orange-600 transition-colors"
             >
               {renderedCopy.cta_primary}
@@ -179,7 +179,7 @@ export default function MachinePageClient({
               </li>
             </ul>
             <Link
-              href="/contact?trial=true"
+              href={`/trial?machine=${machine.slug}`}
               className="block w-full bg-orange-500 text-white py-3 font-bold hover:bg-orange-600 transition-colors text-center"
             >
               Start Free Trial
@@ -212,7 +212,7 @@ export default function MachinePageClient({
             See the difference professional finishing makes. 30-day free trial, no commitment.
           </p>
           <Link
-            href="/contact?trial=true"
+            href={`/trial?machine=${machine.slug}`}
             className="inline-block bg-slate-900 text-white px-8 py-3 font-bold hover:bg-slate-800 transition-colors"
           >
             Request Free Trial
