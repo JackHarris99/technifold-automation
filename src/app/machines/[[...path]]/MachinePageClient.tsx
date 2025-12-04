@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { MarketingHeader } from '@/components/marketing/MarketingHeader';
-import { MarketingFooter } from '@/components/marketing/MarketingFooter';
 
 interface MachinePageClientProps {
   machine: {
@@ -97,8 +95,7 @@ export default function MachinePageClient({
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <MarketingHeader />
+    <>
 
       {/* Hero Section */}
       <section className="bg-slate-900 text-white py-16 border-b-4 border-orange-500">
@@ -380,7 +377,6 @@ export default function MachinePageClient({
         </div>
       </section>
 
-      <MarketingFooter />
-    </div>
+    </>
   );
 }

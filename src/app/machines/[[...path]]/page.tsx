@@ -181,12 +181,16 @@ export default async function MachinesPage({ params }: { params: Promise<{ path?
     const renderedCopy = replacePlaceholders(pageTemplate.copy_sections, personalization);
 
     return (
-      <MachinePageClient
-        machine={virtualMachine}
-        renderedCopy={renderedCopy}
-        basePricing={basePricing}
-        personalization={personalization}
-      />
+      <div className="min-h-screen bg-white">
+        <MarketingHeader />
+        <MachinePageClient
+          machine={virtualMachine}
+          renderedCopy={renderedCopy}
+          basePricing={basePricing}
+          personalization={personalization}
+        />
+        <MarketingFooter />
+      </div>
     );
   }
 
@@ -234,12 +238,16 @@ export default async function MachinesPage({ params }: { params: Promise<{ path?
     const renderedCopy = replacePlaceholders(pageTemplate.copy_sections, personalization);
 
     return (
-      <MachinePageClient
-        machine={virtualMachine}
-        renderedCopy={renderedCopy}
-        basePricing={basePricing}
-        personalization={personalization}
-      />
+      <div className="min-h-screen bg-white">
+        <MarketingHeader />
+        <MachinePageClient
+          machine={virtualMachine}
+          renderedCopy={renderedCopy}
+          basePricing={basePricing}
+          personalization={personalization}
+        />
+        <MarketingFooter />
+      </div>
     );
   }
 
@@ -284,12 +292,16 @@ export default async function MachinesPage({ params }: { params: Promise<{ path?
     const renderedCopy = replacePlaceholders(pageTemplate.copy_sections, personalization);
 
     return (
-      <MachinePageClient
-        machine={virtualMachine}
-        renderedCopy={renderedCopy}
-        basePricing={basePricing}
-        personalization={personalization}
-      />
+      <div className="min-h-screen bg-white">
+        <MarketingHeader />
+        <MachinePageClient
+          machine={virtualMachine}
+          renderedCopy={renderedCopy}
+          basePricing={basePricing}
+          personalization={personalization}
+        />
+        <MarketingFooter />
+      </div>
     );
   }
 
@@ -371,7 +383,7 @@ async function ModelPage({ machine }: { machine: any }) {
   const renderedCopy = replacePlaceholders(pageTemplate.copy_sections, personalization);
 
   return (
-    <>
+    <div className="min-h-screen bg-white">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -390,13 +402,15 @@ async function ModelPage({ machine }: { machine: any }) {
           }),
         }}
       />
+      <MarketingHeader />
       <MachinePageClient
         machine={machine}
         renderedCopy={renderedCopy}
         basePricing={basePricing}
         personalization={personalization}
       />
-    </>
+      <MarketingFooter />
+    </div>
   );
 }
 
