@@ -1,5 +1,13 @@
+'use client';
+
+import { TrialRequestForm } from './TrialRequestForm';
+
 interface SpineCreaserNarrativeProps {
   machine: {
+    machine_id: string;
+    brand: string;
+    model: string;
+    type: string;
     display_name: string;
   };
 }
@@ -302,20 +310,31 @@ export function SpineCreaserNarrative({ machine }: SpineCreaserNarrativeProps) {
         {/* Call to Action */}
         <section className="border-t border-slate-200 pt-12">
           <h2 className="text-2xl font-medium text-slate-900 mb-4">
-            Next Steps
+            Request Your 30-Day Trial
           </h2>
 
           <p className="text-slate-600 leading-relaxed mb-6">
             Every Technifold tool is available for a 30-day evaluation on your {machine.display_name}. There is no obligation and no charge for the trial period. If the results don't meet expectations, return the tooling at no cost.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4">
-            <button className="bg-slate-900 text-white px-6 py-3 font-medium hover:bg-slate-800 transition-colors">
-              Request 30-Day Trial
-            </button>
-            <a href="tel:+441455381538" className="border border-slate-300 text-slate-700 px-6 py-3 font-medium hover:border-slate-400 transition-colors text-center">
-              Technical Enquiries: +44 (0)1455 381 538
-            </a>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-slate-50 border border-slate-200 p-6 rounded">
+              <TrialRequestForm machine={machine} />
+            </div>
+            <div className="flex flex-col justify-center">
+              <p className="text-slate-600 mb-4">
+                Prefer to speak with someone?
+              </p>
+              <a href="tel:+441455381538" className="inline-flex items-center gap-2 text-slate-900 font-medium hover:text-cyan-600 transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                +44 (0)1455 381 538
+              </a>
+              <p className="text-sm text-slate-500 mt-2">
+                Technical enquiries welcome
+              </p>
+            </div>
           </div>
         </section>
 

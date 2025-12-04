@@ -593,7 +593,7 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
 }
 
 /**
- * Handle subscription creation (for tool rentals)
+ * Handle subscription creation (for tool rentals AND trial subscriptions)
  */
 async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
   const supabase = getSupabaseClient();
@@ -605,9 +605,30 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
   const contactId = metadata.contact_id || null;
   const purchaseType = metadata.purchase_type;
   const shippingAddressId = metadata.shipping_address_id;
+  const machineId = metadata.machine_id || null;
+  const trialIntentId = metadata.trial_intent_id || null;
+  const selectedPrice = metadata.selected_price ? parseFloat(metadata.selected_price) : null;
 
-  if (!companyId || purchaseType !== 'rental') {
-    console.log('[stripe-webhook] Skipping non-rental subscription:', subscription.id);
+  if (!companyId) {
+    console.log('[stripe-webhook] Skipping subscription without company_id:', subscription.id);
+    return;
+  }
+
+  // Handle trial subscriptions (from /offer page)
+  if (purchaseType === 'subscription_trial' || trialIntentId) {
+    await handleTrialSubscriptionCreated(subscription, {
+      companyId,
+      contactId,
+      machineId,
+      trialIntentId,
+      selectedPrice,
+    });
+    return;
+  }
+
+  // Handle rentals (legacy flow)
+  if (purchaseType !== 'rental') {
+    console.log('[stripe-webhook] Skipping non-rental/non-trial subscription:', subscription.id);
     return;
   }
 
@@ -759,14 +780,27 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
 }
 
 /**
- * Handle subscription updates (status changes, payment failures)
+ * Handle subscription updates (status changes, payment failures, price changes)
+ * Handles both rental_agreements AND subscriptions tables
  */
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const supabase = getSupabaseClient();
 
   console.log('[stripe-webhook] Processing customer.subscription.updated:', subscription.id);
 
-  // Find rental agreement
+  // First, try to find in subscriptions table (new flow)
+  const { data: sub } = await supabase
+    .from('subscriptions')
+    .select('subscription_id, status, monthly_price, ratchet_max, company_id, contact_id')
+    .eq('stripe_subscription_id', subscription.id)
+    .single();
+
+  if (sub) {
+    await handleSubscriptionTableUpdate(subscription, sub);
+    return;
+  }
+
+  // Fallback: Find in rental_agreements (legacy flow)
   const { data: rental } = await supabase
     .from('rental_agreements')
     .select('rental_id, status')
@@ -774,7 +808,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     .single();
 
   if (!rental) {
-    console.log('[stripe-webhook] No rental found for subscription:', subscription.id);
+    console.log('[stripe-webhook] No subscription or rental found for:', subscription.id);
     return;
   }
 
@@ -809,14 +843,214 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 }
 
 /**
+ * Handle updates to subscriptions table with ratchet logic
+ */
+async function handleSubscriptionTableUpdate(
+  stripeSubscription: Stripe.Subscription,
+  existingSub: {
+    subscription_id: string;
+    status: string;
+    monthly_price: number;
+    ratchet_max: number | null;
+    company_id: string;
+    contact_id: string | null;
+  }
+) {
+  const supabase = getSupabaseClient();
+
+  // Get current price from Stripe
+  const firstItem = stripeSubscription.items.data[0];
+  const newMonthlyPrice = firstItem ? (firstItem.price.unit_amount || 0) / 100 : existingSub.monthly_price;
+
+  // Map Stripe status to our status
+  let newStatus: string = existingSub.status;
+  switch (stripeSubscription.status) {
+    case 'trialing':
+      newStatus = 'trial';
+      break;
+    case 'active':
+      newStatus = 'active';
+      break;
+    case 'past_due':
+      newStatus = 'past_due';
+      break;
+    case 'canceled':
+    case 'unpaid':
+      newStatus = 'cancelled';
+      break;
+    case 'paused':
+      newStatus = 'paused';
+      break;
+  }
+
+  // Build update object
+  const updates: Record<string, any> = {
+    updated_at: new Date().toISOString(),
+  };
+
+  // Status change
+  if (newStatus !== existingSub.status) {
+    updates.status = newStatus;
+  }
+
+  // Price change
+  if (newMonthlyPrice !== existingSub.monthly_price) {
+    updates.monthly_price = newMonthlyPrice;
+  }
+
+  // Period dates
+  updates.current_period_start = new Date(stripeSubscription.current_period_start * 1000).toISOString();
+  updates.current_period_end = new Date(stripeSubscription.current_period_end * 1000).toISOString();
+
+  if (stripeSubscription.trial_end) {
+    updates.trial_end_date = new Date(stripeSubscription.trial_end * 1000).toISOString();
+  }
+
+  // Ratchet logic: price can only increase, never decrease
+  const currentRatchetMax = existingSub.ratchet_max || existingSub.monthly_price;
+
+  if (newMonthlyPrice > currentRatchetMax) {
+    // Price increased - update ratchet_max
+    updates.ratchet_max = newMonthlyPrice;
+    console.log(`[stripe-webhook] Ratchet increased: ${currentRatchetMax} -> ${newMonthlyPrice}`);
+
+    // Log ratchet increase event
+    await supabase.from('subscription_events').insert({
+      subscription_id: existingSub.subscription_id,
+      event_type: 'price_increased',
+      event_name: 'Price increased (ratchet updated)',
+      old_value: { monthly_price: existingSub.monthly_price, ratchet_max: currentRatchetMax },
+      new_value: { monthly_price: newMonthlyPrice, ratchet_max: newMonthlyPrice },
+      performed_by: 'stripe_webhook',
+    }).catch(err => {
+      console.error('[stripe-webhook] Failed to log price increase event:', err);
+    });
+
+  } else if (newMonthlyPrice < currentRatchetMax) {
+    // Price decreased below ratchet - this is an anomaly!
+    console.warn(`[stripe-webhook] RATCHET VIOLATION: Price ${newMonthlyPrice} < ratchet ${currentRatchetMax}`);
+
+    // Log the anomaly as an event
+    await supabase.from('subscription_events').insert({
+      subscription_id: existingSub.subscription_id,
+      event_type: 'downgrade_below_ratchet',
+      event_name: 'Price decreased below ratchet maximum',
+      old_value: { monthly_price: existingSub.monthly_price, ratchet_max: currentRatchetMax },
+      new_value: { monthly_price: newMonthlyPrice },
+      performed_by: 'stripe_webhook',
+      notes: `Anomaly: New price £${newMonthlyPrice} is below ratchet max £${currentRatchetMax}`,
+    }).catch(err => {
+      console.error('[stripe-webhook] Failed to log ratchet violation event:', err);
+    });
+
+    // Don't update ratchet_max - keep it at the higher value
+    // The v_subscription_anomalies view will flag this
+  }
+
+  // Update the subscription
+  const { error: updateError } = await supabase
+    .from('subscriptions')
+    .update(updates)
+    .eq('subscription_id', existingSub.subscription_id);
+
+  if (updateError) {
+    console.error('[stripe-webhook] Failed to update subscription:', updateError);
+    return;
+  }
+
+  // Log status change if it happened
+  if (newStatus !== existingSub.status) {
+    console.log(`[stripe-webhook] Subscription status updated: ${existingSub.status} -> ${newStatus}`);
+
+    await supabase.from('subscription_events').insert({
+      subscription_id: existingSub.subscription_id,
+      event_type: 'status_changed',
+      event_name: `Status changed to ${newStatus}`,
+      old_value: { status: existingSub.status },
+      new_value: { status: newStatus },
+      performed_by: 'stripe_webhook',
+    }).catch(err => {
+      console.error('[stripe-webhook] Failed to log status change event:', err);
+    });
+
+    // Track as engagement event
+    await supabase.from('engagement_events').insert({
+      company_id: existingSub.company_id,
+      contact_id: existingSub.contact_id,
+      event_type: 'subscription_status_changed',
+      event_data: {
+        subscription_id: existingSub.subscription_id,
+        old_status: existingSub.status,
+        new_status: newStatus,
+      },
+    }).catch(err => {
+      console.error('[stripe-webhook] Failed to track status change:', err);
+    });
+  }
+
+  console.log(`[stripe-webhook] Subscription ${existingSub.subscription_id} updated`);
+}
+
+/**
  * Handle subscription cancellation
+ * Handles both subscriptions AND rental_agreements tables
  */
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const supabase = getSupabaseClient();
 
   console.log('[stripe-webhook] Processing customer.subscription.deleted:', subscription.id);
 
-  // Find and update rental agreement
+  // First, try to find in subscriptions table (new flow)
+  const { data: sub } = await supabase
+    .from('subscriptions')
+    .select('subscription_id, company_id, contact_id')
+    .eq('stripe_subscription_id', subscription.id)
+    .single();
+
+  if (sub) {
+    // Update subscription to cancelled
+    await supabase
+      .from('subscriptions')
+      .update({
+        status: 'cancelled',
+        cancelled_at: new Date().toISOString(),
+        cancellation_reason: subscription.cancellation_details?.reason || 'Subscription cancelled',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('subscription_id', sub.subscription_id);
+
+    console.log('[stripe-webhook] Subscription cancelled:', sub.subscription_id);
+
+    // Log cancellation event
+    await supabase.from('subscription_events').insert({
+      subscription_id: sub.subscription_id,
+      event_type: 'cancelled',
+      event_name: 'Subscription cancelled',
+      old_value: { status: 'active' },
+      new_value: { status: 'cancelled', reason: subscription.cancellation_details?.reason },
+      performed_by: 'stripe_webhook',
+    }).catch(err => {
+      console.error('[stripe-webhook] Failed to log cancellation event:', err);
+    });
+
+    // Track engagement event
+    await supabase.from('engagement_events').insert({
+      company_id: sub.company_id,
+      contact_id: sub.contact_id,
+      event_type: 'subscription_cancelled',
+      event_data: {
+        subscription_id: sub.subscription_id,
+        stripe_subscription_id: subscription.id,
+        reason: subscription.cancellation_details?.reason,
+      },
+    }).catch(err => {
+      console.error('[stripe-webhook] Failed to track subscription_cancelled event:', err);
+    });
+
+    return;
+  }
+
+  // Fallback: Find and update rental agreement (legacy flow)
   const { data: rental } = await supabase
     .from('rental_agreements')
     .select('rental_id, company_id, contact_id')
@@ -824,7 +1058,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     .single();
 
   if (!rental) {
-    console.log('[stripe-webhook] No rental found for deleted subscription:', subscription.id);
+    console.log('[stripe-webhook] No subscription or rental found for deleted subscription:', subscription.id);
     return;
   }
 
@@ -856,4 +1090,159 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
       console.error('[stripe-webhook] Failed to track rental_cancelled event:', err);
     }
   });
+}
+
+/**
+ * Handle trial subscription creation (from /offer page flow)
+ * Creates row in subscriptions table with ratchet logic
+ */
+async function handleTrialSubscriptionCreated(
+  subscription: Stripe.Subscription,
+  meta: {
+    companyId: string;
+    contactId: string | null;
+    machineId: string | null;
+    trialIntentId: string | null;
+    selectedPrice: number | null;
+  }
+) {
+  const supabase = getSupabaseClient();
+
+  console.log('[stripe-webhook] Processing trial subscription:', subscription.id);
+
+  const { companyId, contactId, machineId, trialIntentId, selectedPrice } = meta;
+
+  // Get price from subscription items
+  const firstItem = subscription.items.data[0];
+  if (!firstItem) {
+    console.error('[stripe-webhook] No subscription items found');
+    return;
+  }
+
+  const monthlyPrice = selectedPrice || (firstItem.price.unit_amount || 0) / 100;
+  const currency = (firstItem.price.currency || 'gbp').toUpperCase();
+
+  // Trial dates
+  const trialStart = subscription.trial_start
+    ? new Date(subscription.trial_start * 1000)
+    : null;
+  const trialEnd = subscription.trial_end
+    ? new Date(subscription.trial_end * 1000)
+    : null;
+
+  // Current period
+  const currentPeriodStart = new Date(subscription.current_period_start * 1000);
+  const currentPeriodEnd = new Date(subscription.current_period_end * 1000);
+
+  // Determine status
+  let status: string = 'trial';
+  if (subscription.status === 'active' && !subscription.trial_end) {
+    status = 'active';
+  } else if (subscription.status === 'trialing') {
+    status = 'trial';
+  } else if (subscription.status === 'past_due') {
+    status = 'past_due';
+  }
+
+  // Check if subscription already exists (idempotency)
+  const { data: existingSub } = await supabase
+    .from('subscriptions')
+    .select('subscription_id')
+    .eq('stripe_subscription_id', subscription.id)
+    .single();
+
+  if (existingSub) {
+    console.log('[stripe-webhook] Subscription already exists:', existingSub.subscription_id);
+    return;
+  }
+
+  // Insert subscription row
+  const { data: newSub, error: subError } = await supabase
+    .from('subscriptions')
+    .insert({
+      stripe_subscription_id: subscription.id,
+      stripe_customer_id: subscription.customer as string,
+      company_id: companyId,
+      contact_id: contactId,
+      monthly_price: monthlyPrice,
+      currency,
+      tools: [], // Can be populated later based on machine type
+      status,
+      trial_start_date: trialStart?.toISOString(),
+      trial_end_date: trialEnd?.toISOString(),
+      current_period_start: currentPeriodStart.toISOString(),
+      current_period_end: currentPeriodEnd.toISOString(),
+      next_billing_date: trialEnd?.toISOString() || currentPeriodEnd.toISOString(),
+      ratchet_max: monthlyPrice, // Initialize ratchet to current price
+      notes: machineId ? `Machine: ${machineId}` : undefined,
+    })
+    .select('subscription_id')
+    .single();
+
+  if (subError || !newSub) {
+    console.error('[stripe-webhook] Failed to create subscription:', subError);
+    return;
+  }
+
+  console.log('[stripe-webhook] Subscription created:', newSub.subscription_id);
+
+  // Insert subscription event
+  await supabase
+    .from('subscription_events')
+    .insert({
+      subscription_id: newSub.subscription_id,
+      event_type: 'created',
+      event_name: 'Subscription created from trial offer',
+      old_value: null,
+      new_value: {
+        monthly_price: monthlyPrice,
+        machine_id: machineId,
+        trial_intent_id: trialIntentId,
+        status,
+        trial_end_date: trialEnd?.toISOString(),
+      },
+      performed_by: 'stripe_webhook',
+    })
+    .catch(err => {
+      console.error('[stripe-webhook] Failed to create subscription event:', err);
+    });
+
+  // Track engagement event
+  await supabase.from('engagement_events').insert({
+    company_id: companyId,
+    contact_id: contactId,
+    event_type: 'subscription_created',
+    event_data: {
+      subscription_id: newSub.subscription_id,
+      stripe_subscription_id: subscription.id,
+      monthly_price: monthlyPrice,
+      machine_id: machineId,
+      trial_intent_id: trialIntentId,
+      has_trial: !!trialEnd,
+    },
+  }).catch(err => {
+    console.error('[stripe-webhook] Failed to track subscription_created event:', err);
+  });
+
+  // Send confirmation email
+  try {
+    const { data: company } = await supabase
+      .from('companies')
+      .select('company_name')
+      .eq('company_id', companyId)
+      .single();
+
+    const { data: contact } = await supabase
+      .from('contacts')
+      .select('full_name, email')
+      .eq('contact_id', contactId)
+      .single();
+
+    if (company && contact) {
+      // TODO: Send trial started confirmation email
+      console.log(`[stripe-webhook] Would send trial confirmation to ${contact.email}`);
+    }
+  } catch (emailError) {
+    console.error('[stripe-webhook] Error preparing confirmation email:', emailError);
+  }
 }

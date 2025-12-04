@@ -24,10 +24,30 @@ interface Subscription {
   tool_count: number;
 }
 
+interface SubscriptionAnomaly {
+  subscription_id: string;
+  stripe_subscription_id: string | null;
+  company_id: string;
+  company_name: string;
+  contact_id: string | null;
+  contact_name: string | null;
+  contact_email: string | null;
+  monthly_price: number;
+  ratchet_max: number;
+  currency: string;
+  status: string;
+  violation_amount: number;
+  violation_percentage: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export default function SubscriptionsAdminPage() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [anomalies, setAnomalies] = useState<SubscriptionAnomaly[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'trial' | 'active' | 'past_due' | 'cancelled'>('all');
+  const [showAnomalies, setShowAnomalies] = useState(false);
 
   useEffect(() => {
     loadSubscriptions();
@@ -37,6 +57,8 @@ export default function SubscriptionsAdminPage() {
     setLoading(true);
     try {
       const supabase = createClient();
+
+      // Load subscriptions
       const { data, error } = await supabase
         .from('v_active_subscriptions')
         .select('*')
@@ -49,6 +71,19 @@ export default function SubscriptionsAdminPage() {
       }
 
       setSubscriptions(data || []);
+
+      // Load anomalies (ratchet violations)
+      const { data: anomalyData, error: anomalyError } = await supabase
+        .from('v_subscription_anomalies')
+        .select('*')
+        .order('updated_at', { ascending: false });
+
+      if (anomalyError) {
+        console.warn('[Subscriptions] Anomaly load error:', anomalyError);
+        // Don't fail if view doesn't exist yet
+      } else {
+        setAnomalies(anomalyData || []);
+      }
     } catch (error) {
       console.error('[Subscriptions] Exception:', error);
       alert('Failed to load subscriptions');
@@ -124,13 +159,13 @@ export default function SubscriptionsAdminPage() {
           </div>
 
           {/* Filters */}
-          <div className="mt-6 flex gap-2">
+          <div className="mt-6 flex gap-2 flex-wrap">
             {['all', 'trial', 'active', 'past_due', 'cancelled'].map((f) => (
               <button
                 key={f}
-                onClick={() => setFilter(f as typeof filter)}
+                onClick={() => { setFilter(f as typeof filter); setShowAnomalies(false); }}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  filter === f
+                  filter === f && !showAnomalies
                     ? 'bg-blue-600 text-white'
                     : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
                 }`}
@@ -143,11 +178,116 @@ export default function SubscriptionsAdminPage() {
                 )}
               </button>
             ))}
+            {/* Anomalies Button */}
+            <button
+              onClick={() => setShowAnomalies(!showAnomalies)}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                showAnomalies
+                  ? 'bg-red-600 text-white'
+                  : anomalies.length > 0
+                    ? 'bg-red-50 text-red-700 border border-red-300 hover:bg-red-100'
+                    : 'bg-white text-gray-400 border border-gray-200'
+              }`}
+            >
+              Anomalies
+              {anomalies.length > 0 && (
+                <span className={`ml-2 text-xs ${showAnomalies ? 'opacity-75' : 'bg-red-600 text-white px-1.5 py-0.5 rounded-full'}`}>
+                  {anomalies.length}
+                </span>
+              )}
+            </button>
           </div>
         </div>
 
+        {/* Anomalies Table */}
+        {showAnomalies && (
+          <div className="mb-8">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <h3 className="text-lg font-medium text-red-800">Ratchet Violations</h3>
+              </div>
+              <p className="text-sm text-red-700 mt-1">
+                These subscriptions have a monthly price below their ratchet maximum. Prices should only increase, never decrease.
+              </p>
+            </div>
+
+            {anomalies.length === 0 ? (
+              <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+                <div className="text-green-500 mb-4">
+                  <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-1">No Anomalies Found</h3>
+                <p className="text-gray-500">All subscriptions are within their ratchet limits</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-red-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-red-700 uppercase tracking-wider">Company</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-red-700 uppercase tracking-wider">Contact</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-red-700 uppercase tracking-wider">Current Price</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-red-700 uppercase tracking-wider">Ratchet Max</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-red-700 uppercase tracking-wider">Violation</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-red-700 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-red-700 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {anomalies.map((anomaly) => (
+                      <tr key={anomaly.subscription_id} className="hover:bg-red-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{anomaly.company_name}</div>
+                          {anomaly.stripe_subscription_id && (
+                            <div className="text-xs text-gray-500 font-mono">{anomaly.stripe_subscription_id.substring(0, 20)}...</div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{anomaly.contact_name || '—'}</div>
+                          <div className="text-xs text-gray-500">{anomaly.contact_email || '—'}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-red-600">
+                            {formatCurrency(anomaly.monthly_price, anomaly.currency)}/mo
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {formatCurrency(anomaly.ratchet_max, anomaly.currency)}/mo
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-red-600">
+                            -{formatCurrency(anomaly.violation_amount, anomaly.currency)}
+                          </div>
+                          <div className="text-xs text-red-500">
+                            {anomaly.violation_percentage}% below
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getStatusBadge(anomaly.status)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <Link href={`/admin/subscriptions/${anomaly.subscription_id}`} className="text-blue-600 hover:text-blue-900">
+                            Investigate
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Subscriptions Table */}
-        {filteredSubscriptions.length === 0 ? (
+        {!showAnomalies && filteredSubscriptions.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-12 text-center">
             <div className="text-gray-400 mb-4">
               <svg
@@ -177,7 +317,7 @@ export default function SubscriptionsAdminPage() {
               Create Subscription
             </Link>
           </div>
-        ) : (
+        ) : !showAnomalies ? (
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -279,7 +419,7 @@ export default function SubscriptionsAdminPage() {
               </tbody>
             </table>
           </div>
-        )}
+        ) : null}
 
         {/* Summary Stats */}
         {subscriptions.length > 0 && (
