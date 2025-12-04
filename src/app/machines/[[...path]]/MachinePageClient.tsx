@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { CoverWorkNarrative } from '@/components/machines/CoverWorkNarrative';
+import { PerfectBinderNarrative } from '@/components/machines/PerfectBinderNarrative';
 
 interface MachinePageClientProps {
   machine: {
@@ -98,6 +99,9 @@ export default function MachinePageClient({
   // Check if this is a folding machine type
   const isFoldingMachine = machine.type === 'folder' || machine.type === 'folding_machine' || machine.type === 'folding-machines';
 
+  // Check if this is a perfect binder type
+  const isPerfectBinder = machine.type === 'perfect_binder' || machine.type === 'perfect-binder' || machine.type === 'perfect-binders';
+
   // For folding machines, render the Cover Work narrative
   if (isFoldingMachine) {
     return (
@@ -119,7 +123,28 @@ export default function MachinePageClient({
     );
   }
 
-  // For non-folding machines, render the original content
+  // For perfect binders, render the Perfect Binder narrative
+  if (isPerfectBinder) {
+    return (
+      <>
+        {/* Breadcrumb Header */}
+        <section className="bg-slate-900 text-white py-6 border-b-4 border-orange-500">
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="text-orange-400 text-sm">
+              <Link href="/machines" className="hover:text-orange-300">All Machines</Link>
+              {' / '}
+              <span className="text-gray-400">{machine.brand} {machine.model}</span>
+            </div>
+          </div>
+        </section>
+
+        {/* Perfect Binder Narrative */}
+        <PerfectBinderNarrative machine={machine} />
+      </>
+    );
+  }
+
+  // For other machine types, render the original content
   return (
     <>
 
