@@ -49,8 +49,15 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
           </p>
         </div>
 
-        <div className="bg-gray-100 rounded-lg aspect-video flex items-center justify-center">
-          <span className="text-gray-400">Tooling video/image placeholder</span>
+        <div className="rounded-lg overflow-hidden shadow-lg">
+          <iframe
+            src="https://www.youtube.com/embed/QEZVzxka01U"
+            title="Tri-Creaser Fast-Fit demonstration"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="w-full aspect-video"
+          />
         </div>
       </section>
 
@@ -109,8 +116,17 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
               </p>
             </div>
 
-            <div className="bg-gray-200 rounded-lg aspect-video flex items-center justify-center">
-              <span className="text-gray-400">Tri-Creaser media placeholder</span>
+            <div className="space-y-4">
+              <img
+                src="/images/products/tri-creaser-action.jpg"
+                alt="Tri-Creaser creating perfect letterpress-style creases"
+                className="w-full rounded-lg shadow-lg"
+              />
+              <img
+                src="/images/results/fiber-crack-before-and-after.jpg"
+                alt="Before and after: fibre cracking eliminated with Tri-Creaser"
+                className="w-full rounded-lg shadow-lg"
+              />
             </div>
           </div>
         </div>
@@ -172,8 +188,17 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
             </p>
           </div>
 
-          <div className="bg-gray-100 rounded-lg aspect-video flex items-center justify-center">
-            <span className="text-gray-400">Micro-Perf media placeholder</span>
+          <div className="space-y-4">
+            <img
+              src="/images/products/micro-perforator-action.jpg"
+              alt="Micro-Perforator creating clean letterpress-style perforations"
+              className="w-full rounded-lg shadow-lg"
+            />
+            <img
+              src="/images/results/perforation-before-and-after-1.jpg"
+              alt="Before and after: perforation quality comparison"
+              className="w-full rounded-lg shadow-lg"
+            />
           </div>
         </div>
       </section>
@@ -234,8 +259,17 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
               </p>
             </div>
 
-            <div className="bg-gray-200 rounded-lg aspect-video flex items-center justify-center">
-              <span className="text-gray-400">Multi-Tool media placeholder</span>
+            <div className="space-y-4">
+              <img
+                src="/images/products/multi-tool-action.jpg"
+                alt="Multi-Tool Cutting System producing guillotine-quality cuts inline"
+                className="w-full rounded-lg shadow-lg"
+              />
+              <img
+                src="/images/results/cutting-before-and-after-1.jpg"
+                alt="Before and after: cutting quality comparison"
+                className="w-full rounded-lg shadow-lg"
+              />
             </div>
           </div>
         </div>

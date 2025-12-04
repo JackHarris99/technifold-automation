@@ -56,8 +56,15 @@ export function SpineCreaserNarrative({ machine }: SpineCreaserNarrativeProps) {
             </p>
           </div>
 
-          <div className="bg-gray-100 rounded-lg aspect-video flex items-center justify-center">
-            <span className="text-gray-400">Image placeholder</span>
+          <div className="rounded-lg overflow-hidden shadow-lg">
+            <iframe
+              src="https://www.youtube.com/embed/bdiPRqmoSj8"
+              title="Spine Creaser demonstration"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full aspect-video"
+            />
           </div>
         </div>
       </section>
@@ -165,8 +172,17 @@ export function SpineCreaserNarrative({ machine }: SpineCreaserNarrativeProps) {
             </p>
           </div>
 
-          <div className="bg-gray-100 rounded-lg aspect-video flex items-center justify-center">
-            <span className="text-gray-400">Spine-Creaser image placeholder</span>
+          <div className="space-y-4">
+            <img
+              src="/images/products/spine-creaser-action.jpg"
+              alt="Spine Creaser creating perfect inline cover creases"
+              className="w-full rounded-lg shadow-lg"
+            />
+            <img
+              src="/images/products/spine-creaser-detail.jpg"
+              alt="Spine Creaser detail showing rubber creasing technology"
+              className="w-full rounded-lg shadow-lg"
+            />
           </div>
         </div>
       </section>
@@ -207,8 +223,12 @@ export function SpineCreaserNarrative({ machine }: SpineCreaserNarrativeProps) {
               </p>
             </div>
 
-            <div className="bg-gray-200 rounded-lg aspect-video flex items-center justify-center">
-              <span className="text-gray-400">Capability 1 media placeholder</span>
+            <div>
+              <img
+                src="/images/results/spine-creaser-result-1.jpg"
+                alt="Perfect spine crease with no fibre cracking"
+                className="w-full rounded-lg shadow-lg"
+              />
             </div>
           </div>
 
@@ -240,8 +260,12 @@ export function SpineCreaserNarrative({ machine }: SpineCreaserNarrativeProps) {
               </p>
             </div>
 
-            <div className="bg-gray-200 rounded-lg aspect-video flex items-center justify-center">
-              <span className="text-gray-400">Capability 2 media placeholder</span>
+            <div>
+              <img
+                src="/images/results/spine-creaser-result-2.jpg"
+                alt="Laminated cover with perfect crease - no lifting"
+                className="w-full rounded-lg shadow-lg"
+              />
             </div>
           </div>
 
@@ -272,8 +296,12 @@ export function SpineCreaserNarrative({ machine }: SpineCreaserNarrativeProps) {
               </p>
             </div>
 
-            <div className="bg-gray-200 rounded-lg aspect-video flex items-center justify-center">
-              <span className="text-gray-400">Capability 3 media placeholder</span>
+            <div>
+              <img
+                src="/images/products/spine-creaser-installed.JPG"
+                alt="Spine Creaser installed on saddle stitcher"
+                className="w-full rounded-lg shadow-lg"
+              />
             </div>
           </div>
 
@@ -305,8 +333,12 @@ export function SpineCreaserNarrative({ machine }: SpineCreaserNarrativeProps) {
               </p>
             </div>
 
-            <div className="bg-gray-200 rounded-lg aspect-video flex items-center justify-center">
-              <span className="text-gray-400">Capability 4 media placeholder</span>
+            <div>
+              <img
+                src="/images/before-after/saddle-stitch-perfect-crease.JPG"
+                alt="Perfect saddle stitch crease result"
+                className="w-full rounded-lg shadow-lg"
+              />
             </div>
           </div>
 
@@ -327,8 +359,12 @@ export function SpineCreaserNarrative({ machine }: SpineCreaserNarrativeProps) {
               </p>
             </div>
 
-            <div className="bg-gray-200 rounded-lg aspect-video flex items-center justify-center">
-              <span className="text-gray-400">Capability 5 media placeholder</span>
+            <div>
+              <img
+                src="/images/before-after/book-spine-perfect-after.JPG"
+                alt="Professional booklet with perfect spine at full speed"
+                className="w-full rounded-lg shadow-lg"
+              />
             </div>
           </div>
         </div>

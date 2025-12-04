@@ -77,8 +77,15 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
             </p>
           </div>
 
-          <div className="bg-gray-100 rounded-lg aspect-video flex items-center justify-center">
-            <span className="text-gray-400">Image placeholder</span>
+          <div className="rounded-lg overflow-hidden shadow-lg">
+            <iframe
+              src="https://www.youtube.com/embed/2_76v5KYx5U"
+              title="Quad-Creaser demonstration"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full aspect-video"
+            />
           </div>
         </div>
       </section>
@@ -171,8 +178,17 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
             </p>
           </div>
 
-          <div className="bg-gray-100 rounded-lg aspect-video flex items-center justify-center">
-            <span className="text-gray-400">Quad Creaser image placeholder</span>
+          <div className="space-y-4">
+            <img
+              src="/images/products/quad-creaser-action.jpg"
+              alt="Quad Creaser installed on perfect binder"
+              className="w-full rounded-lg shadow-lg"
+            />
+            <img
+              src="/images/products/quad-creaser-color-ribs.jpg"
+              alt="Quad Creaser colour-coded ribs for easy setup"
+              className="w-full rounded-lg shadow-lg"
+            />
           </div>
         </div>
       </section>
@@ -214,8 +230,13 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
               </p>
             </div>
 
-            <div className="bg-gray-200 rounded-lg aspect-video flex items-center justify-center">
-              <span className="text-gray-400">Capability 1 media placeholder</span>
+            <div>
+              <img
+                src="/images/results/cover-crease-before.JPG"
+                alt="Cover cracking before Quad Creaser"
+                className="w-full rounded-lg shadow-lg mb-2"
+              />
+              <p className="text-sm text-gray-500 text-center">Before: Fibre cracking with OEM scoring</p>
             </div>
           </div>
 
@@ -242,8 +263,13 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
               </p>
             </div>
 
-            <div className="bg-gray-200 rounded-lg aspect-video flex items-center justify-center">
-              <span className="text-gray-400">Capability 2 media placeholder</span>
+            <div>
+              <img
+                src="/images/results/cover-crease-after.JPG"
+                alt="Perfect cover crease with Quad Creaser"
+                className="w-full rounded-lg shadow-lg mb-2"
+              />
+              <p className="text-sm text-gray-500 text-center">After: Letterpress-quality crease with Quad Creaser</p>
             </div>
           </div>
 
@@ -288,8 +314,12 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
               </p>
             </div>
 
-            <div className="bg-gray-200 rounded-lg aspect-video flex items-center justify-center">
-              <span className="text-gray-400">Capability 3 media placeholder</span>
+            <div>
+              <img
+                src="/images/products/quad-creaser-installed.JPG"
+                alt="Quad Creaser installed showing adjustable settings"
+                className="w-full rounded-lg shadow-lg"
+              />
             </div>
           </div>
 
@@ -319,8 +349,12 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
               </p>
             </div>
 
-            <div className="bg-gray-200 rounded-lg aspect-video flex items-center justify-center">
-              <span className="text-gray-400">Capability 4 media placeholder</span>
+            <div>
+              <img
+                src="/images/technical/quad-creaser-step1.jpeg"
+                alt="Quad Creaser setup step 1"
+                className="w-full rounded-lg shadow-lg"
+              />
             </div>
           </div>
 
@@ -349,8 +383,12 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
               </p>
             </div>
 
-            <div className="bg-gray-200 rounded-lg aspect-video flex items-center justify-center">
-              <span className="text-gray-400">Capability 5 media placeholder</span>
+            <div>
+              <img
+                src="/images/products/quad-creaser-main.jpg"
+                alt="Quad Creaser main product view"
+                className="w-full rounded-lg shadow-lg"
+              />
             </div>
           </div>
         </div>
