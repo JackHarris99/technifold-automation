@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { CoverWorkNarrative } from '@/components/machines/CoverWorkNarrative';
 import { PerfectBinderNarrative } from '@/components/machines/PerfectBinderNarrative';
+import { SpineCreaserNarrative } from '@/components/machines/SpineCreaserNarrative';
 
 interface MachinePageClientProps {
   machine: {
@@ -102,6 +103,12 @@ export default function MachinePageClient({
   // Check if this is a perfect binder type
   const isPerfectBinder = machine.type === 'perfect_binder' || machine.type === 'perfect-binder' || machine.type === 'perfect-binders';
 
+  // Check if this is a spine-creaser capable machine (saddle stitchers, booklet makers, cover feeders)
+  const isSpineCreaserMachine =
+    machine.type === 'saddle_stitcher' || machine.type === 'saddle-stitcher' || machine.type === 'saddle-stitchers' ||
+    machine.type === 'booklet_maker' || machine.type === 'booklet-maker' || machine.type === 'booklet-makers' ||
+    machine.type === 'cover_feeder' || machine.type === 'cover-feeder' || machine.type === 'cover-feeders';
+
   // For folding machines, render the Cover Work narrative
   if (isFoldingMachine) {
     return (
@@ -140,6 +147,27 @@ export default function MachinePageClient({
 
         {/* Perfect Binder Narrative */}
         <PerfectBinderNarrative machine={machine} />
+      </>
+    );
+  }
+
+  // For spine-creaser capable machines (saddle stitchers, booklet makers, cover feeders)
+  if (isSpineCreaserMachine) {
+    return (
+      <>
+        {/* Breadcrumb Header */}
+        <section className="bg-slate-900 text-white py-6 border-b-4 border-orange-500">
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="text-orange-400 text-sm">
+              <Link href="/machines" className="hover:text-orange-300">All Machines</Link>
+              {' / '}
+              <span className="text-gray-400">{machine.brand} {machine.model}</span>
+            </div>
+          </div>
+        </section>
+
+        {/* Spine Creaser Narrative */}
+        <SpineCreaserNarrative machine={machine} />
       </>
     );
   }
