@@ -6,365 +6,321 @@ interface CoverWorkNarrativeProps {
 
 export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
   return (
-    <div className="space-y-16 py-16">
-      {/* HERO SECTION */}
-      <section className="max-w-6xl mx-auto px-6 grid gap-8 md:grid-cols-2 items-center">
-        <div>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-            Unlock Thousands in Monthly Finishing Efficiency from Your Existing {machine.display_name}
-          </h2>
+    <article className="bg-white">
+      {/* Header */}
+      <header className="bg-slate-900 text-white py-12 border-b border-slate-700">
+        <div className="max-w-4xl mx-auto px-6">
+          <p className="text-cyan-400 text-sm font-medium tracking-wide uppercase mb-3">
+            Technifold Technical Reference
+          </p>
+          <h1 className="text-3xl md:text-4xl font-light text-white leading-tight">
+            Unlock Thousands in Monthly Finishing Efficiency from Your Existing{' '}
+            <span className="font-medium">{machine.display_name}</span>
+          </h1>
+        </div>
+      </header>
 
-          <p className="text-gray-700 mb-4">
-            Your folding machine already handles speed, registration and folding accuracy brilliantly — but it has one unavoidable limitation:
+      {/* Main Content */}
+      <div className="max-w-4xl mx-auto px-6 py-12">
+
+        {/* Introduction */}
+        <section className="mb-12">
+          <p className="text-lg text-slate-700 leading-relaxed mb-6">
+            Your folding machine already handles speed, registration and folding accuracy brilliantly — but it has one unavoidable limitation.
           </p>
 
-          <p className="text-gray-900 font-semibold mb-4">
+          <p className="text-lg text-slate-800 font-medium leading-relaxed mb-6">
             It was never engineered to crease, perforate, or cut single sheets to a high standard.
           </p>
 
-          <ul className="text-gray-700 mb-6 space-y-1">
-            <li>OEM scoring wheels tear fibres.</li>
-            <li>Standard perf wheels rip rather than perforate.</li>
-            <li>Integrated slitting knives rough-trim a stack, not a single sheet.</li>
-          </ul>
+          <div className="text-slate-600 leading-relaxed space-y-4 mb-8">
+            <p>OEM scoring wheels tear fibres. Standard perf wheels rip rather than perforate. Integrated slitting knives rough-trim a stack, not a single sheet.</p>
 
-          <p className="text-gray-700 mb-4">If you've ever fought with:</p>
+            <p>If you've ever fought with cracking along the fold, furry chewed edges, tough folds that refuse to lie flat, perfs that snap, tear or don't run straight, operators babysitting the machine all shift, or guillotine bottlenecks that delay dispatch — none of that is the fault of your {machine.display_name}.</p>
+          </div>
 
-          <ul className="text-gray-700 mb-6 space-y-1">
-            <li>Cracking along the fold</li>
-            <li>Furry, chewed edges</li>
-            <li>Tough folds that refuse to lie flat</li>
-            <li>Perfs that snap, tear or don't run straight</li>
-            <li>Operators babysitting the machine all shift</li>
-            <li>Guillotine bottlenecks that delay dispatch</li>
-          </ul>
+          <p className="text-slate-900 font-medium text-lg border-l-2 border-cyan-500 pl-4">
+            It's the tooling. And that's exactly where Technifold comes in.
+          </p>
+        </section>
 
-          <p className="text-gray-700 mb-4">
-            …none of that is the fault of your {machine.display_name}.<br />
-            It's the tooling.
+        {/* Video Reference */}
+        <aside className="mb-12 bg-slate-50 border border-slate-200 p-6">
+          <p className="text-sm text-slate-500 uppercase tracking-wide mb-3">Technical Demonstration</p>
+          <div className="aspect-video">
+            <iframe
+              src="https://www.youtube.com/embed/QEZVzxka01U"
+              title="Tri-Creaser Fast-Fit demonstration"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full"
+            />
+          </div>
+        </aside>
+
+        {/* Three Capabilities Overview */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-medium text-slate-900 mb-6">
+            Three Precision-Engineered Capabilities for Your {machine.display_name}
+          </h2>
+
+          <p className="text-slate-600 leading-relaxed mb-8">
+            Technifold finishing tools are built around patented rubber-based technology and colour-coded tooling systems that deliver measurable, consistent results across a wide range of substrates and applications.
           </p>
 
-          <p className="text-gray-900 font-semibold">
-            And that's exactly where Technifold comes in.
-          </p>
-        </div>
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <div className="border border-slate-200 p-5">
+              <p className="text-cyan-600 text-xs font-medium uppercase tracking-wide mb-2">Capability 01</p>
+              <p className="text-slate-900 font-medium">Tri-Creaser</p>
+              <p className="text-slate-500 text-sm mt-1">Fibre-crack elimination</p>
+            </div>
+            <div className="border border-slate-200 p-5">
+              <p className="text-cyan-600 text-xs font-medium uppercase tracking-wide mb-2">Capability 02</p>
+              <p className="text-slate-900 font-medium">Micro-Perforator</p>
+              <p className="text-slate-500 text-sm mt-1">Precision perforation</p>
+            </div>
+            <div className="border border-slate-200 p-5">
+              <p className="text-cyan-600 text-xs font-medium uppercase tracking-wide mb-2">Capability 03</p>
+              <p className="text-slate-900 font-medium">Multi-Tool</p>
+              <p className="text-slate-500 text-sm mt-1">Inline trimming &amp; slitting</p>
+            </div>
+          </div>
+        </section>
 
-        <div className="rounded-lg overflow-hidden shadow-lg">
-          <iframe
-            src="https://www.youtube.com/embed/QEZVzxka01U"
-            title="Tri-Creaser Fast-Fit demonstration"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="w-full aspect-video"
-          />
-        </div>
-      </section>
-
-      {/* TRI-CREASER SECTION */}
-      <section className="bg-gray-50 py-12">
-        <div className="max-w-6xl mx-auto px-6">
-          <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">
-            Transform Your {machine.display_name} into a High-End Finishing System
+        {/* Capability 1: Tri-Creaser */}
+        <section className="mb-12 pb-12 border-b border-slate-200">
+          <h3 className="text-xl font-medium text-slate-900 mb-4">
+            Tri-Creaser: Eliminate Fibre-Cracking Permanently
           </h3>
 
-          <p className="text-gray-700 mb-8">
-            By adding three world-leading capabilities — Tri-Creaser, Micro-Perforation, and Multi-Tool Cutting — you turn your {machine.display_name} into a machine that can genuinely finish commercial-grade single-sheet work inline:
-          </p>
-
-          <div className="grid gap-8 md:grid-cols-2 items-start">
-            <div>
-              <h4 className="text-xl font-bold text-gray-900 mb-4">
-                1) Tri-Creaser – Eliminate Fibre-Cracking & Produce Perfect Folds
-              </h4>
-
-              <p className="text-gray-700 mb-4">
-                Your folder's metal scoring wheel isn't a creaser — it's a blunt scoring device designed decades ago. It crushes fibres, causes cracking along the fold, and forces operators to adjust constantly for stock, grain and coating.
+          <div className="md:flex md:gap-8 mb-6">
+            <div className="md:flex-1">
+              <p className="text-slate-600 leading-relaxed mb-4">
+                OEM scoring wheels crush and fracture the substrate. Every fold becomes a fault line waiting to crack — especially on coated, laminated, or digitally printed stock.
               </p>
 
-              <p className="text-gray-700 mb-4">
-                The Tri-Creaser replaces that entire flawed process with:
+              <p className="text-slate-600 leading-relaxed mb-4">
+                The Tri-Creaser uses patented rubber-matrix technology to form a genuine channel crease without damaging fibres. The result is a fold that bends cleanly, lies flat, and never cracks — regardless of paper weight, coating, or grain direction.
               </p>
 
-              <ul className="text-gray-700 mb-6 space-y-2">
-                <li className="flex items-start gap-2">
-                  <span className="text-orange-500 mt-1">•</span>
-                  <span>True compression creasing (no tearing or fibre-cracking)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-orange-500 mt-1">•</span>
-                  <span>Fold-flat results even on heavy, laminated and digital stocks</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-orange-500 mt-1">•</span>
-                  <span>Zero set-up headaches — the tooling compensates automatically</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-orange-500 mt-1">•</span>
-                  <span>Repeatable quality — same result on job 1 and job 10,000</span>
-                </li>
-              </ul>
-
-              <div className="bg-white border-l-4 border-orange-500 p-4 mb-4 space-y-2">
-                <p className="text-gray-600 italic">"Works perfectly across the entire substrate range."</p>
-                <p className="text-gray-600 italic">"Prevents cracking 100% on laminated and digital stock."</p>
-                <p className="text-gray-600 italic">"Operators report near-zero reprints caused by poor folds."</p>
-              </div>
-
-              <p className="text-gray-900 font-semibold">
-                This is why Tri-Creaser is used on over 100,000 folding machines worldwide.
+              <p className="text-slate-600 leading-relaxed">
+                This applies to 170gsm gloss, 350gsm board, short-grain digital, laminated covers — and everything in between.
               </p>
             </div>
 
-            <div className="space-y-4">
+            <figure className="md:w-64 mt-6 md:mt-0 flex-shrink-0">
               <img
                 src="/images/products/tri-creaser-action.jpg"
-                alt="Tri-Creaser creating perfect letterpress-style creases"
-                className="w-full rounded-lg shadow-lg"
+                alt="Tri-Creaser tooling in operation"
+                className="w-full border border-slate-200"
               />
+              <figcaption className="text-xs text-slate-400 mt-2">Fig. 1 — Tri-Creaser Fast-Fit module</figcaption>
+            </figure>
+          </div>
+
+          <div className="bg-slate-50 border border-slate-200 p-5 md:flex md:gap-8">
+            <figure className="md:w-48 flex-shrink-0 mb-4 md:mb-0">
               <img
-                src="/images/results/fiber-crack-before-and-after.jpg"
-                alt="Before and after: fibre cracking eliminated with Tri-Creaser"
-                className="w-full rounded-lg shadow-lg"
+                src="/images/results/fiber-crack-before.JPG"
+                alt="Fibre cracking with OEM scoring"
+                className="w-full border border-slate-300"
               />
-            </div>
+              <figcaption className="text-xs text-slate-400 mt-2">Before: OEM scoring damage</figcaption>
+            </figure>
+            <figure className="md:w-48 flex-shrink-0">
+              <img
+                src="/images/results/fiber-crack-after.JPG"
+                alt="Clean fold with Tri-Creaser"
+                className="w-full border border-slate-300"
+              />
+              <figcaption className="text-xs text-slate-400 mt-2">After: Tri-Creaser result</figcaption>
+            </figure>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* MICRO-PERF SECTION */}
-      <section className="max-w-6xl mx-auto px-6">
-        <div className="grid gap-8 md:grid-cols-2 items-start">
-          <div>
-            <h4 className="text-xl font-bold text-gray-900 mb-4">
-              2) Micro-Perforation – Clean, Controlled, Letterpress-Quality Perfs
-            </h4>
+        {/* Capability 2: Micro-Perforator */}
+        <section className="mb-12 pb-12 border-b border-slate-200">
+          <h3 className="text-xl font-medium text-slate-900 mb-4">
+            Micro-Perforator: Clean, Consistent, Controllable Perforations
+          </h3>
 
-            <p className="text-gray-700 mb-4">
-              Most folders "perforate" by tearing.<br />
-              The operator hears the wheel ripping the sheet.
-            </p>
-
-            <p className="text-gray-700 mb-4">
-              The result: dust, debris, weak perfs, and inconsistent tear strength.
-            </p>
-
-            <p className="text-gray-700 mb-4">
-              Technifold's Micro-Perf system delivers:
-            </p>
-
-            <ul className="text-gray-700 mb-6 space-y-2">
-              <li className="flex items-start gap-2">
-                <span className="text-orange-500 mt-1">•</span>
-                <span>Crisp, controlled, letterpress-style perforation</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-orange-500 mt-1">•</span>
-                <span>No fibre ripping, no debris, no weak spots</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-orange-500 mt-1">•</span>
-                <span>Multiple TPI options for every stock and job</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-orange-500 mt-1">•</span>
-                <span>Close-proximity perfing for tickets, offers, vouchers</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-orange-500 mt-1">•</span>
-                <span>Virtually invisible perf lines when required</span>
-              </li>
-            </ul>
-
-            <div className="bg-gray-50 border-l-4 border-orange-500 p-4 mb-4 space-y-2">
-              <p className="text-gray-600 italic">"Simulates true letterpress perforation."</p>
-              <p className="text-gray-600 italic">"Perfectly even tear strength — no more snapping or dragging."</p>
-              <p className="text-gray-600 italic">"Reduces guillotine load dramatically."</p>
-            </div>
-
-            <p className="text-gray-700">
-              Operators love it because it just works.<br />
-              <span className="font-semibold text-gray-900">Owners love it because it makes money.</span>
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <img
-              src="/images/products/micro-perforator-action.jpg"
-              alt="Micro-Perforator creating clean letterpress-style perforations"
-              className="w-full rounded-lg shadow-lg"
-            />
-            <img
-              src="/images/results/perforation-before-and-after-1.jpg"
-              alt="Before and after: perforation quality comparison"
-              className="w-full rounded-lg shadow-lg"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* MULTI-TOOL SECTION */}
-      <section className="bg-gray-50 py-12">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid gap-8 md:grid-cols-2 items-start">
-            <div>
-              <h4 className="text-xl font-bold text-gray-900 mb-4">
-                3) Multi-Tool Cutting System – Guillotine-Quality Cutting, Inline
-              </h4>
-
-              <p className="text-gray-700 mb-4">
-                Your {machine.display_name} was never built to clean-cut a single sheet.<br />
-                Its built-in knives are made for trimming folded signatures — not producing commercial-grade edges.
+          <div className="md:flex md:gap-8 mb-6">
+            <div className="md:flex-1">
+              <p className="text-slate-600 leading-relaxed mb-4">
+                Standard perf wheels leave ragged edges. The cuts are uneven, the tear is unpredictable, and the result looks cheap. The Micro-Perforator solves this with a precision-engineered rotary blade system that delivers cleanly cut micro-perforations on every pass.
               </p>
 
-              <p className="text-gray-700 mb-4">
-                The Multi-Tool Cutting System changes that entirely:
+              <p className="text-slate-600 leading-relaxed mb-4">
+                Operators can adjust cut-to-tie ratio and perforation depth to match the stock. The result is a professional tear that separates exactly where intended — no ripping, no burrs, no fibre pull.
               </p>
 
-              <ul className="text-gray-700 mb-6 space-y-2">
-                <li className="flex items-start gap-2">
-                  <span className="text-orange-500 mt-1">•</span>
-                  <span>Guillotine-quality edge trimming</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-orange-500 mt-1">•</span>
-                  <span>High-quality single-cut or double-cut</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-orange-500 mt-1">•</span>
-                  <span>Clean slitting for two-up work</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-orange-500 mt-1">•</span>
-                  <span>Self-sharpening cutting bosses (thousands of runs)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-orange-500 mt-1">•</span>
-                  <span>No more furry edges</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-orange-500 mt-1">•</span>
-                  <span>No more offline finishing delays</span>
-                </li>
-              </ul>
-
-              <div className="bg-white border-l-4 border-orange-500 p-4 mb-4 space-y-2">
-                <p className="text-gray-600 italic">"Cut quality as good as a guillotine."</p>
-                <p className="text-gray-600 italic">"Blades last up to 5× longer."</p>
-                <p className="text-gray-600 italic">"Edge-trimming has never been easier."</p>
-              </div>
-
-              <p className="text-gray-900 font-semibold">
-                This is what lets operators finish full jobs inline — at speed — without tying up the guillotine.
+              <p className="text-slate-600 leading-relaxed">
+                Direct mail, response cards, tickets, coupons, vouchers — anything that needs to separate cleanly can now be finished inline, in one pass, at full machine speed.
               </p>
             </div>
 
-            <div className="space-y-4">
+            <figure className="md:w-64 mt-6 md:mt-0 flex-shrink-0">
+              <img
+                src="/images/products/micro-perforator-action.jpg"
+                alt="Micro-Perforator tooling"
+                className="w-full border border-slate-200"
+              />
+              <figcaption className="text-xs text-slate-400 mt-2">Fig. 2 — Micro-Perforator module</figcaption>
+            </figure>
+          </div>
+
+          <div className="bg-slate-50 border border-slate-200 p-5 md:flex md:gap-8">
+            <figure className="md:w-48 flex-shrink-0 mb-4 md:mb-0">
+              <img
+                src="/images/results/perforation-before-1.jpg"
+                alt="Poor perforation quality"
+                className="w-full border border-slate-300"
+              />
+              <figcaption className="text-xs text-slate-400 mt-2">Before: Ragged perf edge</figcaption>
+            </figure>
+            <figure className="md:w-48 flex-shrink-0">
+              <img
+                src="/images/results/perforation-after-1.jpg"
+                alt="Clean Micro-Perforator result"
+                className="w-full border border-slate-300"
+              />
+              <figcaption className="text-xs text-slate-400 mt-2">After: Micro-Perforator result</figcaption>
+            </figure>
+          </div>
+        </section>
+
+        {/* Capability 3: Multi-Tool */}
+        <section className="mb-12 pb-12 border-b border-slate-200">
+          <h3 className="text-xl font-medium text-slate-900 mb-4">
+            Multi-Tool: Inline Trimming Without the Guillotine Bottleneck
+          </h3>
+
+          <div className="md:flex md:gap-8 mb-6">
+            <div className="md:flex-1">
+              <p className="text-slate-600 leading-relaxed mb-4">
+                Guillotine trimming is slow, manual, and creates a bottleneck between folding and dispatch. Every stack that stops at the guillotine burns labour, floor space, and turnaround time.
+              </p>
+
+              <p className="text-slate-600 leading-relaxed mb-4">
+                The Multi-Tool removes this entirely. Rotary slitting and trimming happens inline, on the folder, at full production speed. Sheets come off the machine finished — no secondary handling, no stack waiting, no guillotine queue.
+              </p>
+
+              <p className="text-slate-600 leading-relaxed">
+                The result is faster job completion, lower labour cost per job, and a bindery floor that moves work instead of storing it.
+              </p>
+            </div>
+
+            <figure className="md:w-64 mt-6 md:mt-0 flex-shrink-0">
               <img
                 src="/images/products/multi-tool-action.jpg"
-                alt="Multi-Tool Cutting System producing guillotine-quality cuts inline"
-                className="w-full rounded-lg shadow-lg"
+                alt="Multi-Tool cutting system"
+                className="w-full border border-slate-200"
               />
+              <figcaption className="text-xs text-slate-400 mt-2">Fig. 3 — Multi-Tool cutting module</figcaption>
+            </figure>
+          </div>
+
+          <div className="bg-slate-50 border border-slate-200 p-5 md:flex md:gap-8">
+            <figure className="md:w-48 flex-shrink-0 mb-4 md:mb-0">
               <img
-                src="/images/results/cutting-before-and-after-1.jpg"
-                alt="Before and after: cutting quality comparison"
-                className="w-full rounded-lg shadow-lg"
+                src="/images/before-after/cutting-before-and-after-1.jpg"
+                alt="Inline trim result"
+                className="w-full border border-slate-300"
               />
+              <figcaption className="text-xs text-slate-400 mt-2">Inline trim quality</figcaption>
+            </figure>
+          </div>
+        </section>
+
+        {/* Business Impact */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-medium text-slate-900 mb-6">
+            Operational Impact
+          </h2>
+
+          <p className="text-slate-600 leading-relaxed mb-6">
+            Technifold tooling is not a marginal improvement. It fundamentally changes the economics of your finishing operation.
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-x-8 gap-y-4 text-slate-600 mb-8">
+            <div className="flex gap-3">
+              <span className="text-cyan-600 flex-shrink-0">—</span>
+              <span>Eliminate reprints caused by cracked folds</span>
+            </div>
+            <div className="flex gap-3">
+              <span className="text-cyan-600 flex-shrink-0">—</span>
+              <span>Remove guillotine bottlenecks from workflow</span>
+            </div>
+            <div className="flex gap-3">
+              <span className="text-cyan-600 flex-shrink-0">—</span>
+              <span>Reduce operator intervention and babysitting</span>
+            </div>
+            <div className="flex gap-3">
+              <span className="text-cyan-600 flex-shrink-0">—</span>
+              <span>Accept jobs previously rejected as "too difficult"</span>
+            </div>
+            <div className="flex gap-3">
+              <span className="text-cyan-600 flex-shrink-0">—</span>
+              <span>Finish digitally printed work without compromise</span>
+            </div>
+            <div className="flex gap-3">
+              <span className="text-cyan-600 flex-shrink-0">—</span>
+              <span>Lower labour cost per finished piece</span>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* ROI / TRUST SECTION */}
-      <section className="max-w-6xl mx-auto px-6">
-        <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
-          The Result? Your {machine.display_name} Becomes a Production Weapon
-        </h3>
+          <p className="text-slate-600 leading-relaxed">
+            Across more than 100,000 installations worldwide over 20+ years, customers consistently report savings of £1,000–£5,000 per month — with full payback in as few as five job runs.
+          </p>
+        </section>
 
-        <p className="text-gray-700 mb-6">
-          When Tri-Creaser + Micro-Perf + Multi-Tool Cutting are combined, your {machine.display_name}:
-        </p>
+        {/* Technical Specifications Reference */}
+        <section className="mb-12 bg-slate-900 text-white p-6">
+          <p className="text-cyan-400 text-sm font-medium tracking-wide uppercase mb-3">
+            Performance Data
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div>
+              <p className="text-2xl font-light">100K+</p>
+              <p className="text-slate-400 text-sm">Installations</p>
+            </div>
+            <div>
+              <p className="text-2xl font-light">20+</p>
+              <p className="text-slate-400 text-sm">Years in Field</p>
+            </div>
+            <div>
+              <p className="text-2xl font-light">£3K+</p>
+              <p className="text-slate-400 text-sm">Avg. Monthly Saving</p>
+            </div>
+            <div>
+              <p className="text-2xl font-light">30</p>
+              <p className="text-slate-400 text-sm">Day Trial Period</p>
+            </div>
+          </div>
+        </section>
 
-        <div className="grid md:grid-cols-2 gap-4 mb-8">
-          <ul className="space-y-2">
-            <li className="flex items-center gap-2 text-gray-700">
-              <span className="text-green-600">✔</span> Eliminates cracking
-            </li>
-            <li className="flex items-center gap-2 text-gray-700">
-              <span className="text-green-600">✔</span> Eliminates furry edges
-            </li>
-            <li className="flex items-center gap-2 text-gray-700">
-              <span className="text-green-600">✔</span> Eliminates weak perfs
-            </li>
-            <li className="flex items-center gap-2 text-gray-700">
-              <span className="text-green-600">✔</span> Finishes full jobs inline
-            </li>
-          </ul>
-          <ul className="space-y-2">
-            <li className="flex items-center gap-2 text-gray-700">
-              <span className="text-green-600">✔</span> Reduces guillotine load
-            </li>
-            <li className="flex items-center gap-2 text-gray-700">
-              <span className="text-green-600">✔</span> Runs with fewer corrections
-            </li>
-            <li className="flex items-center gap-2 text-gray-700">
-              <span className="text-green-600">✔</span> Handles more profitable job types
-            </li>
-          </ul>
-        </div>
+        {/* Call to Action */}
+        <section className="border-t border-slate-200 pt-12">
+          <h2 className="text-2xl font-medium text-slate-900 mb-4">
+            Next Steps
+          </h2>
 
-        <p className="text-gray-700 mb-8">
-          Your machine becomes:
-        </p>
+          <p className="text-slate-600 leading-relaxed mb-6">
+            Every Technifold tool is available for a 30-day evaluation on your {machine.display_name}. There is no obligation and no charge for the trial period. If the results don't meet expectations, return the tooling at no cost.
+          </p>
 
-        <ul className="text-gray-900 font-semibold mb-12 space-y-1">
-          <li>faster</li>
-          <li>more profitable</li>
-          <li>more versatile</li>
-          <li>more consistent</li>
-          <li>and far more operator-friendly</li>
-        </ul>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <button className="bg-slate-900 text-white px-6 py-3 font-medium hover:bg-slate-800 transition-colors">
+              Request 30-Day Trial
+            </button>
+            <a href="tel:+441onal11538" className="border border-slate-300 text-slate-700 px-6 py-3 font-medium hover:border-slate-400 transition-colors text-center">
+              Technical Enquiries: +44 (0)1455 381 538
+            </a>
+          </div>
+        </section>
 
-        <h4 className="text-xl font-bold text-gray-900 mb-4">
-          Why Businesses Trust Technifold
-        </h4>
-
-        <p className="text-gray-700 mb-4">
-          Technifold solutions run on over 100,000 folding, stitching and binding machines worldwide.
-        </p>
-
-        <p className="text-gray-700 mb-6">
-          Across 20+ years, customers consistently report £1,000–£3,000+ in monthly savings through:
-        </p>
-
-        <ul className="text-gray-700 mb-8 space-y-1">
-          <li>fewer reprints</li>
-          <li>faster turnaround</li>
-          <li>less guillotine usage</li>
-          <li>fewer rejected jobs</li>
-          <li>taking on higher-margin work</li>
-        </ul>
-
-        <p className="text-gray-700">
-          A folding machine like the {machine.display_name} is already a powerful asset.<br />
-          <span className="font-semibold text-gray-900">Technifold tooling ensures you extract its full financial potential.</span>
-        </p>
-      </section>
-
-      {/* CTA SECTION (OFFICIAL, LOCKED) */}
-      <section className="max-w-6xl mx-auto px-6 mt-12 text-center">
-        <h2 className="text-2xl font-semibold text-gray-900">
-          Unlock the full potential of your {machine.display_name}
-        </h2>
-        <p className="mt-2 text-gray-700">
-          Register below to begin your free 30-day trial.
-        </p>
-        <div className="mt-4">
-          <button className="bg-orange-500 text-white px-8 py-3 font-bold hover:bg-orange-600 transition-colors">
-            Register for Free Trial
-          </button>
-        </div>
-      </section>
-    </div>
+      </div>
+    </article>
   );
 }

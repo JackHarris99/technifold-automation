@@ -6,496 +6,283 @@ interface PerfectBinderNarrativeProps {
 
 export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps) {
   return (
-    <div className="py-16">
-      {/* HERO SECTION */}
-      <section className="max-w-6xl mx-auto px-6 mb-16">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-          Stop Fibre-Cracking, Laminate Lifting and Slow Makereadies on Your {machine.display_name} — Permanently
-        </h1>
-
-        {/* CTA Block */}
-        <div className="bg-slate-900 text-white p-8 rounded-lg mt-8">
-          <h2 className="text-2xl font-semibold mb-2">
-            Unlock the full potential of your {machine.display_name}
-          </h2>
-          <p className="text-gray-300 mb-4">
-            Register below to begin your free 30-day trial.
+    <article className="bg-white">
+      {/* Header */}
+      <header className="bg-slate-900 text-white py-12 border-b border-slate-700">
+        <div className="max-w-4xl mx-auto px-6">
+          <p className="text-cyan-400 text-sm font-medium tracking-wide uppercase mb-3">
+            Technifold Technical Reference
           </p>
-          <button className="bg-orange-500 text-white px-8 py-3 font-bold hover:bg-orange-600 transition-colors">
-            Register for Free Trial
-          </button>
+          <h1 className="text-3xl md:text-4xl font-light text-white leading-tight">
+            Stop Fibre-Cracking, Laminate Lifting and Slow Makereadies on Your{' '}
+            <span className="font-medium">{machine.display_name}</span> — Permanently
+          </h1>
         </div>
-      </section>
+      </header>
 
-      {/* INTRO PROBLEM SECTION */}
-      <section className="max-w-6xl mx-auto px-6 mb-16">
-        <div className="grid gap-8 md:grid-cols-2 items-start">
-          <div>
-            <p className="text-gray-700 mb-4">
-              Your perfect binder is an incredible machine.
-            </p>
+      {/* Main Content */}
+      <div className="max-w-4xl mx-auto px-6 py-12">
 
-            <p className="text-gray-700 mb-4">
-              It handles feeding, gluing, nipping and trimming with astonishing reliability — but it has one fatal weak link:
-            </p>
+        {/* Introduction */}
+        <section className="mb-12">
+          <p className="text-lg text-slate-700 leading-relaxed mb-6">
+            Your perfect binder is an incredible machine. It handles feeding, gluing, nipping and trimming with astonishing reliability — but it has one fatal weak link:
+          </p>
 
-            <p className="text-gray-900 font-semibold mb-4">
-              The cover-feeder's rotary metal scoring system.
-            </p>
+          <p className="text-lg text-slate-800 font-medium leading-relaxed mb-6">
+            The cover-feeder's rotary metal scoring system.
+          </p>
 
-            <p className="text-gray-700 mb-2">
-              It wasn't engineered for modern coated stocks.
-            </p>
-            <p className="text-gray-700 mb-2">
-              It wasn't engineered for premium finishes.
-            </p>
-            <p className="text-gray-700 mb-4">
-              And it certainly wasn't engineered for digital, laminated or short-grain work.
-            </p>
+          <div className="text-slate-600 leading-relaxed space-y-4 mb-8">
+            <p>It wasn't engineered for modern coated stocks. It wasn't engineered for premium finishes. And it certainly wasn't engineered for digital, laminated or short-grain work.</p>
 
-            <p className="text-gray-700 mb-4">If your operators are fighting:</p>
-
-            <ul className="text-gray-700 mb-6 space-y-1">
-              <li>fibre-cracking along the spine</li>
-              <li>laminate lifting on premium covers</li>
-              <li>weak, shallow hinge lines</li>
-              <li>spine splitting during setup</li>
-              <li>covers tearing at the fold during feeding</li>
-              <li>slow makeready whenever stock changes</li>
-              <li>inconsistent creases from run to run</li>
-            </ul>
-
-            <p className="text-gray-700 mb-4">
-              …none of that is because your {machine.display_name} is "old" or "fussy."
-            </p>
-
-            <p className="text-gray-700 mb-1">
-              It's the scoring system.
-            </p>
-            <p className="text-gray-900 font-semibold">
-              And it's holding the machine back.
-            </p>
+            <p>If your operators are fighting fibre-cracking along the spine, laminate lifting on premium covers, weak shallow hinge lines, spine splitting during setup, covers tearing at the fold during feeding, slow makeready whenever stock changes, or inconsistent creases from run to run — none of that is because your {machine.display_name} is "old" or "fussy."</p>
           </div>
 
-          <div className="rounded-lg overflow-hidden shadow-lg">
+          <p className="text-slate-900 font-medium text-lg border-l-2 border-cyan-500 pl-4">
+            It's the scoring system. And it's holding the machine back.
+          </p>
+        </section>
+
+        {/* Video Reference */}
+        <aside className="mb-12 bg-slate-50 border border-slate-200 p-6">
+          <p className="text-sm text-slate-500 uppercase tracking-wide mb-3">Technical Demonstration</p>
+          <div className="aspect-video">
             <iframe
               src="https://www.youtube.com/embed/2_76v5KYx5U"
               title="Quad-Creaser demonstration"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-              className="w-full aspect-video"
+              className="w-full h-full"
             />
           </div>
-        </div>
-      </section>
+        </aside>
 
-      {/* WHY METAL SCORING FAILS SECTION */}
-      <section className="bg-gray-50 py-12 mb-16">
-        <div className="max-w-6xl mx-auto px-6">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+        {/* Why Metal Scoring Fails */}
+        <section className="mb-12 pb-12 border-b border-slate-200">
+          <h2 className="text-2xl font-medium text-slate-900 mb-6">
             Why Metal Scoring Fails — and Always Will
           </h2>
 
-          <p className="text-gray-700 mb-4">
-            Rotary metal scoring wheels are fundamentally flawed because they slice through fibres, instead of working with them.
+          <p className="text-slate-600 leading-relaxed mb-6">
+            Rotary metal scoring wheels are fundamentally flawed because they slice through fibres, instead of working with them. That action causes fibre cracking, laminate delamination, cover weakness at the hinge, excessive operator intervention, and spine "popping" shortly after folding.
           </p>
 
-          <p className="text-gray-700 mb-4">That action causes:</p>
-
-          <ul className="text-gray-700 mb-6 space-y-2">
-            <li>❌ fibre cracking</li>
-            <li>❌ laminate delamination</li>
-            <li>❌ cover weakness at the hinge</li>
-            <li>❌ excessive operator intervention</li>
-            <li>❌ spine "popping" shortly after folding</li>
-          </ul>
-
-          <p className="text-gray-700 mb-4">
-            And because the metal wheel can only cut in one way, there's no meaningful control over:
+          <p className="text-slate-600 leading-relaxed mb-6">
+            And because the metal wheel can only cut in one way, there's no meaningful control over crease width, crease depth, stock compensation, coating sensitivity, or digital toner behaviour.
           </p>
 
-          <ul className="text-gray-700 mb-6 space-y-1">
-            <li>crease width</li>
-            <li>crease depth</li>
-            <li>stock compensation</li>
-            <li>coating sensitivity</li>
-            <li>digital toner behaviour</li>
-          </ul>
-
-          <p className="text-gray-700">
+          <p className="text-slate-600 leading-relaxed">
             Operators are forced to "fight" the cover every time the substrate changes.
           </p>
-        </div>
-      </section>
+        </section>
 
-      {/* QUAD CREASER OVERVIEW SECTION */}
-      <section className="max-w-6xl mx-auto px-6 mb-16">
-        <div className="grid gap-8 md:grid-cols-2 items-start">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
-              The Quad Creaser Turns Your {machine.display_name} Into a Precision Creasing System
-            </h2>
+        {/* The Quad Creaser Solution */}
+        <section className="mb-12 pb-12 border-b border-slate-200">
+          <h2 className="text-2xl font-medium text-slate-900 mb-6">
+            The Quad Creaser Turns Your {machine.display_name} Into a Precision Creasing System
+          </h2>
 
-            <p className="text-gray-700 mb-4">
-              The Technifold Quad Creaser replaces the metal scoring wheel with a true fibre-friendly creasing mechanism engineered around:
-            </p>
+          <div className="md:flex md:gap-8 mb-6">
+            <div className="md:flex-1">
+              <p className="text-slate-600 leading-relaxed mb-4">
+                The Technifold Quad Creaser replaces the metal scoring wheel with a true fibre-friendly creasing mechanism engineered around gentle rotary action, substrate-responsive rubber profiles, adjustable crease width and depth, adjustable hinge width, non-destructive pressure distribution, and replaceable split-band design for consumable renewal.
+              </p>
 
-            <ul className="text-gray-700 mb-6 space-y-2">
-              <li className="flex items-start gap-2">
-                <span className="text-green-600">✔</span>
-                <span>gentle rotary action</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-600">✔</span>
-                <span>substrate-responsive rubber profiles</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-600">✔</span>
-                <span>adjustable crease width and depth</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-600">✔</span>
-                <span>adjustable hinge width</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-600">✔</span>
-                <span>non-destructive pressure distribution</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-600">✔</span>
-                <span>replaceable split-band design (for consumable renewal)</span>
-              </li>
-            </ul>
+              <p className="text-slate-600 leading-relaxed mb-4">
+                The result is the closest thing to a letterpress-quality hinge you can achieve on a rotary perfect binder — without damaging fibres or lifting laminate.
+              </p>
 
-            <p className="text-gray-700 mb-4">
-              The result is the closest thing to a letterpress-quality hinge you can achieve on a rotary perfect binder — without damaging fibres or lifting laminate.
-            </p>
+              <p className="text-slate-900 font-medium">
+                Zero cracking. Zero tearing. Zero laminate lifting. At any production speed.
+              </p>
+            </div>
 
-            <p className="text-gray-900 font-semibold">
-              Zero cracking. Zero tearing. Zero laminate lifting.<br />
-              At any production speed.
-            </p>
+            <figure className="md:w-64 mt-6 md:mt-0 flex-shrink-0">
+              <img
+                src="/images/products/quad-creaser-action.jpg"
+                alt="Quad Creaser installed on perfect binder"
+                className="w-full border border-slate-200"
+              />
+              <figcaption className="text-xs text-slate-400 mt-2">Fig. 1 — Quad Creaser module</figcaption>
+            </figure>
           </div>
+        </section>
 
-          <div className="space-y-4">
-            <img
-              src="/images/products/quad-creaser-action.jpg"
-              alt="Quad Creaser installed on perfect binder"
-              className="w-full rounded-lg shadow-lg"
-            />
-            <img
-              src="/images/products/quad-creaser-color-ribs.jpg"
-              alt="Quad Creaser colour-coded ribs for easy setup"
-              className="w-full rounded-lg shadow-lg"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* WHAT THE QUAD CREASER DOES DIFFERENTLY */}
-      <section className="bg-gray-50 py-12 mb-16">
-        <div className="max-w-6xl mx-auto px-6">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">
+        {/* What the Quad Creaser Does Differently */}
+        <section className="mb-12 pb-12 border-b border-slate-200">
+          <h2 className="text-2xl font-medium text-slate-900 mb-6">
             What the Quad Creaser Does Differently
           </h2>
 
-          {/* CAPABILITY 1 */}
-          <div className="grid gap-8 md:grid-cols-2 items-start mb-12">
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                1. Eliminates Fibre Cracking Completely
-              </h3>
+          {/* Capability 1 */}
+          <div className="mb-10">
+            <h3 className="text-lg font-medium text-slate-900 mb-3">
+              1. Eliminates Fibre Cracking Completely
+            </h3>
 
-              <p className="text-gray-700 mb-4">
-                Your documentation states clearly that the Quad Creaser:
-              </p>
+            <div className="md:flex md:gap-8">
+              <div className="md:flex-1">
+                <p className="text-slate-600 leading-relaxed mb-4">
+                  The Quad Creaser completely eliminates fibre cracking 100%. This applies to coated stocks, laminated covers, UV varnished covers, digital short-grain work, and heavy 300–400gsm materials.
+                </p>
 
-              <p className="text-gray-700 italic mb-4">
-                "Completely eliminates fibre cracking 100%."
-              </p>
+                <p className="text-slate-600 leading-relaxed">
+                  Where metal scoring destroys fibres, the Quad Creaser uses gentle, controlled, rubber-based pressure to create a strong, flexible hinge without any surface damage.
+                </p>
+              </div>
 
-              <p className="text-gray-700 mb-4">This applies to:</p>
-
-              <ul className="text-gray-700 mb-6 space-y-1">
-                <li>coated stocks</li>
-                <li>laminated covers</li>
-                <li>UV varnished covers</li>
-                <li>digital short-grain work</li>
-                <li>heavy 300–400gsm materials</li>
-              </ul>
-
-              <p className="text-gray-700">
-                Where metal scoring destroys fibres, the Quad Creaser uses gentle, controlled, rubber-based pressure to create a strong, flexible hinge without any surface damage.
-              </p>
-            </div>
-
-            <div>
-              <img
-                src="/images/results/cover-crease-before.JPG"
-                alt="Cover cracking before Quad Creaser"
-                className="w-full rounded-lg shadow-lg mb-2"
-              />
-              <p className="text-sm text-gray-500 text-center">Before: Fibre cracking with OEM scoring</p>
+              <div className="md:w-48 mt-4 md:mt-0 flex-shrink-0 space-y-3">
+                <figure>
+                  <img src="/images/results/cover-crease-before.JPG" alt="Cover cracking before" className="w-full border border-slate-300" />
+                  <figcaption className="text-xs text-slate-400 mt-1">Before: OEM scoring</figcaption>
+                </figure>
+                <figure>
+                  <img src="/images/results/cover-crease-after.JPG" alt="Perfect crease after" className="w-full border border-slate-300" />
+                  <figcaption className="text-xs text-slate-400 mt-1">After: Quad Creaser</figcaption>
+                </figure>
+              </div>
             </div>
           </div>
 
-          {/* CAPABILITY 2 */}
-          <div className="grid gap-8 md:grid-cols-2 items-start mb-12">
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                2. Eliminates Laminate Lifting Permanently
-              </h3>
+          {/* Capability 2 */}
+          <div className="mb-10">
+            <h3 className="text-lg font-medium text-slate-900 mb-3">
+              2. Eliminates Laminate Lifting Permanently
+            </h3>
 
-              <p className="text-gray-700 mb-4">
-                Metal scoring knives pull laminate apart.<br />
-                The Quad Creaser supports the surface layer during hinge formation to prevent:
-              </p>
-
-              <ul className="text-gray-700 mb-6 space-y-1">
-                <li>film break</li>
-                <li>film lift</li>
-                <li>film curl</li>
-              </ul>
-
-              <p className="text-gray-700">
-                This unlocks premium cover options without risk.
-              </p>
-            </div>
-
-            <div>
-              <img
-                src="/images/results/cover-crease-after.JPG"
-                alt="Perfect cover crease with Quad Creaser"
-                className="w-full rounded-lg shadow-lg mb-2"
-              />
-              <p className="text-sm text-gray-500 text-center">After: Letterpress-quality crease with Quad Creaser</p>
-            </div>
+            <p className="text-slate-600 leading-relaxed mb-4">
+              Metal scoring knives pull laminate apart. The Quad Creaser supports the surface layer during hinge formation to prevent film break, film lift, and film curl. This unlocks premium cover options without risk.
+            </p>
           </div>
 
-          {/* CAPABILITY 3 */}
-          <div className="grid gap-8 md:grid-cols-2 items-start mb-12">
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                3. Creates Stronger, Deeper and More Consistent Hinges
-              </h3>
+          {/* Capability 3 */}
+          <div className="mb-10">
+            <h3 className="text-lg font-medium text-slate-900 mb-3">
+              3. Creates Stronger, Deeper and More Consistent Hinges
+            </h3>
 
-              <p className="text-gray-700 mb-4">
-                Metal scoring gives you one crease.<br />
-                The Quad Creaser gives precise control over:
-              </p>
+            <p className="text-slate-600 leading-relaxed mb-4">
+              Metal scoring gives you one crease. The Quad Creaser gives precise control over crease width, crease depth, and hinge width. Operators can create soft creases for lighter stocks, deeper reinforced hinges for heavy covers, and adjust hinge width for laminate behaviour — achieving consistent results over long runs.
+            </p>
 
-              <ul className="text-gray-700 mb-6 space-y-2">
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600">✔</span>
-                  <span>crease width</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600">✔</span>
-                  <span>crease depth</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600">✔</span>
-                  <span>hinge width</span>
-                </li>
-              </ul>
-
-              <p className="text-gray-700 mb-4">Operators can now:</p>
-
-              <ul className="text-gray-700 mb-6 space-y-1">
-                <li>create soft creases for lighter stocks</li>
-                <li>create deeper, reinforced hinges for heavy covers</li>
-                <li>adjust hinge width for laminate behaviour</li>
-                <li>achieve consistent results over long runs</li>
-              </ul>
-
-              <p className="text-gray-700">
-                This is genuine tooling control — not "press harder / press softer."
-              </p>
-            </div>
-
-            <div>
-              <img
-                src="/images/products/quad-creaser-installed.JPG"
-                alt="Quad Creaser installed showing adjustable settings"
-                className="w-full rounded-lg shadow-lg"
-              />
-            </div>
+            <p className="text-slate-600 leading-relaxed">
+              This is genuine tooling control — not "press harder / press softer."
+            </p>
           </div>
 
-          {/* CAPABILITY 4 */}
-          <div className="grid gap-8 md:grid-cols-2 items-start mb-12">
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                4. Stops Setup Waste Dead
-              </h3>
+          {/* Capability 4 */}
+          <div className="mb-10">
+            <h3 className="text-lg font-medium text-slate-900 mb-3">
+              4. Stops Setup Waste Dead
+            </h3>
 
-              <p className="text-gray-700 mb-4">
-                OEM scoring regularly splits, tears or ruins covers during setup.
-              </p>
-
-              <p className="text-gray-700 mb-4">With Quad Creaser:</p>
-
-              <ul className="text-gray-700 mb-6 space-y-1">
-                <li>no tearing</li>
-                <li>no splitting</li>
-                <li>no bursting</li>
-                <li>no laminate lift</li>
-                <li>no reprint cascade</li>
-              </ul>
-
-              <p className="text-gray-700">
-                From sheet one, results are sale-ready.
-              </p>
-            </div>
-
-            <div>
-              <img
-                src="/images/technical/quad-creaser-step1.jpeg"
-                alt="Quad Creaser setup step 1"
-                className="w-full rounded-lg shadow-lg"
-              />
-            </div>
+            <p className="text-slate-600 leading-relaxed">
+              OEM scoring regularly splits, tears or ruins covers during setup. With Quad Creaser: no tearing, no splitting, no bursting, no laminate lift, no reprint cascade. From sheet one, results are sale-ready.
+            </p>
           </div>
 
-          {/* CAPABILITY 5 */}
-          <div className="grid gap-8 md:grid-cols-2 items-start">
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                5. Works at Full Machine Speed
-              </h3>
+          {/* Capability 5 */}
+          <div>
+            <h3 className="text-lg font-medium text-slate-900 mb-3">
+              5. Works at Full Machine Speed
+            </h3>
 
-              <p className="text-gray-700 mb-4">
-                Most finishing tools slow a machine down.<br />
-                The Quad Creaser does not.
-              </p>
-
-              <p className="text-gray-700 mb-4">
-                As your documentation confirms:
-              </p>
-
-              <p className="text-gray-700 italic mb-4">
-                "Not limited by speed — works as fast as the machine can run."
-              </p>
-
-              <p className="text-gray-700">
-                If your {machine.display_name} can run 6,000 cycles/hour, the Quad Creaser runs 6,000.
-              </p>
-            </div>
-
-            <div>
-              <img
-                src="/images/products/quad-creaser-main.jpg"
-                alt="Quad Creaser main product view"
-                className="w-full rounded-lg shadow-lg"
-              />
-            </div>
+            <p className="text-slate-600 leading-relaxed">
+              Most finishing tools slow a machine down. The Quad Creaser does not. It works as fast as the machine can run. If your {machine.display_name} can run 6,000 cycles/hour, the Quad Creaser runs 6,000.
+            </p>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* BUSINESS ROI SECTION */}
-      <section className="max-w-6xl mx-auto px-6 mb-16">
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
-          What This Means for Your Business
-        </h2>
-
-        <ul className="space-y-4">
-          <li className="flex items-start gap-2">
-            <span className="text-green-600 mt-1">✔</span>
-            <div>
-              <span className="font-semibold text-gray-900">Fewer reprints</span>
-              <p className="text-gray-700">Cracked or delaminated covers go straight in the bin. Quad Creaser eliminates that.</p>
-            </div>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-green-600 mt-1">✔</span>
-            <div>
-              <span className="font-semibold text-gray-900">Fewer customer complaints</span>
-              <p className="text-gray-700">Covers look clean, tight and professional — every single time.</p>
-            </div>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-green-600 mt-1">✔</span>
-            <div>
-              <span className="font-semibold text-gray-900">Faster job turnaround</span>
-              <p className="text-gray-700">No more bindery delays caused by cover scoring issues.</p>
-            </div>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-green-600 mt-1">✔</span>
-            <div>
-              <span className="font-semibold text-gray-900">Better utilisation of your perfect binder</span>
-              <p className="text-gray-700">More jobs per shift, fewer interruptions.</p>
-            </div>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-green-600 mt-1">✔</span>
-            <div>
-              <span className="font-semibold text-gray-900">Take on more premium cover work</span>
-              <p className="text-gray-700">Run laminates, digital, heavy and coated stocks confidently.</p>
-            </div>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-green-600 mt-1">✔</span>
-            <div>
-              <span className="font-semibold text-gray-900">Lower labour cost per job</span>
-              <p className="text-gray-700">Operators stop firefighting and start producing.</p>
-            </div>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-green-600 mt-1">✔</span>
-            <div>
-              <span className="font-semibold text-gray-900">Increased profitability</span>
-              <p className="text-gray-700">Your perfect binder becomes a reliable high-end finishing asset — not a bottleneck.</p>
-            </div>
-          </li>
-        </ul>
-      </section>
-
-      {/* GLOBAL TRUST / ROI SECTION */}
-      <section className="bg-gray-50 py-12 mb-16">
-        <div className="max-w-6xl mx-auto px-6">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
-            Real-World ROI (Based on 20+ Years of Installations)
+        {/* Business Impact */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-medium text-slate-900 mb-6">
+            What This Means for Your Business
           </h2>
 
-          <p className="text-gray-700 mb-4">Across global binderies:</p>
+          <div className="grid md:grid-cols-2 gap-x-8 gap-y-4 text-slate-600 mb-8">
+            <div className="flex gap-3">
+              <span className="text-cyan-600 flex-shrink-0">—</span>
+              <span>Fewer reprints from cracked or delaminated covers</span>
+            </div>
+            <div className="flex gap-3">
+              <span className="text-cyan-600 flex-shrink-0">—</span>
+              <span>Fewer customer complaints</span>
+            </div>
+            <div className="flex gap-3">
+              <span className="text-cyan-600 flex-shrink-0">—</span>
+              <span>Faster job turnaround</span>
+            </div>
+            <div className="flex gap-3">
+              <span className="text-cyan-600 flex-shrink-0">—</span>
+              <span>Better utilisation of your perfect binder</span>
+            </div>
+            <div className="flex gap-3">
+              <span className="text-cyan-600 flex-shrink-0">—</span>
+              <span>Take on more premium cover work confidently</span>
+            </div>
+            <div className="flex gap-3">
+              <span className="text-cyan-600 flex-shrink-0">—</span>
+              <span>Lower labour cost per job</span>
+            </div>
+            <div className="flex gap-3">
+              <span className="text-cyan-600 flex-shrink-0">—</span>
+              <span>Increased profitability</span>
+            </div>
+          </div>
 
-          <ul className="text-gray-700 mb-6 space-y-1">
-            <li>£1,000–£5,000 saved per month</li>
-            <li>Pays for itself in as few as 5 job runs</li>
-            <li>Massive reduction in setup waste</li>
-            <li>Dramatic reduction in customer returns</li>
-            <li>Stabilised finishing quality</li>
-            <li>Predictable, repeatable cover production</li>
-          </ul>
+          <p className="text-slate-600 leading-relaxed">
+            Your perfect binder becomes a reliable high-end finishing asset — not a bottleneck.
+          </p>
+        </section>
 
-          <p className="text-gray-700 mb-4">
-            The Quad Creaser is used across well over 100,000 finishing machines worldwide, and the economics are proven.
+        {/* Technical Specifications Reference */}
+        <section className="mb-12 bg-slate-900 text-white p-6">
+          <p className="text-cyan-400 text-sm font-medium tracking-wide uppercase mb-3">
+            Performance Data
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div>
+              <p className="text-2xl font-light">100K+</p>
+              <p className="text-slate-400 text-sm">Installations</p>
+            </div>
+            <div>
+              <p className="text-2xl font-light">20+</p>
+              <p className="text-slate-400 text-sm">Years in Field</p>
+            </div>
+            <div>
+              <p className="text-2xl font-light">£5K+</p>
+              <p className="text-slate-400 text-sm">Monthly Savings</p>
+            </div>
+            <div>
+              <p className="text-2xl font-light">30</p>
+              <p className="text-slate-400 text-sm">Day Trial Period</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Call to Action */}
+        <section className="border-t border-slate-200 pt-12">
+          <h2 className="text-2xl font-medium text-slate-900 mb-4">
+            Next Steps
+          </h2>
+
+          <p className="text-slate-600 leading-relaxed mb-6">
+            Every Technifold tool is available for a 30-day evaluation on your {machine.display_name}. There is no obligation and no charge for the trial period. If the results don't meet expectations, return the tooling at no cost.
           </p>
 
-          <p className="text-gray-700">
-            Your {machine.display_name} is already capable of brilliant work —<br />
-            you just need the creasing system it deserved from day one.
-          </p>
-        </div>
-      </section>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <button className="bg-slate-900 text-white px-6 py-3 font-medium hover:bg-slate-800 transition-colors">
+              Request 30-Day Trial
+            </button>
+            <a href="tel:+441455381538" className="border border-slate-300 text-slate-700 px-6 py-3 font-medium hover:border-slate-400 transition-colors text-center">
+              Technical Enquiries: +44 (0)1455 381 538
+            </a>
+          </div>
+        </section>
 
-      {/* FINAL CTA SECTION */}
-      <section className="max-w-6xl mx-auto px-6 text-center">
-        <h2 className="text-2xl font-semibold text-gray-900">
-          Unlock the full potential of your {machine.display_name}
-        </h2>
-        <p className="mt-2 text-gray-700">
-          Register below to begin your free 30-day trial.
-        </p>
-        <div className="mt-4">
-          <button className="bg-orange-500 text-white px-8 py-3 font-bold hover:bg-orange-600 transition-colors">
-            Register for Free Trial
-          </button>
-        </div>
-      </section>
-    </div>
+      </div>
+    </article>
   );
 }
