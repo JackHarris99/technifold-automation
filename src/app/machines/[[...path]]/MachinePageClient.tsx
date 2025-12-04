@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { CoverWorkNarrative } from '@/components/machines/CoverWorkNarrative';
 
 interface MachinePageClientProps {
   machine: {
@@ -94,6 +95,31 @@ export default function MachinePageClient({
     }, 100);
   };
 
+  // Check if this is a folding machine type
+  const isFoldingMachine = machine.type === 'folder' || machine.type === 'folding_machine' || machine.type === 'folding-machines';
+
+  // For folding machines, render the Cover Work narrative
+  if (isFoldingMachine) {
+    return (
+      <>
+        {/* Breadcrumb Header */}
+        <section className="bg-slate-900 text-white py-6 border-b-4 border-orange-500">
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="text-orange-400 text-sm">
+              <Link href="/machines" className="hover:text-orange-300">All Machines</Link>
+              {' / '}
+              <span className="text-gray-400">{machine.brand} {machine.model}</span>
+            </div>
+          </div>
+        </section>
+
+        {/* Cover Work Narrative */}
+        <CoverWorkNarrative machine={machine} />
+      </>
+    );
+  }
+
+  // For non-folding machines, render the original content
   return (
     <>
 
