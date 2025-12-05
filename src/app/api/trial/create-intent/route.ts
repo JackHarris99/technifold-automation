@@ -158,7 +158,30 @@ export async function POST(request: NextRequest) {
       contact_id = newContact.contact_id;
     }
 
-    // 3. Generate secure token and insert trial_intent
+    // 3. Link machine to company (if not already linked)
+    const { data: existingLink } = await supabase
+      .from('company_machines')
+      .select('id')
+      .eq('company_id', company_id)
+      .eq('machine_id', machine_id)
+      .single();
+
+    if (!existingLink) {
+      const { error: linkError } = await supabase
+        .from('company_machines')
+        .insert({
+          company_id,
+          machine_id,
+          source: 'trial_request',
+        });
+
+      if (linkError) {
+        console.warn('[trial/create-intent] Failed to link machine to company:', linkError);
+        // Don't fail the request - this is non-critical
+      }
+    }
+
+    // 4. Generate secure token and insert trial_intent
     const token = crypto.randomBytes(32).toString('base64url');
 
     const { error: intentError } = await supabase
@@ -182,7 +205,8 @@ export async function POST(request: NextRequest) {
 
     const resend = getResendClient();
     if (resend) {
-      const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+      // Use trial-specific from address, fall back to general, then Resend default
+      const fromEmail = process.env.RESEND_FROM_EMAIL_TRIALS || process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
 
       try {
         await resend.emails.send({
