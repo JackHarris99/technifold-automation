@@ -1,6 +1,9 @@
 /**
  * Resend Email Client
  * Sends transactional and marketing emails
+ *
+ * All templates use table-based layouts for maximum compatibility
+ * with Outlook desktop, Gmail, Apple Mail, and mobile clients.
  */
 
 import { Resend } from 'resend';
@@ -22,6 +25,119 @@ export function getResendClient(): Resend | null {
 
 export function isResendConfigured(): boolean {
   return !!process.env.RESEND_API_KEY;
+}
+
+/**
+ * Common email wrapper - table-based layout for all clients
+ */
+function emailWrapper(content: string): string {
+  return `<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>Technifold</title>
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <![endif]-->
+  <style>
+    * { box-sizing: border-box; }
+    body, table, td, p, a, li { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+    body { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+    a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; font-size: inherit !important; font-family: inherit !important; font-weight: inherit !important; line-height: inherit !important; }
+    @media only screen and (max-width: 620px) {
+      .mobile-full { width: 100% !important; }
+      .mobile-padding { padding: 20px !important; }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: Arial, Helvetica, sans-serif;">
+  <!-- Outer wrapper table -->
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f5;">
+    <tr>
+      <td align="center" style="padding: 20px 10px;">
+        <!-- Inner content table -->
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" class="mobile-full" style="max-width: 600px; width: 100%;">
+          ${content}
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+/**
+ * Bulletproof button that works in all email clients including Outlook
+ */
+function emailButton(text: string, url: string, bgColor: string = '#3b82f6'): string {
+  return `<table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin: 0 auto;">
+  <tr>
+    <td style="border-radius: 6px; background-color: ${bgColor};">
+      <a href="${url}" target="_blank" style="display: inline-block; padding: 14px 28px; font-size: 16px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 6px; background-color: ${bgColor}; font-family: Arial, sans-serif;">
+        <!--[if mso]>
+        <i style="letter-spacing: 28px; mso-font-width: -100%; mso-text-raise: 26pt;">&nbsp;</i>
+        <![endif]-->
+        <span style="mso-text-raise: 13pt;">${text}</span>
+        <!--[if mso]>
+        <i style="letter-spacing: 28px; mso-font-width: -100%;">&nbsp;</i>
+        <![endif]-->
+      </a>
+    </td>
+  </tr>
+</table>`;
+}
+
+/**
+ * Email header section with solid background color
+ */
+function emailHeader(title: string, subtitle: string | null, bgColor: string): string {
+  return `<tr>
+  <td style="background-color: ${bgColor}; padding: 30px 40px;" class="mobile-padding">
+    <h1 style="margin: 0; font-size: 26px; line-height: 32px; font-weight: 700; color: #ffffff; font-family: Arial, sans-serif;">${title}</h1>
+    ${subtitle ? `<p style="margin: 8px 0 0 0; font-size: 16px; line-height: 24px; color: rgba(255,255,255,0.85); font-family: Arial, sans-serif;">${subtitle}</p>` : ''}
+  </td>
+</tr>`;
+}
+
+/**
+ * Email footer with company info
+ */
+function emailFooter(): string {
+  return `<tr>
+  <td style="padding: 30px 40px 0 40px;" class="mobile-padding">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-top: 1px solid #e5e7eb;">
+      <tr>
+        <td style="padding-top: 24px;">
+          <p style="margin: 0 0 12px 0; font-size: 14px; line-height: 20px; color: #666666; font-family: Arial, sans-serif;">
+            Questions? Contact our support team:<br>
+            Email: <a href="mailto:support@technifold.com" style="color: #2563eb; text-decoration: none;">support@technifold.com</a><br>
+            Phone: +44 (0) 1455 555580
+          </p>
+          <p style="margin: 0; font-size: 12px; line-height: 18px; color: #999999; font-family: Arial, sans-serif;">
+            Technifold Ltd<br>
+            Unit 2, St John's Business Park<br>
+            Lutterworth, Leicestershire, LE17 4HB, UK<br>
+            <a href="https://technifold.com" style="color: #2563eb; text-decoration: none;">technifold.com</a>
+          </p>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+  <td style="padding: 20px 40px 30px 40px;" class="mobile-padding">&nbsp;</td>
+</tr>`;
 }
 
 /**
@@ -51,60 +167,44 @@ export async function sendMarketingEmail({
   }
 
   try {
-    // Use test mode if domain not verified
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+
+    const html = emailWrapper(`
+      ${emailHeader(`Solutions for ${companyName}`, null, '#2563eb')}
+      <tr>
+        <td style="background-color: #ffffff; padding: 30px 40px;" class="mobile-padding">
+          <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 24px; color: #333333; font-family: Arial, sans-serif;">
+            Hi${contactName ? ` ${contactName}` : ''},
+          </p>
+          <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 24px; color: #333333; font-family: Arial, sans-serif;">
+            ${preview}
+          </p>
+          <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 24px; color: #333333; font-family: Arial, sans-serif;">
+            We've prepared personalized solutions based on your interests:
+          </p>
+          ${emailButton('View Your Solutions', tokenUrl, '#2563eb')}
+          <p style="margin: 30px 0 0 0; font-size: 14px; line-height: 20px; color: #666666; font-family: Arial, sans-serif;">
+            This link is personalized for you and expires in 30 days.
+          </p>
+        </td>
+      </tr>
+      ${emailFooter()}
+      ${unsubscribeUrl ? `
+      <tr>
+        <td align="center" style="padding: 0 40px 20px 40px;">
+          <p style="margin: 0; font-size: 11px; color: #999999; font-family: Arial, sans-serif;">
+            <a href="${unsubscribeUrl}" style="color: #999999; text-decoration: underline;">Unsubscribe from marketing emails</a>
+          </p>
+        </td>
+      </tr>
+      ` : ''}
+    `);
 
     const { data, error } = await resend.emails.send({
       from: fromEmail,
       to: [to],
       subject,
-      html: `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          </head>
-          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); padding: 30px; border-radius: 12px 12px 0 0;">
-              <h1 style="color: white; margin: 0; font-size: 28px;">Solutions for ${companyName}</h1>
-            </div>
-
-            <div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
-              <p style="font-size: 16px; margin-top: 0;">Hi${contactName ? ` ${contactName}` : ''},</p>
-
-              <p style="font-size: 16px;">${preview}</p>
-
-              <p style="font-size: 16px;">We've prepared personalized solutions based on your interests:</p>
-
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${tokenUrl}" style="background: #2563eb; color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; display: inline-block;">
-                  View Your Solutions
-                </a>
-              </div>
-
-              <p style="font-size: 14px; color: #666; margin-top: 30px;">
-                This link is personalized for you and expires in 30 days.
-              </p>
-
-              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-
-              <p style="font-size: 12px; color: #999;">
-                Technifold Ltd<br>
-                Unit 2, St John's Business Park<br>
-                Lutterworth, Leicestershire, LE17 4HB, UK<br>
-                <a href="https://technifold.com" style="color: #2563eb;">technifold.com</a>
-              </p>
-
-              ${unsubscribeUrl ? `
-                <p style="font-size: 11px; color: #999; margin-top: 16px; text-align: center;">
-                  <a href="${unsubscribeUrl}" style="color: #999;">Unsubscribe from marketing emails</a>
-                </p>
-              ` : ''}
-            </div>
-          </body>
-        </html>
-      `
+      html
     });
 
     if (error) {
@@ -159,128 +259,154 @@ export async function sendOrderConfirmation({
 
     const itemsHtml = orderItems.map(item => `
       <tr>
-        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">
-          <div style="font-weight: 600;">${item.product_code}</div>
-          <div style="font-size: 14px; color: #666;">${item.description}</div>
+        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; font-family: Arial, sans-serif;">
+          <strong style="color: #333333;">${item.product_code}</strong><br>
+          <span style="font-size: 14px; color: #666666;">${item.description}</span>
         </td>
-        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.quantity}</td>
-        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">${currencySymbol}${item.unit_price.toFixed(2)}</td>
-        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 600;">${currencySymbol}${item.total_price.toFixed(2)}</td>
+        <td align="center" style="padding: 12px; border-bottom: 1px solid #e5e7eb; font-family: Arial, sans-serif; color: #333333;">${item.quantity}</td>
+        <td align="right" style="padding: 12px; border-bottom: 1px solid #e5e7eb; font-family: Arial, sans-serif; color: #333333;">${currencySymbol}${item.unit_price.toFixed(2)}</td>
+        <td align="right" style="padding: 12px; border-bottom: 1px solid #e5e7eb; font-family: Arial, sans-serif; color: #333333; font-weight: 600;">${currencySymbol}${item.total_price.toFixed(2)}</td>
       </tr>
     `).join('');
+
+    const html = emailWrapper(`
+      ${emailHeader(isRental ? '✓ Rental Agreement Confirmed' : '✓ Order Confirmed', null, '#16a34a')}
+      <tr>
+        <td style="background-color: #ffffff; padding: 30px 40px;" class="mobile-padding">
+          <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 24px; color: #333333; font-family: Arial, sans-serif;">
+            Hi${contactName ? ` ${contactName}` : ''},
+          </p>
+          <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px; color: #333333; font-family: Arial, sans-serif;">
+            Thank you for your ${isRental ? 'rental agreement' : 'order'}! We've received your payment and are processing your ${isRental ? 'equipment rental' : 'order'}.
+          </p>
+
+          ${isRental ? `
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 20px;">
+            <tr>
+              <td style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; font-family: Arial, sans-serif;">
+                <p style="margin: 0 0 4px 0; font-weight: 600; color: #92400e; font-size: 14px;">30-Day Free Trial</p>
+                <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 20px;">
+                  Your 30-day trial begins upon delivery. Monthly rental payments will start automatically after the trial period unless you return the equipment.
+                </p>
+              </td>
+            </tr>
+          </table>
+          ` : ''}
+
+          <!-- Order ID Box -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td style="background-color: #f9fafb; padding: 16px; font-family: Arial, sans-serif;">
+                <p style="margin: 0 0 4px 0; font-size: 14px; color: #666666;">Order ID</p>
+                <p style="margin: 0; font-family: monospace; font-size: 14px; color: #111111;">${orderId}</p>
+              </td>
+            </tr>
+          </table>
+
+          <h2 style="margin: 0 0 16px 0; font-size: 18px; color: #333333; font-family: Arial, sans-serif;">Order Details</h2>
+
+          <!-- Order Items Table -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr style="background-color: #f9fafb;">
+              <th align="left" style="padding: 12px; font-size: 12px; color: #666666; text-transform: uppercase; font-family: Arial, sans-serif; font-weight: 600;">Item</th>
+              <th align="center" style="padding: 12px; font-size: 12px; color: #666666; text-transform: uppercase; font-family: Arial, sans-serif; font-weight: 600;">Qty</th>
+              <th align="right" style="padding: 12px; font-size: 12px; color: #666666; text-transform: uppercase; font-family: Arial, sans-serif; font-weight: 600;">Price</th>
+              <th align="right" style="padding: 12px; font-size: 12px; color: #666666; text-transform: uppercase; font-family: Arial, sans-serif; font-weight: 600;">Total</th>
+            </tr>
+            ${itemsHtml}
+          </table>
+
+          <!-- Totals -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-top: 2px solid #e5e7eb; margin-bottom: 24px;">
+            <tr>
+              <td style="padding: 12px 0; font-family: Arial, sans-serif;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="color: #666666; font-size: 14px;">Subtotal:</td>
+                    <td align="right" style="font-weight: 600; color: #333333; font-size: 14px;">${currencySymbol}${subtotal.toFixed(2)}</td>
+                  </tr>
+                  ${taxAmount > 0 ? `
+                  <tr>
+                    <td style="color: #666666; font-size: 14px; padding-top: 8px;">VAT:</td>
+                    <td align="right" style="font-weight: 600; color: #333333; font-size: 14px; padding-top: 8px;">${currencySymbol}${taxAmount.toFixed(2)}</td>
+                  </tr>
+                  ` : ''}
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="border-top: 2px solid #e5e7eb; padding: 16px 0; font-family: Arial, sans-serif;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="font-size: 18px; font-weight: 700; color: #333333;">Total${isRental ? ' (First Payment)' : ''}:</td>
+                    <td align="right" style="font-size: 18px; font-weight: 700; color: #16a34a;">${currencySymbol}${totalAmount.toFixed(2)}</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <h2 style="margin: 0 0 16px 0; font-size: 18px; color: #333333; font-family: Arial, sans-serif;">Shipping Address</h2>
+
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td style="background-color: #f9fafb; padding: 16px; font-family: Arial, sans-serif;">
+                <p style="margin: 0 0 4px 0; font-weight: 600; color: #333333;">${companyName}</p>
+                <p style="margin: 0; color: #666666; font-size: 14px; line-height: 20px;">
+                  ${shippingAddress.address_line_1}<br>
+                  ${shippingAddress.address_line_2 ? `${shippingAddress.address_line_2}<br>` : ''}
+                  ${shippingAddress.city}, ${shippingAddress.postal_code}<br>
+                  ${shippingAddress.country}
+                </p>
+              </td>
+            </tr>
+          </table>
+
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td align="center">
+                ${emailButton('Track Your Order', `${process.env.NEXT_PUBLIC_BASE_URL}/track-order`, '#3b82f6')}
+                <p style="margin: 8px 0 0 0; font-size: 12px; color: #666666; font-family: Arial, sans-serif;">Order ID: ${orderId}</p>
+              </td>
+            </tr>
+          </table>
+
+          <h2 style="margin: 0 0 16px 0; font-size: 18px; color: #333333; font-family: Arial, sans-serif;">What's Next?</h2>
+
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+            <tr>
+              <td style="padding: 0 0 8px 20px; color: #666666; font-size: 14px; line-height: 20px; font-family: Arial, sans-serif;">
+                1. We're preparing your ${isRental ? 'equipment' : 'order'} for shipment
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0 0 8px 20px; color: #666666; font-size: 14px; line-height: 20px; font-family: Arial, sans-serif;">
+                2. You'll receive a shipping confirmation email with tracking details
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0 0 8px 20px; color: #666666; font-size: 14px; line-height: 20px; font-family: Arial, sans-serif;">
+                3. Delivery typically takes 3-5 business days
+              </td>
+            </tr>
+            ${isRental ? `
+            <tr>
+              <td style="padding: 0 0 8px 20px; color: #666666; font-size: 14px; line-height: 20px; font-family: Arial, sans-serif;">
+                4. Your 30-day trial begins upon delivery
+              </td>
+            </tr>
+            ` : ''}
+          </table>
+        </td>
+      </tr>
+      ${emailFooter()}
+    `);
 
     const { data, error } = await resend.emails.send({
       from: fromEmail,
       to: [to],
       subject: `${isRental ? 'Rental Agreement' : 'Order'} Confirmation - Technifold`,
-      html: `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          </head>
-          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); padding: 30px; border-radius: 12px 12px 0 0;">
-              <h1 style="color: white; margin: 0; font-size: 28px;">${isRental ? '✓ Rental Agreement Confirmed' : '✓ Order Confirmed'}</h1>
-            </div>
-
-            <div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
-              <p style="font-size: 16px; margin-top: 0;">Hi${contactName ? ` ${contactName}` : ''},</p>
-
-              <p style="font-size: 16px;">Thank you for your ${isRental ? 'rental agreement' : 'order'}! We've received your payment and are processing your ${isRental ? 'equipment rental' : 'order'}.</p>
-
-              ${isRental ? `
-                <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; margin: 20px 0; border-radius: 4px;">
-                  <p style="margin: 0; font-weight: 600; color: #92400e;">30-Day Free Trial</p>
-                  <p style="margin: 8px 0 0 0; color: #92400e; font-size: 14px;">
-                    Your 30-day trial begins upon delivery. Monthly rental payments will start automatically after the trial period unless you return the equipment.
-                  </p>
-                </div>
-              ` : ''}
-
-              <div style="background: #f9fafb; padding: 16px; border-radius: 8px; margin: 20px 0;">
-                <p style="margin: 0; font-size: 14px; color: #666;">Order ID</p>
-                <p style="margin: 4px 0 0 0; font-family: monospace; font-size: 12px; color: #111;">${orderId}</p>
-              </div>
-
-              <h2 style="font-size: 18px; margin-top: 30px; margin-bottom: 16px;">Order Details</h2>
-
-              <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                  <tr style="background: #f9fafb;">
-                    <th style="padding: 12px; text-align: left; font-size: 12px; color: #666; text-transform: uppercase;">Item</th>
-                    <th style="padding: 12px; text-align: center; font-size: 12px; color: #666; text-transform: uppercase;">Qty</th>
-                    <th style="padding: 12px; text-align: right; font-size: 12px; color: #666; text-transform: uppercase;">Price</th>
-                    <th style="padding: 12px; text-align: right; font-size: 12px; color: #666; text-transform: uppercase;">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${itemsHtml}
-                </tbody>
-              </table>
-
-              <div style="margin-top: 24px; padding-top: 16px; border-top: 2px solid #e5e7eb;">
-                <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-                  <span style="color: #666;">Subtotal:</span>
-                  <span style="font-weight: 600;">${currencySymbol}${subtotal.toFixed(2)}</span>
-                </div>
-                ${taxAmount > 0 ? `
-                  <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-                    <span style="color: #666;">VAT:</span>
-                    <span style="font-weight: 600;">${currencySymbol}${taxAmount.toFixed(2)}</span>
-                  </div>
-                ` : ''}
-                <div style="display: flex; justify-content: space-between; padding: 16px 0; border-top: 2px solid #e5e7eb; margin-top: 8px;">
-                  <span style="font-size: 18px; font-weight: 700;">Total${isRental ? ' (First Payment)' : ''}:</span>
-                  <span style="font-size: 18px; font-weight: 700; color: #16a34a;">${currencySymbol}${totalAmount.toFixed(2)}</span>
-                </div>
-              </div>
-
-              <h2 style="font-size: 18px; margin-top: 30px; margin-bottom: 16px;">Shipping Address</h2>
-
-              <div style="background: #f9fafb; padding: 16px; border-radius: 8px;">
-                <p style="margin: 0; font-weight: 600;">${companyName}</p>
-                <p style="margin: 4px 0 0 0; color: #666;">${shippingAddress.address_line_1}</p>
-                ${shippingAddress.address_line_2 ? `<p style="margin: 4px 0 0 0; color: #666;">${shippingAddress.address_line_2}</p>` : ''}
-                <p style="margin: 4px 0 0 0; color: #666;">${shippingAddress.city}, ${shippingAddress.postal_code}</p>
-                <p style="margin: 4px 0 0 0; color: #666;">${shippingAddress.country}</p>
-              </div>
-
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.NEXT_PUBLIC_BASE_URL}/track-order" style="background: #3b82f6; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">
-                  Track Your Order
-                </a>
-                <p style="font-size: 12px; color: #666; margin-top: 8px;">Order ID: ${orderId}</p>
-              </div>
-
-              <h2 style="font-size: 18px; margin-top: 30px; margin-bottom: 16px;">What's Next?</h2>
-
-              <ol style="padding-left: 20px; color: #666;">
-                <li style="margin-bottom: 8px;">We're preparing your ${isRental ? 'equipment' : 'order'} for shipment</li>
-                <li style="margin-bottom: 8px;">You'll receive a shipping confirmation email with tracking details</li>
-                <li style="margin-bottom: 8px;">Delivery typically takes 3-5 business days</li>
-                ${isRental ? '<li style="margin-bottom: 8px;">Your 30-day trial begins upon delivery</li>' : ''}
-              </ol>
-
-              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-
-              <p style="font-size: 14px; color: #666;">
-                Questions? Contact our support team:<br>
-                Email: <a href="mailto:support@technifold.com" style="color: #2563eb;">support@technifold.com</a><br>
-                Phone: +44 (0) 1707 393700
-              </p>
-
-              <p style="font-size: 12px; color: #999; margin-top: 24px;">
-                Technifold Ltd<br>
-                Unit 2, St John's Business Park<br>
-                Lutterworth, Leicestershire, LE17 4HB, UK<br>
-                <a href="https://technifold.com" style="color: #2563eb;">technifold.com</a>
-              </p>
-            </div>
-          </body>
-        </html>
-      `
+      html
     });
 
     if (error) {
@@ -326,88 +452,91 @@ export async function sendShippingNotification({
   try {
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
 
+    const html = emailWrapper(`
+      ${emailHeader('Your Order Has Shipped!', null, '#7c3aed')}
+      <tr>
+        <td style="background-color: #ffffff; padding: 30px 40px;" class="mobile-padding">
+          <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 24px; color: #333333; font-family: Arial, sans-serif;">
+            Hi${contactName ? ` ${contactName}` : ''},
+          </p>
+          <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 24px; color: #333333; font-family: Arial, sans-serif;">
+            Great news! Your order has been shipped and is on its way to ${companyName}.
+          </p>
+
+          <!-- Tracking Info Box -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td style="background-color: #f0f9ff; border-left: 4px solid #3b82f6; padding: 20px; font-family: Arial, sans-serif;">
+                <h2 style="margin: 0 0 16px 0; font-size: 18px; color: #1e40af;">Tracking Information</h2>
+
+                <p style="margin: 0 0 4px 0; font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Tracking Number</p>
+                <p style="margin: 0 0 16px 0; font-family: monospace; font-size: 18px; font-weight: 700; color: #1e293b;">${trackingNumber}</p>
+
+                <p style="margin: 0 0 4px 0; font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Carrier</p>
+                <p style="margin: 0 0 ${estimatedDelivery ? '16px' : '0'}; font-size: 16px; font-weight: 600; color: #1e293b;">${carrier}</p>
+
+                ${estimatedDelivery ? `
+                <p style="margin: 0 0 4px 0; font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Estimated Delivery</p>
+                <p style="margin: 0; font-size: 16px; font-weight: 600; color: #1e293b;">${estimatedDelivery}</p>
+                ` : ''}
+
+                ${trackingUrl ? `
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-top: 20px;">
+                  <tr>
+                    <td align="center">
+                      ${emailButton('Track Your Package', trackingUrl, '#3b82f6')}
+                    </td>
+                  </tr>
+                </table>
+                ` : ''}
+              </td>
+            </tr>
+          </table>
+
+          <!-- Order ID Box -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td style="background-color: #f9fafb; padding: 16px; font-family: Arial, sans-serif;">
+                <p style="margin: 0 0 4px 0; font-size: 14px; color: #666666;">Order ID</p>
+                <p style="margin: 0; font-family: monospace; font-size: 14px; color: #111111;">${orderId}</p>
+              </td>
+            </tr>
+          </table>
+
+          <h2 style="margin: 0 0 16px 0; font-size: 18px; color: #333333; font-family: Arial, sans-serif;">Delivery Tips</h2>
+
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+            <tr>
+              <td style="padding: 0 0 8px 20px; color: #666666; font-size: 14px; line-height: 20px; font-family: Arial, sans-serif;">
+                • Someone should be available to sign for the delivery
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0 0 8px 20px; color: #666666; font-size: 14px; line-height: 20px; font-family: Arial, sans-serif;">
+                • Keep your tracking number handy for any inquiries
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0 0 8px 20px; color: #666666; font-size: 14px; line-height: 20px; font-family: Arial, sans-serif;">
+                • Inspect the package upon delivery for any damage
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0 0 8px 20px; color: #666666; font-size: 14px; line-height: 20px; font-family: Arial, sans-serif;">
+                • Contact us immediately if there are any issues
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      ${emailFooter()}
+    `);
+
     const { data, error } = await resend.emails.send({
       from: fromEmail,
       to: [to],
       subject: `Your order has shipped - Technifold`,
-      html: `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          </head>
-          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); padding: 30px; border-radius: 12px 12px 0 0;">
-              <h1 style="color: white; margin: 0; font-size: 28px;">📦 Your Order Has Shipped!</h1>
-            </div>
-
-            <div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
-              <p style="font-size: 16px; margin-top: 0;">Hi${contactName ? ` ${contactName}` : ''},</p>
-
-              <p style="font-size: 16px;">Great news! Your order has been shipped and is on its way to ${companyName}.</p>
-
-              <div style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 24px 0; border-radius: 4px;">
-                <h2 style="margin: 0 0 16px 0; font-size: 18px; color: #1e40af;">Tracking Information</h2>
-
-                <div style="margin-bottom: 12px;">
-                  <div style="font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Tracking Number</div>
-                  <div style="font-family: monospace; font-size: 18px; font-weight: 700; color: #1e293b; margin-top: 4px;">${trackingNumber}</div>
-                </div>
-
-                <div style="margin-bottom: 12px;">
-                  <div style="font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Carrier</div>
-                  <div style="font-size: 16px; font-weight: 600; color: #1e293b; margin-top: 4px;">${carrier}</div>
-                </div>
-
-                ${estimatedDelivery ? `
-                  <div style="margin-bottom: 12px;">
-                    <div style="font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Estimated Delivery</div>
-                    <div style="font-size: 16px; font-weight: 600; color: #1e293b; margin-top: 4px;">${estimatedDelivery}</div>
-                  </div>
-                ` : ''}
-
-                ${trackingUrl ? `
-                  <div style="text-align: center; margin-top: 20px;">
-                    <a href="${trackingUrl}" style="background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; display: inline-block;">
-                      Track Your Package
-                    </a>
-                  </div>
-                ` : ''}
-              </div>
-
-              <div style="background: #f9fafb; padding: 16px; border-radius: 8px; margin: 20px 0;">
-                <p style="margin: 0; font-size: 14px; color: #666;">Order ID</p>
-                <p style="margin: 4px 0 0 0; font-family: monospace; font-size: 12px; color: #111;">${orderId}</p>
-              </div>
-
-              <h2 style="font-size: 18px; margin-top: 30px; margin-bottom: 16px;">Delivery Tips</h2>
-
-              <ul style="padding-left: 20px; color: #666;">
-                <li style="margin-bottom: 8px;">Someone should be available to sign for the delivery</li>
-                <li style="margin-bottom: 8px;">Keep your tracking number handy for any inquiries</li>
-                <li style="margin-bottom: 8px;">Inspect the package upon delivery for any damage</li>
-                <li style="margin-bottom: 8px;">Contact us immediately if there are any issues</li>
-              </ul>
-
-              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-
-              <p style="font-size: 14px; color: #666;">
-                Questions about your delivery?<br>
-                Email: <a href="mailto:support@technifold.com" style="color: #2563eb;">support@technifold.com</a><br>
-                Phone: +44 (0) 1707 393700
-              </p>
-
-              <p style="font-size: 12px; color: #999; margin-top: 24px;">
-                Technifold Ltd<br>
-                Unit 2, St John's Business Park<br>
-                Lutterworth, Leicestershire, LE17 4HB, UK<br>
-                <a href="https://technifold.com" style="color: #2563eb;">technifold.com</a>
-              </p>
-            </div>
-          </body>
-        </html>
-      `
+      html
     });
 
     if (error) {
@@ -455,112 +584,120 @@ export async function sendTrialConfirmation({
       ? trialEndDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
       : '30 days from delivery';
 
+    const html = emailWrapper(`
+      ${emailHeader('Your Trial Has Started!', '30 days to experience the difference', '#3b82f6')}
+      <tr>
+        <td style="background-color: #ffffff; padding: 30px 40px;" class="mobile-padding">
+          <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 24px; color: #333333; font-family: Arial, sans-serif;">
+            Hi ${contactName || 'there'},
+          </p>
+          <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 24px; color: #333333; font-family: Arial, sans-serif;">
+            Great news! Your 30-day free trial${machineName ? ` for your <strong>${machineName}</strong>` : ''} is now active. You won't be charged during the trial period.
+          </p>
+
+          <!-- Trial Active Box -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td style="background-color: #f0fdf4; border: 2px solid #22c55e; padding: 20px; font-family: Arial, sans-serif;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td width="40" valign="top">
+                      <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                        <tr>
+                          <td style="background-color: #22c55e; width: 32px; height: 32px; text-align: center; font-weight: bold; color: #ffffff; font-size: 18px; font-family: Arial, sans-serif;">✓</td>
+                        </tr>
+                      </table>
+                    </td>
+                    <td valign="top" style="padding-left: 12px;">
+                      <p style="margin: 0 0 8px 0; font-size: 18px; font-weight: 700; color: #166534;">Trial Active</p>
+                      <p style="margin: 0; color: #166534; font-size: 14px; line-height: 20px;">
+                        <strong>Trial ends:</strong> ${trialEndFormatted}<br>
+                        <strong>Then:</strong> ${currencySymbol}${monthlyPrice.toFixed(2)}/month
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <h2 style="margin: 0 0 16px 0; font-size: 18px; color: #333333; font-family: Arial, sans-serif;">What Happens Next?</h2>
+
+          <!-- Steps -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px; border-left: 3px solid #3b82f6;">
+            <tr>
+              <td style="padding: 0 0 20px 20px;">
+                <p style="margin: 0 0 4px 0; font-weight: 700; color: #1e40af; font-size: 14px; font-family: Arial, sans-serif;">1. We'll Ship Your Equipment</p>
+                <p style="margin: 0; color: #666666; font-size: 14px; line-height: 20px; font-family: Arial, sans-serif;">Your tools will be dispatched within 1-2 business days. You'll receive tracking information by email.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0 0 20px 20px;">
+                <p style="margin: 0 0 4px 0; font-weight: 700; color: #1e40af; font-size: 14px; font-family: Arial, sans-serif;">2. Try It Risk-Free</p>
+                <p style="margin: 0; color: #666666; font-size: 14px; line-height: 20px; font-family: Arial, sans-serif;">Use the equipment on your machine for 30 days. See the results for yourself.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0 0 0 20px;">
+                <p style="margin: 0 0 4px 0; font-weight: 700; color: #1e40af; font-size: 14px; font-family: Arial, sans-serif;">3. Keep It or Return It</p>
+                <p style="margin: 0; color: #666666; font-size: 14px; line-height: 20px; font-family: Arial, sans-serif;">Love it? Do nothing - your subscription continues automatically. Not for you? Contact us to arrange a free return.</p>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Warning Box -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; font-family: Arial, sans-serif;">
+                <p style="margin: 0 0 4px 0; font-weight: 600; color: #92400e; font-size: 14px;">No Payment Until Trial Ends</p>
+                <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 20px;">
+                  Your card will not be charged until ${trialEndFormatted}. Cancel anytime before then at no cost.
+                </p>
+              </td>
+            </tr>
+          </table>
+
+          <h2 style="margin: 0 0 16px 0; font-size: 18px; color: #333333; font-family: Arial, sans-serif;">Your Subscription Details</h2>
+
+          <!-- Details Table -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; margin-bottom: 24px;">
+            <tr>
+              <td style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; color: #666666; font-size: 14px; font-family: Arial, sans-serif;">Company</td>
+              <td align="right" style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #333333; font-size: 14px; font-family: Arial, sans-serif;">${companyName}</td>
+            </tr>
+            ${machineName ? `
+            <tr>
+              <td style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; color: #666666; font-size: 14px; font-family: Arial, sans-serif;">Machine</td>
+              <td align="right" style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #333333; font-size: 14px; font-family: Arial, sans-serif;">${machineName}</td>
+            </tr>
+            ` : ''}
+            <tr>
+              <td style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; color: #666666; font-size: 14px; font-family: Arial, sans-serif;">Monthly Price (after trial)</td>
+              <td align="right" style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #333333; font-size: 14px; font-family: Arial, sans-serif;">${currencySymbol}${monthlyPrice.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 16px; color: #666666; font-size: 14px; font-family: Arial, sans-serif;">Trial Ends</td>
+              <td align="right" style="padding: 12px 16px; font-weight: 600; color: #333333; font-size: 14px; font-family: Arial, sans-serif;">${trialEndFormatted}</td>
+            </tr>
+          </table>
+
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+            <tr>
+              <td align="center">
+                ${emailButton('Contact Support', `${process.env.NEXT_PUBLIC_BASE_URL}/contact`, '#3b82f6')}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      ${emailFooter()}
+    `);
+
     const { data, error } = await resend.emails.send({
       from: fromEmail,
       to: [to],
       subject: `Your 30-Day Free Trial Has Started - Technifold`,
-      html: `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          </head>
-          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); padding: 30px; border-radius: 12px 12px 0 0;">
-              <h1 style="color: white; margin: 0; font-size: 28px;">Your Trial Has Started!</h1>
-              <p style="color: #bfdbfe; margin: 8px 0 0 0; font-size: 16px;">30 days to experience the difference</p>
-            </div>
-
-            <div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
-              <p style="font-size: 16px; margin-top: 0;">Hi ${contactName || 'there'},</p>
-
-              <p style="font-size: 16px;">Great news! Your 30-day free trial${machineName ? ` for your <strong>${machineName}</strong>` : ''} is now active. You won't be charged during the trial period.</p>
-
-              <div style="background: #f0fdf4; border: 2px solid #22c55e; padding: 20px; border-radius: 8px; margin: 24px 0;">
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                  <div style="background: #22c55e; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">✓</div>
-                  <div style="font-size: 18px; font-weight: 700; color: #166534;">Trial Active</div>
-                </div>
-                <p style="margin: 0; color: #166534;">
-                  <strong>Trial ends:</strong> ${trialEndFormatted}<br>
-                  <strong>Then:</strong> ${currencySymbol}${monthlyPrice.toFixed(2)}/month
-                </p>
-              </div>
-
-              <h2 style="font-size: 18px; margin-top: 30px; margin-bottom: 16px;">What Happens Next?</h2>
-
-              <div style="border-left: 3px solid #3b82f6; padding-left: 20px; margin: 20px 0;">
-                <div style="margin-bottom: 20px;">
-                  <div style="font-weight: 700; color: #1e40af; margin-bottom: 4px;">1. We'll Ship Your Equipment</div>
-                  <div style="color: #666; font-size: 14px;">Your tools will be dispatched within 1-2 business days. You'll receive tracking information by email.</div>
-                </div>
-                <div style="margin-bottom: 20px;">
-                  <div style="font-weight: 700; color: #1e40af; margin-bottom: 4px;">2. Try It Risk-Free</div>
-                  <div style="color: #666; font-size: 14px;">Use the equipment on your machine for 30 days. See the results for yourself.</div>
-                </div>
-                <div style="margin-bottom: 20px;">
-                  <div style="font-weight: 700; color: #1e40af; margin-bottom: 4px;">3. Keep It or Return It</div>
-                  <div style="color: #666; font-size: 14px;">Love it? Do nothing - your subscription continues automatically. Not for you? Contact us to arrange a free return.</div>
-                </div>
-              </div>
-
-              <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; margin: 24px 0; border-radius: 4px;">
-                <p style="margin: 0; font-weight: 600; color: #92400e;">No Payment Until Trial Ends</p>
-                <p style="margin: 8px 0 0 0; color: #92400e; font-size: 14px;">
-                  Your card will not be charged until ${trialEndFormatted}. Cancel anytime before then at no cost.
-                </p>
-              </div>
-
-              <h2 style="font-size: 18px; margin-top: 30px; margin-bottom: 16px;">Your Subscription Details</h2>
-
-              <div style="background: #f9fafb; padding: 16px; border-radius: 8px;">
-                <table style="width: 100%;">
-                  <tr>
-                    <td style="padding: 8px 0; color: #666;">Company</td>
-                    <td style="padding: 8px 0; text-align: right; font-weight: 600;">${companyName}</td>
-                  </tr>
-                  ${machineName ? `
-                  <tr>
-                    <td style="padding: 8px 0; color: #666;">Machine</td>
-                    <td style="padding: 8px 0; text-align: right; font-weight: 600;">${machineName}</td>
-                  </tr>
-                  ` : ''}
-                  <tr>
-                    <td style="padding: 8px 0; color: #666;">Monthly Price (after trial)</td>
-                    <td style="padding: 8px 0; text-align: right; font-weight: 600;">${currencySymbol}${monthlyPrice.toFixed(2)}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px 0; color: #666;">Trial Ends</td>
-                    <td style="padding: 8px 0; text-align: right; font-weight: 600;">${trialEndFormatted}</td>
-                  </tr>
-                </table>
-              </div>
-
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.NEXT_PUBLIC_BASE_URL}/contact" style="background: #3b82f6; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">
-                  Contact Support
-                </a>
-              </div>
-
-              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-
-              <p style="font-size: 14px; color: #666;">
-                Questions about your trial?<br>
-                Email: <a href="mailto:support@technifold.com" style="color: #2563eb;">support@technifold.com</a><br>
-                Phone: +44 (0) 1707 393700
-              </p>
-
-              <p style="font-size: 12px; color: #999; margin-top: 24px;">
-                Technifold Ltd<br>
-                Unit 2, St John's Business Park<br>
-                Lutterworth, Leicestershire, LE17 4HB, UK<br>
-                <a href="https://technifold.com" style="color: #2563eb;">technifold.com</a>
-              </p>
-            </div>
-          </body>
-        </html>
-      `
+      html
     });
 
     if (error) {
