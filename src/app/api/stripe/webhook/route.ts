@@ -599,6 +599,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
   const supabase = getSupabaseClient();
 
   console.log('[stripe-webhook] Processing customer.subscription.created:', subscription.id);
+  console.log('[stripe-webhook] Subscription metadata:', JSON.stringify(subscription.metadata || {}));
 
   const metadata = subscription.metadata || {};
   const companyId = metadata.company_id;
@@ -609,6 +610,8 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
   const trialIntentId = metadata.trial_intent_id || null;
   const selectedPrice = metadata.selected_price ? parseFloat(metadata.selected_price) : null;
 
+  console.log('[stripe-webhook] Parsed values - companyId:', companyId, 'purchaseType:', purchaseType, 'trialIntentId:', trialIntentId);
+
   if (!companyId) {
     console.log('[stripe-webhook] Skipping subscription without company_id:', subscription.id);
     return;
@@ -616,6 +619,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
 
   // Handle trial subscriptions (from /offer page)
   if (purchaseType === 'subscription_trial' || trialIntentId) {
+    console.log('[stripe-webhook] Routing to handleTrialSubscriptionCreated');
     await handleTrialSubscriptionCreated(subscription, {
       companyId,
       contactId,
@@ -628,7 +632,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
 
   // Handle rentals (legacy flow)
   if (purchaseType !== 'rental') {
-    console.log('[stripe-webhook] Skipping non-rental/non-trial subscription:', subscription.id);
+    console.log('[stripe-webhook] Skipping non-rental/non-trial subscription:', subscription.id, 'purchaseType:', purchaseType);
     return;
   }
 
@@ -1109,6 +1113,7 @@ async function handleTrialSubscriptionCreated(
   const supabase = getSupabaseClient();
 
   console.log('[stripe-webhook] Processing trial subscription:', subscription.id);
+  console.log('[stripe-webhook] Trial metadata:', JSON.stringify(meta));
 
   const { companyId, contactId, machineId, trialIntentId, selectedPrice } = meta;
 
@@ -1153,6 +1158,8 @@ async function handleTrialSubscriptionCreated(
 
   if (existingSub) {
     console.log('[stripe-webhook] Subscription already exists:', existingSub.subscription_id);
+    // Still try to send email in case it failed before
+    await sendTrialEmail(supabase, companyId, contactId, machineId, monthlyPrice, trialEnd);
     return;
   }
 
@@ -1225,22 +1232,60 @@ async function handleTrialSubscriptionCreated(
   });
 
   // Send confirmation email
+  await sendTrialEmail(supabase, companyId, contactId, machineId, monthlyPrice, trialEnd);
+}
+
+/**
+ * Helper to send trial confirmation email
+ * Extracted to allow retry on idempotent webhook hits
+ */
+async function sendTrialEmail(
+  supabase: ReturnType<typeof getSupabaseClient>,
+  companyId: string,
+  contactId: string | null,
+  machineId: string | null,
+  monthlyPrice: number,
+  trialEnd: Date | null
+) {
   try {
+    console.log('[stripe-webhook] Attempting to send trial email, contactId:', contactId);
+
     const { data: company } = await supabase
       .from('companies')
       .select('company_name')
       .eq('company_id', companyId)
       .single();
 
-    const { data: contact } = await supabase
-      .from('contacts')
-      .select('full_name, email')
-      .eq('contact_id', contactId)
-      .single();
+    console.log('[stripe-webhook] Company lookup:', company ? company.company_name : 'NOT FOUND');
+
+    // Try to find contact by ID first, then fallback to company's primary contact
+    let contact: { full_name: string | null; email: string } | null = null;
+
+    if (contactId && contactId !== '') {
+      const { data: contactById } = await supabase
+        .from('contacts')
+        .select('full_name, email')
+        .eq('contact_id', contactId)
+        .single();
+      contact = contactById;
+      console.log('[stripe-webhook] Contact by ID:', contact ? contact.email : 'NOT FOUND');
+    }
+
+    // Fallback: get any contact for this company
+    if (!contact) {
+      const { data: companyContact } = await supabase
+        .from('contacts')
+        .select('full_name, email')
+        .eq('company_id', companyId)
+        .limit(1)
+        .single();
+      contact = companyContact;
+      console.log('[stripe-webhook] Fallback contact:', contact ? contact.email : 'NOT FOUND');
+    }
 
     // Get machine name if we have a machine ID
     let machineName: string | undefined;
-    if (machineId) {
+    if (machineId && machineId !== '') {
       const { data: machine } = await supabase
         .from('machines')
         .select('brand, model')
@@ -1249,9 +1294,11 @@ async function handleTrialSubscriptionCreated(
       if (machine) {
         machineName = `${machine.brand} ${machine.model}`.trim();
       }
+      console.log('[stripe-webhook] Machine lookup:', machineName || 'NOT FOUND');
     }
 
     if (company && contact?.email) {
+      console.log('[stripe-webhook] Sending trial confirmation to:', contact.email);
       const emailResult = await sendTrialConfirmation({
         to: contact.email,
         contactName: contact.full_name || '',
@@ -1263,10 +1310,16 @@ async function handleTrialSubscriptionCreated(
       });
 
       if (emailResult.success) {
-        console.log(`[stripe-webhook] Trial confirmation sent to ${contact.email}`);
+        console.log(`[stripe-webhook] Trial confirmation sent to ${contact.email}, messageId: ${emailResult.messageId}`);
       } else {
         console.error('[stripe-webhook] Failed to send trial confirmation:', emailResult.error);
       }
+    } else {
+      console.error('[stripe-webhook] Cannot send email - missing data:', {
+        hasCompany: !!company,
+        hasContact: !!contact,
+        contactEmail: contact?.email || 'none'
+      });
     }
   } catch (emailError) {
     console.error('[stripe-webhook] Error sending confirmation email:', emailError);
