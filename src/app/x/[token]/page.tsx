@@ -2,8 +2,7 @@
  * Token Resolver Route - Tokenized Marketing Pages
  * /x/[token] - Verify HMAC token, track engagement, show personalized offer
  *
- * SIMPLIFIED VERSION - Removed abandoned content_blocks schema
- * TODO: Rebuild with proper machine-specific longform copy approach
+ * Uses the same narrative components as /machines/[slug] for consistency
  */
 
 import { notFound } from 'next/navigation';
@@ -11,6 +10,9 @@ import { verifyToken } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
+import { CoverWorkNarrative } from '@/components/machines/CoverWorkNarrative';
+import { PerfectBinderNarrative } from '@/components/machines/PerfectBinderNarrative';
+import { SpineCreaserNarrative } from '@/components/machines/SpineCreaserNarrative';
 
 interface TokenPageProps {
   params: Promise<{
@@ -95,11 +97,14 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
     notFound();
   }
 
-  // 4. FETCH COMPANY MACHINES (for future machine-specific offers)
+  // 4. FETCH COMPANY MACHINES WITH FULL DETAILS
   const { data: companyMachines } = await supabase
     .from('company_machine')
-    .select('machine_id, machines(brand, model, display_name)')
+    .select('machine_id, machines(machine_id, brand, model, display_name, type, slug)')
     .eq('company_id', company_id);
+
+  // Get primary machine for narrative selection
+  const primaryMachine = companyMachines?.[0]?.machines as any;
 
   // 5. CHECK CONSENT
   let consentGranted = true;
@@ -151,121 +156,118 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
     );
   }
 
-  // 6. RENDER SIMPLIFIED OFFER PAGE
+  // 6. DETERMINE WHICH NARRATIVE TO SHOW
+  const machineType = primaryMachine?.type?.toLowerCase() || '';
+
+  const isFoldingMachine =
+    machineType.includes('folder') ||
+    machineType.includes('folding');
+
+  const isPerfectBinder =
+    machineType.includes('binder') ||
+    machineType.includes('perfect');
+
+  const isSpineCreaserMachine =
+    machineType.includes('stitcher') ||
+    machineType.includes('saddle') ||
+    machineType.includes('booklet') ||
+    machineType.includes('cover_feeder') ||
+    machineType.includes('cover-feeder');
+
+  // 7. RENDER PAGE WITH APPROPRIATE NARRATIVE
   return (
     <div className="min-h-screen bg-white">
       <MarketingHeader />
 
-      {/* Hero */}
-      <section className="bg-slate-900 text-white py-16 border-b-4 border-orange-500">
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="inline-block bg-orange-500/20 border border-orange-500/30 px-3 py-1 text-xs font-bold mb-4 text-orange-300">
-            Exclusive Offer for {company.company_name}
-          </div>
-
-          <h1 className="text-4xl font-bold mb-6 leading-tight">
-            Transform Your Print Finishing
-          </h1>
-
-          <p className="text-lg text-gray-300 mb-8 max-w-3xl">
-            Eliminate fiber cracking, reduce waste, and increase productivity with Technifold's
-            precision finishing tools. Over 40,000 installations worldwide.
-          </p>
-
-          <a
-            href="/contact"
-            className="inline-block bg-orange-500 text-white px-8 py-3 text-base font-bold hover:bg-orange-600 transition-colors"
-          >
-            Request Free Trial →
-          </a>
+      {/* Personalization Banner */}
+      <section className="bg-blue-600 text-white py-3">
+        <div className="max-w-6xl mx-auto px-6 text-center">
+          <span className="text-blue-100">Exclusive offer for</span>{' '}
+          <span className="font-bold">{company.company_name}</span>
         </div>
       </section>
 
-      {/* Machine Context (if known) */}
-      {companyMachines && companyMachines.length > 0 && (
-        <section className="py-12 bg-gray-50 border-t border-gray-300">
-          <div className="max-w-4xl mx-auto px-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Equipment</h2>
-            <div className="space-y-4">
-              {companyMachines.map((cm: any) => (
-                <div key={cm.machine_id} className="bg-white border-2 border-gray-200 p-4">
-                  <h3 className="text-lg font-bold text-gray-900">
-                    {cm.machines?.brand} {cm.machines?.model}
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Compatible solutions available
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+      {/* Render the appropriate narrative based on machine type */}
+      {primaryMachine && isFoldingMachine && (
+        <CoverWorkNarrative machine={primaryMachine} />
       )}
 
-      {/* Solutions Grid */}
-      <section className="py-16 bg-white">
-        <div className="max-w-4xl mx-auto px-6">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Our Solutions</h2>
+      {primaryMachine && isPerfectBinder && (
+        <PerfectBinderNarrative machine={primaryMachine} />
+      )}
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <a href="/tools/tri-creaser" className="bg-slate-50 border-2 border-gray-200 p-6 hover:border-orange-500 transition-colors group">
-              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600">
-                Tri-Creaser
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Eliminate fiber cracking completely. 40,000+ installations worldwide.
+      {primaryMachine && isSpineCreaserMachine && (
+        <SpineCreaserNarrative machine={primaryMachine} />
+      )}
+
+      {/* Fallback if no machine or unknown type */}
+      {(!primaryMachine || (!isFoldingMachine && !isPerfectBinder && !isSpineCreaserMachine)) && (
+        <>
+          {/* Generic Hero */}
+          <section className="bg-slate-900 text-white py-16 border-b-4 border-orange-500">
+            <div className="max-w-4xl mx-auto px-6">
+              <h1 className="text-4xl font-bold mb-6 leading-tight">
+                Transform Your Print Finishing
+              </h1>
+              <p className="text-lg text-gray-300 mb-8 max-w-3xl">
+                Eliminate fiber cracking, reduce waste, and increase productivity with Technifold's
+                precision finishing tools. Over 40,000 installations worldwide.
               </p>
-              <span className="text-orange-600 font-semibold">Learn more →</span>
-            </a>
+              <a
+                href="/contact"
+                className="inline-block bg-orange-500 text-white px-8 py-3 text-base font-bold hover:bg-orange-600 transition-colors"
+              >
+                Request Free Trial →
+              </a>
+            </div>
+          </section>
 
-            <a href="/tools/quad-creaser" className="bg-slate-50 border-2 border-gray-200 p-6 hover:border-orange-500 transition-colors group">
-              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600">
-                Quad-Creaser
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Perfect bound book finishing. Four creases inline. Zero flaking.
+          {/* Generic Solutions Grid */}
+          <section className="py-16 bg-white">
+            <div className="max-w-4xl mx-auto px-6">
+              <h2 className="text-3xl font-bold text-gray-900 mb-8">Our Solutions</h2>
+              <div className="grid md:grid-cols-2 gap-6">
+                <a href="/tools/tri-creaser" className="bg-slate-50 border-2 border-gray-200 p-6 hover:border-orange-500 transition-colors group">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600">Tri-Creaser</h3>
+                  <p className="text-gray-600 mb-4">Eliminate fiber cracking completely. 40,000+ installations worldwide.</p>
+                  <span className="text-orange-600 font-semibold">Learn more →</span>
+                </a>
+                <a href="/tools/quad-creaser" className="bg-slate-50 border-2 border-gray-200 p-6 hover:border-orange-500 transition-colors group">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600">Quad-Creaser</h3>
+                  <p className="text-gray-600 mb-4">Perfect bound book finishing. Four creases inline. Zero flaking.</p>
+                  <span className="text-orange-600 font-semibold">Learn more →</span>
+                </a>
+                <a href="/tools/spine-creaser" className="bg-slate-50 border-2 border-gray-200 p-6 hover:border-orange-500 transition-colors group">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600">Spine-Creaser</h3>
+                  <p className="text-gray-600 mb-4">Saddle stitcher transformation. Deep crease at 20,000 BPH.</p>
+                  <span className="text-orange-600 font-semibold">Learn more →</span>
+                </a>
+                <a href="/tools/multi-tool" className="bg-slate-50 border-2 border-gray-200 p-6 hover:border-orange-500 transition-colors group">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600">Multi-Tool</h3>
+                  <p className="text-gray-600 mb-4">6-in-1 modular system. Crease, perf, cut, matrix removal inline.</p>
+                  <span className="text-orange-600 font-semibold">Learn more →</span>
+                </a>
+              </div>
+            </div>
+          </section>
+
+          {/* Generic CTA */}
+          <section className="py-12 bg-orange-500 text-white border-t-4 border-orange-600">
+            <div className="max-w-4xl mx-auto px-6 text-center">
+              <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Finishing?</h2>
+              <p className="text-lg text-orange-100 mb-6">
+                Request a free 30-day trial. Zero risk, zero commitment.
               </p>
-              <span className="text-orange-600 font-semibold">Learn more →</span>
-            </a>
-
-            <a href="/tools/spine-creaser" className="bg-slate-50 border-2 border-gray-200 p-6 hover:border-orange-500 transition-colors group">
-              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600">
-                Spine-Creaser
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Saddle stitcher transformation. Deep crease at 20,000 BPH.
-              </p>
-              <span className="text-orange-600 font-semibold">Learn more →</span>
-            </a>
-
-            <a href="/tools/multi-tool" className="bg-slate-50 border-2 border-gray-200 p-6 hover:border-orange-500 transition-colors group">
-              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600">
-                Multi-Tool
-              </h3>
-              <p className="text-gray-600 mb-4">
-                6-in-1 modular system. Crease, perf, cut, matrix removal inline.
-              </p>
-              <span className="text-orange-600 font-semibold">Learn more →</span>
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-12 bg-orange-500 text-white border-t-4 border-orange-600">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Finishing?</h2>
-          <p className="text-lg text-orange-100 mb-6">
-            Request a free 30-day trial. Zero risk, zero commitment.
-          </p>
-          <a
-            href="/contact"
-            className="inline-block bg-slate-900 text-white px-8 py-3 text-base font-bold hover:bg-slate-800 transition-colors"
-          >
-            Request Free Trial →
-          </a>
-        </div>
-      </section>
+              <a
+                href="/contact"
+                className="inline-block bg-slate-900 text-white px-8 py-3 text-base font-bold hover:bg-slate-800 transition-colors"
+              >
+                Request Free Trial →
+              </a>
+            </div>
+          </section>
+        </>
+      )}
 
       <MarketingFooter />
     </div>

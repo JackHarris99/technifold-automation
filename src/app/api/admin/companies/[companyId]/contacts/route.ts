@@ -11,12 +11,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 export async function GET(
   request: NextRequest,
@@ -24,7 +18,7 @@ export async function GET(
 ) {
   try {
     const { companyId } = await params;
-    const supabaseGet = getSupabaseClient();
+    const supabase = getSupabaseClient();
 
     // Fetch ALL contacts for the company in batches (Supabase 1000 row limit)
     let allContacts: any[] = [];
@@ -33,7 +27,7 @@ export async function GET(
     let hasMore = true;
 
     while (hasMore) {
-      const { data: batch, error } = await supabaseGet
+      const { data: batch, error } = await supabase
         .from('contacts')
         .select('contact_id, company_id, full_name, email')
         .eq('company_id', companyId)
@@ -85,6 +79,7 @@ export async function POST(
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('contacts')
       .insert({

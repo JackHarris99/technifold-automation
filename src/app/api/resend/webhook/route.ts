@@ -7,6 +7,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { Resend } from 'resend';
+
+// Initialize Resend client for sending notifications
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 // Resend webhook events we care about
 type ResendEventType =
@@ -165,11 +169,65 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // For high-value events (clicked), check if we should notify the sales rep
+    // For high-value events (clicked, opened), notify the sales rep
     if (body.type === 'email.clicked' || body.type === 'email.opened') {
-      // TODO: Trigger sales rep notification
-      // For now, just log it
       console.log(`[resend-webhook] 🔥 High engagement: ${contact.email} ${body.type}`);
+
+      // Look up the company's account owner (sales rep)
+      const { data: company } = await supabase
+        .from('companies')
+        .select('company_name, account_owner')
+        .eq('company_id', contact.company_id)
+        .single();
+
+      if (company?.account_owner) {
+        // Look up the sales rep's email
+        const { data: salesRep } = await supabase
+          .from('users')
+          .select('email, full_name')
+          .eq('sales_rep_id', company.account_owner)
+          .single();
+
+        if (salesRep?.email && resend) {
+          const eventType = body.type === 'email.clicked' ? 'clicked a link' : 'opened your email';
+          const linkInfo = body.data.click?.link ? ` (${body.data.click.link})` : '';
+
+          try {
+            await resend.emails.send({
+              from: process.env.RESEND_FROM_EMAIL || 'notifications@technifold.com',
+              to: salesRep.email,
+              subject: `🔥 ${contact.email} ${eventType}`,
+              html: `
+                <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;">
+                  <div style="background: #f59e0b; color: white; padding: 16px; text-align: center;">
+                    <h2 style="margin: 0; font-size: 18px;">Customer Engagement Alert</h2>
+                  </div>
+                  <div style="padding: 20px; background: #fff; border: 1px solid #e5e7eb;">
+                    <p style="margin: 0 0 16px 0; font-size: 16px;">
+                      <strong>${contact.email}</strong> from <strong>${company.company_name}</strong> just ${eventType}${linkInfo}.
+                    </p>
+                    <p style="margin: 0 0 16px 0; color: #666; font-size: 14px;">
+                      Subject: ${body.data.subject}
+                    </p>
+                    <p style="margin: 0; font-size: 14px;">
+                      This could be a good time to follow up!
+                    </p>
+                    <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+                      <a href="${process.env.NEXT_PUBLIC_BASE_URL}/admin/company/${contact.company_id}"
+                         style="background: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; display: inline-block; border-radius: 4px; font-size: 14px;">
+                        View Company
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              `,
+            });
+            console.log(`[resend-webhook] Sales rep notification sent to ${salesRep.email}`);
+          } catch (notifyErr) {
+            console.error('[resend-webhook] Failed to send sales rep notification:', notifyErr);
+          }
+        }
+      }
     }
 
     return NextResponse.json({

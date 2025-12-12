@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyWebhookSignature, stripe } from '@/lib/stripe-client';
 import { getSupabaseClient } from '@/lib/supabase';
-import { sendOrderConfirmation } from '@/lib/resend-client';
+import { sendOrderConfirmation, sendTrialConfirmation } from '@/lib/resend-client';
 import Stripe from 'stripe';
 
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -1238,11 +1238,37 @@ async function handleTrialSubscriptionCreated(
       .eq('contact_id', contactId)
       .single();
 
-    if (company && contact) {
-      // TODO: Send trial started confirmation email
-      console.log(`[stripe-webhook] Would send trial confirmation to ${contact.email}`);
+    // Get machine name if we have a machine ID
+    let machineName: string | undefined;
+    if (machineId) {
+      const { data: machine } = await supabase
+        .from('machines')
+        .select('brand, model')
+        .eq('machine_id', machineId)
+        .single();
+      if (machine) {
+        machineName = `${machine.brand} ${machine.model}`.trim();
+      }
+    }
+
+    if (company && contact?.email) {
+      const emailResult = await sendTrialConfirmation({
+        to: contact.email,
+        contactName: contact.full_name || '',
+        companyName: company.company_name || '',
+        monthlyPrice: monthlyPrice,
+        currency: 'GBP',
+        trialEndDate: trialEnd,
+        machineName,
+      });
+
+      if (emailResult.success) {
+        console.log(`[stripe-webhook] Trial confirmation sent to ${contact.email}`);
+      } else {
+        console.error('[stripe-webhook] Failed to send trial confirmation:', emailResult.error);
+      }
     }
   } catch (emailError) {
-    console.error('[stripe-webhook] Error preparing confirmation email:', emailError);
+    console.error('[stripe-webhook] Error sending confirmation email:', emailError);
   }
 }

@@ -4,12 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { getSupabaseClient } from '@/lib/supabase';
 
 // Helper function to create slug from brand name
 function createSlug(brand: string): string {
@@ -21,6 +16,8 @@ function createSlug(brand: string): string {
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = getSupabaseClient();
+
     // Get all unique brands from machines table
     const { data: machines, error: machinesError } = await supabase
       .from('machines')

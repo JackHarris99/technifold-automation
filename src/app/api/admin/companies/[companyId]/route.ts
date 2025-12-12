@@ -4,12 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { getSupabaseClient } from '@/lib/supabase';
 
 export async function PATCH(
   request: NextRequest,
@@ -31,6 +26,7 @@ export async function PATCH(
 
     const { company_name, account_owner, category } = body;
 
+    const supabase = getSupabaseClient();
     const updateData: any = {
       updated_at: new Date().toISOString(),
     };

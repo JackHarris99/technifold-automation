@@ -4,13 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClient } from '@/lib/supabase';
 import { getStoragePath, MediaType, getFileExtension } from '@/lib/media';
-
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 export const runtime = 'nodejs';
 
@@ -74,6 +69,8 @@ export async function POST(request: NextRequest) {
       fileSize: file.size,
       fileType: file.type,
     });
+
+    const supabase = getSupabaseClient();
 
     // Convert file to buffer
     const arrayBuffer = await file.arrayBuffer();
@@ -181,6 +178,8 @@ export async function DELETE(request: NextRequest) {
     if (!storagePath || !table || !column || !recordId) {
       return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
     }
+
+    const supabase = getSupabaseClient();
 
     // Delete from storage
     const { error: deleteError } = await supabase.storage.from('media').remove([storagePath]);

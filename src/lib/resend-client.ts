@@ -421,3 +421,156 @@ export async function sendShippingNotification({
     return { success: false, error: err.message };
   }
 }
+
+/**
+ * Send trial confirmation email when subscription is created
+ */
+export async function sendTrialConfirmation({
+  to,
+  contactName,
+  companyName,
+  monthlyPrice,
+  currency,
+  trialEndDate,
+  machineName,
+}: {
+  to: string;
+  contactName: string;
+  companyName: string;
+  monthlyPrice: number;
+  currency: string;
+  trialEndDate: Date | null;
+  machineName?: string;
+}): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  const resend = getResendClient();
+
+  if (!resend) {
+    return { success: false, error: 'Resend not configured' };
+  }
+
+  try {
+    const fromEmail = process.env.RESEND_FROM_EMAIL_TRIALS || process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+    const currencySymbol = currency === 'GBP' ? '£' : currency;
+    const trialEndFormatted = trialEndDate
+      ? trialEndDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+      : '30 days from delivery';
+
+    const { data, error } = await resend.emails.send({
+      from: fromEmail,
+      to: [to],
+      subject: `Your 30-Day Free Trial Has Started - Technifold`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); padding: 30px; border-radius: 12px 12px 0 0;">
+              <h1 style="color: white; margin: 0; font-size: 28px;">Your Trial Has Started!</h1>
+              <p style="color: #bfdbfe; margin: 8px 0 0 0; font-size: 16px;">30 days to experience the difference</p>
+            </div>
+
+            <div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
+              <p style="font-size: 16px; margin-top: 0;">Hi ${contactName || 'there'},</p>
+
+              <p style="font-size: 16px;">Great news! Your 30-day free trial${machineName ? ` for your <strong>${machineName}</strong>` : ''} is now active. You won't be charged during the trial period.</p>
+
+              <div style="background: #f0fdf4; border: 2px solid #22c55e; padding: 20px; border-radius: 8px; margin: 24px 0;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                  <div style="background: #22c55e; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">✓</div>
+                  <div style="font-size: 18px; font-weight: 700; color: #166534;">Trial Active</div>
+                </div>
+                <p style="margin: 0; color: #166534;">
+                  <strong>Trial ends:</strong> ${trialEndFormatted}<br>
+                  <strong>Then:</strong> ${currencySymbol}${monthlyPrice.toFixed(2)}/month
+                </p>
+              </div>
+
+              <h2 style="font-size: 18px; margin-top: 30px; margin-bottom: 16px;">What Happens Next?</h2>
+
+              <div style="border-left: 3px solid #3b82f6; padding-left: 20px; margin: 20px 0;">
+                <div style="margin-bottom: 20px;">
+                  <div style="font-weight: 700; color: #1e40af; margin-bottom: 4px;">1. We'll Ship Your Equipment</div>
+                  <div style="color: #666; font-size: 14px;">Your tools will be dispatched within 1-2 business days. You'll receive tracking information by email.</div>
+                </div>
+                <div style="margin-bottom: 20px;">
+                  <div style="font-weight: 700; color: #1e40af; margin-bottom: 4px;">2. Try It Risk-Free</div>
+                  <div style="color: #666; font-size: 14px;">Use the equipment on your machine for 30 days. See the results for yourself.</div>
+                </div>
+                <div style="margin-bottom: 20px;">
+                  <div style="font-weight: 700; color: #1e40af; margin-bottom: 4px;">3. Keep It or Return It</div>
+                  <div style="color: #666; font-size: 14px;">Love it? Do nothing - your subscription continues automatically. Not for you? Contact us to arrange a free return.</div>
+                </div>
+              </div>
+
+              <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; margin: 24px 0; border-radius: 4px;">
+                <p style="margin: 0; font-weight: 600; color: #92400e;">No Payment Until Trial Ends</p>
+                <p style="margin: 8px 0 0 0; color: #92400e; font-size: 14px;">
+                  Your card will not be charged until ${trialEndFormatted}. Cancel anytime before then at no cost.
+                </p>
+              </div>
+
+              <h2 style="font-size: 18px; margin-top: 30px; margin-bottom: 16px;">Your Subscription Details</h2>
+
+              <div style="background: #f9fafb; padding: 16px; border-radius: 8px;">
+                <table style="width: 100%;">
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Company</td>
+                    <td style="padding: 8px 0; text-align: right; font-weight: 600;">${companyName}</td>
+                  </tr>
+                  ${machineName ? `
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Machine</td>
+                    <td style="padding: 8px 0; text-align: right; font-weight: 600;">${machineName}</td>
+                  </tr>
+                  ` : ''}
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Monthly Price (after trial)</td>
+                    <td style="padding: 8px 0; text-align: right; font-weight: 600;">${currencySymbol}${monthlyPrice.toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Trial Ends</td>
+                    <td style="padding: 8px 0; text-align: right; font-weight: 600;">${trialEndFormatted}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${process.env.NEXT_PUBLIC_BASE_URL}/contact" style="background: #3b82f6; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">
+                  Contact Support
+                </a>
+              </div>
+
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+
+              <p style="font-size: 14px; color: #666;">
+                Questions about your trial?<br>
+                Email: <a href="mailto:support@technifold.com" style="color: #2563eb;">support@technifold.com</a><br>
+                Phone: +44 (0) 1707 393700
+              </p>
+
+              <p style="font-size: 12px; color: #999; margin-top: 24px;">
+                Technifold Ltd<br>
+                Unit 2, St John's Business Park<br>
+                Lutterworth, Leicestershire, LE17 4HB, UK<br>
+                <a href="https://technifold.com" style="color: #2563eb;">technifold.com</a>
+              </p>
+            </div>
+          </body>
+        </html>
+      `
+    });
+
+    if (error) {
+      console.error('[Resend] Trial confirmation error:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, messageId: data?.id };
+  } catch (err: any) {
+    console.error('[Resend] Unexpected error:', err);
+    return { success: false, error: err.message };
+  }
+}

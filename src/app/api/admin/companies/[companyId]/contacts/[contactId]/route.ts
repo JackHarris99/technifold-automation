@@ -7,12 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { getSupabaseClient } from '@/lib/supabase';
 
 export async function PATCH(
   request: NextRequest,
@@ -32,6 +27,7 @@ export async function PATCH(
       );
     }
 
+    const supabase = getSupabaseClient();
     const updateData: any = {};
 
     if (body.first_name !== undefined) updateData.first_name = body.first_name;
@@ -94,6 +90,7 @@ export async function DELETE(
       );
     }
 
+    const supabase = getSupabaseClient();
     const { error } = await supabase
       .from('contacts')
       .delete()

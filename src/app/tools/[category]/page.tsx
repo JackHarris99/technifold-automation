@@ -4,6 +4,9 @@ import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
 import Link from 'next/link';
 
+// Force dynamic rendering - requires database access
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{ category: string }>;
 }
@@ -182,13 +185,7 @@ export default async function CategoryPage({ params }: PageProps) {
   );
 }
 
-export async function generateStaticParams() {
-  const categories = await getProductCategories();
-  
-  return categories.map((category) => ({
-    category: encodeURIComponent(category.toLowerCase().replace(/\s+/g, '-')),
-  }));
-}
+// generateStaticParams removed - using dynamic rendering instead
 
 export async function generateMetadata({ params }: PageProps) {
   const { category } = await params;
