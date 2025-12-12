@@ -192,7 +192,6 @@ export async function POST(request: NextRequest) {
     await supabase.from('engagement_events').insert({
       company_id: company.company_id,
       contact_id: contact?.contact_id,
-      event_type: 'trial_checkout_created',
       event_name: 'trial_checkout_created',
       source: token ? 'email_campaign' : 'website',
       meta: {

@@ -170,8 +170,6 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       stripe_customer_id: session.customer as string,
       shipping_address_id: shippingAddressId,
       order_type: orderType,
-      offer_key: offerKey,
-      campaign_key: campaignKey,
       items,
       subtotal,
       tax_amount: taxAmount,
@@ -180,6 +178,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       status: 'paid',
       payment_status: 'paid',
       paid_at: new Date().toISOString(),
+      notes: offerKey || campaignKey ? `Offer: ${offerKey || 'N/A'}, Campaign: ${campaignKey || 'N/A'}` : null,
     })
     .select('order_id')
     .single();
@@ -388,14 +387,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   // Track engagement event (idempotent on source + source_event_id)
-  await supabase.from('engagement_events').insert({
+  const { error: engagementErr } = await supabase.from('engagement_events').insert({
     company_id: companyId,
     contact_id: contactId,
     source: 'stripe',
     source_event_id: session.id,
     event_name: 'checkout_completed',
     offer_key: offerKey,
-    campaign_key: campaignKey,
     value: total,
     currency,
     meta: {
@@ -403,12 +401,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       order_id: order.order_id,
       items: items.map(i => ({ product_code: i.product_code, quantity: i.quantity })),
     },
-  }).catch(err => {
-    // Ignore duplicate key errors (idempotency)
-    if (!err.message?.includes('duplicate') && !err.code === '23505') {
-      console.error('[stripe-webhook] Failed to create engagement event:', err);
-    }
   });
+  if (engagementErr && !engagementErr.message?.includes('duplicate') && engagementErr.code !== '23505') {
+    console.error('[stripe-webhook] Failed to create engagement event:', engagementErr);
+  }
 
   // Note: Zoho integration removed - using Stripe invoices only
 }
@@ -461,7 +457,7 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
   const contactId = metadata.contact_id || null;
 
   if (companyId) {
-    await supabase.from('engagement_events').insert({
+    const { error: paymentFailedErr } = await supabase.from('engagement_events').insert({
       company_id: companyId,
       contact_id: contactId,
       source: 'stripe',
@@ -473,11 +469,10 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
         failure_code: paymentIntent.last_payment_error?.code,
         failure_message: paymentIntent.last_payment_error?.message,
       },
-    }).catch(err => {
-      if (!err.message?.includes('duplicate') && err.code !== '23505') {
-        console.error('[stripe-webhook] Failed to track payment_failed event:', err);
-      }
     });
+    if (paymentFailedErr && !paymentFailedErr.message?.includes('duplicate') && paymentFailedErr.code !== '23505') {
+      console.error('[stripe-webhook] Failed to track payment_failed event:', paymentFailedErr);
+    }
   }
 
   // Update order status if exists
@@ -514,7 +509,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   const contactId = metadata.contact_id || null;
 
   if (companyId) {
-    await supabase.from('engagement_events').insert({
+    const { error: invoicePaidErr } = await supabase.from('engagement_events').insert({
       company_id: companyId,
       contact_id: contactId,
       source: 'stripe',
@@ -526,11 +521,10 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
         invoice_number: invoice.number,
         stripe_invoice_id: invoice.id,
       },
-    }).catch(err => {
-      if (!err.message?.includes('duplicate') && err.code !== '23505') {
-        console.error('[stripe-webhook] Failed to track invoice_paid event:', err);
-      }
     });
+    if (invoicePaidErr && !invoicePaidErr.message?.includes('duplicate') && invoicePaidErr.code !== '23505') {
+      console.error('[stripe-webhook] Failed to track invoice_paid event:', invoicePaidErr);
+    }
   }
 }
 
@@ -570,7 +564,7 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
     .eq('order_id', order.order_id);
 
   // Track refund as engagement event
-  await supabase.from('engagement_events').insert({
+  const { error: refundErr } = await supabase.from('engagement_events').insert({
     company_id: order.company_id,
     contact_id: order.contact_id,
     source: 'stripe',
@@ -583,11 +577,10 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
       refund_amount: refundAmount,
       total_refunded: (charge.amount_refunded || 0) / 100,
     },
-  }).catch(err => {
-    if (!err.message?.includes('duplicate') && err.code !== '23505') {
-      console.error('[stripe-webhook] Failed to track charge_refunded event:', err);
-    }
   });
+  if (refundErr && !refundErr.message?.includes('duplicate') && refundErr.code !== '23505') {
+    console.error('[stripe-webhook] Failed to track charge_refunded event:', refundErr);
+  }
 
   console.log('[stripe-webhook] Order refund processed:', order.order_id);
 }
@@ -705,7 +698,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
   }
 
   // Track rental started event
-  await supabase.from('engagement_events').insert({
+  const { error: rentalStartedErr } = await supabase.from('engagement_events').insert({
     company_id: companyId,
     contact_id: contactId,
     source: 'stripe',
@@ -719,11 +712,10 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
       product_code: productCode,
       has_trial: !!subscription.trial_end,
     },
-  }).catch(err => {
-    if (!err.message?.includes('duplicate') && err.code !== '23505') {
-      console.error('[stripe-webhook] Failed to track rental_started event:', err);
-    }
   });
+  if (rentalStartedErr && !rentalStartedErr.message?.includes('duplicate') && rentalStartedErr.code !== '23505') {
+    console.error('[stripe-webhook] Failed to track rental_started event:', rentalStartedErr);
+  }
 
   // Send rental/trial confirmation email
   try {
@@ -919,23 +911,24 @@ async function handleSubscriptionTableUpdate(
     console.log(`[stripe-webhook] Ratchet increased: ${currentRatchetMax} -> ${newMonthlyPrice}`);
 
     // Log ratchet increase event
-    await supabase.from('subscription_events').insert({
+    const { error: ratchetIncErr } = await supabase.from('subscription_events').insert({
       subscription_id: existingSub.subscription_id,
       event_type: 'price_increased',
       event_name: 'Price increased (ratchet updated)',
       old_value: { monthly_price: existingSub.monthly_price, ratchet_max: currentRatchetMax },
       new_value: { monthly_price: newMonthlyPrice, ratchet_max: newMonthlyPrice },
       performed_by: 'stripe_webhook',
-    }).catch(err => {
-      console.error('[stripe-webhook] Failed to log price increase event:', err);
     });
+    if (ratchetIncErr) {
+      console.error('[stripe-webhook] Failed to log price increase event:', ratchetIncErr);
+    }
 
   } else if (newMonthlyPrice < currentRatchetMax) {
     // Price decreased below ratchet - this is an anomaly!
     console.warn(`[stripe-webhook] RATCHET VIOLATION: Price ${newMonthlyPrice} < ratchet ${currentRatchetMax}`);
 
     // Log the anomaly as an event
-    await supabase.from('subscription_events').insert({
+    const { error: ratchetViolationErr } = await supabase.from('subscription_events').insert({
       subscription_id: existingSub.subscription_id,
       event_type: 'downgrade_below_ratchet',
       event_name: 'Price decreased below ratchet maximum',
@@ -943,9 +936,10 @@ async function handleSubscriptionTableUpdate(
       new_value: { monthly_price: newMonthlyPrice },
       performed_by: 'stripe_webhook',
       notes: `Anomaly: New price £${newMonthlyPrice} is below ratchet max £${currentRatchetMax}`,
-    }).catch(err => {
-      console.error('[stripe-webhook] Failed to log ratchet violation event:', err);
     });
+    if (ratchetViolationErr) {
+      console.error('[stripe-webhook] Failed to log ratchet violation event:', ratchetViolationErr);
+    }
 
     // Don't update ratchet_max - keep it at the higher value
     // The v_subscription_anomalies view will flag this
@@ -966,30 +960,33 @@ async function handleSubscriptionTableUpdate(
   if (newStatus !== existingSub.status) {
     console.log(`[stripe-webhook] Subscription status updated: ${existingSub.status} -> ${newStatus}`);
 
-    await supabase.from('subscription_events').insert({
+    const { error: statusChangeErr } = await supabase.from('subscription_events').insert({
       subscription_id: existingSub.subscription_id,
       event_type: 'status_changed',
       event_name: `Status changed to ${newStatus}`,
       old_value: { status: existingSub.status },
       new_value: { status: newStatus },
       performed_by: 'stripe_webhook',
-    }).catch(err => {
-      console.error('[stripe-webhook] Failed to log status change event:', err);
     });
+    if (statusChangeErr) {
+      console.error('[stripe-webhook] Failed to log status change event:', statusChangeErr);
+    }
 
     // Track as engagement event
-    await supabase.from('engagement_events').insert({
+    const { error: statusEngagementErr } = await supabase.from('engagement_events').insert({
       company_id: existingSub.company_id,
       contact_id: existingSub.contact_id,
-      event_type: 'subscription_status_changed',
-      event_data: {
+      event_name: 'subscription_status_changed',
+      source: 'stripe',
+      meta: {
         subscription_id: existingSub.subscription_id,
         old_status: existingSub.status,
         new_status: newStatus,
       },
-    }).catch(err => {
-      console.error('[stripe-webhook] Failed to track status change:', err);
     });
+    if (statusEngagementErr) {
+      console.error('[stripe-webhook] Failed to track status change:', statusEngagementErr);
+    }
   }
 
   console.log(`[stripe-webhook] Subscription ${existingSub.subscription_id} updated`);
@@ -1026,30 +1023,33 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     console.log('[stripe-webhook] Subscription cancelled:', sub.subscription_id);
 
     // Log cancellation event
-    await supabase.from('subscription_events').insert({
+    const { error: cancelEventErr } = await supabase.from('subscription_events').insert({
       subscription_id: sub.subscription_id,
       event_type: 'cancelled',
       event_name: 'Subscription cancelled',
       old_value: { status: 'active' },
       new_value: { status: 'cancelled', reason: subscription.cancellation_details?.reason },
       performed_by: 'stripe_webhook',
-    }).catch(err => {
-      console.error('[stripe-webhook] Failed to log cancellation event:', err);
     });
+    if (cancelEventErr) {
+      console.error('[stripe-webhook] Failed to log cancellation event:', cancelEventErr);
+    }
 
     // Track engagement event
-    await supabase.from('engagement_events').insert({
+    const { error: cancelEngagementErr } = await supabase.from('engagement_events').insert({
       company_id: sub.company_id,
       contact_id: sub.contact_id,
-      event_type: 'subscription_cancelled',
-      event_data: {
+      event_name: 'subscription_cancelled',
+      source: 'stripe',
+      meta: {
         subscription_id: sub.subscription_id,
         stripe_subscription_id: subscription.id,
         reason: subscription.cancellation_details?.reason,
       },
-    }).catch(err => {
-      console.error('[stripe-webhook] Failed to track subscription_cancelled event:', err);
     });
+    if (cancelEngagementErr) {
+      console.error('[stripe-webhook] Failed to track subscription_cancelled event:', cancelEngagementErr);
+    }
 
     return;
   }
@@ -1079,7 +1079,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   console.log('[stripe-webhook] Rental cancelled:', rental.rental_id);
 
   // Track cancellation event
-  await supabase.from('engagement_events').insert({
+  const { error: rentalCancelErr } = await supabase.from('engagement_events').insert({
     company_id: rental.company_id,
     contact_id: rental.contact_id,
     source: 'stripe',
@@ -1089,11 +1089,10 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
       rental_id: rental.rental_id,
       reason: subscription.cancellation_details?.reason,
     },
-  }).catch(err => {
-    if (!err.message?.includes('duplicate') && err.code !== '23505') {
-      console.error('[stripe-webhook] Failed to track rental_cancelled event:', err);
-    }
   });
+  if (rentalCancelErr && !rentalCancelErr.message?.includes('duplicate') && rentalCancelErr.code !== '23505') {
+    console.error('[stripe-webhook] Failed to track rental_cancelled event:', rentalCancelErr);
+  }
 }
 
 /**
@@ -1194,7 +1193,7 @@ async function handleTrialSubscriptionCreated(
   console.log('[stripe-webhook] Subscription created:', newSub.subscription_id);
 
   // Insert subscription event
-  await supabase
+  const { error: subEventErr } = await supabase
     .from('subscription_events')
     .insert({
       subscription_id: newSub.subscription_id,
@@ -1209,17 +1208,18 @@ async function handleTrialSubscriptionCreated(
         trial_end_date: trialEnd?.toISOString(),
       },
       performed_by: 'stripe_webhook',
-    })
-    .catch(err => {
-      console.error('[stripe-webhook] Failed to create subscription event:', err);
     });
+  if (subEventErr) {
+    console.error('[stripe-webhook] Failed to create subscription event:', subEventErr);
+  }
 
   // Track engagement event
-  await supabase.from('engagement_events').insert({
+  const { error: trialEngagementErr } = await supabase.from('engagement_events').insert({
     company_id: companyId,
     contact_id: contactId,
-    event_type: 'subscription_created',
-    event_data: {
+    event_name: 'subscription_created',
+    source: 'stripe',
+    meta: {
       subscription_id: newSub.subscription_id,
       stripe_subscription_id: subscription.id,
       monthly_price: monthlyPrice,
@@ -1227,9 +1227,10 @@ async function handleTrialSubscriptionCreated(
       trial_intent_id: trialIntentId,
       has_trial: !!trialEnd,
     },
-  }).catch(err => {
-    console.error('[stripe-webhook] Failed to track subscription_created event:', err);
   });
+  if (trialEngagementErr) {
+    console.error('[stripe-webhook] Failed to track subscription_created event:', trialEngagementErr);
+  }
 
   // Send confirmation email
   await sendTrialEmail(supabase, companyId, contactId, machineId, monthlyPrice, trialEnd);
