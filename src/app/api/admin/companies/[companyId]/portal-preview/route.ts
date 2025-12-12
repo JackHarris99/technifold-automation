@@ -97,7 +97,25 @@ export async function GET(
       })
     );
 
-    return NextResponse.json({ tools: toolsWithConsumables });
+    // Extract previously ordered items (consumables with purchase history)
+    const previouslyOrdered = toolsWithConsumables
+      .flatMap(tool =>
+        tool.consumables
+          .filter((c: any) => c.last_purchased_at)
+          .map((c: any) => ({
+            ...c,
+            tool_code: tool.tool_code,
+            tool_description: tool.description
+          }))
+      )
+      .sort((a: any, b: any) =>
+        new Date(b.last_purchased_at).getTime() - new Date(a.last_purchased_at).getTime()
+      );
+
+    return NextResponse.json({
+      tools: toolsWithConsumables,
+      previously_ordered: previouslyOrdered
+    });
   } catch (err) {
     console.error('[admin/companies/portal-preview] Error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

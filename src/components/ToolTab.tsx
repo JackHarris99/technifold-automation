@@ -77,138 +77,133 @@ export function ToolTab({
   const sortedCategories = Object.keys(groupedItems).sort();
 
   return (
-    <div className="space-y-4">
-      {/* Tool Header */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="relative w-20 h-20 bg-gray-100 rounded-lg flex-shrink-0">
-              <Image
-                src={`/product_images/${toolTab.tool_code}.jpg`}
-                alt={toolTab.tool_desc || toolTab.tool_code}
-                fill
-                className="object-contain p-2 rounded-lg"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.onerror = null;
-                  target.src = '/product-placeholder.svg';
-                }}
-              />
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">
-                {toolTab.tool_desc || toolTab.tool_code}
-              </h2>
-              <p className="text-sm text-gray-500">Tool Code: {toolTab.tool_code}</p>
-            </div>
+    <div className="space-y-6">
+      {/* Tool Header Card */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 text-white shadow-lg">
+        <div className="flex items-center gap-5">
+          <div className="relative w-24 h-24 bg-white/20 rounded-xl flex-shrink-0 overflow-hidden backdrop-blur-sm">
+            <Image
+              src={`/product_images/${toolTab.tool_code}.jpg`}
+              alt={toolTab.tool_desc || toolTab.tool_code}
+              fill
+              className="object-contain p-3"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.onerror = null;
+                target.src = '/product-placeholder.svg';
+              }}
+            />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold">
+              {toolTab.tool_desc || toolTab.tool_code}
+            </h2>
+            <p className="text-blue-100 font-mono text-sm mt-1">{toolTab.tool_code}</p>
+            <p className="text-blue-200 text-sm mt-2">
+              {allItems.length} compatible consumable{allItems.length !== 1 ? 's' : ''}
+            </p>
           </div>
         </div>
       </div>
 
       {/* Consumables List */}
-      <div className="space-y-3">
-        <h3 className="text-lg font-medium text-gray-900">Compatible Consumables</h3>
+      {allItems.length === 0 ? (
+        <div className="text-center py-16 bg-white rounded-2xl border border-slate-200">
+          <svg className="w-16 h-16 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+          <h3 className="text-lg font-semibold text-slate-700 mb-2">No Consumables Found</h3>
+          <p className="text-slate-500">Contact us for compatible parts for this tool</p>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {sortedCategories.map((category) => (
+            <div key={category}>
+              <div className="flex items-center gap-3 mb-4">
+                <h3 className="text-lg font-bold text-slate-800">{category}</h3>
+                <div className="flex-1 h-px bg-slate-200"></div>
+                <span className="text-sm text-slate-400">{groupedItems[category].length} items</span>
+              </div>
+              <div className="grid gap-3">
+                {groupedItems[category].map((item) => {
+                  const currentQuantity = quantities[item.consumable_code] || 0;
+                  const isInCart = currentQuantity > 0;
 
-        {allItems.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 bg-white rounded-lg border border-gray-200">
-            No consumables found for this tool
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {sortedCategories.map((category) => (
-              <div key={category}>
-                <h3 className="text-lg font-semibold text-gray-800 mb-3 pb-2 border-b">
-                  {category}
-                </h3>
-                <div className="space-y-2">
-                  {groupedItems[category].map((item) => {
-                    const currentQuantity = quantities[item.consumable_code] || 0;
+                  return (
+                    <div
+                      key={item.consumable_code}
+                      className={`bg-white rounded-xl border-2 transition-all hover:shadow-lg ${
+                        isInCart ? 'border-green-400 shadow-md' : 'border-slate-200 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="p-4">
+                        <div className="flex items-center gap-4">
+                          {/* Product Image */}
+                          <div className="relative w-20 h-20 bg-slate-50 rounded-lg flex-shrink-0 overflow-hidden">
+                            <Image
+                              src={`/product_images/${item.consumable_code}.jpg`}
+                              alt={item.description}
+                              fill
+                              className="object-contain p-2"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.onerror = null;
+                                target.src = '/product-placeholder.svg';
+                              }}
+                            />
+                          </div>
 
-                    return (
-                <div
-                  key={item.consumable_code}
-                  className="bg-white rounded-lg border-2 border-gray-200 transition-all hover:shadow-md hover:border-gray-300"
-                >
-                  <div className="p-4">
-                    <div className="flex items-center gap-4">
-                      {/* Product Image */}
-                      <div className="relative w-24 h-24 bg-gray-50 rounded-lg flex-shrink-0">
-                        <Image
-                          src={`/product_images/${item.consumable_code}.jpg`}
-                          alt={item.description}
-                          fill
-                          className="object-contain p-2"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.onerror = null;
-                            target.src = '/product-placeholder.svg';
-                          }}
-                        />
-                      </div>
-
-                      {/* Product Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h4 className="text-base font-medium text-gray-900">
+                          {/* Product Info */}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-base font-semibold text-slate-900 leading-tight">
                               {item.description}
                             </h4>
-                            <p className="text-sm text-gray-500 mt-1">
-                              Code: {item.consumable_code}
+                            <p className="text-sm text-slate-400 font-mono mt-1">
+                              {item.consumable_code}
                             </p>
-                            {allCompatibleConsumables && 'category' in item && (item as typeof allCompatibleConsumables[0]).category && (
-                              <span className="inline-block mt-2 text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                                {(item as typeof allCompatibleConsumables[0]).category}
-                              </span>
+                          </div>
+
+                          {/* Price */}
+                          <div className="text-right px-4">
+                            {item.price ? (
+                              <div className="text-xl font-bold text-slate-900">
+                                £{item.price.toFixed(2)}
+                              </div>
+                            ) : (
+                              <div className="text-sm text-slate-400">
+                                Price on request
+                              </div>
                             )}
+                          </div>
+
+                          {/* Quantity Picker and Add to Cart */}
+                          <div className="flex items-center gap-3">
+                            <QuantityPicker
+                              value={currentQuantity}
+                              onChange={(qty) => handleQuantityChange(item.consumable_code, qty)}
+                              max={99}
+                            />
+                            <button
+                              onClick={() => handleAddToCart(item.consumable_code)}
+                              className={`px-5 py-2.5 rounded-lg font-semibold transition-all ${
+                                isInCart
+                                  ? 'bg-green-600 text-white hover:bg-green-700 shadow-sm'
+                                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-sm'
+                              }`}
+                            >
+                              {isInCart ? 'In Cart' : 'Add'}
+                            </button>
                           </div>
                         </div>
                       </div>
-
-                      {/* Price and Actions */}
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          {item.price ? (
-                            <div className="text-lg font-semibold text-gray-900">
-                              £{item.price.toFixed(2)}
-                            </div>
-                          ) : (
-                            <div className="text-sm text-gray-500">
-                              Price on request
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Quantity Picker and Add to Cart */}
-                        <div className="flex items-center gap-2">
-                          <QuantityPicker
-                            value={currentQuantity}
-                            onChange={(qty) => handleQuantityChange(item.consumable_code, qty)}
-                            max={99}
-                          />
-                          <button
-                            onClick={() => handleAddToCart(item.consumable_code)}
-                            className={`px-4 py-2 rounded-md font-medium transition-colors ${
-                              currentQuantity > 0
-                                ? 'bg-green-600 text-white hover:bg-green-700'
-                                : 'bg-blue-600 text-white hover:bg-blue-700'
-                            }`}
-                          >
-                            {currentQuantity > 0 ? 'Update' : 'Add to Cart'}
-                          </button>
-                        </div>
-                      </div>
                     </div>
-                  </div>
-                </div>
-                    );
-                  })}
-                </div>
+                  );
+                })}
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

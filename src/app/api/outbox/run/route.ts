@@ -198,91 +198,40 @@ async function processSendOfferEmail(job: any) {
   const isReorder = offer_key?.startsWith('reorder');
   const isWebsiteCapture = campaign_key === 'website_lead_capture';
 
-  let tokenUrl: string;
+  // Helper to generate personalized token URL for each contact
+  const generateTokenUrlForContact = (contactId: string): string => {
+    if (isReorder) {
+      // /r/ for reorder portal
+      return generateReorderUrl(baseUrl, company_id, contactId);
+    } else if (isWebsiteCapture) {
+      // /m/ for marketing pages (shows their interests)
+      const token = generateToken({
+        company_id,
+        contact_id: contactId
+      }, 720); // 30 days
+      return `${baseUrl}/m/${token}`;
+    } else {
+      // /x/ for campaign offers
+      return generateOfferUrl(
+        baseUrl,
+        company_id,
+        offer_key || 'machine_solutions',
+        {
+          contactId: contactId,
+          campaignKey: campaign_key,
+          ttlHours: 72
+        }
+      );
+    }
+  };
 
-  if (isReorder) {
-    // /r/ for reorder portal
-    tokenUrl = generateReorderUrl(baseUrl, company_id, contact_ids[0]);
-  } else if (isWebsiteCapture) {
-    // /m/ for marketing pages (shows their interests)
-    const token = generateToken({
-      company_id,
-      contact_id: contact_ids[0]
-    }, 720); // 30 days
-    tokenUrl = `${baseUrl}/m/${token}`;
-  } else {
-    // /x/ for campaign offers
-    const token = generateOfferUrl(
-      baseUrl,
-      company_id,
-      offer_key || 'machine_solutions',
-      {
-        contactId: contact_ids[0],
-        campaignKey: campaign_key,
-        ttlHours: 72
-      }
-    );
-    tokenUrl = `${baseUrl}/x/${token}`;
-  }
+  // Email intro text for preview
+  const intro = 'Transform your print finishing with Technifold solutions. Eliminate fiber cracking, reduce waste, and increase productivity.';
 
-  // Simplified email - no problem cards (abandoned schema removed)
-  // Just send simple intro text
-  let intro = 'Transform your print finishing with Technifold solutions. Eliminate fiber cracking, reduce waste, and increase productivity.';
-
-  // Build email HTML
-  const emailHtml = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <div style="background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); padding: 30px; border-radius: 12px; margin-bottom: 30px;">
-        <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">Exclusive Offer from Technifold</h1>
-        <p style="color: #dbeafe; margin: 0; font-size: 16px;">${intro}</p>
-      </div>
-
-      <div style="background: white; border: 2px solid #e5e7eb; border-radius: 12px; padding: 24px; margin-bottom: 20px;">
-        <h2 style="color: #1f2937; font-size: 20px; margin: 0 0 12px 0;">Transform Your Print Finishing</h2>
-        <p style="color: #374151; font-size: 15px; line-height: 1.6; margin-bottom: 16px;">
-          Discover precision finishing tools that eliminate fiber cracking, reduce waste, and increase productivity. Over 40,000 installations worldwide.
-        </p>
-        <ul style="color: #374151; font-size: 15px; line-height: 1.8; margin: 0; padding-left: 20px;">
-          <li>Tri-Creaser: Eliminate fiber cracking completely</li>
-          <li>Quad-Creaser: Perfect bound book finishing</li>
-          <li>Spine-Creaser: Saddle stitcher transformation</li>
-          <li>Multi-Tool: 6-in-1 modular finishing system</li>
-        </ul>
-      </div>
-
-      <div style="text-align: center; margin: 40px 0;">
-        <a href="${tokenUrl}" style="display: inline-block; background: #2563eb; color: white; padding: 16px 32px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 18px;">
-          See All Solutions for Your Machine
-        </a>
-      </div>
-
-      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center;">
-        <p style="color: #6b7280; font-size: 13px; margin-bottom: 5px;">
-          Direct link (copy if button doesn't work):
-        </p>
-        <p style="color: #2563eb; font-size: 12px; word-break: break-all;">
-          ${tokenUrl}
-        </p>
-      </div>
-
-      <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #9ca3af;">
-        <p>Technifold Ltd • Professional Print Finishing Solutions</p>
-      </div>
-    </body>
-    </html>
-  `;
-
-  // Send email via Resend
+  // Check Resend is configured before fetching contacts
   if (!isResendConfigured()) {
     console.warn('[outbox-worker] Resend not configured - email not sent');
-    console.log('[outbox-worker] Token URL:', tokenUrl);
-    return; // Skip if Resend not set up
+    return;
   }
 
   // Get contact details for email
@@ -295,8 +244,11 @@ async function processSendOfferEmail(job: any) {
     throw new Error('No valid contacts found');
   }
 
-  // Send email to each contact
+  // Send email to each contact with their own personalized token
   for (const contact of contacts) {
+    // Generate personalized token URL for THIS contact
+    const tokenUrl = generateTokenUrlForContact(contact.contact_id);
+
     // Generate unsubscribe URL for this contact
     const unsubscribeUrl = generateUnsubscribeUrl(
       baseUrl,
@@ -318,7 +270,7 @@ async function processSendOfferEmail(job: any) {
     });
 
     if (result.success) {
-      console.log(`[outbox-worker] Email sent to ${contact.email}`);
+      console.log(`[outbox-worker] Email sent to ${contact.email} with personalized token`);
 
       // Track email sent
       await supabase.from('contact_interactions').insert({
@@ -522,17 +474,14 @@ async function processSendReorderReminder(job: any) {
     throw new Error(`Company not found: ${company_id}`);
   }
 
-  // Generate reorder portal link
-  const tokenUrl = generateReorderUrl(baseUrl, company_id, contact_ids[0]);
-
   // Calculate days since last order
   const lastOrderDate = company.last_invoice_at ? new Date(company.last_invoice_at) : null;
   const daysSinceOrder = lastOrderDate
     ? Math.floor((Date.now() - lastOrderDate.getTime()) / (1000 * 60 * 60 * 24))
     : null;
 
-  // Build reorder reminder email
-  const emailHtml = `
+  // Helper to build reorder email HTML with personalized token
+  const buildReorderEmailHtml = (tokenUrl: string, contactName?: string) => `
     <!DOCTYPE html>
     <html>
     <head>
@@ -546,7 +495,7 @@ async function processSendReorderReminder(job: any) {
       </div>
 
       <div style="background: white; border: 2px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; padding: 30px;">
-        <p style="font-size: 16px; margin-top: 0;">Hi there,</p>
+        <p style="font-size: 16px; margin-top: 0;">Hi ${contactName || 'there'},</p>
 
         <p style="font-size: 16px;">
           ${daysSinceOrder
@@ -595,10 +544,9 @@ async function processSendReorderReminder(job: any) {
     </html>
   `;
 
-  // Send email via Resend
+  // Check Resend is configured
   if (!isResendConfigured()) {
     console.warn('[outbox-worker] Resend not configured - reorder reminder not sent');
-    console.log('[outbox-worker] Reorder URL:', tokenUrl);
     return;
   }
 
@@ -621,8 +569,11 @@ async function processSendReorderReminder(job: any) {
 
   const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
 
-  // Send to each contact
+  // Send to each contact with their own personalized token
   for (const contact of contacts) {
+    // Generate personalized reorder portal URL for THIS contact
+    const tokenUrl = generateReorderUrl(baseUrl, company_id, contact.contact_id);
+
     // Generate personalized unsubscribe URL for this contact
     const unsubscribeUrl = generateUnsubscribeUrl(
       baseUrl,
@@ -630,6 +581,10 @@ async function processSendReorderReminder(job: any) {
       contact.email,
       company_id
     );
+
+    // Build email HTML with personalized token and contact name
+    const contactName = contact.first_name || contact.full_name?.split(' ')[0];
+    const emailHtml = buildReorderEmailHtml(tokenUrl, contactName);
 
     // Add unsubscribe link to email
     const emailWithUnsubscribe = emailHtml.replace(
@@ -649,7 +604,7 @@ async function processSendReorderReminder(job: any) {
       throw new Error(`Reorder reminder send failed: ${error.message}`);
     }
 
-    console.log(`[outbox-worker] Reorder reminder sent to ${contact.email}`);
+    console.log(`[outbox-worker] Reorder reminder sent to ${contact.email} with personalized token`);
 
     // Track event
     await supabase.from('engagement_events').insert({
