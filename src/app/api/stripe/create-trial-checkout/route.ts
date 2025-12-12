@@ -158,9 +158,12 @@ export async function POST(request: NextRequest) {
         metadata: {
           company_id: company.company_id,
           contact_id: contact?.contact_id || '',
+          machine_id: machine?.machine_id || '',
           machine_slug: machine_slug || '',
           machine_name: machineName,
           monthly_price_gbp: offer_price.toString(),
+          selected_price: offer_price.toString(),
+          purchase_type: 'subscription_trial',
           source: token ? 'email_campaign' : 'website',
         }
       },
