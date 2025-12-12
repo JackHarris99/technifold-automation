@@ -6,6 +6,7 @@ import { CompanyPayload, CartItem, ReorderItem } from '@/types';
 import { ReorderTab } from './ReorderTab';
 import { ToolTab } from './ToolTab';
 import { CartBar } from './CartBar';
+import { CheckoutModal } from './CheckoutModal';
 
 interface PortalPageProps {
   payload: CompanyPayload;
@@ -19,6 +20,7 @@ interface PortalPageProps {
 export function PortalPage({ payload, contact }: PortalPageProps) {
   const [activeTab, setActiveTab] = useState<string>('reorder');
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   const addToCart = (item: ReorderItem, quantity: number) => {
     if (quantity <= 0) return;
@@ -57,36 +59,17 @@ export function PortalPage({ payload, contact }: PortalPageProps) {
     return cart.reduce((total, item) => total + item.quantity, 0);
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (cart.length === 0) return;
+    setIsCheckoutOpen(true);
+  };
 
-    try {
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          company_id: payload.company_id,
-          contact_id: contact?.contact_id,
-          items: cart.map(item => ({
-            product_code: item.consumable_code,
-            quantity: item.quantity,
-          })),
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        alert(`Checkout failed: ${data.error}`);
-        return;
-      }
-
-      // Redirect to Stripe checkout
-      window.location.href = data.url;
-    } catch (error) {
-      console.error('[PortalPage] Checkout error:', error);
-      alert('Failed to start checkout. Please try again.');
-    }
+  const handleCheckoutSuccess = (paymentIntentId: string) => {
+    console.log('[PortalPage] Checkout successful:', paymentIntentId);
+    // Clear cart after successful checkout
+    setCart([]);
+    setIsCheckoutOpen(false);
+    // Could redirect to a success page or show inline success message
   };
 
   const tabs = [
@@ -228,6 +211,16 @@ export function PortalPage({ payload, contact }: PortalPageProps) {
         totalPrice={getTotalPrice()}
         cart={cart}
         onCheckout={handleCheckout}
+      />
+
+      {/* Checkout Modal */}
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        cart={cart}
+        companyId={String(payload.company_id)}
+        contactId={contact?.contact_id}
+        onSuccess={handleCheckoutSuccess}
       />
     </div>
   );

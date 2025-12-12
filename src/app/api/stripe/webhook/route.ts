@@ -411,22 +411,23 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
 /**
  * Handle payment_intent.succeeded
+ * Creates orders for embedded checkout (PaymentIntent API) or updates existing orders
  */
 async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   const supabase = getSupabaseClient();
 
   console.log('[stripe-webhook] Processing payment_intent.succeeded:', paymentIntent.id);
 
-  // Update order if exists (may have been created by checkout.session.completed)
-  const { data: order } = await supabase
+  // Check if order already exists (created by checkout.session.completed or previous webhook)
+  const { data: existingOrder } = await supabase
     .from('orders')
     .select('order_id, company_id, status')
     .eq('stripe_payment_intent_id', paymentIntent.id)
     .single();
 
-  if (order) {
+  if (existingOrder) {
     // Update order status if not already paid
-    if (order.status !== 'paid') {
+    if (existingOrder.status !== 'paid') {
       await supabase
         .from('orders')
         .update({
@@ -434,12 +435,243 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
           payment_status: 'paid',
           paid_at: new Date().toISOString(),
         })
+        .eq('order_id', existingOrder.order_id);
+
+      console.log('[stripe-webhook] Order status updated to paid:', existingOrder.order_id);
+    }
+    return;
+  }
+
+  // No existing order - this is from embedded checkout (PaymentIntent API)
+  // Create new order from PaymentIntent metadata
+  const metadata = paymentIntent.metadata || {};
+  const companyId = metadata.company_id;
+  const contactId = metadata.contact_id || null;
+  const source = metadata.source;
+
+  // Only process embedded checkout payments
+  if (source !== 'reorder_portal') {
+    console.log('[stripe-webhook] Ignoring payment_intent without reorder_portal source:', paymentIntent.id);
+    return;
+  }
+
+  if (!companyId) {
+    console.error('[stripe-webhook] Missing company_id in payment_intent metadata:', paymentIntent.id);
+    return;
+  }
+
+  // Parse line items from metadata
+  let lineItems: Array<{
+    product_code: string;
+    description: string;
+    quantity: number;
+    unit_price: number;
+    total_price: number;
+  }> = [];
+
+  try {
+    lineItems = JSON.parse(metadata.line_items || '[]');
+  } catch (e) {
+    console.error('[stripe-webhook] Failed to parse line_items:', e);
+    return;
+  }
+
+  const subtotal = parseFloat(metadata.subtotal || '0');
+  const taxAmount = parseFloat(metadata.tax_amount || '0');
+  const totalAmount = parseFloat(metadata.total_amount || '0');
+  const currency = (paymentIntent.currency || 'gbp').toUpperCase();
+
+  // Create order record
+  const { data: order, error: orderError } = await supabase
+    .from('orders')
+    .insert({
+      company_id: companyId,
+      contact_id: contactId,
+      stripe_payment_intent_id: paymentIntent.id,
+      stripe_customer_id: paymentIntent.customer as string,
+      order_type: 'consumables_reorder',
+      items: lineItems,
+      subtotal,
+      tax_amount: taxAmount,
+      total_amount: totalAmount,
+      currency,
+      status: 'paid',
+      payment_status: 'paid',
+      paid_at: new Date().toISOString(),
+      notes: 'Embedded checkout (reorder portal)',
+    })
+    .select('order_id')
+    .single();
+
+  if (orderError) {
+    console.error('[stripe-webhook] Failed to create order:', orderError);
+    return;
+  }
+
+  console.log('[stripe-webhook] Order created from embedded checkout:', order.order_id);
+
+  // Create Stripe invoice for this payment
+  try {
+    const stripeCustomerId = paymentIntent.customer as string;
+
+    if (stripeCustomerId) {
+      // Create invoice
+      const invoice = await stripe.invoices.create({
+        customer: stripeCustomerId,
+        auto_advance: false,
+        collection_method: 'charge_automatically',
+        metadata: {
+          order_id: order.order_id,
+          company_id: companyId,
+        },
+      });
+
+      // Add line items to invoice
+      for (const item of lineItems) {
+        await stripe.invoiceItems.create({
+          customer: stripeCustomerId,
+          invoice: invoice.id,
+          description: `${item.product_code} - ${item.description}`,
+          quantity: item.quantity,
+          unit_amount: Math.round(item.unit_price * 100),
+          currency: currency.toLowerCase(),
+        });
+      }
+
+      // Add VAT as separate line item if applicable
+      if (taxAmount > 0) {
+        await stripe.invoiceItems.create({
+          customer: stripeCustomerId,
+          invoice: invoice.id,
+          description: 'VAT (20%)',
+          amount: Math.round(taxAmount * 100),
+          currency: currency.toLowerCase(),
+        });
+      }
+
+      // Finalize the invoice
+      const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id);
+
+      // Mark as paid (payment already happened via PaymentIntent)
+      await stripe.invoices.pay(finalizedInvoice.id, {
+        paid_out_of_band: true,
+      });
+
+      // Update order with invoice ID
+      await supabase
+        .from('orders')
+        .update({ stripe_invoice_id: finalizedInvoice.id })
         .eq('order_id', order.order_id);
 
-      console.log('[stripe-webhook] Order status updated to paid:', order.order_id);
+      console.log('[stripe-webhook] Stripe invoice created:', finalizedInvoice.id);
     }
+  } catch (invoiceError) {
+    console.error('[stripe-webhook] Failed to create Stripe invoice:', invoiceError);
+    // Don't fail - order is already created
+  }
+
+  // Insert order_items
+  const orderItems = lineItems.map((item) => ({
+    order_id: order.order_id,
+    product_code: item.product_code,
+    description: item.description,
+    quantity: item.quantity,
+    unit_price: item.unit_price,
+    total_price: item.total_price,
+  }));
+
+  const { error: itemsError } = await supabase
+    .from('order_items')
+    .insert(orderItems);
+
+  if (itemsError) {
+    console.error('[stripe-webhook] Failed to create order_items:', itemsError);
+  }
+
+  // Send order confirmation email
+  try {
+    const { data: company } = await supabase
+      .from('companies')
+      .select('company_name')
+      .eq('company_id', companyId)
+      .single();
+
+    const { data: contact } = await supabase
+      .from('contacts')
+      .select('full_name, email')
+      .eq('contact_id', contactId)
+      .single();
+
+    if (company && contact?.email) {
+      const emailResult = await sendOrderConfirmation({
+        to: contact.email,
+        contactName: contact.full_name || '',
+        companyName: company.company_name || '',
+        orderId: order.order_id,
+        orderItems: lineItems,
+        subtotal,
+        taxAmount,
+        totalAmount,
+        currency,
+        shippingAddress: null, // Embedded checkout doesn't collect shipping yet
+        isRental: false,
+      });
+
+      if (emailResult.success) {
+        console.log('[stripe-webhook] Order confirmation email sent:', emailResult.messageId);
+      } else {
+        console.error('[stripe-webhook] Failed to send order confirmation:', emailResult.error);
+      }
+    }
+  } catch (emailError) {
+    console.error('[stripe-webhook] Error sending order confirmation:', emailError);
+  }
+
+  // Track engagement event
+  const { error: engagementErr } = await supabase.from('engagement_events').insert({
+    company_id: companyId,
+    contact_id: contactId,
+    source: 'stripe',
+    source_event_id: paymentIntent.id,
+    event_name: 'embedded_checkout_completed',
+    value: totalAmount,
+    currency,
+    meta: {
+      payment_intent_id: paymentIntent.id,
+      order_id: order.order_id,
+      items: lineItems.map(i => ({ product_code: i.product_code, quantity: i.quantity })),
+    },
+  });
+
+  if (engagementErr && !engagementErr.message?.includes('duplicate') && engagementErr.code !== '23505') {
+    console.error('[stripe-webhook] Failed to create engagement event:', engagementErr);
+  }
+
+  // Regenerate portal cache
+  const { error: cacheError } = await supabase
+    .rpc('regenerate_company_payload', { p_company_id: companyId });
+
+  if (cacheError) {
+    console.error('[stripe-webhook] Cache regeneration failed:', cacheError);
   } else {
-    console.log('[stripe-webhook] No order found for payment_intent:', paymentIntent.id);
+    console.log(`[stripe-webhook] Regenerated portal cache for ${companyId}`);
+  }
+
+  // Track purchase interaction
+  if (contactId) {
+    await supabase.from('contact_interactions').insert({
+      contact_id: contactId,
+      company_id: companyId,
+      interaction_type: 'portal_purchase',
+      url: `/r`,
+      metadata: {
+        order_id: order.order_id,
+        total_amount: totalAmount,
+        currency,
+        item_count: lineItems.length,
+        source: 'embedded_checkout'
+      }
+    });
   }
 }
 
