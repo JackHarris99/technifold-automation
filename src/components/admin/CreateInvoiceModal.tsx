@@ -89,7 +89,7 @@ export default function CreateInvoiceModal({
     setItems(items.filter((_, i) => i !== index));
   };
 
-  const updateItem = (index: number, field: keyof InvoiceItem, value: string | number) => {
+  const updateItem = async (index: number, field: keyof InvoiceItem, value: string | number) => {
     const newItems = [...items];
     if (field === 'unit_price' || field === 'quantity') {
       newItems[index] = { ...newItems[index], [field]: Number(value) };
@@ -97,6 +97,25 @@ export default function CreateInvoiceModal({
       newItems[index] = { ...newItems[index], [field]: value };
     }
     setItems(newItems);
+
+    // Auto-lookup product when product_code is entered
+    if (field === 'product_code' && typeof value === 'string' && value.trim() !== '') {
+      try {
+        const response = await fetch(`/api/admin/products/${value.trim()}`);
+        if (response.ok) {
+          const product = await response.json();
+          newItems[index] = {
+            ...newItems[index],
+            description: product.description || newItems[index].description,
+            unit_price: product.retail_price || product.price || newItems[index].unit_price,
+          };
+          setItems([...newItems]);
+        }
+      } catch (err) {
+        // If product not found, just continue with manual entry
+        console.log('Product not found, manual entry mode');
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -285,21 +304,21 @@ export default function CreateInvoiceModal({
                   value={item.product_code}
                   onChange={(e) => updateItem(index, 'product_code', e.target.value)}
                   placeholder="Product Code"
-                  className="w-32 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="w-32 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-gray-900 placeholder-gray-400"
                 />
                 <input
                   type="text"
                   value={item.description}
                   onChange={(e) => updateItem(index, 'description', e.target.value)}
                   placeholder="Description"
-                  className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-gray-900 placeholder-gray-400"
                 />
                 <input
                   type="number"
                   value={item.quantity}
                   onChange={(e) => updateItem(index, 'quantity', e.target.value)}
                   min="1"
-                  className="w-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="w-20 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-gray-900"
                 />
                 <input
                   type="number"
@@ -308,7 +327,7 @@ export default function CreateInvoiceModal({
                   min="0"
                   step="0.01"
                   placeholder="Price"
-                  className="w-28 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="w-28 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-gray-900 placeholder-gray-400"
                 />
                 {items.length > 1 && (
                   <button
