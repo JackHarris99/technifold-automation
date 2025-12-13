@@ -43,6 +43,13 @@ export default function CreateInvoiceModal({
     vat_number: string | null;
   } | null>(null);
   const [checkingVAT, setCheckingVAT] = useState(true);
+  const [productSuggestions, setProductSuggestions] = useState<Array<{
+    product_code: string;
+    description: string;
+    price: number;
+    currency: string;
+  }>>([]);
+  const [showSuggestions, setShowSuggestions] = useState<number | null>(null); // index of item showing suggestions
 
   // Load contacts on mount
   useEffect(() => {
@@ -98,27 +105,37 @@ export default function CreateInvoiceModal({
     }
     setItems(newItems);
 
-    // Auto-lookup product when product_code is entered
-    if (field === 'product_code' && typeof value === 'string' && value.trim() !== '') {
-      try {
-        const response = await fetch(`/api/admin/products/${encodeURIComponent(value.trim())}`);
-        if (response.ok) {
-          const product = await response.json();
-          console.log('[CreateInvoiceModal] Product found:', product);
-          newItems[index] = {
-            ...newItems[index],
-            description: product.description || newItems[index].description,
-            unit_price: product.price || newItems[index].unit_price,
-          };
-          setItems([...newItems]);
-        } else {
-          const errorData = await response.json().catch(() => ({}));
-          console.log('[CreateInvoiceModal] Product not found:', value.trim(), response.status, errorData);
+    // Auto-search products when product_code is entered
+    if (field === 'product_code' && typeof value === 'string') {
+      if (value.trim().length > 0) {
+        try {
+          const response = await fetch(`/api/admin/products/search?q=${encodeURIComponent(value.trim())}`);
+          if (response.ok) {
+            const data = await response.json();
+            setProductSuggestions(data.products || []);
+            setShowSuggestions(index);
+          }
+        } catch (err) {
+          console.error('[CreateInvoiceModal] Error searching products:', err);
         }
-      } catch (err) {
-        console.error('[CreateInvoiceModal] Error fetching product:', err);
+      } else {
+        setProductSuggestions([]);
+        setShowSuggestions(null);
       }
     }
+  };
+
+  const selectProduct = (index: number, product: { product_code: string; description: string; price: number }) => {
+    const newItems = [...items];
+    newItems[index] = {
+      ...newItems[index],
+      product_code: product.product_code,
+      description: product.description,
+      unit_price: product.price,
+    };
+    setItems(newItems);
+    setProductSuggestions([]);
+    setShowSuggestions(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -301,15 +318,35 @@ export default function CreateInvoiceModal({
               Invoice Items
             </label>
             {items.map((item, index) => (
-              <div key={index} className="flex gap-2">
-                <input
-                  type="text"
-                  value={item.product_code}
-                  onChange={(e) => updateItem(index, 'product_code', e.target.value)}
-                  placeholder="Product Code"
-                  className="w-32 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-gray-900 placeholder-gray-400"
-                />
-                <input
+              <div key={index} className="relative">
+                <div className="flex gap-2">
+                  <div className="relative w-32">
+                    <input
+                      type="text"
+                      value={item.product_code}
+                      onChange={(e) => updateItem(index, 'product_code', e.target.value)}
+                      placeholder="Type to search..."
+                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-gray-900 placeholder-gray-400"
+                    />
+                    {/* Autocomplete dropdown */}
+                    {showSuggestions === index && productSuggestions.length > 0 && (
+                      <div className="absolute z-50 mt-1 w-96 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                        {productSuggestions.map((product, pIndex) => (
+                          <button
+                            key={pIndex}
+                            type="button"
+                            onClick={() => selectProduct(index, product)}
+                            className="w-full px-3 py-2 text-left hover:bg-blue-50 border-b border-gray-100 last:border-b-0"
+                          >
+                            <div className="font-medium text-sm text-gray-900">{product.product_code}</div>
+                            <div className="text-xs text-gray-600">{product.description}</div>
+                            <div className="text-xs text-green-600 font-semibold">£{product.price.toFixed(2)}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <input
                   type="text"
                   value={item.description}
                   onChange={(e) => updateItem(index, 'description', e.target.value)}
@@ -332,15 +369,16 @@ export default function CreateInvoiceModal({
                   placeholder="Price"
                   className="w-28 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-gray-900 placeholder-gray-400"
                 />
-                {items.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeItem(index)}
-                    className="px-3 py-2 text-red-600 hover:text-red-800"
-                  >
-                    Remove
-                  </button>
-                )}
+                  {items.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeItem(index)}
+                      className="px-3 py-2 text-red-600 hover:text-red-800"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
             <button
