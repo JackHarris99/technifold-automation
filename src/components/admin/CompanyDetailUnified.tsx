@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import CompanySelector from './CompanySelector';
 import MediaImage from '@/components/shared/MediaImage';
+import CreateInvoiceModal from './CreateInvoiceModal';
 
 interface CompanyDetailUnifiedProps {
   company: any;
@@ -70,6 +71,9 @@ export default function CompanyDetailUnified({
   // Expandable sections
   const [showEngagement, setShowEngagement] = useState(false);
   const [showOrders, setShowOrders] = useState(false);
+
+  // Invoice modal
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
 
   // Get color scheme for this company's owner
   const ownerColors = OWNER_COLORS[company.account_owner || ''] || {
@@ -521,6 +525,15 @@ export default function CompanyDetailUnified({
               <div className="font-bold text-lg text-gray-900 mb-2">📄 Create Quote</div>
               <div className="text-sm text-gray-600">Build custom quote</div>
             </button>
+
+            <button
+              onClick={() => setShowInvoiceModal(true)}
+              disabled={!canAct}
+              className="p-6 bg-gradient-to-br from-purple-50 to-violet-50 border-2 border-purple-200 rounded-xl hover:shadow-lg transition-shadow text-left disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="font-bold text-lg text-gray-900 mb-2">💳 Create Invoice</div>
+              <div className="text-sm text-gray-600">Send Stripe invoice via email</div>
+            </button>
           </div>
 
           {/* Recent Activity - Expandable */}
@@ -608,6 +621,15 @@ export default function CompanyDetailUnified({
 
         </div>
       </div>
+
+      {/* Invoice Modal */}
+      {showInvoiceModal && (
+        <CreateInvoiceModal
+          companyId={company.company_id}
+          companyName={company.company_name}
+          onClose={() => setShowInvoiceModal(false)}
+        />
+      )}
     </div>
   );
 }
