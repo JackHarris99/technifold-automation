@@ -107,7 +107,7 @@ export default function CreateInvoiceModal({
           newItems[index] = {
             ...newItems[index],
             description: product.description || newItems[index].description,
-            unit_price: product.retail_price || product.price || newItems[index].unit_price,
+            unit_price: product.price || newItems[index].unit_price,
           };
           setItems([...newItems]);
         }
