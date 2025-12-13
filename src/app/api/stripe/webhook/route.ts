@@ -69,8 +69,32 @@ export async function POST(request: NextRequest) {
         await handlePaymentIntentFailed(event.data.object as Stripe.PaymentIntent);
         break;
 
+      case 'invoice.created':
+        await handleInvoiceCreated(event.data.object as Stripe.Invoice);
+        break;
+
+      case 'invoice.finalized':
+        await handleInvoiceFinalized(event.data.object as Stripe.Invoice);
+        break;
+
+      case 'invoice.sent':
+        await handleInvoiceSent(event.data.object as Stripe.Invoice);
+        break;
+
       case 'invoice.paid':
         await handleInvoicePaid(event.data.object as Stripe.Invoice);
+        break;
+
+      case 'invoice.payment_failed':
+        await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
+        break;
+
+      case 'invoice.voided':
+        await handleInvoiceVoided(event.data.object as Stripe.Invoice);
+        break;
+
+      case 'invoice.marked_uncollectible':
+        await handleInvoiceUncollectible(event.data.object as Stripe.Invoice);
         break;
 
       case 'charge.refunded':
@@ -728,35 +752,252 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
 }
 
 /**
- * Handle invoice.paid (for subscription or manual invoices)
+ * Handle invoice.created (invoice-led orders)
+ */
+async function handleInvoiceCreated(invoice: Stripe.Invoice) {
+  const supabase = getSupabaseClient();
+
+  console.log('[stripe-webhook] Processing invoice.created:', invoice.id);
+
+  // Check if this is a standalone invoice (not from checkout)
+  const metadata = invoice.metadata || {};
+  const companyId = metadata.company_id;
+  const contactId = metadata.contact_id || null;
+
+  // Only track if it has our metadata (created via our invoice API)
+  if (companyId) {
+    // Order record was already created by createStripeInvoice()
+    // Just log the event
+    console.log('[stripe-webhook] Invoice created for company:', companyId);
+  }
+}
+
+/**
+ * Handle invoice.finalized
+ */
+async function handleInvoiceFinalized(invoice: Stripe.Invoice) {
+  const supabase = getSupabaseClient();
+
+  console.log('[stripe-webhook] Processing invoice.finalized:', invoice.id);
+
+  // Update order status to 'open' (finalized and ready to be sent)
+  const { error } = await supabase
+    .from('orders')
+    .update({
+      invoice_status: 'open',
+      invoice_url: invoice.hosted_invoice_url || undefined,
+      invoice_pdf_url: invoice.invoice_pdf || undefined,
+    })
+    .eq('stripe_invoice_id', invoice.id);
+
+  if (error) {
+    console.error('[stripe-webhook] Failed to update order on invoice.finalized:', error);
+  }
+}
+
+/**
+ * Handle invoice.sent
+ */
+async function handleInvoiceSent(invoice: Stripe.Invoice) {
+  const supabase = getSupabaseClient();
+
+  console.log('[stripe-webhook] Processing invoice.sent:', invoice.id);
+
+  // Update order status to 'sent'
+  const { error } = await supabase
+    .from('orders')
+    .update({
+      invoice_status: 'sent',
+      status: 'sent',
+      invoice_sent_at: new Date().toISOString(),
+    })
+    .eq('stripe_invoice_id', invoice.id);
+
+  if (error) {
+    console.error('[stripe-webhook] Failed to update order on invoice.sent:', error);
+  }
+}
+
+/**
+ * Handle invoice.paid (for invoice-led orders and subscriptions)
  */
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
   const supabase = getSupabaseClient();
 
   console.log('[stripe-webhook] Processing invoice.paid:', invoice.id);
 
-  // Track invoice payment as engagement event
+  const metadata = invoice.metadata || {};
+  const companyId = metadata.company_id;
+  const contactId = metadata.contact_id || null;
+
+  // Update order status to paid
+  const { data: order } = await supabase
+    .from('orders')
+    .update({
+      invoice_status: 'paid',
+      status: 'paid',
+      payment_status: 'paid',
+      paid_at: new Date().toISOString(),
+    })
+    .eq('stripe_invoice_id', invoice.id)
+    .select('order_id, company_id, contact_id, items, total_amount, currency')
+    .single();
+
+  if (order) {
+    console.log('[stripe-webhook] Order marked as paid:', order.order_id);
+
+    // Check if this is an international shipment - if so, generate commercial invoice
+    const { data: company } = await supabase
+      .from('companies')
+      .select('country')
+      .eq('company_id', order.company_id)
+      .single();
+
+    if (company && company.country && company.country.toUpperCase() !== 'GB' && company.country.toUpperCase() !== 'UK') {
+      console.log('[stripe-webhook] International order detected - generating commercial invoice');
+
+      // Generate commercial invoice for customs clearance
+      const { generateCommercialInvoice } = await import('@/lib/commercial-invoice');
+      const invoiceResult = await generateCommercialInvoice({ order_id: order.order_id });
+
+      if (invoiceResult.success) {
+        console.log('[stripe-webhook] Commercial invoice generated:', invoiceResult.pdf_url);
+      } else {
+        console.error('[stripe-webhook] Failed to generate commercial invoice:', invoiceResult.error);
+        // Don't fail the whole webhook - just log the error
+      }
+    }
+
+    // Track payment event
+    const { error: paidEventErr } = await supabase.from('engagement_events').insert({
+      company_id: order.company_id,
+      contact_id: order.contact_id,
+      source: 'stripe',
+      source_event_id: invoice.id,
+      event_name: 'invoice_paid',
+      value: order.total_amount,
+      currency: order.currency,
+      meta: {
+        invoice_number: invoice.number,
+        stripe_invoice_id: invoice.id,
+        order_id: order.order_id,
+      },
+    });
+    if (paidEventErr && !paidEventErr.message?.includes('duplicate') && paidEventErr.code !== '23505') {
+      console.error('[stripe-webhook] Failed to track invoice_paid event:', paidEventErr);
+    }
+  } else {
+    // This might be a subscription invoice - just track it
+    if (companyId) {
+      const { error: invoicePaidErr } = await supabase.from('engagement_events').insert({
+        company_id: companyId,
+        contact_id: contactId,
+        source: 'stripe',
+        source_event_id: invoice.id,
+        event_name: 'invoice_paid',
+        value: (invoice.amount_paid || 0) / 100,
+        currency: invoice.currency?.toUpperCase() || 'GBP',
+        meta: {
+          invoice_number: invoice.number,
+          stripe_invoice_id: invoice.id,
+          type: 'subscription',
+        },
+      });
+      if (invoicePaidErr && !invoicePaidErr.message?.includes('duplicate') && invoicePaidErr.code !== '23505') {
+        console.error('[stripe-webhook] Failed to track invoice_paid event:', invoicePaidErr);
+      }
+    }
+  }
+}
+
+/**
+ * Handle invoice.payment_failed
+ */
+async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
+  const supabase = getSupabaseClient();
+
+  console.log('[stripe-webhook] Processing invoice.payment_failed:', invoice.id);
+
+  // Update order status
+  const { error } = await supabase
+    .from('orders')
+    .update({
+      invoice_status: 'open', // Keep as open for retry
+      payment_status: 'unpaid',
+      meta: {
+        last_payment_error: invoice.last_finalization_error?.message || 'Payment failed',
+      },
+    })
+    .eq('stripe_invoice_id', invoice.id);
+
+  if (error) {
+    console.error('[stripe-webhook] Failed to update order on payment_failed:', error);
+  }
+
+  // Track failed payment
   const metadata = invoice.metadata || {};
   const companyId = metadata.company_id;
   const contactId = metadata.contact_id || null;
 
   if (companyId) {
-    const { error: invoicePaidErr } = await supabase.from('engagement_events').insert({
+    await supabase.from('engagement_events').insert({
       company_id: companyId,
       contact_id: contactId,
       source: 'stripe',
       source_event_id: invoice.id,
-      event_name: 'invoice_paid',
-      value: (invoice.amount_paid || 0) / 100,
+      event_name: 'invoice_payment_failed',
+      value: (invoice.amount_due || 0) / 100,
       currency: invoice.currency?.toUpperCase() || 'GBP',
       meta: {
-        invoice_number: invoice.number,
-        stripe_invoice_id: invoice.id,
+        invoice_id: invoice.id,
+        error: invoice.last_finalization_error?.message,
       },
     });
-    if (invoicePaidErr && !invoicePaidErr.message?.includes('duplicate') && invoicePaidErr.code !== '23505') {
-      console.error('[stripe-webhook] Failed to track invoice_paid event:', invoicePaidErr);
-    }
+  }
+}
+
+/**
+ * Handle invoice.voided
+ */
+async function handleInvoiceVoided(invoice: Stripe.Invoice) {
+  const supabase = getSupabaseClient();
+
+  console.log('[stripe-webhook] Processing invoice.voided:', invoice.id);
+
+  // Update order status to cancelled
+  const { error } = await supabase
+    .from('orders')
+    .update({
+      invoice_status: 'void',
+      status: 'cancelled',
+      invoice_voided_at: new Date().toISOString(),
+    })
+    .eq('stripe_invoice_id', invoice.id);
+
+  if (error) {
+    console.error('[stripe-webhook] Failed to update order on invoice.voided:', error);
+  }
+}
+
+/**
+ * Handle invoice.marked_uncollectible
+ */
+async function handleInvoiceUncollectible(invoice: Stripe.Invoice) {
+  const supabase = getSupabaseClient();
+
+  console.log('[stripe-webhook] Processing invoice.marked_uncollectible:', invoice.id);
+
+  // Update order status to uncollectible
+  const { error } = await supabase
+    .from('orders')
+    .update({
+      invoice_status: 'uncollectible',
+      status: 'cancelled',
+    })
+    .eq('stripe_invoice_id', invoice.id);
+
+  if (error) {
+    console.error('[stripe-webhook] Failed to update order on uncollectible:', error);
   }
 }
 

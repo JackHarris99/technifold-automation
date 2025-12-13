@@ -552,6 +552,194 @@ export async function sendShippingNotification({
 }
 
 /**
+ * Send invoice email when Stripe invoice is created
+ */
+export async function sendInvoiceEmail({
+  to,
+  contactName,
+  companyName,
+  invoiceNumber,
+  invoiceUrl,
+  invoicePdfUrl,
+  items,
+  subtotal,
+  taxAmount,
+  totalAmount,
+  currency,
+  vatExemptReason,
+}: {
+  to: string;
+  contactName: string;
+  companyName: string;
+  invoiceNumber: string;
+  invoiceUrl: string;
+  invoicePdfUrl?: string | null;
+  items: Array<{ product_code: string; description: string; quantity: number; unit_price: number }>;
+  subtotal: number;
+  taxAmount: number;
+  totalAmount: number;
+  currency: string;
+  vatExemptReason?: string | null;
+}): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  const resend = getResendClient();
+
+  if (!resend) {
+    return { success: false, error: 'Resend not configured' };
+  }
+
+  try {
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+    const currencySymbol = currency.toUpperCase() === 'GBP' ? '£' : currency.toUpperCase();
+
+    const itemsHtml = items.map(item => `
+      <tr>
+        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; font-family: Arial, sans-serif;">
+          <strong style="color: #333333;">${item.product_code}</strong><br>
+          <span style="font-size: 14px; color: #666666;">${item.description}</span>
+        </td>
+        <td align="center" style="padding: 12px; border-bottom: 1px solid #e5e7eb; font-family: Arial, sans-serif; color: #333333;">${item.quantity}</td>
+        <td align="right" style="padding: 12px; border-bottom: 1px solid #e5e7eb; font-family: Arial, sans-serif; color: #333333;">${currencySymbol}${item.unit_price.toFixed(2)}</td>
+        <td align="right" style="padding: 12px; border-bottom: 1px solid #e5e7eb; font-family: Arial, sans-serif; color: #333333; font-weight: 600;">${currencySymbol}${(item.unit_price * item.quantity).toFixed(2)}</td>
+      </tr>
+    `).join('');
+
+    const html = emailWrapper(`
+      ${emailHeader('Invoice from Technifold', `Invoice #${invoiceNumber}`, '#2563eb')}
+      <tr>
+        <td style="background-color: #ffffff; padding: 30px 40px;" class="mobile-padding">
+          <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 24px; color: #333333; font-family: Arial, sans-serif;">
+            Hi${contactName ? ` ${contactName}` : ''},
+          </p>
+          <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px; color: #333333; font-family: Arial, sans-serif;">
+            Thank you for your order! An invoice for ${companyName} is ready for payment.
+          </p>
+
+          <!-- Invoice Number Box -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td style="background-color: #f9fafb; padding: 16px; font-family: Arial, sans-serif;">
+                <p style="margin: 0 0 4px 0; font-size: 14px; color: #666666;">Invoice Number</p>
+                <p style="margin: 0; font-family: monospace; font-size: 16px; font-weight: 700; color: #111111;">${invoiceNumber}</p>
+              </td>
+            </tr>
+          </table>
+
+          <h2 style="margin: 0 0 16px 0; font-size: 18px; color: #333333; font-family: Arial, sans-serif;">Invoice Details</h2>
+
+          <!-- Invoice Items Table -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr style="background-color: #f9fafb;">
+              <th align="left" style="padding: 12px; font-size: 12px; color: #666666; text-transform: uppercase; font-family: Arial, sans-serif; font-weight: 600;">Item</th>
+              <th align="center" style="padding: 12px; font-size: 12px; color: #666666; text-transform: uppercase; font-family: Arial, sans-serif; font-weight: 600;">Qty</th>
+              <th align="right" style="padding: 12px; font-size: 12px; color: #666666; text-transform: uppercase; font-family: Arial, sans-serif; font-weight: 600;">Price</th>
+              <th align="right" style="padding: 12px; font-size: 12px; color: #666666; text-transform: uppercase; font-family: Arial, sans-serif; font-weight: 600;">Total</th>
+            </tr>
+            ${itemsHtml}
+          </table>
+
+          <!-- Totals -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-top: 2px solid #e5e7eb; margin-bottom: 24px;">
+            <tr>
+              <td style="padding: 12px 0; font-family: Arial, sans-serif;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="color: #666666; font-size: 14px;">Subtotal:</td>
+                    <td align="right" style="font-weight: 600; color: #333333; font-size: 14px;">${currencySymbol}${subtotal.toFixed(2)}</td>
+                  </tr>
+                  ${taxAmount > 0 ? `
+                  <tr>
+                    <td style="color: #666666; font-size: 14px; padding-top: 8px;">VAT (20%):</td>
+                    <td align="right" style="font-weight: 600; color: #333333; font-size: 14px; padding-top: 8px;">${currencySymbol}${taxAmount.toFixed(2)}</td>
+                  </tr>
+                  ` : ''}
+                  ${vatExemptReason ? `
+                  <tr>
+                    <td colspan="2" style="color: #666666; font-size: 12px; padding-top: 4px; font-style: italic;">
+                      ${vatExemptReason}
+                    </td>
+                  </tr>
+                  ` : ''}
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="border-top: 2px solid #e5e7eb; padding: 16px 0; font-family: Arial, sans-serif;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="font-size: 18px; font-weight: 700; color: #333333;">Total Due:</td>
+                    <td align="right" style="font-size: 18px; font-weight: 700; color: #2563eb;">${currencySymbol}${totalAmount.toFixed(2)}</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Payment Info Box -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; font-family: Arial, sans-serif;">
+                <h3 style="margin: 0 0 12px 0; font-size: 16px; color: #1e40af; font-family: Arial, sans-serif;">Payment Methods</h3>
+                <p style="margin: 0; color: #1e40af; font-size: 14px; line-height: 20px;">
+                  • Pay by card (Visa, Mastercard, Amex)<br>
+                  • Bank transfer (BACS - 3-5 days)<br>
+                  • Apple Pay / Google Pay
+                </p>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Payment Button -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td align="center">
+                ${emailButton('View and Pay Invoice', invoiceUrl, '#16a34a')}
+                <p style="margin: 12px 0 0 0; font-size: 12px; color: #666666; font-family: Arial, sans-serif;">
+                  Payment due on receipt
+                </p>
+              </td>
+            </tr>
+          </table>
+
+          ${invoicePdfUrl ? `
+          <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 20px; color: #666666; text-align: center; font-family: Arial, sans-serif;">
+            <a href="${invoicePdfUrl}" style="color: #2563eb; text-decoration: none;">Download PDF Invoice</a>
+          </p>
+          ` : ''}
+
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; font-family: Arial, sans-serif;">
+                <p style="margin: 0; font-size: 14px; color: #92400e; line-height: 20px;">
+                  <strong>B2B Friendly:</strong> You can forward this invoice to your accounts department. The payment link works for anyone in your organization.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      ${emailFooter()}
+    `);
+
+    const { data, error } = await resend.emails.send({
+      from: fromEmail,
+      to: [to],
+      subject: `Invoice ${invoiceNumber} from Technifold - ${currencySymbol}${totalAmount.toFixed(2)}`,
+      html
+    });
+
+    if (error) {
+      console.error('[Resend] Invoice email error:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, messageId: data?.id };
+  } catch (err: any) {
+    console.error('[Resend] Unexpected error:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
  * Send trial confirmation email when subscription is created
  */
 export async function sendTrialConfirmation({

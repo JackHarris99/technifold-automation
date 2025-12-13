@@ -1,11 +1,13 @@
 /**
  * Create Quote Modal
  * Server action to draft quote with server-resolved prices
+ * With VAT number collection for EU customers
  */
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import VATNumberForm from '../shared/VATNumberForm';
 
 interface CreateQuoteModalProps {
   companyId: string;
@@ -16,6 +18,13 @@ interface CreateQuoteModalProps {
 interface QuoteItem {
   product_code: string;
   quantity: number;
+}
+
+interface CompanyInfo {
+  company_id: string;
+  company_name: string;
+  country: string;
+  vat_number: string | null;
 }
 
 export default function CreateQuoteModal({
@@ -30,6 +39,31 @@ export default function CreateQuoteModal({
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showVATForm, setShowVATForm] = useState(false);
+  const [companyInfo, setCompanyInfo] = useState<CompanyInfo | null>(null);
+  const [checkingVAT, setCheckingVAT] = useState(true);
+
+  // Check if VAT number is needed on mount
+  useEffect(() => {
+    checkVATStatus();
+  }, [companyId]);
+
+  const checkVATStatus = async () => {
+    try {
+      const response = await fetch(`/api/companies/check-vat-needed?company_id=${companyId}`);
+      const data = await response.json();
+
+      if (data.company) {
+        setCompanyInfo(data.company);
+      }
+
+      // Don't show VAT form on mount, only when creating quote
+      setCheckingVAT(false);
+    } catch (err) {
+      console.error('Failed to check VAT status:', err);
+      setCheckingVAT(false);
+    }
+  };
 
   const addItem = () => {
     setItems([...items, { product_code: '', quantity: 1 }]);
@@ -60,6 +94,28 @@ export default function CreateQuoteModal({
         return;
       }
 
+      // Check if VAT number is needed
+      const vatCheckResponse = await fetch(`/api/companies/check-vat-needed?company_id=${companyId}`);
+      const vatCheckData = await vatCheckResponse.json();
+
+      if (vatCheckData.vat_needed) {
+        // Show VAT form instead of creating quote
+        setCompanyInfo(vatCheckData.company);
+        setShowVATForm(true);
+        setLoading(false);
+        return;
+      }
+
+      // Proceed with quote creation
+      await createQuote(validItems);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      setLoading(false);
+    }
+  };
+
+  const createQuote = async (validItems: QuoteItem[]) => {
+    try {
       const response = await fetch('/api/admin/quotes/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -81,10 +137,43 @@ export default function CreateQuoteModal({
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
+      throw err;
     } finally {
       setLoading(false);
     }
   };
+
+  const handleVATSaved = async (vatNumber: string) => {
+    // Update company info
+    if (companyInfo) {
+      setCompanyInfo({ ...companyInfo, vat_number: vatNumber });
+    }
+    setShowVATForm(false);
+
+    // Proceed with quote creation
+    const validItems = items.filter(item => item.product_code.trim() !== '');
+    setLoading(true);
+    await createQuote(validItems);
+  };
+
+  const handleVATSkipped = async () => {
+    setShowVATForm(false);
+
+    // Proceed with quote creation anyway (will charge VAT or handle as needed)
+    const validItems = items.filter(item => item.product_code.trim() !== '');
+    setLoading(true);
+    await createQuote(validItems);
+  };
+
+  if (checkingVAT) {
+    return (
+      <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-lg shadow-xl p-8">
+          <div className="text-center">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
@@ -99,6 +188,19 @@ export default function CreateQuoteModal({
           {error && (
             <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
               {error}
+            </div>
+          )}
+
+          {/* VAT Number Form (if needed) */}
+          {showVATForm && companyInfo && (
+            <div className="mb-6">
+              <VATNumberForm
+                companyId={companyInfo.company_id}
+                companyName={companyInfo.company_name}
+                country={companyInfo.country}
+                onSaved={handleVATSaved}
+                onSkip={handleVATSkipped}
+              />
             </div>
           )}
 

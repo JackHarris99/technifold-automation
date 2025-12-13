@@ -6,7 +6,7 @@ import { CompanyPayload, CartItem, ReorderItem } from '@/types';
 import { ReorderTab } from './ReorderTab';
 import { ToolTab } from './ToolTab';
 import { CartBar } from './CartBar';
-import { CheckoutModal } from './CheckoutModal';
+import { InvoiceRequestModal } from './InvoiceRequestModal';
 
 interface PortalPageProps {
   payload: CompanyPayload;
@@ -20,7 +20,7 @@ interface PortalPageProps {
 export function PortalPage({ payload, contact }: PortalPageProps) {
   const [activeTab, setActiveTab] = useState<string>('reorder');
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
 
   const addToCart = (item: ReorderItem, quantity: number) => {
     if (quantity <= 0) return;
@@ -59,17 +59,17 @@ export function PortalPage({ payload, contact }: PortalPageProps) {
     return cart.reduce((total, item) => total + item.quantity, 0);
   };
 
-  const handleCheckout = () => {
+  const handleRequestInvoice = () => {
     if (cart.length === 0) return;
-    setIsCheckoutOpen(true);
+    setIsInvoiceModalOpen(true);
   };
 
-  const handleCheckoutSuccess = (paymentIntentId: string) => {
-    console.log('[PortalPage] Checkout successful:', paymentIntentId);
-    // Clear cart after successful checkout
+  const handleInvoiceSuccess = (orderId: string) => {
+    console.log('[PortalPage] Invoice created successfully:', orderId);
+    // Clear cart after successful invoice request
     setCart([]);
-    setIsCheckoutOpen(false);
-    // Could redirect to a success page or show inline success message
+    setIsInvoiceModalOpen(false);
+    // Show success message - invoice sent to email
   };
 
   const tabs = [
@@ -210,17 +210,17 @@ export function PortalPage({ payload, contact }: PortalPageProps) {
         itemCount={getCartQuantity()}
         totalPrice={getTotalPrice()}
         cart={cart}
-        onCheckout={handleCheckout}
+        onCheckout={handleRequestInvoice}
       />
 
-      {/* Checkout Modal */}
-      <CheckoutModal
-        isOpen={isCheckoutOpen}
-        onClose={() => setIsCheckoutOpen(false)}
+      {/* Invoice Request Modal */}
+      <InvoiceRequestModal
+        isOpen={isInvoiceModalOpen}
+        onClose={() => setIsInvoiceModalOpen(false)}
         cart={cart}
         companyId={String(payload.company_id)}
         contactId={contact?.contact_id}
-        onSuccess={handleCheckoutSuccess}
+        onSuccess={handleInvoiceSuccess}
       />
     </div>
   );

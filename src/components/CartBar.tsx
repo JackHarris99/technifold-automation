@@ -126,7 +126,7 @@ export function CartBar({ itemCount, totalPrice, cart, onCheckout }: CartBarProp
                     Processing...
                   </span>
                 ) : (
-                  'Proceed to Checkout'
+                  'Request Invoice'
                 )}
               </button>
             </div>
