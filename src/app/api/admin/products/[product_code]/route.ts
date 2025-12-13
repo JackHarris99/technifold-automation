@@ -11,6 +11,8 @@ export async function GET(
   context: { params: Promise<{ product_code: string }> }
 ) {
   const { product_code: productCode } = await context.params;
+  console.log('[API] Looking up product:', productCode);
+
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
@@ -20,11 +22,13 @@ export async function GET(
     .single();
 
   if (error || !data) {
+    console.log('[API] Product not found:', productCode, error);
     return NextResponse.json(
-      { error: 'Product not found' },
+      { error: 'Product not found', details: error?.message },
       { status: 404 }
     );
   }
 
+  console.log('[API] Product found:', data);
   return NextResponse.json(data);
 }

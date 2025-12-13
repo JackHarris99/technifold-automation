@@ -101,19 +101,22 @@ export default function CreateInvoiceModal({
     // Auto-lookup product when product_code is entered
     if (field === 'product_code' && typeof value === 'string' && value.trim() !== '') {
       try {
-        const response = await fetch(`/api/admin/products/${value.trim()}`);
+        const response = await fetch(`/api/admin/products/${encodeURIComponent(value.trim())}`);
         if (response.ok) {
           const product = await response.json();
+          console.log('[CreateInvoiceModal] Product found:', product);
           newItems[index] = {
             ...newItems[index],
             description: product.description || newItems[index].description,
             unit_price: product.price || newItems[index].unit_price,
           };
           setItems([...newItems]);
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          console.log('[CreateInvoiceModal] Product not found:', value.trim(), response.status, errorData);
         }
       } catch (err) {
-        // If product not found, just continue with manual entry
-        console.log('Product not found, manual entry mode');
+        console.error('[CreateInvoiceModal] Error fetching product:', err);
       }
     }
   };
