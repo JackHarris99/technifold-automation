@@ -8,10 +8,10 @@ import { getSupabaseClient } from '@/lib/supabase';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { product_code: string } }
+  context: { params: Promise<{ product_code: string }> }
 ) {
+  const { product_code: productCode } = await context.params;
   const supabase = getSupabaseClient();
-  const productCode = params.product_code;
 
   const { data, error } = await supabase
     .from('products')
