@@ -187,7 +187,10 @@ export default function CreateInvoiceModal({
     try {
       const response = await fetch('/api/admin/invoices/create', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Secret': process.env.NEXT_PUBLIC_ADMIN_SECRET || 'Technifold',
+        },
         body: JSON.stringify({
           company_id: companyId,
           contact_id: contactId,
