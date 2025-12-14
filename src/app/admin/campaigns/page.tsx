@@ -16,8 +16,8 @@ export default function UnifiedCampaignPage() {
   // Audience filters
   const [territory, setTerritory] = useState('all');
   const [category, setCategory] = useState('all');
-  const [minOrders, setMinOrders] = useState('');
-  const [daysSinceOrder, setDaysSinceOrder] = useState('');
+  const [targetingMode, setTargetingMode] = useState<'all' | 'reorder_opps' | 'has_tools' | 'active_subs'>('all');
+  const [daysSinceOrder, setDaysSinceOrder] = useState('90');
 
   // Email content
   const [subject, setSubject] = useState('');
@@ -33,35 +33,83 @@ export default function UnifiedCampaignPage() {
 
   useEffect(() => {
     loadAudience();
-  }, [territory, category, minOrders, daysSinceOrder]);
+  }, [territory, category, targetingMode, daysSinceOrder]);
 
   async function loadAudience() {
     setLoading(true);
     const supabase = createClient();
+    let companyIds: string[] = [];
 
-    let query = supabase
-      .from('companies')
-      .select('company_id, company_name, category, last_invoice_at, account_owner')
-      .not('last_invoice_at', 'is', null)
-      .order('last_invoice_at', { ascending: false });
+    try {
+      // Different targeting strategies based on mode
+      if (targetingMode === 'reorder_opps') {
+        // Find companies with consumables not ordered in X days
+        const daysAgo = new Date();
+        daysAgo.setDate(daysAgo.getDate() - parseInt(daysSinceOrder || '90'));
 
-    if (territory !== 'all') {
-      query = query.eq('account_owner', territory);
+        const { data: consumables } = await supabase
+          .from('company_consumables')
+          .select('company_id')
+          .lt('last_ordered_at', daysAgo.toISOString());
+
+        companyIds = [...new Set(consumables?.map(c => c.company_id) || [])];
+
+      } else if (targetingMode === 'has_tools') {
+        // Find companies that own tools
+        const { data: tools } = await supabase
+          .from('company_tools')
+          .select('company_id');
+
+        companyIds = [...new Set(tools?.map(t => t.company_id) || [])];
+
+      } else if (targetingMode === 'active_subs') {
+        // Find companies with active subscriptions
+        const { data: subs } = await supabase
+          .from('subscriptions')
+          .select('company_id')
+          .in('status', ['active', 'trial']);
+
+        companyIds = [...new Set(subs?.map(s => s.company_id) || [])];
+
+      } else {
+        // Default: all companies
+        const { data: allCompanies } = await supabase
+          .from('companies')
+          .select('company_id')
+          .limit(200);
+
+        companyIds = allCompanies?.map(c => c.company_id) || [];
+      }
+
+      // Now fetch company details for the filtered IDs
+      if (companyIds.length === 0) {
+        setCompanies([]);
+        setLoading(false);
+        return;
+      }
+
+      let query = supabase
+        .from('companies')
+        .select('company_id, company_name, category, account_owner')
+        .in('company_id', companyIds);
+
+      if (territory !== 'all') {
+        query = query.eq('account_owner', territory);
+      }
+
+      if (category !== 'all') {
+        query = query.eq('category', category);
+      }
+
+      const { data } = await query.limit(200);
+      setCompanies(data || []);
+
+    } catch (error) {
+      console.error('Error loading audience:', error);
+      setCompanies([]);
+    } finally {
+      setLoading(false);
     }
-
-    if (category !== 'all') {
-      query = query.eq('category', category);
-    }
-
-    if (daysSinceOrder) {
-      const daysAgo = new Date();
-      daysAgo.setDate(daysAgo.getDate() - parseInt(daysSinceOrder));
-      query = query.lt('last_invoice_at', daysAgo.toISOString());
-    }
-
-    const { data } = await query.limit(200);
-    setCompanies(data || []);
-    setLoading(false);
   }
 
   async function handleSend() {
@@ -169,32 +217,75 @@ export default function UnifiedCampaignPage() {
             <h2 className="text-xl font-bold mb-4">Select Audience</h2>
 
             {/* Filters */}
-            <div className="grid grid-cols-4 gap-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium mb-2">Territory</label>
-                <select value={territory} onChange={e => setTerritory(e.target.value)} className="w-full border rounded-lg px-3 py-2">
-                  <option value="all">All Territories</option>
-                  <option value="Lee">Lee</option>
-                  <option value="Callum">Callum</option>
-                  <option value="Steve">Steve</option>
-                </select>
+            <div className="space-y-4 mb-6">
+              {/* Targeting Strategy */}
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <label className="block text-sm font-semibold mb-3 text-blue-900">Targeting Strategy (Fact Tables)</label>
+                <div className="grid grid-cols-4 gap-3">
+                  <button
+                    onClick={() => setTargetingMode('all')}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm ${targetingMode === 'all' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-300'}`}
+                  >
+                    All Companies
+                  </button>
+                  <button
+                    onClick={() => setTargetingMode('reorder_opps')}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm ${targetingMode === 'reorder_opps' ? 'bg-orange-600 text-white' : 'bg-white text-gray-700 border border-gray-300'}`}
+                  >
+                    Reorder Opps
+                  </button>
+                  <button
+                    onClick={() => setTargetingMode('has_tools')}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm ${targetingMode === 'has_tools' ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 border border-gray-300'}`}
+                  >
+                    Has Tools
+                  </button>
+                  <button
+                    onClick={() => setTargetingMode('active_subs')}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm ${targetingMode === 'active_subs' ? 'bg-green-600 text-white' : 'bg-white text-gray-700 border border-gray-300'}`}
+                  >
+                    Active Subscriptions
+                  </button>
+                </div>
+                {targetingMode === 'reorder_opps' && (
+                  <div className="mt-3">
+                    <label className="block text-sm font-medium mb-2">Days Since Last Order</label>
+                    <input
+                      type="number"
+                      value={daysSinceOrder}
+                      onChange={e => setDaysSinceOrder(e.target.value)}
+                      placeholder="e.g. 90"
+                      className="w-48 border rounded-lg px-3 py-2"
+                    />
+                    <p className="text-xs text-gray-600 mt-1">Target companies with consumables not ordered in {daysSinceOrder || '90'} days</p>
+                  </div>
+                )}
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Category</label>
-                <select value={category} onChange={e => setCategory(e.target.value)} className="w-full border rounded-lg px-3 py-2">
-                  <option value="all">All Categories</option>
-                  <option value="Hot VIP">Hot VIP</option>
-                  <option value="Regular">Regular</option>
-                  <option value="Cold">Cold</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Days Since Order</label>
-                <input type="number" value={daysSinceOrder} onChange={e => setDaysSinceOrder(e.target.value)} placeholder="e.g. 90" className="w-full border rounded-lg px-3 py-2" />
-              </div>
-              <div className="flex items-end gap-2">
-                <button onClick={selectAll} className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold">Select All</button>
-                <button onClick={clearAll} className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold">Clear</button>
+
+              {/* Additional Filters */}
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Territory</label>
+                  <select value={territory} onChange={e => setTerritory(e.target.value)} className="w-full border rounded-lg px-3 py-2">
+                    <option value="all">All Territories</option>
+                    <option value="Lee">Lee</option>
+                    <option value="Callum">Callum</option>
+                    <option value="Steve">Steve</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Category</label>
+                  <select value={category} onChange={e => setCategory(e.target.value)} className="w-full border rounded-lg px-3 py-2">
+                    <option value="all">All Categories</option>
+                    <option value="Hot VIP">Hot VIP</option>
+                    <option value="Regular">Regular</option>
+                    <option value="Cold">Cold</option>
+                  </select>
+                </div>
+                <div className="flex items-end gap-2">
+                  <button onClick={selectAll} className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold">Select All</button>
+                  <button onClick={clearAll} className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold">Clear</button>
+                </div>
               </div>
             </div>
 
@@ -215,7 +306,10 @@ export default function UnifiedCampaignPage() {
                     />
                     <div className="flex-1">
                       <div className="font-semibold">{company.company_name}</div>
-                      <div className="text-sm text-gray-600">{company.category} • {company.account_owner} • Last order: {company.last_invoice_at?.split('T')[0]}</div>
+                      <div className="text-sm text-gray-600">
+                        {company.category && `${company.category} • `}
+                        {company.account_owner && `${company.account_owner}`}
+                      </div>
                     </div>
                   </div>
                 ))
