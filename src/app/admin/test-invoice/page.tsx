@@ -140,6 +140,12 @@ export default function TestInvoicePage() {
   };
 
   const addProductToInvoice = (product: Product) => {
+    // Don't add products without prices
+    if (!product.price || product.price === 0) {
+      alert('Cannot add product: Price not set in database');
+      return;
+    }
+
     // Check if product already exists
     const existingIndex = invoiceItems.findIndex(item => item.product_code === product.product_code);
 
@@ -369,11 +375,14 @@ export default function TestInvoicePage() {
                       key={index}
                       onClick={() => addProductToInvoice(product)}
                       className="w-full px-4 py-3 text-left hover:bg-blue-50 border-b border-gray-100 last:border-b-0"
+                      disabled={!product.price || product.price === 0}
                     >
                       <div className="font-semibold text-gray-900">{product.product_code}</div>
                       <div className="text-sm text-gray-600">{product.description}</div>
-                      <div className="text-sm font-semibold text-green-600">
-                        {product.currency.toUpperCase()} {product.price.toFixed(2)}
+                      <div className={`text-sm font-semibold ${product.price ? 'text-green-600' : 'text-red-600'}`}>
+                        {product.price
+                          ? `${(product.currency || 'GBP').toUpperCase()} ${product.price.toFixed(2)}`
+                          : 'Price not set - cannot add'}
                       </div>
                     </button>
                   ))}
