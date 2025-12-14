@@ -140,36 +140,12 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
         .eq('company_id', company_id);
     }
 
-    // 4. Create invoice line items
-    for (const item of items) {
-      await stripe.invoiceItems.create({
-        customer: stripeCustomerId,
-        amount: Math.round(item.unit_price * item.quantity * 100), // Convert to pence
-        currency: currency.toLowerCase(),
-        description: `${item.product_code} - ${item.description}`,
-        metadata: {
-          product_code: item.product_code,
-          quantity: item.quantity.toString(),
-        }
-      });
-    }
-
-    // 5. Add VAT line item if applicable
-    if (vat_amount > 0) {
-      await stripe.invoiceItems.create({
-        customer: stripeCustomerId,
-        amount: Math.round(vat_amount * 100),
-        currency: currency.toLowerCase(),
-        description: `VAT (${(vat_rate * 100).toFixed(0)}%)`,
-      });
-    }
-
-    // 6. Create invoice
+    // 4. Create draft invoice first
     const invoice = await stripe.invoices.create({
       customer: stripeCustomerId,
       collection_method: 'send_invoice',
       days_until_due: 0, // Due on receipt
-      auto_advance: true, // Auto-finalize
+      auto_advance: false, // We'll finalize manually after adding items
       description: notes || undefined,
       metadata: {
         company_id,
@@ -181,8 +157,39 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
       footer: vat_exempt_reason ? `VAT: ${vat_exempt_reason}` : undefined,
     });
 
+    console.log('[stripe-invoices] Created draft invoice:', invoice.id);
+
+    // 5. Add line items to the invoice
+    for (const item of items) {
+      await stripe.invoiceItems.create({
+        customer: stripeCustomerId,
+        invoice: invoice.id, // Attach to specific invoice
+        amount: Math.round(item.unit_price * item.quantity * 100), // Convert to pence
+        currency: currency.toLowerCase(),
+        description: `${item.product_code} - ${item.description}`,
+        metadata: {
+          product_code: item.product_code,
+          quantity: item.quantity.toString(),
+        }
+      });
+      console.log('[stripe-invoices] Added item:', item.product_code, '£' + item.unit_price);
+    }
+
+    // 6. Add VAT line item if applicable
+    if (vat_amount > 0) {
+      await stripe.invoiceItems.create({
+        customer: stripeCustomerId,
+        invoice: invoice.id, // Attach to specific invoice
+        amount: Math.round(vat_amount * 100),
+        currency: currency.toLowerCase(),
+        description: `VAT (${(vat_rate * 100).toFixed(0)}%)`,
+      });
+      console.log('[stripe-invoices] Added VAT:', '£' + vat_amount.toFixed(2));
+    }
+
     // 7. Finalize invoice (makes it immutable and sendable)
     const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id);
+    console.log('[stripe-invoices] Finalized invoice. Total:', finalizedInvoice.amount_due / 100);
 
     // 8. Send invoice via Resend (NOT Stripe's automatic email)
     const { sendInvoiceEmail } = await import('./resend-client');
@@ -208,6 +215,7 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
     }
 
     // 9. Create order record in Supabase
+    console.log('[stripe-invoices] Creating order record in Supabase...');
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
@@ -239,9 +247,12 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
       .single();
 
     if (orderError || !order) {
-      console.error('Failed to create order record:', orderError);
+      console.error('[stripe-invoices] ❌ FAILED to create order record in Supabase:', orderError);
+      console.error('[stripe-invoices] Error details:', JSON.stringify(orderError, null, 2));
       // Invoice was created in Stripe but failed to save to DB
       // We'll rely on webhooks to create the record later
+    } else {
+      console.log('[stripe-invoices] ✅ Order record created:', order.order_id);
     }
 
     return {
