@@ -21,37 +21,58 @@ interface Contact {
   full_name: string;
 }
 
+interface Product {
+  product_code: string;
+  description: string;
+  price: number;
+  currency: string;
+}
+
+interface InvoiceItem {
+  product_code: string;
+  description: string;
+  quantity: number;
+  unit_price: number;
+}
+
 export default function TestInvoicePage() {
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState('');
   const [selectedContactId, setSelectedContactId] = useState('');
+  const [companySearch, setCompanySearch] = useState('');
+  const [showCompanyDropdown, setShowCompanyDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingCompanies, setLoadingCompanies] = useState(true);
   const [loadingContacts, setLoadingContacts] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Test invoice items (simple, hardcoded for testing)
-  const testItems = [
-    {
-      product_code: 'TEST-001',
-      description: 'Test Product 1 - Tri-Creaser',
-      quantity: 2,
-      unit_price: 89.99,
-    },
-    {
-      product_code: 'TEST-002',
-      description: 'Test Product 2 - Carbon Steel Blade',
-      quantity: 10,
-      unit_price: 12.50,
-    },
-  ];
+  // Product search state
+  const [productSearch, setProductSearch] = useState('');
+  const [productSuggestions, setProductSuggestions] = useState<Product[]>([]);
+  const [showProductDropdown, setShowProductDropdown] = useState(false);
+  const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
 
   // Load companies on mount
   useEffect(() => {
     loadCompanies();
   }, []);
+
+  // Filter companies based on search
+  useEffect(() => {
+    if (companySearch.trim() === '') {
+      setFilteredCompanies(companies.slice(0, 20));
+    } else {
+      const searchLower = companySearch.toLowerCase();
+      const filtered = companies.filter(c =>
+        c.company_name.toLowerCase().includes(searchLower) ||
+        c.company_id.toLowerCase().includes(searchLower)
+      ).slice(0, 20);
+      setFilteredCompanies(filtered);
+    }
+  }, [companySearch, companies]);
 
   // Load contacts when company selected
   useEffect(() => {
@@ -60,11 +81,35 @@ export default function TestInvoicePage() {
     }
   }, [selectedCompanyId]);
 
+  // Search products when user types
+  useEffect(() => {
+    const searchProducts = async () => {
+      if (productSearch.trim().length < 2) {
+        setProductSuggestions([]);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/admin/products/search?q=${encodeURIComponent(productSearch.trim())}`);
+        if (response.ok) {
+          const data = await response.json();
+          setProductSuggestions(data.products || []);
+        }
+      } catch (err) {
+        console.error('Error searching products:', err);
+      }
+    };
+
+    const timeoutId = setTimeout(searchProducts, 300); // Debounce
+    return () => clearTimeout(timeoutId);
+  }, [productSearch]);
+
   const loadCompanies = async () => {
     try {
       const response = await fetch('/api/admin/companies/all');
       const data = await response.json();
       setCompanies(data.companies || []);
+      setFilteredCompanies((data.companies || []).slice(0, 20));
     } catch (err) {
       console.error('Failed to load companies:', err);
     } finally {
@@ -88,16 +133,66 @@ export default function TestInvoicePage() {
     }
   };
 
+  const selectCompany = (company: Company) => {
+    setSelectedCompanyId(company.company_id);
+    setCompanySearch(company.company_name);
+    setShowCompanyDropdown(false);
+  };
+
+  const addProductToInvoice = (product: Product) => {
+    // Check if product already exists
+    const existingIndex = invoiceItems.findIndex(item => item.product_code === product.product_code);
+
+    if (existingIndex >= 0) {
+      // Increase quantity
+      const newItems = [...invoiceItems];
+      newItems[existingIndex].quantity += 1;
+      setInvoiceItems(newItems);
+    } else {
+      // Add new item
+      setInvoiceItems([...invoiceItems, {
+        product_code: product.product_code,
+        description: product.description,
+        quantity: 1,
+        unit_price: product.price,
+      }]);
+    }
+
+    setProductSearch('');
+    setProductSuggestions([]);
+    setShowProductDropdown(false);
+  };
+
+  const updateItemQuantity = (index: number, quantity: number) => {
+    const newItems = [...invoiceItems];
+    newItems[index].quantity = Math.max(1, quantity);
+    setInvoiceItems(newItems);
+  };
+
+  const updateItemPrice = (index: number, price: number) => {
+    const newItems = [...invoiceItems];
+    newItems[index].unit_price = Math.max(0, price);
+    setInvoiceItems(newItems);
+  };
+
+  const removeItem = (index: number) => {
+    setInvoiceItems(invoiceItems.filter((_, i) => i !== index));
+  };
+
   const createTestInvoice = async () => {
     setLoading(true);
     setError(null);
     setResult(null);
 
     try {
+      if (invoiceItems.length === 0) {
+        throw new Error('Please add at least one product to the invoice');
+      }
+
       console.log('[TEST] Creating invoice with:', {
         company_id: selectedCompanyId,
         contact_id: selectedContactId,
-        items: testItems,
+        items: invoiceItems,
       });
 
       const response = await fetch('/api/admin/invoices/create', {
@@ -109,7 +204,7 @@ export default function TestInvoicePage() {
         body: JSON.stringify({
           company_id: selectedCompanyId,
           contact_id: selectedContactId,
-          items: testItems,
+          items: invoiceItems,
           currency: 'gbp',
           notes: 'TEST INVOICE - Created via Test Page',
         }),
@@ -135,7 +230,7 @@ export default function TestInvoicePage() {
   const selectedCompany = companies.find(c => c.company_id === selectedCompanyId);
   const selectedContact = contacts.find(c => c.contact_id === selectedContactId);
 
-  const subtotal = testItems.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
+  const subtotal = invoiceItems.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -150,33 +245,57 @@ export default function TestInvoicePage() {
           </p>
         </div>
 
-        {/* Company Selection */}
+        {/* Company Search */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Step 1: Select Company
+            Step 1: Search Company
           </h2>
           {loadingCompanies ? (
             <div className="text-gray-500">Loading companies...</div>
           ) : (
-            <select
-              value={selectedCompanyId}
-              onChange={(e) => setSelectedCompanyId(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">-- Select a company --</option>
-              {companies.slice(0, 50).map((company) => (
-                <option key={company.company_id} value={company.company_id}>
-                  {company.company_name} ({company.country || 'Unknown'})
-                  {company.vat_number ? ' - VAT: ' + company.vat_number : ''}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <input
+                type="text"
+                value={companySearch}
+                onChange={(e) => {
+                  setCompanySearch(e.target.value);
+                  setShowCompanyDropdown(true);
+                  if (!e.target.value) {
+                    setSelectedCompanyId('');
+                  }
+                }}
+                onFocus={() => setShowCompanyDropdown(true)}
+                placeholder="Type company name or ID..."
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              />
+
+              {/* Company Dropdown */}
+              {showCompanyDropdown && filteredCompanies.length > 0 && (
+                <div className="absolute z-50 w-full mt-1 bg-white border-2 border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                  {filteredCompanies.map((company) => (
+                    <button
+                      key={company.company_id}
+                      onClick={() => selectCompany(company)}
+                      className="w-full px-4 py-3 text-left hover:bg-blue-50 border-b border-gray-100 last:border-b-0"
+                    >
+                      <div className="font-semibold text-gray-900">{company.company_name}</div>
+                      <div className="text-sm text-gray-600">
+                        {company.company_id} • {company.country || 'Unknown'}
+                        {company.vat_number && ` • VAT: ${company.vat_number}`}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
 
           {selectedCompany && (
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+            <div className="mt-4 p-4 bg-green-50 border-2 border-green-500 rounded-lg">
               <div className="text-sm">
+                <div className="font-semibold text-green-900 mb-2">✓ Company Selected</div>
                 <div><strong>Company:</strong> {selectedCompany.company_name}</div>
+                <div><strong>ID:</strong> {selectedCompany.company_id}</div>
                 <div><strong>Country:</strong> {selectedCompany.country || 'GB'}</div>
                 <div><strong>VAT Number:</strong> {selectedCompany.vat_number || 'None'}</div>
               </div>
@@ -199,7 +318,7 @@ export default function TestInvoicePage() {
                 <select
                   value={selectedContactId}
                   onChange={(e) => setSelectedContactId(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                 >
                   {contacts.map((contact) => (
                     <option key={contact.contact_id} value={contact.contact_id}>
@@ -209,8 +328,9 @@ export default function TestInvoicePage() {
                 </select>
 
                 {selectedContact && (
-                  <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                  <div className="mt-4 p-4 bg-green-50 border-2 border-green-500 rounded-lg">
                     <div className="text-sm">
+                      <div className="font-semibold text-green-900 mb-2">✓ Contact Selected</div>
                       <div><strong>Name:</strong> {selectedContact.full_name}</div>
                       <div><strong>Email:</strong> {selectedContact.email}</div>
                     </div>
@@ -221,62 +341,131 @@ export default function TestInvoicePage() {
           </div>
         )}
 
-        {/* Invoice Items Preview */}
+        {/* Product Search & Add */}
         {selectedCompanyId && selectedContactId && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Step 3: Invoice Items (Hardcoded for Testing)
+              Step 3: Add Products
             </h2>
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-2 text-sm font-semibold text-gray-700">Product</th>
-                  <th className="text-left py-2 text-sm font-semibold text-gray-700">Description</th>
-                  <th className="text-right py-2 text-sm font-semibold text-gray-700">Qty</th>
-                  <th className="text-right py-2 text-sm font-semibold text-gray-700">Price</th>
-                  <th className="text-right py-2 text-sm font-semibold text-gray-700">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {testItems.map((item, index) => (
-                  <tr key={index} className="border-b border-gray-100">
-                    <td className="py-2 text-sm text-gray-900">{item.product_code}</td>
-                    <td className="py-2 text-sm text-gray-600">{item.description}</td>
-                    <td className="py-2 text-sm text-gray-900 text-right">{item.quantity}</td>
-                    <td className="py-2 text-sm text-gray-900 text-right">£{item.unit_price.toFixed(2)}</td>
-                    <td className="py-2 text-sm font-semibold text-gray-900 text-right">
-                      £{(item.unit_price * item.quantity).toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
-                <tr className="border-t-2 border-gray-300">
-                  <td colSpan={4} className="py-2 text-sm font-bold text-gray-900 text-right">
-                    Subtotal:
-                  </td>
-                  <td className="py-2 text-sm font-bold text-gray-900 text-right">
-                    £{subtotal.toFixed(2)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <p className="text-xs text-gray-500 mt-2">
-              VAT will be calculated automatically based on company country and VAT number
-            </p>
+
+            <div className="relative mb-6">
+              <input
+                type="text"
+                value={productSearch}
+                onChange={(e) => {
+                  setProductSearch(e.target.value);
+                  setShowProductDropdown(true);
+                }}
+                onFocus={() => setShowProductDropdown(true)}
+                placeholder="Type product code or description..."
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              />
+
+              {/* Product Dropdown */}
+              {showProductDropdown && productSuggestions.length > 0 && (
+                <div className="absolute z-50 w-full mt-1 bg-white border-2 border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                  {productSuggestions.map((product, index) => (
+                    <button
+                      key={index}
+                      onClick={() => addProductToInvoice(product)}
+                      className="w-full px-4 py-3 text-left hover:bg-blue-50 border-b border-gray-100 last:border-b-0"
+                    >
+                      <div className="font-semibold text-gray-900">{product.product_code}</div>
+                      <div className="text-sm text-gray-600">{product.description}</div>
+                      <div className="text-sm font-semibold text-green-600">
+                        {product.currency.toUpperCase()} {product.price.toFixed(2)}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Invoice Items Table */}
+            {invoiceItems.length > 0 && (
+              <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Product</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Description</th>
+                      <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Qty</th>
+                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Price</th>
+                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Total</th>
+                      <th className="w-16"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {invoiceItems.map((item, index) => (
+                      <tr key={index} className="border-t border-gray-200">
+                        <td className="py-3 px-4 text-sm font-mono text-gray-900">{item.product_code}</td>
+                        <td className="py-3 px-4 text-sm text-gray-600">{item.description}</td>
+                        <td className="py-3 px-4 text-center">
+                          <input
+                            type="number"
+                            value={item.quantity}
+                            onChange={(e) => updateItemQuantity(index, parseInt(e.target.value) || 1)}
+                            min="1"
+                            className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-gray-900"
+                          />
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <input
+                            type="number"
+                            value={item.unit_price}
+                            onChange={(e) => updateItemPrice(index, parseFloat(e.target.value) || 0)}
+                            min="0"
+                            step="0.01"
+                            className="w-24 px-2 py-1 border border-gray-300 rounded text-right text-gray-900"
+                          />
+                        </td>
+                        <td className="py-3 px-4 text-sm font-semibold text-gray-900 text-right">
+                          £{(item.unit_price * item.quantity).toFixed(2)}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <button
+                            onClick={() => removeItem(index)}
+                            className="text-red-600 hover:text-red-800 font-semibold"
+                          >
+                            ×
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    <tr className="border-t-2 border-gray-300 bg-gray-50">
+                      <td colSpan={4} className="py-3 px-4 text-sm font-bold text-gray-900 text-right">
+                        Subtotal:
+                      </td>
+                      <td className="py-3 px-4 text-sm font-bold text-gray-900 text-right">
+                        £{subtotal.toFixed(2)}
+                      </td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {invoiceItems.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                No products added yet. Search and add products above.
+              </div>
+            )}
           </div>
         )}
 
         {/* Create Invoice Button */}
-        {selectedCompanyId && selectedContactId && (
+        {selectedCompanyId && selectedContactId && invoiceItems.length > 0 && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
             <button
               onClick={createTestInvoice}
               disabled={loading}
               className="w-full bg-green-600 text-white px-6 py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {loading ? 'Creating Invoice...' : '🚀 Create Test Invoice'}
+              {loading ? 'Creating Invoice...' : '🚀 Create Invoice & Send Email'}
             </button>
             <p className="text-xs text-gray-500 text-center mt-2">
-              This will create a real Stripe invoice and send a real email
+              This will create a real Stripe invoice and send a real email to {selectedContact?.email}
             </p>
           </div>
         )}
