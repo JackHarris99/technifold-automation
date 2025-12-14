@@ -163,77 +163,78 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const total = (fullSession.amount_total || 0) / 100;
   const currency = fullSession.currency?.toUpperCase() || 'GBP';
 
-  // Create order record (idempotent on stripe_checkout_session_id)
-  const { data: existingOrder } = await supabase
-    .from('orders')
-    .select('order_id')
-    .eq('stripe_checkout_session_id', session.id)
+  // Create invoice record (idempotent on stripe_checkout_session_id)
+  // Check if invoice already exists
+  const { data: existingInvoice } = await supabase
+    .from('invoices')
+    .select('invoice_id')
+    .eq('stripe_payment_intent_id', session.payment_intent as string)
     .single();
 
-  if (existingOrder) {
-    console.log('[stripe-webhook] Order already exists:', existingOrder.order_id);
+  if (existingInvoice) {
+    console.log('[stripe-webhook] Invoice already exists:', existingInvoice.invoice_id);
     return;
   }
 
-  // Determine order type
-  let orderType = 'consumables_reorder'; // Default
+  // Determine invoice type
+  let invoiceType = 'sale'; // Default
   if (purchaseType === 'purchase') {
-    orderType = 'tool_purchase';
+    invoiceType = 'sale';
   } else if (purchaseType === 'rental') {
     // Rentals handled by subscription webhook - this shouldn't happen
-    orderType = 'tool_rental_payment';
+    invoiceType = 'rental';
   }
 
-  const { data: order, error: orderError } = await supabase
-    .from('orders')
+  const { data: invoice, error: invoiceError } = await supabase
+    .from('invoices')
     .insert({
       company_id: companyId,
       contact_id: contactId,
-      stripe_checkout_session_id: session.id,
       stripe_payment_intent_id: session.payment_intent as string,
       stripe_customer_id: session.customer as string,
       shipping_address_id: shippingAddressId,
-      order_type: orderType,
-      items,
+      invoice_type: invoiceType,
+      currency: currency.toLowerCase(),
       subtotal,
       tax_amount: taxAmount,
+      shipping_amount: 0,
       total_amount: total,
-      currency,
       status: 'paid',
       payment_status: 'paid',
+      invoice_date: new Date(),
       paid_at: new Date().toISOString(),
       notes: offerKey || campaignKey ? `Offer: ${offerKey || 'N/A'}, Campaign: ${campaignKey || 'N/A'}` : null,
     })
-    .select('order_id')
+    .select('invoice_id')
     .single();
 
-  if (orderError) {
-    console.error('[stripe-webhook] Failed to create order:', orderError);
+  if (invoiceError) {
+    console.error('[stripe-webhook] Failed to create invoice:', invoiceError);
     return;
   }
 
-  console.log('[stripe-webhook] Order created:', order.order_id);
+  console.log('[stripe-webhook] Invoice created:', invoice.invoice_id);
 
   // Create Stripe invoice for accounting/tax purposes
   try {
     const stripeCustomerId = session.customer as string;
 
-    // Create invoice
-    const invoice = await stripe.invoices.create({
+    // Create Stripe invoice for accounting/tax purposes
+    const stripeInvoice = await stripe.invoices.create({
       customer: stripeCustomerId,
       auto_advance: false, // We'll finalize it manually
       collection_method: 'charge_automatically',
       metadata: {
-        order_id: order.order_id,
+        invoice_id: invoice.invoice_id,
         company_id: companyId,
       },
     });
 
-    // Add line items to invoice
+    // Add line items to Stripe invoice
     for (const item of items) {
       await stripe.invoiceItems.create({
         customer: stripeCustomerId,
-        invoice: invoice.id,
+        invoice: stripeInvoice.id,
         description: `${item.product_code} - ${item.description}`,
         quantity: item.quantity,
         unit_amount: Math.round(item.unit_price * 100), // Convert to cents
@@ -245,28 +246,28 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     if (taxAmount > 0) {
       await stripe.invoiceItems.create({
         customer: stripeCustomerId,
-        invoice: invoice.id,
+        invoice: stripeInvoice.id,
         description: 'VAT',
         amount: Math.round(taxAmount * 100),
         currency: currency.toLowerCase(),
       });
     }
 
-    // Finalize the invoice
-    const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id);
+    // Finalize the Stripe invoice
+    const finalizedStripeInvoice = await stripe.invoices.finalizeInvoice(stripeInvoice.id);
 
     // Mark as paid (payment already happened via checkout)
-    await stripe.invoices.pay(finalizedInvoice.id, {
+    await stripe.invoices.pay(finalizedStripeInvoice.id, {
       paid_out_of_band: true, // Payment happened outside this invoice
     });
 
-    // Update order with invoice ID
+    // Update our invoice record with Stripe invoice ID
     await supabase
-      .from('orders')
-      .update({ stripe_invoice_id: finalizedInvoice.id })
-      .eq('order_id', order.order_id);
+      .from('invoices')
+      .update({ stripe_invoice_id: finalizedStripeInvoice.id })
+      .eq('invoice_id', invoice.invoice_id);
 
-    console.log('[stripe-webhook] Stripe invoice created:', finalizedInvoice.id);
+    console.log('[stripe-webhook] Stripe invoice created:', finalizedStripeInvoice.id);
   } catch (invoiceError) {
     console.error('[stripe-webhook] Failed to create Stripe invoice:', invoiceError);
     // Don't fail the webhook if invoice creation fails - order is already created
@@ -300,7 +301,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         to: contact.email,
         contactName: contact.full_name,
         companyName: company.company_name,
-        orderId: order.order_id,
+        orderId: invoice.invoice_id,
         orderItems: items,
         subtotal,
         taxAmount,
@@ -323,61 +324,28 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     // Don't fail the webhook if email fails
   }
 
-  // Insert order_items (canonical line items)
-  const orderItems = items.map((item) => ({
-    order_id: order.order_id,
+  // Insert invoice_items (canonical line items)
+  const invoiceItems = items.map((item, index) => ({
+    invoice_id: invoice.invoice_id,
     product_code: item.product_code,
+    line_number: index + 1,
     description: item.description,
     quantity: item.quantity,
     unit_price: item.unit_price,
-    total_price: item.total_price,
+    line_total: item.total_price,
   }));
 
   const { error: itemsError } = await supabase
-    .from('order_items')
-    .insert(orderItems);
+    .from('invoice_items')
+    .insert(invoiceItems);
 
   if (itemsError) {
-    console.error('[stripe-webhook] Failed to create order_items:', itemsError);
-    // Don't fail the whole process - order header is already created
-  }
-
-  // Update company_tool for any tools purchased
-  const toolPurchases = items.filter(item => {
-    // Check if this product is a tool
-    return item.product_code && item.quantity > 0;
-  });
-
-  for (const toolItem of toolPurchases) {
-    // Check if it's a tool
-    const { data: product } = await supabase
-      .from('products')
-      .select('type')
-      .eq('product_code', toolItem.product_code)
-      .single();
-
-    if (product?.type === 'tool') {
-      // Upsert to company_tool
-      await supabase
-        .from('company_tool')
-        .upsert({
-          company_id: companyId,
-          tool_code: toolItem.product_code,
-          total_units: toolItem.quantity,
-          first_seen_at: new Date().toISOString().split('T')[0],
-          last_seen_at: new Date().toISOString().split('T')[0]
-        }, {
-          onConflict: 'company_id,tool_code',
-          ignoreDuplicates: false
-        })
-        .then(({ error }) => {
-          if (error) {
-            console.error('[stripe-webhook] company_tool update failed:', error);
-          } else {
-            console.log(`[stripe-webhook] Updated company_tool: ${toolItem.product_code}`);
-          }
-        });
-    }
+    console.error('[stripe-webhook] Failed to create invoice_items:', itemsError);
+    // Don't fail the whole process - invoice header is already created
+  } else {
+    console.log('[stripe-webhook] Created', invoiceItems.length, 'invoice line items');
+    // Fact tables (company_tool, company_consumables) will auto-update via trigger
+    // when payment_status = 'paid' (which it already is since payment happened via checkout)
   }
 
   // Regenerate portal cache for this company
@@ -398,7 +366,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       interaction_type: 'portal_purchase',
       url: `/checkout`,
       metadata: {
-        order_id: order.order_id,
+        invoice_id: invoice.invoice_id,
         total_amount: total,
         currency,
         item_count: items.length
@@ -422,7 +390,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     currency,
     meta: {
       stripe_session_id: session.id,
-      order_id: order.order_id,
+      invoice_id: invoice.invoice_id,
       items: items.map(i => ({ product_code: i.product_code, quantity: i.quantity })),
     },
   });
@@ -505,56 +473,57 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   const totalAmount = parseFloat(metadata.total_amount || '0');
   const currency = (paymentIntent.currency || 'gbp').toUpperCase();
 
-  // Create order record
-  const { data: order, error: orderError } = await supabase
-    .from('orders')
+  // Create invoice record
+  const { data: invoice, error: invoiceError } = await supabase
+    .from('invoices')
     .insert({
       company_id: companyId,
       contact_id: contactId,
       stripe_payment_intent_id: paymentIntent.id,
       stripe_customer_id: paymentIntent.customer as string,
-      order_type: 'consumables_reorder',
-      items: lineItems,
+      invoice_type: 'sale',
+      currency: currency.toLowerCase(),
       subtotal,
       tax_amount: taxAmount,
+      shipping_amount: 0,
       total_amount: totalAmount,
-      currency,
       status: 'paid',
       payment_status: 'paid',
+      invoice_date: new Date(),
       paid_at: new Date().toISOString(),
       notes: 'Embedded checkout (reorder portal)',
     })
-    .select('order_id')
+    .select('invoice_id')
     .single();
 
-  if (orderError) {
-    console.error('[stripe-webhook] Failed to create order:', orderError);
+  if (invoiceError) {
+    console.error('[stripe-webhook] Failed to create invoice:', invoiceError);
     return;
   }
 
-  console.log('[stripe-webhook] Order created from embedded checkout:', order.order_id);
+  console.log('[stripe-webhook] Invoice created from embedded checkout:', invoice.invoice_id);
 
   // Create Stripe invoice for this payment
   try {
     const stripeCustomerId = paymentIntent.customer as string;
 
     if (stripeCustomerId) {
-      // Create invoice
-      const invoice = await stripe.invoices.create({
+      // Create Stripe invoice
+      const stripeInvoice = await stripe.invoices.create({
         customer: stripeCustomerId,
         auto_advance: false,
         collection_method: 'charge_automatically',
         metadata: {
-          order_id: order.order_id,
+          invoice_id: invoice.invoice_id,
           company_id: companyId,
         },
       });
 
-      // Add line items to invoice
+      // Add line items to Stripe invoice
       for (const item of lineItems) {
         await stripe.invoiceItems.create({
           customer: stripeCustomerId,
-          invoice: invoice.id,
+          invoice: stripeInvoice.id,
           description: `${item.product_code} - ${item.description}`,
           quantity: item.quantity,
           unit_amount: Math.round(item.unit_price * 100),
@@ -566,50 +535,54 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
       if (taxAmount > 0) {
         await stripe.invoiceItems.create({
           customer: stripeCustomerId,
-          invoice: invoice.id,
+          invoice: stripeInvoice.id,
           description: 'VAT (20%)',
           amount: Math.round(taxAmount * 100),
           currency: currency.toLowerCase(),
         });
       }
 
-      // Finalize the invoice
-      const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id);
+      // Finalize the Stripe invoice
+      const finalizedStripeInvoice = await stripe.invoices.finalizeInvoice(stripeInvoice.id);
 
       // Mark as paid (payment already happened via PaymentIntent)
-      await stripe.invoices.pay(finalizedInvoice.id, {
+      await stripe.invoices.pay(finalizedStripeInvoice.id, {
         paid_out_of_band: true,
       });
 
-      // Update order with invoice ID
+      // Update our invoice record with Stripe invoice ID
       await supabase
-        .from('orders')
-        .update({ stripe_invoice_id: finalizedInvoice.id })
-        .eq('order_id', order.order_id);
+        .from('invoices')
+        .update({ stripe_invoice_id: finalizedStripeInvoice.id })
+        .eq('invoice_id', invoice.invoice_id);
 
-      console.log('[stripe-webhook] Stripe invoice created:', finalizedInvoice.id);
+      console.log('[stripe-webhook] Stripe invoice created:', finalizedStripeInvoice.id);
     }
   } catch (invoiceError) {
     console.error('[stripe-webhook] Failed to create Stripe invoice:', invoiceError);
-    // Don't fail - order is already created
+    // Don't fail - invoice is already created
   }
 
-  // Insert order_items
-  const orderItems = lineItems.map((item) => ({
-    order_id: order.order_id,
+  // Insert invoice_items
+  const invoiceItems = lineItems.map((item, index) => ({
+    invoice_id: invoice.invoice_id,
     product_code: item.product_code,
+    line_number: index + 1,
     description: item.description,
     quantity: item.quantity,
     unit_price: item.unit_price,
-    total_price: item.total_price,
+    line_total: item.total_price,
   }));
 
   const { error: itemsError } = await supabase
-    .from('order_items')
-    .insert(orderItems);
+    .from('invoice_items')
+    .insert(invoiceItems);
 
   if (itemsError) {
-    console.error('[stripe-webhook] Failed to create order_items:', itemsError);
+    console.error('[stripe-webhook] Failed to create invoice_items:', itemsError);
+  } else {
+    console.log('[stripe-webhook] Created', invoiceItems.length, 'invoice line items');
+    // Fact tables auto-update via trigger when payment_status = 'paid'
   }
 
   // Send order confirmation email
@@ -631,7 +604,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
         to: contact.email,
         contactName: contact.full_name || '',
         companyName: company.company_name || '',
-        orderId: order.order_id,
+        orderId: invoice.invoice_id,
         orderItems: lineItems,
         subtotal,
         taxAmount,
@@ -662,7 +635,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
     currency,
     meta: {
       payment_intent_id: paymentIntent.id,
-      order_id: order.order_id,
+      invoice_id: invoice.invoice_id,
       items: lineItems.map(i => ({ product_code: i.product_code, quantity: i.quantity })),
     },
   });
@@ -689,7 +662,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
       interaction_type: 'portal_purchase',
       url: `/r`,
       metadata: {
-        order_id: order.order_id,
+        invoice_id: invoice.invoice_id,
         total_amount: totalAmount,
         currency,
         item_count: lineItems.length,
@@ -731,23 +704,23 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
     }
   }
 
-  // Update order status if exists
-  const { data: order } = await supabase
-    .from('orders')
-    .select('order_id')
+  // Update invoice status if exists
+  const { data: invoice } = await supabase
+    .from('invoices')
+    .select('invoice_id')
     .eq('stripe_payment_intent_id', paymentIntent.id)
     .single();
 
-  if (order) {
+  if (invoice) {
     await supabase
-      .from('orders')
+      .from('invoices')
       .update({
-        status: 'cancelled',
+        status: 'void',
         payment_status: 'unpaid',
       })
-      .eq('order_id', order.order_id);
+      .eq('invoice_id', invoice.invoice_id);
 
-    console.log('[stripe-webhook] Order status updated to cancelled:', order.order_id);
+    console.log('[stripe-webhook] Invoice status updated to cancelled:', invoice.invoice_id);
   }
 }
 
@@ -830,7 +803,23 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   const companyId = metadata.company_id;
   const contactId = metadata.contact_id || null;
 
-  // Update order status to paid
+  // Update NEW invoices table (triggers automatic fact table updates)
+  const { data: newInvoice } = await supabase
+    .from('invoices')
+    .update({
+      status: 'paid',
+      payment_status: 'paid',
+      paid_at: new Date().toISOString(),
+    })
+    .eq('stripe_invoice_id', invoice.id)
+    .select('invoice_id, company_id, contact_id, total_amount, currency')
+    .single();
+
+  if (newInvoice) {
+    console.log('[stripe-webhook] New invoice table updated (fact tables auto-updated via trigger):', newInvoice.invoice_id);
+  }
+
+  // Update OLD orders table (legacy - can remove once fully migrated)
   const { data: order } = await supabase
     .from('orders')
     .update({
@@ -1011,42 +1000,42 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
 
   const paymentIntentId = charge.payment_intent as string;
 
-  // Find order by payment_intent_id
-  const { data: order } = await supabase
-    .from('orders')
-    .select('order_id, company_id, contact_id, total_amount, currency')
+  // Find invoice by payment_intent_id
+  const { data: invoice } = await supabase
+    .from('invoices')
+    .select('invoice_id, company_id, contact_id, total_amount, currency')
     .eq('stripe_payment_intent_id', paymentIntentId)
     .single();
 
-  if (!order) {
-    console.log('[stripe-webhook] No order found for refunded charge:', charge.id);
+  if (!invoice) {
+    console.log('[stripe-webhook] No invoice found for refunded charge:', charge.id);
     return;
   }
 
-  // Update order payment status
+  // Update invoice payment status
   const refundAmount = (charge.amount_refunded || 0) / 100;
-  const totalAmount = order.total_amount;
+  const totalAmount = invoice.total_amount;
 
-  const newPaymentStatus = refundAmount >= totalAmount ? 'refunded' : 'partially_refunded';
+  const newPaymentStatus = refundAmount >= totalAmount ? 'refunded' : 'partial';
 
   await supabase
-    .from('orders')
+    .from('invoices')
     .update({
       payment_status: newPaymentStatus,
     })
-    .eq('order_id', order.order_id);
+    .eq('invoice_id', invoice.invoice_id);
 
   // Track refund as engagement event
   const { error: refundErr } = await supabase.from('engagement_events').insert({
-    company_id: order.company_id,
-    contact_id: order.contact_id,
+    company_id: invoice.company_id,
+    contact_id: invoice.contact_id,
     source: 'stripe',
     source_event_id: charge.id,
     event_name: 'charge_refunded',
     value: refundAmount,
-    currency: order.currency,
+    currency: invoice.currency,
     meta: {
-      order_id: order.order_id,
+      invoice_id: invoice.invoice_id,
       refund_amount: refundAmount,
       total_refunded: (charge.amount_refunded || 0) / 100,
     },
@@ -1055,7 +1044,7 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
     console.error('[stripe-webhook] Failed to track charge_refunded event:', refundErr);
   }
 
-  console.log('[stripe-webhook] Order refund processed:', order.order_id);
+  console.log('[stripe-webhook] Invoice refund processed:', invoice.invoice_id);
 }
 
 /**

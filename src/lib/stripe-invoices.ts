@@ -214,50 +214,72 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
       // Invoice URL is still accessible via Stripe dashboard
     }
 
-    // 9. Create order record in Supabase
-    console.log('[stripe-invoices] Creating order record in Supabase...');
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
+    // 9. Create invoice record in Supabase (new invoices table)
+    console.log('[stripe-invoices] Creating invoice record in Supabase...');
+    const { data: invoiceRecord, error: invoiceError } = await supabase
+      .from('invoices')
       .insert({
         company_id,
         contact_id,
         stripe_invoice_id: invoice.id,
         stripe_customer_id: stripeCustomerId,
-        items: items,
+        invoice_number: finalizedInvoice.number || invoice.id,
+        invoice_type: 'sale',
+        currency: currency.toLowerCase(),
         subtotal,
         tax_amount: vat_amount,
         total_amount: total,
-        currency: currency.toUpperCase(),
         status: 'sent',
         payment_status: 'unpaid',
-        invoice_status: 'sent',
+        invoice_date: new Date(),
         invoice_url: finalizedInvoice.hosted_invoice_url,
         invoice_pdf_url: finalizedInvoice.invoice_pdf,
-        invoice_sent_at: new Date().toISOString(),
-        offer_key,
-        campaign_key,
-        meta: {
-          vat_rate,
-          vat_exempt_reason,
-          contact_name: contact.full_name || contact.first_name,
-          company_name: company.company_name,
-        }
+        sent_at: new Date().toISOString(),
+        notes: notes || null,
       })
-      .select('order_id')
+      .select('invoice_id')
       .single();
 
-    if (orderError || !order) {
-      console.error('[stripe-invoices] ❌ FAILED to create order record in Supabase:', orderError);
-      console.error('[stripe-invoices] Error details:', JSON.stringify(orderError, null, 2));
+    if (invoiceError || !invoiceRecord) {
+      console.error('[stripe-invoices] ❌ FAILED to create invoice record in Supabase:', invoiceError);
+      console.error('[stripe-invoices] Error details:', JSON.stringify(invoiceError, null, 2));
       // Invoice was created in Stripe but failed to save to DB
       // We'll rely on webhooks to create the record later
+      return {
+        success: true,
+        stripe_invoice_id: invoice.id,
+        invoice_url: finalizedInvoice.hosted_invoice_url || undefined,
+        invoice_pdf_url: finalizedInvoice.invoice_pdf || undefined,
+      };
+    }
+
+    console.log('[stripe-invoices] ✅ Invoice record created:', invoiceRecord.invoice_id);
+
+    // 10. Create invoice line items (new invoice_items table)
+    const lineItemsToInsert = items.map((item, index) => ({
+      invoice_id: invoiceRecord.invoice_id,
+      product_code: item.product_code,
+      line_number: index + 1,
+      description: item.description,
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+      line_total: item.unit_price * item.quantity,
+    }));
+
+    const { error: itemsError } = await supabase
+      .from('invoice_items')
+      .insert(lineItemsToInsert);
+
+    if (itemsError) {
+      console.error('[stripe-invoices] ❌ FAILED to create invoice items:', itemsError);
+      console.error('[stripe-invoices] Error details:', JSON.stringify(itemsError, null, 2));
     } else {
-      console.log('[stripe-invoices] ✅ Order record created:', order.order_id);
+      console.log('[stripe-invoices] ✅ Created', lineItemsToInsert.length, 'invoice line items');
     }
 
     return {
       success: true,
-      order_id: order?.order_id,
+      order_id: invoiceRecord.invoice_id, // Keep compatible with existing code
       stripe_invoice_id: invoice.id,
       invoice_url: finalizedInvoice.hosted_invoice_url || undefined,
       invoice_pdf_url: finalizedInvoice.invoice_pdf || undefined,
@@ -279,14 +301,13 @@ export async function voidStripeInvoice(stripeInvoiceId: string): Promise<{ succ
   try {
     await stripe.invoices.voidInvoice(stripeInvoiceId);
 
-    // Update order in Supabase
+    // Update invoice in Supabase
     const supabase = getSupabaseClient();
     await supabase
-      .from('orders')
+      .from('invoices')
       .update({
-        invoice_status: 'void',
-        status: 'cancelled',
-        invoice_voided_at: new Date().toISOString(),
+        status: 'void',
+        voided_at: new Date().toISOString(),
       })
       .eq('stripe_invoice_id', stripeInvoiceId);
 
