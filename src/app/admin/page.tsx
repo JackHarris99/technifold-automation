@@ -1,11 +1,11 @@
 import { redirect } from 'next/navigation';
 
 export default async function AdminPage() {
-  // Redirect to Company Console
-  redirect('/admin/company');
+  // Redirect to Sales Center (new homepage)
+  redirect('/admin/sales');
 }
 
 export const metadata = {
-  title: 'Technifold Admin',
-  description: 'Company management console',
+  title: 'Technifold Sales Engine',
+  description: 'Action-driven sales and marketing platform',
 };
