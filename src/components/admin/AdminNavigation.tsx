@@ -28,7 +28,7 @@ export default function AdminNavigation({ isDirector }: AdminNavigationProps) {
           <NavSection title="Sales Actions">
             <NavLink href="/admin/sales" icon="🎯" label="Action Dashboard" />
             <NavLink href="/admin/pipeline" icon="📊" label="Pipeline" />
-            <NavLink href="/admin/companies" icon="🏢" label="My Companies" />
+            <NavLink href="/admin/sales/companies" icon="🏢" label="My Territory" />
           </NavSection>
 
           <NavSection title="Quick Tools">

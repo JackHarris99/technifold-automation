@@ -182,9 +182,9 @@ export default async function SalesCenterPage() {
         {/* Quick Links */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
           <QuickLinkCard
-            href="/admin/companies"
+            href="/admin/sales/companies"
             icon="🏢"
-            title="My Companies"
+            title="My Territory"
             description="View all companies in your territory"
           />
           <QuickLinkCard
@@ -197,7 +197,7 @@ export default async function SalesCenterPage() {
             href="/admin/companies"
             icon="🔍"
             title="Search All Companies"
-            description="Cross-territory company lookup"
+            description="Cross-territory lookup (CRM)"
           />
         </div>
       </div>
