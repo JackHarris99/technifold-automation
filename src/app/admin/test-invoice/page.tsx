@@ -55,9 +55,16 @@ export default function TestInvoicePage() {
   const [showProductDropdown, setShowProductDropdown] = useState(false);
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
 
-  // Load companies on mount
+  // Load companies on mount and check URL params for pre-selected company
   useEffect(() => {
     loadCompanies();
+
+    // Check if company_id is in URL params
+    const params = new URLSearchParams(window.location.search);
+    const companyIdFromUrl = params.get('company_id');
+    if (companyIdFromUrl) {
+      setSelectedCompanyId(companyIdFromUrl);
+    }
   }, []);
 
   // Filter companies based on search
@@ -74,12 +81,18 @@ export default function TestInvoicePage() {
     }
   }, [companySearch, companies]);
 
-  // Load contacts when company selected
+  // Load contacts when company selected and update search field
   useEffect(() => {
     if (selectedCompanyId) {
       loadContacts(selectedCompanyId);
+
+      // Update company search field with selected company name
+      const company = companies.find(c => c.company_id === selectedCompanyId);
+      if (company) {
+        setCompanySearch(company.company_name);
+      }
     }
-  }, [selectedCompanyId]);
+  }, [selectedCompanyId, companies]);
 
   // Search products when user types
   useEffect(() => {

@@ -24,28 +24,43 @@ export default async function CRMPage() {
     .select('*', { count: 'exact', head: true })
     .eq('status', 'trial');
 
-  // Fetch total revenue (last 30 days)
+  // Fetch total revenue from paid invoices (last 30 days)
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const { data: recentOrders } = await supabase
-    .from('orders')
+  const { data: recentInvoices } = await supabase
+    .from('invoices')
     .select('total_amount')
     .eq('payment_status', 'paid')
-    .gte('created_at', thirtyDaysAgo);
+    .gte('invoice_date', thirtyDaysAgo);
 
-  const totalRevenue = recentOrders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0;
+  const totalRevenue = recentInvoices?.reduce((sum, invoice) => sum + (invoice.total_amount || 0), 0) || 0;
 
-  // Fetch recent orders
-  const { data: latestOrders } = await supabase
-    .from('orders')
+  // Fetch tools statistics
+  const { data: toolsData } = await supabase
+    .from('company_tools')
+    .select('total_units', { count: 'exact' });
+
+  const totalToolsOwned = toolsData?.reduce((sum, t) => sum + (t.total_units || 0), 0) || 0;
+
+  // Fetch reorder opportunities (consumables not ordered in 90+ days)
+  const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+  const { count: reorderOpportunities } = await supabase
+    .from('company_consumables')
+    .select('*', { count: 'exact', head: true })
+    .lt('last_ordered_at', ninetyDaysAgo);
+
+  // Fetch recent invoices (both paid and unpaid)
+  const { data: latestInvoices } = await supabase
+    .from('invoices')
     .select(`
-      order_id,
-      created_at,
+      invoice_id,
+      invoice_date,
       total_amount,
       payment_status,
-      companies!inner(company_name)
+      stripe_invoice_id,
+      companies!inner(company_name, company_id)
     `)
-    .order('created_at', { ascending: false })
-    .limit(10);
+    .order('invoice_date', { ascending: false })
+    .limit(15);
 
   // Fetch recent subscriptions
   const { data: recentSubscriptions } = await supabase
@@ -86,12 +101,18 @@ export default async function CRMPage() {
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Global Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-8">
           <MetricCard
             label="Total Companies"
             value={totalCompanies?.toString() || '0'}
             icon="🏢"
             color="gray"
+          />
+          <MetricCard
+            label="Tools Owned"
+            value={totalToolsOwned.toLocaleString('en-GB')}
+            icon="🔧"
+            color="blue"
           />
           <MetricCard
             label="Active Subscriptions"
@@ -104,6 +125,12 @@ export default async function CRMPage() {
             value={activeTrials?.toString() || '0'}
             icon="🚀"
             color="blue"
+          />
+          <MetricCard
+            label="Reorder Opps"
+            value={reorderOpportunities?.toString() || '0'}
+            icon="🔄"
+            color="orange"
           />
           <MetricCard
             label="Revenue (30d)"
@@ -135,32 +162,32 @@ export default async function CRMPage() {
           />
         </div>
 
-        {/* Recent Orders */}
+        {/* Recent Invoices */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
           <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">Recent Orders</h2>
+            <h2 className="text-xl font-bold text-gray-900">Recent Invoices</h2>
             <Link
-              href="/admin/orders"
+              href="/admin/invoices"
               className="text-sm text-blue-600 hover:text-blue-700 font-medium"
             >
               View All →
             </Link>
           </div>
 
-          {!latestOrders || latestOrders.length === 0 ? (
+          {!latestInvoices || latestInvoices.length === 0 ? (
             <div className="p-12 text-center">
-              <div className="text-6xl mb-4">📦</div>
+              <div className="text-6xl mb-4">📄</div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                No orders yet
+                No invoices yet
               </h3>
               <p className="text-gray-600">
-                Orders will appear here once invoices are paid
+                Invoices will appear here once created
               </p>
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
-              {latestOrders.map((order: any) => (
-                <OrderRow key={order.order_id} order={order} />
+              {latestInvoices.map((invoice: any) => (
+                <InvoiceRow key={invoice.invoice_id} invoice={invoice} />
               ))}
             </div>
           )}
@@ -195,12 +222,13 @@ function MetricCard({
   label: string;
   value: string;
   icon: string;
-  color: 'gray' | 'green' | 'blue';
+  color: 'gray' | 'green' | 'blue' | 'orange';
 }) {
   const colorClasses = {
     gray: 'bg-gray-50 border-gray-200',
     green: 'bg-green-50 border-green-200',
     blue: 'bg-blue-50 border-blue-200',
+    orange: 'bg-orange-50 border-orange-200',
   };
 
   return (
@@ -237,44 +265,55 @@ function ActionCard({
   );
 }
 
-function OrderRow({ order }: { order: any }) {
+function InvoiceRow({ invoice }: { invoice: any }) {
   const statusColors = {
     paid: 'bg-green-100 text-green-800',
     unpaid: 'bg-yellow-100 text-yellow-800',
-    cancelled: 'bg-gray-100 text-gray-800',
+    void: 'bg-gray-100 text-gray-800',
+    draft: 'bg-blue-100 text-blue-800',
   };
 
   return (
-    <div className="p-6 hover:bg-gray-50 transition-colors">
+    <Link
+      href={`/admin/company/${invoice.companies?.company_id}`}
+      className="block p-6 hover:bg-gray-50 transition-colors"
+    >
       <div className="flex items-center justify-between">
-        <div>
+        <div className="flex-1">
           <h3 className="font-semibold text-gray-900">
-            {order.companies?.company_name || 'Unknown Company'}
+            {invoice.companies?.company_name || 'Unknown Company'}
           </h3>
-          <p className="text-sm text-gray-600">
-            {new Date(order.created_at).toLocaleDateString('en-GB', {
-              day: '2-digit',
-              month: 'short',
-              year: 'numeric',
-            })}
-          </p>
+          <div className="flex items-center gap-3 mt-1">
+            <p className="text-sm text-gray-600">
+              {new Date(invoice.invoice_date).toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+              })}
+            </p>
+            {invoice.stripe_invoice_id && (
+              <span className="text-xs text-gray-500 font-mono">
+                {invoice.stripe_invoice_id}
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right">
             <p className="text-lg font-bold text-gray-900">
-              £{order.total_amount?.toLocaleString('en-GB', { minimumFractionDigits: 2 }) || '0.00'}
+              £{invoice.total_amount?.toLocaleString('en-GB', { minimumFractionDigits: 2 }) || '0.00'}
             </p>
             <span
               className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                statusColors[order.payment_status as keyof typeof statusColors] || statusColors.unpaid
+                statusColors[invoice.payment_status as keyof typeof statusColors] || statusColors.unpaid
               }`}
             >
-              {order.payment_status}
+              {invoice.payment_status}
             </span>
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 

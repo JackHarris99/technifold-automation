@@ -27,43 +27,50 @@ export default async function SalesCompanyDetailPage({ params }: PageProps) {
     redirect('/admin/sales/companies');
   }
 
-  // Fetch tools
+  // Fetch tools owned (from fact table)
   const { data: tools } = await supabase
-    .from('tools')
-    .select('*')
+    .from('company_tools')
+    .select(`
+      tool_code,
+      first_seen_at,
+      last_seen_at,
+      total_units,
+      products:tool_code (description, category, price)
+    `)
     .eq('company_id', company_id)
-    .order('install_date', { ascending: false });
+    .order('last_seen_at', { ascending: false });
 
-  // Fetch subscriptions
+  // Fetch active subscriptions with tools allocated
   const { data: subscriptions } = await supabase
     .from('subscriptions')
-    .select('*')
+    .select(`
+      *,
+      subscription_tools (
+        tool_code,
+        added_at,
+        products:tool_code (description, category)
+      ),
+      contacts:contact_id (full_name, email)
+    `)
     .eq('company_id', company_id)
     .in('status', ['active', 'trial'])
     .order('created_at', { ascending: false });
 
-  // Fetch last consumable orders (not full history, just recent)
-  const { data: recentOrders } = await supabase
-    .from('orders')
-    .select('order_id, created_at, items, total_amount')
+  // Fetch recent consumable orders (from fact table)
+  const { data: consumables } = await supabase
+    .from('company_consumables')
+    .select(`
+      consumable_code,
+      last_ordered_at,
+      last_order_quantity,
+      last_order_amount,
+      total_orders,
+      total_quantity,
+      products:consumable_code (description, category, price)
+    `)
     .eq('company_id', company_id)
-    .order('created_at', { ascending: false })
-    .limit(3); // Only last 3 orders
-
-  // Extract consumables from orders
-  const consumables: any[] = [];
-  recentOrders?.forEach(order => {
-    if (order.items && Array.isArray(order.items)) {
-      order.items.forEach((item: any) => {
-        if (item.product_code?.startsWith('CONS')) {
-          consumables.push({
-            ...item,
-            order_date: order.created_at,
-          });
-        }
-      });
-    }
-  });
+    .order('last_ordered_at', { ascending: false })
+    .limit(10);
 
   // Fetch contacts
   const { data: contacts } = await supabase

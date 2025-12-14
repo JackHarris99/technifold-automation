@@ -1,15 +1,18 @@
 /**
  * Streamlined Company View for Sales Center
- * Shows ONLY: Tools, Subscriptions, Consumables (NO order history bloat)
+ * Uses FACT TABLES: company_tools, company_consumables, subscription_tools
+ * Shows ONLY action-relevant data (NO order history bloat)
  */
 
 'use client';
 
+import Link from 'next/link';
+
 interface StreamlinedCompanyViewProps {
   company: any;
-  tools: any[];
-  subscriptions: any[];
-  consumables: any[];
+  tools: any[];  // From company_tools fact table
+  subscriptions: any[];  // From subscriptions with subscription_tools
+  consumables: any[];  // From company_consumables fact table
   contacts: any[];
 }
 
@@ -23,10 +26,10 @@ export default function StreamlinedCompanyView({
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="text-3xl font-bold text-gray-900">{tools.length}</div>
-          <div className="text-sm text-gray-600">Machines Installed</div>
+          <div className="text-sm text-gray-600">Tools Owned</div>
         </div>
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="text-3xl font-bold text-gray-900">{subscriptions.length}</div>
@@ -34,7 +37,11 @@ export default function StreamlinedCompanyView({
         </div>
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="text-3xl font-bold text-gray-900">{consumables.length}</div>
-          <div className="text-sm text-gray-600">Recent Consumables</div>
+          <div className="text-sm text-gray-600">Consumable Products</div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="text-3xl font-bold text-gray-900">{contacts.length}</div>
+          <div className="text-sm text-gray-600">Contacts</div>
         </div>
       </div>
 
@@ -43,35 +50,37 @@ export default function StreamlinedCompanyView({
         <div className="lg:col-span-2 space-y-6">
           {/* Tools Section */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">Machines</h2>
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900">Tools Owned</h2>
+              <Link
+                href={`/admin/company/${company.company_id}`}
+                className="text-sm text-blue-600 hover:text-blue-700"
+              >
+                View Full CRM →
+              </Link>
             </div>
             <div className="p-6">
               {tools.length === 0 ? (
-                <p className="text-gray-600 text-center py-8">No machines installed yet</p>
+                <p className="text-gray-600 text-center py-8">No tools owned yet</p>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {tools.map((tool) => (
                     <div
-                      key={tool.tool_id}
+                      key={tool.tool_code}
                       className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors"
                     >
                       <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{tool.model}</h3>
-                          <p className="text-sm text-gray-600">S/N: {tool.serial_number}</p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            Installed: {tool.install_date ? new Date(tool.install_date).toLocaleDateString('en-GB') : 'Unknown'}
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          {subscriptions.some(s => s.tools?.includes(tool.tool_id)) ? (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              Subscribed
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                              No Subscription
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-gray-900">{tool.products?.description || tool.tool_code}</h3>
+                            <span className="text-xs text-gray-500">({tool.tool_code})</span>
+                          </div>
+                          <div className="mt-1 text-sm text-gray-600">
+                            Qty: {tool.total_units} • Last seen: {new Date(tool.last_seen_at).toLocaleDateString('en-GB')}
+                          </div>
+                          {tool.products?.category && (
+                            <span className="inline-block mt-2 px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded">
+                              {tool.products.category}
                             </span>
                           )}
                         </div>
@@ -92,9 +101,6 @@ export default function StreamlinedCompanyView({
               {subscriptions.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-gray-600 mb-4">No active subscriptions</p>
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
-                    Start Trial
-                  </button>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -105,48 +111,46 @@ export default function StreamlinedCompanyView({
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div>
-                          <h3 className="font-semibold text-gray-900">
-                            {sub.status === 'trial' ? 'Trial Subscription' : 'Active Subscription'}
-                          </h3>
-                          <p className="text-sm text-gray-600">
-                            {sub.tools?.length || 0} machine(s) covered
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-gray-900">
+                              £{sub.monthly_price?.toFixed(2)}/month
+                            </h3>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              sub.status === 'active' ? 'bg-green-100 text-green-800' :
+                              sub.status === 'trial' ? 'bg-blue-100 text-blue-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {sub.status}
+                            </span>
+                          </div>
+                          {sub.trial_end_date && sub.status === 'trial' && (
+                            <p className="text-sm text-gray-600 mt-1">
+                              Trial ends: {new Date(sub.trial_end_date).toLocaleDateString('en-GB')}
+                            </p>
+                          )}
+                          {sub.contacts && (
+                            <p className="text-sm text-gray-600 mt-1">
+                              Contact: {sub.contacts.full_name} ({sub.contacts.email})
+                            </p>
+                          )}
                         </div>
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            sub.status === 'trial'
-                              ? 'bg-purple-100 text-purple-800'
-                              : 'bg-green-100 text-green-800'
-                          }`}
-                        >
-                          {sub.status}
-                        </span>
                       </div>
 
-                      {sub.status === 'trial' && sub.trial_end_date && (
-                        <div className="bg-orange-50 border border-orange-200 rounded p-3 mb-3">
-                          <p className="text-sm text-orange-800">
-                            <strong>Trial ends:</strong>{' '}
-                            {new Date(sub.trial_end_date).toLocaleDateString('en-GB')} (
-                            {Math.ceil((new Date(sub.trial_end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days)
-                          </p>
+                      {/* Tools on subscription */}
+                      {sub.subscription_tools && sub.subscription_tools.length > 0 ? (
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <p className="text-xs font-medium text-gray-700 mb-2">Tools Included:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {sub.subscription_tools.map((st: any) => (
+                              <span key={st.tool_code} className="inline-flex items-center px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded">
+                                {st.products?.description || st.tool_code}
+                              </span>
+                            ))}
+                          </div>
                         </div>
-                      )}
-
-                      {sub.next_billing_date && sub.status === 'active' && (
-                        <p className="text-sm text-gray-600">
-                          Next billing: {new Date(sub.next_billing_date).toLocaleDateString('en-GB')}
-                        </p>
-                      )}
-
-                      {sub.status === 'trial' && (
-                        <div className="flex gap-2 mt-3">
-                          <button className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium">
-                            Convert to Paid
-                          </button>
-                          <button className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">
-                            Extend Trial
-                          </button>
+                      ) : (
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <p className="text-xs text-amber-600">⚠️ No tools allocated - needs manual assignment</p>
                         </div>
                       )}
                     </div>
@@ -158,41 +162,62 @@ export default function StreamlinedCompanyView({
 
           {/* Consumables Section */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            <div className="px-6 py-4 border-b border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
               <h2 className="text-xl font-bold text-gray-900">Recent Consumables</h2>
-              <p className="text-sm text-gray-600 mt-1">Last 3 orders only (not full history)</p>
+              <Link
+                href={`/admin/company/${company.company_id}/reorder`}
+                className="px-3 py-1.5 bg-green-600 text-white rounded text-sm font-medium hover:bg-green-700"
+              >
+                Send Reorder Link
+              </Link>
             </div>
             <div className="p-6">
               {consumables.length === 0 ? (
-                <p className="text-gray-600 text-center py-8">No recent consumable orders</p>
+                <p className="text-gray-600 text-center py-8">No consumable orders yet</p>
               ) : (
                 <div className="space-y-3">
-                  {consumables.map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0"
-                    >
-                      <div>
-                        <h4 className="font-medium text-gray-900">{item.description}</h4>
-                        <p className="text-xs text-gray-500">Code: {item.product_code}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-gray-900">
-                          {new Date(item.order_date).toLocaleDateString('en-GB')}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {Math.floor((Date.now() - new Date(item.order_date).getTime()) / (1000 * 60 * 60 * 24))} days ago
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                  {consumables.map((consumable) => {
+                    const daysSinceOrder = Math.floor(
+                      (Date.now() - new Date(consumable.last_ordered_at).getTime()) / (1000 * 60 * 60 * 24)
+                    );
+                    const isReorderOpportunity = daysSinceOrder > 90;
 
-              {consumables.length > 0 && (
-                <button className="w-full mt-4 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 text-sm font-medium">
-                  Send Reorder Reminder
-                </button>
+                    return (
+                      <div
+                        key={consumable.consumable_code}
+                        className={`border rounded-lg p-4 ${
+                          isReorderOpportunity ? 'border-amber-300 bg-amber-50' : 'border-gray-200'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold text-gray-900">
+                                {consumable.products?.description || consumable.consumable_code}
+                              </h3>
+                              {isReorderOpportunity && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800">
+                                  Reorder!
+                                </span>
+                              )}
+                            </div>
+                            <div className="mt-1 text-sm text-gray-600">
+                              Last ordered: {new Date(consumable.last_ordered_at).toLocaleDateString('en-GB')} ({daysSinceOrder} days ago)
+                            </div>
+                            <div className="mt-1 text-sm text-gray-600">
+                              Last qty: {consumable.last_order_quantity} • Total ordered: {consumable.total_quantity} ({consumable.total_orders} orders)
+                            </div>
+                            {consumable.last_order_amount && (
+                              <div className="mt-1 text-sm font-medium text-gray-900">
+                                £{consumable.last_order_amount.toFixed(2)}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
           </div>
@@ -200,72 +225,61 @@ export default function StreamlinedCompanyView({
 
         {/* Sidebar (1/3 width) */}
         <div className="space-y-6">
-          {/* Contacts */}
+          {/* Contacts Section */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-bold text-gray-900">Contacts</h2>
+              <h2 className="text-xl font-bold text-gray-900">Contacts</h2>
             </div>
             <div className="p-6">
               {contacts.length === 0 ? (
-                <p className="text-sm text-gray-600">No contacts</p>
+                <p className="text-gray-600 text-center py-4">No contacts</p>
               ) : (
                 <div className="space-y-3">
-                  {contacts.map((contact) => (
-                    <div key={contact.contact_id} className="pb-3 border-b border-gray-100 last:border-b-0">
-                      <h4 className="font-medium text-gray-900 text-sm">
-                        {contact.full_name || `${contact.first_name} ${contact.last_name}`}
-                      </h4>
-                      <p className="text-xs text-gray-600">{contact.email}</p>
-                      {contact.phone && <p className="text-xs text-gray-600">{contact.phone}</p>}
-                      {contact.is_primary && (
-                        <span className="inline-block mt-1 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
-                          Primary
-                        </span>
-                      )}
+                  {contacts.slice(0, 5).map((contact) => (
+                    <div key={contact.contact_id} className="border-b border-gray-100 pb-3 last:border-0">
+                      <div className="font-medium text-gray-900">{contact.full_name || `${contact.first_name} ${contact.last_name}`}</div>
+                      {contact.email && <div className="text-sm text-gray-600">{contact.email}</div>}
+                      {contact.role && <div className="text-xs text-gray-500">{contact.role}</div>}
                     </div>
                   ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Company Info */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-bold text-gray-900">Company Info</h2>
-            </div>
-            <div className="p-6 space-y-2 text-sm">
-              <div>
-                <span className="text-gray-600">Country:</span>{' '}
-                <span className="font-medium text-gray-900">{company.country || 'UK'}</span>
-              </div>
-              {company.vat_number && (
-                <div>
-                  <span className="text-gray-600">VAT:</span>{' '}
-                  <span className="font-medium text-gray-900">{company.vat_number}</span>
-                </div>
-              )}
-              {company.eori_number && (
-                <div>
-                  <span className="text-gray-600">EORI:</span>{' '}
-                  <span className="font-medium text-gray-900">{company.eori_number}</span>
+                  {contacts.length > 5 && (
+                    <Link
+                      href={`/admin/company/${company.company_id}`}
+                      className="text-sm text-blue-600 hover:text-blue-700"
+                    >
+                      View all {contacts.length} contacts →
+                    </Link>
+                  )}
                 </div>
               )}
             </div>
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 className="font-semibold text-blue-900 mb-3 text-sm">Need full audit history?</h3>
-            <a
-              href={`/admin/company/${company.company_id}`}
-              className="block w-full px-4 py-2 bg-white text-blue-700 text-center rounded-lg hover:bg-blue-100 text-sm font-medium"
-            >
-              View in CRM →
-            </a>
-            <p className="text-xs text-blue-700 mt-2">
-              Full order history, invoices, and complete audit trail available in CRM section
-            </p>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">Quick Actions</h2>
+            </div>
+            <div className="p-6 space-y-3">
+              <Link
+                href={`/admin/company/${company.company_id}/reorder`}
+                className="block w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-center font-medium"
+              >
+                Send Reorder Email
+              </Link>
+              <Link
+                href={`/admin/quote-builder?company_id=${company.company_id}`}
+                className="block w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-center font-medium"
+              >
+                Create Quote
+              </Link>
+              <Link
+                href={`/admin/test-invoice?company_id=${company.company_id}`}
+                className="block w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-center font-medium"
+              >
+                Send Invoice
+              </Link>
+            </div>
           </div>
         </div>
       </div>
