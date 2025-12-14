@@ -14,9 +14,9 @@ export async function GET(
     const { companyId } = await context.params;
     const supabase = getSupabaseClient();
 
-    // Get company's tools from company_tool table
+    // Get company's tools from company_tools table
     const { data: companyTools } = await supabase
-      .from('company_tool')
+      .from('company_tools')
       .select('tool_code')
       .eq('company_id', companyId);
 
