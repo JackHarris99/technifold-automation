@@ -1,13 +1,15 @@
 /**
  * Admin Rentals Page
  * View all tool rental subscriptions
+ * ⚠️ DEPRECATED - Use Subscriptions instead
  */
 
 import { getSupabaseClient } from '@/lib/supabase';
 import Link from 'next/link';
+import DeprecationBanner from '@/components/admin/DeprecationBanner';
 
 export const metadata = {
-  title: 'Tool Rentals | Technifold Admin',
+  title: 'Tool Rentals (Legacy) | Technifold Admin',
   description: 'View active tool rental subscriptions',
 };
 
@@ -39,8 +41,15 @@ export default async function RentalsPage() {
 
   return (
     <div className="h-full flex flex-col overflow-auto bg-gray-50">
+      <DeprecationBanner
+        message="Rentals table is legacy. Use the new Subscriptions system for all ongoing rental management."
+        replacementUrl="/admin/subscriptions"
+        replacementLabel="View Subscriptions"
+        reason="The rental_agreements table is being replaced by the subscriptions table which provides better tracking and Stripe integration."
+      />
+
       <div className="px-6 py-6 bg-white border-b border-gray-200">
-        <h1 className="text-3xl font-bold text-gray-900">Tool Rentals</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Tool Rentals (Legacy)</h1>
         <p className="mt-2 text-gray-600">
           Manage tool rental subscriptions
         </p>

@@ -1,10 +1,12 @@
 /**
  * CRM Homepage - View-Only Audit System
  * Cross-territory company lookup and analytics
+ * ⚠️ DEPRECATED - Use Sales Center instead
  */
 
 import { getSupabaseClient } from '@/lib/supabase';
 import Link from 'next/link';
+import DeprecationBanner from '@/components/admin/DeprecationBanner';
 
 export default async function CRMPage() {
   const supabase = getSupabaseClient();
@@ -77,13 +79,20 @@ export default async function CRMPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <DeprecationBanner
+        message="This CRM view is deprecated. Use the new Sales Center for a streamlined sales workflow."
+        replacementUrl="/admin/sales"
+        replacementLabel="Go to Sales Center"
+        reason="Sales Center provides a better territory-focused experience with fact-based data architecture."
+      />
+
       {/* Header */}
       <div className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                CRM - System of Record
+                CRM - System of Record (Deprecated)
               </h1>
               <p className="text-sm text-gray-600 mt-1">
                 Cross-territory company lookup and complete audit history
