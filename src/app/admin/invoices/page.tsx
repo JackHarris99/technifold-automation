@@ -7,6 +7,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { getCurrentUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 interface Invoice {
   invoice_id: string;
@@ -86,7 +87,8 @@ export default async function InvoicesPage() {
   const paidTotal = paidInvoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <AdminLayout>
+      <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-6">
@@ -224,5 +226,6 @@ export default async function InvoicesPage() {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 }
