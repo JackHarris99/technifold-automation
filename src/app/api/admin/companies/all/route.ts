@@ -81,17 +81,19 @@ export async function GET() {
     }
 
     // 4. Aggregate in memory
-    const toolsByCompany = new Map<string, number>();
-    const toolsWithConsumablesByCompany = new Map<string, number>();
-    allTools.forEach(t => {
-      const current = toolsByCompany.get(t.company_id) || 0;
-      toolsByCompany.set(t.company_id, current + (t.total_units || 0));
+    const toolsByCompany = new Map<string, number>(); // Sum of total_units
+    const uniqueToolsByCompany = new Map<string, Set<string>>(); // Unique tool codes
 
-      // Count tools that have consumables mapped
-      if (toolsWithConsumables.has(t.tool_code)) {
-        const currentWithCons = toolsWithConsumablesByCompany.get(t.company_id) || 0;
-        toolsWithConsumablesByCompany.set(t.company_id, currentWithCons + 1);
+    allTools.forEach(t => {
+      // Sum total_units for machine_count
+      const current = toolsByCompany.get(t.company_id) || 0;
+      toolsByCompany.set(t.company_id, current + (t.total_units || 1));
+
+      // Track unique tool codes per company
+      if (!uniqueToolsByCompany.has(t.company_id)) {
+        uniqueToolsByCompany.set(t.company_id, new Set());
       }
+      uniqueToolsByCompany.get(t.company_id)!.add(t.tool_code);
     });
 
     const subsByCompany = new Map<string, { total: number; trials: number }>();
@@ -106,7 +108,7 @@ export async function GET() {
     const enrichedCompanies = allCompanies.map(company => ({
       ...company,
       machine_count: toolsByCompany.get(company.company_id) || 0,
-      tools_with_consumables: toolsWithConsumablesByCompany.get(company.company_id) || 0,
+      unique_tool_count: uniqueToolsByCompany.get(company.company_id)?.size || 0,
       subscription_count: subsByCompany.get(company.company_id)?.total || 0,
       has_trial: (subsByCompany.get(company.company_id)?.trials || 0) > 0,
     }));

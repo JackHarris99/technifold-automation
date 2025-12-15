@@ -12,7 +12,7 @@ interface Company {
   company_id: string;
   company_name: string;
   machine_count?: number;
-  tools_with_consumables?: number;
+  unique_tool_count?: number;
   country?: string;
 }
 
@@ -192,7 +192,7 @@ export default function TestReorderLinkPage() {
                       >
                         <div className="font-semibold text-gray-900">{company.company_name}</div>
                         <div className="text-sm text-gray-600">
-                          {company.company_id} • {company.country || 'UK'} • {company.tools_with_consumables || 0} in portal
+                          {company.company_id} • {company.country || 'UK'} • {company.machine_count || 0} tools ({company.unique_tool_count || 0} unique)
                         </div>
                       </button>
                     ))}
@@ -209,7 +209,8 @@ export default function TestReorderLinkPage() {
                 <div className="font-semibold text-green-900 mb-2">Selected Company</div>
                 <div><strong>Name:</strong> {selectedCompany.company_name}</div>
                 <div><strong>ID:</strong> {selectedCompany.company_id}</div>
-                <div><strong>Tools in Portal:</strong> {selectedCompany.tools_with_consumables || 0}</div>
+                <div><strong>Total Tools Owned:</strong> {selectedCompany.machine_count || 0}</div>
+                <div><strong>Unique Tool Types:</strong> {selectedCompany.unique_tool_count || 0} (tabs in portal)</div>
               </div>
             </div>
           )}
