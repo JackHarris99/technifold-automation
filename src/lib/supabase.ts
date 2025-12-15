@@ -244,7 +244,7 @@ export function generatePortalUrl(portalToken: string): string {
   const isDevelopment = process.env.NODE_ENV === 'development';
   const baseUrl = isDevelopment
     ? 'http://localhost:3000'
-    : (process.env.NEXT_PUBLIC_BASE_URL || 'https://technifold.com');
+    : (process.env.NEXT_PUBLIC_BASE_URL || 'https://www.technifold.com');
   return `${baseUrl}/portal/${portalToken}`;
 }
 

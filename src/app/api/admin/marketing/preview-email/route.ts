@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     // Generate token and URL
     const token = generateToken({ company_id, contact_id });
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://yourdomain.com';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.technifold.com';
     const tokenUrl = `${baseUrl}/m/${token}`;
 
     const contactName = contact.full_name || contact.first_name || '';

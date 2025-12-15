@@ -17,10 +17,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use the deployed URL or localhost
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ||
-                    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` :
-                    'http://localhost:3000';
+    // Use the production URL
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.technifold.com';
 
     // Generate the tokenized URL (30 days TTL)
     const url = generateReorderUrl(baseUrl, company_id, contact_id);

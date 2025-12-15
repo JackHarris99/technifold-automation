@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://technifold-automation.vercel.app';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.technifold.com';
 
     // Create Stripe Checkout Session for subscription with 30-day trial
     // Using price_data for dynamic pricing

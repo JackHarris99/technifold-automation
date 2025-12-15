@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. Create checkout session based on purchase type
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.technifold.com';
     let session: Stripe.Checkout.Session;
 
     if (body.purchase_type === 'rental') {

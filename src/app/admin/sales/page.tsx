@@ -245,6 +245,7 @@ export default async function SalesCenterPage() {
               emptyMessage="No trials ending this week"
               emptyIcon="✅"
               color="red"
+              viewAllHref="/admin/sales/trials-ending"
             >
               {trialsEnding.map((trial) => (
                 <Link
@@ -276,6 +277,7 @@ export default async function SalesCenterPage() {
               emptyMessage="All invoices paid"
               emptyIcon="💰"
               color="orange"
+              viewAllHref="/admin/sales/unpaid-invoices"
             >
               {unpaidInvoices.map((invoice) => (
                 <div
@@ -318,6 +320,7 @@ export default async function SalesCenterPage() {
               emptyMessage="No reorder opportunities found"
               emptyIcon="📦"
               color="purple"
+              viewAllHref="/admin/sales/reorder-opportunities"
             >
               {reorderOpportunities.map((opp) => (
                 <Link
@@ -417,6 +420,7 @@ function ActionSection({
   emptyMessage,
   emptyIcon,
   color,
+  viewAllHref,
   children,
 }: {
   title: string;
@@ -426,6 +430,7 @@ function ActionSection({
   emptyMessage: string;
   emptyIcon: string;
   color: 'red' | 'orange' | 'purple' | 'blue';
+  viewAllHref?: string;
   children: React.ReactNode;
 }) {
   const headerColors = {
@@ -452,9 +457,19 @@ function ActionSection({
             {count}
           </span>
         </div>
-        {total && (
-          <span className="text-sm font-semibold text-gray-700">{total}</span>
-        )}
+        <div className="flex items-center gap-3">
+          {total && (
+            <span className="text-sm font-semibold text-gray-700">{total}</span>
+          )}
+          {viewAllHref && count > 0 && (
+            <Link
+              href={viewAllHref}
+              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+            >
+              View All →
+            </Link>
+          )}
+        </div>
       </div>
 
       {count === 0 ? (

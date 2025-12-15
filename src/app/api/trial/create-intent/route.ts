@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Send email with offer link
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://technifold-automation.vercel.app';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.technifold.com';
     const offerUrl = `${baseUrl}/offer?token=${token}`;
     const machineName = `${machine_brand} ${machine_model}`.trim();
 

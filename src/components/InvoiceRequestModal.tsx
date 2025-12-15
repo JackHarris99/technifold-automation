@@ -8,7 +8,7 @@
 
 import { useState } from 'react';
 import { CartItem } from '@/types';
-import VATNumberForm from './shared/VATNumberForm';
+import CompanyDetailsForm from './shared/CompanyDetailsForm';
 
 interface InvoiceRequestModalProps {
   isOpen: boolean;
@@ -27,6 +27,18 @@ interface InvoiceResult {
   invoice_pdf_url?: string;
 }
 
+interface CompanyDetails {
+  company_id: string;
+  company_name: string;
+  address_line1: string;
+  address_line2: string;
+  city: string;
+  county: string;
+  postcode: string;
+  country: string;
+  vat_number: string;
+}
+
 export function InvoiceRequestModal({
   isOpen,
   onClose,
@@ -38,12 +50,11 @@ export function InvoiceRequestModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [invoiceResult, setInvoiceResult] = useState<InvoiceResult | null>(null);
-  const [showVATForm, setShowVATForm] = useState(false);
-  const [companyInfo, setCompanyInfo] = useState<{
-    company_id: string;
-    company_name: string;
-    country: string;
-    vat_number: string | null;
+  const [showDetailsForm, setShowDetailsForm] = useState(false);
+  const [detailsNeeded, setDetailsNeeded] = useState<{
+    addressNeeded: boolean;
+    vatNeeded: boolean;
+    company: CompanyDetails;
   } | null>(null);
 
   if (!isOpen) return null;
@@ -53,14 +64,18 @@ export function InvoiceRequestModal({
     setError(null);
 
     try {
-      // First check if VAT number is needed
-      const vatCheckResponse = await fetch(`/api/companies/check-vat-needed?company_id=${companyId}`);
-      const vatCheckData = await vatCheckResponse.json();
+      // Check if company details are complete
+      const checkResponse = await fetch(`/api/companies/check-details-needed?company_id=${companyId}`);
+      const checkData = await checkResponse.json();
 
-      if (vatCheckData.vat_needed) {
-        // Show VAT form
-        setCompanyInfo(vatCheckData.company);
-        setShowVATForm(true);
+      if (checkData.details_needed) {
+        // Show details form
+        setDetailsNeeded({
+          addressNeeded: checkData.address_needed,
+          vatNeeded: checkData.vat_needed,
+          company: checkData.company,
+        });
+        setShowDetailsForm(true);
         setLoading(false);
         return;
       }
@@ -109,27 +124,22 @@ export function InvoiceRequestModal({
     }
   };
 
-  const handleVATSaved = async (vatNumber: string) => {
-    // Update company info
-    if (companyInfo) {
-      setCompanyInfo({ ...companyInfo, vat_number: vatNumber });
-    }
-    setShowVATForm(false);
+  const handleDetailsSaved = async () => {
+    setShowDetailsForm(false);
     setLoading(true);
     await createInvoice();
   };
 
-  const handleVATSkipped = async () => {
-    setShowVATForm(false);
-    setLoading(true);
-    await createInvoice();
+  const handleDetailsCancel = () => {
+    setShowDetailsForm(false);
   };
 
   const handleClose = () => {
     if (!loading) {
       setInvoiceResult(null);
       setError(null);
-      setShowVATForm(false);
+      setShowDetailsForm(false);
+      setDetailsNeeded(null);
       onClose();
     }
   };
@@ -189,15 +199,15 @@ export function InvoiceRequestModal({
             </div>
           )}
 
-          {/* VAT Form */}
-          {showVATForm && companyInfo && (
+          {/* Company Details Form */}
+          {showDetailsForm && detailsNeeded && (
             <div className="mb-6">
-              <VATNumberForm
-                companyId={companyInfo.company_id}
-                companyName={companyInfo.company_name}
-                country={companyInfo.country}
-                onSaved={handleVATSaved}
-                onSkip={handleVATSkipped}
+              <CompanyDetailsForm
+                company={detailsNeeded.company}
+                addressNeeded={detailsNeeded.addressNeeded}
+                vatNeeded={detailsNeeded.vatNeeded}
+                onSaved={handleDetailsSaved}
+                onCancel={handleDetailsCancel}
               />
             </div>
           )}
@@ -258,7 +268,7 @@ export function InvoiceRequestModal({
           ) : (
             // Request Invoice View
             <>
-              {!showVATForm && (
+              {!showDetailsForm && (
                 <>
                   {/* Order Summary */}
                   <div className="mb-6">

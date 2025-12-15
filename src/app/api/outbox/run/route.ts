@@ -192,7 +192,7 @@ async function processSendOfferEmail(job: any) {
   const supabase = getSupabaseClient();
 
   // Generate tokenized landing URL
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://technifold-automation.vercel.app';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.technifold.com';
 
   // Determine URL type based on offer_key
   const isReorder = offer_key?.startsWith('reorder');
@@ -313,7 +313,7 @@ async function processSendTrialEmail(job: any) {
   }
 
   const supabase = getSupabaseClient();
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://technifold-automation.vercel.app';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.technifold.com';
 
   // Build trial email HTML
   const emailHtml = `
@@ -461,7 +461,7 @@ async function processSendReorderReminder(job: any) {
   }
 
   const supabase = getSupabaseClient();
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://technifold-automation.vercel.app';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.technifold.com';
 
   // Fetch company details
   const { data: company } = await supabase
