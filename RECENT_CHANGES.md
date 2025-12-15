@@ -1,7 +1,7 @@
 # Recent Changes - December 15, 2025
 
 ## Summary
-Completed 5 partially-implemented features to bring the platform to ~95% functionality. All core business workflows are now operational.
+Completed 4 partially-implemented features to bring the platform to ~95% functionality. All core business workflows are now operational.
 
 ---
 
@@ -30,27 +30,7 @@ Visit: `/invoices/commercial/{order_id}` for any international order
 
 ---
 
-## 2. Schema Fix - company_tools Table ✅
-
-### What It Does
-Fixes column name mismatch between database schema and application code.
-
-### Why It Was Needed
-- **Problem**: Code in reorder portal and admin pages queried `total_units` column, but the database migration created `total_quantity`
-- **Impact**: Queries would fail or return undefined values
-
-### What Changed
-- **`supabase/migrations/20251215_01_rename_total_quantity_to_total_units.sql`**: NEW migration that renames column and updates the upsert function
-
-### Why This Name
-"units" better represents physical tool count vs "quantity" which implies consumables
-
-### Test It
-Check company tools in `/admin/sales/company/{company_id}` - quantities should display correctly
-
----
-
-## 3. Machine Assignment UI ✅
+## 2. Machine Assignment UI ✅
 
 ### What It Does
 Allows sales reps to manually add, edit, and remove tools from companies (separate from purchase history).
@@ -84,7 +64,7 @@ Allows sales reps to manually add, edit, and remove tools from companies (separa
 
 ---
 
-## 4. Content Blocks Management ✅
+## 3. Content Blocks Management ✅
 
 ### What It Does
 Provides CRUD API for managing reusable content blocks (features, benefits, stats, testimonials).
@@ -112,7 +92,7 @@ Visit: `/admin/content-blocks`
 
 ---
 
-## 5. Shipping Manifest Workflow ✅
+## 4. Shipping Manifest Workflow ✅
 
 ### What It Does
 Admin interface for tracking international shipments with customs declarations.
@@ -142,16 +122,6 @@ Admin interface for tracking international shipments with customs declarations.
 
 ### Test It
 Visit: `/admin/shipping-manifests`
-
----
-
-## Database Changes Required
-
-**IMPORTANT**: Run this migration before deploying:
-```bash
-# This renames total_quantity to total_units in company_tools table
-supabase/migrations/20251215_01_rename_total_quantity_to_total_units.sql
-```
 
 ---
 
