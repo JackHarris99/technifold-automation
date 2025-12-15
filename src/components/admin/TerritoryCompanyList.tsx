@@ -12,22 +12,26 @@ import Link from 'next/link';
 interface TerritoryCompanyListProps {
   userId: string;
   userName: string;
+  isDirector?: boolean;
 }
 
-export default function TerritoryCompanyList({ userId, userName }: TerritoryCompanyListProps) {
+export default function TerritoryCompanyList({ userId, userName, isDirector = false }: TerritoryCompanyListProps) {
   const [companies, setCompanies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'name' | 'machines' | 'subscriptions'>('name');
 
   useEffect(() => {
     fetchTerritoryCompanies();
-  }, [userId]);
+  }, [userId, isDirector]);
 
   async function fetchTerritoryCompanies() {
     setLoading(true);
     try {
-      // Fetch companies filtered by account_owner on server side
-      const response = await fetch(`/api/admin/companies/territory?user_id=${userId}`);
+      // Directors see all companies, sales reps see only their territory
+      const url = isDirector
+        ? '/api/admin/companies/all'
+        : `/api/admin/companies/territory?user_id=${userId}`;
+      const response = await fetch(url);
       const data = await response.json();
       setCompanies(data.companies || []);
     } catch (error) {

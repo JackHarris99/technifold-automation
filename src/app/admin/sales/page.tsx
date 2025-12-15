@@ -42,11 +42,17 @@ export default async function SalesCenterPage() {
   let metricsError: any = null;
 
   try {
-    // Get companies in territory
-    const { data: companies } = await supabase
+    // Get companies in territory (directors see all, reps see their territory)
+    let companiesQuery = supabase
       .from('companies')
-      .select('company_id')
-      .eq('account_owner', currentUser.id);
+      .select('company_id');
+
+    // Only filter by account_owner for sales reps (not directors)
+    if (currentUser.role !== 'director' && currentUser.sales_rep_id) {
+      companiesQuery = companiesQuery.eq('account_owner', currentUser.sales_rep_id);
+    }
+
+    const { data: companies } = await companiesQuery;
 
     const companyIds = companies?.map(c => c.company_id) || [];
     const companiesInTerritory = companyIds.length;
@@ -111,10 +117,16 @@ export default async function SalesCenterPage() {
   let actionsError: any = null;
 
   try {
-    const { data: companies } = await supabase
+    // Get companies in territory (directors see all, reps see their territory)
+    let actionsCompaniesQuery = supabase
       .from('companies')
-      .select('company_id, company_name')
-      .eq('account_owner', currentUser.id);
+      .select('company_id, company_name');
+
+    if (currentUser.role !== 'director' && currentUser.sales_rep_id) {
+      actionsCompaniesQuery = actionsCompaniesQuery.eq('account_owner', currentUser.sales_rep_id);
+    }
+
+    const { data: companies } = await actionsCompaniesQuery;
 
     const companyIds = companies?.map(c => c.company_id) || [];
 

@@ -24,7 +24,11 @@ export default async function SalesCenterCompaniesPage() {
           </p>
         </div>
 
-        <TerritoryCompanyList userId={currentUser.id} userName={currentUser.full_name || currentUser.email} />
+        <TerritoryCompanyList
+          userId={currentUser.sales_rep_id || ''}
+          userName={currentUser.full_name || currentUser.email}
+          isDirector={currentUser.role === 'director'}
+        />
       </div>
     </div>
   );
