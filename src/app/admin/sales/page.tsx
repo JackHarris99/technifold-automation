@@ -131,28 +131,31 @@ export default async function SalesCenterPage() {
     const companyIds = companies?.map(c => c.company_id) || [];
 
     if (companyIds.length > 0) {
-      // Find reorder opportunities (consumables not ordered in 90+ days)
+      // Find reorder opportunities - companies that haven't ordered in 90+ days
+      // Use companies.last_invoice_at for company-level (not per-product) tracking
       const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
       const { data: reorderOpps } = await supabase
-        .from('company_consumables')
-        .select('company_id')
+        .from('companies')
+        .select('company_id, company_name, last_invoice_at')
         .in('company_id', companyIds)
-        .lt('last_ordered_at', ninetyDaysAgo)
-        .limit(5);
+        .not('last_invoice_at', 'is', null)
+        .lt('last_invoice_at', ninetyDaysAgo)
+        .order('last_invoice_at', { ascending: true })
+        .limit(10);
 
-      reorderOpps?.forEach((opp) => {
-        const company = companies?.find(c => c.company_id === opp.company_id);
-        if (company) {
-          urgentActions.push({
-            action_type: 'reorder_opportunity',
-            company_id: company.company_id,
-            company_name: company.company_name,
-            priority: 3,
-            message: 'Consumables not ordered in 90+ days',
-            action_data: {},
-            action_url: `/admin/sales/company/${company.company_id}`,
-          });
-        }
+      reorderOpps?.forEach((company) => {
+        const daysSinceOrder = Math.floor(
+          (Date.now() - new Date(company.last_invoice_at).getTime()) / (1000 * 60 * 60 * 24)
+        );
+        urgentActions.push({
+          action_type: 'reorder_opportunity',
+          company_id: company.company_id,
+          company_name: company.company_name,
+          priority: daysSinceOrder > 180 ? 2 : 3,
+          message: `Last order ${daysSinceOrder} days ago`,
+          action_data: { last_invoice_at: company.last_invoice_at },
+          action_url: `/admin/sales/company/${company.company_id}`,
+        });
       });
 
       // Find trials ending soon (within 7 days)
