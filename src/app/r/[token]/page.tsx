@@ -8,12 +8,141 @@ import { notFound } from 'next/navigation';
 import { verifyToken } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 import { PortalPage } from '@/components/PortalPage';
-import type { CompanyPayload } from '@/types';
+import type { CompanyPayload, ReorderItem, ToolTab } from '@/types';
 
 interface ReorderPortalProps {
   params: Promise<{
     token: string;
   }>;
+}
+
+/**
+ * Generate portal payload on-the-fly from database
+ * This ensures customers always see current data even if cache is empty
+ */
+async function generatePortalPayload(companyId: string, companyName: string): Promise<CompanyPayload> {
+  const supabase = getSupabaseClient();
+
+  // Get company's tools from company_tools table
+  const { data: companyTools } = await supabase
+    .from('company_tools')
+    .select('tool_code')
+    .eq('company_id', companyId);
+
+  if (!companyTools || companyTools.length === 0) {
+    return {
+      company_id: parseInt(companyId) || 0,
+      company_name: companyName,
+      reorder_items: [],
+      by_tool_tabs: []
+    };
+  }
+
+  const toolCodes = companyTools.map(ct => ct.tool_code);
+
+  // Get tool details
+  const { data: tools } = await supabase
+    .from('products')
+    .select('product_code, description, category, type')
+    .in('product_code', toolCodes)
+    .eq('type', 'tool');
+
+  // For each tool, get consumables
+  const toolsWithConsumables = await Promise.all(
+    (tools || []).map(async (tool) => {
+      // Get consumables for this tool
+      const { data: consumableMap } = await supabase
+        .from('tool_consumable_map')
+        .select('consumable_code')
+        .eq('tool_code', tool.product_code)
+        .limit(500);
+
+      const consumableCodes = (consumableMap || []).map(cm => cm.consumable_code);
+
+      if (consumableCodes.length === 0) {
+        return {
+          tool_code: tool.product_code,
+          tool_desc: tool.description,
+          items: [] as ReorderItem[]
+        };
+      }
+
+      // Get consumable details with prices
+      const { data: consumables } = await supabase
+        .from('products')
+        .select('product_code, description, price, category, image_url')
+        .in('product_code', consumableCodes)
+        .limit(500);
+
+      // Check order history for this company
+      const { data: companyOrders } = await supabase
+        .from('orders')
+        .select('order_id, created_at')
+        .eq('company_id', companyId)
+        .eq('payment_status', 'paid')
+        .order('created_at', { ascending: false });
+
+      const orderIds = companyOrders?.map(o => o.order_id) || [];
+
+      // Get order items for these orders
+      let orderItemsByProduct = new Map<string, string>();
+      if (orderIds.length > 0) {
+        const { data: orderItems } = await supabase
+          .from('order_items')
+          .select('product_code, order_id')
+          .in('order_id', orderIds)
+          .in('product_code', consumableCodes);
+
+        // Map product_code to most recent order date
+        orderItems?.forEach(oi => {
+          if (!orderItemsByProduct.has(oi.product_code)) {
+            const order = companyOrders?.find(o => o.order_id === oi.order_id);
+            if (order) {
+              orderItemsByProduct.set(oi.product_code, order.created_at);
+            }
+          }
+        });
+      }
+
+      const items: ReorderItem[] = (consumables || []).map(cons => ({
+        consumable_code: cons.product_code,
+        description: cons.description || cons.product_code,
+        price: cons.price,
+        last_purchased: orderItemsByProduct.get(cons.product_code)?.split('T')[0] || null,
+        category: cons.category
+      }));
+
+      return {
+        tool_code: tool.product_code,
+        tool_desc: tool.description,
+        items
+      };
+    })
+  );
+
+  // Extract previously ordered items (consumables with purchase history)
+  const reorderItems: ReorderItem[] = toolsWithConsumables
+    .flatMap(tool => tool.items.filter(item => item.last_purchased))
+    .sort((a, b) => {
+      if (!a.last_purchased) return 1;
+      if (!b.last_purchased) return -1;
+      return new Date(b.last_purchased).getTime() - new Date(a.last_purchased).getTime();
+    });
+
+  // Remove duplicates (same consumable might be in multiple tools)
+  const seenCodes = new Set<string>();
+  const uniqueReorderItems = reorderItems.filter(item => {
+    if (seenCodes.has(item.consumable_code)) return false;
+    seenCodes.add(item.consumable_code);
+    return true;
+  });
+
+  return {
+    company_id: parseInt(companyId) || 0,
+    company_name: companyName,
+    reorder_items: uniqueReorderItems,
+    by_tool_tabs: toolsWithConsumables as ToolTab[]
+  };
 }
 
 export default async function ReorderPortalPage({ params }: ReorderPortalProps) {
@@ -44,7 +173,7 @@ export default async function ReorderPortalPage({ params }: ReorderPortalProps) 
   const { company_id, contact_id } = payload;
   const supabase = getSupabaseClient();
 
-  // 2. Fetch company with cached portal payload
+  // 2. Fetch company
   const { data: company, error: companyError } = await supabase
     .from('companies')
     .select('company_id, company_name, portal_payload')
@@ -73,27 +202,30 @@ export default async function ReorderPortalPage({ params }: ReorderPortalProps) 
     }
   }
 
-  // 4. Get portal payload
+  // 4. Get portal payload - ALWAYS generate fresh if cache is empty
   let portalPayload: CompanyPayload;
 
-  if (company.portal_payload) {
-    // Use cached payload
+  if (company.portal_payload &&
+      (company.portal_payload as any).by_tool_tabs?.length > 0) {
+    // Use cached payload if it has data
     console.log(`[Reorder] Using cached payload for ${company.company_name}`);
     portalPayload = company.portal_payload as CompanyPayload;
   } else {
-    // No cache - return empty portal
-    console.log(`[Reorder] No cache for ${company.company_name} - empty portal`);
-    portalPayload = {
-      company_id: company.company_id,
-      company_name: company.company_name,
-      reorder_items: [],
-      by_tool_tabs: []
-    };
+    // Generate on-the-fly to ensure customer sees their data
+    console.log(`[Reorder] Generating payload on-the-fly for ${company.company_name}`);
+    portalPayload = await generatePortalPayload(company.company_id, company.company_name);
 
-    // Generate in background
-    supabase.rpc('regenerate_company_payload', { p_company_id: company.company_id })
+    // Update cache in background (don't await)
+    supabase
+      .from('companies')
+      .update({ portal_payload: portalPayload })
+      .eq('company_id', company.company_id)
       .then(({ error }) => {
-        if (error) console.error('[Reorder] Generation failed:', error);
+        if (error) {
+          console.error('[Reorder] Failed to update cache:', error);
+        } else {
+          console.log('[Reorder] Cache updated for', company.company_name);
+        }
       });
   }
 
