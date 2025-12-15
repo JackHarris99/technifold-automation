@@ -67,9 +67,8 @@ export function MarketingFooter() {
           <div>
             <h3 className="font-semibold mb-4">Contact</h3>
             <div className="text-sm text-gray-400 space-y-2">
-              <p>Email: info@technifold.com</p>
-              <p>Phone: +44 (0) 1234 567890</p>
-              <p>Support: support@technifold.com</p>
+              <p>Email: info@technifold.co.uk</p>
+              <p>Phone: +44 (0)1455 554491</p>
             </div>
           </div>
         </div>

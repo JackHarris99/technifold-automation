@@ -144,8 +144,8 @@ export default function TermsPage() {
             </p>
             <div className="text-gray-700 ml-4">
               <p>Technifold Limited</p>
-              <p>Email: info@technifold.com</p>
-              <p>Phone: +44 (0) 1707 393700</p>
+              <p>Email: info@technifold.co.uk</p>
+              <p>Phone: +44 (0)1455 554491</p>
             </div>
           </section>
 

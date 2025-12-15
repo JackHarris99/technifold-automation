@@ -31,8 +31,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
-                      <p className="text-gray-600">info@technifold.com</p>
-                      <p className="text-gray-600">support@technifold.com</p>
+                      <p className="text-gray-600">info@technifold.co.uk</p>
                     </div>
                   </div>
 
@@ -44,7 +43,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900 mb-1">Phone</h3>
-                      <p className="text-gray-600">+44 (0) 1234 567890</p>
+                      <p className="text-gray-600">+44 (0)1455 554491</p>
                       <p className="text-gray-600 text-sm">Mon-Fri 9:00 AM - 5:00 PM GMT</p>
                     </div>
                   </div>
@@ -60,9 +59,9 @@ export default function ContactPage() {
                       <h3 className="font-semibold text-gray-900 mb-1">Address</h3>
                       <p className="text-gray-600">
                         Technifold Limited<br />
-                        Innovation Way<br />
-                        Technology Park<br />
-                        Cambridge, CB4 0WS<br />
+                        Unit 2D Tungsten Park<br />
+                        Lutterworth<br />
+                        Leicestershire, LE17 4JA<br />
                         United Kingdom
                       </p>
                     </div>

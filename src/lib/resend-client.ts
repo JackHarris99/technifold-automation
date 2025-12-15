@@ -120,15 +120,15 @@ function emailFooter(): string {
       <tr>
         <td style="padding-top: 24px;">
           <p style="margin: 0 0 12px 0; font-size: 14px; line-height: 20px; color: #666666; font-family: Arial, sans-serif;">
-            Questions? Contact our support team:<br>
-            Email: <a href="mailto:support@technifold.com" style="color: #2563eb; text-decoration: none;">support@technifold.com</a><br>
-            Phone: +44 (0) 1455 555580
+            Questions? Contact our team:<br>
+            Email: <a href="mailto:info@technifold.co.uk" style="color: #2563eb; text-decoration: none;">info@technifold.co.uk</a><br>
+            Phone: +44 (0)1455 554491
           </p>
           <p style="margin: 0; font-size: 12px; line-height: 18px; color: #999999; font-family: Arial, sans-serif;">
             Technifold Ltd<br>
-            Unit 2, St John's Business Park<br>
-            Lutterworth, Leicestershire, LE17 4HB, UK<br>
-            <a href="https://technifold.com" style="color: #2563eb; text-decoration: none;">technifold.com</a>
+            Unit 2D Tungsten Park<br>
+            Lutterworth, Leicestershire, LE17 4JA, UK<br>
+            <a href="https://technifold.co.uk" style="color: #2563eb; text-decoration: none;">technifold.co.uk</a>
           </p>
         </td>
       </tr>

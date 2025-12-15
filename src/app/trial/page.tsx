@@ -69,7 +69,7 @@ function TrialPageContent() {
       setSubmitted(true);
     } catch (error) {
       console.error('Trial request error:', error);
-      alert('Something went wrong. Please try again or contact us at sales@technifold.co.uk');
+      alert('Something went wrong. Please try again or contact us at info@technifold.co.uk');
       setLoading(false);
     }
   }
@@ -100,7 +100,7 @@ function TrialPageContent() {
                   <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">1</div>
                   <div>
                     <div className="font-semibold">Check Your Email</div>
-                    <div className="text-sm text-gray-600">Look for an email from sales@technifold.co.uk in the next few minutes</div>
+                    <div className="text-sm text-gray-600">Look for an email from info@technifold.co.uk in the next few minutes</div>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">

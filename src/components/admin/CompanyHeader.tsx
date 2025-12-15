@@ -30,14 +30,7 @@ export default function CompanyHeader({ company }: CompanyHeaderProps) {
     alert('Create Invoice action - To be implemented');
   };
 
-  const handleOpenInZoho = () => {
-    if (company.zoho_account_id) {
-      window.open(`https://crm.zoho.com/crm/org123/tab/Accounts/${company.zoho_account_id}`, '_blank');
-    } else {
-      alert('Company not synced to Zoho yet');
-    }
-  };
-
+  
   const handleCopyPortalLink = () => {
     if (company.portal_token) {
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
@@ -103,15 +96,7 @@ export default function CompanyHeader({ company }: CompanyHeaderProps) {
               >
                 Create Invoice
               </button>
-              {company.zoho_account_id && (
-                <button
-                  onClick={handleOpenInZoho}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  Open in Zoho →
-                </button>
-              )}
-            </div>
+                          </div>
           </div>
         </div>
       </div>

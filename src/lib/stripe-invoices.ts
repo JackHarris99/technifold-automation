@@ -6,9 +6,20 @@
 import Stripe from 'stripe';
 import { getSupabaseClient } from './supabase';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
-});
+// Lazy-load Stripe client to avoid build-time errors
+let stripeClient: Stripe | null = null;
+
+function getStripeClient(): Stripe {
+  if (!stripeClient) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('STRIPE_SECRET_KEY environment variable is required');
+    }
+    stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2024-12-18.acacia',
+    });
+  }
+  return stripeClient;
+}
 
 interface InvoiceLineItem {
   product_code: string;
@@ -67,7 +78,7 @@ function calculateVAT(subtotal: number, country: string, vatNumber: string | nul
       };
     } else {
       // EU customer without VAT number - should collect VAT (or refuse sale)
-      console.warn(`EU customer ${company_id} missing VAT number`);
+      console.warn(`EU customer in ${countryUpper} missing VAT number`);
       return {
         vat_amount: 0,
         vat_rate: 0,
@@ -123,7 +134,7 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
     let stripeCustomerId = company.stripe_customer_id;
 
     if (!stripeCustomerId) {
-      const customer = await stripe.customers.create({
+      const customer = await getStripeClient().customers.create({
         email: contact.email,
         name: company.company_name,
         metadata: {
@@ -141,7 +152,7 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
     }
 
     // 4. Create draft invoice first
-    const invoice = await stripe.invoices.create({
+    const invoice = await getStripeClient().invoices.create({
       customer: stripeCustomerId,
       collection_method: 'send_invoice',
       days_until_due: 0, // Due on receipt
@@ -161,7 +172,7 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
 
     // 5. Add line items to the invoice
     for (const item of items) {
-      await stripe.invoiceItems.create({
+      await getStripeClient().invoiceItems.create({
         customer: stripeCustomerId,
         invoice: invoice.id, // Attach to specific invoice
         amount: Math.round(item.unit_price * item.quantity * 100), // Convert to pence
@@ -177,7 +188,7 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
 
     // 6. Add VAT line item if applicable
     if (vat_amount > 0) {
-      await stripe.invoiceItems.create({
+      await getStripeClient().invoiceItems.create({
         customer: stripeCustomerId,
         invoice: invoice.id, // Attach to specific invoice
         amount: Math.round(vat_amount * 100),
@@ -188,7 +199,7 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
     }
 
     // 7. Finalize invoice (makes it immutable and sendable)
-    const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id);
+    const finalizedInvoice = await getStripeClient().invoices.finalizeInvoice(invoice.id);
     console.log('[stripe-invoices] Finalized invoice. Total:', finalizedInvoice.amount_due / 100);
 
     // 8. Send invoice via Resend (NOT Stripe's automatic email)
@@ -299,7 +310,7 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
  */
 export async function voidStripeInvoice(stripeInvoiceId: string): Promise<{ success: boolean; error?: string }> {
   try {
-    await stripe.invoices.voidInvoice(stripeInvoiceId);
+    await getStripeClient().invoices.voidInvoice(stripeInvoiceId);
 
     // Update invoice in Supabase
     const supabase = getSupabaseClient();

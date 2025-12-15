@@ -630,8 +630,8 @@ export default function QuotePreview({
           <div className="text-center text-sm text-gray-600">
             <p className="mb-2">
               Questions about this quote? Contact us at{' '}
-              <a href="mailto:sales@technifold.com" className="text-blue-600 hover:underline font-semibold">
-                sales@technifold.com
+              <a href="mailto:info@technifold.co.uk" className="text-blue-600 hover:underline font-semibold">
+                info@technifold.co.uk
               </a>
             </p>
             <p className="text-xs text-gray-500">

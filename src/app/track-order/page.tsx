@@ -247,7 +247,7 @@ export default function TrackOrderPage() {
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-700">
                   <strong>Need help with your order?</strong><br />
-                  Contact us at <a href="mailto:support@technifold.com" className="text-blue-600 hover:underline">support@technifold.com</a> or call +44 (0) 1707 393700
+                  Contact us at <a href="mailto:info@technifold.co.uk" className="text-blue-600 hover:underline">info@technifold.co.uk</a> or call +44 (0)1455 554491
                 </p>
               </div>
             </div>

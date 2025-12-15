@@ -75,7 +75,7 @@ export default function QuoteSuccessPage() {
           </div>
 
           <p className="text-sm text-gray-500 mt-8">
-            Need help? Email us at support@technifold.com
+            Need help? Email us at info@technifold.co.uk
           </p>
         </div>
       </main>

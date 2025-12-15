@@ -85,7 +85,7 @@ export default function MachinePageClient({
       setSubmitted(true);
     } catch (error) {
       console.error('Trial request error:', error);
-      alert('Something went wrong. Please try again or contact us at sales@technifold.co.uk');
+      alert('Something went wrong. Please try again or contact us at info@technifold.co.uk');
       setLoading(false);
     }
   }

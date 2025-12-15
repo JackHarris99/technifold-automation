@@ -106,12 +106,12 @@ export async function generateCommercialInvoice(params: CommercialInvoiceParams)
 
       // Exporter (Technifold)
       exporterName: 'Technifold Ltd',
-      exporterAddress: 'Unit 2, St John\'s Business Park',
+      exporterAddress: 'Unit 2D Tungsten Park',
       exporterCity: 'Lutterworth',
-      exporterPostcode: 'LE17 4HB',
+      exporterPostcode: 'LE17 4JA',
       exporterCountry: 'United Kingdom',
-      exporterVAT: 'GB123456789', // TODO: Get from env or config
-      exporterEORI: 'GB123456789000', // TODO: Get from env or config
+      exporterVAT: 'GB738934000',
+      exporterEORI: '', // EORI to be added when available
 
       // Consignee (Customer)
       consigneeName: company.company_name,
