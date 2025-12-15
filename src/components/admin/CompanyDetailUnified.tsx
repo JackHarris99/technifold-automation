@@ -81,6 +81,15 @@ export default function CompanyDetailUnified({
   // Invoice modal
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
 
+  // Contact logging
+  const [loggingContact, setLoggingContact] = useState(false);
+  const [contactLog, setContactLog] = useState({
+    method: 'phone',
+    contact_id: '',
+    notes: '',
+  });
+  const [savingContactLog, setSavingContactLog] = useState(false);
+
   // Get color scheme for this company's owner
   const ownerColors = OWNER_COLORS[company.account_owner || ''] || {
     border: 'border-gray-300',
@@ -190,8 +199,51 @@ export default function CompanyDetailUnified({
     }
   };
 
+  const handleLogContact = async () => {
+    if (!contactLog.notes.trim()) {
+      alert('Please add notes about the contact');
+      return;
+    }
+
+    setSavingContactLog(true);
+    try {
+      const response = await fetch(`/api/admin/companies/${company.company_id}/log-contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          method: contactLog.method,
+          contact_id: contactLog.contact_id || null,
+          notes: contactLog.notes,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to log contact');
+
+      alert('Contact logged successfully!');
+      setLoggingContact(false);
+      setContactLog({ method: 'phone', contact_id: '', notes: '' });
+      router.refresh();
+    } catch (error) {
+      console.error('Log contact error:', error);
+      alert('Failed to log contact');
+    } finally {
+      setSavingContactLog(false);
+    }
+  };
+
   const lastOrder = orders.length > 0 ? orders[0] : null;
   const totalRevenue = orders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
+
+  // Calculate last contacted date from manual contact logs
+  const manualContacts = recentEngagement.filter(e =>
+    e.event_type?.includes('manual_contact')
+  );
+  const lastContacted = manualContacts.length > 0
+    ? manualContacts[0].occurred_at
+    : null;
+  const daysSinceContact = lastContacted
+    ? Math.floor((Date.now() - new Date(lastContacted).getTime()) / (1000 * 60 * 60 * 24))
+    : null;
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
@@ -219,9 +271,9 @@ export default function CompanyDetailUnified({
                 <div className="font-bold text-xl text-gray-900">{contacts.length}</div>
               </div>
               <div>
-                <div className="text-gray-500 text-xs uppercase">Last Order</div>
-                <div className="font-bold text-xl text-gray-900">
-                  {lastOrder ? new Date(lastOrder.created_at).toLocaleDateString() : 'Never'}
+                <div className="text-gray-500 text-xs uppercase">Last Contacted</div>
+                <div className={`font-bold text-xl ${daysSinceContact && daysSinceContact > 90 ? 'text-red-600' : daysSinceContact && daysSinceContact > 30 ? 'text-orange-600' : 'text-gray-900'}`}>
+                  {lastContacted ? `${daysSinceContact}d ago` : 'Never'}
                 </div>
               </div>
               <div>
@@ -351,6 +403,101 @@ export default function CompanyDetailUnified({
                   <div className="text-sm font-bold text-gray-700">Company ID</div>
                   <div className="text-gray-500 text-sm font-mono">{company.company_id}</div>
                 </div>
+              </div>
+            )}
+          </div>
+
+          {/* Log Contact Card */}
+          <div className="bg-white border-2 border-blue-200 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Log Contact</h2>
+                <p className="text-sm text-gray-600 mt-1">Record phone calls, emails, or visits</p>
+              </div>
+              <button
+                onClick={() => setLoggingContact(!loggingContact)}
+                disabled={!canAct}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loggingContact ? 'Cancel' : '+ Log Contact'}
+              </button>
+            </div>
+
+            {loggingContact && (
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Contact Method</label>
+                    <select
+                      value={contactLog.method}
+                      onChange={(e) => setContactLog({ ...contactLog, method: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                    >
+                      <option value="phone">📞 Phone Call</option>
+                      <option value="email">📧 Email</option>
+                      <option value="visit">🏢 In-Person Visit</option>
+                      <option value="meeting">💼 Meeting</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Contact Person (Optional)</label>
+                    <select
+                      value={contactLog.contact_id}
+                      onChange={(e) => setContactLog({ ...contactLog, contact_id: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                    >
+                      <option value="">-- General company contact --</option>
+                      {contacts.map((contact) => (
+                        <option key={contact.contact_id} value={contact.contact_id}>
+                          {contact.full_name || contact.email}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Notes *</label>
+                    <textarea
+                      value={contactLog.notes}
+                      onChange={(e) => setContactLog({ ...contactLog, notes: e.target.value })}
+                      placeholder="What was discussed? Any follow-up needed?"
+                      rows={4}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                    />
+                  </div>
+
+                  <button
+                    onClick={handleLogContact}
+                    disabled={savingContactLog || !contactLog.notes.trim()}
+                    className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400"
+                  >
+                    {savingContactLog ? 'Logging...' : 'Save Contact Log'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Show recent contact logs */}
+            {manualContacts.length > 0 && (
+              <div className="mt-4 space-y-2">
+                <h3 className="text-sm font-bold text-gray-700">Recent Contact History</h3>
+                {manualContacts.slice(0, 5).map((contact, idx) => (
+                  <div key={idx} className="text-sm p-3 bg-gray-50 rounded border border-gray-200">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-semibold">
+                        {contact.event_type === 'manual_contact_phone' && '📞 Phone'}
+                        {contact.event_type === 'manual_contact_email' && '📧 Email'}
+                        {contact.event_type === 'manual_contact_visit' && '🏢 Visit'}
+                        {contact.event_type === 'manual_contact_meeting' && '💼 Meeting'}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {new Date(contact.occurred_at).toLocaleDateString('en-GB')}
+                      </span>
+                    </div>
+                    <div className="text-gray-700">{contact.meta?.notes || contact.event_name}</div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
