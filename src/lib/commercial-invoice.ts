@@ -96,7 +96,7 @@ export async function generateCommercialInvoice(params: CommercialInvoiceParams)
     });
 
     // 6. Calculate totals
-    const totalWeight = lineItems.reduce((sum, item) => sum + item.total_weight_kg, 0);
+    const totalWeight = lineItems.reduce((sum: number, item: any) => sum + item.total_weight_kg, 0);
     const totalValue = order.subtotal; // Use order subtotal for accuracy
 
     // 7. Generate HTML for commercial invoice
@@ -472,7 +472,7 @@ export async function getCommercialInvoiceHtml(order_id: string): Promise<string
     });
 
     // 6. Calculate totals
-    const totalWeight = lineItems.reduce((sum, item) => sum + item.total_weight_kg, 0);
+    const totalWeight = lineItems.reduce((sum: number, item: any) => sum + item.total_weight_kg, 0);
     const totalValue = order.subtotal;
 
     // 7. Generate HTML
