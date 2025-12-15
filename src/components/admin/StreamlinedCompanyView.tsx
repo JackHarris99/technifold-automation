@@ -274,10 +274,10 @@ export default function StreamlinedCompanyView({
                 Create Quote
               </Link>
               <Link
-                href={`/admin/test-invoice?company_id=${company.company_id}`}
+                href={`/admin/invoices/new?company_id=${company.company_id}`}
                 className="block w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-center font-medium"
               >
-                Send Invoice
+                Create Invoice
               </Link>
             </div>
           </div>

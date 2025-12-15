@@ -33,7 +33,7 @@ export default function AdminNavigation({ isDirector }: AdminNavigationProps) {
 
           <NavSection title="Quick Tools">
             <NavLink href="/admin/quote-builder" icon="📄" label="Create Quote" />
-            <NavLink href="/admin/test-invoice" icon="📧" label="Send Invoice" />
+            <NavLink href="/admin/invoices/new" icon="💳" label="Create Invoice" />
             <NavLink href="/admin/sku-explorer" icon="📦" label="SKU Explorer" />
           </NavSection>
         </>

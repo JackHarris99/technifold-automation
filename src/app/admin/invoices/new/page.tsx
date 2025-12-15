@@ -1,7 +1,7 @@
 /**
- * Invoice Creation Test Page
- * Simple UI to test end-to-end invoice creation:
- * Stripe Invoice → Resend Email → Supabase Order Record
+ * Invoice Builder
+ * Create and send invoices to customers
+ * Stripe Invoice → Resend Email → Supabase Record
  */
 
 'use client';
@@ -35,7 +35,7 @@ interface InvoiceItem {
   unit_price: number;
 }
 
-export default function TestInvoicePage() {
+export default function NewInvoicePage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -198,7 +198,7 @@ export default function TestInvoicePage() {
     setInvoiceItems(invoiceItems.filter((_, i) => i !== index));
   };
 
-  const createTestInvoice = async () => {
+  const createInvoice = async () => {
     setLoading(true);
     setError(null);
     setResult(null);
@@ -208,7 +208,7 @@ export default function TestInvoicePage() {
         throw new Error('Please add at least one product to the invoice');
       }
 
-      console.log('[TEST] Creating invoice with:', {
+      console.log('[INVOICE] Creating invoice with:', {
         company_id: selectedCompanyId,
         contact_id: selectedContactId,
         items: invoiceItems,
@@ -225,7 +225,7 @@ export default function TestInvoicePage() {
           contact_id: selectedContactId,
           items: invoiceItems,
           currency: 'gbp',
-          notes: 'TEST INVOICE - Created via Test Page',
+          notes: 'Created via Invoice Builder',
         }),
       });
 
@@ -235,11 +235,11 @@ export default function TestInvoicePage() {
         throw new Error(data.error || `HTTP ${response.status}`);
       }
 
-      console.log('[TEST] Invoice created successfully:', data);
+      console.log('[INVOICE] Invoice created successfully:', data);
       setResult(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      console.error('[TEST] Invoice creation failed:', err);
+      console.error('[INVOICE] Invoice creation failed:', err);
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -257,10 +257,10 @@ export default function TestInvoicePage() {
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Invoice Creation Test
+            Create Invoice
           </h1>
           <p className="text-sm text-gray-600">
-            Test the complete invoice flow: Stripe Invoice → Resend Email → Supabase DB
+            Create and send invoices with Stripe billing integration
           </p>
         </div>
 
@@ -480,7 +480,7 @@ export default function TestInvoicePage() {
         {selectedCompanyId && selectedContactId && invoiceItems.length > 0 && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
             <button
-              onClick={createTestInvoice}
+              onClick={createInvoice}
               disabled={loading}
               className="w-full bg-green-600 text-white px-6 py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
