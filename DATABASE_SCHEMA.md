@@ -105,12 +105,30 @@ Consumable order history per company (fact table)
 - `last_order_quantity` (integer) - Last order quantity
 - `last_invoice_id` (text) - Reference to last invoice
 
+### company_product_history
+Purchase history for other products (parts, accessories, services, etc.)
+- `company_id` (text, PK, FK → companies)
+- `product_code` (text, PK, FK → products)
+- `product_type` (text) - Product type from products.type (part, accessory, service, etc.)
+- `first_purchased_at` (date) - First purchase date
+- `last_purchased_at` (date) - Most recent purchase date
+- `total_purchases` (integer) - Number of purchase transactions
+- `total_quantity` (integer) - Total quantity purchased
+- `last_purchase_amount` (numeric) - Last purchase amount
+- `last_invoice_id` (text) - Reference to last invoice
+
+**Note**: This complements company_tools (for machines) and company_consumables (for reorder items). Use this for everything else (parts, accessories, services).
+
 ---
 
 ## Orders & Invoicing
 
-### orders
-Customer orders
+### ⚠️ orders (DEPRECATED - Historic Sage Data)
+**STATUS**: Deprecated - Do not build new features on this table
+**REASON**: Contains messy historic Sage invoice data. Facts extracted to company_tools/company_consumables/company_product_history.
+**ACTION**: Use for reference only. Future invoicing uses `invoices` table.
+
+Customer orders (historic Sage data)
 - `order_id` (uuid, PK)
 - `company_id` (text, FK → companies)
 - `currency` (text) - Currency code (default: GBP)
@@ -151,8 +169,12 @@ Customer orders
 - `rental_agreement_id` (uuid, FK → rental_agreements)
 - `created_at`, `updated_at` (timestamptz)
 
-### order_items
-Line items for orders
+### ⚠️ order_items (DEPRECATED - Historic Sage Data)
+**STATUS**: Deprecated - Do not build new features on this table
+**REASON**: Line items from messy historic Sage data. See `orders` table deprecation note.
+**ACTION**: Use for reference only. Future invoicing uses `invoice_items` table.
+
+Line items for orders (historic Sage data)
 - `order_id` (uuid, PK, FK → orders)
 - `product_code` (text, PK, FK → products)
 - `description` (text)
@@ -361,8 +383,12 @@ All customer engagement events
 - `value` (numeric) - Monetary value if applicable
 - `currency` (text) - Currency code
 
-### contact_interactions
-Legacy contact interactions (being phased out for engagement_events)
+### ⚠️ contact_interactions (DEPRECATED - Use engagement_events)
+**STATUS**: Deprecated - Do not build new features on this table
+**REASON**: Superseded by `engagement_events` which tracks at both company AND contact level with richer data (campaigns, value, etc.)
+**ACTION**: Use `engagement_events` for all new tracking. This table kept for reference only.
+
+Legacy contact interactions
 - `id` (uuid, PK)
 - `company_id` (text, FK → companies)
 - `contact_id` (uuid, FK → contacts)
