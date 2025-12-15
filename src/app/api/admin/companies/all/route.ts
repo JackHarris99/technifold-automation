@@ -55,19 +55,6 @@ export async function GET() {
       if (tools) allTools = allTools.concat(tools);
     }
 
-    // 2b. Get all tool codes that have consumables mapped
-    const allToolCodes = [...new Set(allTools.map(t => t.tool_code))];
-    let toolsWithConsumables = new Set<string>();
-
-    for (let i = 0; i < allToolCodes.length; i += 500) {
-      const batch = allToolCodes.slice(i, i + 500);
-      const { data: mappings } = await supabase
-        .from('tool_consumable_map')
-        .select('tool_code')
-        .in('tool_code', batch);
-      mappings?.forEach(m => toolsWithConsumables.add(m.tool_code));
-    }
-
     // 3. Fetch ALL subscriptions in batches
     let allSubscriptions: any[] = [];
     for (let i = 0; i < companyIds.length; i += 500) {
