@@ -29,15 +29,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: companiesError.message }, { status: 500 });
     }
 
-    // For each company, get machine count and subscription count
+    // For each company, get tool count and subscription count from fact tables
     const enrichedCompanies = await Promise.all(
       (companies || []).map(async (company) => {
-        // Count machines
-        const { count: machineCount } = await supabase
-          .from('tools')
-          .select('*', { count: 'exact', head: true })
-          .eq('company_id', company.company_id)
-          .eq('status', 'active');
+        // Count tools from company_tools fact table
+        const { data: tools } = await supabase
+          .from('company_tools')
+          .select('total_units')
+          .eq('company_id', company.company_id);
+
+        const machineCount = tools?.reduce((sum, t) => sum + (t.total_units || 0), 0) || 0;
 
         // Count active subscriptions
         const { count: subscriptionCount } = await supabase
@@ -55,7 +56,7 @@ export async function GET(request: NextRequest) {
 
         return {
           ...company,
-          machine_count: machineCount || 0,
+          machine_count: machineCount,
           subscription_count: subscriptionCount || 0,
           has_trial: (trialCount || 0) > 0,
         };

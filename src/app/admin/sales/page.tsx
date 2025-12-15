@@ -37,15 +37,142 @@ export default async function SalesCenterPage() {
 
   const supabase = getSupabaseClient();
 
-  // Fetch urgent actions for this rep
-  const { data: urgentActions, error: actionsError } = await supabase
-    .rpc('get_urgent_actions', { rep_id: currentUser.id });
+  // Build metrics from fact tables
+  let salesMetrics: SalesMetrics | null = null;
+  let metricsError: any = null;
 
-  // Fetch performance metrics
-  const { data: metrics, error: metricsError } = await supabase
-    .rpc('get_sales_metrics', { rep_id: currentUser.id });
+  try {
+    // Get companies in territory
+    const { data: companies } = await supabase
+      .from('companies')
+      .select('company_id')
+      .eq('account_owner', currentUser.id);
 
-  const salesMetrics: SalesMetrics | null = metrics?.[0] || null;
+    const companyIds = companies?.map(c => c.company_id) || [];
+    const companiesInTerritory = companyIds.length;
+
+    if (companiesInTerritory > 0) {
+      // Get revenue from paid invoices (last 30 days)
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: invoices } = await supabase
+        .from('invoices')
+        .select('total_amount')
+        .in('company_id', companyIds)
+        .eq('payment_status', 'paid')
+        .gte('invoice_date', thirtyDaysAgo);
+
+      const totalRevenue = invoices?.reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0;
+      const dealsClosed = invoices?.length || 0;
+
+      // Get active trials
+      const { count: activeTrials } = await supabase
+        .from('subscriptions')
+        .select('*', { count: 'exact', head: true })
+        .in('company_id', companyIds)
+        .eq('status', 'trial');
+
+      // Get unpaid invoices
+      const { data: unpaidInvoices } = await supabase
+        .from('invoices')
+        .select('total_amount')
+        .in('company_id', companyIds)
+        .eq('payment_status', 'unpaid');
+
+      const unpaidInvoicesCount = unpaidInvoices?.length || 0;
+      const unpaidInvoicesTotal = unpaidInvoices?.reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0;
+
+      salesMetrics = {
+        total_revenue: totalRevenue,
+        deals_closed: dealsClosed,
+        active_trials: activeTrials || 0,
+        trial_conversion_rate: 0, // TODO: calculate from fact tables
+        companies_in_territory: companiesInTerritory,
+        unpaid_invoices_count: unpaidInvoicesCount,
+        unpaid_invoices_total: unpaidInvoicesTotal,
+      };
+    } else {
+      salesMetrics = {
+        total_revenue: 0,
+        deals_closed: 0,
+        active_trials: 0,
+        trial_conversion_rate: 0,
+        companies_in_territory: 0,
+        unpaid_invoices_count: 0,
+        unpaid_invoices_total: 0,
+      };
+    }
+  } catch (error) {
+    console.error('Error fetching metrics:', error);
+    metricsError = error;
+  }
+
+  // Build urgent actions from fact tables
+  const urgentActions: UrgentAction[] = [];
+  let actionsError: any = null;
+
+  try {
+    const { data: companies } = await supabase
+      .from('companies')
+      .select('company_id, company_name')
+      .eq('account_owner', currentUser.id);
+
+    const companyIds = companies?.map(c => c.company_id) || [];
+
+    if (companyIds.length > 0) {
+      // Find reorder opportunities (consumables not ordered in 90+ days)
+      const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: reorderOpps } = await supabase
+        .from('company_consumables')
+        .select('company_id')
+        .in('company_id', companyIds)
+        .lt('last_ordered_at', ninetyDaysAgo)
+        .limit(5);
+
+      reorderOpps?.forEach((opp) => {
+        const company = companies?.find(c => c.company_id === opp.company_id);
+        if (company) {
+          urgentActions.push({
+            action_type: 'reorder_opportunity',
+            company_id: company.company_id,
+            company_name: company.company_name,
+            priority: 3,
+            message: 'Consumables not ordered in 90+ days',
+            action_data: {},
+            action_url: `/admin/sales/company/${company.company_id}`,
+          });
+        }
+      });
+
+      // Find trials ending soon (within 7 days)
+      const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: endingTrials } = await supabase
+        .from('subscriptions')
+        .select('company_id, trial_end_date')
+        .in('company_id', companyIds)
+        .eq('status', 'trial')
+        .lt('trial_end_date', sevenDaysFromNow)
+        .limit(5);
+
+      endingTrials?.forEach((trial) => {
+        const company = companies?.find(c => c.company_id === trial.company_id);
+        if (company) {
+          const daysLeft = Math.ceil((new Date(trial.trial_end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+          urgentActions.push({
+            action_type: 'trial_ending',
+            company_id: company.company_id,
+            company_name: company.company_name,
+            priority: 1,
+            message: `Trial ending in ${daysLeft} days`,
+            action_data: { trial_end_date: trial.trial_end_date },
+            action_url: `/admin/sales/company/${company.company_id}`,
+          });
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching urgent actions:', error);
+    actionsError = error;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
