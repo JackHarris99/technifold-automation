@@ -50,9 +50,22 @@ export async function GET() {
       const batch = companyIds.slice(i, i + 500);
       const { data: tools } = await supabase
         .from('company_tools')
-        .select('company_id, total_units')
+        .select('company_id, tool_code, total_units')
         .in('company_id', batch);
       if (tools) allTools = allTools.concat(tools);
+    }
+
+    // 2b. Get all tool codes that have consumables mapped
+    const allToolCodes = [...new Set(allTools.map(t => t.tool_code))];
+    let toolsWithConsumables = new Set<string>();
+
+    for (let i = 0; i < allToolCodes.length; i += 500) {
+      const batch = allToolCodes.slice(i, i + 500);
+      const { data: mappings } = await supabase
+        .from('tool_consumable_map')
+        .select('tool_code')
+        .in('tool_code', batch);
+      mappings?.forEach(m => toolsWithConsumables.add(m.tool_code));
     }
 
     // 3. Fetch ALL subscriptions in batches
@@ -69,9 +82,16 @@ export async function GET() {
 
     // 4. Aggregate in memory
     const toolsByCompany = new Map<string, number>();
+    const toolsWithConsumablesByCompany = new Map<string, number>();
     allTools.forEach(t => {
       const current = toolsByCompany.get(t.company_id) || 0;
       toolsByCompany.set(t.company_id, current + (t.total_units || 0));
+
+      // Count tools that have consumables mapped
+      if (toolsWithConsumables.has(t.tool_code)) {
+        const currentWithCons = toolsWithConsumablesByCompany.get(t.company_id) || 0;
+        toolsWithConsumablesByCompany.set(t.company_id, currentWithCons + 1);
+      }
     });
 
     const subsByCompany = new Map<string, { total: number; trials: number }>();
@@ -86,6 +106,7 @@ export async function GET() {
     const enrichedCompanies = allCompanies.map(company => ({
       ...company,
       machine_count: toolsByCompany.get(company.company_id) || 0,
+      tools_with_consumables: toolsWithConsumablesByCompany.get(company.company_id) || 0,
       subscription_count: subsByCompany.get(company.company_id)?.total || 0,
       has_trial: (subsByCompany.get(company.company_id)?.trials || 0) > 0,
     }));
