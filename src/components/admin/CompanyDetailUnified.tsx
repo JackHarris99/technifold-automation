@@ -17,7 +17,10 @@ interface CompanyDetailUnifiedProps {
   machines: any[];
   contacts: any[];
   recentEngagement: any[];
-  orders: any[];
+  tools: any[];
+  consumables: any[];
+  subscriptions: any[];
+  invoices: any[];
   permissions: {
     canSendMarketing: boolean;
     canCreateQuote: boolean;
@@ -42,7 +45,10 @@ export default function CompanyDetailUnified({
   machines,
   contacts,
   recentEngagement,
-  orders,
+  tools,
+  consumables,
+  subscriptions,
+  invoices,
   permissions
 }: CompanyDetailUnifiedProps) {
   const router = useRouter();
@@ -489,6 +495,134 @@ export default function CompanyDetailUnified({
                           </span>
                         )}
                         <span className="text-xs text-gray-500">Confidence: {cm.confidence_score}/5</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Tools Owned - FACT TABLE */}
+          <div className="bg-white border-2 border-gray-200 rounded-xl p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Tools Owned ({tools.length})</h2>
+            {tools.length === 0 ? (
+              <p className="text-gray-500">No tools purchased yet</p>
+            ) : (
+              <div className="space-y-3">
+                {tools.map((tool) => (
+                  <div key={tool.tool_code} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="font-semibold text-gray-900">{tool.products?.description || tool.tool_code}</div>
+                        <div className="text-sm text-gray-600 mt-1">Code: {tool.tool_code}</div>
+                        <div className="text-sm text-gray-600">Quantity: {tool.total_units} unit{tool.total_units !== 1 ? 's' : ''}</div>
+                        <div className="text-xs text-gray-500 mt-2">
+                          First seen: {new Date(tool.first_seen_at).toLocaleDateString('en-GB')}
+                          {' '}• Last updated: {new Date(tool.last_seen_at).toLocaleDateString('en-GB')}
+                        </div>
+                      </div>
+                      {tool.products?.image_url && (
+                        <img src={tool.products.image_url} alt={tool.products.description} className="w-20 h-20 object-cover rounded" />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Consumables History - FACT TABLE */}
+          <div className="bg-white border-2 border-gray-200 rounded-xl p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Consumables History ({consumables.length})</h2>
+            {consumables.length === 0 ? (
+              <p className="text-gray-500">No consumable purchases</p>
+            ) : (
+              <div className="space-y-3">
+                {consumables.map((cons) => {
+                  const daysSinceLastOrder = Math.floor((Date.now() - new Date(cons.last_ordered_at).getTime()) / (1000 * 60 * 60 * 24));
+                  const isReorderOpp = daysSinceLastOrder > 90;
+                  return (
+                    <div key={cons.consumable_code} className={`border rounded-lg p-4 ${isReorderOpp ? 'border-orange-300 bg-orange-50' : 'border-gray-200'}`}>
+                      <div className="font-semibold text-gray-900">{cons.products?.description || cons.consumable_code}</div>
+                      <div className="text-sm text-gray-600 mt-1">Code: {cons.consumable_code}</div>
+                      <div className="grid grid-cols-2 gap-4 mt-3 text-sm">
+                        <div><span className="text-gray-600">Total orders:</span> <span className="font-semibold">{cons.total_orders}</span></div>
+                        <div><span className="text-gray-600">Total quantity:</span> <span className="font-semibold">{cons.total_quantity}</span></div>
+                        <div>
+                          <span className="text-gray-600">Last order:</span> <span className="font-semibold">{new Date(cons.last_ordered_at).toLocaleDateString('en-GB')}</span>
+                          {isReorderOpp && <span className="ml-2 text-xs bg-orange-600 text-white px-2 py-0.5 rounded">{daysSinceLastOrder} days ago</span>}
+                        </div>
+                        <div><span className="text-gray-600">Last amount:</span> <span className="font-semibold">£{cons.last_order_amount?.toFixed(2) || '0.00'}</span></div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Active Subscriptions */}
+          <div className="bg-white border-2 border-gray-200 rounded-xl p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Active Subscriptions ({subscriptions.length})</h2>
+            {subscriptions.length === 0 ? (
+              <p className="text-gray-500">No active subscriptions</p>
+            ) : (
+              <div className="space-y-3">
+                {subscriptions.map((sub) => (
+                  <div key={sub.subscription_id} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-gray-900">Subscription #{sub.subscription_id.slice(0, 8)}</span>
+                          <span className={`text-xs px-2 py-1 rounded ${sub.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
+                            {sub.status}
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-600 mt-1">{sub.contacts?.full_name || 'No contact assigned'}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-semibold text-gray-900">£{sub.monthly_price.toFixed(2)}/{sub.billing_cycle}</div>
+                      </div>
+                    </div>
+                    {sub.subscription_tools && sub.subscription_tools.length > 0 && (
+                      <div className="border-t border-gray-200 pt-3">
+                        <div className="text-xs text-gray-600 mb-2">Allocated Tools ({sub.subscription_tools.length}):</div>
+                        {sub.subscription_tools.slice(0, 3).map((tool: any) => (
+                          <div key={tool.tool_code} className="text-sm text-gray-700">• {tool.products?.description || tool.tool_code}</div>
+                        ))}
+                        {sub.subscription_tools.length > 3 && <div className="text-sm text-gray-500">+ {sub.subscription_tools.length - 3} more</div>}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Stripe Invoices - Future Only */}
+          <div className="bg-white border-2 border-gray-200 rounded-xl p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Invoices ({invoices.length})</h2>
+            <p className="text-xs text-gray-500 mb-4">Stripe invoices only (no historic Sage data)</p>
+            {invoices.length === 0 ? (
+              <p className="text-gray-500">No invoices yet</p>
+            ) : (
+              <div className="space-y-3">
+                {invoices.map((inv) => (
+                  <div key={inv.invoice_id} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="font-semibold text-gray-900">Invoice #{inv.invoice_id.slice(0, 8)}</span>
+                          <span className={`text-xs px-2 py-1 rounded ${inv.payment_status === 'paid' ? 'bg-green-100 text-green-800' : inv.payment_status === 'unpaid' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}`}>
+                            {inv.payment_status}
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-600">Created: {new Date(inv.created_at).toLocaleDateString('en-GB')}</div>
+                        {inv.due_date && <div className="text-sm text-gray-600">Due: {new Date(inv.due_date).toLocaleDateString('en-GB')}</div>}
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-gray-900">£{inv.total_amount?.toFixed(2) || '0.00'}</div>
                       </div>
                     </div>
                   </div>
