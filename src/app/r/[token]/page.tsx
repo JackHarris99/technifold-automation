@@ -220,32 +220,20 @@ export default async function ReorderPortalPage({ params }: ReorderPortalProps) 
     }
   }
 
-  // 4. Get portal payload - ALWAYS generate fresh if cache is empty
-  let portalPayload: CompanyPayload;
+  // 4. ALWAYS generate fresh payload to show ALL tools
+  console.log(`[Reorder] Generating fresh payload for ${company.company_name}`);
+  const portalPayload = await generatePortalPayload(String(company.company_id), company.company_name);
 
-  if (company.portal_payload &&
-      (company.portal_payload as any).by_tool_tabs?.length > 0) {
-    // Use cached payload if it has data
-    console.log(`[Reorder] Using cached payload for ${company.company_name}`);
-    portalPayload = company.portal_payload as CompanyPayload;
-  } else {
-    // Generate on-the-fly to ensure customer sees their data
-    console.log(`[Reorder] Generating payload on-the-fly for ${company.company_name}`);
-    portalPayload = await generatePortalPayload(company.company_id, company.company_name);
-
-    // Update cache in background (don't await)
-    supabase
-      .from('companies')
-      .update({ portal_payload: portalPayload })
-      .eq('company_id', company.company_id)
-      .then(({ error }) => {
-        if (error) {
-          console.error('[Reorder] Failed to update cache:', error);
-        } else {
-          console.log('[Reorder] Cache updated for', company.company_name);
-        }
-      });
-  }
+  // Update cache in background
+  supabase
+    .from('companies')
+    .update({ portal_payload: portalPayload })
+    .eq('company_id', company.company_id)
+    .then(({ error }) => {
+      if (error) {
+        console.error('[Reorder] Failed to update cache:', error);
+      }
+    });
 
   // 5. Track reorder portal view
   if (contact) {
