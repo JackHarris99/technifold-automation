@@ -363,7 +363,7 @@ async function processSendTrialEmail(job: any) {
 
         <p style="font-size: 14px; color: #666;">
           Questions? Reply to this email or call us:<br>
-          <strong>01707 275 114</strong> (UK office hours)
+          <strong>+44 (0)1455 554491</strong> (UK office hours)
         </p>
 
         <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
@@ -376,7 +376,7 @@ async function processSendTrialEmail(job: any) {
         </div>
 
         <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #9ca3af;">
-          <p>Technifold Ltd • Unit 2, St John's Business Park • Lutterworth, LE17 4HB</p>
+          <p>Technifold Ltd • Unit 2D Tungsten Park • Lutterworth, Leicestershire, LE17 4JA</p>
         </div>
       </div>
     </body>

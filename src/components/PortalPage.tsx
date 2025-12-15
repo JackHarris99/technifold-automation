@@ -171,8 +171,8 @@ export function PortalPage({ payload, contact }: PortalPageProps) {
             <div className="bg-slate-50 rounded-xl p-4">
               <h3 className="text-sm font-semibold text-slate-700 mb-2">Need Help?</h3>
               <p className="text-xs text-slate-500 mb-3">Our team is here to assist with your order.</p>
-              <a href="tel:+441455381538" className="text-sm text-blue-600 font-medium hover:text-blue-700">
-                +44 (0)1455 381 538
+              <a href="tel:+441455554491" className="text-sm text-blue-600 font-medium hover:text-blue-700">
+                +44 (0)1455 554491
               </a>
             </div>
           </div>
