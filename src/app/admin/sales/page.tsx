@@ -386,6 +386,7 @@ export default async function SalesCenterPage() {
           </div>
         </div>
       </div>
+    </div>
     </AdminLayout>
   );
 }
