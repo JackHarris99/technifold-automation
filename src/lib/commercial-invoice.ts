@@ -407,27 +407,108 @@ function buildCommercialInvoiceHtml(data: {
  * Used by the download endpoint
  */
 export async function getCommercialInvoiceHtml(order_id: string): Promise<string | null> {
-  const result = await generateCommercialInvoice({ order_id });
+  try {
+    const supabase = getSupabaseClient();
 
-  if (!result.success) {
+    // 1. Get order with items
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('order_id', order_id)
+      .single();
+
+    if (orderError || !order || !order.items) {
+      console.error('[commercial-invoice] Order not found:', order_id);
+      return null;
+    }
+
+    // Only generate for international orders
+    if (!order.shipping_country || order.shipping_country === 'GB') {
+      console.log('[commercial-invoice] Skipping - domestic order');
+      return null;
+    }
+
+    // 2. Get company details
+    const { data: company } = await supabase
+      .from('companies')
+      .select('company_name, country, vat_number, eori_number')
+      .eq('company_id', order.company_id)
+      .single();
+
+    if (!company) {
+      console.error('[commercial-invoice] Company not found');
+      return null;
+    }
+
+    // 3. Get contact details
+    const { data: contact } = await supabase
+      .from('contacts')
+      .select('full_name, email')
+      .eq('contact_id', order.contact_id)
+      .single();
+
+    // 4. Get product details with customs data
+    const productCodes = order.items.map((item: any) => item.product_code);
+    const { data: products } = await supabase
+      .from('products')
+      .select('product_code, description, hs_code, country_of_origin, weight_kg, customs_value_gbp')
+      .in('product_code', productCodes);
+
+    // 5. Build line items
+    const lineItems = order.items.map((item: any) => {
+      const product = products?.find(p => p.product_code === item.product_code);
+      return {
+        hs_code: product?.hs_code || '0000.00.00',
+        description: item.description,
+        product_code: item.product_code,
+        country_of_origin: product?.country_of_origin || 'GB',
+        quantity: item.qty || item.quantity,
+        unit_price: item.unit_price,
+        unit_weight_kg: product?.weight_kg || 0,
+        total_weight_kg: (product?.weight_kg || 0) * (item.qty || item.quantity),
+        customs_value: product?.customs_value_gbp || item.unit_price,
+        total_value: (product?.customs_value_gbp || item.unit_price) * (item.qty || item.quantity),
+      };
+    });
+
+    // 6. Calculate totals
+    const totalWeight = lineItems.reduce((sum, item) => sum + item.total_weight_kg, 0);
+    const totalValue = order.subtotal;
+
+    // 7. Generate HTML
+    const html = buildCommercialInvoiceHtml({
+      invoiceNumber: `CI-${order.invoice_number || order.stripe_invoice_id?.substring(3, 15) || order_id.substring(0, 12)}`,
+      invoiceDate: new Date(order.created_at).toLocaleDateString('en-GB'),
+
+      // Exporter (Technifold)
+      exporterName: 'Technifold Ltd',
+      exporterAddress: 'Unit 2D Tungsten Park',
+      exporterCity: 'Lutterworth',
+      exporterPostcode: 'LE17 4JA',
+      exporterCountry: 'United Kingdom',
+      exporterVAT: 'GB738934000',
+      exporterEORI: '',
+
+      // Consignee (Customer)
+      consigneeName: company.company_name,
+      consigneeContact: contact?.full_name || '',
+      consigneeCountry: order.shipping_country,
+      consigneeVAT: company.vat_number || '',
+      consigneeEORI: company.eori_number || '',
+
+      // Shipment
+      lineItems,
+      totalWeight,
+      totalValue,
+      currency: order.currency,
+      incoterms: order.incoterms || 'DDP',
+      reasonForExport: 'Sale',
+    });
+
+    return html;
+
+  } catch (error) {
+    console.error('[commercial-invoice] Error generating HTML:', error);
     return null;
   }
-
-  // For now, regenerate the HTML each time
-  // In production, you'd cache this or store the PDF
-  const supabase = getSupabaseClient();
-
-  const { data: order } = await supabase
-    .from('orders')
-    .select('*')
-    .eq('order_id', order_id)
-    .single();
-
-  if (!order) {
-    return null;
-  }
-
-  // TODO: Fetch all data and regenerate HTML
-  // For now, return a placeholder
-  return '<html><body><h1>Commercial Invoice</h1><p>PDF generation coming soon...</p></body></html>';
 }

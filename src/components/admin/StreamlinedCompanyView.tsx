@@ -6,7 +6,9 @@
 
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
+import ManageToolsModal from './ManageToolsModal';
 
 interface StreamlinedCompanyViewProps {
   company: any;
@@ -23,8 +25,24 @@ export default function StreamlinedCompanyView({
   consumables,
   contacts,
 }: StreamlinedCompanyViewProps) {
+  const [showManageToolsModal, setShowManageToolsModal] = useState(false);
+
+  function handleToolsSaved() {
+    // Reload the page to show updated tools
+    window.location.reload();
+  }
+
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
+    <>
+      <ManageToolsModal
+        companyId={company.company_id}
+        companyName={company.company_name}
+        isOpen={showManageToolsModal}
+        onClose={() => setShowManageToolsModal(false)}
+        onSaved={handleToolsSaved}
+      />
+
+      <div className="max-w-7xl mx-auto px-6 py-8">
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -52,12 +70,20 @@ export default function StreamlinedCompanyView({
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
               <h2 className="text-xl font-bold text-gray-900">Tools Owned</h2>
-              <Link
-                href={`/admin/company/${company.company_id}`}
-                className="text-sm text-blue-600 hover:text-blue-700"
-              >
-                View Full CRM →
-              </Link>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowManageToolsModal(true)}
+                  className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700"
+                >
+                  Manage Tools
+                </button>
+                <Link
+                  href={`/admin/company/${company.company_id}`}
+                  className="text-sm text-blue-600 hover:text-blue-700"
+                >
+                  View Full CRM →
+                </Link>
+              </div>
             </div>
             <div className="p-6">
               {tools.length === 0 ? (
@@ -284,5 +310,6 @@ export default function StreamlinedCompanyView({
         </div>
       </div>
     </div>
+    </>
   );
 }
