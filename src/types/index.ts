@@ -9,6 +9,7 @@ export type ReorderItem = {
 export type ToolTab = {
   tool_code: string;
   tool_desc: string | null;
+  quantity?: number;
   items: ReorderItem[];
 };
 

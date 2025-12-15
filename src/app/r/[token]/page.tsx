@@ -19,14 +19,15 @@ interface ReorderPortalProps {
 /**
  * Generate portal payload on-the-fly from database
  * This ensures customers always see current data even if cache is empty
+ * Shows ALL tools the company owns, with quantities and consumables where available
  */
 async function generatePortalPayload(companyId: string, companyName: string): Promise<CompanyPayload> {
   const supabase = getSupabaseClient();
 
-  // Get company's tools from company_tools table
+  // Get company's tools from company_tools table WITH quantities
   const { data: companyTools } = await supabase
     .from('company_tools')
-    .select('tool_code')
+    .select('tool_code, total_units')
     .eq('company_id', companyId);
 
   if (!companyTools || companyTools.length === 0) {
@@ -38,31 +39,57 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
     };
   }
 
-  const toolCodes = companyTools.map(ct => ct.tool_code);
+  // Group tools by tool_code and sum quantities
+  const toolQuantities = new Map<string, number>();
+  companyTools.forEach(ct => {
+    const current = toolQuantities.get(ct.tool_code) || 0;
+    toolQuantities.set(ct.tool_code, current + (ct.total_units || 1));
+  });
 
-  // Get tool details
-  const { data: tools } = await supabase
+  const uniqueToolCodes = [...toolQuantities.keys()];
+
+  // Get tool details from products table (for descriptions)
+  const { data: toolProducts } = await supabase
     .from('products')
-    .select('product_code, description, category, type')
-    .in('product_code', toolCodes)
-    .eq('type', 'tool');
+    .select('product_code, description')
+    .in('product_code', uniqueToolCodes);
 
-  // For each tool, get consumables
+  const toolDescriptions = new Map<string, string>();
+  toolProducts?.forEach(tp => {
+    toolDescriptions.set(tp.product_code, tp.description || tp.product_code);
+  });
+
+  // Get order history ONCE for all consumables
+  const { data: companyOrders } = await supabase
+    .from('orders')
+    .select('order_id, created_at')
+    .eq('company_id', companyId)
+    .eq('payment_status', 'paid')
+    .order('created_at', { ascending: false });
+
+  const orderIds = companyOrders?.map(o => o.order_id) || [];
+
+  // For each unique tool, get consumables
   const toolsWithConsumables = await Promise.all(
-    (tools || []).map(async (tool) => {
+    uniqueToolCodes.map(async (toolCode) => {
+      const quantity = toolQuantities.get(toolCode) || 1;
+      const description = toolDescriptions.get(toolCode) || toolCode;
+
       // Get consumables for this tool
       const { data: consumableMap } = await supabase
         .from('tool_consumable_map')
         .select('consumable_code')
-        .eq('tool_code', tool.product_code)
+        .eq('tool_code', toolCode)
         .limit(500);
 
       const consumableCodes = (consumableMap || []).map(cm => cm.consumable_code);
 
+      // No consumables mapped - still show the tool with empty items
       if (consumableCodes.length === 0) {
         return {
-          tool_code: tool.product_code,
-          tool_desc: tool.description,
+          tool_code: toolCode,
+          tool_desc: description,
+          quantity: quantity > 1 ? quantity : undefined,
           items: [] as ReorderItem[]
         };
       }
@@ -74,17 +101,7 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
         .in('product_code', consumableCodes)
         .limit(500);
 
-      // Check order history for this company
-      const { data: companyOrders } = await supabase
-        .from('orders')
-        .select('order_id, created_at')
-        .eq('company_id', companyId)
-        .eq('payment_status', 'paid')
-        .order('created_at', { ascending: false });
-
-      const orderIds = companyOrders?.map(o => o.order_id) || [];
-
-      // Get order items for these orders
+      // Get order items for these consumables
       let orderItemsByProduct = new Map<string, string>();
       if (orderIds.length > 0) {
         const { data: orderItems } = await supabase
@@ -113,8 +130,9 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
       }));
 
       return {
-        tool_code: tool.product_code,
-        tool_desc: tool.description,
+        tool_code: toolCode,
+        tool_desc: description,
+        quantity: quantity > 1 ? quantity : undefined,
         items
       };
     })

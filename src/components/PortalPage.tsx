@@ -76,7 +76,9 @@ export function PortalPage({ payload, contact }: PortalPageProps) {
     { id: 'reorder', label: 'Previously Ordered', code: '', icon: 'clock' },
     ...(payload.by_tool_tabs || []).map(tab => ({
       id: tab.tool_code,
-      label: tab.tool_desc || tab.tool_code,
+      label: tab.quantity && tab.quantity > 1
+        ? `${tab.tool_desc || tab.tool_code} (x${tab.quantity})`
+        : (tab.tool_desc || tab.tool_code),
       code: tab.tool_code,
       icon: 'tool'
     }))
