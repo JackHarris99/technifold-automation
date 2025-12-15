@@ -138,27 +138,59 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
     })
   );
 
-  // Extract previously ordered items (consumables with purchase history)
-  const reorderItems: ReorderItem[] = toolsWithConsumables
-    .flatMap(tool => tool.items.filter(item => item.last_purchased))
-    .sort((a, b) => {
-      if (!a.last_purchased) return 1;
-      if (!b.last_purchased) return -1;
-      return new Date(b.last_purchased).getTime() - new Date(a.last_purchased).getTime();
-    });
+  // Get ALL previously ordered products (not just ones linked to tools)
+  let reorderItems: ReorderItem[] = [];
 
-  // Remove duplicates (same consumable might be in multiple tools)
-  const seenCodes = new Set<string>();
-  const uniqueReorderItems = reorderItems.filter(item => {
-    if (seenCodes.has(item.consumable_code)) return false;
-    seenCodes.add(item.consumable_code);
-    return true;
-  });
+  if (orderIds.length > 0) {
+    // Get all order items for this company
+    const { data: allOrderItems } = await supabase
+      .from('order_items')
+      .select('product_code, order_id')
+      .in('order_id', orderIds);
+
+    if (allOrderItems && allOrderItems.length > 0) {
+      // Get unique product codes and their most recent order date
+      const productLastOrdered = new Map<string, string>();
+      allOrderItems.forEach(oi => {
+        if (!productLastOrdered.has(oi.product_code)) {
+          const order = companyOrders?.find(o => o.order_id === oi.order_id);
+          if (order) {
+            productLastOrdered.set(oi.product_code, order.created_at);
+          }
+        }
+      });
+
+      const orderedProductCodes = [...productLastOrdered.keys()];
+
+      // Get product details for all ordered products
+      const { data: orderedProducts } = await supabase
+        .from('products')
+        .select('product_code, description, price, category')
+        .in('product_code', orderedProductCodes);
+
+      if (orderedProducts) {
+        reorderItems = orderedProducts.map(prod => ({
+          consumable_code: prod.product_code,
+          description: prod.description || prod.product_code,
+          price: prod.price,
+          last_purchased: productLastOrdered.get(prod.product_code)?.split('T')[0] || null,
+          category: prod.category
+        }));
+
+        // Sort by most recently ordered
+        reorderItems.sort((a, b) => {
+          if (!a.last_purchased) return 1;
+          if (!b.last_purchased) return -1;
+          return new Date(b.last_purchased).getTime() - new Date(a.last_purchased).getTime();
+        });
+      }
+    }
+  }
 
   return {
     company_id: parseInt(companyId) || 0,
     company_name: companyName,
-    reorder_items: uniqueReorderItems,
+    reorder_items: reorderItems,
     by_tool_tabs: toolsWithConsumables as ToolTab[]
   };
 }
