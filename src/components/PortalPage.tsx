@@ -121,9 +121,10 @@ export function PortalPage({ payload, contact }: PortalPageProps) {
       </header>
 
       {/* Main Content */}
-      <div className="flex h-[calc(100vh-4rem)]">
-        {/* Left Sidebar Navigation */}
-        <nav className="w-72 bg-white border-r border-slate-200 overflow-y-auto shadow-sm">
+      <div className="max-w-7xl mx-auto w-full">
+        <div className="flex h-[calc(100vh-4rem)]">
+          {/* Left Sidebar Navigation */}
+          <nav className="w-72 bg-white border-r border-slate-200 overflow-y-auto shadow-sm flex-shrink-0">
           <div className="p-5">
             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
               Browse Products
@@ -203,6 +204,7 @@ export function PortalPage({ payload, contact }: PortalPageProps) {
             )}
           </div>
         </main>
+        </div>
       </div>
 
       {/* Cart Bar */}
