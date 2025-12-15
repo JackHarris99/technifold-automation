@@ -1,6 +1,8 @@
 /**
  * API: Get companies for specific territory (account_owner filtered)
- * GET /api/admin/companies/territory?user_id={uuid}
+ * GET /api/admin/companies/territory?user_id={sales_rep_id}
+ *
+ * Optimized to use bulk queries instead of N+1
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -17,10 +19,10 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = getSupabaseClient();
 
-    // Fetch companies assigned to this user
+    // 1. Fetch all companies for this territory in ONE query
     const { data: companies, error: companiesError } = await supabase
       .from('companies')
-      .select('company_id, company_name, country, account_owner')
+      .select('company_id, company_name, country, account_owner, category')
       .eq('account_owner', userId)
       .order('company_name');
 
@@ -29,39 +31,47 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: companiesError.message }, { status: 500 });
     }
 
-    // For each company, get tool count and subscription count from fact tables
-    const enrichedCompanies = await Promise.all(
-      (companies || []).map(async (company) => {
-        // Count tools from company_tools fact table
-        const { data: tools } = await supabase
-          .from('company_tools')
-          .select('total_units')
-          .eq('company_id', company.company_id);
+    if (!companies || companies.length === 0) {
+      return NextResponse.json({ companies: [], count: 0 });
+    }
 
-        const machineCount = tools?.reduce((sum, t) => sum + (t.total_units || 0), 0) || 0;
+    const companyIds = companies.map(c => c.company_id);
 
-        // Count active subscriptions
-        const { count: subscriptionCount } = await supabase
-          .from('subscriptions')
-          .select('*', { count: 'exact', head: true })
-          .eq('company_id', company.company_id)
-          .in('status', ['active', 'trial']);
+    // 2. Fetch ALL tools for these companies in ONE query
+    const { data: allTools } = await supabase
+      .from('company_tools')
+      .select('company_id, total_units')
+      .in('company_id', companyIds);
 
-        // Check for active trials
-        const { count: trialCount } = await supabase
-          .from('subscriptions')
-          .select('*', { count: 'exact', head: true })
-          .eq('company_id', company.company_id)
-          .eq('status', 'trial');
+    // 3. Fetch ALL subscriptions for these companies in ONE query
+    const { data: allSubscriptions } = await supabase
+      .from('subscriptions')
+      .select('company_id, status')
+      .in('company_id', companyIds)
+      .in('status', ['active', 'trial']);
 
-        return {
-          ...company,
-          machine_count: machineCount,
-          subscription_count: subscriptionCount || 0,
-          has_trial: (trialCount || 0) > 0,
-        };
-      })
-    );
+    // 4. Aggregate in memory (fast)
+    const toolsByCompany = new Map<string, number>();
+    allTools?.forEach(t => {
+      const current = toolsByCompany.get(t.company_id) || 0;
+      toolsByCompany.set(t.company_id, current + (t.total_units || 0));
+    });
+
+    const subsByCompany = new Map<string, { total: number; trials: number }>();
+    allSubscriptions?.forEach(s => {
+      const current = subsByCompany.get(s.company_id) || { total: 0, trials: 0 };
+      current.total++;
+      if (s.status === 'trial') current.trials++;
+      subsByCompany.set(s.company_id, current);
+    });
+
+    // 5. Enrich companies with counts
+    const enrichedCompanies = companies.map(company => ({
+      ...company,
+      machine_count: toolsByCompany.get(company.company_id) || 0,
+      subscription_count: subsByCompany.get(company.company_id)?.total || 0,
+      has_trial: (subsByCompany.get(company.company_id)?.trials || 0) > 0,
+    }));
 
     return NextResponse.json({
       companies: enrichedCompanies,
