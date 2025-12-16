@@ -8,6 +8,7 @@ import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import ReorderTab from '@/components/admin/console-tabs/ReorderTab';
 import { canActOnCompany } from '@/lib/auth';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 interface ReorderPageProps {
   params: Promise<{
@@ -44,8 +45,9 @@ export default async function ReorderPage({ params }: ReorderPageProps) {
     .limit(500);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <AdminLayout>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header with Back Button */}
         <div className="mb-6 flex items-center gap-4">
           <Link
@@ -64,5 +66,6 @@ export default async function ReorderPage({ params }: ReorderPageProps) {
         />
       </div>
     </div>
+    </AdminLayout>
   );
 }

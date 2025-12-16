@@ -7,6 +7,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 interface Company {
   company_id: string;
@@ -252,8 +253,9 @@ export default function NewInvoicePage() {
   const subtotal = invoiceItems.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
+    <AdminLayout>
+      <div className="min-h-screen bg-gray-50 p-8">
+        <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
@@ -583,5 +585,6 @@ export default function NewInvoicePage() {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 }

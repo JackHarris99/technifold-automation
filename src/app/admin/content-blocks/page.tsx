@@ -7,6 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 const BLOCK_TYPES = [
   { value: 'feature', label: 'Feature', icon: '⚡', color: 'blue' },
@@ -107,8 +108,9 @@ export default function ContentBlocksLibraryPage() {
   const filteredBlocks = blocks.filter(b => !filterType || b.block_type === filterType);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
+    <AdminLayout>
+      <div className="min-h-screen bg-gray-50 p-8">
+        <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Content Blocks Library</h1>
@@ -309,5 +311,6 @@ export default function ContentBlocksLibraryPage() {
         )}
       </div>
     </div>
+    </AdminLayout>
   );
 }

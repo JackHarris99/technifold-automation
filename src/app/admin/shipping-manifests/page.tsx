@@ -7,6 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 interface ShippingManifest {
   manifest_id: string;
@@ -119,8 +120,9 @@ export default function ShippingManifestsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+    <AdminLayout>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
       <div className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
@@ -287,5 +289,6 @@ export default function ShippingManifestsPage() {
         </div>
       )}
     </div>
+    </AdminLayout>
   );
 }

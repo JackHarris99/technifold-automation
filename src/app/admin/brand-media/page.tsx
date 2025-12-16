@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import MediaUpload from '@/components/admin/MediaUpload';
 import MediaImage from '@/components/shared/MediaImage';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 interface Brand {
   brand_slug: string;
@@ -80,8 +81,9 @@ export default function BrandMediaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <AdminLayout>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Brand Media</h1>
           <p className="text-gray-600">Upload and manage brand logos and hero images</p>
@@ -166,5 +168,6 @@ export default function BrandMediaPage() {
         )}
       </div>
     </div>
+    </AdminLayout>
   );
 }

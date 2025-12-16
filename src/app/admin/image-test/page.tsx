@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import MediaImage from '@/components/shared/MediaImage';
 import Image from 'next/image';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 export default function ImageTestPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -34,8 +35,9 @@ export default function ImageTestPage() {
   }
 
   return (
-    <div className="p-8">
-      <div className="max-w-7xl mx-auto">
+    <AdminLayout>
+      <div className="p-8">
+        <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">Image Upload Diagnostic</h1>
         <p className="text-gray-600 mb-8">
           This page shows products with image_url values and tests if they display correctly.
@@ -119,5 +121,6 @@ export default function ImageTestPage() {
         )}
       </div>
     </div>
+    </AdminLayout>
   );
 }

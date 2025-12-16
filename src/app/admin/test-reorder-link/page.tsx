@@ -7,6 +7,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 interface Company {
   company_id: string;
@@ -145,8 +146,9 @@ export default function TestReorderLinkPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-2xl mx-auto">
+    <AdminLayout>
+      <div className="min-h-screen bg-gray-100 p-8">
+        <div className="max-w-2xl mx-auto">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
             Test Reorder Link Generator
@@ -317,5 +319,6 @@ export default function TestReorderLinkPage() {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 }

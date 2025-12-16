@@ -33,6 +33,13 @@ interface UnpaidInvoice {
   invoice_url: string | null;
 }
 
+interface NeedsContact {
+  company_id: string;
+  company_name: string;
+  days_since_contact: number;
+  last_contact_at: string | null;
+}
+
 interface SalesMetrics {
   total_revenue: number;
   deals_closed: number;
@@ -79,6 +86,7 @@ export default async function SalesCenterPage() {
   let reorderOpportunities: ReorderOpportunity[] = [];
   let trialsEnding: TrialEnding[] = [];
   let unpaidInvoices: UnpaidInvoice[] = [];
+  let needsContact: NeedsContact[] = [];
 
   if (companyIds.length > 0) {
     // Batch fetch all data in parallel
@@ -92,6 +100,7 @@ export default async function SalesCenterPage() {
       trialsResult,
       reorderResult,
       endingTrialsResult,
+      lastContactsResult,
     ] = await Promise.all([
       // Revenue from paid invoices (last 30 days)
       supabase
@@ -137,6 +146,14 @@ export default async function SalesCenterPage() {
         .gt('trial_end_date', new Date().toISOString())
         .order('trial_end_date', { ascending: true })
         .limit(10),
+
+      // Last manual contact for each company
+      supabase
+        .from('engagement_events')
+        .select('company_id, occurred_at, event_name')
+        .in('company_id', companyIds)
+        .ilike('event_name', 'manual_contact%')
+        .order('occurred_at', { ascending: false }),
     ]);
 
     // Process metrics
@@ -174,6 +191,56 @@ export default async function SalesCenterPage() {
       days_left: Math.ceil((new Date(trial.trial_end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
       trial_end_date: trial.trial_end_date,
     }));
+
+    // Process last contacts - group by company and get most recent
+    const lastContactData = lastContactsResult.data || [];
+    const lastContactMap = new Map<string, { occurred_at: string; event_name: string }>();
+
+    // Get the most recent contact for each company
+    lastContactData.forEach(event => {
+      if (!lastContactMap.has(event.company_id)) {
+        lastContactMap.set(event.company_id, {
+          occurred_at: event.occurred_at,
+          event_name: event.event_name,
+        });
+      }
+    });
+
+    // Calculate days since contact for all companies
+    const now = Date.now();
+    const ninetyDays = 90 * 24 * 60 * 60 * 1000;
+
+    needsContact = companyIds
+      .map(companyId => {
+        const lastContact = lastContactMap.get(companyId);
+        const companyName = companyMap.get(companyId) || 'Unknown Company';
+
+        if (!lastContact) {
+          // Never contacted
+          return {
+            company_id: companyId,
+            company_name: companyName,
+            days_since_contact: 999,
+            last_contact_at: null,
+          };
+        }
+
+        const daysSince = Math.floor((now - new Date(lastContact.occurred_at).getTime()) / (1000 * 60 * 60 * 24));
+
+        if (daysSince >= 90) {
+          return {
+            company_id: companyId,
+            company_name: companyName,
+            days_since_contact: daysSince,
+            last_contact_at: lastContact.occurred_at,
+          };
+        }
+
+        return null;
+      })
+      .filter((item): item is NeedsContact => item !== null)
+      .sort((a, b) => b.days_since_contact - a.days_since_contact)
+      .slice(0, 10);
   }
 
   return (
@@ -265,6 +332,39 @@ export default async function SalesCenterPage() {
                     trial.days_left <= 2 ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'
                   }`}>
                     {trial.days_left}d
+                  </div>
+                </Link>
+              ))}
+            </ActionSection>
+
+            {/* Companies Needing Contact */}
+            <ActionSection
+              title="Need to Contact"
+              icon="📞"
+              count={needsContact.length}
+              emptyMessage="All companies contacted recently"
+              emptyIcon="✅"
+              color="orange"
+              viewAllHref="/admin/sales/companies"
+            >
+              {needsContact.map((company) => (
+                <Link
+                  key={company.company_id}
+                  href={`/admin/sales/company/${company.company_id}`}
+                  className="flex items-center justify-between p-4 hover:bg-orange-50 transition-colors border-b border-gray-100 last:border-b-0"
+                >
+                  <div>
+                    <h4 className="font-semibold text-gray-900">{company.company_name}</h4>
+                    <p className="text-sm text-gray-500">
+                      {company.last_contact_at
+                        ? `Last contact: ${new Date(company.last_contact_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                        : 'Never contacted'}
+                    </p>
+                  </div>
+                  <div className={`px-3 py-1 rounded-full text-sm font-bold ${
+                    company.days_since_contact >= 180 ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'
+                  }`}>
+                    {company.days_since_contact === 999 ? 'Never' : `${company.days_since_contact}d`}
                   </div>
                 </Link>
               ))}
