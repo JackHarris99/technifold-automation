@@ -8,6 +8,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import CompanySearchBar from './CompanySearchBar';
 
 interface NavSection {
   title: string;
@@ -128,6 +129,13 @@ export default function AdminNav() {
           {collapsed ? '→' : '←'}
         </button>
       </div>
+
+      {/* Universal Company Search */}
+      {!collapsed && (
+        <div className="p-4 border-b border-gray-800">
+          <CompanySearchBar />
+        </div>
+      )}
 
       {/* Navigation Sections */}
       <div className="py-4">
