@@ -8,6 +8,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
+export const maxDuration = 60; // Vercel: allow up to 60s for this endpoint
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get('user_id');
@@ -19,12 +21,13 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = getSupabaseClient();
 
-    // 1. Fetch all companies for this territory in ONE query
+    // 1. Fetch all companies for this territory in ONE query (with reasonable limit)
     const { data: companies, error: companiesError } = await supabase
       .from('companies')
       .select('company_id, company_name, country, account_owner, category')
       .eq('account_owner', userId)
-      .order('company_name');
+      .order('company_name')
+      .limit(1000); // Reasonable limit per territory
 
     if (companiesError) {
       console.error('[territory] Error fetching companies:', companiesError);
