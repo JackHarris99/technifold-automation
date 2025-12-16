@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
   const { data: machines, error } = await supabase
     .from('machines')
     .select('machine_id, brand, model, display_name, type, slug')
-    .or(`brand.ilike.%${query}%,model.ilike.%${query}%,display_name.ilike.%${query}%`)
+    .or(`brand.ilike.*${query}*,model.ilike.*${query}*,display_name.ilike.*${query}*`)
     .limit(limit);
 
   if (error) {

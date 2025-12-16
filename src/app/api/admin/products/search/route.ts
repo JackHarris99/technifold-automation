@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   const { data, error } = await supabase
     .from('products')
     .select('product_code, description, price, currency, type')
-    .or(`product_code.ilike.%${query}%,description.ilike.%${query}%`)
+    .or(`product_code.ilike.*${query}*,description.ilike.*${query}*`)
     .eq('active', true)
     .limit(10);
 

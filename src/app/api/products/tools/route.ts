@@ -22,7 +22,7 @@ export async function GET(request: Request) {
 
   // Add search filter if provided
   if (search) {
-    query = query.or(`description.ilike.%${search}%,product_code.ilike.%${search}%`);
+    query = query.or(`description.ilike.*${search}*,product_code.ilike.*${search}*`);
   }
 
   const { data, error } = await query;
