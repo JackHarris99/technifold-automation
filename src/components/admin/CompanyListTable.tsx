@@ -21,6 +21,7 @@ export default function CompanyListTable() {
   const [sortBy, setSortBy] = useState<'name' | 'value' | 'orders' | 'last_order'>('value');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [filter, setFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchCompanies();
@@ -40,8 +41,18 @@ export default function CompanyListTable() {
   }
 
   const filtered = companies.filter(c => {
-    if (filter === 'all') return true;
-    return c.account_owner === filter;
+    // Filter by account owner
+    if (filter !== 'all' && c.account_owner !== filter) return false;
+
+    // Filter by search term
+    if (searchTerm.trim()) {
+      const search = searchTerm.toLowerCase();
+      const companyName = (c.company_name || '').toLowerCase();
+      const companyId = (c.company_id || '').toLowerCase();
+      return companyName.includes(search) || companyId.includes(search);
+    }
+
+    return true;
   });
 
   const sorted = [...filtered].sort((a, b) => {
@@ -77,36 +88,69 @@ export default function CompanyListTable() {
   return (
     <div>
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-4 mb-6 flex gap-4">
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="px-4 py-2 border rounded-lg"
-        >
-          <option value="all">All Reps ({companies.length})</option>
-          <option value="Lee">🔴 Lee</option>
-          <option value="Callum">🔵 Callum</option>
-          <option value="Steve">🟢 Steve</option>
-          <option value="jack_harris">🟣 Jack Harris</option>
-        </select>
+      <div className="bg-white rounded-lg shadow p-4 mb-6">
+        <div className="flex gap-4 mb-4">
+          {/* Search Input */}
+          <div className="flex-1">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search companies by name or ID..."
+              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+        </div>
 
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as any)}
-          className="px-4 py-2 border rounded-lg"
-        >
-          <option value="value">Sort by Value</option>
-          <option value="orders">Sort by Orders</option>
-          <option value="last_order">Sort by Last Order</option>
-          <option value="name">Sort by Name</option>
-        </select>
+        <div className="flex gap-4">
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="px-4 py-2 border rounded-lg"
+          >
+            <option value="all">All Reps ({companies.length})</option>
+            <option value="Lee">🔴 Lee</option>
+            <option value="Callum">🔵 Callum</option>
+            <option value="Steve">🟢 Steve</option>
+            <option value="jack_harris">🟣 Jack Harris</option>
+          </select>
 
-        <button
-          onClick={() => setSortDir(prev => prev === 'asc' ? 'desc' : 'asc')}
-          className="px-4 py-2 border rounded-lg hover:bg-gray-50"
-        >
-          {sortDir === 'asc' ? '↑ Ascending' : '↓ Descending'}
-        </button>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+            className="px-4 py-2 border rounded-lg"
+          >
+            <option value="value">Sort by Value</option>
+            <option value="orders">Sort by Orders</option>
+            <option value="last_order">Sort by Last Order</option>
+            <option value="name">Sort by Name</option>
+          </select>
+
+          <button
+            onClick={() => setSortDir(prev => prev === 'asc' ? 'desc' : 'asc')}
+            className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+          >
+            {sortDir === 'asc' ? '↑ Ascending' : '↓ Descending'}
+          </button>
+
+          {(searchTerm || filter !== 'all') && (
+            <button
+              onClick={() => {
+                setSearchTerm('');
+                setFilter('all');
+              }}
+              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium"
+            >
+              Clear Filters
+            </button>
+          )}
+        </div>
+
+        {searchTerm && (
+          <div className="mt-3 text-sm text-gray-600">
+            Found {filtered.length} {filtered.length === 1 ? 'company' : 'companies'} matching "{searchTerm}"
+          </div>
+        )}
       </div>
 
       {/* Table */}
