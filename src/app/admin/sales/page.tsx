@@ -147,13 +147,14 @@ export default async function SalesCenterPage() {
         .order('trial_end_date', { ascending: true })
         .limit(10),
 
-      // Last manual contact for each company
+      // Last manual contact for each company (limit to most recent per company)
       supabase
         .from('engagement_events')
         .select('company_id, occurred_at, event_name')
         .in('company_id', companyIds)
         .ilike('event_name', 'manual_contact%')
-        .order('occurred_at', { ascending: false }),
+        .order('occurred_at', { ascending: false })
+        .limit(1000), // Reasonable limit to prevent fetching thousands of rows
     ]);
 
     // Process metrics
