@@ -22,13 +22,21 @@ interface ReorderPortalProps {
  * Shows ALL tools the company owns, with quantities and consumables where available
  */
 async function generatePortalPayload(companyId: string, companyName: string): Promise<CompanyPayload> {
+  console.log(`[generatePortalPayload] Starting for company_id: "${companyId}"`);
   const supabase = getSupabaseClient();
 
   // Get company's tools from company_tools table WITH quantities
-  const { data: companyTools } = await supabase
+  const { data: companyTools, error: toolsError } = await supabase
     .from('company_tools')
     .select('tool_code, total_units')
     .eq('company_id', companyId);
+
+  console.log(`[generatePortalPayload] company_tools query:`, {
+    companyId,
+    count: companyTools?.length || 0,
+    error: toolsError,
+    sample: companyTools?.[0]
+  });
 
   if (!companyTools || companyTools.length === 0) {
     return {
@@ -60,10 +68,17 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
   });
 
   // Get company's consumable order history from fact table
-  const { data: companyConsumables } = await supabase
+  const { data: companyConsumables, error: consumablesError } = await supabase
     .from('company_consumables')
     .select('consumable_code, last_ordered_at')
     .eq('company_id', companyId);
+
+  console.log(`[generatePortalPayload] company_consumables query:`, {
+    companyId,
+    count: companyConsumables?.length || 0,
+    error: consumablesError,
+    sample: companyConsumables?.[0]
+  });
 
   const consumableLastOrdered = new Map<string, string>();
   companyConsumables?.forEach(cc => {
