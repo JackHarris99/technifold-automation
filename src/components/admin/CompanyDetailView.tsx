@@ -32,6 +32,9 @@ export default function CompanyDetailView({
   subscriptions,
 }: CompanyDetailViewProps) {
   const [activeTab, setActiveTab] = useState('overview');
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
+  const [sendingEmail, setSendingEmail] = useState(false);
 
   const tabs = [
     { id: 'overview', label: 'Overview', count: null },
@@ -40,6 +43,47 @@ export default function CompanyDetailView({
     { id: 'invoices', label: 'Invoices', count: invoices.length },
     { id: 'engagement', label: 'Engagement', count: engagement.length },
   ];
+
+  async function handleSendReorderEmail() {
+    if (selectedContacts.length === 0) {
+      alert('Please select at least one contact');
+      return;
+    }
+
+    setSendingEmail(true);
+    try {
+      const response = await fetch('/api/admin/reorder/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company_id: company.company_id,
+          contact_ids: selectedContacts,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(`Successfully sent reorder emails to ${selectedContacts.length} contact(s)!`);
+        setShowEmailModal(false);
+        setSelectedContacts([]);
+      } else {
+        alert(`Error: ${data.error || 'Failed to send emails'}`);
+      }
+    } catch (error) {
+      alert('Error sending emails. Please try again.');
+    } finally {
+      setSendingEmail(false);
+    }
+  }
+
+  function toggleContact(contactId: string) {
+    setSelectedContacts(prev =>
+      prev.includes(contactId)
+        ? prev.filter(id => id !== contactId)
+        : [...prev, contactId]
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -58,15 +102,15 @@ export default function CompanyDetailView({
               <p className="text-gray-500 mt-1">{company.company_id}</p>
             </div>
             <div className="flex gap-3">
-              <Link
-                href={`/admin/test-reorder-link?company_id=${company.company_id}`}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              <button
+                onClick={() => setShowEmailModal(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
               >
                 Send Reorder Email
-              </Link>
+              </button>
               <Link
                 href={`/admin/invoices/new?company_id=${company.company_id}`}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
               >
                 Create Invoice
               </Link>
@@ -426,6 +470,86 @@ function InvoicesTab({ invoices, companyId }: any) {
           )}
         </div>
       </div>
+
+      {/* Send Reorder Email Modal */}
+      {showEmailModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-900">Send Reorder Email</h2>
+              <p className="text-gray-600 mt-1">
+                Select contacts to receive personalized reorder emails with tokenized links
+              </p>
+            </div>
+
+            <div className="p-6">
+              {contacts.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  No contacts found for this company. Add contacts first.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3 mb-4">
+                    <button
+                      onClick={() => setSelectedContacts(contacts.map(c => c.contact_id))}
+                      className="text-sm text-blue-600 hover:text-blue-700"
+                    >
+                      Select All
+                    </button>
+                    <button
+                      onClick={() => setSelectedContacts([])}
+                      className="text-sm text-gray-600 hover:text-gray-700"
+                    >
+                      Clear
+                    </button>
+                    <span className="text-sm text-gray-500">
+                      {selectedContacts.length} of {contacts.length} selected
+                    </span>
+                  </div>
+
+                  {contacts.map((contact) => (
+                    <label
+                      key={contact.contact_id}
+                      className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedContacts.includes(contact.contact_id)}
+                        onChange={() => toggleContact(contact.contact_id)}
+                        className="w-5 h-5 text-blue-600 rounded"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900">{contact.full_name}</div>
+                        <div className="text-sm text-gray-500">{contact.email}</div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowEmailModal(false);
+                  setSelectedContacts([]);
+                }}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                disabled={sendingEmail}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSendReorderEmail}
+                disabled={sendingEmail || selectedContacts.length === 0}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium"
+              >
+                {sendingEmail ? 'Sending...' : `Send to ${selectedContacts.length} Contact${selectedContacts.length !== 1 ? 's' : ''}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
