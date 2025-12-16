@@ -6,6 +6,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 
 interface CompanyDetailViewProps {
@@ -35,6 +36,12 @@ export default function CompanyDetailView({
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Track when component is mounted (for portal)
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Debug: Track modal state changes
   useEffect(() => {
@@ -481,8 +488,8 @@ function InvoicesTab({ invoices, companyId }: any) {
         </div>
       </div>
 
-      {/* Send Reorder Email Modal */}
-      {showEmailModal && (
+      {/* Send Reorder Email Modal - Rendered via Portal */}
+      {isMounted && showEmailModal && createPortal(
         <div
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]"
           onClick={(e) => {
@@ -576,7 +583,8 @@ function InvoicesTab({ invoices, companyId }: any) {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
