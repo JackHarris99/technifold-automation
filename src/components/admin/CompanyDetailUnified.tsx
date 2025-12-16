@@ -231,8 +231,11 @@ export default function CompanyDetailUnified({
     }
   };
 
-  const lastOrder = orders.length > 0 ? orders[0] : null;
-  const totalRevenue = orders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
+  // Calculate metrics from invoices (new system - no historic orders)
+  const lastInvoice = invoices.length > 0 ? invoices[0] : null;
+  const totalRevenue = invoices
+    .filter(inv => inv.payment_status === 'paid')
+    .reduce((sum, inv) => sum + (inv.total_amount || 0), 0);
 
   // Calculate last contacted date from manual contact logs
   const manualContacts = recentEngagement.filter(e =>
@@ -849,52 +852,59 @@ export default function CompanyDetailUnified({
             )}
           </div>
 
-          {/* Order History - Expandable */}
+          {/* Invoice History - Expandable */}
           <div className="bg-white border-2 border-gray-200 rounded-xl p-6">
             <button
               onClick={() => setShowOrders(!showOrders)}
               className="w-full flex items-center justify-between text-left"
             >
-              <h2 className="text-xl font-bold text-gray-900">Order History ({orders.length})</h2>
+              <h2 className="text-xl font-bold text-gray-900">Invoice History ({invoices.length})</h2>
               <span className="text-2xl">{showOrders ? '−' : '+'}</span>
             </button>
 
             {showOrders && (
               <div className="mt-4 space-y-4">
-                {orders.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">No orders yet</p>
+                {invoices.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">No invoices yet</p>
                 ) : (
-                  orders.slice(0, 10).map((order: any) => {
-                    const items = Array.isArray(order.items) ? order.items : [];
-                    const itemCount = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
-
-                    return (
-                      <div key={order.order_id} className="border border-gray-200 rounded-lg p-4">
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <div className="font-bold text-gray-900">
-                              {order.books_invoice_id ? `Invoice #${order.books_invoice_id}` : `Order #${order.order_id.split('-')[0].toUpperCase()}`}
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              {new Date(order.created_at).toLocaleDateString()} • {itemCount} items
-                            </div>
+                  invoices.slice(0, 10).map((invoice: any) => (
+                    <div key={invoice.invoice_id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <div className="font-bold text-gray-900">
+                            Invoice #{invoice.invoice_number || invoice.invoice_id.split('-')[0].toUpperCase()}
                           </div>
-                          <div className="text-right">
-                            <div className="text-xl font-bold text-gray-900">
-                              £{order.total_amount?.toFixed(2) || '0.00'}
-                            </div>
-                            <span className={`text-xs px-2 py-1 rounded-full ${
-                              order.payment_status === 'paid'
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-yellow-100 text-yellow-700'
-                            }`}>
-                              {order.payment_status}
-                            </span>
+                          <div className="text-sm text-gray-600">
+                            {new Date(invoice.invoice_date || invoice.created_at).toLocaleDateString()}
                           </div>
                         </div>
+                        <div className="text-right">
+                          <div className="text-xl font-bold text-gray-900">
+                            £{invoice.total_amount?.toFixed(2) || '0.00'}
+                          </div>
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            invoice.payment_status === 'paid'
+                              ? 'bg-green-100 text-green-700'
+                              : invoice.payment_status === 'unpaid'
+                              ? 'bg-red-100 text-red-700'
+                              : 'bg-yellow-100 text-yellow-700'
+                          }`}>
+                            {invoice.payment_status}
+                          </span>
+                        </div>
                       </div>
-                    );
-                  })
+                      {invoice.invoice_url && (
+                        <a
+                          href={invoice.invoice_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:text-blue-800"
+                        >
+                          View on Stripe →
+                        </a>
+                      )}
+                    </div>
+                  ))
                 )}
               </div>
             )}
