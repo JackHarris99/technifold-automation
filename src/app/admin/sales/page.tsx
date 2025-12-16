@@ -248,7 +248,7 @@ export default async function SalesCenterPage() {
                 Sales Control Center
               </h1>
               <p className="text-sm text-gray-600 mt-1">
-                {currentUser.full_name} • {isDirector ? 'All Territories' : 'My Territory'}
+                {currentUser.full_name} • All Companies View
               </p>
             </div>
             <div className="flex gap-3">
