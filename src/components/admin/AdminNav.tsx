@@ -28,6 +28,53 @@ export default function AdminNav() {
 
       {/* Navigation */}
       <div className="py-4">
+        {/* Dashboard */}
+        <div className="mb-6">
+          <div className="px-4 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            Dashboard
+          </div>
+          <Link
+            href="/admin/sales"
+            className={`block px-4 py-2 text-sm transition-colors ${
+              pathname === '/admin/sales' || pathname === '/admin'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            Sales Center
+          </Link>
+          <Link
+            href="/admin/sales/reorder-opportunities"
+            className={`block px-4 py-2 text-sm transition-colors ${
+              pathname === '/admin/sales/reorder-opportunities'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            Reorder Opportunities
+          </Link>
+          <Link
+            href="/admin/sales/trials-ending"
+            className={`block px-4 py-2 text-sm transition-colors ${
+              pathname === '/admin/sales/trials-ending'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            Trials Ending
+          </Link>
+          <Link
+            href="/admin/sales/unpaid-invoices"
+            className={`block px-4 py-2 text-sm transition-colors ${
+              pathname === '/admin/sales/unpaid-invoices'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            Unpaid Invoices
+          </Link>
+        </div>
+
         {/* Companies */}
         <div className="mb-6">
           <div className="px-4 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
