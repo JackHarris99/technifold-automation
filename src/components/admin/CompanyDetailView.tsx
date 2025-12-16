@@ -103,7 +103,10 @@ export default function CompanyDetailView({
             </div>
             <div className="flex gap-3">
               <button
-                onClick={() => setShowEmailModal(true)}
+                onClick={() => {
+                  console.log('[CompanyDetail] Opening email modal, contacts:', contacts.length);
+                  setShowEmailModal(true);
+                }}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
               >
                 Send Reorder Email
