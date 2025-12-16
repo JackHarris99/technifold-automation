@@ -1,0 +1,432 @@
+table_name,column_name,data_type,is_nullable,column_default
+activity_log,activity_id,uuid,NO,gen_random_uuid()
+activity_log,user_id,uuid,YES,null
+activity_log,user_email,text,NO,null
+activity_log,user_name,text,NO,null
+activity_log,action_type,text,NO,null
+activity_log,entity_type,text,YES,null
+activity_log,entity_id,text,YES,null
+activity_log,description,text,YES,null
+activity_log,metadata,jsonb,YES,'{}'::jsonb
+activity_log,ip_address,text,YES,null
+activity_log,user_agent,text,YES,null
+activity_log,created_at,timestamp with time zone,NO,now()
+brand_media,brand_slug,text,NO,null
+brand_media,brand_name,text,NO,null
+brand_media,logo_url,text,YES,null
+brand_media,hero_url,text,YES,null
+catalog_products,product_code,text,YES,null
+catalog_products,description,text,YES,null
+catalog_products,category,text,YES,null
+companies,company_id,text,NO,null
+companies,company_name,text,NO,null
+companies,website,text,YES,null
+companies,country,text,YES,null
+companies,type,text,YES,'customer'::text
+companies,source,text,YES,'sage_import'::text
+companies,account_opened_at,date,YES,null
+companies,first_invoice_at,date,YES,null
+companies,last_invoice_at,date,YES,null
+companies,vat_number,text,YES,null
+companies,eori_number,text,YES,null
+companies,company_reg_number,text,YES,null
+companies,created_at,timestamp with time zone,YES,now()
+companies,updated_at,timestamp with time zone,YES,now()
+companies,category,text,YES,null
+companies,stripe_customer_id,text,YES,null
+companies,zoho_account_id,text,YES,null
+companies,account_owner,text,YES,null
+companies,portal_payload,jsonb,YES,null
+companies,domain,text,YES,null
+company_consumables,company_id,text,NO,null
+company_consumables,consumable_code,text,NO,null
+company_consumables,first_ordered_at,date,NO,null
+company_consumables,last_ordered_at,date,NO,null
+company_consumables,total_orders,integer,NO,1
+company_consumables,total_quantity,integer,NO,null
+company_consumables,last_order_amount,numeric,YES,null
+company_consumables,last_order_quantity,integer,YES,null
+company_consumables,last_invoice_id,text,YES,null
+company_machine,id,uuid,NO,gen_random_uuid()
+company_machine,machine_id,uuid,NO,null
+company_machine,quantity,integer,YES,1
+company_machine,location,text,YES,null
+company_machine,verified,boolean,YES,FALSE
+company_machine,source,text,YES,'website_form'::text
+company_machine,notes,text,YES,null
+company_machine,created_at,timestamp with time zone,YES,now()
+company_machine,company_id,text,NO,null
+company_machine,confidence,smallint,YES,1
+company_machine,evidence,jsonb,YES,'{}'::jsonb
+company_tools,company_id,text,NO,null
+company_tools,tool_code,text,NO,null
+company_tools,first_seen_at,date,NO,null
+company_tools,last_seen_at,date,NO,null
+company_tools,total_units,integer,NO,null
+contact_interactions,id,uuid,NO,gen_random_uuid()
+contact_interactions,contact_id,uuid,NO,null
+contact_interactions,interaction_type,text,NO,null
+contact_interactions,url,text,YES,null
+contact_interactions,referrer,text,YES,null
+contact_interactions,metadata,jsonb,YES,null
+contact_interactions,occurred_at,timestamp with time zone,YES,now()
+contact_interactions,company_id,text,NO,null
+contacts,contact_id,uuid,NO,gen_random_uuid()
+contacts,company_id,text,NO,null
+contacts,first_name,text,YES,null
+contacts,last_name,text,YES,null
+contacts,full_name,text,YES,null
+contacts,email,text,YES,null
+contacts,phone,text,YES,null
+contacts,role,text,YES,null
+contacts,source,text,YES,'sage_import'::text
+contacts,status,text,YES,'active'::text
+contacts,created_at,timestamp with time zone,YES,now()
+contacts,updated_at,timestamp with time zone,YES,now()
+contacts,token,uuid,YES,null
+contacts,marketing_status,text,YES,null
+contacts,gdpr_consent_at,timestamp with time zone,YES,null
+contacts,zoho_contact_id,text,YES,null
+engagement_events,event_id,uuid,NO,gen_random_uuid()
+engagement_events,company_id,text,YES,null
+engagement_events,contact_id,uuid,YES,null
+engagement_events,occurred_at,timestamp with time zone,NO,now()
+engagement_events,event_type,text,NO,null
+engagement_events,source,text,YES,null
+engagement_events,url,text,YES,null
+engagement_events,meta,jsonb,NO,'{}'::jsonb
+engagement_events,source_event_id,text,YES,null
+engagement_events,event_name,text,YES,null
+engagement_events,campaign_key,text,YES,null
+engagement_events,offer_key,text,YES,null
+engagement_events,value,numeric,YES,null
+engagement_events,currency,text,YES,null
+invoice_items,invoice_id,uuid,NO,null
+invoice_items,product_code,text,NO,null
+invoice_items,line_number,integer,NO,null
+invoice_items,description,text,NO,null
+invoice_items,quantity,integer,NO,null
+invoice_items,unit_price,numeric,NO,null
+invoice_items,line_total,numeric,NO,null
+invoice_items,notes,text,YES,null
+invoices,invoice_id,uuid,NO,gen_random_uuid()
+invoices,company_id,text,NO,null
+invoices,contact_id,uuid,YES,null
+invoices,stripe_invoice_id,text,YES,null
+invoices,stripe_customer_id,text,YES,null
+invoices,stripe_payment_intent_id,text,YES,null
+invoices,invoice_number,text,YES,null
+invoices,invoice_type,text,YES,null
+invoices,currency,text,NO,'gbp'::text
+invoices,subtotal,numeric,NO,null
+invoices,tax_amount,numeric,YES,0
+invoices,shipping_amount,numeric,YES,0
+invoices,total_amount,numeric,NO,null
+invoices,status,text,NO,null
+invoices,payment_status,text,NO,null
+invoices,invoice_date,date,NO,CURRENT_DATE
+invoices,due_date,date,YES,null
+invoices,paid_at,timestamp with time zone,YES,null
+invoices,sent_at,timestamp with time zone,YES,null
+invoices,voided_at,timestamp with time zone,YES,null
+invoices,invoice_url,text,YES,null
+invoices,invoice_pdf_url,text,YES,null
+invoices,shipping_address_id,uuid,YES,null
+invoices,shipping_country,text,YES,null
+invoices,tracking_number,text,YES,null
+invoices,carrier,text,YES,null
+invoices,shipped_at,timestamp with time zone,YES,null
+invoices,notes,text,YES,null
+invoices,created_by,text,YES,null
+invoices,created_at,timestamp with time zone,NO,now()
+invoices,updated_at,timestamp with time zone,NO,now()
+machines,machine_id,uuid,NO,gen_random_uuid()
+machines,brand,text,NO,null
+machines,model,text,YES,null
+machines,display_name,text,YES,null
+machines,type,text,NO,null
+machines,shaft_size_mm,integer,YES,null
+machines,country,text,YES,null
+machines,oem_url,text,YES,null
+machines,description,text,YES,null
+machines,created_at,timestamp with time zone,YES,now()
+machines,updated_at,timestamp with time zone,YES,now()
+machines,slug,text,YES,null
+machines,type_canonical,text,YES,null
+machines,outer_diameter_mm,numeric,YES,null
+machines,shaft_specs,jsonb,YES,null
+machines,shaft_config_id,integer,YES,null
+order_items,order_id,uuid,NO,null
+order_items,product_code,text,NO,null
+order_items,description,text,YES,null
+order_items,qty,integer,NO,null
+order_items,unit_price,numeric,NO,null
+order_items,line_total,numeric,NO,null
+orders,order_id,uuid,NO,gen_random_uuid()
+orders,company_id,text,NO,null
+orders,currency,text,NO,'GBP'::text
+orders,payment_channel,text,NO,null
+orders,payment_status,text,NO,'unpaid'::text
+orders,fulfillment_status,text,NO,'hold_unpaid'::text
+orders,subtotal,numeric,NO,0
+orders,shipping_amount,numeric,NO,0
+orders,tax_amount,numeric,NO,0
+orders,total_amount,numeric,NO,0
+orders,shipping_country,text,YES,null
+orders,shipping_name,text,YES,null
+orders,shipping_company,text,YES,null
+orders,shipping_address1,text,YES,null
+orders,shipping_address2,text,YES,null
+orders,shipping_city,text,YES,null
+orders,shipping_postcode,text,YES,null
+orders,stripe_checkout_session_id,text,YES,null
+orders,stripe_payment_intent_id,text,YES,null
+orders,books_customer_id,text,YES,null
+orders,books_invoice_id,text,YES,null
+orders,books_payment_id,text,YES,null
+orders,created_at,timestamp with time zone,NO,now()
+orders,updated_at,timestamp with time zone,NO,now()
+orders,shipping_address_id,uuid,YES,null
+orders,invoice_number,text,YES,null
+orders,order_type,text,YES,null
+orders,rental_agreement_id,uuid,YES,null
+orders,tracking_number,text,YES,null
+orders,carrier,text,YES,null
+orders,shipped_at,timestamp with time zone,YES,null
+orders,estimated_delivery,text,YES,null
+orders,stripe_invoice_id,text,YES,null
+orders,invoice_status,text,YES,null
+orders,invoice_url,text,YES,null
+orders,invoice_pdf_url,text,YES,null
+orders,commercial_invoice_pdf_url,text,YES,null
+orders,invoice_sent_at,timestamp with time zone,YES,null
+orders,invoice_voided_at,timestamp with time zone,YES,null
+orders,shipping_weight_kg,numeric,YES,null
+orders,incoterms,text,YES,null
+outbox,job_id,uuid,NO,gen_random_uuid()
+outbox,job_type,text,NO,null
+outbox,status,text,NO,'pending'::text
+outbox,attempts,integer,NO,0
+outbox,max_attempts,integer,NO,3
+outbox,payload,jsonb,NO,'{}'::jsonb
+outbox,company_id,text,YES,null
+outbox,order_id,uuid,YES,null
+outbox,last_error,text,YES,null
+outbox,locked_until,timestamp with time zone,YES,null
+outbox,created_at,timestamp with time zone,NO,now()
+outbox,updated_at,timestamp with time zone,NO,now()
+outbox,completed_at,timestamp with time zone,YES,null
+products,product_code,text,NO,null
+products,description,text,YES,null
+products,type,text,YES,'part'::text
+products,category,text,YES,null
+products,active,boolean,YES,TRUE
+products,is_marketable,boolean,YES,FALSE
+products,is_reminder_eligible,boolean,YES,FALSE
+products,price,numeric,YES,null
+products,currency,text,YES,'GBP'::text
+products,site_visibility,ARRAY,YES,'{technifold}'::text[]
+products,extra,jsonb,YES,'{}'::jsonb
+products,image_url,text,YES,null
+products,image_alt,text,YES,null
+products,video_url,text,YES,null
+products,weight_kg,numeric,YES,null
+products,dimensions_cm,text,YES,null
+products,hs_code,text,YES,null
+products,country_of_origin,text,YES,'GB'::text
+products,rental_price_monthly,numeric,YES,null
+products,customs_value_gbp,numeric,YES,null
+products,width_cm,numeric,YES,null
+products,height_cm,numeric,YES,null
+products,depth_cm,numeric,YES,null
+quote_requests,quote_request_id,uuid,NO,gen_random_uuid()
+quote_requests,company_id,character varying,NO,null
+quote_requests,contact_id,uuid,NO,null
+quote_requests,machine_slug,character varying,YES,null
+quote_requests,interested_products,jsonb,YES,'[]'::jsonb
+quote_requests,status,character varying,NO,'requested'::character varying
+quote_requests,source,character varying,NO,'manual'::character varying
+quote_requests,assigned_to,character varying,YES,null
+quote_requests,notes,text,YES,null
+quote_requests,marketing_token,text,YES,null
+quote_requests,quote_token,text,YES,null
+quote_requests,lost_reason,text,YES,null
+quote_requests,won_amount,numeric,YES,null
+quote_requests,created_at,timestamp with time zone,YES,now()
+quote_requests,updated_at,timestamp with time zone,YES,now()
+quote_requests,quote_sent_at,timestamp with time zone,YES,null
+quote_requests,closed_at,timestamp with time zone,YES,null
+rental_agreements,rental_id,uuid,NO,gen_random_uuid()
+rental_agreements,serial_number,text,NO,null
+rental_agreements,company_id,text,NO,null
+rental_agreements,contact_id,uuid,YES,null
+rental_agreements,product_code,text,NO,null
+rental_agreements,stripe_subscription_id,text,YES,null
+rental_agreements,stripe_customer_id,text,YES,null
+rental_agreements,monthly_price,numeric,NO,null
+rental_agreements,currency,text,NO,'GBP'::text
+rental_agreements,start_date,timestamp with time zone,NO,null
+rental_agreements,trial_end_date,timestamp with time zone,YES,null
+rental_agreements,minimum_term_months,integer,NO,24
+rental_agreements,contract_signed_at,timestamp with time zone,NO,null
+rental_agreements,contract_pdf_url,text,YES,null
+rental_agreements,contract_ip_address,inet,YES,null
+rental_agreements,status,text,NO,'trial'::text
+rental_agreements,cancelled_at,timestamp with time zone,YES,null
+rental_agreements,cancellation_reason,text,YES,null
+rental_agreements,tool_returned_at,timestamp with time zone,YES,null
+rental_agreements,return_condition,text,YES,null
+rental_agreements,created_at,timestamp with time zone,NO,now()
+rental_agreements,updated_at,timestamp with time zone,NO,now()
+shipping_addresses,address_id,uuid,NO,gen_random_uuid()
+shipping_addresses,company_id,text,NO,null
+shipping_addresses,address_line_1,text,NO,null
+shipping_addresses,address_line_2,text,YES,null
+shipping_addresses,city,text,NO,null
+shipping_addresses,state_province,text,YES,null
+shipping_addresses,postal_code,text,NO,null
+shipping_addresses,country,text,NO,'GB'::text
+shipping_addresses,is_default,boolean,YES,FALSE
+shipping_addresses,label,text,YES,null
+shipping_addresses,created_at,timestamp with time zone,NO,now()
+shipping_addresses,updated_at,timestamp with time zone,NO,now()
+shipping_manifests,manifest_id,uuid,NO,gen_random_uuid()
+shipping_manifests,company_id,text,NO,null
+shipping_manifests,subscription_id,character varying,YES,null
+shipping_manifests,order_id,uuid,YES,null
+shipping_manifests,destination_country,character varying,NO,null
+shipping_manifests,shipment_type,character varying,NO,null
+shipping_manifests,courier,character varying,YES,null
+shipping_manifests,tracking_number,character varying,YES,null
+shipping_manifests,shipped_at,timestamp without time zone,YES,null
+shipping_manifests,delivered_at,timestamp without time zone,YES,null
+shipping_manifests,customs_invoice_number,character varying,YES,null
+shipping_manifests,total_customs_value_gbp,numeric,YES,null
+shipping_manifests,total_weight_kg,numeric,YES,null
+shipping_manifests,items,jsonb,NO,null
+shipping_manifests,created_at,timestamp without time zone,YES,CURRENT_TIMESTAMP
+shipping_manifests,updated_at,timestamp without time zone,YES,CURRENT_TIMESTAMP
+shipping_manifests,notes,text,YES,null
+site_branding,brand_key,text,NO,null
+site_branding,brand_name,text,NO,null
+site_branding,logo_url,text,YES,null
+site_branding,created_at,timestamp with time zone,YES,now()
+site_branding,updated_at,timestamp with time zone,YES,now()
+subscription_events,event_id,uuid,NO,gen_random_uuid()
+subscription_events,subscription_id,uuid,NO,null
+subscription_events,event_type,character varying,NO,null
+subscription_events,event_name,character varying,YES,null
+subscription_events,old_value,jsonb,YES,null
+subscription_events,new_value,jsonb,YES,null
+subscription_events,performed_by,text,YES,null
+subscription_events,performed_at,timestamp without time zone,YES,CURRENT_TIMESTAMP
+subscription_events,notes,text,YES,null
+subscription_tools,subscription_id,uuid,NO,null
+subscription_tools,tool_code,text,NO,null
+subscription_tools,added_at,timestamp with time zone,NO,now()
+subscription_tools,added_by,text,YES,null
+subscription_tools,removed_at,timestamp with time zone,YES,null
+subscription_tools,removed_by,text,YES,null
+subscription_tools,removal_reason,text,YES,null
+subscriptions,subscription_id,uuid,NO,gen_random_uuid()
+subscriptions,stripe_subscription_id,character varying,YES,null
+subscriptions,stripe_customer_id,character varying,YES,null
+subscriptions,company_id,text,NO,null
+subscriptions,contact_id,uuid,YES,null
+subscriptions,monthly_price,numeric,NO,null
+subscriptions,currency,character varying,YES,'GBP'::character varying
+subscriptions,tools,jsonb,YES,'[]'::jsonb
+subscriptions,status,character varying,YES,'trial'::character varying
+subscriptions,trial_start_date,timestamp without time zone,YES,null
+subscriptions,trial_end_date,timestamp without time zone,YES,null
+subscriptions,current_period_start,timestamp without time zone,YES,null
+subscriptions,current_period_end,timestamp without time zone,YES,null
+subscriptions,next_billing_date,timestamp without time zone,YES,null
+subscriptions,ratchet_max,numeric,YES,null
+subscriptions,cancel_at_period_end,boolean,YES,FALSE
+subscriptions,cancelled_at,timestamp without time zone,YES,null
+subscriptions,cancellation_reason,text,YES,null
+subscriptions,created_at,timestamp without time zone,YES,CURRENT_TIMESTAMP
+subscriptions,updated_at,timestamp without time zone,YES,CURRENT_TIMESTAMP
+subscriptions,notes,text,YES,null
+subscriptions,created_by,text,YES,null
+subscriptions,updated_by,text,YES,null
+tool_consumable_map,tool_code,text,NO,null
+tool_consumable_map,consumable_code,text,NO,null
+trial_intents,id,uuid,NO,gen_random_uuid()
+trial_intents,token,text,NO,null
+trial_intents,company_id,text,YES,null
+trial_intents,contact_id,uuid,YES,null
+trial_intents,machine_id,uuid,YES,null
+trial_intents,created_at,timestamp with time zone,YES,now()
+users,user_id,uuid,NO,gen_random_uuid()
+users,email,text,NO,null
+users,password_hash,text,NO,null
+users,full_name,text,NO,null
+users,role,text,NO,null
+users,sales_rep_id,text,YES,null
+users,is_active,boolean,NO,TRUE
+users,last_login_at,timestamp with time zone,YES,null
+users,created_at,timestamp with time zone,NO,now()
+users,updated_at,timestamp with time zone,NO,now()
+v_active_subscription_tools,subscription_id,uuid,YES,null
+v_active_subscription_tools,tool_code,text,YES,null
+v_active_subscription_tools,added_at,timestamp with time zone,YES,null
+v_active_subscription_tools,added_by,text,YES,null
+v_active_subscription_tools,company_id,text,YES,null
+v_active_subscription_tools,contact_id,uuid,YES,null
+v_active_subscription_tools,subscription_status,character varying,YES,null
+v_active_subscription_tools,tool_name,text,YES,null
+v_active_subscription_tools,tool_rental_price,numeric,YES,null
+v_active_subscriptions,subscription_id,uuid,YES,null
+v_active_subscriptions,stripe_subscription_id,character varying,YES,null
+v_active_subscriptions,company_id,text,YES,null
+v_active_subscriptions,company_name,text,YES,null
+v_active_subscriptions,contact_id,uuid,YES,null
+v_active_subscriptions,contact_name,text,YES,null
+v_active_subscriptions,contact_email,text,YES,null
+v_active_subscriptions,monthly_price,numeric,YES,null
+v_active_subscriptions,currency,character varying,YES,null
+v_active_subscriptions,tools,jsonb,YES,null
+v_active_subscriptions,status,character varying,YES,null
+v_active_subscriptions,trial_end_date,timestamp without time zone,YES,null
+v_active_subscriptions,next_billing_date,timestamp without time zone,YES,null
+v_active_subscriptions,ratchet_max,numeric,YES,null
+v_active_subscriptions,created_at,timestamp without time zone,YES,null
+v_active_subscriptions,trial_days_remaining,integer,YES,null
+v_active_subscriptions,tool_count,integer,YES,null
+v_invoice_details,invoice_id,uuid,YES,null
+v_invoice_details,invoice_number,text,YES,null
+v_invoice_details,company_id,text,YES,null
+v_invoice_details,company_name,text,YES,null
+v_invoice_details,contact_id,uuid,YES,null
+v_invoice_details,contact_name,text,YES,null
+v_invoice_details,stripe_invoice_id,text,YES,null
+v_invoice_details,invoice_type,text,YES,null
+v_invoice_details,total_amount,numeric,YES,null
+v_invoice_details,currency,text,YES,null
+v_invoice_details,status,text,YES,null
+v_invoice_details,payment_status,text,YES,null
+v_invoice_details,invoice_date,date,YES,null
+v_invoice_details,paid_at,timestamp with time zone,YES,null
+v_invoice_details,created_by,text,YES,null
+v_invoice_details,line_items,jsonb,YES,null
+v_subscription_anomalies,subscription_id,uuid,YES,null
+v_subscription_anomalies,company_id,text,YES,null
+v_subscription_anomalies,contact_id,uuid,YES,null
+v_subscription_anomalies,stripe_subscription_id,character varying,YES,null
+v_subscription_anomalies,stripe_customer_id,character varying,YES,null
+v_subscription_anomalies,status,character varying,YES,null
+v_subscription_anomalies,monthly_price,numeric,YES,null
+v_subscription_anomalies,ratchet_max,numeric,YES,null
+v_subscription_anomalies,violation_amount,numeric,YES,null
+v_subscription_anomalies,violation_percent,numeric,YES,null
+v_subscription_anomalies,current_period_start,timestamp without time zone,YES,null
+v_subscription_anomalies,current_period_end,timestamp without time zone,YES,null
+v_subscription_anomalies,next_billing_date,timestamp without time zone,YES,null
+v_subscription_anomalies,trial_end_date,timestamp without time zone,YES,null
+v_subscription_anomalies,updated_at,timestamp without time zone,YES,null
+vw_company_consumable_payload,company_id,text,YES,null
+vw_company_consumable_payload,company_name,text,YES,null
+vw_company_consumable_payload,reorder_items,json,YES,null
+vw_company_consumable_payload,by_tool_tabs,json,YES,null
