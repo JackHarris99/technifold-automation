@@ -57,11 +57,33 @@ export default async function SalesCenterPage() {
 
   const supabase = getSupabaseClient();
 
-  // All reps see ALL companies (no territory filtering)
-  // Metrics and opportunities shown for all companies
-  const { data: companies } = await supabase
-    .from('companies')
-    .select('company_id, company_name, account_owner');
+  // Fetch ALL companies (bypass 1000 row limit with batching)
+  let allCompanies: any[] = [];
+  let start = 0;
+  const batchSize = 1000;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data: batch, error } = await supabase
+      .from('companies')
+      .select('company_id, company_name, account_owner')
+      .range(start, start + batchSize - 1);
+
+    if (error) {
+      console.error('[Sales Center] Companies query error:', error);
+      break;
+    }
+
+    if (batch && batch.length > 0) {
+      allCompanies = allCompanies.concat(batch);
+      start += batchSize;
+      hasMore = batch.length === batchSize;
+    } else {
+      hasMore = false;
+    }
+  }
+
+  const companies = allCompanies;
   const companyIds = companies?.map(c => c.company_id) || [];
   const companyMap = new Map(companies?.map(c => [c.company_id, c.company_name]) || []);
 
