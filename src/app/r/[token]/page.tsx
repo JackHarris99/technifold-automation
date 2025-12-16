@@ -59,15 +59,18 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
     toolDescriptions.set(tp.product_code, tp.description || tp.product_code);
   });
 
-  // Get order history ONCE for all consumables
-  const { data: companyOrders } = await supabase
-    .from('orders')
-    .select('order_id, created_at')
-    .eq('company_id', companyId)
-    .eq('payment_status', 'paid')
-    .order('created_at', { ascending: false });
+  // Get company's consumable order history from fact table
+  const { data: companyConsumables } = await supabase
+    .from('company_consumables')
+    .select('consumable_code, last_ordered_at')
+    .eq('company_id', companyId);
 
-  const orderIds = companyOrders?.map(o => o.order_id) || [];
+  const consumableLastOrdered = new Map<string, string>();
+  companyConsumables?.forEach(cc => {
+    if (cc.last_ordered_at) {
+      consumableLastOrdered.set(cc.consumable_code, cc.last_ordered_at);
+    }
+  });
 
   // For each unique tool, get consumables
   const toolsWithConsumables = await Promise.all(
@@ -101,31 +104,12 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
         .in('product_code', consumableCodes)
         .limit(500);
 
-      // Get order items for these consumables
-      let orderItemsByProduct = new Map<string, string>();
-      if (orderIds.length > 0) {
-        const { data: orderItems } = await supabase
-          .from('order_items')
-          .select('product_code, order_id')
-          .in('order_id', orderIds)
-          .in('product_code', consumableCodes);
-
-        // Map product_code to most recent order date
-        orderItems?.forEach(oi => {
-          if (!orderItemsByProduct.has(oi.product_code)) {
-            const order = companyOrders?.find(o => o.order_id === oi.order_id);
-            if (order) {
-              orderItemsByProduct.set(oi.product_code, order.created_at);
-            }
-          }
-        });
-      }
-
+      // Map consumables to reorder items using fact table data
       const items: ReorderItem[] = (consumables || []).map(cons => ({
         consumable_code: cons.product_code,
         description: cons.description || cons.product_code,
         price: cons.price,
-        last_purchased: orderItemsByProduct.get(cons.product_code)?.split('T')[0] || null,
+        last_purchased: consumableLastOrdered.get(cons.product_code)?.split('T')[0] || null,
         category: cons.category
       }));
 
@@ -138,52 +122,34 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
     })
   );
 
-  // Get ALL previously ordered products (not just ones linked to tools)
+  // Get ALL previously ordered consumables (not just ones linked to tools)
+  // Use company_consumables fact table instead of orders/order_items
   let reorderItems: ReorderItem[] = [];
 
-  if (orderIds.length > 0) {
-    // Get all order items for this company
-    const { data: allOrderItems } = await supabase
-      .from('order_items')
-      .select('product_code, order_id')
-      .in('order_id', orderIds);
+  if (companyConsumables && companyConsumables.length > 0) {
+    const orderedProductCodes = companyConsumables.map(cc => cc.consumable_code);
 
-    if (allOrderItems && allOrderItems.length > 0) {
-      // Get unique product codes and their most recent order date
-      const productLastOrdered = new Map<string, string>();
-      allOrderItems.forEach(oi => {
-        if (!productLastOrdered.has(oi.product_code)) {
-          const order = companyOrders?.find(o => o.order_id === oi.order_id);
-          if (order) {
-            productLastOrdered.set(oi.product_code, order.created_at);
-          }
-        }
+    // Get product details for all ordered consumables
+    const { data: orderedProducts } = await supabase
+      .from('products')
+      .select('product_code, description, price, category')
+      .in('product_code', orderedProductCodes);
+
+    if (orderedProducts) {
+      reorderItems = orderedProducts.map(prod => ({
+        consumable_code: prod.product_code,
+        description: prod.description || prod.product_code,
+        price: prod.price,
+        last_purchased: consumableLastOrdered.get(prod.product_code)?.split('T')[0] || null,
+        category: prod.category
+      }));
+
+      // Sort by most recently ordered
+      reorderItems.sort((a, b) => {
+        if (!a.last_purchased) return 1;
+        if (!b.last_purchased) return -1;
+        return new Date(b.last_purchased).getTime() - new Date(a.last_purchased).getTime();
       });
-
-      const orderedProductCodes = [...productLastOrdered.keys()];
-
-      // Get product details for all ordered products
-      const { data: orderedProducts } = await supabase
-        .from('products')
-        .select('product_code, description, price, category')
-        .in('product_code', orderedProductCodes);
-
-      if (orderedProducts) {
-        reorderItems = orderedProducts.map(prod => ({
-          consumable_code: prod.product_code,
-          description: prod.description || prod.product_code,
-          price: prod.price,
-          last_purchased: productLastOrdered.get(prod.product_code)?.split('T')[0] || null,
-          category: prod.category
-        }));
-
-        // Sort by most recently ordered
-        reorderItems.sort((a, b) => {
-          if (!a.last_purchased) return 1;
-          if (!b.last_purchased) return -1;
-          return new Date(b.last_purchased).getTime() - new Date(a.last_purchased).getTime();
-        });
-      }
     }
   }
 
