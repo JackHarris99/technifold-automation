@@ -8,6 +8,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
+import CompanySearchBar from './CompanySearchBar';
 
 export default function AdminNav() {
   const pathname = usePathname();
@@ -24,6 +25,11 @@ export default function AdminNav() {
       <div className="p-4 border-b border-gray-800">
         <h1 className="text-lg font-bold">Technifold Admin</h1>
         <p className="text-xs text-gray-400">Sales Engine</p>
+      </div>
+
+      {/* Universal Company Search */}
+      <div className="p-4 border-b border-gray-800">
+        <CompanySearchBar />
       </div>
 
       {/* Navigation */}

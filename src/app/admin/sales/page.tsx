@@ -56,18 +56,12 @@ export default async function SalesCenterPage() {
   }
 
   const supabase = getSupabaseClient();
-  const isDirector = currentUser.role === 'director';
 
-  // Get companies in territory (directors see all, reps see their territory)
-  let companiesQuery = supabase
+  // All reps see ALL companies (no territory filtering)
+  // Metrics and opportunities shown for all companies
+  const { data: companies } = await supabase
     .from('companies')
-    .select('company_id, company_name');
-
-  if (!isDirector && currentUser.sales_rep_id) {
-    companiesQuery = companiesQuery.eq('account_owner', currentUser.sales_rep_id);
-  }
-
-  const { data: companies } = await companiesQuery;
+    .select('company_id, company_name, account_owner');
   const companyIds = companies?.map(c => c.company_id) || [];
   const companyMap = new Map(companies?.map(c => [c.company_id, c.company_name]) || []);
 

@@ -16,20 +16,13 @@ export default async function CompaniesPage() {
   }
 
   const supabase = getSupabaseClient();
-  const isDirector = user.role === 'director';
 
-  // Territory filtering
-  let query = supabase
+  // All reps see ALL companies (no territory filtering)
+  // Visual indicators will show ownership
+  const { data: companies, error } = await supabase
     .from('companies')
     .select('company_id, company_name, account_owner, category, country, last_invoice_at')
     .order('company_name');
-
-  // Sales reps only see their territory
-  if (!isDirector && user.sales_rep_id) {
-    query = query.eq('account_owner', user.sales_rep_id);
-  }
-
-  const { data: companies, error } = await query;
 
   if (error) {
     console.error('[Companies] Query error:', error);
@@ -40,9 +33,9 @@ export default async function CompaniesPage() {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Companies</h1>
+        <h1 className="text-3xl font-bold text-gray-900">All Companies</h1>
         <p className="text-gray-600 mt-2">
-          {isDirector ? 'All companies' : `Your territory`} • {totalCompanies} companies
+          {totalCompanies} companies • All reps can view and manage
         </p>
       </div>
 
@@ -76,8 +69,10 @@ export default async function CompaniesPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {companies.map((company) => (
-                <tr key={company.company_id} className="hover:bg-gray-50">
+              {companies.map((company) => {
+                const isMyCompany = company.account_owner === user.sales_rep_id;
+                return (
+                <tr key={company.company_id} className={`hover:bg-gray-50 ${isMyCompany ? 'bg-blue-50' : ''}`}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <Link
                       href={`/admin/company/${company.company_id}`}
@@ -87,8 +82,23 @@ export default async function CompaniesPage() {
                     </Link>
                     <div className="text-sm text-gray-500">{company.company_id}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {company.account_owner || '-'}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    {company.account_owner ? (
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          isMyCompany
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-200 text-gray-700'
+                        }`}>
+                          {company.account_owner}
+                        </span>
+                        {isMyCompany && (
+                          <span className="text-xs text-blue-600 font-semibold">YOU</span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 text-xs">Unassigned</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {company.category && (
@@ -112,7 +122,8 @@ export default async function CompaniesPage() {
                     </Link>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
