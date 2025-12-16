@@ -25,35 +25,30 @@ export default async function ReorderOpportunitiesPage() {
   }
 
   const supabase = getSupabaseClient();
-  const isDirector = currentUser.role === 'director';
 
-  // Get companies in territory with order history
+  // All companies with order history (no territory filtering)
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
 
-  let companiesQuery = supabase
+  const { data: companies } = await supabase
     .from('companies')
-    .select('company_id, company_name, last_invoice_at, total_revenue')
+    .select('company_id, company_name, account_owner, last_invoice_at, total_revenue')
     .not('last_invoice_at', 'is', null)
-    .lt('last_invoice_at', ninetyDaysAgo);
+    .lt('last_invoice_at', ninetyDaysAgo)
+    .order('last_invoice_at', { ascending: true });
 
-  if (!isDirector && currentUser.sales_rep_id) {
-    companiesQuery = companiesQuery.eq('account_owner', currentUser.sales_rep_id);
-  }
-
-  const { data: companies } = await companiesQuery.order('last_invoice_at', { ascending: true });
-
-  // Get order counts for each company
+  // Get invoice counts for each company
   const companyIds = companies?.map(c => c.company_id) || [];
   let orderCounts = new Map<string, number>();
 
   if (companyIds.length > 0) {
-    const { data: orders } = await supabase
-      .from('orders')
+    const { data: invoices } = await supabase
+      .from('invoices')
       .select('company_id')
-      .in('company_id', companyIds);
+      .in('company_id', companyIds)
+      .eq('payment_status', 'paid');
 
-    orders?.forEach(o => {
-      orderCounts.set(o.company_id, (orderCounts.get(o.company_id) || 0) + 1);
+    invoices?.forEach(inv => {
+      orderCounts.set(inv.company_id, (orderCounts.get(inv.company_id) || 0) + 1);
     });
   }
 
