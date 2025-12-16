@@ -9,7 +9,6 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import PipelineTable from '@/components/admin/PipelineTable';
-import AdminLayout from '@/components/admin/AdminLayout';
 
 export const metadata = {
   title: 'Sales Pipeline | Technifold Admin',
@@ -194,7 +193,6 @@ export default async function SalesPipelinePage() {
   const data = await getPipelineData(salesRepId);
 
   return (
-    <AdminLayout>
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -298,6 +296,5 @@ export default async function SalesPipelinePage() {
         </div>
       </div>
     </div>
-    </AdminLayout>
   );
 }

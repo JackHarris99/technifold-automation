@@ -7,7 +7,6 @@
 
 import { useEffect, useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import AdminLayout from '@/components/admin/AdminLayout';
 
 interface User {
   user_id: string;
@@ -56,16 +55,13 @@ export default function UsersPage() {
 
   if (loading) {
     return (
-      <AdminLayout>
         <div className="flex items-center justify-center h-64">
           <div className="text-gray-500">Loading users...</div>
         </div>
-      </AdminLayout>
     );
   }
 
   return (
-    <AdminLayout>
       <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between mb-6">
@@ -160,7 +156,6 @@ export default function UsersPage() {
         )}
       </div>
     </div>
-    </AdminLayout>
   );
 }
 

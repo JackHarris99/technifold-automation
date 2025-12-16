@@ -8,7 +8,6 @@
 import { getSupabaseClient } from '@/lib/supabase';
 import { getCurrentUser, isDirector } from '@/lib/auth';
 import EngagementsTable from '@/components/admin/EngagementsTable';
-import AdminLayout from '@/components/admin/AdminLayout';
 
 export default async function EngagementsPage() {
   const supabase = getSupabaseClient();
@@ -17,14 +16,12 @@ export default async function EngagementsPage() {
 
   if (!currentUser) {
     return (
-      <AdminLayout>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Please Log In</h1>
             <a href="/admin/login" className="text-blue-600 hover:underline">Go to Login</a>
           </div>
         </div>
-      </AdminLayout>
     );
   }
 
@@ -63,7 +60,6 @@ export default async function EngagementsPage() {
   const engagementTypes = [...new Set(allEngagements?.map(e => e.event_type).filter(Boolean) || [])].sort();
 
   return (
-    <AdminLayout>
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4">
         <div className="mb-6">
@@ -86,6 +82,5 @@ export default async function EngagementsPage() {
         />
       </div>
     </div>
-    </AdminLayout>
   );
 }

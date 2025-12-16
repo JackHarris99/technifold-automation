@@ -5,11 +5,9 @@
  */
 
 import CompanyListTable from '@/components/admin/CompanyListTable';
-import AdminLayout from '@/components/admin/AdminLayout';
 
 export default function CompanyListPage() {
   return (
-    <AdminLayout>
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="mb-8">
@@ -22,6 +20,5 @@ export default function CompanyListPage() {
           <CompanyListTable />
         </div>
       </div>
-    </AdminLayout>
   );
 }

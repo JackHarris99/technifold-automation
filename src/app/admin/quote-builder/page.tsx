@@ -11,7 +11,6 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import QuotePreview from '@/components/admin/QuotePreview';
 import MediaImage from '@/components/shared/MediaImage';
-import AdminLayout from '@/components/admin/AdminLayout';
 
 interface Company {
   company_id: string;
@@ -279,7 +278,6 @@ export default function QuoteBuilderV2Page() {
   }
 
   return (
-    <AdminLayout>
       <div className="min-h-screen bg-gray-50 p-8">
         <div className="max-w-7xl mx-auto">
         {/* Header */}
@@ -546,6 +544,5 @@ export default function QuoteBuilderV2Page() {
         )}
       </div>
     </div>
-    </AdminLayout>
   );
 }

@@ -8,7 +8,6 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
 import CompanyDetailUnified from '@/components/admin/CompanyDetailUnified';
 import { getCompanyPermissions } from '@/lib/permissions';
-import AdminLayout from '@/components/admin/AdminLayout';
 
 interface CompanyConsolePageProps {
   params: Promise<{
@@ -144,7 +143,6 @@ export default async function CompanyConsolePage({ params }: CompanyConsolePageP
   const permissions = await getCompanyPermissions(company);
 
   return (
-    <AdminLayout>
       <CompanyDetailUnified
         company={company}
         salesRep={salesRep}
@@ -157,6 +155,5 @@ export default async function CompanyConsolePage({ params }: CompanyConsolePageP
         invoices={invoices || []}
         permissions={permissions}
       />
-    </AdminLayout>
   );
 }

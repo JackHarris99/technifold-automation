@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import Link from 'next/link';
-import AdminLayout from '@/components/admin/AdminLayout';
 
 interface Subscription {
   subscription_id: string;
@@ -140,7 +139,6 @@ export default function SubscriptionsAdminPage() {
   }
 
   return (
-    <AdminLayout>
       <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
         {/* Header */}
@@ -464,6 +462,5 @@ export default function SubscriptionsAdminPage() {
         )}
       </div>
     </div>
-    </AdminLayout>
   );
 }

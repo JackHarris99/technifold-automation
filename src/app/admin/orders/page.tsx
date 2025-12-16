@@ -7,11 +7,9 @@
 
 import OrdersTable from '@/components/admin/OrdersTable';
 import DeprecationBanner from '@/components/admin/DeprecationBanner';
-import AdminLayout from '@/components/admin/AdminLayout';
 
 export default function OrdersPage() {
   return (
-    <AdminLayout>
       <div className="h-full flex flex-col bg-white">
       <DeprecationBanner
         message="This page uses historic Sage order data which is messy and inconsistent. Use Stripe Invoices for future invoicing."
@@ -31,6 +29,5 @@ export default function OrdersPage() {
         <OrdersTable />
       </div>
     </div>
-    </AdminLayout>
   );
 }

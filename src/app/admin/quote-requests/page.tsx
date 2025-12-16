@@ -6,7 +6,6 @@
 import { getSupabaseClient } from '@/lib/supabase';
 import QuoteRequestsTable from '@/components/admin/QuoteRequestsTable';
 import Link from 'next/link';
-import AdminLayout from '@/components/admin/AdminLayout';
 
 export default async function QuoteRequestsPage() {
   const supabase = getSupabaseClient();
@@ -41,7 +40,6 @@ export default async function QuoteRequestsPage() {
   };
 
   return (
-    <AdminLayout>
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
@@ -88,6 +86,5 @@ export default async function QuoteRequestsPage() {
         <QuoteRequestsTable initialData={requests} />
       </div>
     </div>
-    </AdminLayout>
   );
 }

@@ -7,7 +7,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { isDirector, getCurrentUser } from '@/lib/auth';
-import AdminNavigation from '@/components/admin/AdminNavigation';
+import AdminNav from '@/components/admin/AdminNav';
 
 export default async function AdminLayout({
   children,
@@ -42,17 +42,8 @@ export default async function AdminLayout({
           </Link>
         </div>
 
-        {/* Section Tabs */}
-        <div className="px-3 py-4 border-b border-blue-500/30">
-          <div className="space-y-1">
-            <SectionTab href="/admin/sales" label="Sales Center" icon="🎯" />
-            <SectionTab href="/admin/marketing" label="Marketing" icon="📧" />
-            <SectionTab href="/admin/crm" label="CRM" icon="🏢" />
-          </div>
-        </div>
-
-        {/* Dynamic Navigation based on current section */}
-        <AdminNavigation isDirector={isDir} />
+        {/* Unified Navigation */}
+        <AdminNav />
 
         {/* User Info & Actions */}
         <div className="p-4 border-t border-blue-500/30 space-y-2 mt-auto">
@@ -96,17 +87,5 @@ export default async function AdminLayout({
         {children}
       </main>
     </div>
-  );
-}
-
-function SectionTab({ href, label, icon }: { href: string; label: string; icon: string }) {
-  return (
-    <Link
-      href={href}
-      className="flex items-center space-x-3 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-lg transition-all font-medium text-sm"
-    >
-      <span className="text-xl">{icon}</span>
-      <span>{label}</span>
-    </Link>
   );
 }

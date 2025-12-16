@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import AdminLayout from '@/components/admin/AdminLayout';
 
 interface Company {
   company_id: string;
@@ -176,7 +175,6 @@ export default function CreateSubscriptionPage() {
   );
 
   return (
-    <AdminLayout>
       <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
         {/* Header */}
@@ -384,6 +382,5 @@ export default function CreateSubscriptionPage() {
         </div>
       </div>
     </div>
-    </AdminLayout>
   );
 }

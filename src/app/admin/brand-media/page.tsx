@@ -8,7 +8,6 @@
 import { useState, useEffect } from 'react';
 import MediaUpload from '@/components/admin/MediaUpload';
 import MediaImage from '@/components/shared/MediaImage';
-import AdminLayout from '@/components/admin/AdminLayout';
 
 interface Brand {
   brand_slug: string;
@@ -81,7 +80,6 @@ export default function BrandMediaPage() {
   }
 
   return (
-    <AdminLayout>
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
@@ -168,6 +166,5 @@ export default function BrandMediaPage() {
         )}
       </div>
     </div>
-    </AdminLayout>
   );
 }

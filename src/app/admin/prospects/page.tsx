@@ -5,7 +5,6 @@
 
 import { getSupabaseClient } from '@/lib/supabase';
 import ProspectsTable from '@/components/admin/ProspectsTable';
-import AdminLayout from '@/components/admin/AdminLayout';
 
 export default async function ProspectsPage() {
   const supabase = getSupabaseClient();
@@ -82,7 +81,6 @@ export default async function ProspectsPage() {
   });
 
   return (
-    <AdminLayout>
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
@@ -105,6 +103,5 @@ export default async function ProspectsPage() {
         <ProspectsTable prospects={prospectsData} />
       </div>
     </div>
-    </AdminLayout>
   );
 }

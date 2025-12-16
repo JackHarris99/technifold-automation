@@ -6,7 +6,6 @@
 import { getCurrentUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import TerritoryCompanyList from '@/components/admin/TerritoryCompanyList';
-import AdminLayout from '@/components/admin/AdminLayout';
 
 export default async function SalesCenterCompaniesPage() {
   const currentUser = await getCurrentUser();
@@ -16,7 +15,6 @@ export default async function SalesCenterCompaniesPage() {
   }
 
   return (
-    <AdminLayout>
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="mb-8">
@@ -33,6 +31,5 @@ export default async function SalesCenterCompaniesPage() {
           />
         </div>
       </div>
-    </AdminLayout>
   );
 }
