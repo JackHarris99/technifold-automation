@@ -43,26 +43,47 @@ export default function ManageToolsModal({
   const [saving, setSaving] = useState(false);
   const [selectedToolCode, setSelectedToolCode] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [toolSearch, setToolSearch] = useState('');
+  const [searchLoading, setSearchLoading] = useState(false);
 
   // Load data when modal opens
   useEffect(() => {
     if (isOpen) {
-      loadData();
+      loadCurrentTools();
     }
   }, [isOpen, companyId]);
 
-  async function loadData() {
+  // Debounced search for available tools
+  useEffect(() => {
+    if (!toolSearch.trim()) {
+      setAvailableTools([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const res = await fetch(`/api/products/tools?search=${encodeURIComponent(toolSearch)}`);
+        const data = await res.json();
+        setAvailableTools(data.tools || []);
+      } catch (err) {
+        console.error('Search failed:', err);
+        setAvailableTools([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [toolSearch]);
+
+  async function loadCurrentTools() {
     setLoading(true);
     try {
       // Load current tools for this company
       const toolsRes = await fetch(`/api/admin/companies/${companyId}/tools`);
       const toolsData = await toolsRes.json();
       setCurrentTools(toolsData.tools || []);
-
-      // Load all available tools
-      const availableRes = await fetch('/api/products/tools');
-      const availableData = await availableRes.json();
-      setAvailableTools(availableData.tools || []);
     } catch (err) {
       console.error('Failed to load tools:', err);
     } finally {
@@ -94,9 +115,10 @@ export default function ManageToolsModal({
       }
 
       // Reload tools
-      await loadData();
+      await loadCurrentTools();
       setSelectedToolCode('');
       setQuantity(1);
+      setToolSearch('');
       alert('Tool added successfully');
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to add tool');
@@ -124,7 +146,7 @@ export default function ManageToolsModal({
       }
 
       // Reload tools
-      await loadData();
+      await loadCurrentTools();
       alert('Tool quantity updated');
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to update tool');
@@ -152,7 +174,7 @@ export default function ManageToolsModal({
       }
 
       // Reload tools
-      await loadData();
+      await loadCurrentTools();
       alert('Tool removed successfully');
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to remove tool');
@@ -199,21 +221,40 @@ export default function ManageToolsModal({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Select Tool
+                      Search for Tool
                     </label>
-                    <select
-                      value={selectedToolCode}
-                      onChange={(e) => setSelectedToolCode(e.target.value)}
+                    <input
+                      type="text"
+                      value={toolSearch}
+                      onChange={(e) => setToolSearch(e.target.value)}
+                      placeholder="Type to search tools..."
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       disabled={saving}
-                    >
-                      <option value="">-- Select a tool --</option>
-                      {availableTools.map((tool) => (
-                        <option key={tool.product_code} value={tool.product_code}>
-                          {tool.description} ({tool.product_code})
-                        </option>
-                      ))}
-                    </select>
+                    />
+                    {toolSearch && (
+                      <div className="mt-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg bg-white">
+                        {searchLoading ? (
+                          <div className="p-3 text-center text-gray-500">Searching...</div>
+                        ) : availableTools.length === 0 ? (
+                          <div className="p-3 text-center text-gray-500">No tools found</div>
+                        ) : (
+                          availableTools.map((tool) => (
+                            <button
+                              key={tool.product_code}
+                              onClick={() => {
+                                setSelectedToolCode(tool.product_code);
+                                setToolSearch(tool.description);
+                                setAvailableTools([]);
+                              }}
+                              className="w-full text-left px-3 py-2 hover:bg-blue-50 border-b border-gray-100 last:border-b-0"
+                            >
+                              <div className="font-medium text-gray-900">{tool.description}</div>
+                              <div className="text-xs text-gray-600">{tool.product_code} • {tool.category}</div>
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -236,6 +277,11 @@ export default function ManageToolsModal({
                 >
                   {saving ? 'Adding...' : 'Add Tool'}
                 </button>
+                {selectedToolCode && (
+                  <div className="mt-2 text-sm text-gray-600">
+                    Selected: {toolSearch}
+                  </div>
+                )}
               </div>
 
               {/* Current Tools */}
