@@ -84,7 +84,6 @@ export default async function SalesCenterPage() {
   }
 
   const companies = allCompanies;
-  const companyIds = companies?.map(c => c.company_id) || [];
   const companyMap = new Map(companies?.map(c => [c.company_id, c.company_name]) || []);
 
   // Build metrics
@@ -92,7 +91,7 @@ export default async function SalesCenterPage() {
     total_revenue: 0,
     deals_closed: 0,
     active_trials: 0,
-    companies_in_territory: companyIds.length,
+    companies_in_territory: companies.length,
     unpaid_invoices_count: 0,
     unpaid_invoices_total: 0,
   };
@@ -103,7 +102,7 @@ export default async function SalesCenterPage() {
   let unpaidInvoices: UnpaidInvoice[] = [];
   let needsContact: NeedsContact[] = [];
 
-  if (companyIds.length > 0) {
+  if (companies.length > 0) {
     // Batch fetch all data in parallel
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
     const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
@@ -117,59 +116,53 @@ export default async function SalesCenterPage() {
       endingTrialsResult,
       lastContactsResult,
     ] = await Promise.all([
-      // Revenue from paid invoices (last 30 days)
+      // Revenue from paid invoices (last 30 days) - ALL companies
       supabase
         .from('invoices')
         .select('total_amount')
-        .in('company_id', companyIds)
         .eq('payment_status', 'paid')
         .gte('invoice_date', thirtyDaysAgo),
 
-      // Unpaid invoices with details
+      // Unpaid invoices with details - ALL companies
       supabase
         .from('invoices')
         .select('invoice_id, company_id, total_amount, invoice_date, invoice_url')
-        .in('company_id', companyIds)
         .eq('payment_status', 'unpaid')
         .order('invoice_date', { ascending: true })
         .limit(10),
 
-      // Active trials count
+      // Active trials count - ALL companies
       supabase
         .from('subscriptions')
         .select('*', { count: 'exact', head: true })
-        .in('company_id', companyIds)
         .eq('status', 'trial'),
 
-      // Reorder opportunities (90+ days since last order)
+      // Reorder opportunities (90+ days since last order) - ALL companies
       supabase
         .from('companies')
         .select('company_id, company_name, last_invoice_at')
-        .in('company_id', companyIds)
         .not('last_invoice_at', 'is', null)
         .lt('last_invoice_at', ninetyDaysAgo)
         .order('last_invoice_at', { ascending: true })
         .limit(10),
 
-      // Trials ending soon (within 7 days)
+      // Trials ending soon (within 7 days) - ALL companies
       supabase
         .from('subscriptions')
         .select('subscription_id, company_id, trial_end_date')
-        .in('company_id', companyIds)
         .eq('status', 'trial')
         .lt('trial_end_date', sevenDaysFromNow)
         .gt('trial_end_date', new Date().toISOString())
         .order('trial_end_date', { ascending: true })
         .limit(10),
 
-      // Last manual contact for each company (limit to most recent per company)
+      // Last manual contact for each company (ALL companies)
       supabase
         .from('engagement_events')
         .select('company_id, occurred_at, event_name')
-        .in('company_id', companyIds)
         .ilike('event_name', 'manual_contact%')
         .order('occurred_at', { ascending: false })
-        .limit(1000), // Reasonable limit to prevent fetching thousands of rows
+        .limit(1000), // Limit to most recent 1000 contact events
     ]);
 
     // Process metrics
@@ -226,15 +219,15 @@ export default async function SalesCenterPage() {
     const now = Date.now();
     const ninetyDays = 90 * 24 * 60 * 60 * 1000;
 
-    needsContact = companyIds
-      .map(companyId => {
-        const lastContact = lastContactMap.get(companyId);
-        const companyName = companyMap.get(companyId) || 'Unknown Company';
+    needsContact = companies
+      .map(company => {
+        const lastContact = lastContactMap.get(company.company_id);
+        const companyName = company.company_name;
 
         if (!lastContact) {
           // Never contacted
           return {
-            company_id: companyId,
+            company_id: company.company_id,
             company_name: companyName,
             days_since_contact: 999,
             last_contact_at: null,
@@ -245,7 +238,7 @@ export default async function SalesCenterPage() {
 
         if (daysSince >= 90) {
           return {
-            company_id: companyId,
+            company_id: company.company_id,
             company_name: companyName,
             days_since_contact: daysSince,
             last_contact_at: lastContact.occurred_at,
@@ -360,7 +353,7 @@ export default async function SalesCenterPage() {
               emptyMessage="All companies contacted recently"
               emptyIcon="✅"
               color="orange"
-              viewAllHref="/admin/sales/companies"
+              viewAllHref="/admin/companies"
             >
               {needsContact.map((company) => (
                 <Link
