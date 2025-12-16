@@ -181,7 +181,7 @@ function InvoiceRow({ invoice, urgency }: { invoice: UnpaidInvoice; urgency: 'ov
     >
       <div className="flex-1">
         <Link
-          href={`/admin/sales/company/${invoice.company_id}`}
+          href={`/admin/company/${invoice.company_id}`}
           className="font-semibold text-gray-900 hover:text-blue-600"
         >
           {invoice.company_name}

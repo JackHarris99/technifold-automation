@@ -172,7 +172,7 @@ export default async function InvoicesPage() {
                     </td>
                     <td className="py-3 px-4">
                       <Link
-                        href={`/admin/sales/company/${invoice.company_id}`}
+                        href={`/admin/company/${invoice.company_id}`}
                         className="text-blue-600 hover:text-blue-800 font-medium"
                       >
                         {invoice.company_name}

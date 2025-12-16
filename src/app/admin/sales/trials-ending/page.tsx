@@ -190,7 +190,7 @@ function TrialRow({ trial, urgency }: { trial: TrialEnding; urgency: 'critical' 
 
   return (
     <Link
-      href={`/admin/sales/company/${trial.company_id}`}
+      href={`/admin/company/${trial.company_id}`}
       className={`flex items-center justify-between p-4 ${hoverColors[urgency]} transition-colors border-b border-gray-100 last:border-b-0`}
     >
       <div>

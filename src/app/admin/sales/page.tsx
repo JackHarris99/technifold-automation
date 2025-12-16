@@ -319,7 +319,7 @@ export default async function SalesCenterPage() {
               {trialsEnding.map((trial) => (
                 <Link
                   key={trial.subscription_id}
-                  href={`/admin/sales/company/${trial.company_id}`}
+                  href={`/admin/company/${trial.company_id}`}
                   className="flex items-center justify-between p-4 hover:bg-red-50 transition-colors border-b border-gray-100 last:border-b-0"
                 >
                   <div>
@@ -350,7 +350,7 @@ export default async function SalesCenterPage() {
               {needsContact.map((company) => (
                 <Link
                   key={company.company_id}
-                  href={`/admin/sales/company/${company.company_id}`}
+                  href={`/admin/company/${company.company_id}`}
                   className="flex items-center justify-between p-4 hover:bg-orange-50 transition-colors border-b border-gray-100 last:border-b-0"
                 >
                   <div>
@@ -427,7 +427,7 @@ export default async function SalesCenterPage() {
               {reorderOpportunities.map((opp) => (
                 <Link
                   key={opp.company_id}
-                  href={`/admin/sales/company/${opp.company_id}`}
+                  href={`/admin/company/${opp.company_id}`}
                   className="flex items-center justify-between p-4 hover:bg-purple-50 transition-colors border-b border-gray-100 last:border-b-0"
                 >
                   <div>
