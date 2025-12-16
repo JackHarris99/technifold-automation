@@ -25,13 +25,14 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
   console.log(`[generatePortalPayload] Starting for company_id: "${companyId}"`);
   const supabase = getSupabaseClient();
 
-  // Get company's tools from company_tools table WITH quantities
+  // Get company's tools from unified product history table WITH quantities
   const { data: companyTools, error: toolsError } = await supabase
-    .from('company_tools')
-    .select('tool_code, total_units')
-    .eq('company_id', companyId);
+    .from('company_product_history')
+    .select('product_code, total_quantity')
+    .eq('company_id', companyId)
+    .eq('product_type', 'tool');
 
-  console.log(`[generatePortalPayload] company_tools query:`, {
+  console.log(`[generatePortalPayload] company_product_history (tools) query:`, {
     companyId,
     count: companyTools?.length || 0,
     error: toolsError,
@@ -47,11 +48,11 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
     };
   }
 
-  // Group tools by tool_code and sum quantities
+  // Group tools by product_code and sum quantities
   const toolQuantities = new Map<string, number>();
   companyTools.forEach(ct => {
-    const current = toolQuantities.get(ct.tool_code) || 0;
-    toolQuantities.set(ct.tool_code, current + (ct.total_units || 1));
+    const current = toolQuantities.get(ct.product_code) || 0;
+    toolQuantities.set(ct.product_code, current + (ct.total_quantity || 1));
   });
 
   const uniqueToolCodes = [...toolQuantities.keys()];
@@ -67,13 +68,14 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
     toolDescriptions.set(tp.product_code, tp.description || tp.product_code);
   });
 
-  // Get company's consumable order history from fact table
+  // Get company's consumable order history from unified product history table
   const { data: companyConsumables, error: consumablesError } = await supabase
-    .from('company_consumables')
-    .select('consumable_code, last_ordered_at')
-    .eq('company_id', companyId);
+    .from('company_product_history')
+    .select('product_code, last_purchased_at')
+    .eq('company_id', companyId)
+    .eq('product_type', 'consumable');
 
-  console.log(`[generatePortalPayload] company_consumables query:`, {
+  console.log(`[generatePortalPayload] company_product_history (consumables) query:`, {
     companyId,
     count: companyConsumables?.length || 0,
     error: consumablesError,
@@ -82,8 +84,8 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
 
   const consumableLastOrdered = new Map<string, string>();
   companyConsumables?.forEach(cc => {
-    if (cc.last_ordered_at) {
-      consumableLastOrdered.set(cc.consumable_code, cc.last_ordered_at);
+    if (cc.last_purchased_at) {
+      consumableLastOrdered.set(cc.product_code, cc.last_purchased_at);
     }
   });
 
@@ -138,11 +140,11 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
   );
 
   // Get ALL previously ordered consumables (not just ones linked to tools)
-  // Use company_consumables fact table instead of orders/order_items
+  // Use unified product history table instead of deprecated orders/order_items
   let reorderItems: ReorderItem[] = [];
 
   if (companyConsumables && companyConsumables.length > 0) {
-    const orderedProductCodes = companyConsumables.map(cc => cc.consumable_code);
+    const orderedProductCodes = companyConsumables.map(cc => cc.product_code);
 
     // Get product details for all ordered consumables
     const { data: orderedProducts } = await supabase
