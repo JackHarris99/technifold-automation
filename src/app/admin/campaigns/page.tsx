@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 export default function UnifiedCampaignPage() {
   const router = useRouter();
@@ -181,7 +182,8 @@ export default function UnifiedCampaignPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <AdminLayout>
+      <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -395,5 +397,6 @@ export default function UnifiedCampaignPage() {
         )}
       </div>
     </div>
+    </AdminLayout>
   );
 }

@@ -7,6 +7,7 @@
 import { getSupabaseClient } from '@/lib/supabase';
 import Link from 'next/link';
 import DeprecationBanner from '@/components/admin/DeprecationBanner';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 export default async function CRMPage() {
   const supabase = getSupabaseClient();
@@ -78,8 +79,9 @@ export default async function CRMPage() {
     .limit(5);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <DeprecationBanner
+    <AdminLayout>
+      <div className="min-h-screen bg-gray-50">
+        <DeprecationBanner
         message="This CRM view is deprecated. Use the new Sales Center for a streamlined sales workflow."
         replacementUrl="/admin/sales"
         replacementLabel="Go to Sales Center"
@@ -219,6 +221,7 @@ export default async function CRMPage() {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 }
 

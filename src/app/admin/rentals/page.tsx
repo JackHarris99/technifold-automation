@@ -7,6 +7,7 @@
 import { getSupabaseClient } from '@/lib/supabase';
 import Link from 'next/link';
 import DeprecationBanner from '@/components/admin/DeprecationBanner';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 export const metadata = {
   title: 'Tool Rentals (Legacy) | Technifold Admin',
@@ -40,8 +41,9 @@ export default async function RentalsPage() {
   const cancelledRentals = rentals?.filter(r => r.status === 'cancelled') || [];
 
   return (
-    <div className="h-full flex flex-col overflow-auto bg-gray-50">
-      <DeprecationBanner
+    <AdminLayout>
+      <div className="h-full flex flex-col overflow-auto bg-gray-50">
+        <DeprecationBanner
         message="Rentals table is legacy. Use the new Subscriptions system for all ongoing rental management."
         replacementUrl="/admin/subscriptions"
         replacementLabel="View Subscriptions"
@@ -215,5 +217,6 @@ export default async function RentalsPage() {
         {/* Content padding */}
       </div>
     </div>
+    </AdminLayout>
   );
 }

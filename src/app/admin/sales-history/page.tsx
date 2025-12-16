@@ -10,6 +10,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { redirect } from 'next/navigation';
 import SalesHistoryTabs from '@/components/admin/SalesHistoryTabs';
 import DeprecationBanner from '@/components/admin/DeprecationBanner';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 export const metadata = {
   title: 'Sales History | Technifold Admin',
@@ -134,7 +135,7 @@ export default async function SalesHistoryPage() {
   const data = await getSalesHistoryData(salesRepId);
 
   return (
-    <>
+    <AdminLayout>
       <DeprecationBanner
         message="This page uses historic Sage order data which is messy and inconsistent. For company sales history, use the new company detail pages."
         replacementUrl="/admin/sales/companies"
@@ -142,6 +143,6 @@ export default async function SalesHistoryPage() {
         reason="Orders table contains historic Sage data with incorrect prices. Use company_tools, company_consumables, and company_product_history fact tables for accurate data."
       />
       <SalesHistoryTabs {...data} />
-    </>
+    </AdminLayout>
   );
 }
