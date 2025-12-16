@@ -58,12 +58,18 @@ export default function CompanyDetailView({
               <p className="text-gray-500 mt-1">{company.company_id}</p>
             </div>
             <div className="flex gap-3">
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              <Link
+                href={`/admin/test-reorder-link?company_id=${company.company_id}`}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
                 Send Reorder Email
-              </button>
-              <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+              </Link>
+              <Link
+                href={`/admin/invoices/new?company_id=${company.company_id}`}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              >
                 Create Invoice
-              </button>
+              </Link>
             </div>
           </div>
 
