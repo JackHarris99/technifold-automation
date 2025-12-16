@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 interface CompanyDetailViewProps {
@@ -35,6 +35,13 @@ export default function CompanyDetailView({
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [sendingEmail, setSendingEmail] = useState(false);
+
+  // Debug: Track modal state changes
+  useEffect(() => {
+    console.log('[CompanyDetail] useEffect - showEmailModal changed to:', showEmailModal);
+  }, [showEmailModal]);
+
+  console.log('[CompanyDetail] Component render - showEmailModal:', showEmailModal);
 
   const tabs = [
     { id: 'overview', label: 'Overview', count: null },
@@ -475,15 +482,32 @@ function InvoicesTab({ invoices, companyId }: any) {
       </div>
 
       {/* Send Reorder Email Modal */}
-      {console.log('[CompanyDetail] Render check - showEmailModal:', showEmailModal)}
       {showEmailModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => console.log('[Modal] Background clicked')}>
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]"
+          onClick={(e) => {
+            console.log('[Modal] Background clicked');
+            if (e.target === e.currentTarget) {
+              setShowEmailModal(false);
+            }
+          }}
+        >
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="p-6 border-b border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900">Send Reorder Email</h2>
-              <p className="text-gray-600 mt-1">
-                Select contacts to receive personalized reorder emails with tokenized links
-              </p>
+              <div className="flex items-start justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Send Reorder Email</h2>
+                  <p className="text-gray-600 mt-1">
+                    Select contacts to receive personalized reorder emails with tokenized links
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowEmailModal(false)}
+                  className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
+                >
+                  ×
+                </button>
+              </div>
             </div>
 
             <div className="p-6">
