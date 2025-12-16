@@ -6,6 +6,7 @@
 
 import { getSupabaseClient } from '@/lib/supabase';
 import CategoryTable from '@/components/admin/CategoryTable';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 export default async function CategorizePage() {
   const supabase = getSupabaseClient();
@@ -19,8 +20,9 @@ export default async function CategorizePage() {
   const companiesData = companies || [];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <AdminLayout>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Company Categorization</h1>
           <p className="text-gray-600 mt-2">
@@ -31,5 +33,6 @@ export default async function CategorizePage() {
         <CategoryTable companies={companiesData} />
       </div>
     </div>
+    </AdminLayout>
   );
 }

@@ -7,6 +7,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { getCurrentUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 interface UnpaidInvoice {
   invoice_id: string;
@@ -71,8 +72,9 @@ export default async function UnpaidInvoicesPage() {
   const recent = unpaidInvoices.filter(i => i.days_old < 14);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+    <AdminLayout>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
       <div className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-6xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
@@ -156,6 +158,7 @@ export default async function UnpaidInvoicesPage() {
         )}
       </div>
     </div>
+    </AdminLayout>
   );
 }
 
