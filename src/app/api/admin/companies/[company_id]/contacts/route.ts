@@ -14,10 +14,10 @@ import { getSupabaseClient } from '@/lib/supabase';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ companyId: string }> }
+  { params }: { params: Promise<{ company_id: string }> }
 ) {
   try {
-    const { companyId } = await params;
+    const { company_id: companyId } = await params;
     const supabase = getSupabaseClient();
 
     // Fetch ALL contacts for the company in batches (Supabase 1000 row limit)
@@ -57,10 +57,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  context: { params: Promise<{ companyId: string }> }
+  context: { params: Promise<{ company_id: string }> }
 ) {
   try {
-    const { companyId } = await context.params;
+    const { company_id: companyId } = await context.params;
     const body = await request.json();
 
     // Check territory permission
