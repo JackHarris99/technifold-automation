@@ -312,58 +312,88 @@ export default function SendReorderPage() {
 
                     {/* Portal Content Preview */}
                     <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <h3 className="font-bold text-gray-900 mb-3">🛒 Portal Content Preview</h3>
+                      <h3 className="font-bold text-gray-900 mb-3">🛒 Reorder Portal Preview</h3>
                       <p className="text-sm text-gray-600 mb-4">
                         This is what customers see when they click the link in their email:
                       </p>
 
-                      <div className="bg-white p-6 rounded border border-gray-300">
-                        <div className="flex items-center justify-between mb-6 pb-4 border-b">
-                          <div>
-                            <h2 className="text-2xl font-bold text-gray-900">{company?.company_name}</h2>
-                            <p className="text-sm text-gray-600">Personalized Reorder Portal</p>
+                      <div className="bg-slate-50 rounded border border-gray-300 overflow-hidden">
+                        {/* Portal Header */}
+                        <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <div className="text-white font-bold text-sm">TECHNIFOLD</div>
+                              <div className="h-6 w-px bg-slate-600"></div>
+                              <div>
+                                <div className="font-bold text-sm">{company?.company_name}</div>
+                                <div className="text-xs text-slate-300">Consumables Reorder Portal</div>
+                              </div>
+                            </div>
                           </div>
-                          <img
-                            src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/technifold.png"
-                            alt="Technifold"
-                            className="h-10"
-                          />
                         </div>
 
-                        <div className="space-y-4">
-                          <div className="bg-blue-50 p-4 rounded-lg">
-                            <h4 className="font-bold text-blue-900 mb-2">Your Order History</h4>
-                            <p className="text-sm text-blue-800">
-                              Based on your previous orders, we've pre-selected items you might need to restock.
+                        {/* Portal Layout */}
+                        <div className="flex h-96">
+                          {/* Left Sidebar */}
+                          <div className="w-48 bg-white border-r border-slate-200 p-3">
+                            <div className="text-xs font-bold text-slate-400 uppercase mb-2">Browse Products</div>
+                            <div className="space-y-1">
+                              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-2">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Previously Ordered
+                              </div>
+                              <div className="px-3 py-2 text-xs text-slate-600 flex items-center gap-2">
+                                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                </svg>
+                                <span className="truncate">Tool Tabs (if owned)</span>
+                              </div>
+                            </div>
+                            <div className="mt-6 pt-4 border-t border-slate-200">
+                              <div className="bg-slate-50 rounded-lg p-2">
+                                <div className="text-xs font-semibold text-slate-700">Need Help?</div>
+                                <div className="text-xs text-blue-600 mt-1">+44 (0)1455 554491</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Main Content Area */}
+                          <div className="flex-1 bg-white p-4 overflow-y-auto">
+                            <h2 className="text-lg font-bold text-gray-900 mb-3">Previously Ordered Consumables</h2>
+                            <p className="text-sm text-gray-600 mb-4">
+                              Quick reorder based on your purchase history
                             </p>
-                          </div>
 
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded border">
-                              <div>
-                                <p className="font-medium text-gray-900">Product Name Example</p>
-                                <p className="text-sm text-gray-500">Last ordered: 3 months ago</p>
+                            {/* Product Cards */}
+                            <div className="space-y-2">
+                              <div className="bg-white border border-gray-200 rounded-lg p-3">
+                                <div className="flex justify-between items-start">
+                                  <div className="flex-1">
+                                    <div className="font-medium text-sm text-gray-900">Consumable Item</div>
+                                    <div className="text-xs text-gray-500">Product Code • Last ordered: [date]</div>
+                                    <div className="text-sm font-semibold text-gray-900 mt-1">£[price]</div>
+                                  </div>
+                                  <button className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-medium">
+                                    Add to Cart
+                                  </button>
+                                </div>
                               </div>
-                              <button className="px-4 py-2 bg-blue-600 text-white rounded text-sm">
-                                Add to Cart
-                              </button>
-                            </div>
-                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded border">
-                              <div>
-                                <p className="font-medium text-gray-900">Product Name Example</p>
-                                <p className="text-sm text-gray-500">Last ordered: 5 months ago</p>
-                              </div>
-                              <button className="px-4 py-2 bg-blue-600 text-white rounded text-sm">
-                                Add to Cart
-                              </button>
+
+                              <div className="text-xs text-gray-500 italic">+ More items based on order history...</div>
                             </div>
                           </div>
+                        </div>
 
-                          <div className="pt-4 border-t">
-                            <button className="w-full py-3 bg-green-600 text-white font-bold rounded-lg">
-                              Proceed to Checkout
-                            </button>
+                        {/* Cart Bar */}
+                        <div className="bg-slate-800 text-white p-3 flex items-center justify-between">
+                          <div className="text-sm">
+                            <span className="font-semibold">Cart:</span> 0 items
                           </div>
+                          <button className="px-4 py-1.5 bg-green-600 text-white rounded-lg text-sm font-semibold">
+                            Request Invoice
+                          </button>
                         </div>
                       </div>
                     </div>
