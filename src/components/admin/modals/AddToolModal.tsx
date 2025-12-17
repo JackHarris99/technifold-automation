@@ -35,9 +35,9 @@ export default function AddToolModal({ isOpen, onClose, companyId }: AddToolModa
       // Query products where rental_price_monthly is NOT NULL (these are tools)
       const { data, error: fetchError } = await supabase
         .from('products')
-        .select('product_code, product_name, rental_price_monthly')
+        .select('product_code, description, rental_price_monthly')
         .not('rental_price_monthly', 'is', null)
-        .order('product_name');
+        .order('description');
 
       if (fetchError) throw fetchError;
 
@@ -132,7 +132,7 @@ export default function AddToolModal({ isOpen, onClose, companyId }: AddToolModa
                 <option value="">Select a tool...</option>
                 {products.map((product) => (
                   <option key={product.product_code} value={product.product_code}>
-                    {product.product_code} - {product.product_name}
+                    {product.product_code} - {product.description}
                   </option>
                 ))}
               </select>

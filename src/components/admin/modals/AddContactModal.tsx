@@ -30,6 +30,9 @@ export default function AddContactModal({ isOpen, onClose, companyId }: AddConta
     try {
       const supabase = createClient();
 
+      // Generate a unique token for this contact (for tokenized links)
+      const contactToken = crypto.randomUUID();
+
       const { error: insertError } = await supabase.from('contacts').insert({
         company_id: companyId,
         first_name: formData.first_name || null,
@@ -41,6 +44,7 @@ export default function AddContactModal({ isOpen, onClose, companyId }: AddConta
         marketing_status: formData.marketing_status,
         source: 'manual',
         status: 'active',
+        token: contactToken,
       });
 
       if (insertError) throw insertError;

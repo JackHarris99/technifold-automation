@@ -10,6 +10,7 @@ import Link from 'next/link';
 import AddContactModal from './modals/AddContactModal';
 import AddToolModal from './modals/AddToolModal';
 import AddSubscriptionToolModal from './modals/AddSubscriptionToolModal';
+import ManageAddressModal from './modals/ManageAddressModal';
 
 interface CompanyDetailViewProps {
   company: any;
@@ -40,6 +41,8 @@ export default function CompanyDetailView({
   const [showAddContactModal, setShowAddContactModal] = useState(false);
   const [showAddToolModal, setShowAddToolModal] = useState(false);
   const [showAddSubToolModal, setShowAddSubToolModal] = useState(false);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<any>(null);
 
   const tabs = [
     { id: 'overview', label: 'Overview', count: null },
@@ -161,6 +164,16 @@ export default function CompanyDetailView({
         companyId={company.company_id}
         subscriptions={subscriptions}
       />
+      <ManageAddressModal
+        isOpen={showAddressModal}
+        onClose={() => {
+          setShowAddressModal(false);
+          setEditingAddress(null);
+        }}
+        companyId={company.company_id}
+        companyName={company.company_name}
+        existingAddress={editingAddress}
+      />
     </div>
   );
 }
@@ -240,6 +253,15 @@ function OverviewTab({ company, contacts, shippingAddresses, onAddContact }: { c
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Shipping Addresses ({shippingAddresses.length})</h2>
+          <button
+            onClick={() => {
+              setEditingAddress(null);
+              setShowAddressModal(true);
+            }}
+            className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
+          >
+            + Add Address
+          </button>
         </div>
         {shippingAddresses.length === 0 ? (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
@@ -252,7 +274,7 @@ function OverviewTab({ company, contacts, shippingAddresses, onAddContact }: { c
             {shippingAddresses.map((address) => (
               <div
                 key={address.address_id}
-                className={`border rounded-lg p-4 ${address.is_default ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
+                className={`border rounded-lg p-4 relative ${address.is_default ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
               >
                 {address.is_default && (
                   <div className="inline-block px-2 py-0.5 bg-blue-600 text-white text-xs font-medium rounded mb-2">
@@ -262,13 +284,22 @@ function OverviewTab({ company, contacts, shippingAddresses, onAddContact }: { c
                 {address.label && (
                   <div className="font-medium text-sm text-gray-900 mb-2">{address.label}</div>
                 )}
-                <div className="text-sm text-gray-600 space-y-1">
+                <div className="text-sm text-gray-600 space-y-1 mb-3">
                   <div>{address.address_line_1}</div>
                   {address.address_line_2 && <div>{address.address_line_2}</div>}
                   <div>{address.city}{address.state_province && `, ${address.state_province}`}</div>
                   <div>{address.postal_code}</div>
                   <div className="font-medium">{address.country}</div>
                 </div>
+                <button
+                  onClick={() => {
+                    setEditingAddress(address);
+                    setShowAddressModal(true);
+                  }}
+                  className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  Edit
+                </button>
               </div>
             ))}
           </div>
