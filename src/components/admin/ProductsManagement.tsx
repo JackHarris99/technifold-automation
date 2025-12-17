@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { createClient } from '@/lib/supabase-client';
 
 interface Product {
   product_code: string;
@@ -57,13 +56,20 @@ export default function ProductsManagement({ products: initialProducts }: Produc
     }
 
     try {
-      const supabase = createClient();
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('product_code', productCode);
+      const response = await fetch('/api/admin/products/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          product_code: productCode,
+        }),
+      });
 
-      if (error) throw error;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete product');
+      }
 
       setProducts(products.filter((p) => p.product_code !== productCode));
       alert('Product deleted successfully');
@@ -291,23 +297,21 @@ function ProductModal({ product, onClose, onSuccess }: ProductModalProps) {
     }
 
     try {
-      const supabase = createClient();
+      const action = isEdit ? 'update' : 'create';
+      const response = await fetch('/api/admin/products/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action,
+          product_code: isEdit ? product.product_code : undefined,
+          product_data: formData,
+        }),
+      });
 
-      if (isEdit) {
-        // Update existing product
-        const { error: updateError } = await supabase
-          .from('products')
-          .update(formData)
-          .eq('product_code', product.product_code);
+      const data = await response.json();
 
-        if (updateError) throw updateError;
-      } else {
-        // Insert new product
-        const { error: insertError } = await supabase
-          .from('products')
-          .insert(formData);
-
-        if (insertError) throw insertError;
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save product');
       }
 
       onSuccess(formData as Product);

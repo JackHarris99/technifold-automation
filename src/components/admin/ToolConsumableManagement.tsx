@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { createClient } from '@/lib/supabase-client';
 
 interface Product {
   product_code: string;
@@ -57,14 +56,21 @@ export default function ToolConsumableManagement({
     }
 
     try {
-      const supabase = createClient();
-      const { error } = await supabase
-        .from('tool_consumable_map')
-        .delete()
-        .eq('tool_code', toolCode)
-        .eq('consumable_code', consumableCode);
+      const response = await fetch('/api/admin/tool-consumables/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          tool_code: toolCode,
+          consumable_code: consumableCode,
+        }),
+      });
 
-      if (error) throw error;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to remove relationship');
+      }
 
       setRelationships(
         relationships.filter(
@@ -236,36 +242,30 @@ function AddRelationshipModal({
     }
 
     try {
-      const supabase = createClient();
-
-      // Filter out any that already exist
-      const existingSet = new Set(
-        existingRelationships
-          .filter((r) => r.tool_code === selectedTool)
-          .map((r) => r.consumable_code)
-      );
-
-      const newRelationships = Array.from(selectedConsumables)
-        .filter((consumableCode) => !existingSet.has(consumableCode))
-        .map((consumableCode) => ({
+      const response = await fetch('/api/admin/tool-consumables/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_multiple',
           tool_code: selectedTool,
-          consumable_code: consumableCode,
-        }));
+          consumable_codes: Array.from(selectedConsumables),
+        }),
+      });
 
-      if (newRelationships.length === 0) {
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to add relationships');
+      }
+
+      if (data.created_count === 0) {
         setError('All selected consumables are already linked to this tool');
         setLoading(false);
         return;
       }
 
-      const { error: insertError } = await supabase
-        .from('tool_consumable_map')
-        .insert(newRelationships);
-
-      if (insertError) throw insertError;
-
-      onSuccess(newRelationships);
-      alert(`Added ${newRelationships.length} relationship(s) successfully`);
+      onSuccess(data.relationships || []);
+      alert(`Added ${data.created_count} relationship(s) successfully`);
     } catch (err: any) {
       console.error('Error adding relationships:', err);
       setError(err.message || 'Failed to add relationships');
