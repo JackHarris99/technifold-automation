@@ -21,6 +21,7 @@ export default function SendReorderPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     if (!companyId) {
@@ -68,6 +69,7 @@ export default function SendReorderPage() {
       return;
     }
 
+    console.log('[SendReorder] Sending to:', { companyId, selectedContacts });
     setSending(true);
     setError(null);
 
@@ -81,17 +83,24 @@ export default function SendReorderPage() {
         }),
       });
 
+      console.log('[SendReorder] Response status:', response.status);
+
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Failed to send emails');
+        console.error('[SendReorder] Error response:', data);
+        throw new Error(data.error || `Failed to send emails (${response.status})`);
       }
+
+      const result = await response.json();
+      console.log('[SendReorder] Success:', result);
 
       setSuccess(true);
       setTimeout(() => {
         router.push(`/admin/company/${companyId}`);
       }, 2000);
     } catch (err: any) {
-      setError(err.message);
+      console.error('[SendReorder] Catch error:', err);
+      setError(err.message || 'Unknown error occurred');
     } finally {
       setSending(false);
     }
@@ -213,6 +222,89 @@ export default function SendReorderPage() {
                 </div>
               )}
             </div>
+
+            {/* Email Preview */}
+            {selectedContacts.length > 0 && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
+                <button
+                  onClick={() => setShowPreview(!showPreview)}
+                  className="flex items-center justify-between w-full text-left"
+                >
+                  <h2 className="text-lg font-bold text-gray-900">Email Preview</h2>
+                  <span className="text-blue-600 text-sm">
+                    {showPreview ? '▼ Hide' : '▶ Show'}
+                  </span>
+                </button>
+
+                {showPreview && (
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="text-sm text-gray-600 mb-4">
+                      <p><strong>From:</strong> sales@technifold.com</p>
+                      <p><strong>To:</strong> {selectedContacts.length} contact{selectedContacts.length !== 1 ? 's' : ''}</p>
+                      <p><strong>Subject:</strong> Time to Restock Your Technifold Supplies</p>
+                    </div>
+
+                    <div className="bg-white p-6 rounded border border-gray-300">
+                      <div className="mb-4">
+                        <img
+                          src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/technifold.png"
+                          alt="Technifold"
+                          className="h-12 mb-4"
+                        />
+                      </div>
+
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">
+                        Hi [Contact Name],
+                      </h3>
+
+                      <p className="text-gray-700 mb-4">
+                        We hope your Technifold tools are working great for you! Based on your previous orders,
+                        it might be time to restock your supplies.
+                      </p>
+
+                      <p className="text-gray-700 mb-4">
+                        We've put together a personalized reorder link just for you, making it quick and easy
+                        to get the products you need:
+                      </p>
+
+                      <div className="my-6">
+                        <a
+                          href="#"
+                          className="inline-block px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          View Your Personalized Catalog
+                        </a>
+                      </div>
+
+                      <p className="text-gray-700 mb-4">
+                        This link is personalized for {company?.company_name} and includes:
+                      </p>
+
+                      <ul className="list-disc list-inside text-gray-700 mb-4 ml-4">
+                        <li>Your complete order history</li>
+                        <li>Quick reorder with saved preferences</li>
+                        <li>Current pricing and availability</li>
+                        <li>Fast checkout process</li>
+                      </ul>
+
+                      <p className="text-gray-700 mb-4">
+                        If you have any questions or need assistance, please don't hesitate to reach out.
+                      </p>
+
+                      <p className="text-gray-700">
+                        Best regards,<br/>
+                        <strong>The Technifold Team</strong>
+                      </p>
+
+                      <div className="mt-6 pt-6 border-t border-gray-200 text-xs text-gray-500">
+                        <p>This is a personalized email sent to {company?.company_name}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Error Message */}
             {error && (
