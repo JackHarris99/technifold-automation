@@ -204,6 +204,59 @@ function OverviewTab({
 }) {
   const defaultAddress = shippingAddresses.find(addr => addr.is_default);
 
+  async function handleUpdateVAT() {
+    const newVat = prompt('Enter VAT number:', company.vat_number || '');
+    if (newVat === null) return; // User cancelled
+
+    try {
+      const response = await fetch(`/api/admin/companies/${company.company_id}/update-billing`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vat_number: newVat }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update VAT number');
+      }
+
+      alert('VAT number updated successfully! Refresh the page to see changes.');
+      window.location.reload();
+    } catch (error: any) {
+      console.error('[UpdateVAT] Error:', error);
+      alert(`Failed to update VAT number: ${error.message}`);
+    }
+  }
+
+  async function handleUpdateBillingAddress() {
+    const newAddress = prompt(
+      'Enter billing address (use Enter for new lines):',
+      company.billing_address || ''
+    );
+    if (newAddress === null) return; // User cancelled
+
+    try {
+      const response = await fetch(`/api/admin/companies/${company.company_id}/update-billing`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ billing_address: newAddress }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update billing address');
+      }
+
+      alert('Billing address updated successfully! Refresh the page to see changes.');
+      window.location.reload();
+    } catch (error: any) {
+      console.error('[UpdateBillingAddress] Error:', error);
+      alert(`Failed to update billing address: ${error.message}`);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -223,11 +276,40 @@ function OverviewTab({
               <dt className="text-sm text-gray-500">Country</dt>
               <dd className="text-sm font-medium">{company.country || '-'}</dd>
             </div>
-            <div>
-              <dt className="text-sm text-gray-500">VAT Number</dt>
-              <dd className="text-sm font-medium">{company.vat_number || 'Not set'}</dd>
+
+            {/* VAT Number - Editable */}
+            <div className="border-t pt-3">
+              <dt className="text-sm text-gray-500 mb-1">VAT Number</dt>
+              <dd className="text-sm font-medium">
+                {company.vat_number || <span className="text-gray-400 italic">Not set - click to add</span>}
+              </dd>
+              <button
+                onClick={handleUpdateVAT}
+                className="text-xs text-blue-600 hover:text-blue-800 font-medium mt-1"
+              >
+                Edit VAT
+              </button>
             </div>
-            <div>
+
+            {/* Billing Address - Editable */}
+            <div className="border-t pt-3">
+              <dt className="text-sm text-gray-500 mb-1">Billing Address</dt>
+              <dd className="text-sm">
+                {company.billing_address ? (
+                  <div className="text-gray-700 whitespace-pre-line">{company.billing_address}</div>
+                ) : (
+                  <span className="text-gray-400 italic">Not set - click to add</span>
+                )}
+              </dd>
+              <button
+                onClick={handleUpdateBillingAddress}
+                className="text-xs text-blue-600 hover:text-blue-800 font-medium mt-1"
+              >
+                Edit Billing Address
+              </button>
+            </div>
+
+            <div className="border-t pt-3">
               <dt className="text-sm text-gray-500">Website</dt>
               <dd className="text-sm font-medium">
                 {company.website ? (
