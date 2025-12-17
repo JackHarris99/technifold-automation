@@ -9,7 +9,7 @@ import { generateReorderUrl, generateUnsubscribeUrl } from '@/lib/tokens';
 import { getResendClient } from '@/lib/resend-client';
 
 /**
- * Build reorder reminder email HTML
+ * Build reorder reminder email HTML - matches preview design
  */
 function buildReorderEmailHtml(
   tokenUrl: string,
@@ -25,62 +25,71 @@ function buildReorderEmailHtml(
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
-    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <div style="background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); padding: 30px; border-radius: 12px 12px 0 0;">
-        <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">Time to Restock?</h1>
-        <p style="color: #e9d5ff; margin: 0; font-size: 16px;">Your Technifold consumables may be running low</p>
-      </div>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+      <div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <!-- Logo Header -->
+        <div style="padding: 30px 40px; background-color: #ffffff; border-bottom: 1px solid #e5e7eb;">
+          <img
+            src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/technifold.png"
+            alt="Technifold"
+            style="height: 48px; display: block;"
+          />
+        </div>
 
-      <div style="background: white; border: 2px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; padding: 30px;">
-        <p style="font-size: 16px; margin-top: 0;">Hi ${contactName || 'there'},</p>
+        <!-- Email Content -->
+        <div style="padding: 40px;">
+          <h2 style="font-size: 24px; font-weight: bold; color: #111827; margin: 0 0 24px 0;">
+            Hi ${contactName || 'there'},
+          </h2>
 
-        <p style="font-size: 16px;">
-          ${daysSinceOrder
-            ? `It's been <strong>${daysSinceOrder} days</strong> since your last order.`
-            : `We noticed it's been a while since your last order.`}
-          Time to check your consumable stock levels?
-        </p>
+          <p style="font-size: 16px; color: #374151; margin: 0 0 16px 0; line-height: 24px;">
+            We hope your Technifold tools are working great for you! Based on your previous orders, it might be time to restock your supplies.
+          </p>
 
-        <div style="background: #f5f3ff; border: 2px solid #c4b5fd; border-radius: 8px; padding: 20px; margin: 24px 0;">
-          <h3 style="margin: 0 0 12px 0; color: #5b21b6;">Quick Reorder Benefits:</h3>
-          <ul style="margin: 0; padding-left: 20px; color: #6b7280;">
-            <li>See your previous orders instantly</li>
-            <li>Reorder with one click</li>
-            <li>Same prices as before</li>
-            <li>Fast UK shipping</li>
+          <p style="font-size: 16px; color: #374151; margin: 0 0 24px 0; line-height: 24px;">
+            We've put together a personalized reorder link just for you, making it quick and easy to get the products you need:
+          </p>
+
+          <!-- CTA Button -->
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${tokenUrl}" style="display: inline-block; background-color: #2563eb; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">
+              View Your Personalized Catalog
+            </a>
+          </div>
+
+          <p style="font-size: 16px; color: #374151; margin: 24px 0 12px 0;">
+            This link is personalized for ${companyName} and includes:
+          </p>
+
+          <ul style="margin: 0 0 24px 0; padding-left: 24px; color: #374151; font-size: 16px; line-height: 28px;">
+            <li>Your complete order history</li>
+            <li>Quick reorder with saved preferences</li>
+            <li>Current pricing and availability</li>
+            <li>Fast checkout process</li>
           </ul>
-        </div>
 
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${tokenUrl}" style="display: inline-block; background: #7c3aed; color: white; padding: 18px 36px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 18px;">
-            View Your Reorder Portal
-          </a>
-        </div>
-
-        <p style="font-size: 14px; color: #666; text-align: center;">
-          Your personalized portal shows everything you've ordered before,<br>
-          making reordering quick and easy.
-        </p>
-
-        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-
-        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-          <p style="color: #6b7280; font-size: 13px; margin-bottom: 5px;">
-            Direct link to your portal:
+          <p style="font-size: 16px; color: #374151; margin: 24px 0 16px 0; line-height: 24px;">
+            If you have any questions or need assistance, please don't hesitate to reach out.
           </p>
-          <p style="color: #7c3aed; font-size: 12px; word-break: break-all;">
-            ${tokenUrl}
+
+          <p style="font-size: 16px; color: #374151; margin: 0;">
+            Best regards,<br/>
+            <strong>The Technifold Team</strong>
           </p>
         </div>
 
-        <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #9ca3af;">
-          <p>Technifold Ltd • Professional Print Finishing Solutions</p>
+        <!-- Footer -->
+        <div style="padding: 24px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
+          <p style="margin: 0; font-size: 12px; color: #6b7280; text-align: center;">
+            This is a personalized email sent to ${companyName}
+          </p>
         </div>
       </div>
 
-      <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-        <p style="font-size: 11px; color: #999;">
-          <a href="${unsubscribeUrl}" style="color: #999; text-decoration: underline;">Unsubscribe from marketing emails</a>
+      <!-- Unsubscribe -->
+      <div style="text-align: center; margin-top: 24px;">
+        <p style="font-size: 11px; color: #9ca3af; margin: 0;">
+          <a href="${unsubscribeUrl}" style="color: #9ca3af; text-decoration: underline;">Unsubscribe from marketing emails</a>
         </p>
       </div>
     </body>
