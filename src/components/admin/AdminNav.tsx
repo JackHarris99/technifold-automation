@@ -158,6 +158,16 @@ export default function AdminNav() {
             Tools
           </div>
           <Link
+            href="/admin/send-reorder"
+            className={`block px-4 py-2 text-sm transition-colors ${
+              pathname === '/admin/send-reorder'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            Send Reorder Email
+          </Link>
+          <Link
             href="/admin/test-reorder-link"
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname === '/admin/test-reorder-link'
