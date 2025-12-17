@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase-client';
 
 interface AddSubscriptionToolModalProps {
   isOpen: boolean;
@@ -36,18 +35,14 @@ export default function AddSubscriptionToolModal({
 
   const loadProducts = async () => {
     try {
-      const supabase = createClient();
+      const response = await fetch('/api/admin/tools/list');
+      const data = await response.json();
 
-      // Query products where rental_price_monthly is NOT NULL (these are rentable tools)
-      const { data, error: fetchError } = await supabase
-        .from('products')
-        .select('product_code, product_name, rental_price_monthly')
-        .not('rental_price_monthly', 'is', null)
-        .order('product_name');
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load tools');
+      }
 
-      if (fetchError) throw fetchError;
-
-      setProducts(data || []);
+      setProducts(data.tools || []);
     } catch (err: any) {
       console.error('Error loading products:', err);
       setError('Failed to load products');
@@ -74,36 +69,20 @@ export default function AddSubscriptionToolModal({
     }
 
     try {
-      const supabase = createClient();
-
-      // Check if tool already exists in this subscription
-      const { data: existingTool, error: checkError } = await supabase
-        .from('subscription_tools')
-        .select('tool_code')
-        .eq('subscription_id', formData.subscription_id)
-        .eq('tool_code', formData.tool_code)
-        .is('removed_at', null)
-        .single();
-
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw checkError;
-      }
-
-      if (existingTool) {
-        setError('This tool is already in the subscription');
-        setLoading(false);
-        return;
-      }
-
-      // Insert into subscription_tools
-      const { error: insertError } = await supabase.from('subscription_tools').insert({
-        subscription_id: formData.subscription_id,
-        tool_code: formData.tool_code,
-        added_by: 'admin',
-        added_at: new Date().toISOString(),
+      const response = await fetch('/api/admin/subscription-tools/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subscription_id: formData.subscription_id,
+          tool_code: formData.tool_code,
+        }),
       });
 
-      if (insertError) throw insertError;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to add tool to subscription');
+      }
 
       // Success - reload page
       window.location.reload();
@@ -170,7 +149,7 @@ export default function AddSubscriptionToolModal({
                   <option value="">Select a tool...</option>
                   {products.map((product) => (
                     <option key={product.product_code} value={product.product_code}>
-                      {product.product_code} - {product.product_name} (£{product.rental_price_monthly}/mo)
+                      {product.product_code} - {product.description} (£{product.rental_price_monthly}/mo)
                     </option>
                   ))}
                 </select>
