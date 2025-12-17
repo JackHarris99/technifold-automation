@@ -24,7 +24,7 @@
     },
     {
       "path": "/api/outbox/run",
-      "schedule": "0 8,12,16,20 * * *"
+      "schedule": "*/5 * * * *"
     }
   ]
 }
