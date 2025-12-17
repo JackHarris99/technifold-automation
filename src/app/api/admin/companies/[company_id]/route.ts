@@ -1,17 +1,47 @@
 /**
- * PATCH /api/admin/companies/[companyId]
- * Update company settings
+ * GET /api/admin/companies/[company_id] - Fetch company details
+ * PATCH /api/admin/companies/[company_id] - Update company settings
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
-export async function PATCH(
+export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ companyId: string }> }
+  context: { params: Promise<{ company_id: string }> }
 ) {
   try {
-    const { companyId } = await context.params;
+    const { company_id } = await context.params;
+
+    const supabase = getSupabaseClient();
+    const { data: company, error } = await supabase
+      .from('companies')
+      .select('*')
+      .eq('company_id', company_id)
+      .single();
+
+    if (error) {
+      console.error('Fetch company error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    if (!company) {
+      return NextResponse.json({ error: 'Company not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(company);
+  } catch (error: any) {
+    console.error('Fetch company error:', error);
+    return NextResponse.json({ error: error.message || 'Failed to fetch company' }, { status: 500 });
+  }
+}
+
+export async function PATCH(
+  request: NextRequest,
+  context: { params: Promise<{ company_id: string }> }
+) {
+  try {
+    const { company_id: companyId } = await context.params;
     const body = await request.json();
 
     // Check territory permission
