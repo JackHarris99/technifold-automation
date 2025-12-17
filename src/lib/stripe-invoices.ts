@@ -125,10 +125,30 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
       return { success: false, error: 'Contact not found' };
     }
 
-    // 2. Calculate totals and VAT
+    // 2. Get shipping address for destination country
+    const { data: shippingAddress } = await supabase
+      .from('shipping_addresses')
+      .select('country')
+      .eq('company_id', company_id)
+      .eq('is_default', true)
+      .single();
+
+    const destinationCountry = shippingAddress?.country || company.country || 'GB';
+
+    // 3. Calculate subtotal and shipping
     const subtotal = items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
-    const { vat_amount, vat_rate, vat_exempt_reason } = calculateVAT(subtotal, company.country, company.vat_number);
-    const total = subtotal + vat_amount;
+
+    // Calculate shipping cost using SQL function
+    const { data: shippingData } = await supabase.rpc('calculate_shipping_cost', {
+      p_country_code: destinationCountry,
+      p_order_subtotal: subtotal,
+    });
+    const shippingCost = shippingData || 0;
+
+    // 4. Calculate VAT on subtotal + shipping (shipping is taxable in UK/EU)
+    const taxableAmount = subtotal + shippingCost;
+    const { vat_amount, vat_rate, vat_exempt_reason } = calculateVAT(taxableAmount, destinationCountry, company.vat_number);
+    const total = taxableAmount + vat_amount;
 
     // 3. Create or retrieve Stripe Customer
     let stripeCustomerId = company.stripe_customer_id;
@@ -186,7 +206,19 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
       console.log('[stripe-invoices] Added item:', item.product_code, '£' + item.unit_price);
     }
 
-    // 6. Add VAT line item if applicable
+    // 6. Add shipping line item if applicable
+    if (shippingCost > 0) {
+      await getStripeClient().invoiceItems.create({
+        customer: stripeCustomerId,
+        invoice: invoice.id,
+        amount: Math.round(shippingCost * 100),
+        currency: currency.toLowerCase(),
+        description: `Shipping to ${destinationCountry}`,
+      });
+      console.log('[stripe-invoices] Added shipping:', '£' + shippingCost.toFixed(2));
+    }
+
+    // 7. Add VAT line item if applicable
     if (vat_amount > 0) {
       await getStripeClient().invoiceItems.create({
         customer: stripeCustomerId,
@@ -213,6 +245,7 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
       invoicePdfUrl: finalizedInvoice.invoice_pdf,
       items: items,
       subtotal,
+      shippingAmount: shippingCost,
       taxAmount: vat_amount,
       totalAmount: total,
       currency: currency.toUpperCase(),
@@ -238,6 +271,8 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
         invoice_type: 'sale',
         currency: currency.toLowerCase(),
         subtotal,
+        shipping_amount: shippingCost,
+        shipping_country: destinationCountry,
         tax_amount: vat_amount,
         total_amount: total,
         status: 'sent',

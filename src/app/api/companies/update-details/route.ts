@@ -40,36 +40,73 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
-    // Build update object
-    const updateData: Record<string, string | null> = {
-      address_line1: address_line1.trim(),
-      address_line2: address_line2?.trim() || null,
-      city: city.trim(),
-      county: county?.trim() || null,
-      postcode: postcode.trim().toUpperCase(),
-      country: country.trim().toUpperCase(),
-    };
-
-    // Add VAT number if provided
+    // 1. Update VAT number on company if provided
     if (vat_number) {
       const cleanedVAT = vat_number.trim().toUpperCase();
       if (cleanedVAT.length >= 4) {
-        updateData.vat_number = cleanedVAT;
+        const { error: vatError } = await supabase
+          .from('companies')
+          .update({ vat_number: cleanedVAT })
+          .eq('company_id', company_id);
+
+        if (vatError) {
+          console.error('[update-details] Failed to update VAT number:', vatError);
+          return NextResponse.json(
+            { error: 'Failed to save VAT number' },
+            { status: 500 }
+          );
+        }
       }
     }
 
-    // Update company in Supabase
-    const { error: updateError } = await supabase
-      .from('companies')
-      .update(updateData)
-      .eq('company_id', company_id);
+    // 2. Save shipping address to shipping_addresses table
+    // Check if default address exists
+    const { data: existingDefault, error: checkError } = await supabase
+      .from('shipping_addresses')
+      .select('address_id')
+      .eq('company_id', company_id)
+      .eq('is_default', true)
+      .single();
 
-    if (updateError) {
-      console.error('[update-details] Database error:', updateError);
-      return NextResponse.json(
-        { error: 'Failed to save company details' },
-        { status: 500 }
-      );
+    const addressData = {
+      company_id,
+      address_line_1: address_line1.trim(),
+      address_line_2: address_line2?.trim() || null,
+      city: city.trim(),
+      state_province: county?.trim() || null,
+      postal_code: postcode.trim().toUpperCase(),
+      country: country.trim().toUpperCase(),
+      is_default: true,
+      label: 'Primary Shipping Address',
+    };
+
+    if (existingDefault) {
+      // Update existing default address
+      const { error: updateError } = await supabase
+        .from('shipping_addresses')
+        .update(addressData)
+        .eq('address_id', existingDefault.address_id);
+
+      if (updateError) {
+        console.error('[update-details] Failed to update shipping address:', updateError);
+        return NextResponse.json(
+          { error: 'Failed to save shipping address' },
+          { status: 500 }
+        );
+      }
+    } else {
+      // Create new default address
+      const { error: insertError } = await supabase
+        .from('shipping_addresses')
+        .insert(addressData);
+
+      if (insertError) {
+        console.error('[update-details] Failed to create shipping address:', insertError);
+        return NextResponse.json(
+          { error: 'Failed to save shipping address' },
+          { status: 500 }
+        );
+      }
     }
 
     // Sync to Stripe customer if they have a stripe_customer_id

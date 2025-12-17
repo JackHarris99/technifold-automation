@@ -7,6 +7,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import AddContactModal from './modals/AddContactModal';
+import AddToolModal from './modals/AddToolModal';
+import AddSubscriptionToolModal from './modals/AddSubscriptionToolModal';
 
 interface CompanyDetailViewProps {
   company: any;
@@ -18,6 +21,7 @@ interface CompanyDetailViewProps {
   invoices: any[];
   engagement: any[];
   subscriptions: any[];
+  shippingAddresses: any[];
 }
 
 export default function CompanyDetailView({
@@ -30,8 +34,12 @@ export default function CompanyDetailView({
   invoices,
   engagement,
   subscriptions,
+  shippingAddresses,
 }: CompanyDetailViewProps) {
   const [activeTab, setActiveTab] = useState('overview');
+  const [showAddContactModal, setShowAddContactModal] = useState(false);
+  const [showAddToolModal, setShowAddToolModal] = useState(false);
+  const [showAddSubToolModal, setShowAddSubToolModal] = useState(false);
 
   const tabs = [
     { id: 'overview', label: 'Overview', count: null },
@@ -100,7 +108,12 @@ export default function CompanyDetailView({
       {/* Content */}
       <div className="px-8 py-6">
         {activeTab === 'overview' && (
-          <OverviewTab company={company} contacts={contacts} />
+          <OverviewTab
+            company={company}
+            contacts={contacts}
+            shippingAddresses={shippingAddresses}
+            onAddContact={() => setShowAddContactModal(true)}
+          />
         )}
 
         {activeTab === 'products' && (
@@ -109,6 +122,7 @@ export default function CompanyDetailView({
             consumables={purchasedConsumables}
             parts={purchasedParts}
             companyId={company.company_id}
+            onAddTool={() => setShowAddToolModal(true)}
           />
         )}
 
@@ -117,6 +131,7 @@ export default function CompanyDetailView({
             subscriptionTools={subscriptionTools}
             subscriptions={subscriptions}
             companyId={company.company_id}
+            onAddTool={() => setShowAddSubToolModal(true)}
           />
         )}
 
@@ -128,62 +143,132 @@ export default function CompanyDetailView({
           <EngagementTab engagement={engagement} />
         )}
       </div>
+
+      {/* Modals */}
+      <AddContactModal
+        isOpen={showAddContactModal}
+        onClose={() => setShowAddContactModal(false)}
+        companyId={company.company_id}
+      />
+      <AddToolModal
+        isOpen={showAddToolModal}
+        onClose={() => setShowAddToolModal(false)}
+        companyId={company.company_id}
+      />
+      <AddSubscriptionToolModal
+        isOpen={showAddSubToolModal}
+        onClose={() => setShowAddSubToolModal(false)}
+        companyId={company.company_id}
+        subscriptions={subscriptions}
+      />
     </div>
   );
 }
 
 // Overview Tab
-function OverviewTab({ company, contacts }: { company: any; contacts: any[] }) {
+function OverviewTab({ company, contacts, shippingAddresses, onAddContact }: { company: any; contacts: any[]; shippingAddresses: any[]; onAddContact: () => void }) {
+  const defaultAddress = shippingAddresses.find(addr => addr.is_default);
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Company Info */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold mb-4">Company Information</h2>
-        <dl className="space-y-3">
-          <div>
-            <dt className="text-sm text-gray-500">Account Owner</dt>
-            <dd className="text-sm font-medium">{company.account_owner || 'Unassigned'}</dd>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Company Info */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold mb-4">Company Information</h2>
+          <dl className="space-y-3">
+            <div>
+              <dt className="text-sm text-gray-500">Account Owner</dt>
+              <dd className="text-sm font-medium">{company.account_owner || 'Unassigned'}</dd>
+            </div>
+            <div>
+              <dt className="text-sm text-gray-500">Category</dt>
+              <dd className="text-sm font-medium">{company.category || '-'}</dd>
+            </div>
+            <div>
+              <dt className="text-sm text-gray-500">Country</dt>
+              <dd className="text-sm font-medium">{company.country || '-'}</dd>
+            </div>
+            <div>
+              <dt className="text-sm text-gray-500">VAT Number</dt>
+              <dd className="text-sm font-medium">{company.vat_number || 'Not set'}</dd>
+            </div>
+            <div>
+              <dt className="text-sm text-gray-500">Website</dt>
+              <dd className="text-sm font-medium">
+                {company.website ? (
+                  <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                    {company.website}
+                  </a>
+                ) : '-'}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm text-gray-500">Stripe Customer ID</dt>
+              <dd className="text-sm font-mono text-gray-600">{company.stripe_customer_id || 'Not set'}</dd>
+            </div>
+          </dl>
+        </div>
+
+        {/* Contacts */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Contacts ({contacts.length})</h2>
+            <button
+              onClick={onAddContact}
+              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+            >
+              + Add Contact
+            </button>
           </div>
-          <div>
-            <dt className="text-sm text-gray-500">Category</dt>
-            <dd className="text-sm font-medium">{company.category || '-'}</dd>
-          </div>
-          <div>
-            <dt className="text-sm text-gray-500">Country</dt>
-            <dd className="text-sm font-medium">{company.country || '-'}</dd>
-          </div>
-          <div>
-            <dt className="text-sm text-gray-500">Website</dt>
-            <dd className="text-sm font-medium">
-              {company.website ? (
-                <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                  {company.website}
-                </a>
-              ) : '-'}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-sm text-gray-500">Stripe Customer ID</dt>
-            <dd className="text-sm font-mono text-gray-600">{company.stripe_customer_id || 'Not set'}</dd>
-          </div>
-        </dl>
+          {contacts.length === 0 ? (
+            <p className="text-gray-500 text-sm">No contacts yet</p>
+          ) : (
+            <div className="space-y-3">
+              {contacts.slice(0, 5).map((contact) => (
+                <div key={contact.contact_id} className="border-b border-gray-100 pb-3 last:border-0">
+                  <div className="font-medium text-sm">{contact.full_name || `${contact.first_name} ${contact.last_name}`}</div>
+                  <div className="text-sm text-gray-500">{contact.email}</div>
+                  {contact.role && <div className="text-xs text-gray-400 mt-1">{contact.role}</div>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Contacts */}
+      {/* Shipping Addresses */}
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Contacts ({contacts.length})</h2>
-          <button className="text-sm text-blue-600 hover:text-blue-800">+ Add Contact</button>
+          <h2 className="text-lg font-semibold">Shipping Addresses ({shippingAddresses.length})</h2>
         </div>
-        {contacts.length === 0 ? (
-          <p className="text-gray-500 text-sm">No contacts yet</p>
+        {shippingAddresses.length === 0 ? (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+            <p className="text-sm text-amber-800">
+              No shipping address on file. Customer will be prompted to provide shipping details when placing orders.
+            </p>
+          </div>
         ) : (
-          <div className="space-y-3">
-            {contacts.slice(0, 5).map((contact) => (
-              <div key={contact.contact_id} className="border-b border-gray-100 pb-3 last:border-0">
-                <div className="font-medium text-sm">{contact.full_name || `${contact.first_name} ${contact.last_name}`}</div>
-                <div className="text-sm text-gray-500">{contact.email}</div>
-                {contact.role && <div className="text-xs text-gray-400 mt-1">{contact.role}</div>}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {shippingAddresses.map((address) => (
+              <div
+                key={address.address_id}
+                className={`border rounded-lg p-4 ${address.is_default ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
+              >
+                {address.is_default && (
+                  <div className="inline-block px-2 py-0.5 bg-blue-600 text-white text-xs font-medium rounded mb-2">
+                    Default
+                  </div>
+                )}
+                {address.label && (
+                  <div className="font-medium text-sm text-gray-900 mb-2">{address.label}</div>
+                )}
+                <div className="text-sm text-gray-600 space-y-1">
+                  <div>{address.address_line_1}</div>
+                  {address.address_line_2 && <div>{address.address_line_2}</div>}
+                  <div>{address.city}{address.state_province && `, ${address.state_province}`}</div>
+                  <div>{address.postal_code}</div>
+                  <div className="font-medium">{address.country}</div>
+                </div>
               </div>
             ))}
           </div>
@@ -194,14 +279,17 @@ function OverviewTab({ company, contacts }: { company: any; contacts: any[] }) {
 }
 
 // Products Tab
-function ProductsTab({ tools, consumables, parts, companyId }: any) {
+function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
   return (
     <div className="space-y-6">
       {/* Purchased Tools */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Purchased Tools ({tools.length})</h2>
-          <button className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700">
+          <button
+            onClick={onAddTool}
+            className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 font-medium"
+          >
             + Add Tool
           </button>
         </div>
@@ -280,7 +368,7 @@ function ProductsTab({ tools, consumables, parts, companyId }: any) {
 }
 
 // Subscriptions Tab
-function SubscriptionsTab({ subscriptionTools, subscriptions, companyId }: any) {
+function SubscriptionsTab({ subscriptionTools, subscriptions, companyId, onAddTool }: any) {
   const activeSub = subscriptions[0];
 
   return (
@@ -310,7 +398,10 @@ function SubscriptionsTab({ subscriptionTools, subscriptions, companyId }: any) 
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Tools on Subscription ({subscriptionTools.length})</h2>
-          <button className="text-sm bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700">
+          <button
+            onClick={onAddTool}
+            className="text-sm bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 font-medium"
+          >
             + Add Tool to Subscription
           </button>
         </div>

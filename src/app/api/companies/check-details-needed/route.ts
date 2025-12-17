@@ -21,22 +21,38 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
-    const { data: company, error } = await supabase
+    // Get company details (VAT number)
+    const { data: company, error: companyError } = await supabase
       .from('companies')
-      .select('company_id, company_name, address_line1, address_line2, city, county, postcode, country, vat_number')
+      .select('company_id, company_name, country, vat_number')
       .eq('company_id', companyId)
       .single();
 
-    if (error || !company) {
+    if (companyError || !company) {
       return NextResponse.json(
         { error: 'Company not found' },
         { status: 404 }
       );
     }
 
+    // Get default shipping address
+    const { data: shippingAddress } = await supabase
+      .from('shipping_addresses')
+      .select('address_line_1, address_line_2, city, state_province, postal_code, country')
+      .eq('company_id', companyId)
+      .eq('is_default', true)
+      .single();
+
     // Check what's missing
-    const hasAddress = !!(company.address_line1 && company.city && company.postcode && company.country);
-    const isEU = isEUCountry(company.country || '');
+    const hasAddress = !!(
+      shippingAddress?.address_line_1 &&
+      shippingAddress?.city &&
+      shippingAddress?.postal_code &&
+      shippingAddress?.country
+    );
+
+    const addressCountry = shippingAddress?.country || company.country || '';
+    const isEU = isEUCountry(addressCountry);
     const needsVAT = isEU && !company.vat_number;
 
     // Details needed if address is incomplete OR VAT is needed
@@ -49,12 +65,12 @@ export async function GET(request: NextRequest) {
       company: {
         company_id: company.company_id,
         company_name: company.company_name,
-        address_line1: company.address_line1 || '',
-        address_line2: company.address_line2 || '',
-        city: company.city || '',
-        county: company.county || '',
-        postcode: company.postcode || '',
-        country: company.country || '',
+        address_line1: shippingAddress?.address_line_1 || '',
+        address_line2: shippingAddress?.address_line_2 || '',
+        city: shippingAddress?.city || '',
+        county: shippingAddress?.state_province || '',
+        postcode: shippingAddress?.postal_code || '',
+        country: shippingAddress?.country || company.country || '',
         vat_number: company.vat_number || '',
       },
     });
