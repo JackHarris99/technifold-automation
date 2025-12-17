@@ -43,7 +43,7 @@ export default function SendReorderPage() {
         const contactsRes = await fetch(`/api/admin/companies/${companyId}/contacts`);
         if (!contactsRes.ok) throw new Error('Failed to fetch contacts');
         const contactsData = await contactsRes.json();
-        setContacts(contactsData);
+        setContacts(contactsData.contacts || []);
       } catch (err: any) {
         setError(err.message);
       } finally {
