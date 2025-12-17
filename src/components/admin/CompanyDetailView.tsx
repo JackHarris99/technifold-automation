@@ -116,6 +116,14 @@ export default function CompanyDetailView({
             contacts={contacts}
             shippingAddresses={shippingAddresses}
             onAddContact={() => setShowAddContactModal(true)}
+            onAddAddress={() => {
+              setEditingAddress(null);
+              setShowAddressModal(true);
+            }}
+            onEditAddress={(address) => {
+              setEditingAddress(address);
+              setShowAddressModal(true);
+            }}
           />
         )}
 
@@ -179,7 +187,21 @@ export default function CompanyDetailView({
 }
 
 // Overview Tab
-function OverviewTab({ company, contacts, shippingAddresses, onAddContact }: { company: any; contacts: any[]; shippingAddresses: any[]; onAddContact: () => void }) {
+function OverviewTab({
+  company,
+  contacts,
+  shippingAddresses,
+  onAddContact,
+  onAddAddress,
+  onEditAddress
+}: {
+  company: any;
+  contacts: any[];
+  shippingAddresses: any[];
+  onAddContact: () => void;
+  onAddAddress: () => void;
+  onEditAddress: (address: any) => void;
+}) {
   const defaultAddress = shippingAddresses.find(addr => addr.is_default);
 
   return (
@@ -254,10 +276,7 @@ function OverviewTab({ company, contacts, shippingAddresses, onAddContact }: { c
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Shipping Addresses ({shippingAddresses.length})</h2>
           <button
-            onClick={() => {
-              setEditingAddress(null);
-              setShowAddressModal(true);
-            }}
+            onClick={onAddAddress}
             className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
           >
             + Add Address
@@ -292,10 +311,7 @@ function OverviewTab({ company, contacts, shippingAddresses, onAddContact }: { c
                   <div className="font-medium">{address.country}</div>
                 </div>
                 <button
-                  onClick={() => {
-                    setEditingAddress(address);
-                    setShowAddressModal(true);
-                  }}
+                  onClick={() => onEditAddress(address)}
                   className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                 >
                   Edit
