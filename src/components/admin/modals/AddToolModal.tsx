@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/lib/supabase-client';
 
 interface AddToolModalProps {
   isOpen: boolean;
@@ -30,7 +30,7 @@ export default function AddToolModal({ isOpen, onClose, companyId }: AddToolModa
 
   const loadProducts = async () => {
     try {
-      const supabase = createClientComponentClient();
+      const supabase = createClient();
 
       // Query products where rental_price_monthly is NOT NULL (these are tools)
       const { data, error: fetchError } = await supabase
@@ -68,7 +68,7 @@ export default function AddToolModal({ isOpen, onClose, companyId }: AddToolModa
     }
 
     try {
-      const supabase = createClientComponentClient();
+      const supabase = createClient();
 
       // Insert into company_product_history
       const { error: insertError } = await supabase.from('company_product_history').insert({

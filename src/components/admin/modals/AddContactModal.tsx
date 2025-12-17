@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/lib/supabase-client';
 
 interface AddContactModalProps {
   isOpen: boolean;
@@ -28,7 +28,7 @@ export default function AddContactModal({ isOpen, onClose, companyId }: AddConta
     setError(null);
 
     try {
-      const supabase = createClientComponentClient();
+      const supabase = createClient();
 
       const { error: insertError } = await supabase.from('contacts').insert({
         company_id: companyId,

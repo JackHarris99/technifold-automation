@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/lib/supabase-client';
 
 interface Product {
   product_code: string;
@@ -57,7 +57,7 @@ export default function ProductsManagement({ products: initialProducts }: Produc
     }
 
     try {
-      const supabase = createClientComponentClient();
+      const supabase = createClient();
       const { error } = await supabase
         .from('products')
         .delete()
@@ -291,7 +291,7 @@ function ProductModal({ product, onClose, onSuccess }: ProductModalProps) {
     }
 
     try {
-      const supabase = createClientComponentClient();
+      const supabase = createClient();
 
       if (isEdit) {
         // Update existing product

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/lib/supabase-client';
 
 interface AddSubscriptionToolModalProps {
   isOpen: boolean;
@@ -36,7 +36,7 @@ export default function AddSubscriptionToolModal({
 
   const loadProducts = async () => {
     try {
-      const supabase = createClientComponentClient();
+      const supabase = createClient();
 
       // Query products where rental_price_monthly is NOT NULL (these are rentable tools)
       const { data, error: fetchError } = await supabase
@@ -74,7 +74,7 @@ export default function AddSubscriptionToolModal({
     }
 
     try {
-      const supabase = createClientComponentClient();
+      const supabase = createClient();
 
       // Check if tool already exists in this subscription
       const { data: existingTool, error: checkError } = await supabase

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/lib/supabase-client';
 
 interface Product {
   product_code: string;
@@ -57,7 +57,7 @@ export default function ToolConsumableManagement({
     }
 
     try {
-      const supabase = createClientComponentClient();
+      const supabase = createClient();
       const { error } = await supabase
         .from('tool_consumable_map')
         .delete()
@@ -236,7 +236,7 @@ function AddRelationshipModal({
     }
 
     try {
-      const supabase = createClientComponentClient();
+      const supabase = createClient();
 
       // Filter out any that already exist
       const existingSet = new Set(
