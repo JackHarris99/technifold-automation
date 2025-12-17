@@ -83,6 +83,32 @@ export async function POST(request: NextRequest) {
       console.error('[admin/reorder/send] Event error:', eventError);
     }
 
+    // Trigger outbox processor immediately to send emails now (not wait for cron)
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+      const outboxUrl = `${baseUrl}/api/outbox/run`;
+      const cronSecret = process.env.CRON_SECRET;
+
+      console.log('[admin/reorder/send] Triggering outbox processor...');
+
+      const outboxResponse = await fetch(outboxUrl, {
+        method: 'POST',
+        headers: {
+          'x-cron-secret': cronSecret || '',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (outboxResponse.ok) {
+        console.log('[admin/reorder/send] Outbox processor triggered successfully');
+      } else {
+        console.error('[admin/reorder/send] Outbox trigger failed:', await outboxResponse.text());
+      }
+    } catch (triggerError) {
+      console.error('[admin/reorder/send] Failed to trigger outbox:', triggerError);
+      // Don't fail the request - job is queued and will be processed by cron eventually
+    }
+
     return NextResponse.json({
       success: true,
       job_id: job.job_id,
