@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase-client';
 
 interface AddToolModalProps {
   isOpen: boolean;
@@ -30,18 +29,14 @@ export default function AddToolModal({ isOpen, onClose, companyId }: AddToolModa
 
   const loadProducts = async () => {
     try {
-      const supabase = createClient();
+      const response = await fetch('/api/admin/tools/list');
+      const data = await response.json();
 
-      // Query products where rental_price_monthly is NOT NULL (these are tools)
-      const { data, error: fetchError } = await supabase
-        .from('products')
-        .select('product_code, description, rental_price_monthly')
-        .not('rental_price_monthly', 'is', null)
-        .order('description');
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load tools');
+      }
 
-      if (fetchError) throw fetchError;
-
-      setProducts(data || []);
+      setProducts(data.tools || []);
     } catch (err: any) {
       console.error('Error loading products:', err);
       setError('Failed to load products');
@@ -68,22 +63,24 @@ export default function AddToolModal({ isOpen, onClose, companyId }: AddToolModa
     }
 
     try {
-      const supabase = createClient();
-
-      // Insert into company_product_history
-      const { error: insertError } = await supabase.from('company_product_history').insert({
-        company_id: companyId,
-        product_code: formData.product_code,
-        product_type: 'tool',
-        first_purchased_at: formData.first_purchased_at,
-        last_purchased_at: formData.last_purchased_at,
-        total_purchases: formData.total_purchases,
-        total_quantity: formData.total_quantity,
-        source: 'manual',
-        added_by: 'admin',
+      const response = await fetch('/api/admin/tools/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company_id: companyId,
+          product_code: formData.product_code,
+          first_purchased_at: formData.first_purchased_at,
+          last_purchased_at: formData.last_purchased_at,
+          total_purchases: formData.total_purchases,
+          total_quantity: formData.total_quantity,
+        }),
       });
 
-      if (insertError) throw insertError;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to add tool');
+      }
 
       // Success - reload page
       window.location.reload();

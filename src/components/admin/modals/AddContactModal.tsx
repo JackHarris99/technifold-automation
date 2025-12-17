@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { createClient } from '@/lib/supabase-client';
 
 interface AddContactModalProps {
   isOpen: boolean;
@@ -28,26 +27,26 @@ export default function AddContactModal({ isOpen, onClose, companyId }: AddConta
     setError(null);
 
     try {
-      const supabase = createClient();
-
-      // Generate a unique token for this contact (for tokenized links)
-      const contactToken = crypto.randomUUID();
-
-      const { error: insertError } = await supabase.from('contacts').insert({
-        company_id: companyId,
-        first_name: formData.first_name || null,
-        last_name: formData.last_name || null,
-        full_name: formData.full_name || `${formData.first_name} ${formData.last_name}`.trim(),
-        email: formData.email || null,
-        phone: formData.phone || null,
-        role: formData.role || null,
-        marketing_status: formData.marketing_status,
-        source: 'manual',
-        status: 'active',
-        token: contactToken,
+      const response = await fetch('/api/admin/contacts/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company_id: companyId,
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          full_name: formData.full_name,
+          email: formData.email,
+          phone: formData.phone,
+          role: formData.role,
+          marketing_status: formData.marketing_status,
+        }),
       });
 
-      if (insertError) throw insertError;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to add contact');
+      }
 
       // Success - reload page
       window.location.reload();

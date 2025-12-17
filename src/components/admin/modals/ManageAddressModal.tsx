@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase-client';
 
 interface Address {
   address_id?: string;
@@ -76,50 +75,30 @@ export default function ManageAddressModal({
     setError(null);
 
     try {
-      const supabase = createClient();
+      const action = existingAddress?.address_id ? 'update' : 'create';
 
-      // If setting as default, unset all other defaults first
-      if (formData.is_default) {
-        await supabase
-          .from('shipping_addresses')
-          .update({ is_default: false })
-          .eq('company_id', companyId);
-      }
+      const response = await fetch('/api/admin/addresses/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action,
+          company_id: companyId,
+          address_id: existingAddress?.address_id,
+          address_line_1: formData.address_line_1,
+          address_line_2: formData.address_line_2,
+          city: formData.city,
+          state_province: formData.state_province,
+          postal_code: formData.postal_code,
+          country: formData.country,
+          is_default: formData.is_default,
+          label: formData.label,
+        }),
+      });
 
-      if (existingAddress?.address_id) {
-        // Update existing address
-        const { error: updateError } = await supabase
-          .from('shipping_addresses')
-          .update({
-            address_line_1: formData.address_line_1,
-            address_line_2: formData.address_line_2 || null,
-            city: formData.city,
-            state_province: formData.state_province || null,
-            postal_code: formData.postal_code,
-            country: formData.country,
-            is_default: formData.is_default,
-            label: formData.label || null,
-          })
-          .eq('address_id', existingAddress.address_id);
+      const data = await response.json();
 
-        if (updateError) throw updateError;
-      } else {
-        // Insert new address
-        const { error: insertError } = await supabase
-          .from('shipping_addresses')
-          .insert({
-            company_id: companyId,
-            address_line_1: formData.address_line_1,
-            address_line_2: formData.address_line_2 || null,
-            city: formData.city,
-            state_province: formData.state_province || null,
-            postal_code: formData.postal_code,
-            country: formData.country,
-            is_default: formData.is_default,
-            label: formData.label || null,
-          });
-
-        if (insertError) throw insertError;
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save address');
       }
 
       // Success - reload page
@@ -140,14 +119,21 @@ export default function ManageAddressModal({
     setError(null);
 
     try {
-      const supabase = createClient();
+      const response = await fetch('/api/admin/addresses/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          company_id: companyId,
+          address_id: existingAddress.address_id,
+        }),
+      });
 
-      const { error: deleteError } = await supabase
-        .from('shipping_addresses')
-        .delete()
-        .eq('address_id', existingAddress.address_id);
+      const data = await response.json();
 
-      if (deleteError) throw deleteError;
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete address');
+      }
 
       // Success - reload page
       window.location.reload();
