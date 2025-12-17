@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         .eq('status', 'pending')
         .lt('attempts', 5)  // max_attempts default
         .or('locked_until.is.null,locked_until.lt.' + new Date().toISOString())
-        .order('scheduled_for', { ascending: true })
+        .order('created_at', { ascending: true })
         .limit(1);
 
       if (fetchError) {
@@ -111,17 +111,12 @@ export async function POST(request: NextRequest) {
         const maxAttempts = job.max_attempts || 3;
         const newStatus = newAttempts >= maxAttempts ? 'dead' : 'failed';
 
-        // Calculate exponential backoff for retry
-        const retryDelayMinutes = Math.pow(2, newAttempts) * 5; // 5, 10, 20, 40, 80 minutes
-        const scheduledFor = new Date(Date.now() + retryDelayMinutes * 60 * 1000).toISOString();
-
         await supabase
           .from('outbox')
           .update({
             status: newStatus,
             last_error: errorMessage,
             locked_until: null,
-            scheduled_for: newStatus === 'failed' ? scheduledFor : undefined,
           })
           .eq('job_id', job.job_id);
 

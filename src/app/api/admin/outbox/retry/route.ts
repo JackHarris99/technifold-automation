@@ -52,7 +52,6 @@ export async function POST(request: NextRequest) {
       .update({
         status: 'pending',
         locked_until: null,
-        scheduled_for: new Date().toISOString(),
         last_error: null,
       })
       .eq('job_id', job_id);

@@ -100,7 +100,6 @@ export async function POST(request: NextRequest) {
             status: 'pending',
             attempts: 0,
             max_attempts: 3,
-            scheduled_for: new Date().toISOString(),
             payload: {
               company_id: company.company_id,
               contact_ids: contacts.map(c => c.contact_id),

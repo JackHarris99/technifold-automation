@@ -104,7 +104,6 @@ export async function POST(request: NextRequest) {
         attempts: 0,
         max_attempts: 3,
         payload: jobPayload,
-        scheduled_for: new Date().toISOString(),
       })
       .select('job_id')
       .single();

@@ -110,7 +110,6 @@ export async function POST(request: NextRequest) {
         job_type: 'zoho_create_quote',
         status: 'pending',
         payload: jobPayload,
-        scheduled_for: new Date().toISOString(),
       })
       .select('job_id')
       .single();
