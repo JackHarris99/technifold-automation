@@ -489,11 +489,13 @@ function InvoicesTab({ invoices, companyId }: any) {
       </div>
 
       {/* Send Reorder Email Modal - Rendered via Portal */}
-      {isMounted && showEmailModal && createPortal(
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]"
-          onClick={(e) => {
-            console.log('[Modal] Background clicked');
+      {showEmailModal && typeof window !== 'undefined' && (() => {
+        console.log('[Portal] Creating portal for modal');
+        return createPortal(
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]"
+            onClick={(e) => {
+              console.log('[Modal] Background clicked');
             if (e.target === e.currentTarget) {
               setShowEmailModal(false);
             }
@@ -585,7 +587,8 @@ function InvoicesTab({ invoices, companyId }: any) {
           </div>
         </div>,
         document.body
-      )}
+      );
+      })()}
     </div>
   );
 }
