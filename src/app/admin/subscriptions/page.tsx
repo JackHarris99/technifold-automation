@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase-client';
 import Link from 'next/link';
 
 interface Subscription {
@@ -56,37 +55,18 @@ export default function SubscriptionsAdminPage() {
   async function loadSubscriptions() {
     setLoading(true);
     try {
-      const supabase = createClient();
+      const response = await fetch('/api/admin/subscriptions/list');
+      const data = await response.json();
 
-      // Load subscriptions
-      const { data, error } = await supabase
-        .from('v_active_subscriptions')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('[Subscriptions] Load error:', error);
-        alert(`Failed to load subscriptions: ${error.message}`);
-        return;
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load subscriptions');
       }
 
-      setSubscriptions(data || []);
-
-      // Load anomalies (ratchet violations)
-      const { data: anomalyData, error: anomalyError } = await supabase
-        .from('v_subscription_anomalies')
-        .select('*')
-        .order('updated_at', { ascending: false });
-
-      if (anomalyError) {
-        console.warn('[Subscriptions] Anomaly load error:', anomalyError);
-        // Don't fail if view doesn't exist yet
-      } else {
-        setAnomalies(anomalyData || []);
-      }
-    } catch (error) {
+      setSubscriptions(data.subscriptions || []);
+      setAnomalies(data.anomalies || []);
+    } catch (error: any) {
       console.error('[Subscriptions] Exception:', error);
-      alert('Failed to load subscriptions');
+      alert(`Failed to load subscriptions: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }

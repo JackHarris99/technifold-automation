@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase-client';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -81,44 +80,20 @@ export default function SubscriptionManagePage() {
   async function loadSubscription() {
     setLoading(true);
     try {
-      const supabase = createClient();
+      const response = await fetch(`/api/admin/subscriptions/${subscriptionId}`);
+      const data = await response.json();
 
-      // Load subscription
-      const { data: subData, error: subError } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('subscription_id', subscriptionId)
-        .single();
-
-      if (subError || !subData) {
+      if (!response.ok) {
         alert('Subscription not found');
         router.push('/admin/subscriptions');
         return;
       }
 
-      setSubscription(subData);
-      setNewPrice(subData.monthly_price.toString());
-
-      // Load company
-      const { data: companyData } = await supabase
-        .from('companies')
-        .select('company_name, billing_address')
-        .eq('company_id', subData.company_id)
-        .single();
-
-      setCompany(companyData);
-
-      // Load contact if exists
-      if (subData.contact_id) {
-        const { data: contactData } = await supabase
-          .from('contacts')
-          .select('full_name, email')
-          .eq('contact_id', subData.contact_id)
-          .single();
-
-        setContact(contactData);
-      }
-    } catch (error) {
+      setSubscription(data.subscription);
+      setNewPrice(data.subscription.monthly_price.toString());
+      setCompany(data.company);
+      setContact(data.contact);
+    } catch (error: any) {
       console.error('[SubscriptionManage] Load error:', error);
       alert('Failed to load subscription');
     } finally {
@@ -127,62 +102,70 @@ export default function SubscriptionManagePage() {
   }
 
   async function loadEvents() {
-    const supabase = createClient();
-    const { data } = await supabase
-      .from('subscription_events')
-      .select('*')
-      .eq('subscription_id', subscriptionId)
-      .order('performed_at', { ascending: false });
+    try {
+      const response = await fetch(`/api/admin/subscriptions/${subscriptionId}/events`);
+      const data = await response.json();
 
-    setEvents(data || []);
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load events');
+      }
+
+      setEvents(data.events || []);
+    } catch (error: any) {
+      console.error('Error loading events:', error);
+    }
   }
 
   async function loadProducts() {
-    const supabase = createClient();
-    const { data } = await supabase
-      .from('products')
-      .select('product_code, description, price')
-      .eq('type', 'tool')
-      .order('description');
+    try {
+      const response = await fetch('/api/admin/tools/list');
+      const data = await response.json();
 
-    setProducts(data || []);
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load tools');
+      }
+
+      // Map to match expected interface
+      const mappedProducts = (data.tools || []).map((tool: any) => ({
+        product_code: tool.product_code,
+        description: tool.description,
+        price: tool.price || 0,
+      }));
+
+      setProducts(mappedProducts);
+    } catch (error: any) {
+      console.error('Error loading products:', error);
+    }
   }
 
   async function handleAddTool() {
     if (!selectedTool || !subscription) return;
 
-    const supabase = createClient();
+    try {
+      const response = await fetch('/api/admin/subscriptions/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add_tool',
+          subscription_id: subscriptionId,
+          tool_code: selectedTool,
+        }),
+      });
 
-    const updatedTools = [...subscription.tools, selectedTool];
+      const data = await response.json();
 
-    const { error } = await supabase
-      .from('subscriptions')
-      .update({
-        tools: updatedTools,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('subscription_id', subscriptionId);
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to add tool');
+      }
 
-    if (error) {
-      alert(`Failed to add tool: ${error.message}`);
-      return;
+      alert('Tool added successfully! Don\'t forget to update the price if needed.');
+      setShowAddTool(false);
+      setSelectedTool('');
+      loadSubscription();
+      loadEvents();
+    } catch (error: any) {
+      alert(`Failed to add tool: ${error.message || 'Unknown error'}`);
     }
-
-    // Log event
-    await supabase.from('subscription_events').insert({
-      subscription_id: subscriptionId,
-      event_type: 'tool_added',
-      event_name: 'Tool added to subscription',
-      old_value: { tools: subscription.tools },
-      new_value: { tools: updatedTools },
-      notes: `Added ${selectedTool}`,
-    });
-
-    alert('Tool added successfully! Don\'t forget to update the price if needed.');
-    setShowAddTool(false);
-    setSelectedTool('');
-    loadSubscription();
-    loadEvents();
   }
 
   async function handleUpdatePrice() {
@@ -204,41 +187,30 @@ export default function SubscriptionManagePage() {
       if (!confirm) return;
     }
 
-    const supabase = createClient();
+    try {
+      const response = await fetch('/api/admin/subscriptions/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_price',
+          subscription_id: subscriptionId,
+          new_price: priceValue,
+        }),
+      });
 
-    const newRatchetMax = Math.max(
-      priceValue,
-      subscription.ratchet_max || 0
-    );
+      const data = await response.json();
 
-    const { error } = await supabase
-      .from('subscriptions')
-      .update({
-        monthly_price: priceValue,
-        ratchet_max: newRatchetMax,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('subscription_id', subscriptionId);
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update price');
+      }
 
-    if (error) {
-      alert(`Failed to update price: ${error.message}`);
-      return;
+      alert('Price updated successfully!');
+      setShowUpdatePrice(false);
+      loadSubscription();
+      loadEvents();
+    } catch (error: any) {
+      alert(`Failed to update price: ${error.message || 'Unknown error'}`);
     }
-
-    // Log event
-    await supabase.from('subscription_events').insert({
-      subscription_id: subscriptionId,
-      event_type: priceValue > subscription.monthly_price ? 'price_increased' : 'price_decreased',
-      event_name: 'Subscription price updated',
-      old_value: { monthly_price: subscription.monthly_price },
-      new_value: { monthly_price: priceValue },
-      notes: `Price changed from £${subscription.monthly_price} to £${priceValue}`,
-    });
-
-    alert('Price updated successfully!');
-    setShowUpdatePrice(false);
-    loadSubscription();
-    loadEvents();
   }
 
   async function handleCancelSubscription() {
@@ -247,69 +219,56 @@ export default function SubscriptionManagePage() {
     const reason = window.prompt('Cancellation reason (optional):');
     if (reason === null) return; // User clicked cancel
 
-    const supabase = createClient();
+    try {
+      const response = await fetch('/api/admin/subscriptions/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'cancel',
+          subscription_id: subscriptionId,
+          cancellation_reason: reason || null,
+        }),
+      });
 
-    const { error } = await supabase
-      .from('subscriptions')
-      .update({
-        status: 'cancelled',
-        cancelled_at: new Date().toISOString(),
-        cancellation_reason: reason || null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('subscription_id', subscriptionId);
+      const data = await response.json();
 
-    if (error) {
-      alert(`Failed to cancel subscription: ${error.message}`);
-      return;
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to cancel subscription');
+      }
+
+      alert('Subscription cancelled');
+      loadSubscription();
+      loadEvents();
+    } catch (error: any) {
+      alert(`Failed to cancel subscription: ${error.message || 'Unknown error'}`);
     }
-
-    // Log event
-    await supabase.from('subscription_events').insert({
-      subscription_id: subscriptionId,
-      event_type: 'cancelled',
-      event_name: 'Subscription cancelled',
-      old_value: { status: subscription.status },
-      new_value: { status: 'cancelled' },
-      notes: reason || 'No reason provided',
-    });
-
-    alert('Subscription cancelled');
-    loadSubscription();
-    loadEvents();
   }
 
   async function handleActivateSubscription() {
     if (!subscription) return;
 
-    const supabase = createClient();
+    try {
+      const response = await fetch('/api/admin/subscriptions/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'activate',
+          subscription_id: subscriptionId,
+        }),
+      });
 
-    const { error } = await supabase
-      .from('subscriptions')
-      .update({
-        status: 'active',
-        current_period_start: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq('subscription_id', subscriptionId);
+      const data = await response.json();
 
-    if (error) {
-      alert(`Failed to activate subscription: ${error.message}`);
-      return;
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to activate subscription');
+      }
+
+      alert('Subscription activated');
+      loadSubscription();
+      loadEvents();
+    } catch (error: any) {
+      alert(`Failed to activate subscription: ${error.message || 'Unknown error'}`);
     }
-
-    // Log event
-    await supabase.from('subscription_events').insert({
-      subscription_id: subscriptionId,
-      event_type: 'reactivated',
-      event_name: 'Subscription activated',
-      old_value: { status: subscription.status },
-      new_value: { status: 'active' },
-    });
-
-    alert('Subscription activated');
-    loadSubscription();
-    loadEvents();
   }
 
   function formatCurrency(amount: number, currency: string = 'GBP') {

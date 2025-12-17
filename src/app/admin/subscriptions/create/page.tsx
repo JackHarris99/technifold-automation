@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase-client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -56,36 +55,56 @@ export default function CreateSubscriptionPage() {
   }, [formData.company_id]);
 
   async function loadCompanies() {
-    const supabase = createClient();
-    const { data } = await supabase
-      .from('companies')
-      .select('company_id, company_name')
-      .order('company_name')
-      .limit(1000);
+    try {
+      const response = await fetch('/api/admin/companies/list');
+      const data = await response.json();
 
-    setCompanies(data || []);
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load companies');
+      }
+
+      setCompanies(data.companies || []);
+    } catch (error: any) {
+      console.error('Error loading companies:', error);
+    }
   }
 
   async function loadContacts(company_id: string) {
-    const supabase = createClient();
-    const { data } = await supabase
-      .from('contacts')
-      .select('contact_id, full_name, email')
-      .eq('company_id', company_id)
-      .order('full_name');
+    try {
+      const response = await fetch(`/api/admin/contacts/list?company_id=${company_id}`);
+      const data = await response.json();
 
-    setContacts(data || []);
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load contacts');
+      }
+
+      setContacts(data.contacts || []);
+    } catch (error: any) {
+      console.error('Error loading contacts:', error);
+    }
   }
 
   async function loadProducts() {
-    const supabase = createClient();
-    const { data } = await supabase
-      .from('products')
-      .select('product_code, description, type, price')
-      .eq('type', 'tool')
-      .order('description');
+    try {
+      const response = await fetch('/api/admin/tools/list');
+      const data = await response.json();
 
-    setProducts(data || []);
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load tools');
+      }
+
+      // Map to match expected interface
+      const mappedProducts = (data.tools || []).map((tool: any) => ({
+        product_code: tool.product_code,
+        description: tool.description,
+        type: 'tool',
+        price: tool.price || 0,
+      }));
+
+      setProducts(mappedProducts);
+    } catch (error: any) {
+      console.error('Error loading products:', error);
+    }
   }
 
   function toggleTool(productCode: string) {
@@ -118,53 +137,32 @@ export default function CreateSubscriptionPage() {
     setLoading(true);
 
     try {
-      const supabase = createClient();
-
-      const trialDays = parseInt(formData.trial_days);
-      const trialStartDate = new Date();
-      const trialEndDate = new Date();
-      trialEndDate.setDate(trialEndDate.getDate() + trialDays);
-
-      const { data, error } = await supabase
-        .from('subscriptions')
-        .insert({
+      const response = await fetch('/api/admin/subscriptions/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
           company_id: formData.company_id,
           contact_id: formData.contact_id || null,
-          monthly_price: parseFloat(formData.monthly_price),
+          monthly_price: formData.monthly_price,
           currency: formData.currency,
           tools: formData.tools,
-          status: 'trial',
-          trial_start_date: trialStartDate.toISOString(),
-          trial_end_date: trialEndDate.toISOString(),
+          trial_days: formData.trial_days,
           notes: formData.notes || null,
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('[CreateSubscription] Error:', error);
-        alert(`Failed to create subscription: ${error.message}`);
-        return;
-      }
-
-      // Log subscription event
-      await supabase.from('subscription_events').insert({
-        subscription_id: data.subscription_id,
-        event_type: 'created',
-        event_name: 'Subscription created',
-        new_value: {
-          monthly_price: parseFloat(formData.monthly_price),
-          tools: formData.tools,
-          trial_days: trialDays,
-        },
-        notes: 'Subscription created via admin UI',
+        }),
       });
 
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create subscription');
+      }
+
       alert('Subscription created successfully!');
-      router.push(`/admin/subscriptions/${data.subscription_id}`);
-    } catch (error) {
+      router.push(`/admin/subscriptions/${data.subscription.subscription_id}`);
+    } catch (error: any) {
       console.error('[CreateSubscription] Exception:', error);
-      alert('Failed to create subscription');
+      alert(`Failed to create subscription: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }

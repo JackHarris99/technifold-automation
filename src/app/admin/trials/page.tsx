@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase-client';
 import Link from 'next/link';
 
 interface TrialIntent {
@@ -32,50 +31,17 @@ export default function TrialsAdminPage() {
   async function loadTrials() {
     setLoading(true);
     try {
-      const supabase = createClient();
+      const response = await fetch('/api/admin/trials/list');
+      const data = await response.json();
 
-      // Fetch trial intents with company, contact, and machine info
-      const { data, error } = await supabase
-        .from('trial_intents')
-        .select(`
-          id,
-          token,
-          company_id,
-          contact_id,
-          machine_id,
-          created_at,
-          companies:company_id(company_name),
-          contacts:contact_id(full_name, email),
-          machines:machine_id(brand, model, type)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('[Trials] Load error:', error);
-        alert(`Failed to load trials: ${error.message}`);
-        return;
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load trials');
       }
 
-      // Transform data to flatten joined tables
-      const transformedData = (data || []).map((trial: any) => ({
-        id: trial.id,
-        token: trial.token,
-        company_id: trial.company_id,
-        contact_id: trial.contact_id,
-        machine_id: trial.machine_id,
-        created_at: trial.created_at,
-        company_name: trial.companies?.company_name || null,
-        contact_name: trial.contacts?.full_name || null,
-        contact_email: trial.contacts?.email || null,
-        machine_brand: trial.machines?.brand || null,
-        machine_model: trial.machines?.model || null,
-        machine_type: trial.machines?.type || null,
-      }));
-
-      setTrials(transformedData);
-    } catch (error) {
+      setTrials(data.trials || []);
+    } catch (error: any) {
       console.error('[Trials] Exception:', error);
-      alert('Failed to load trials');
+      alert(`Failed to load trials: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
