@@ -88,7 +88,8 @@ export default function SendReorderPage() {
       if (!response.ok) {
         const data = await response.json();
         console.error('[SendReorder] Error response:', data);
-        throw new Error(data.error || `Failed to send emails (${response.status})`);
+        console.error('[SendReorder] Error details:', data.details);
+        throw new Error(data.details || data.error || `Failed to send emails (${response.status})`);
       }
 
       const result = await response.json();
