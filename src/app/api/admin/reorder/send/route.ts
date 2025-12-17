@@ -11,6 +11,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { company_id, contact_ids, offer_key, campaign_key } = body;
 
+    console.log('[reorder/send] Request:', { company_id, contact_ids, offer_key, campaign_key });
+
     if (!company_id || !contact_ids || contact_ids.length === 0) {
       return NextResponse.json(
         { error: 'company_id and contact_ids are required' },
@@ -83,10 +85,11 @@ export async function POST(request: NextRequest) {
       job_id: job.job_id,
       recipient_count: contacts.length
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error('[admin/reorder/send] Unexpected error:', err);
+    console.error('[admin/reorder/send] Error stack:', err?.stack);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: err?.message || 'Unknown error' },
       { status: 500 }
     );
   }

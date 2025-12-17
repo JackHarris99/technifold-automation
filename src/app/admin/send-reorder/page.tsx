@@ -237,12 +237,18 @@ export default function SendReorderPage() {
                 </button>
 
                 {showPreview && (
-                  <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="text-sm text-gray-600 mb-4">
-                      <p><strong>From:</strong> sales@technifold.com</p>
-                      <p><strong>To:</strong> {selectedContacts.length} contact{selectedContacts.length !== 1 ? 's' : ''}</p>
-                      <p><strong>Subject:</strong> Time to Restock Your Technifold Supplies</p>
-                    </div>
+                  <div className="mt-4 space-y-6">
+                    {/* Email Preview */}
+                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <h3 className="font-bold text-gray-900 mb-3">📧 Email Preview</h3>
+                      <div className="text-sm text-gray-600 mb-4">
+                        <p><strong>From:</strong> sales@technifold.com</p>
+                        <p><strong>To:</strong> {selectedContacts.length} contact{selectedContacts.length !== 1 ? 's' : ''}</p>
+                        <p><strong>Subject:</strong> Time to Restock Your Technifold Supplies</p>
+                        <p className="text-xs italic text-blue-600 mt-2">
+                          Note: Each email will be personalized with the contact's actual name
+                        </p>
+                      </div>
 
                     <div className="bg-white p-6 rounded border border-gray-300">
                       <div className="mb-4">
@@ -299,6 +305,65 @@ export default function SendReorderPage() {
 
                       <div className="mt-6 pt-6 border-t border-gray-200 text-xs text-gray-500">
                         <p>This is a personalized email sent to {company?.company_name}</p>
+                      </div>
+                    </div>
+                    </div>
+
+                    {/* Portal Content Preview */}
+                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <h3 className="font-bold text-gray-900 mb-3">🛒 Portal Content Preview</h3>
+                      <p className="text-sm text-gray-600 mb-4">
+                        This is what customers see when they click the link in their email:
+                      </p>
+
+                      <div className="bg-white p-6 rounded border border-gray-300">
+                        <div className="flex items-center justify-between mb-6 pb-4 border-b">
+                          <div>
+                            <h2 className="text-2xl font-bold text-gray-900">{company?.company_name}</h2>
+                            <p className="text-sm text-gray-600">Personalized Reorder Portal</p>
+                          </div>
+                          <img
+                            src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/technifold.png"
+                            alt="Technifold"
+                            className="h-10"
+                          />
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="bg-blue-50 p-4 rounded-lg">
+                            <h4 className="font-bold text-blue-900 mb-2">Your Order History</h4>
+                            <p className="text-sm text-blue-800">
+                              Based on your previous orders, we've pre-selected items you might need to restock.
+                            </p>
+                          </div>
+
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded border">
+                              <div>
+                                <p className="font-medium text-gray-900">Product Name Example</p>
+                                <p className="text-sm text-gray-500">Last ordered: 3 months ago</p>
+                              </div>
+                              <button className="px-4 py-2 bg-blue-600 text-white rounded text-sm">
+                                Add to Cart
+                              </button>
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded border">
+                              <div>
+                                <p className="font-medium text-gray-900">Product Name Example</p>
+                                <p className="text-sm text-gray-500">Last ordered: 5 months ago</p>
+                              </div>
+                              <button className="px-4 py-2 bg-blue-600 text-white rounded text-sm">
+                                Add to Cart
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="pt-4 border-t">
+                            <button className="w-full py-3 bg-green-600 text-white font-bold rounded-lg">
+                              Proceed to Checkout
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
