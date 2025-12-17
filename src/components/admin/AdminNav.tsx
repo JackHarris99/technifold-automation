@@ -152,6 +152,43 @@ export default function AdminNav() {
           </Link>
         </div>
 
+        {/* Products */}
+        <div className="mb-6">
+          <div className="px-4 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            Products
+          </div>
+          <Link
+            href="/admin/products"
+            className={`block px-4 py-2 text-sm transition-colors ${
+              pathname === '/admin/products'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            Product Catalog
+          </Link>
+          <Link
+            href="/admin/tool-consumables"
+            className={`block px-4 py-2 text-sm transition-colors ${
+              pathname === '/admin/tool-consumables'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            Tool-Consumable Links
+          </Link>
+          <Link
+            href="/admin/sku-explorer"
+            className={`block px-4 py-2 text-sm transition-colors ${
+              pathname === '/admin/sku-explorer'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            SKU Explorer
+          </Link>
+        </div>
+
         {/* Tools */}
         <div className="mb-6">
           <div className="px-4 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
@@ -186,16 +223,6 @@ export default function AdminNav() {
             }`}
           >
             Quote Builder
-          </Link>
-          <Link
-            href="/admin/sku-explorer"
-            className={`block px-4 py-2 text-sm transition-colors ${
-              pathname === '/admin/sku-explorer'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-            }`}
-          >
-            SKU Explorer
           </Link>
         </div>
 
