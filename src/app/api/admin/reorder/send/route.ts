@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Log engagement event
-    await supabase
+    const { error: eventError } = await supabase
       .from('engagement_events')
       .insert({
         company_id,
@@ -77,8 +77,11 @@ export async function POST(request: NextRequest) {
           contact_count: contacts.length,
           offer_key: offer_key || 'reorder_reminder'
         }
-      })
-      .catch(err => console.error('[admin/reorder/send] Event error:', err));
+      });
+
+    if (eventError) {
+      console.error('[admin/reorder/send] Event error:', eventError);
+    }
 
     return NextResponse.json({
       success: true,
