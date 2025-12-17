@@ -1,18 +1,18 @@
 /**
- * Send Reorder Email Page
- * Dedicated page for sending tokenized reorder emails to company contacts
+ * Send Reorder Email - Single Dedicated Page
+ * Accepts company_id as query param and pre-fills company info
  */
 
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function SendReorderPage() {
-  const params = useParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
-  const companyId = params.company_id as string;
+  const companyId = searchParams.get('company_id');
 
   const [company, setCompany] = useState<any>(null);
   const [contacts, setContacts] = useState<any[]>([]);
@@ -23,6 +23,12 @@ export default function SendReorderPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!companyId) {
+      setError('No company ID provided');
+      setLoading(false);
+      return;
+    }
+
     async function fetchData() {
       try {
         setLoading(true);

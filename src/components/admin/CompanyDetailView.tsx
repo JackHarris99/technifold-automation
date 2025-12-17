@@ -59,7 +59,7 @@ export default function CompanyDetailView({
             </div>
             <div className="flex gap-3">
               <Link
-                href={`/admin/company/${company.company_id}/send-reorder`}
+                href={`/admin/send-reorder?company_id=${company.company_id}`}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium inline-block"
               >
                 Send Reorder Email
