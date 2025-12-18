@@ -228,6 +228,7 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
       collection_method: 'send_invoice',
       days_until_due: 0, // Due on receipt
       auto_advance: false, // We'll finalize manually after adding items
+      automatic_tax: { enabled: false }, // Disable Stripe Tax - we calculate manually
       description: notes || undefined,
       // Shipping address (billing address comes from Customer object)
       shipping_details: shippingAddress ? {
