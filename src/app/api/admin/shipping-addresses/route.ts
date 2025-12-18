@@ -14,15 +14,15 @@ export async function POST(request: NextRequest) {
       address_line_1,
       address_line_2,
       city,
-      county,
-      postcode,
+      state_province,
+      postal_code,
       country,
       is_default,
     } = body;
 
-    if (!company_id || !address_line_1 || !city || !postcode || !country) {
+    if (!company_id || !address_line_1 || !city || !postal_code || !country) {
       return NextResponse.json(
-        { error: 'company_id, address_line_1, city, postcode, and country are required' },
+        { error: 'company_id, address_line_1, city, postal_code, and country are required' },
         { status: 400 }
       );
     }
@@ -45,8 +45,8 @@ export async function POST(request: NextRequest) {
         address_line_1,
         address_line_2: address_line_2 || null,
         city,
-        county: county || null,
-        postcode,
+        state_province: state_province || null,
+        postal_code,
         country,
         is_default: is_default || false,
       })
