@@ -6,7 +6,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import VATNumberForm from '../shared/VATNumberForm';
+import AddressCollectionModal from '../portals/AddressCollectionModal';
 
 interface CreateInvoiceModalProps {
   companyId: string;
@@ -35,14 +35,8 @@ export default function CreateInvoiceModal({
   const [loading, setLoading] = useState(false);
   const [loadingContacts, setLoadingContacts] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showVATForm, setShowVATForm] = useState(false);
-  const [companyInfo, setCompanyInfo] = useState<{
-    company_id: string;
-    company_name: string;
-    country: string;
-    vat_number: string | null;
-  } | null>(null);
-  const [checkingVAT, setCheckingVAT] = useState(true);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [checkingAddresses, setCheckingAddresses] = useState(true);
   const [productSuggestions, setProductSuggestions] = useState<Array<{
     product_code: string;
     description: string;
@@ -54,7 +48,7 @@ export default function CreateInvoiceModal({
   // Load contacts on mount
   useEffect(() => {
     loadContacts();
-    checkVATStatus();
+    setCheckingAddresses(false); // Simple check - we'll validate on submit
   }, [companyId]);
 
   const loadContacts = async () => {
@@ -69,22 +63,6 @@ export default function CreateInvoiceModal({
       console.error('Failed to load contacts:', err);
     } finally {
       setLoadingContacts(false);
-    }
-  };
-
-  const checkVATStatus = async () => {
-    try {
-      const response = await fetch(`/api/companies/check-vat-needed?company_id=${companyId}`);
-      const data = await response.json();
-
-      if (data.company) {
-        setCompanyInfo(data.company);
-      }
-
-      setCheckingVAT(false);
-    } catch (err) {
-      console.error('Failed to check VAT status:', err);
-      setCheckingVAT(false);
     }
   };
 
@@ -163,14 +141,13 @@ export default function CreateInvoiceModal({
         return;
       }
 
-      // Check if VAT number is needed
-      const vatCheckResponse = await fetch(`/api/companies/check-vat-needed?company_id=${companyId}`);
-      const vatCheckData = await vatCheckResponse.json();
+      // Check if addresses and VAT are needed
+      const checkResponse = await fetch(`/api/companies/check-details-needed?company_id=${companyId}`);
+      const checkData = await checkResponse.json();
 
-      if (vatCheckData.vat_needed) {
-        // Show VAT form instead of creating invoice
-        setCompanyInfo(vatCheckData.company);
-        setShowVATForm(true);
+      if (checkData.details_needed) {
+        // Show address collection modal
+        setShowAddressModal(true);
         setLoading(false);
         return;
       }
@@ -217,12 +194,8 @@ export default function CreateInvoiceModal({
     }
   };
 
-  const handleVATSaved = async (vatNumber: string) => {
-    // Update company info
-    if (companyInfo) {
-      setCompanyInfo({ ...companyInfo, vat_number: vatNumber });
-    }
-    setShowVATForm(false);
+  const handleAddressSaved = async () => {
+    setShowAddressModal(false);
 
     // Proceed with invoice creation
     const validItems = items.filter(item =>
@@ -234,17 +207,8 @@ export default function CreateInvoiceModal({
     await createInvoice(validItems);
   };
 
-  const handleVATSkipped = async () => {
-    setShowVATForm(false);
-
-    // Proceed with invoice creation anyway
-    const validItems = items.filter(item =>
-      item.product_code.trim() !== '' &&
-      item.description.trim() !== '' &&
-      item.unit_price > 0
-    );
-    setLoading(true);
-    await createInvoice(validItems);
+  const handleAddressCancel = () => {
+    setShowAddressModal(false);
   };
 
   const calculateTotal = () => {
@@ -253,7 +217,7 @@ export default function CreateInvoiceModal({
     }, 0);
   };
 
-  if (checkingVAT || loadingContacts) {
+  if (checkingAddresses || loadingContacts) {
     return (
       <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
         <div className="bg-white rounded-lg shadow-xl p-8">
@@ -282,17 +246,15 @@ export default function CreateInvoiceModal({
             </div>
           )}
 
-          {/* VAT Number Form (if needed) */}
-          {showVATForm && companyInfo && (
-            <div className="mb-6">
-              <VATNumberForm
-                companyId={companyInfo.company_id}
-                companyName={companyInfo.company_name}
-                country={companyInfo.country}
-                onSaved={handleVATSaved}
-                onSkip={handleVATSkipped}
-              />
-            </div>
+          {/* Address Collection Modal (shown when addresses are missing) */}
+          {showAddressModal && (
+            <AddressCollectionModal
+              isOpen={showAddressModal}
+              onClose={handleAddressCancel}
+              companyId={companyId}
+              companyName={companyName}
+              onSuccess={handleAddressSaved}
+            />
           )}
 
           {/* Contact Selection */}
