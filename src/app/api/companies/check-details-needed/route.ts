@@ -37,7 +37,7 @@ async function checkCompanyDetails(companyId: string) {
   // Get default shipping address
   const { data: shippingAddress } = await supabase
     .from('shipping_addresses')
-    .select('address_line1, address_line2, city, county, postcode, country')
+    .select('address_line_1, address_line_2, city, state_province, postal_code, country')
     .eq('company_id', companyId)
     .eq('is_default', true)
     .single();
@@ -51,9 +51,9 @@ async function checkCompanyDetails(companyId: string) {
   );
 
   const hasShippingAddress = !!(
-    shippingAddress?.address_line1 &&
+    shippingAddress?.address_line_1 &&
     shippingAddress?.city &&
-    shippingAddress?.postcode &&
+    shippingAddress?.postal_code &&
     shippingAddress?.country
   );
 
@@ -84,11 +84,11 @@ async function checkCompanyDetails(companyId: string) {
         billing_country: company.billing_country || '',
       },
       shipping_address: shippingAddress ? {
-        address_line1: shippingAddress.address_line1,
-        address_line2: shippingAddress.address_line2 || '',
+        address_line1: shippingAddress.address_line_1,
+        address_line2: shippingAddress.address_line_2 || '',
         city: shippingAddress.city,
-        county: shippingAddress.county || '',
-        postcode: shippingAddress.postcode,
+        county: shippingAddress.state_province || '',
+        postcode: shippingAddress.postal_code,
         country: shippingAddress.country,
       } : null,
     }
