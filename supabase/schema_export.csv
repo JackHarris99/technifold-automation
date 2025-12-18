@@ -38,6 +38,12 @@ companies,zoho_account_id,text,YES,null
 companies,account_owner,text,YES,null
 companies,portal_payload,jsonb,YES,null
 companies,domain,text,YES,null
+companies,billing_address_line1,text,YES,null
+companies,billing_address_line2,text,YES,null
+companies,billing_city,text,YES,null
+companies,billing_county,text,YES,null
+companies,billing_postcode,text,YES,null
+companies,billing_country,text,YES,null
 company_consumables,company_id,text,NO,null
 company_consumables,consumable_code,text,NO,null
 company_consumables,first_ordered_at,date,NO,null
@@ -47,6 +53,12 @@ company_consumables,total_quantity,integer,NO,null
 company_consumables,last_order_amount,numeric,YES,null
 company_consumables,last_order_quantity,integer,YES,null
 company_consumables,last_invoice_id,text,YES,null
+company_consumables_view,company_id,text,YES,null
+company_consumables_view,consumable_code,text,YES,null
+company_consumables_view,first_ordered_at,date,YES,null
+company_consumables_view,last_ordered_at,date,YES,null
+company_consumables_view,total_orders,integer,YES,null
+company_consumables_view,total_quantity,integer,YES,null
 company_machine,id,uuid,NO,gen_random_uuid()
 company_machine,machine_id,uuid,NO,null
 company_machine,quantity,integer,YES,1
@@ -58,11 +70,27 @@ company_machine,created_at,timestamp with time zone,YES,now()
 company_machine,company_id,text,NO,null
 company_machine,confidence,smallint,YES,1
 company_machine,evidence,jsonb,YES,'{}'::jsonb
+company_product_history,company_id,text,NO,null
+company_product_history,product_code,text,NO,null
+company_product_history,product_type,text,NO,null
+company_product_history,first_purchased_at,date,NO,null
+company_product_history,last_purchased_at,date,NO,null
+company_product_history,total_purchases,integer,NO,1
+company_product_history,total_quantity,integer,NO,1
+company_product_history,source,text,YES,'invoice'::text
+company_product_history,added_by,text,YES,null
+company_product_history,created_at,timestamp with time zone,NO,now()
+company_product_history,updated_at,timestamp with time zone,NO,now()
 company_tools,company_id,text,NO,null
 company_tools,tool_code,text,NO,null
 company_tools,first_seen_at,date,NO,null
 company_tools,last_seen_at,date,NO,null
 company_tools,total_units,integer,NO,null
+company_tools_view,company_id,text,YES,null
+company_tools_view,tool_code,text,YES,null
+company_tools_view,first_seen_at,date,YES,null
+company_tools_view,last_seen_at,date,YES,null
+company_tools_view,total_units,integer,YES,null
 contact_interactions,id,uuid,NO,gen_random_uuid()
 contact_interactions,contact_id,uuid,NO,null
 contact_interactions,interaction_type,text,NO,null
@@ -307,6 +335,16 @@ shipping_manifests,items,jsonb,NO,null
 shipping_manifests,created_at,timestamp without time zone,YES,CURRENT_TIMESTAMP
 shipping_manifests,updated_at,timestamp without time zone,YES,CURRENT_TIMESTAMP
 shipping_manifests,notes,text,YES,null
+shipping_rates,rate_id,uuid,NO,gen_random_uuid()
+shipping_rates,country_code,text,NO,null
+shipping_rates,rate_gbp,numeric,NO,null
+shipping_rates,zone_name,text,YES,null
+shipping_rates,min_order_value,numeric,YES,0
+shipping_rates,free_shipping_threshold,numeric,YES,null
+shipping_rates,active,boolean,NO,TRUE
+shipping_rates,notes,text,YES,null
+shipping_rates,created_at,timestamp with time zone,NO,now()
+shipping_rates,updated_at,timestamp with time zone,NO,now()
 site_branding,brand_key,text,NO,null
 site_branding,brand_name,text,NO,null
 site_branding,logo_url,text,YES,null
