@@ -104,10 +104,22 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
   try {
     const supabase = getSupabaseClient();
 
-    // 1. Get company and contact details
+    // 1. Get company and contact details (including billing address)
     const { data: company, error: companyError } = await supabase
       .from('companies')
-      .select('company_name, country, vat_number, eori_number, stripe_customer_id')
+      .select(`
+        company_name,
+        country,
+        vat_number,
+        eori_number,
+        stripe_customer_id,
+        billing_address_line_1,
+        billing_address_line_2,
+        billing_city,
+        billing_state_province,
+        billing_postal_code,
+        billing_country
+      `)
       .eq('company_id', company_id)
       .single();
 
@@ -125,10 +137,10 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
       return { success: false, error: 'Contact not found' };
     }
 
-    // 2. Get shipping address for destination country
+    // 2. Get shipping address (full details)
     const { data: shippingAddress } = await supabase
       .from('shipping_addresses')
-      .select('country')
+      .select('address_line_1, address_line_2, city, state_province, postal_code, country')
       .eq('company_id', company_id)
       .eq('is_default', true)
       .single();
@@ -150,13 +162,21 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
     const { vat_amount, vat_rate, vat_exempt_reason } = calculateVAT(taxableAmount, destinationCountry, company.vat_number);
     const total = taxableAmount + vat_amount;
 
-    // 3. Create or retrieve Stripe Customer
+    // 3. Create or retrieve Stripe Customer (with billing address)
     let stripeCustomerId = company.stripe_customer_id;
 
     if (!stripeCustomerId) {
       const customer = await getStripeClient().customers.create({
         email: contact.email,
         name: company.company_name,
+        address: company.billing_address_line_1 ? {
+          line1: company.billing_address_line_1,
+          line2: company.billing_address_line_2 || undefined,
+          city: company.billing_city || undefined,
+          state: company.billing_state_province || undefined,
+          postal_code: company.billing_postal_code || undefined,
+          country: company.billing_country || undefined,
+        } : undefined,
         metadata: {
           company_id,
           contact_id,
@@ -171,13 +191,34 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
         .eq('company_id', company_id);
     }
 
-    // 4. Create draft invoice first
+    // 4. Create draft invoice first (with billing and shipping addresses)
     const invoice = await getStripeClient().invoices.create({
       customer: stripeCustomerId,
       collection_method: 'send_invoice',
       days_until_due: 0, // Due on receipt
       auto_advance: false, // We'll finalize manually after adding items
       description: notes || undefined,
+      // Billing address on invoice
+      customer_address: company.billing_address_line_1 ? {
+        line1: company.billing_address_line_1,
+        line2: company.billing_address_line_2 || undefined,
+        city: company.billing_city || undefined,
+        state: company.billing_state_province || undefined,
+        postal_code: company.billing_postal_code || undefined,
+        country: company.billing_country || undefined,
+      } : undefined,
+      // Shipping address on invoice
+      customer_shipping: shippingAddress ? {
+        name: company.company_name,
+        address: {
+          line1: shippingAddress.address_line_1,
+          line2: shippingAddress.address_line_2 || undefined,
+          city: shippingAddress.city || undefined,
+          state: shippingAddress.state_province || undefined,
+          postal_code: shippingAddress.postal_code || undefined,
+          country: shippingAddress.country || undefined,
+        }
+      } : undefined,
       metadata: {
         company_id,
         contact_id,
