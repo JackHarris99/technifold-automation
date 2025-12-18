@@ -142,15 +142,20 @@ export default function CreateInvoiceModal({
       }
 
       // Check if addresses and VAT are needed
+      console.log('[CreateInvoiceModal] Checking if addresses needed for company:', companyId);
       const checkResponse = await fetch(`/api/companies/check-details-needed?company_id=${companyId}`);
       const checkData = await checkResponse.json();
+      console.log('[CreateInvoiceModal] Check result:', checkData);
 
       if (checkData.details_needed) {
+        console.log('[CreateInvoiceModal] Addresses needed - showing modal');
         // Show address collection modal
         setShowAddressModal(true);
         setLoading(false);
         return;
       }
+
+      console.log('[CreateInvoiceModal] Addresses OK - proceeding with invoice creation');
 
       // Proceed with invoice creation
       await createInvoice(validItems);
@@ -179,10 +184,18 @@ export default function CreateInvoiceModal({
 
       if (!response.ok) {
         const data = await response.json();
+        console.error('[CreateInvoiceModal] API Error:', data);
+
+        // Show detailed error if address-related
+        if (data.details) {
+          throw new Error(`${data.error}\n\n${data.details}`);
+        }
+
         throw new Error(data.error || 'Failed to create invoice');
       }
 
       const data = await response.json();
+      console.log('[CreateInvoiceModal] Invoice created successfully:', data);
       alert(`Invoice created successfully!\n\nInvoice sent to customer via email.\n\nStripe Invoice ID: ${data.invoice_id || 'N/A'}`);
       onClose();
       window.location.reload(); // Refresh to show new invoice
