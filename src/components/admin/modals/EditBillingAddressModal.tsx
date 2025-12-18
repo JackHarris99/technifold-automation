@@ -8,11 +8,11 @@ interface EditBillingAddressModalProps {
   companyId: string;
   companyName: string;
   currentBillingAddress: {
-    billing_address_line1?: string;
-    billing_address_line2?: string;
+    billing_address_line_1?: string;
+    billing_address_line_2?: string;
     billing_city?: string;
-    billing_county?: string;
-    billing_postcode?: string;
+    billing_state_province?: string;
+    billing_postal_code?: string;
     billing_country?: string;
   };
 }
@@ -25,11 +25,11 @@ export default function EditBillingAddressModal({
   currentBillingAddress,
 }: EditBillingAddressModalProps) {
   const [formData, setFormData] = useState({
-    billing_address_line1: '',
-    billing_address_line2: '',
+    billing_address_line_1: '',
+    billing_address_line_2: '',
     billing_city: '',
-    billing_county: '',
-    billing_postcode: '',
+    billing_state_province: '',
+    billing_postal_code: '',
     billing_country: 'GB', // Default to UK
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,11 +38,11 @@ export default function EditBillingAddressModal({
   useEffect(() => {
     if (isOpen && currentBillingAddress) {
       setFormData({
-        billing_address_line1: currentBillingAddress.billing_address_line1 || '',
-        billing_address_line2: currentBillingAddress.billing_address_line2 || '',
+        billing_address_line_1: currentBillingAddress.billing_address_line_1 || '',
+        billing_address_line_2: currentBillingAddress.billing_address_line_2 || '',
         billing_city: currentBillingAddress.billing_city || '',
-        billing_county: currentBillingAddress.billing_county || '',
-        billing_postcode: currentBillingAddress.billing_postcode || '',
+        billing_state_province: currentBillingAddress.billing_state_province || '',
+        billing_postal_code: currentBillingAddress.billing_postal_code || '',
         billing_country: currentBillingAddress.billing_country || 'GB',
       });
     }
@@ -105,8 +105,8 @@ export default function EditBillingAddressModal({
             </label>
             <input
               type="text"
-              value={formData.billing_address_line1}
-              onChange={(e) => handleChange('billing_address_line1', e.target.value)}
+              value={formData.billing_address_line_1}
+              onChange={(e) => handleChange('billing_address_line_1', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="123 Main Street"
               required
@@ -120,8 +120,8 @@ export default function EditBillingAddressModal({
             </label>
             <input
               type="text"
-              value={formData.billing_address_line2}
-              onChange={(e) => handleChange('billing_address_line2', e.target.value)}
+              value={formData.billing_address_line_2}
+              onChange={(e) => handleChange('billing_address_line_2', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Suite 100 (optional)"
             />
@@ -148,8 +148,8 @@ export default function EditBillingAddressModal({
               </label>
               <input
                 type="text"
-                value={formData.billing_county}
-                onChange={(e) => handleChange('billing_county', e.target.value)}
+                value={formData.billing_state_province}
+                onChange={(e) => handleChange('billing_state_province', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Greater London (optional)"
               />
@@ -164,8 +164,8 @@ export default function EditBillingAddressModal({
               </label>
               <input
                 type="text"
-                value={formData.billing_postcode}
-                onChange={(e) => handleChange('billing_postcode', e.target.value)}
+                value={formData.billing_postal_code}
+                onChange={(e) => handleChange('billing_postal_code', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="SW1A 1AA"
                 required

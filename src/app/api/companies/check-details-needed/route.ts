@@ -20,11 +20,11 @@ async function checkCompanyDetails(companyId: string) {
       company_name,
       country,
       vat_number,
-      billing_address_line1,
-      billing_address_line2,
+      billing_address_line_1,
+      billing_address_line_2,
       billing_city,
-      billing_county,
-      billing_postcode,
+      billing_state_province,
+      billing_postal_code,
       billing_country
     `)
     .eq('company_id', companyId)
@@ -44,9 +44,9 @@ async function checkCompanyDetails(companyId: string) {
 
   // Check what's missing
   const hasBillingAddress = !!(
-    company.billing_address_line1 &&
+    company.billing_address_line_1 &&
     company.billing_city &&
-    company.billing_postcode &&
+    company.billing_postal_code &&
     company.billing_country
   );
 
@@ -76,11 +76,11 @@ async function checkCompanyDetails(companyId: string) {
         company_name: company.company_name,
         country: company.country || '',
         vat_number: company.vat_number || '',
-        billing_address_line1: company.billing_address_line1 || '',
-        billing_address_line2: company.billing_address_line2 || '',
+        billing_address_line1: company.billing_address_line_1 || '',
+        billing_address_line2: company.billing_address_line_2 || '',
         billing_city: company.billing_city || '',
-        billing_county: company.billing_county || '',
-        billing_postcode: company.billing_postcode || '',
+        billing_county: company.billing_state_province || '',
+        billing_postcode: company.billing_postal_code || '',
         billing_country: company.billing_country || '',
       },
       shipping_address: shippingAddress ? {

@@ -13,21 +13,21 @@ interface AddressCollectionModalProps {
 
 interface AddressFormData {
   // Billing address (required)
-  billing_address_line1: string;
-  billing_address_line2: string;
+  billing_address_line_1: string;
+  billing_address_line_2: string;
   billing_city: string;
-  billing_county: string;
-  billing_postcode: string;
+  billing_state_province: string;
+  billing_postal_code: string;
   billing_country: string;
   vat_number: string;
 
   // Shipping address (optional - can use billing)
   use_billing_for_shipping: boolean;
-  shipping_address_line1: string;
-  shipping_address_line2: string;
+  shipping_address_line_1: string;
+  shipping_address_line_2: string;
   shipping_city: string;
-  shipping_county: string;
-  shipping_postcode: string;
+  shipping_state_province: string;
+  shipping_postal_code: string;
   shipping_country: string;
 }
 
@@ -39,19 +39,19 @@ export default function AddressCollectionModal({
   onSuccess,
 }: AddressCollectionModalProps) {
   const [formData, setFormData] = useState<AddressFormData>({
-    billing_address_line1: '',
-    billing_address_line2: '',
+    billing_address_line_1: '',
+    billing_address_line_2: '',
     billing_city: '',
-    billing_county: '',
-    billing_postcode: '',
+    billing_state_province: '',
+    billing_postal_code: '',
     billing_country: 'GB',
     vat_number: '',
     use_billing_for_shipping: true,
-    shipping_address_line1: '',
-    shipping_address_line2: '',
+    shipping_address_line_1: '',
+    shipping_address_line_2: '',
     shipping_city: '',
-    shipping_county: '',
-    shipping_postcode: '',
+    shipping_state_province: '',
+    shipping_postal_code: '',
     shipping_country: 'GB',
   });
 
@@ -109,11 +109,11 @@ export default function AddressCollectionModal({
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          billing_address_line1: formData.billing_address_line1,
-          billing_address_line2: formData.billing_address_line2,
+          billing_address_line_1: formData.billing_address_line_1,
+          billing_address_line_2: formData.billing_address_line_2,
           billing_city: formData.billing_city,
-          billing_county: formData.billing_county,
-          billing_postcode: formData.billing_postcode,
+          billing_state_province: formData.billing_state_province,
+          billing_postal_code: formData.billing_postal_code,
           billing_country: formData.billing_country,
           vat_number: formData.vat_number || null,
         }),
@@ -131,11 +131,11 @@ export default function AddressCollectionModal({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             company_id: companyId,
-            address_line1: formData.shipping_address_line1,
-            address_line2: formData.shipping_address_line2,
+            address_line_1: formData.shipping_address_line_1,
+            address_line_2: formData.shipping_address_line_2,
             city: formData.shipping_city,
-            county: formData.shipping_county,
-            postcode: formData.shipping_postcode,
+            state_province: formData.shipping_state_province,
+            postal_code: formData.shipping_postal_code,
             country: formData.shipping_country,
             is_default: true,
           }),
@@ -152,11 +152,11 @@ export default function AddressCollectionModal({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             company_id: companyId,
-            address_line1: formData.billing_address_line1,
-            address_line2: formData.billing_address_line2,
+            address_line_1: formData.billing_address_line_1,
+            address_line_2: formData.billing_address_line_2,
             city: formData.billing_city,
-            county: formData.billing_county,
-            postcode: formData.billing_postcode,
+            state_province: formData.billing_state_province,
+            postal_code: formData.billing_postal_code,
             country: formData.billing_country,
             is_default: true,
           }),
@@ -216,8 +216,8 @@ export default function AddressCollectionModal({
                 </label>
                 <input
                   type="text"
-                  value={formData.billing_address_line1}
-                  onChange={(e) => handleChange('billing_address_line1', e.target.value)}
+                  value={formData.billing_address_line_1}
+                  onChange={(e) => handleChange('billing_address_line_1', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="123 Business Street"
                   required
@@ -230,8 +230,8 @@ export default function AddressCollectionModal({
                 </label>
                 <input
                   type="text"
-                  value={formData.billing_address_line2}
-                  onChange={(e) => handleChange('billing_address_line2', e.target.value)}
+                  value={formData.billing_address_line_2}
+                  onChange={(e) => handleChange('billing_address_line_2', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Suite 100 (optional)"
                 />
@@ -257,8 +257,8 @@ export default function AddressCollectionModal({
                   </label>
                   <input
                     type="text"
-                    value={formData.billing_county}
-                    onChange={(e) => handleChange('billing_county', e.target.value)}
+                    value={formData.billing_state_province}
+                    onChange={(e) => handleChange('billing_state_province', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Greater London (optional)"
                   />
@@ -272,8 +272,8 @@ export default function AddressCollectionModal({
                   </label>
                   <input
                     type="text"
-                    value={formData.billing_postcode}
-                    onChange={(e) => handleChange('billing_postcode', e.target.value)}
+                    value={formData.billing_postal_code}
+                    onChange={(e) => handleChange('billing_postal_code', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="SW1A 1AA"
                     required
@@ -385,8 +385,8 @@ export default function AddressCollectionModal({
                   </label>
                   <input
                     type="text"
-                    value={formData.shipping_address_line1}
-                    onChange={(e) => handleChange('shipping_address_line1', e.target.value)}
+                    value={formData.shipping_address_line_1}
+                    onChange={(e) => handleChange('shipping_address_line_1', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Delivery address"
                     required
@@ -399,8 +399,8 @@ export default function AddressCollectionModal({
                   </label>
                   <input
                     type="text"
-                    value={formData.shipping_address_line2}
-                    onChange={(e) => handleChange('shipping_address_line2', e.target.value)}
+                    value={formData.shipping_address_line_2}
+                    onChange={(e) => handleChange('shipping_address_line_2', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Optional"
                   />
@@ -425,8 +425,8 @@ export default function AddressCollectionModal({
                     </label>
                     <input
                       type="text"
-                      value={formData.shipping_county}
-                      onChange={(e) => handleChange('shipping_county', e.target.value)}
+                      value={formData.shipping_state_province}
+                      onChange={(e) => handleChange('shipping_state_province', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
@@ -439,8 +439,8 @@ export default function AddressCollectionModal({
                     </label>
                     <input
                       type="text"
-                      value={formData.shipping_postcode}
-                      onChange={(e) => handleChange('shipping_postcode', e.target.value)}
+                      value={formData.shipping_postal_code}
+                      onChange={(e) => handleChange('shipping_postal_code', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     />

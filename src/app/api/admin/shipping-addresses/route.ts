@@ -11,8 +11,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       company_id,
-      address_line1,
-      address_line2,
+      address_line_1,
+      address_line_2,
       city,
       county,
       postcode,
@@ -20,9 +20,9 @@ export async function POST(request: NextRequest) {
       is_default,
     } = body;
 
-    if (!company_id || !address_line1 || !city || !postcode || !country) {
+    if (!company_id || !address_line_1 || !city || !postcode || !country) {
       return NextResponse.json(
-        { error: 'company_id, address_line1, city, postcode, and country are required' },
+        { error: 'company_id, address_line_1, city, postcode, and country are required' },
         { status: 400 }
       );
     }
@@ -42,8 +42,8 @@ export async function POST(request: NextRequest) {
       .from('shipping_addresses')
       .insert({
         company_id,
-        address_line1,
-        address_line2: address_line2 || null,
+        address_line_1,
+        address_line_2: address_line_2 || null,
         city,
         county: county || null,
         postcode,

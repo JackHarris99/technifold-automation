@@ -23,11 +23,11 @@ export async function PATCH(
     const body = await request.json();
     const {
       vat_number,
-      billing_address_line1,
-      billing_address_line2,
+      billing_address_line_1,
+      billing_address_line_2,
       billing_city,
-      billing_county,
-      billing_postcode,
+      billing_state_province,
+      billing_postal_code,
       billing_country,
     } = body;
 
@@ -36,20 +36,20 @@ export async function PATCH(
     if (vat_number !== undefined) {
       updateData.vat_number = vat_number || null;
     }
-    if (billing_address_line1 !== undefined) {
-      updateData.billing_address_line1 = billing_address_line1 || null;
+    if (billing_address_line_1 !== undefined) {
+      updateData.billing_address_line_1 = billing_address_line_1 || null;
     }
-    if (billing_address_line2 !== undefined) {
-      updateData.billing_address_line2 = billing_address_line2 || null;
+    if (billing_address_line_2 !== undefined) {
+      updateData.billing_address_line_2 = billing_address_line_2 || null;
     }
     if (billing_city !== undefined) {
       updateData.billing_city = billing_city || null;
     }
-    if (billing_county !== undefined) {
-      updateData.billing_county = billing_county || null;
+    if (billing_state_province !== undefined) {
+      updateData.billing_state_province = billing_state_province || null;
     }
-    if (billing_postcode !== undefined) {
-      updateData.billing_postcode = billing_postcode || null;
+    if (billing_postal_code !== undefined) {
+      updateData.billing_postal_code = billing_postal_code || null;
     }
     if (billing_country !== undefined) {
       updateData.billing_country = billing_country || null;

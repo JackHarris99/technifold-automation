@@ -191,11 +191,11 @@ export default function CompanyDetailView({
         companyId={company.company_id}
         companyName={company.company_name}
         currentBillingAddress={{
-          billing_address_line1: company.billing_address_line1,
-          billing_address_line2: company.billing_address_line2,
+          billing_address_line_1: company.billing_address_line_1,
+          billing_address_line_2: company.billing_address_line_2,
           billing_city: company.billing_city,
-          billing_county: company.billing_county,
-          billing_postcode: company.billing_postcode,
+          billing_state_province: company.billing_state_province,
+          billing_postal_code: company.billing_postal_code,
           billing_country: company.billing_country,
         }}
       />
@@ -251,17 +251,17 @@ function OverviewTab({
   // Format billing address for display
   const formatBillingAddress = () => {
     const parts = [
-      company.billing_address_line1,
-      company.billing_address_line2,
+      company.billing_address_line_1,
+      company.billing_address_line_2,
       company.billing_city,
-      company.billing_county,
-      company.billing_postcode,
+      company.billing_state_province,
+      company.billing_postal_code,
       company.billing_country,
     ].filter(Boolean);
     return parts.join(', ');
   };
 
-  const hasBillingAddress = company.billing_address_line1 || company.billing_city || company.billing_postcode;
+  const hasBillingAddress = company.billing_address_line_1 || company.billing_city || company.billing_postal_code;
 
   return (
     <div className="space-y-6">
@@ -303,10 +303,10 @@ function OverviewTab({
               <dd className="text-sm">
                 {hasBillingAddress ? (
                   <div className="text-gray-700">
-                    {company.billing_address_line1 && <div>{company.billing_address_line1}</div>}
-                    {company.billing_address_line2 && <div>{company.billing_address_line2}</div>}
-                    {company.billing_city && <div>{company.billing_city}{company.billing_county ? `, ${company.billing_county}` : ''}</div>}
-                    {company.billing_postcode && <div>{company.billing_postcode}</div>}
+                    {company.billing_address_line_1 && <div>{company.billing_address_line_1}</div>}
+                    {company.billing_address_line_2 && <div>{company.billing_address_line_2}</div>}
+                    {company.billing_city && <div>{company.billing_city}{company.billing_state_province ? `, ${company.billing_state_province}` : ''}</div>}
+                    {company.billing_postal_code && <div>{company.billing_postal_code}</div>}
                     {company.billing_country && <div className="font-medium">{company.billing_country}</div>}
                   </div>
                 ) : (
