@@ -17,6 +17,7 @@ interface InvoiceRequestModalProps {
   companyId: string;
   contactId?: string;
   onSuccess: (orderId: string) => void;
+  token: string; // HMAC token for API authentication
 }
 
 interface InvoiceResult {
@@ -46,6 +47,7 @@ export function InvoiceRequestModal({
   companyId,
   contactId,
   onSuccess,
+  token,
 }: InvoiceRequestModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,8 +62,14 @@ export function InvoiceRequestModal({
     setError(null);
 
     try {
-      // Check if company details are complete
-      const checkResponse = await fetch(`/api/companies/check-details-needed?company_id=${companyId}`);
+      // Check if company details are complete (with token authentication)
+      const checkResponse = await fetch(`/api/companies/check-details-needed`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token }),
+      });
       const checkData = await checkResponse.json();
 
       if (checkData.details_needed) {
@@ -87,7 +95,7 @@ export function InvoiceRequestModal({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          company_id: companyId,
+          token, // Token for authentication
           contact_id: contactId,
           items: cart.map(item => ({
             product_code: item.consumable_code,

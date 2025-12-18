@@ -7,16 +7,22 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   return NextResponse.json({
-    version: '1.1.0-address-fix',
-    deployed_at: '2025-12-18T17:00:00Z',
-    git_commit: '92173fb',
+    version: '1.2.0-security-hardening',
+    deployed_at: new Date().toISOString(),
     features: {
-      address_validation_frontend: true,
-      address_validation_server: true,
+      token_verification_customer_apis: true,
+      address_validation_admin_invoice_builder: true,
+      address_validation_portal: true,
+      address_validation_server_side: true,
       vat_verification_vies: true,
       shipping_calculation: true,
-      modal_z_index_fix: true,
+      dead_code_removed: true,
     },
-    status: 'Address modal should appear before invoice creation',
+    security: {
+      customer_api_token_auth: 'HMAC-SHA256 verification required',
+      admin_api_company_id_validation: 'Server-side address checking',
+      portal_api_backend_validation: 'Full address verification',
+    },
+    status: 'All invoice creation paths secured with address validation and token verification',
   });
 }

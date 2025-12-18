@@ -1,20 +1,34 @@
 /**
  * POST /api/portal/create-invoice
  * Create Stripe invoice from reorder portal
+ * Requires HMAC token for authentication
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createStripeInvoice } from '@/lib/stripe-invoices';
+import { verifyToken } from '@/lib/tokens';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { company_id, contact_id, items, currency, offer_key, campaign_key } = body;
+    const { token, contact_id, items, currency, offer_key, campaign_key } = body;
+
+    // Verify HMAC token
+    const payload = verifyToken(token);
+    if (!payload) {
+      return NextResponse.json(
+        { error: 'Invalid or expired token' },
+        { status: 401 }
+      );
+    }
+
+    // Extract company_id from verified token (not from request body - security!)
+    const company_id = payload.company_id;
 
     // Validate input
-    if (!company_id || !contact_id || !items || !Array.isArray(items) || items.length === 0) {
+    if (!contact_id || !items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        { error: 'company_id, contact_id, and items are required' },
+        { error: 'contact_id and items are required' },
         { status: 400 }
       );
     }
@@ -27,6 +41,23 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
+    }
+
+    // CRITICAL: Check if company has required addresses BEFORE creating invoice
+    const checkResponse = await fetch(`${request.nextUrl.origin}/api/companies/check-details-needed?company_id=${company_id}`);
+    const checkData = await checkResponse.json();
+
+    if (checkData.details_needed) {
+      return NextResponse.json(
+        {
+          error: 'Company address required',
+          details: 'This company needs billing and shipping addresses before invoices can be created. Please add addresses first.',
+          billing_address_needed: checkData.billing_address_needed,
+          shipping_address_needed: checkData.shipping_address_needed,
+          vat_needed: checkData.vat_needed,
+        },
+        { status: 400 }
+      );
     }
 
     // Create invoice

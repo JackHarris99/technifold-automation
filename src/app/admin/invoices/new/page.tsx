@@ -7,6 +7,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import AddressCollectionModal from '@/components/portals/AddressCollectionModal';
 
 interface Company {
   company_id: string;
@@ -48,6 +49,7 @@ export default function NewInvoicePage() {
   const [loadingContacts, setLoadingContacts] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showAddressModal, setShowAddressModal] = useState(false);
 
   // Product search state
   const [productSearch, setProductSearch] = useState('');
@@ -208,6 +210,22 @@ export default function NewInvoicePage() {
         throw new Error('Please add at least one product to the invoice');
       }
 
+      // Check if addresses and VAT are needed
+      console.log('[INVOICE] Checking if addresses needed for company:', selectedCompanyId);
+      const checkResponse = await fetch(`/api/companies/check-details-needed?company_id=${selectedCompanyId}`);
+      const checkData = await checkResponse.json();
+      console.log('[INVOICE] Check result:', checkData);
+
+      if (checkData.details_needed) {
+        console.log('[INVOICE] Addresses needed - showing modal');
+        // Show address collection modal
+        setShowAddressModal(true);
+        setLoading(false);
+        return;
+      }
+
+      console.log('[INVOICE] Addresses OK - proceeding with invoice creation');
+
       console.log('[INVOICE] Creating invoice with:', {
         company_id: selectedCompanyId,
         contact_id: selectedContactId,
@@ -246,6 +264,17 @@ export default function NewInvoicePage() {
     }
   };
 
+  const handleAddressSaved = async () => {
+    setShowAddressModal(false);
+    // Retry invoice creation after addresses are saved
+    setLoading(true);
+    await createInvoice();
+  };
+
+  const handleAddressCancel = () => {
+    setShowAddressModal(false);
+  };
+
   const selectedCompany = companies.find(c => c.company_id === selectedCompanyId);
   const selectedContact = contacts.find(c => c.contact_id === selectedContactId);
 
@@ -254,6 +283,17 @@ export default function NewInvoicePage() {
   return (
       <div className="min-h-screen bg-gray-50 p-8">
         <div className="max-w-4xl mx-auto">
+        {/* Address Collection Modal (shown when addresses are missing) */}
+        {showAddressModal && selectedCompany && (
+          <AddressCollectionModal
+            isOpen={showAddressModal}
+            onClose={handleAddressCancel}
+            companyId={selectedCompany.company_id}
+            companyName={selectedCompany.company_name}
+            onSuccess={handleAddressSaved}
+          />
+        )}
+
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">

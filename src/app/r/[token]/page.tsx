@@ -273,8 +273,8 @@ export default async function ReorderPortalPage({ params }: ReorderPortalProps) 
       .catch(err => console.error('[Reorder] Tracking failed:', err));
   }
 
-  // 6. Render portal
-  return <PortalPage payload={portalPayload} contact={contact} />;
+  // 6. Render portal with token for API authentication
+  return <PortalPage payload={portalPayload} contact={contact} token={token} />;
 }
 
 export async function generateMetadata({ params }: ReorderPortalProps) {

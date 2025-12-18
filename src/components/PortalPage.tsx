@@ -15,9 +15,10 @@ interface PortalPageProps {
     full_name: string;
     email: string;
   };
+  token: string; // HMAC token for API authentication
 }
 
-export function PortalPage({ payload, contact }: PortalPageProps) {
+export function PortalPage({ payload, contact, token }: PortalPageProps) {
   const [activeTab, setActiveTab] = useState<string>('reorder');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
@@ -225,6 +226,7 @@ export function PortalPage({ payload, contact }: PortalPageProps) {
         companyId={String(payload.company_id)}
         contactId={contact?.contact_id}
         onSuccess={handleInvoiceSuccess}
+        token={token}
       />
     </div>
   );
