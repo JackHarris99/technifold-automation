@@ -223,7 +223,7 @@ export function PortalPage({ payload, contact, token }: PortalPageProps) {
         isOpen={isInvoiceModalOpen}
         onClose={() => setIsInvoiceModalOpen(false)}
         cart={cart}
-        companyId={String(payload.company_id)}
+        companyId={payload.company_id}
         contactId={contact?.contact_id}
         onSuccess={handleInvoiceSuccess}
         token={token}

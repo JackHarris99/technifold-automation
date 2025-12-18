@@ -14,7 +14,7 @@ export type ToolTab = {
 };
 
 export type CompanyPayload = {
-  company_id: number;
+  company_id: string;
   company_name: string;
   reorder_items: ReorderItem[];
   by_tool_tabs: ToolTab[];
