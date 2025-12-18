@@ -89,6 +89,10 @@ export default function AddressCollectionModal({
     setIsSubmitting(true);
     setError(null);
 
+    console.log('[AddressCollection] Form submission started');
+    console.log('[AddressCollection] companyId:', companyId);
+    console.log('[AddressCollection] formData:', formData);
+
     try {
       // Validate VAT number for EU companies
       if (requiresVAT && formData.vat_number.trim()) {
