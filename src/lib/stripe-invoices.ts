@@ -77,12 +77,12 @@ function calculateVAT(subtotal: number, country: string, vatNumber: string | nul
         vat_exempt_reason: 'EU Reverse Charge'
       };
     } else {
-      // EU customer without VAT number - should collect VAT (or refuse sale)
-      console.warn(`EU customer in ${countryUpper} missing VAT number`);
+      // EU customer without VAT number - charge UK VAT as safeguard
+      console.warn(`EU customer in ${countryUpper} missing VAT number - charging UK VAT`);
       return {
-        vat_amount: 0,
-        vat_rate: 0,
-        vat_exempt_reason: 'EU Export - VAT to be collected'
+        vat_amount: subtotal * 0.20,
+        vat_rate: 0.20,
+        vat_exempt_reason: null
       };
     }
   }
