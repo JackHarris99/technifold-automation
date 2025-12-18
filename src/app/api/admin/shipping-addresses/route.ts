@@ -50,8 +50,10 @@ export async function POST(request: NextRequest) {
         country,
         is_default: is_default || false,
       })
-      .select()
-      .single();
+      .select();
+
+    // Extract first result (should only be one anyway)
+    const address = Array.isArray(data) && data.length > 0 ? data[0] : data;
 
     if (error) {
       console.error('[shipping-addresses] Supabase error:', error);
@@ -63,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      address: data,
+      address: address,
     });
   } catch (error) {
     console.error('[shipping-addresses] Exception:', error);

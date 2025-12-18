@@ -163,6 +163,19 @@ export function InvoiceRequestModal({
   // Calculate totals
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
+  // If showing address modal, render it standalone (not nested)
+  if (showAddressModal) {
+    return (
+      <AddressCollectionModal
+        isOpen={showAddressModal}
+        onClose={handleAddressCancel}
+        companyId={companyId}
+        companyName={companyName}
+        onSuccess={handleAddressSaved}
+      />
+    );
+  }
+
   return (
     <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -196,17 +209,6 @@ export function InvoiceRequestModal({
                 <div>{error}</div>
               </div>
             </div>
-          )}
-
-          {/* Address Collection Modal (shown when addresses are missing) */}
-          {showAddressModal && (
-            <AddressCollectionModal
-              isOpen={showAddressModal}
-              onClose={handleAddressCancel}
-              companyId={companyId}
-              companyName={companyName}
-              onSuccess={handleAddressSaved}
-            />
           )}
 
           {/* Invoice Created Success */}
