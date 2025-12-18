@@ -41,7 +41,7 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
 
   if (!companyTools || companyTools.length === 0) {
     return {
-      company_id: parseInt(companyId) || 0,
+      company_id: companyId,
       company_name: companyName,
       reorder_items: [],
       by_tool_tabs: []
@@ -171,7 +171,7 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
   }
 
   return {
-    company_id: parseInt(companyId) || 0,
+    company_id: companyId,
     company_name: companyName,
     reorder_items: reorderItems,
     by_tool_tabs: toolsWithConsumables as ToolTab[]
