@@ -1,0 +1,75 @@
+/**
+ * POST /api/admin/shipping-addresses
+ * Create or update shipping address for a company
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseClient } from '@/lib/supabase';
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const {
+      company_id,
+      address_line1,
+      address_line2,
+      city,
+      county,
+      postcode,
+      country,
+      is_default,
+    } = body;
+
+    if (!company_id || !address_line1 || !city || !postcode || !country) {
+      return NextResponse.json(
+        { error: 'company_id, address_line1, city, postcode, and country are required' },
+        { status: 400 }
+      );
+    }
+
+    const supabase = getSupabaseClient();
+
+    // If setting as default, un-default all other addresses for this company
+    if (is_default) {
+      await supabase
+        .from('shipping_addresses')
+        .update({ is_default: false })
+        .eq('company_id', company_id);
+    }
+
+    // Create new shipping address
+    const { data, error } = await supabase
+      .from('shipping_addresses')
+      .insert({
+        company_id,
+        address_line1,
+        address_line2: address_line2 || null,
+        city,
+        county: county || null,
+        postcode,
+        country,
+        is_default: is_default || false,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[shipping-addresses] Supabase error:', error);
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      address: data,
+    });
+  } catch (error) {
+    console.error('[shipping-addresses] Exception:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

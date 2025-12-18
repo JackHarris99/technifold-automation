@@ -8,7 +8,7 @@
 
 import { useState } from 'react';
 import { CartItem } from '@/types';
-import CompanyDetailsForm from './shared/CompanyDetailsForm';
+import AddressCollectionModal from './portals/AddressCollectionModal';
 
 interface InvoiceRequestModalProps {
   isOpen: boolean;
@@ -50,12 +50,8 @@ export function InvoiceRequestModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [invoiceResult, setInvoiceResult] = useState<InvoiceResult | null>(null);
-  const [showDetailsForm, setShowDetailsForm] = useState(false);
-  const [detailsNeeded, setDetailsNeeded] = useState<{
-    addressNeeded: boolean;
-    vatNeeded: boolean;
-    company: CompanyDetails;
-  } | null>(null);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [companyName, setCompanyName] = useState<string>('');
 
   if (!isOpen) return null;
 
@@ -69,13 +65,9 @@ export function InvoiceRequestModal({
       const checkData = await checkResponse.json();
 
       if (checkData.details_needed) {
-        // Show details form
-        setDetailsNeeded({
-          addressNeeded: checkData.address_needed,
-          vatNeeded: checkData.vat_needed,
-          company: checkData.company,
-        });
-        setShowDetailsForm(true);
+        // Show address collection modal
+        setCompanyName(checkData.company.company_name || 'Your Company');
+        setShowAddressModal(true);
         setLoading(false);
         return;
       }
@@ -124,22 +116,21 @@ export function InvoiceRequestModal({
     }
   };
 
-  const handleDetailsSaved = async () => {
-    setShowDetailsForm(false);
+  const handleAddressSaved = async () => {
+    setShowAddressModal(false);
     setLoading(true);
     await createInvoice();
   };
 
-  const handleDetailsCancel = () => {
-    setShowDetailsForm(false);
+  const handleAddressCancel = () => {
+    setShowAddressModal(false);
   };
 
   const handleClose = () => {
     if (!loading) {
       setInvoiceResult(null);
       setError(null);
-      setShowDetailsForm(false);
-      setDetailsNeeded(null);
+      setShowAddressModal(false);
       onClose();
     }
   };
@@ -199,17 +190,15 @@ export function InvoiceRequestModal({
             </div>
           )}
 
-          {/* Company Details Form */}
-          {showDetailsForm && detailsNeeded && (
-            <div className="mb-6">
-              <CompanyDetailsForm
-                company={detailsNeeded.company}
-                addressNeeded={detailsNeeded.addressNeeded}
-                vatNeeded={detailsNeeded.vatNeeded}
-                onSaved={handleDetailsSaved}
-                onCancel={handleDetailsCancel}
-              />
-            </div>
+          {/* Address Collection Modal (shown when addresses are missing) */}
+          {showAddressModal && (
+            <AddressCollectionModal
+              isOpen={showAddressModal}
+              onClose={handleAddressCancel}
+              companyId={companyId}
+              companyName={companyName}
+              onSuccess={handleAddressSaved}
+            />
           )}
 
           {/* Invoice Created Success */}

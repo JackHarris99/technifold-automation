@@ -141,3 +141,154 @@ export function validateVATNumberFormat(vatNumber: string, countryCode: string):
   // For countries not in the list, just check it has some length
   return numberPart.length >= 2 && numberPart.length <= 15;
 }
+
+/**
+ * VIES VAT Number Verification Result
+ */
+export interface VATVerificationResult {
+  valid: boolean;
+  countryCode?: string;
+  vatNumber?: string;
+  companyName?: string;
+  companyAddress?: string;
+  error?: string;
+  errorCode?: 'INVALID_INPUT' | 'SERVICE_UNAVAILABLE' | 'MS_UNAVAILABLE' | 'TIMEOUT' | 'INVALID_REQUESTER_INFO' | 'SERVER_BUSY' | 'UNKNOWN';
+}
+
+/**
+ * Verify EU VAT number using VIES (VAT Information Exchange System)
+ *
+ * @param countryCode - 2-letter EU country code (e.g., 'DE', 'FR')
+ * @param vatNumber - VAT number WITHOUT country prefix (e.g., '123456789')
+ * @returns Verification result with company details if valid
+ *
+ * @example
+ * const result = await verifyVATNumber('DE', '123456789');
+ * if (result.valid) {
+ *   console.log('Valid VAT for:', result.companyName);
+ * }
+ */
+export async function verifyVATNumber(
+  countryCode: string,
+  vatNumber: string
+): Promise<VATVerificationResult> {
+  try {
+    const country = countryCode.toUpperCase();
+    const vat = vatNumber.trim();
+
+    // Remove country prefix if present
+    const vatWithoutPrefix = vat.startsWith(country) ? vat.substring(2) : vat;
+
+    // Validate country is in EU
+    if (!isEUCountry(country)) {
+      return {
+        valid: false,
+        error: 'Country is not in the EU',
+        errorCode: 'INVALID_INPUT',
+      };
+    }
+
+    // Basic format validation first
+    if (!validateVATNumberFormat(country + vatWithoutPrefix, country)) {
+      return {
+        valid: false,
+        error: 'VAT number format is invalid',
+        errorCode: 'INVALID_INPUT',
+      };
+    }
+
+    // Call VIES API
+    const url = `https://ec.europa.eu/taxation_customs/vies/rest-api/ms/${country}/vat/${encodeURIComponent(vatWithoutPrefix)}`;
+
+    console.log(`[verifyVATNumber] Calling VIES API:`, { country, vat: vatWithoutPrefix });
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      // 10 second timeout
+      signal: AbortSignal.timeout(10000),
+    });
+
+    if (!response.ok) {
+      console.error(`[verifyVATNumber] VIES API error:`, response.status, response.statusText);
+
+      if (response.status === 400) {
+        return {
+          valid: false,
+          error: 'Invalid VAT number format',
+          errorCode: 'INVALID_INPUT',
+        };
+      }
+
+      if (response.status === 503) {
+        return {
+          valid: false,
+          error: 'VAT verification service temporarily unavailable',
+          errorCode: 'SERVICE_UNAVAILABLE',
+        };
+      }
+
+      return {
+        valid: false,
+        error: `VAT verification failed: ${response.statusText}`,
+        errorCode: 'UNKNOWN',
+      };
+    }
+
+    const data = await response.json();
+
+    console.log(`[verifyVATNumber] VIES response:`, data);
+
+    // VIES returns different structures depending on validity
+    // Valid: { isValid: true, name: "...", address: "..." }
+    // Invalid: { isValid: false }
+    // Error: { errorWrapperError: { error: "...", message: "..." } }
+
+    if (data.errorWrapperError) {
+      const errorMsg = data.errorWrapperError.message || data.errorWrapperError.error;
+      console.error(`[verifyVATNumber] VIES error:`, errorMsg);
+
+      return {
+        valid: false,
+        error: `VAT verification error: ${errorMsg}`,
+        errorCode: 'UNKNOWN',
+      };
+    }
+
+    if (data.isValid === true || data.valid === true) {
+      return {
+        valid: true,
+        countryCode: country,
+        vatNumber: vatWithoutPrefix,
+        companyName: data.name || data.companyName || undefined,
+        companyAddress: data.address || data.companyAddress || undefined,
+      };
+    }
+
+    return {
+      valid: false,
+      error: 'VAT number is not registered',
+      errorCode: 'INVALID_INPUT',
+    };
+
+  } catch (error: any) {
+    console.error('[verifyVATNumber] Exception:', error);
+
+    if (error.name === 'AbortError' || error.name === 'TimeoutError') {
+      return {
+        valid: false,
+        error: 'VAT verification timeout - service may be unavailable',
+        errorCode: 'TIMEOUT',
+      };
+    }
+
+    return {
+      valid: false,
+      error: `VAT verification failed: ${error.message}`,
+      errorCode: 'UNKNOWN',
+    };
+  }
+}

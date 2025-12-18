@@ -21,10 +21,21 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
-    // Get company details (VAT number)
+    // Get company details (including billing address and VAT number)
     const { data: company, error: companyError } = await supabase
       .from('companies')
-      .select('company_id, company_name, country, vat_number')
+      .select(`
+        company_id,
+        company_name,
+        country,
+        vat_number,
+        billing_address_line1,
+        billing_address_line2,
+        billing_city,
+        billing_county,
+        billing_postcode,
+        billing_country
+      `)
       .eq('company_id', companyId)
       .single();
 
@@ -38,41 +49,59 @@ export async function GET(request: NextRequest) {
     // Get default shipping address
     const { data: shippingAddress } = await supabase
       .from('shipping_addresses')
-      .select('address_line_1, address_line_2, city, state_province, postal_code, country')
+      .select('address_line1, address_line2, city, county, postcode, country')
       .eq('company_id', companyId)
       .eq('is_default', true)
       .single();
 
     // Check what's missing
-    const hasAddress = !!(
-      shippingAddress?.address_line_1 &&
+    const hasBillingAddress = !!(
+      company.billing_address_line1 &&
+      company.billing_city &&
+      company.billing_postcode &&
+      company.billing_country
+    );
+
+    const hasShippingAddress = !!(
+      shippingAddress?.address_line1 &&
       shippingAddress?.city &&
-      shippingAddress?.postal_code &&
+      shippingAddress?.postcode &&
       shippingAddress?.country
     );
 
-    const addressCountry = shippingAddress?.country || company.country || '';
-    const isEU = isEUCountry(addressCountry);
+    // Check if VAT number is needed (EU companies)
+    const billingCountry = company.billing_country || company.country || '';
+    const isEU = isEUCountry(billingCountry);
     const needsVAT = isEU && !company.vat_number;
 
-    // Details needed if address is incomplete OR VAT is needed
-    const detailsNeeded = !hasAddress || needsVAT;
+    // Details needed if EITHER billing address OR shipping address is incomplete OR VAT is needed
+    const detailsNeeded = !hasBillingAddress || !hasShippingAddress || needsVAT;
 
     return NextResponse.json({
       details_needed: detailsNeeded,
-      address_needed: !hasAddress,
+      billing_address_needed: !hasBillingAddress,
+      shipping_address_needed: !hasShippingAddress,
       vat_needed: needsVAT,
       company: {
         company_id: company.company_id,
         company_name: company.company_name,
-        address_line1: shippingAddress?.address_line_1 || '',
-        address_line2: shippingAddress?.address_line_2 || '',
-        city: shippingAddress?.city || '',
-        county: shippingAddress?.state_province || '',
-        postcode: shippingAddress?.postal_code || '',
-        country: shippingAddress?.country || company.country || '',
+        country: company.country || '',
         vat_number: company.vat_number || '',
+        billing_address_line1: company.billing_address_line1 || '',
+        billing_address_line2: company.billing_address_line2 || '',
+        billing_city: company.billing_city || '',
+        billing_county: company.billing_county || '',
+        billing_postcode: company.billing_postcode || '',
+        billing_country: company.billing_country || '',
       },
+      shipping_address: shippingAddress ? {
+        address_line1: shippingAddress.address_line1,
+        address_line2: shippingAddress.address_line2 || '',
+        city: shippingAddress.city,
+        county: shippingAddress.county || '',
+        postcode: shippingAddress.postcode,
+        country: shippingAddress.country,
+      } : null,
     });
 
   } catch (error) {
