@@ -68,8 +68,7 @@ export async function PATCH(
       .from('companies')
       .update(updateData)
       .eq('company_id', companyId)
-      .select()
-      .single();
+      .select();
 
     if (error) {
       console.error('[update-billing] Supabase error:', error);
@@ -79,9 +78,12 @@ export async function PATCH(
       );
     }
 
+    // Extract first result (should only be one company)
+    const company = Array.isArray(data) && data.length > 0 ? data[0] : data;
+
     return NextResponse.json({
       success: true,
-      company: data,
+      company: company,
     });
   } catch (error) {
     console.error('[update-billing] Exception:', error);
