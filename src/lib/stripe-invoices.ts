@@ -191,6 +191,37 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
         .eq('company_id', company_id);
     }
 
+    // Add customer VAT number to Stripe (if provided and not already added)
+    if (company.vat_number && company.vat_number.trim().length > 0) {
+      try {
+        // Check if customer already has tax IDs
+        const existingTaxIds = await getStripeClient().customers.listTaxIds(stripeCustomerId, { limit: 10 });
+        const hasVatNumber = existingTaxIds.data.some(taxId =>
+          taxId.value === company.vat_number && taxId.verification?.status !== 'unverified'
+        );
+
+        if (!hasVatNumber) {
+          // Determine tax ID type based on billing country
+          const billingCountry = (company.billing_country || company.country || 'GB').toUpperCase();
+          let taxIdType: 'eu_vat' | 'gb_vat' = 'gb_vat';
+
+          const euCountries = ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE'];
+          if (euCountries.includes(billingCountry)) {
+            taxIdType = 'eu_vat';
+          }
+
+          await getStripeClient().customers.createTaxId(stripeCustomerId, {
+            type: taxIdType,
+            value: company.vat_number,
+          });
+          console.log(`[stripe-invoices] Added ${taxIdType} tax ID to customer:`, company.vat_number);
+        }
+      } catch (error) {
+        // Don't fail invoice creation if tax ID fails - just log it
+        console.error('[stripe-invoices] Failed to add tax ID:', error);
+      }
+    }
+
     // 4. Create draft invoice (shipping address via shipping_details)
     const invoice = await getStripeClient().invoices.create({
       customer: stripeCustomerId,
