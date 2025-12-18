@@ -265,9 +265,7 @@ export function InvoiceRequestModal({
           ) : (
             // Request Invoice View
             <>
-              {!showDetailsForm && (
-                <>
-                  {/* Order Summary */}
+              {/* Order Summary */}
                   <div className="mb-6">
                     <h4 className="font-semibold text-gray-900 mb-3">Order Summary</h4>
                     <div className="space-y-2 max-h-64 overflow-y-auto">
@@ -350,8 +348,6 @@ export function InvoiceRequestModal({
                       )}
                     </button>
                   </div>
-                </>
-              )}
             </>
           )}
         </div>
