@@ -21,15 +21,38 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { vat_number, billing_address } = body;
+    const {
+      vat_number,
+      billing_address_line1,
+      billing_address_line2,
+      billing_city,
+      billing_county,
+      billing_postcode,
+      billing_country,
+    } = body;
 
     // Build update object with only provided fields
     const updateData: any = {};
     if (vat_number !== undefined) {
       updateData.vat_number = vat_number || null;
     }
-    if (billing_address !== undefined) {
-      updateData.billing_address = billing_address || null;
+    if (billing_address_line1 !== undefined) {
+      updateData.billing_address_line1 = billing_address_line1 || null;
+    }
+    if (billing_address_line2 !== undefined) {
+      updateData.billing_address_line2 = billing_address_line2 || null;
+    }
+    if (billing_city !== undefined) {
+      updateData.billing_city = billing_city || null;
+    }
+    if (billing_county !== undefined) {
+      updateData.billing_county = billing_county || null;
+    }
+    if (billing_postcode !== undefined) {
+      updateData.billing_postcode = billing_postcode || null;
+    }
+    if (billing_country !== undefined) {
+      updateData.billing_country = billing_country || null;
     }
 
     if (Object.keys(updateData).length === 0) {

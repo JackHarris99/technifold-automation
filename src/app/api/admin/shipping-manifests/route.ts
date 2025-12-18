@@ -73,6 +73,34 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
+    // If order_id provided, fetch quantities from invoice_items
+    let quantitiesMap: Record<string, number> = {};
+    if (order_id) {
+      // Try invoice_items first (new system)
+      const { data: invoiceItems } = await supabase
+        .from('invoice_items')
+        .select('product_code, quantity')
+        .eq('invoice_id', order_id);
+
+      if (invoiceItems && invoiceItems.length > 0) {
+        invoiceItems.forEach(item => {
+          quantitiesMap[item.product_code] = item.quantity;
+        });
+      } else {
+        // Fallback to order_items (legacy system)
+        const { data: orderItems } = await supabase
+          .from('order_items')
+          .select('product_code, quantity')
+          .eq('order_id', order_id);
+
+        if (orderItems) {
+          orderItems.forEach(item => {
+            quantitiesMap[item.product_code] = item.quantity;
+          });
+        }
+      }
+    }
+
     // Fetch product customs data
     const { data: products, error: productsError } = await supabase
       .from('products')
@@ -90,7 +118,7 @@ export async function POST(request: NextRequest) {
       hs_code: product.hs_code || '0000.00.00',
       country_of_origin: product.country_of_origin || 'GB',
       value_gbp: product.customs_value_gbp || 0,
-      quantity: 1, // TODO: Get actual quantity from order or input
+      quantity: quantitiesMap[product.product_code] || 1, // Use actual quantity from order, default to 1
       weight_kg: product.weight_kg || 0,
     }));
 

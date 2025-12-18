@@ -11,6 +11,7 @@ import AddContactModal from './modals/AddContactModal';
 import AddToolModal from './modals/AddToolModal';
 import AddSubscriptionToolModal from './modals/AddSubscriptionToolModal';
 import ManageAddressModal from './modals/ManageAddressModal';
+import EditBillingAddressModal from './modals/EditBillingAddressModal';
 
 interface CompanyDetailViewProps {
   company: any;
@@ -43,6 +44,7 @@ export default function CompanyDetailView({
   const [showAddSubToolModal, setShowAddSubToolModal] = useState(false);
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [editingAddress, setEditingAddress] = useState<any>(null);
+  const [showBillingAddressModal, setShowBillingAddressModal] = useState(false);
 
   const tabs = [
     { id: 'overview', label: 'Overview', count: null },
@@ -124,6 +126,7 @@ export default function CompanyDetailView({
               setEditingAddress(address);
               setShowAddressModal(true);
             }}
+            onEditBillingAddress={() => setShowBillingAddressModal(true)}
           />
         )}
 
@@ -182,6 +185,20 @@ export default function CompanyDetailView({
         companyName={company.company_name}
         existingAddress={editingAddress}
       />
+      <EditBillingAddressModal
+        isOpen={showBillingAddressModal}
+        onClose={() => setShowBillingAddressModal(false)}
+        companyId={company.company_id}
+        companyName={company.company_name}
+        currentBillingAddress={{
+          billing_address_line1: company.billing_address_line1,
+          billing_address_line2: company.billing_address_line2,
+          billing_city: company.billing_city,
+          billing_county: company.billing_county,
+          billing_postcode: company.billing_postcode,
+          billing_country: company.billing_country,
+        }}
+      />
     </div>
   );
 }
@@ -193,7 +210,8 @@ function OverviewTab({
   shippingAddresses,
   onAddContact,
   onAddAddress,
-  onEditAddress
+  onEditAddress,
+  onEditBillingAddress
 }: {
   company: any;
   contacts: any[];
@@ -201,6 +219,7 @@ function OverviewTab({
   onAddContact: () => void;
   onAddAddress: () => void;
   onEditAddress: (address: any) => void;
+  onEditBillingAddress: () => void;
 }) {
   const defaultAddress = shippingAddresses.find(addr => addr.is_default);
 
@@ -229,33 +248,20 @@ function OverviewTab({
     }
   }
 
-  async function handleUpdateBillingAddress() {
-    const newAddress = prompt(
-      'Enter billing address (use Enter for new lines):',
-      company.billing_address || ''
-    );
-    if (newAddress === null) return; // User cancelled
+  // Format billing address for display
+  const formatBillingAddress = () => {
+    const parts = [
+      company.billing_address_line1,
+      company.billing_address_line2,
+      company.billing_city,
+      company.billing_county,
+      company.billing_postcode,
+      company.billing_country,
+    ].filter(Boolean);
+    return parts.join(', ');
+  };
 
-    try {
-      const response = await fetch(`/api/admin/companies/${company.company_id}/update-billing`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ billing_address: newAddress }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to update billing address');
-      }
-
-      alert('Billing address updated successfully! Refresh the page to see changes.');
-      window.location.reload();
-    } catch (error: any) {
-      console.error('[UpdateBillingAddress] Error:', error);
-      alert(`Failed to update billing address: ${error.message}`);
-    }
-  }
+  const hasBillingAddress = company.billing_address_line1 || company.billing_city || company.billing_postcode;
 
   return (
     <div className="space-y-6">
@@ -295,14 +301,20 @@ function OverviewTab({
             <div className="border-t pt-3">
               <dt className="text-sm text-gray-500 mb-1">Billing Address</dt>
               <dd className="text-sm">
-                {company.billing_address ? (
-                  <div className="text-gray-700 whitespace-pre-line">{company.billing_address}</div>
+                {hasBillingAddress ? (
+                  <div className="text-gray-700">
+                    {company.billing_address_line1 && <div>{company.billing_address_line1}</div>}
+                    {company.billing_address_line2 && <div>{company.billing_address_line2}</div>}
+                    {company.billing_city && <div>{company.billing_city}{company.billing_county ? `, ${company.billing_county}` : ''}</div>}
+                    {company.billing_postcode && <div>{company.billing_postcode}</div>}
+                    {company.billing_country && <div className="font-medium">{company.billing_country}</div>}
+                  </div>
                 ) : (
                   <span className="text-gray-400 italic">Not set - click to add</span>
                 )}
               </dd>
               <button
-                onClick={handleUpdateBillingAddress}
+                onClick={onEditBillingAddress}
                 className="text-xs text-blue-600 hover:text-blue-800 font-medium mt-1"
               >
                 Edit Billing Address
