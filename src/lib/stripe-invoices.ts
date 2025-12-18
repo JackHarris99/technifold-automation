@@ -191,24 +191,15 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
         .eq('company_id', company_id);
     }
 
-    // 4. Create draft invoice first (with billing and shipping addresses)
+    // 4. Create draft invoice (shipping address via shipping_details)
     const invoice = await getStripeClient().invoices.create({
       customer: stripeCustomerId,
       collection_method: 'send_invoice',
       days_until_due: 0, // Due on receipt
       auto_advance: false, // We'll finalize manually after adding items
       description: notes || undefined,
-      // Billing address on invoice
-      customer_address: company.billing_address_line_1 ? {
-        line1: company.billing_address_line_1,
-        line2: company.billing_address_line_2 || undefined,
-        city: company.billing_city || undefined,
-        state: company.billing_state_province || undefined,
-        postal_code: company.billing_postal_code || undefined,
-        country: company.billing_country || undefined,
-      } : undefined,
-      // Shipping address on invoice
-      customer_shipping: shippingAddress ? {
+      // Shipping address (billing address comes from Customer object)
+      shipping_details: shippingAddress ? {
         name: company.company_name,
         address: {
           line1: shippingAddress.address_line_1,
