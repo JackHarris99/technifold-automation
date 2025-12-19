@@ -1,6 +1,6 @@
 /**
  * Interactive Invoice Builder
- * Live pricing preview with tiered calculations, tax, and shipping
+ * Premium design with live pricing preview
  */
 
 'use client';
@@ -365,9 +365,9 @@ export default function NewInvoicePage() {
   const selectedContact = contacts.find(c => c.contact_id === selectedContactId);
 
   return (
-      <div className="min-h-screen bg-gray-50 p-8">
-        <div className="max-w-6xl mx-auto">
-        {/* Address Collection Modal (shown when addresses are missing) */}
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 p-6 md:p-10">
+        <div className="max-w-7xl mx-auto">
+        {/* Address Collection Modal */}
         {showAddressModal && selectedCompany && (
           <AddressCollectionModal
             isOpen={showAddressModal}
@@ -379,443 +379,503 @@ export default function NewInvoicePage() {
         )}
 
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Interactive Invoice Builder
+        <div className="mb-8">
+          <h1 className="text-4xl font-semibold text-slate-900 mb-2 tracking-tight">
+            Invoice Builder
           </h1>
-          <p className="text-sm text-gray-600">
-            Live pricing preview with tiered calculations, tax, and shipping
+          <p className="text-slate-600 text-lg">
+            Create professional invoices with intelligent pricing
           </p>
         </div>
 
-        {/* Company Search */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Step 1: Search Company
-          </h2>
-          {loadingCompanies ? (
-            <div className="text-gray-500">Loading companies...</div>
-          ) : (
-            <div className="relative">
-              <input
-                type="text"
-                value={companySearch}
-                onChange={(e) => {
-                  setCompanySearch(e.target.value);
-                  setShowCompanyDropdown(true);
-                  if (!e.target.value) {
-                    setSelectedCompanyId('');
-                  }
-                }}
-                onFocus={() => setShowCompanyDropdown(true)}
-                placeholder="Type company name or ID..."
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-              />
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Company & Contact */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Company Search */}
+            <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-sm border border-slate-200/50 p-6 transition-all hover:shadow-md">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                  <span className="text-blue-600 font-semibold text-sm">1</span>
+                </div>
+                <h2 className="text-lg font-semibold text-slate-900">Company</h2>
+              </div>
 
-              {/* Company Dropdown */}
-              {showCompanyDropdown && filteredCompanies.length > 0 && (
-                <div className="absolute z-50 w-full mt-1 bg-white border-2 border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto">
-                  {filteredCompanies.map((company) => (
-                    <button
-                      key={company.company_id}
-                      onClick={() => selectCompany(company)}
-                      className="w-full px-4 py-3 text-left hover:bg-blue-50 border-b border-gray-100 last:border-b-0"
-                    >
-                      <div className="font-semibold text-gray-900">{company.company_name}</div>
-                      <div className="text-sm text-gray-600">
-                        {company.company_id} • {company.country || 'Unknown'}
-                        {company.vat_number && ` • VAT: ${company.vat_number}`}
-                      </div>
-                    </button>
-                  ))}
+              {loadingCompanies ? (
+                <div className="text-slate-500 text-sm">Loading...</div>
+              ) : (
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={companySearch}
+                    onChange={(e) => {
+                      setCompanySearch(e.target.value);
+                      setShowCompanyDropdown(true);
+                      if (!e.target.value) {
+                        setSelectedCompanyId('');
+                      }
+                    }}
+                    onFocus={() => setShowCompanyDropdown(true)}
+                    placeholder="Search company..."
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-900 transition-all"
+                  />
+
+                  {showCompanyDropdown && filteredCompanies.length > 0 && (
+                    <div className="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-xl shadow-lg max-h-64 overflow-y-auto">
+                      {filteredCompanies.map((company) => (
+                        <button
+                          key={company.company_id}
+                          onClick={() => selectCompany(company)}
+                          className="w-full px-4 py-3 text-left hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-b-0"
+                        >
+                          <div className="font-medium text-slate-900">{company.company_name}</div>
+                          <div className="text-xs text-slate-500 mt-0.5">
+                            {company.company_id} • {company.country || 'Unknown'}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {selectedCompany && (
+                <div className="mt-4 p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200/50">
+                  <div className="text-xs font-medium text-green-700 mb-2">Selected</div>
+                  <div className="text-sm text-slate-700 space-y-1">
+                    <div className="font-medium text-slate-900">{selectedCompany.company_name}</div>
+                    <div className="text-xs text-slate-600">{selectedCompany.country || 'GB'}</div>
+                  </div>
                 </div>
               )}
             </div>
-          )}
 
-          {selectedCompany && (
-            <div className="mt-4 p-4 bg-green-50 border-2 border-green-500 rounded-lg">
-              <div className="text-sm">
-                <div className="font-semibold text-green-900 mb-2">✓ Company Selected</div>
-                <div><strong>Company:</strong> {selectedCompany.company_name}</div>
-                <div><strong>ID:</strong> {selectedCompany.company_id}</div>
-                <div><strong>Country:</strong> {selectedCompany.country || 'GB'}</div>
-                <div><strong>VAT Number:</strong> {selectedCompany.vat_number || 'None'}</div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Contact Selection */}
-        {selectedCompanyId && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Step 2: Select Contact
-            </h2>
-            {loadingContacts ? (
-              <div className="text-gray-500">Loading contacts...</div>
-            ) : contacts.length === 0 ? (
-              <div className="text-yellow-600">No contacts found for this company</div>
-            ) : (
-              <>
-                <select
-                  value={selectedContactId}
-                  onChange={(e) => setSelectedContactId(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-                >
-                  {contacts.map((contact) => (
-                    <option key={contact.contact_id} value={contact.contact_id}>
-                      {contact.full_name} ({contact.email})
-                    </option>
-                  ))}
-                </select>
-
-                {selectedContact && (
-                  <div className="mt-4 p-4 bg-green-50 border-2 border-green-500 rounded-lg">
-                    <div className="text-sm">
-                      <div className="font-semibold text-green-900 mb-2">✓ Contact Selected</div>
-                      <div><strong>Name:</strong> {selectedContact.full_name}</div>
-                      <div><strong>Email:</strong> {selectedContact.email}</div>
-                    </div>
+            {/* Contact Selection */}
+            {selectedCompanyId && (
+              <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-sm border border-slate-200/50 p-6 transition-all hover:shadow-md">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
+                    <span className="text-purple-600 font-semibold text-sm">2</span>
                   </div>
-                )}
-              </>
-            )}
-          </div>
-        )}
+                  <h2 className="text-lg font-semibold text-slate-900">Contact</h2>
+                </div>
 
-        {/* Product Search & Add */}
-        {selectedCompanyId && selectedContactId && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Step 3: Add Products
-            </h2>
-
-            <div className="relative mb-6">
-              <input
-                type="text"
-                value={productSearch}
-                onChange={(e) => {
-                  setProductSearch(e.target.value);
-                  setShowProductDropdown(true);
-                }}
-                onFocus={() => setShowProductDropdown(true)}
-                placeholder="Type product code or description..."
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-              />
-
-              {/* Product Dropdown */}
-              {showProductDropdown && productSuggestions.length > 0 && (
-                <div className="absolute z-50 w-full mt-1 bg-white border-2 border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto">
-                  {productSuggestions.map((product, index) => (
-                    <button
-                      key={index}
-                      onClick={() => addProductToInvoice(product)}
-                      className="w-full px-4 py-3 text-left hover:bg-blue-50 border-b border-gray-100 last:border-b-0"
-                      disabled={!product.price || product.price === 0}
+                {loadingContacts ? (
+                  <div className="text-slate-500 text-sm">Loading...</div>
+                ) : contacts.length === 0 ? (
+                  <div className="text-amber-600 text-sm">No contacts found</div>
+                ) : (
+                  <>
+                    <select
+                      value={selectedContactId}
+                      onChange={(e) => setSelectedContactId(e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-slate-900 transition-all"
                     >
-                      <div className="flex items-center gap-3">
-                        {product.image_url && (
-                          <div className="w-12 h-12 relative flex-shrink-0 bg-gray-100 rounded">
-                            <Image
-                              src={product.image_url}
-                              alt={product.product_code}
-                              fill
-                              className="object-contain rounded"
-                            />
-                          </div>
-                        )}
-                        <div className="flex-1">
-                          <div className="font-semibold text-gray-900">{product.product_code}</div>
-                          <div className="text-sm text-gray-600">{product.description}</div>
-                          <div className={`text-sm font-semibold ${product.price ? 'text-green-600' : 'text-red-600'}`}>
-                            {product.price
-                              ? `${(product.currency || 'GBP').toUpperCase()} ${product.price.toFixed(2)}`
-                              : 'Price not set - cannot add'}
-                          </div>
+                      {contacts.map((contact) => (
+                        <option key={contact.contact_id} value={contact.contact_id}>
+                          {contact.full_name}
+                        </option>
+                      ))}
+                    </select>
+
+                    {selectedContact && (
+                      <div className="mt-4 p-4 bg-gradient-to-br from-purple-50 to-fuchsia-50 rounded-xl border border-purple-200/50">
+                        <div className="text-xs font-medium text-purple-700 mb-2">Recipient</div>
+                        <div className="text-sm text-slate-700">
+                          <div className="font-medium text-slate-900">{selectedContact.full_name}</div>
+                          <div className="text-xs text-slate-600 mt-0.5">{selectedContact.email}</div>
                         </div>
                       </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Live Invoice Preview */}
-            {invoiceItems.length > 0 && (
-              <div className="border-2 border-blue-200 rounded-lg overflow-hidden bg-blue-50">
-                {loadingPreview && (
-                  <div className="p-4 bg-blue-100 text-blue-700 text-center">
-                    Calculating prices...
-                  </div>
-                )}
-
-                {previewError && (
-                  <div className="p-4 bg-red-100 text-red-700">
-                    Preview Error: {previewError}
-                  </div>
-                )}
-
-                {preview && (
-                  <>
-                    {/* Validation Errors */}
-                    {preview.validation_errors.length > 0 && (
-                      <div className="p-4 bg-yellow-100 border-b-2 border-yellow-300">
-                        <div className="font-semibold text-yellow-900 mb-2">⚠️ Validation Warnings</div>
-                        {preview.validation_errors.map((error, idx) => (
-                          <div key={idx} className="text-sm text-yellow-800">{error}</div>
-                        ))}
-                      </div>
                     )}
+                  </>
+                )}
+              </div>
+            )}
 
-                    {/* Line Items */}
-                    <table className="w-full bg-white">
-                      <thead className="bg-gray-100">
+            {/* Preview Summary (Sticky) */}
+            {preview && (
+              <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-lg border border-slate-700 p-6 text-white sticky top-6">
+                <div className="text-xs font-medium text-slate-400 mb-3">Invoice Summary</div>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center pb-3 border-b border-slate-700">
+                    <span className="text-sm text-slate-300">Subtotal</span>
+                    <span className="font-semibold">£{preview.subtotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-slate-300">Shipping</span>
+                    <span className="font-medium">£{preview.shipping.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-3 border-b border-slate-700">
+                    <span className="text-sm text-slate-300">
+                      VAT ({(preview.vat_rate * 100).toFixed(0)}%)
+                    </span>
+                    <span className="font-medium">£{preview.vat_amount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center pt-2">
+                    <span className="text-lg font-semibold">Total</span>
+                    <span className="text-2xl font-bold">£{preview.total.toFixed(2)}</span>
+                  </div>
+                  {preview.total_savings > 0 && (
+                    <div className="mt-3 p-3 bg-green-500/20 rounded-lg border border-green-500/30">
+                      <div className="text-xs text-green-300 mb-1">Total Savings</div>
+                      <div className="text-lg font-bold text-green-400">£{preview.total_savings.toFixed(2)}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column - Products & Invoice */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Product Search */}
+            {selectedCompanyId && selectedContactId && (
+              <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-sm border border-slate-200/50 p-6 transition-all hover:shadow-md">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <span className="text-emerald-600 font-semibold text-sm">3</span>
+                  </div>
+                  <h2 className="text-lg font-semibold text-slate-900">Add Products</h2>
+                </div>
+
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={productSearch}
+                    onChange={(e) => {
+                      setProductSearch(e.target.value);
+                      setShowProductDropdown(true);
+                    }}
+                    onFocus={() => setShowProductDropdown(true)}
+                    placeholder="Search products..."
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-slate-900 transition-all"
+                  />
+
+                  {showProductDropdown && productSuggestions.length > 0 && (
+                    <div className="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-xl shadow-lg max-h-80 overflow-y-auto">
+                      {productSuggestions.map((product, index) => (
+                        <button
+                          key={index}
+                          onClick={() => addProductToInvoice(product)}
+                          className="w-full px-4 py-3 text-left hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-b-0"
+                          disabled={!product.price || product.price === 0}
+                        >
+                          <div className="flex items-center gap-4">
+                            {product.image_url ? (
+                              <div className="w-14 h-14 relative flex-shrink-0 bg-slate-100 rounded-lg overflow-hidden">
+                                <Image
+                                  src={product.image_url}
+                                  alt={product.product_code}
+                                  fill
+                                  className="object-contain p-1"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-14 h-14 flex-shrink-0 bg-slate-100 rounded-lg flex items-center justify-center">
+                                <span className="text-slate-400 text-xs">No image</span>
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-slate-900 truncate">{product.product_code}</div>
+                              <div className="text-sm text-slate-600 truncate">{product.description}</div>
+                              <div className={`text-sm font-semibold mt-1 ${product.price ? 'text-emerald-600' : 'text-red-600'}`}>
+                                {product.price
+                                  ? `£${product.price.toFixed(2)}`
+                                  : 'Price not set'}
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Invoice Preview */}
+            {invoiceItems.length > 0 && (
+              <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-sm border border-slate-200/50 overflow-hidden transition-all hover:shadow-md">
+                {/* Validation Warnings */}
+                {preview?.validation_errors && preview.validation_errors.length > 0 && (
+                  <div className="p-4 bg-amber-50 border-b border-amber-200">
+                    <div className="font-medium text-amber-900 text-sm mb-2">Validation Warnings</div>
+                    {preview.validation_errors.map((error, idx) => (
+                      <div key={idx} className="text-sm text-amber-700">{error}</div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Line Items Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200">
+                        <th className="text-left py-4 px-6 text-xs font-semibold text-slate-600 uppercase tracking-wider">Product</th>
+                        <th className="text-center py-4 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Qty</th>
+                        <th className="text-right py-4 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Price</th>
+                        <th className="text-right py-4 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Total</th>
+                        <th className="w-12"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {loadingPreview ? (
+                        // Skeleton loader - maintains height
+                        invoiceItems.map((_, index) => (
+                          <tr key={index} className="animate-pulse">
+                            <td className="py-4 px-6">
+                              <div className="flex items-center gap-4">
+                                <div className="w-16 h-16 bg-slate-200 rounded-lg"></div>
+                                <div className="flex-1">
+                                  <div className="h-4 bg-slate-200 rounded w-32 mb-2"></div>
+                                  <div className="h-3 bg-slate-200 rounded w-48"></div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-4 px-4 text-center">
+                              <div className="h-9 w-16 bg-slate-200 rounded-lg mx-auto"></div>
+                            </td>
+                            <td className="py-4 px-4 text-right">
+                              <div className="h-4 bg-slate-200 rounded w-16 ml-auto"></div>
+                            </td>
+                            <td className="py-4 px-4 text-right">
+                              <div className="h-4 bg-slate-200 rounded w-20 ml-auto"></div>
+                            </td>
+                            <td className="py-4 px-4"></td>
+                          </tr>
+                        ))
+                      ) : previewError ? (
                         <tr>
-                          <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Product</th>
-                          <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Qty</th>
-                          <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Base Price</th>
-                          <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Unit Price</th>
-                          <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Total</th>
-                          <th className="w-16"></th>
+                          <td colSpan={5} className="py-8 px-6 text-center text-red-600">
+                            Preview Error: {previewError}
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {preview.line_items.map((item, index) => {
+                      ) : preview ? (
+                        preview.line_items.map((item, index) => {
                           const invoiceItem = invoiceItems.find(i => i.product_code === item.product_code);
                           const invoiceItemIndex = invoiceItems.findIndex(i => i.product_code === item.product_code);
 
                           return (
-                            <tr key={index} className="border-t border-gray-200">
-                              <td className="py-3 px-4">
-                                <div className="flex items-center gap-3">
-                                  {item.image_url && (
-                                    <div className="w-16 h-16 relative flex-shrink-0 bg-gray-100 rounded">
+                            <tr key={index} className="group hover:bg-slate-50 transition-colors">
+                              <td className="py-4 px-6">
+                                <div className="flex items-center gap-4">
+                                  {item.image_url ? (
+                                    <div className="w-16 h-16 relative flex-shrink-0 bg-slate-100 rounded-lg overflow-hidden">
                                       <Image
                                         src={item.image_url}
                                         alt={item.product_code}
                                         fill
-                                        className="object-contain rounded"
+                                        className="object-contain p-1"
                                       />
                                     </div>
+                                  ) : (
+                                    <div className="w-16 h-16 flex-shrink-0 bg-slate-100 rounded-lg flex items-center justify-center">
+                                      <span className="text-slate-400 text-xs">No image</span>
+                                    </div>
                                   )}
-                                  <div>
-                                    <div className="font-mono text-sm font-semibold text-gray-900">{item.product_code}</div>
-                                    <div className="text-sm text-gray-600">{item.description}</div>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="font-mono text-sm font-semibold text-slate-900">{item.product_code}</div>
+                                    <div className="text-sm text-slate-600 mt-0.5">{item.description}</div>
                                     {item.discount_applied && (
-                                      <div className="inline-block mt-1 px-2 py-1 bg-green-100 text-green-800 text-xs rounded font-semibold">
+                                      <div className="inline-flex items-center mt-2 px-2 py-1 bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-700 text-xs rounded-full font-medium">
+                                        <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                        </svg>
                                         {item.discount_applied}
                                       </div>
                                     )}
                                   </div>
                                 </div>
                               </td>
-                              <td className="py-3 px-4 text-center">
+                              <td className="py-4 px-4 text-center">
                                 <input
                                   type="number"
                                   value={invoiceItem?.quantity || 1}
                                   onChange={(e) => updateItemQuantity(invoiceItemIndex, parseInt(e.target.value) || 1)}
                                   min="1"
-                                  className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-gray-900"
+                                  className="w-16 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-center text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                 />
                               </td>
-                              <td className="py-3 px-4 text-right">
-                                {item.base_price !== item.unit_price && (
-                                  <span className="text-sm text-gray-400 line-through">
-                                    £{item.base_price.toFixed(2)}
-                                  </span>
-                                )}
-                                {item.base_price === item.unit_price && (
-                                  <span className="text-sm text-gray-600">
-                                    £{item.base_price.toFixed(2)}
-                                  </span>
-                                )}
+                              <td className="py-4 px-4 text-right">
+                                <div className="space-y-1">
+                                  {item.base_price !== item.unit_price && (
+                                    <div className="text-xs text-slate-400 line-through">
+                                      £{item.base_price.toFixed(2)}
+                                    </div>
+                                  )}
+                                  <div className="text-sm font-semibold text-slate-900">
+                                    £{item.unit_price.toFixed(2)}
+                                  </div>
+                                </div>
                               </td>
-                              <td className="py-3 px-4 text-right">
-                                <span className="text-sm font-semibold text-gray-900">
-                                  £{item.unit_price.toFixed(2)}
-                                </span>
+                              <td className="py-4 px-4 text-right">
+                                <div className="text-base font-bold text-slate-900">
+                                  £{item.line_total.toFixed(2)}
+                                </div>
                               </td>
-                              <td className="py-3 px-4 text-sm font-bold text-gray-900 text-right">
-                                £{item.line_total.toFixed(2)}
-                              </td>
-                              <td className="py-3 px-4 text-center">
+                              <td className="py-4 px-4 text-center">
                                 <button
                                   onClick={() => removeItem(invoiceItemIndex)}
-                                  className="text-red-600 hover:text-red-800 font-semibold text-xl"
+                                  className="text-slate-400 hover:text-red-600 transition-colors p-1"
                                 >
-                                  ×
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
                                 </button>
                               </td>
                             </tr>
                           );
-                        })}
+                        })
+                      ) : null}
 
-                        {/* Subtotal */}
-                        <tr className="border-t-2 border-gray-300 bg-gray-50">
-                          <td colSpan={4} className="py-3 px-4 text-sm font-bold text-gray-900 text-right">
-                            Subtotal:
-                          </td>
-                          <td className="py-3 px-4 text-sm font-bold text-gray-900 text-right">
-                            £{preview.subtotal.toFixed(2)}
-                          </td>
-                          <td></td>
-                        </tr>
-
-                        {/* Shipping */}
-                        <tr className="bg-gray-50">
-                          <td colSpan={4} className="py-2 px-4 text-sm text-gray-700 text-right">
-                            Shipping to {preview.company.destination_country}:
-                          </td>
-                          <td className="py-2 px-4 text-sm text-gray-900 text-right">
-                            £{preview.shipping.toFixed(2)}
-                          </td>
-                          <td></td>
-                        </tr>
-
-                        {/* VAT */}
-                        <tr className="bg-gray-50">
-                          <td colSpan={4} className="py-2 px-4 text-sm text-gray-700 text-right">
-                            VAT ({(preview.vat_rate * 100).toFixed(0)}%)
-                            {preview.vat_exempt_reason && (
-                              <span className="ml-2 text-xs text-green-600">
-                                ({preview.vat_exempt_reason})
-                              </span>
-                            )}:
-                          </td>
-                          <td className="py-2 px-4 text-sm text-gray-900 text-right">
-                            £{preview.vat_amount.toFixed(2)}
-                          </td>
-                          <td></td>
-                        </tr>
-
-                        {/* Total */}
-                        <tr className="border-t-2 border-gray-400 bg-blue-50">
-                          <td colSpan={4} className="py-4 px-4 text-lg font-bold text-gray-900 text-right">
-                            TOTAL:
-                          </td>
-                          <td className="py-4 px-4 text-lg font-bold text-blue-900 text-right">
-                            £{preview.total.toFixed(2)}
-                          </td>
-                          <td></td>
-                        </tr>
-
-                        {/* Savings */}
-                        {preview.total_savings > 0 && (
-                          <tr className="bg-green-50">
-                            <td colSpan={4} className="py-2 px-4 text-sm font-semibold text-green-700 text-right">
-                              Total Savings:
+                      {/* Totals */}
+                      {preview && !loadingPreview && (
+                        <>
+                          <tr className="bg-slate-50">
+                            <td colSpan={3} className="py-3 px-6 text-sm font-semibold text-slate-700 text-right">
+                              Subtotal
                             </td>
-                            <td className="py-2 px-4 text-sm font-bold text-green-700 text-right">
-                              -£{preview.total_savings.toFixed(2)}
+                            <td className="py-3 px-4 text-base font-bold text-slate-900 text-right">
+                              £{preview.subtotal.toFixed(2)}
                             </td>
                             <td></td>
                           </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </>
+                          <tr className="bg-slate-50">
+                            <td colSpan={3} className="py-2 px-6 text-sm text-slate-600 text-right">
+                              Shipping to {preview.company.destination_country}
+                            </td>
+                            <td className="py-2 px-4 text-sm font-medium text-slate-900 text-right">
+                              £{preview.shipping.toFixed(2)}
+                            </td>
+                            <td></td>
+                          </tr>
+                          <tr className="bg-slate-50">
+                            <td colSpan={3} className="py-2 px-6 text-sm text-slate-600 text-right">
+                              VAT ({(preview.vat_rate * 100).toFixed(0)}%)
+                              {preview.vat_exempt_reason && (
+                                <span className="ml-2 text-xs text-emerald-600">
+                                  ({preview.vat_exempt_reason})
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-2 px-4 text-sm font-medium text-slate-900 text-right">
+                              £{preview.vat_amount.toFixed(2)}
+                            </td>
+                            <td></td>
+                          </tr>
+                          <tr className="bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+                            <td colSpan={3} className="py-4 px-6 text-lg font-bold text-right">
+                              Total
+                            </td>
+                            <td className="py-4 px-4 text-2xl font-bold text-right">
+                              £{preview.total.toFixed(2)}
+                            </td>
+                            <td></td>
+                          </tr>
+                        </>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {invoiceItems.length === 0 && selectedCompanyId && selectedContactId && (
+              <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-sm border border-slate-200/50 p-12 text-center">
+                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                  </svg>
+                </div>
+                <div className="text-slate-600">
+                  Search and add products to begin
+                </div>
+              </div>
+            )}
+
+            {/* Send Invoice Button */}
+            {preview && !loadingPreview && (
+              <button
+                onClick={createInvoice}
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-5 rounded-2xl font-semibold text-lg shadow-lg shadow-blue-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none hover:shadow-xl hover:shadow-blue-500/40"
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-3">
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Creating Invoice...
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    Send Invoice to {selectedContact?.email}
+                  </span>
                 )}
-              </div>
-            )}
-
-            {invoiceItems.length === 0 && (
-              <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-                No products added yet. Search and add products above.
-              </div>
+              </button>
             )}
           </div>
-        )}
-
-        {/* Create Invoice Button */}
-        {selectedCompanyId && selectedContactId && invoiceItems.length > 0 && preview && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-            <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="text-sm text-blue-900 font-semibold mb-2">Invoice Preview Summary</div>
-              <div className="text-sm text-blue-800">
-                <div>Company: {preview.company.company_name}</div>
-                <div>Destination: {preview.company.destination_country}</div>
-                <div>Items: {preview.line_items.length} product(s), {preview.line_items.reduce((sum, item) => sum + item.quantity, 0)} units</div>
-                <div className="font-bold mt-2">Total Amount: £{preview.total.toFixed(2)}</div>
-              </div>
-            </div>
-
-            <button
-              onClick={createInvoice}
-              disabled={loading || loadingPreview}
-              className="w-full bg-green-600 text-white px-6 py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Creating Invoice...' : '✉️ Send Invoice to Customer'}
-            </button>
-            <p className="text-xs text-gray-500 text-center mt-2">
-              This will create a Stripe invoice for £{preview.total.toFixed(2)} and send email to {selectedContact?.email}
-            </p>
-          </div>
-        )}
+        </div>
 
         {/* Error Display */}
         {error && (
-          <div className="bg-red-50 border-2 border-red-500 rounded-lg p-6 mb-6">
-            <h3 className="text-lg font-bold text-red-900 mb-2">❌ Error</h3>
-            <p className="text-red-800 font-mono text-sm">{error}</p>
+          <div className="mt-6 bg-red-50 border border-red-200 rounded-2xl p-6">
+            <div className="flex items-start gap-3">
+              <svg className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <h3 className="text-lg font-semibold text-red-900">Error</h3>
+                <p className="text-red-700 mt-1 font-mono text-sm">{error}</p>
+              </div>
+            </div>
           </div>
         )}
 
         {/* Success Display */}
         {result && (
-          <div className="bg-green-50 border-2 border-green-500 rounded-lg p-6 mb-6">
-            <h3 className="text-lg font-bold text-green-900 mb-4">✅ Invoice Created Successfully!</h3>
-
-            <div className="space-y-3">
-              <div className="bg-white rounded-lg p-4">
-                <div className="text-sm font-semibold text-gray-700 mb-2">Order ID</div>
-                <div className="font-mono text-xs text-gray-900">{result.order_id || 'N/A'}</div>
+          <div className="mt-6 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-8">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
               </div>
-
-              <div className="bg-white rounded-lg p-4">
-                <div className="text-sm font-semibold text-gray-700 mb-2">Stripe Invoice ID</div>
-                <div className="font-mono text-xs text-gray-900">{result.invoice_id || 'N/A'}</div>
+              <div>
+                <h3 className="text-2xl font-bold text-green-900">Invoice Created Successfully!</h3>
+                <p className="text-green-700 mt-1">The invoice has been sent to {selectedContact?.email}</p>
               </div>
-
-              {result.invoice_url && (
-                <div className="bg-white rounded-lg p-4">
-                  <div className="text-sm font-semibold text-gray-700 mb-2">Customer Payment Page</div>
-                  <a
-                    href={result.invoice_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-700 underline text-sm break-all"
-                  >
-                    {result.invoice_url}
-                  </a>
-                </div>
-              )}
-
-              {result.invoice_pdf_url && (
-                <div className="bg-white rounded-lg p-4">
-                  <div className="text-sm font-semibold text-gray-700 mb-2">Invoice PDF</div>
-                  <a
-                    href={result.invoice_pdf_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-700 underline text-sm break-all"
-                  >
-                    {result.invoice_pdf_url}
-                  </a>
-                </div>
-              )}
             </div>
 
-            <div className="mt-4 p-4 bg-yellow-50 rounded-lg">
-              <p className="text-sm text-yellow-800">
-                <strong>Next Steps:</strong>
-              </p>
-              <ul className="text-sm text-yellow-700 mt-2 space-y-1 list-disc list-inside">
-                <li>Check the contact's email ({selectedContact?.email}) for invoice</li>
-                <li>Check Stripe dashboard for invoice details</li>
-                <li>Check Supabase orders table for order record</li>
-              </ul>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="bg-white rounded-xl p-4 border border-green-200">
+                <div className="text-xs font-semibold text-green-700 mb-1">Order ID</div>
+                <div className="font-mono text-sm text-slate-900">{result.order_id || 'N/A'}</div>
+              </div>
+
+              <div className="bg-white rounded-xl p-4 border border-green-200">
+                <div className="text-xs font-semibold text-green-700 mb-1">Stripe Invoice ID</div>
+                <div className="font-mono text-sm text-slate-900">{result.invoice_id || 'N/A'}</div>
+              </div>
             </div>
+
+            {result.invoice_url && (
+              <div className="bg-white rounded-xl p-4 border border-green-200 mb-4">
+                <div className="text-xs font-semibold text-green-700 mb-2">Customer Payment Page</div>
+                <a
+                  href={result.invoice_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-700 underline text-sm break-all"
+                >
+                  {result.invoice_url}
+                </a>
+              </div>
+            )}
 
             <button
               onClick={() => {
@@ -823,39 +883,12 @@ export default function NewInvoicePage() {
                 setInvoiceItems([]);
                 setPreview(null);
               }}
-              className="mt-4 w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700"
+              className="w-full bg-white border-2 border-green-600 text-green-700 px-6 py-3 rounded-xl font-semibold hover:bg-green-50 transition-all"
             >
               Create Another Invoice
             </button>
           </div>
         )}
-
-        {/* System Status */}
-        <div className="bg-gray-100 rounded-lg p-6">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">System Features</h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex items-center gap-2">
-              <span className="text-green-600">✓</span>
-              <span className="text-gray-700">Live tiered pricing calculations</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-green-600">✓</span>
-              <span className="text-gray-700">Real-time tax and shipping preview</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-green-600">✓</span>
-              <span className="text-gray-700">Product images in invoice</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-green-600">✓</span>
-              <span className="text-gray-700">Discount badges and savings tracking</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-green-600">✓</span>
-              <span className="text-gray-700">Stripe integration with Resend emails</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
