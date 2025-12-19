@@ -1,9 +1,9 @@
 /**
- * Products Admin Page - Full CRUD for product management
+ * Products Admin Page - Category-grouped product management with easy image uploads
  */
 
 import { getSupabaseClient } from '@/lib/supabase';
-import ProductsManagement from '@/components/admin/ProductsManagement';
+import ProductsManagementV2 from '@/components/admin/ProductsManagementV2';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -11,10 +11,12 @@ export const revalidate = 0;
 export default async function ProductsAdminPage() {
   const supabase = getSupabaseClient();
 
-  // Fetch all products
+  // Fetch all products ordered by type, category, then code
   const { data: products, error } = await supabase
     .from('products')
     .select('*')
+    .order('type')
+    .order('category')
     .order('product_code');
 
   if (error) {
@@ -23,15 +25,8 @@ export default async function ProductsAdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Products Management</h1>
-          <p className="mt-2 text-gray-600">
-            Manage all products: tools, consumables, parts, and accessories
-          </p>
-        </div>
-
-        <ProductsManagement products={products || []} />
+      <div className="max-w-[1600px] mx-auto">
+        <ProductsManagementV2 products={products || []} />
       </div>
     </div>
   );
