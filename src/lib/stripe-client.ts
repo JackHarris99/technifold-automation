@@ -4,6 +4,7 @@
 
 import Stripe from 'stripe';
 import { getSupabaseClient } from './supabase';
+import { calculateCartPricing, CartItem } from './pricing';
 
 // Lazy-load Stripe client to avoid build-time errors
 let stripeClient: Stripe | null = null;
@@ -35,19 +36,19 @@ export interface CheckoutLineItem {
 }
 
 /**
- * Resolve product codes to Stripe price IDs
- * Falls back to creating Stripe products/prices if they don't exist
+ * Resolve product codes to Stripe line items with tiered pricing
+ * Uses price_data for dynamic pricing based on quantity tiers
  */
 export async function resolveStripePriceIds(
   items: CheckoutLineItem[]
-): Promise<Array<{ price: string; quantity: number; product_code: string }>> {
+): Promise<Array<{ price_data: Stripe.Checkout.SessionCreateParams.LineItem.PriceData; quantity: number; product_code: string }>> {
   const supabase = getSupabaseClient();
 
   // Fetch product details from database
   const productCodes = items.map(item => item.product_code);
   const { data: products, error } = await supabase
     .from('products')
-    .select('product_code, description, price, currency, stripe_product_id, stripe_price_id_default, is_marketable')
+    .select('product_code, description, price, currency, category, type, is_marketable')
     .in('product_code', productCodes);
 
   if (error || !products) {
@@ -60,55 +61,49 @@ export async function resolveStripePriceIds(
     throw new Error(`Products not available for purchase: ${unmarketable.map(p => p.product_code).join(', ')}`);
   }
 
-  const lineItems: Array<{ price: string; quantity: number; product_code: string }> = [];
-
-  for (const item of items) {
+  // Build cart items for pricing calculation
+  const cartItems: CartItem[] = items.map(item => {
     const product = products.find(p => p.product_code === item.product_code);
     if (!product) {
       throw new Error(`Product not found: ${item.product_code}`);
     }
 
-    let priceId = product.stripe_price_id_default;
+    return {
+      product_code: item.product_code,
+      quantity: item.quantity,
+      category: product.category || '',
+      base_price: product.price || 0,
+      type: product.type,
+    };
+  });
 
-    // If no price ID exists, create Stripe product and price
-    if (!priceId) {
-      console.log(`[stripe] Creating Stripe product/price for ${product.product_code}`);
+  // Calculate tiered pricing
+  const { items: pricedItems, validation_errors } = calculateCartPricing(cartItems);
 
-      // Create or retrieve Stripe product
-      let stripeProductId = product.stripe_product_id;
-      if (!stripeProductId) {
-        const stripeProduct = await stripe.products.create({
+  // Throw error if validation failed
+  if (validation_errors.length > 0) {
+    throw new Error(`Validation errors: ${validation_errors.join('; ')}`);
+  }
+
+  // Build Stripe line items with calculated prices
+  const lineItems: Array<{ price_data: Stripe.Checkout.SessionCreateParams.LineItem.PriceData; quantity: number; product_code: string }> = [];
+
+  for (const item of pricedItems) {
+    const product = products.find(p => p.product_code === item.product_code);
+    if (!product) continue;
+
+    lineItems.push({
+      price_data: {
+        currency: (product.currency || 'GBP').toLowerCase(),
+        product_data: {
           name: product.description || product.product_code,
           metadata: {
             product_code: product.product_code,
+            discount_applied: item.discount_applied || '',
           },
-        });
-        stripeProductId = stripeProduct.id;
-
-        // Update database with Stripe product ID
-        await supabase
-          .from('products')
-          .update({ stripe_product_id: stripeProductId })
-          .eq('product_code', product.product_code);
-      }
-
-      // Create Stripe price
-      const stripePrice = await stripe.prices.create({
-        product: stripeProductId,
-        unit_amount: Math.round((product.price || 0) * 100), // Convert to cents
-        currency: (product.currency || 'GBP').toLowerCase(),
-      });
-      priceId = stripePrice.id;
-
-      // Update database with price ID
-      await supabase
-        .from('products')
-        .update({ stripe_price_id_default: priceId })
-        .eq('product_code', product.product_code);
-    }
-
-    lineItems.push({
-      price: priceId,
+        },
+        unit_amount: Math.round(item.unit_price * 100), // Convert to cents
+      },
       quantity: item.quantity,
       product_code: item.product_code,
     });
@@ -177,14 +172,14 @@ export async function createCheckoutSession(params: {
   // Ensure Stripe customer exists
   const customerId = await ensureStripeCustomer(companyId);
 
-  // Create checkout session
+  // Create checkout session with dynamic pricing
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
     payment_method_types: ['card', 'bacs_debit'], // Support both card and BACS Direct Debit
     customer: customerId,
     automatic_tax: { enabled: true },
     line_items: lineItems.map(item => ({
-      price: item.price,
+      price_data: item.price_data,
       quantity: item.quantity,
     })),
     metadata: {
