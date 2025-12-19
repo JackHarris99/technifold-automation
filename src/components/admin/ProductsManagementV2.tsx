@@ -121,54 +121,9 @@ export default function ProductsManagementV2({ products: initialProducts }: Prod
   };
 
   const handleBulkImageUploaded = async (imageUrl: string, categoryKey: string) => {
-    // Apply image to all products in this category that don't have an image
-    const [type, category] = categoryKey.split('|||');
-
-    // Find all products in this category without images
-    const productsToUpdate = products.filter(p =>
-      p.type === type &&
-      (p.category || 'Uncategorized') === category &&
-      !p.image_url
-    );
-
-    const productCodes = productsToUpdate.map(p => p.product_code);
-
-    if (productCodes.length === 0) {
-      return;
-    }
-
-    // Save to database
-    try {
-      const response = await fetch('/api/admin/products/bulk-update-images', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          product_codes: productCodes,
-          image_url: imageUrl
-        })
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to update products');
-      }
-
-      console.log(`[BulkImageUpload] Updated ${result.updated_count} products in database`);
-
-      // Update local state
-      setProducts(products.map(p => {
-        if (productCodes.includes(p.product_code)) {
-          return { ...p, image_url: imageUrl };
-        }
-        return p;
-      }));
-
-      setShowBulkImageUpload(null);
-    } catch (error: any) {
-      console.error('[BulkImageUpload] Error:', error);
-      alert('Failed to update products: ' + error.message);
-    }
+    // Bulk upload completed - refresh the page to show updated images
+    setShowBulkImageUpload(null);
+    window.location.reload();
   };
 
   // Stats based on current tab filter
@@ -608,6 +563,7 @@ interface BulkImageUploadModalProps {
 function BulkImageUploadModal({ categoryKey, onClose, onSuccess }: BulkImageUploadModalProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<string>('');
   const [type, category] = categoryKey.split('|||');
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -618,29 +574,60 @@ function BulkImageUploadModal({ categoryKey, onClose, onSuccess }: BulkImageUplo
     setError(null);
 
     try {
-      // Upload to a generic category path
-      const categorySlug = category.toLowerCase().replace(/\s+/g, '-');
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('mediaType', 'product');
-      formData.append('identifier', `${type}-${categorySlug}`);
-      formData.append('table', 'products');
-      formData.append('column', 'image_url');
-      formData.append('recordId', 'bulk-placeholder'); // Won't be used
-      formData.append('idColumn', 'product_code');
-
-      const response = await fetch('/api/admin/media/upload', {
+      // Get products that need this image
+      const response = await fetch('/api/admin/products/bulk-upload-image', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type,
+          category,
+          file_name: file.name,
+          file_type: file.type
+        })
       });
 
-      const data = await response.json();
+      const { product_codes } = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Upload failed');
+      if (!response.ok || !product_codes || product_codes.length === 0) {
+        throw new Error('No products found to update');
       }
 
-      onSuccess(data.url, categoryKey);
+      setUploadProgress(`Uploading to ${product_codes.length} products...`);
+
+      // Upload the same image for each product code
+      const uploadResults = [];
+      for (let i = 0; i < product_codes.length; i++) {
+        const productCode = product_codes[i];
+        setUploadProgress(`Uploading ${i + 1}/${product_codes.length}: ${productCode}`);
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('mediaType', 'product');
+        formData.append('identifier', productCode);
+        formData.append('table', 'products');
+        formData.append('column', 'image_url');
+        formData.append('recordId', productCode);
+        formData.append('idColumn', 'product_code');
+
+        const uploadResponse = await fetch('/api/admin/media/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const uploadData = await uploadResponse.json();
+
+        if (!uploadResponse.ok) {
+          console.error(`Failed to upload for ${productCode}:`, uploadData.error);
+          continue;
+        }
+
+        uploadResults.push({ productCode, url: uploadData.url });
+      }
+
+      setUploadProgress(`Completed ${uploadResults.length}/${product_codes.length} uploads`);
+
+      // Trigger success callback (will refresh the page)
+      onSuccess('bulk-complete', categoryKey);
     } catch (err: any) {
       console.error('Bulk upload error:', err);
       setError(err.message || 'Upload failed');
