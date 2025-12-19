@@ -1,13 +1,13 @@
 /**
- * Invoice Builder
- * Create and send invoices to customers
- * Stripe Invoice → Resend Email → Supabase Record
+ * Interactive Invoice Builder
+ * Live pricing preview with tiered calculations, tax, and shipping
  */
 
 'use client';
 
 import { useState, useEffect } from 'react';
 import AddressCollectionModal from '@/components/portals/AddressCollectionModal';
+import Image from 'next/image';
 
 interface Company {
   company_id: string;
@@ -27,13 +27,44 @@ interface Product {
   description: string;
   price: number;
   currency: string;
+  image_url: string | null;
 }
 
 interface InvoiceItem {
   product_code: string;
+  quantity: number;
+}
+
+interface PreviewLineItem {
+  product_code: string;
   description: string;
   quantity: number;
+  base_price: number;
   unit_price: number;
+  line_total: number;
+  discount_applied?: string;
+  image_url: string | null;
+  currency: string;
+}
+
+interface InvoicePreview {
+  company: {
+    company_id: string;
+    company_name: string;
+    country: string;
+    vat_number: string | null;
+    destination_country: string;
+  };
+  line_items: PreviewLineItem[];
+  subtotal: number;
+  shipping: number;
+  vat_amount: number;
+  vat_rate: number;
+  vat_exempt_reason: string | null;
+  total: number;
+  total_savings: number;
+  currency: string;
+  validation_errors: string[];
 }
 
 export default function NewInvoicePage() {
@@ -47,6 +78,7 @@ export default function NewInvoicePage() {
   const [loading, setLoading] = useState(false);
   const [loadingCompanies, setLoadingCompanies] = useState(true);
   const [loadingContacts, setLoadingContacts] = useState(false);
+  const [loadingPreview, setLoadingPreview] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [showAddressModal, setShowAddressModal] = useState(false);
@@ -56,6 +88,10 @@ export default function NewInvoicePage() {
   const [productSuggestions, setProductSuggestions] = useState<Product[]>([]);
   const [showProductDropdown, setShowProductDropdown] = useState(false);
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
+
+  // Preview state
+  const [preview, setPreview] = useState<InvoicePreview | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
 
   // Load companies on mount and check URL params for pre-selected company
   useEffect(() => {
@@ -119,6 +155,16 @@ export default function NewInvoicePage() {
     return () => clearTimeout(timeoutId);
   }, [productSearch]);
 
+  // Load preview whenever items or company changes
+  useEffect(() => {
+    if (selectedCompanyId && invoiceItems.length > 0) {
+      loadPreview();
+    } else {
+      setPreview(null);
+      setPreviewError(null);
+    }
+  }, [selectedCompanyId, invoiceItems]);
+
   const loadCompanies = async () => {
     try {
       const response = await fetch('/api/admin/companies/all');
@@ -148,6 +194,41 @@ export default function NewInvoicePage() {
     }
   };
 
+  const loadPreview = async () => {
+    setLoadingPreview(true);
+    setPreviewError(null);
+
+    try {
+      const response = await fetch('/api/admin/invoices/preview', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Secret': 'Technifold',
+        },
+        body: JSON.stringify({
+          company_id: selectedCompanyId,
+          items: invoiceItems,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP ${response.status}`);
+      }
+
+      if (data.success && data.preview) {
+        setPreview(data.preview);
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load preview';
+      console.error('[PREVIEW] Error:', err);
+      setPreviewError(errorMessage);
+    } finally {
+      setLoadingPreview(false);
+    }
+  };
+
   const selectCompany = (company: Company) => {
     setSelectedCompanyId(company.company_id);
     setCompanySearch(company.company_name);
@@ -173,9 +254,7 @@ export default function NewInvoicePage() {
       // Add new item
       setInvoiceItems([...invoiceItems, {
         product_code: product.product_code,
-        description: product.description,
         quantity: 1,
-        unit_price: product.price,
       }]);
     }
 
@@ -190,17 +269,16 @@ export default function NewInvoicePage() {
     setInvoiceItems(newItems);
   };
 
-  const updateItemPrice = (index: number, price: number) => {
-    const newItems = [...invoiceItems];
-    newItems[index].unit_price = Math.max(0, price);
-    setInvoiceItems(newItems);
-  };
-
   const removeItem = (index: number) => {
     setInvoiceItems(invoiceItems.filter((_, i) => i !== index));
   };
 
   const createInvoice = async () => {
+    if (!preview) {
+      alert('Please wait for preview to load');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setResult(null);
@@ -226,24 +304,32 @@ export default function NewInvoicePage() {
 
       console.log('[INVOICE] Addresses OK - proceeding with invoice creation');
 
+      // Build items from preview (use calculated prices)
+      const itemsToSend = preview.line_items.map(item => ({
+        product_code: item.product_code,
+        description: item.description,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+      }));
+
       console.log('[INVOICE] Creating invoice with:', {
         company_id: selectedCompanyId,
         contact_id: selectedContactId,
-        items: invoiceItems,
+        items: itemsToSend,
       });
 
       const response = await fetch('/api/admin/invoices/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Secret': 'Technifold', // From env.local.txt
+          'X-Admin-Secret': 'Technifold',
         },
         body: JSON.stringify({
           company_id: selectedCompanyId,
           contact_id: selectedContactId,
-          items: invoiceItems,
+          items: itemsToSend,
           currency: 'gbp',
-          notes: 'Created via Invoice Builder',
+          notes: 'Created via Interactive Invoice Builder',
         }),
       });
 
@@ -278,11 +364,9 @@ export default function NewInvoicePage() {
   const selectedCompany = companies.find(c => c.company_id === selectedCompanyId);
   const selectedContact = contacts.find(c => c.contact_id === selectedContactId);
 
-  const subtotal = invoiceItems.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
-
   return (
       <div className="min-h-screen bg-gray-50 p-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
         {/* Address Collection Modal (shown when addresses are missing) */}
         {showAddressModal && selectedCompany && (
           <AddressCollectionModal
@@ -297,10 +381,10 @@ export default function NewInvoicePage() {
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Create Invoice
+            Interactive Invoice Builder
           </h1>
           <p className="text-sm text-gray-600">
-            Create and send invoices with Stripe billing integration
+            Live pricing preview with tiered calculations, tax, and shipping
           </p>
         </div>
 
@@ -430,12 +514,26 @@ export default function NewInvoicePage() {
                       className="w-full px-4 py-3 text-left hover:bg-blue-50 border-b border-gray-100 last:border-b-0"
                       disabled={!product.price || product.price === 0}
                     >
-                      <div className="font-semibold text-gray-900">{product.product_code}</div>
-                      <div className="text-sm text-gray-600">{product.description}</div>
-                      <div className={`text-sm font-semibold ${product.price ? 'text-green-600' : 'text-red-600'}`}>
-                        {product.price
-                          ? `${(product.currency || 'GBP').toUpperCase()} ${product.price.toFixed(2)}`
-                          : 'Price not set - cannot add'}
+                      <div className="flex items-center gap-3">
+                        {product.image_url && (
+                          <div className="w-12 h-12 relative flex-shrink-0 bg-gray-100 rounded">
+                            <Image
+                              src={product.image_url}
+                              alt={product.product_code}
+                              fill
+                              className="object-contain rounded"
+                            />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <div className="font-semibold text-gray-900">{product.product_code}</div>
+                          <div className="text-sm text-gray-600">{product.description}</div>
+                          <div className={`text-sm font-semibold ${product.price ? 'text-green-600' : 'text-red-600'}`}>
+                            {product.price
+                              ? `${(product.currency || 'GBP').toUpperCase()} ${product.price.toFixed(2)}`
+                              : 'Price not set - cannot add'}
+                          </div>
+                        </div>
                       </div>
                     </button>
                   ))}
@@ -443,73 +541,186 @@ export default function NewInvoicePage() {
               )}
             </div>
 
-            {/* Invoice Items Table */}
+            {/* Live Invoice Preview */}
             {invoiceItems.length > 0 && (
-              <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Product</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Description</th>
-                      <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Qty</th>
-                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Price</th>
-                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Total</th>
-                      <th className="w-16"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {invoiceItems.map((item, index) => (
-                      <tr key={index} className="border-t border-gray-200">
-                        <td className="py-3 px-4 text-sm font-mono text-gray-900">{item.product_code}</td>
-                        <td className="py-3 px-4 text-sm text-gray-600">{item.description}</td>
-                        <td className="py-3 px-4 text-center">
-                          <input
-                            type="number"
-                            value={item.quantity}
-                            onChange={(e) => updateItemQuantity(index, parseInt(e.target.value) || 1)}
-                            min="1"
-                            className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-gray-900"
-                          />
-                        </td>
-                        <td className="py-3 px-4 text-right">
-                          <input
-                            type="number"
-                            value={item.unit_price}
-                            onChange={(e) => updateItemPrice(index, parseFloat(e.target.value) || 0)}
-                            min="0"
-                            step="0.01"
-                            className="w-24 px-2 py-1 border border-gray-300 rounded text-right text-gray-900"
-                          />
-                        </td>
-                        <td className="py-3 px-4 text-sm font-semibold text-gray-900 text-right">
-                          £{(item.unit_price * item.quantity).toFixed(2)}
-                        </td>
-                        <td className="py-3 px-4 text-center">
-                          <button
-                            onClick={() => removeItem(index)}
-                            className="text-red-600 hover:text-red-800 font-semibold"
-                          >
-                            ×
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                    <tr className="border-t-2 border-gray-300 bg-gray-50">
-                      <td colSpan={4} className="py-3 px-4 text-sm font-bold text-gray-900 text-right">
-                        Subtotal:
-                      </td>
-                      <td className="py-3 px-4 text-sm font-bold text-gray-900 text-right">
-                        £{subtotal.toFixed(2)}
-                      </td>
-                      <td></td>
-                    </tr>
-                  </tbody>
-                </table>
+              <div className="border-2 border-blue-200 rounded-lg overflow-hidden bg-blue-50">
+                {loadingPreview && (
+                  <div className="p-4 bg-blue-100 text-blue-700 text-center">
+                    Calculating prices...
+                  </div>
+                )}
+
+                {previewError && (
+                  <div className="p-4 bg-red-100 text-red-700">
+                    Preview Error: {previewError}
+                  </div>
+                )}
+
+                {preview && (
+                  <>
+                    {/* Validation Errors */}
+                    {preview.validation_errors.length > 0 && (
+                      <div className="p-4 bg-yellow-100 border-b-2 border-yellow-300">
+                        <div className="font-semibold text-yellow-900 mb-2">⚠️ Validation Warnings</div>
+                        {preview.validation_errors.map((error, idx) => (
+                          <div key={idx} className="text-sm text-yellow-800">{error}</div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Line Items */}
+                    <table className="w-full bg-white">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Product</th>
+                          <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Qty</th>
+                          <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Base Price</th>
+                          <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Unit Price</th>
+                          <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Total</th>
+                          <th className="w-16"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {preview.line_items.map((item, index) => {
+                          const invoiceItem = invoiceItems.find(i => i.product_code === item.product_code);
+                          const invoiceItemIndex = invoiceItems.findIndex(i => i.product_code === item.product_code);
+
+                          return (
+                            <tr key={index} className="border-t border-gray-200">
+                              <td className="py-3 px-4">
+                                <div className="flex items-center gap-3">
+                                  {item.image_url && (
+                                    <div className="w-16 h-16 relative flex-shrink-0 bg-gray-100 rounded">
+                                      <Image
+                                        src={item.image_url}
+                                        alt={item.product_code}
+                                        fill
+                                        className="object-contain rounded"
+                                      />
+                                    </div>
+                                  )}
+                                  <div>
+                                    <div className="font-mono text-sm font-semibold text-gray-900">{item.product_code}</div>
+                                    <div className="text-sm text-gray-600">{item.description}</div>
+                                    {item.discount_applied && (
+                                      <div className="inline-block mt-1 px-2 py-1 bg-green-100 text-green-800 text-xs rounded font-semibold">
+                                        {item.discount_applied}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="py-3 px-4 text-center">
+                                <input
+                                  type="number"
+                                  value={invoiceItem?.quantity || 1}
+                                  onChange={(e) => updateItemQuantity(invoiceItemIndex, parseInt(e.target.value) || 1)}
+                                  min="1"
+                                  className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-gray-900"
+                                />
+                              </td>
+                              <td className="py-3 px-4 text-right">
+                                {item.base_price !== item.unit_price && (
+                                  <span className="text-sm text-gray-400 line-through">
+                                    £{item.base_price.toFixed(2)}
+                                  </span>
+                                )}
+                                {item.base_price === item.unit_price && (
+                                  <span className="text-sm text-gray-600">
+                                    £{item.base_price.toFixed(2)}
+                                  </span>
+                                )}
+                              </td>
+                              <td className="py-3 px-4 text-right">
+                                <span className="text-sm font-semibold text-gray-900">
+                                  £{item.unit_price.toFixed(2)}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 text-sm font-bold text-gray-900 text-right">
+                                £{item.line_total.toFixed(2)}
+                              </td>
+                              <td className="py-3 px-4 text-center">
+                                <button
+                                  onClick={() => removeItem(invoiceItemIndex)}
+                                  className="text-red-600 hover:text-red-800 font-semibold text-xl"
+                                >
+                                  ×
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+
+                        {/* Subtotal */}
+                        <tr className="border-t-2 border-gray-300 bg-gray-50">
+                          <td colSpan={4} className="py-3 px-4 text-sm font-bold text-gray-900 text-right">
+                            Subtotal:
+                          </td>
+                          <td className="py-3 px-4 text-sm font-bold text-gray-900 text-right">
+                            £{preview.subtotal.toFixed(2)}
+                          </td>
+                          <td></td>
+                        </tr>
+
+                        {/* Shipping */}
+                        <tr className="bg-gray-50">
+                          <td colSpan={4} className="py-2 px-4 text-sm text-gray-700 text-right">
+                            Shipping to {preview.company.destination_country}:
+                          </td>
+                          <td className="py-2 px-4 text-sm text-gray-900 text-right">
+                            £{preview.shipping.toFixed(2)}
+                          </td>
+                          <td></td>
+                        </tr>
+
+                        {/* VAT */}
+                        <tr className="bg-gray-50">
+                          <td colSpan={4} className="py-2 px-4 text-sm text-gray-700 text-right">
+                            VAT ({(preview.vat_rate * 100).toFixed(0)}%)
+                            {preview.vat_exempt_reason && (
+                              <span className="ml-2 text-xs text-green-600">
+                                ({preview.vat_exempt_reason})
+                              </span>
+                            )}:
+                          </td>
+                          <td className="py-2 px-4 text-sm text-gray-900 text-right">
+                            £{preview.vat_amount.toFixed(2)}
+                          </td>
+                          <td></td>
+                        </tr>
+
+                        {/* Total */}
+                        <tr className="border-t-2 border-gray-400 bg-blue-50">
+                          <td colSpan={4} className="py-4 px-4 text-lg font-bold text-gray-900 text-right">
+                            TOTAL:
+                          </td>
+                          <td className="py-4 px-4 text-lg font-bold text-blue-900 text-right">
+                            £{preview.total.toFixed(2)}
+                          </td>
+                          <td></td>
+                        </tr>
+
+                        {/* Savings */}
+                        {preview.total_savings > 0 && (
+                          <tr className="bg-green-50">
+                            <td colSpan={4} className="py-2 px-4 text-sm font-semibold text-green-700 text-right">
+                              Total Savings:
+                            </td>
+                            <td className="py-2 px-4 text-sm font-bold text-green-700 text-right">
+                              -£{preview.total_savings.toFixed(2)}
+                            </td>
+                            <td></td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </>
+                )}
               </div>
             )}
 
             {invoiceItems.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
                 No products added yet. Search and add products above.
               </div>
             )}
@@ -517,17 +728,27 @@ export default function NewInvoicePage() {
         )}
 
         {/* Create Invoice Button */}
-        {selectedCompanyId && selectedContactId && invoiceItems.length > 0 && (
+        {selectedCompanyId && selectedContactId && invoiceItems.length > 0 && preview && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="text-sm text-blue-900 font-semibold mb-2">Invoice Preview Summary</div>
+              <div className="text-sm text-blue-800">
+                <div>Company: {preview.company.company_name}</div>
+                <div>Destination: {preview.company.destination_country}</div>
+                <div>Items: {preview.line_items.length} product(s), {preview.line_items.reduce((sum, item) => sum + item.quantity, 0)} units</div>
+                <div className="font-bold mt-2">Total Amount: £{preview.total.toFixed(2)}</div>
+              </div>
+            </div>
+
             <button
               onClick={createInvoice}
-              disabled={loading}
+              disabled={loading || loadingPreview}
               className="w-full bg-green-600 text-white px-6 py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {loading ? 'Creating Invoice...' : '🚀 Create Invoice & Send Email'}
+              {loading ? 'Creating Invoice...' : '✉️ Send Invoice to Customer'}
             </button>
             <p className="text-xs text-gray-500 text-center mt-2">
-              This will create a real Stripe invoice and send a real email to {selectedContact?.email}
+              This will create a Stripe invoice for £{preview.total.toFixed(2)} and send email to {selectedContact?.email}
             </p>
           </div>
         )}
@@ -593,31 +814,45 @@ export default function NewInvoicePage() {
                 <li>Check the contact's email ({selectedContact?.email}) for invoice</li>
                 <li>Check Stripe dashboard for invoice details</li>
                 <li>Check Supabase orders table for order record</li>
-                <li>Try clicking the payment link above</li>
               </ul>
             </div>
+
+            <button
+              onClick={() => {
+                setResult(null);
+                setInvoiceItems([]);
+                setPreview(null);
+              }}
+              className="mt-4 w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700"
+            >
+              Create Another Invoice
+            </button>
           </div>
         )}
 
         {/* System Status */}
         <div className="bg-gray-100 rounded-lg p-6">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">System Checklist</h3>
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">System Features</h3>
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2">
               <span className="text-green-600">✓</span>
-              <span className="text-gray-700">Stripe API configured</span>
+              <span className="text-gray-700">Live tiered pricing calculations</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-green-600">✓</span>
-              <span className="text-gray-700">Resend API configured</span>
+              <span className="text-gray-700">Real-time tax and shipping preview</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-green-600">✓</span>
-              <span className="text-gray-700">Supabase connected</span>
+              <span className="text-gray-700">Product images in invoice</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-green-600">✓</span>
-              <span className="text-gray-700">VAT automation enabled</span>
+              <span className="text-gray-700">Discount badges and savings tracking</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-green-600">✓</span>
+              <span className="text-gray-700">Stripe integration with Resend emails</span>
             </div>
           </div>
         </div>
