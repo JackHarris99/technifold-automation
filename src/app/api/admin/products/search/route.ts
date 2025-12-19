@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
   // Search by product_code OR description
   const { data, error } = await supabase
     .from('products')
-    .select('product_code, description, price, currency, type')
+    .select('product_code, description, price, currency, type, image_url')
     .or(`product_code.ilike.*${query}*,description.ilike.*${query}*`)
     .eq('active', true)
     .limit(10);

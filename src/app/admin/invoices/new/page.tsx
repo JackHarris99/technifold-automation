@@ -605,7 +605,7 @@ export default function NewInvoicePage() {
                             return (
                               <tr key={index} className="group hover:bg-[#fafafa] transition-colors">
                                 <td className="py-5 px-8">
-                                  <div className="flex items-center gap-5">
+                                  <div className="flex items-center gap-5 min-h-[100px]">
                                     {item.image_url ? (
                                       <div className="w-20 h-20 relative flex-shrink-0 bg-[#fafafa] rounded-[14px] overflow-hidden border border-[#e8e8e8]">
                                         <Image
@@ -623,14 +623,16 @@ export default function NewInvoicePage() {
                                     <div className="min-w-0 flex-1">
                                       <div className="font-mono text-[14px] font-[700] text-[#0a0a0a] tracking-tight">{item.product_code}</div>
                                       <div className="text-[14px] text-[#666] mt-1 font-[400]">{item.description}</div>
-                                      {item.discount_applied && (
-                                        <div className="inline-flex items-center mt-3 px-3 py-1.5 bg-[#16a34a] text-white text-[12px] rounded-full font-[700] tracking-tight">
-                                          <svg className="w-3.5 h-3.5 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                          </svg>
-                                          {item.discount_applied}
-                                        </div>
-                                      )}
+                                      <div className="mt-3 h-[26px]">
+                                        {item.discount_applied && (
+                                          <div className="inline-flex items-center px-3 py-1.5 bg-[#16a34a] text-white text-[12px] rounded-full font-[700] tracking-tight">
+                                            <svg className="w-3.5 h-3.5 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                            </svg>
+                                            {item.discount_applied}
+                                          </div>
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
                                 </td>
@@ -677,11 +679,12 @@ export default function NewInvoicePage() {
                           invoiceItems.map((_, index) => (
                             <tr key={index} className="animate-pulse">
                               <td className="py-5 px-8">
-                                <div className="flex items-center gap-5">
+                                <div className="flex items-center gap-5 min-h-[100px]">
                                   <div className="w-20 h-20 bg-[#f0f0f0] rounded-[14px]"></div>
                                   <div className="flex-1">
-                                    <div className="h-4 bg-[#f0f0f0] rounded-[8px] w-40 mb-3"></div>
-                                    <div className="h-3 bg-[#f0f0f0] rounded-[8px] w-56"></div>
+                                    <div className="h-4 bg-[#f0f0f0] rounded-[8px] w-40 mb-2"></div>
+                                    <div className="h-3 bg-[#f0f0f0] rounded-[8px] w-56 mb-3"></div>
+                                    <div className="h-[26px]"></div>
                                   </div>
                                 </div>
                               </td>
