@@ -573,6 +573,193 @@ export default function NewInvoicePage() {
                 </div>
               )}
 
+              {/* Tiered Pricing Guide */}
+              {preview && !loadingPreview && preview.line_items.length > 0 && (() => {
+                // Calculate standard tier products (£33 products)
+                const standardItems = preview.line_items.filter(item => item.discount_applied?.includes('total units'));
+                const standardTotalQty = standardItems.reduce((sum, item) => sum + item.quantity, 0);
+
+                // Calculate premium tier products
+                const premiumItems = preview.line_items.filter(item => item.discount_applied?.includes('volume discount'));
+
+                // Tier breakpoints
+                const standardTiers = [
+                  { min: 1, max: 3, price: 33, label: 'Tier 1' },
+                  { min: 4, max: 7, price: 29, label: 'Tier 2' },
+                  { min: 8, max: 9, price: 27, label: 'Tier 3' },
+                  { min: 10, max: 19, price: 25, label: 'Tier 4' },
+                  { min: 20, max: 24, price: 23, label: 'Tier 5' },
+                  { min: 25, max: 29, price: 22, label: 'Tier 6' },
+                  { min: 30, max: 34, price: 21, label: 'Tier 7' },
+                  { min: 35, max: 999, price: 20, label: 'Tier 8' },
+                ];
+
+                const premiumTiers = [
+                  { min: 1, max: 2, discount: 0, label: 'Base' },
+                  { min: 3, max: 4, discount: 7, label: 'Tier 1' },
+                  { min: 5, max: 9, discount: 15, label: 'Tier 2' },
+                  { min: 10, max: 999, discount: 25, label: 'Tier 3' },
+                ];
+
+                const hasStandard = standardItems.length > 0;
+                const hasPremium = premiumItems.length > 0;
+
+                if (!hasStandard && !hasPremium) return null;
+
+                return (
+                  <div className="mb-6 bg-gradient-to-br from-[#f9fafb] to-white rounded-[20px] shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8] p-8">
+                    <div className="flex items-center gap-3 mb-6">
+                      <svg className="w-6 h-6 text-[#16a34a]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg>
+                      <h3 className="text-[17px] font-[800] text-[#0a0a0a] tracking-[-0.01em]">Tiered Pricing Guide</h3>
+                    </div>
+
+                    <div className="space-y-6">
+                      {/* Standard Tier Products */}
+                      {hasStandard && (() => {
+                        const currentTier = standardTiers.find(t => standardTotalQty >= t.min && standardTotalQty <= t.max);
+                        const nextTier = standardTiers.find(t => t.min > standardTotalQty);
+                        const progress = currentTier ? ((standardTotalQty - currentTier.min) / (currentTier.max - currentTier.min + 1)) * 100 : 0;
+                        const unitsToNext = nextTier ? nextTier.min - standardTotalQty : 0;
+                        const potentialSavings = nextTier && currentTier ? (currentTier.price - nextTier.price) * standardTotalQty : 0;
+
+                        return (
+                          <div className="bg-white rounded-[16px] p-6 border border-[#e8e8e8]">
+                            <div className="flex items-center justify-between mb-4">
+                              <div>
+                                <div className="text-[13px] font-[700] text-[#666] uppercase tracking-[0.05em] mb-1">Standard Tier Products</div>
+                                <div className="text-[15px] font-[600] text-[#0a0a0a]">{standardItems.length} product(s) • {standardTotalQty} total units</div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-[13px] text-[#666] font-[500]">Current Price</div>
+                                <div className="text-[22px] font-[800] text-[#0a0a0a] tracking-[-0.02em]">£{currentTier?.price || 33}/unit</div>
+                              </div>
+                            </div>
+
+                            {/* Progress Bar */}
+                            <div className="mb-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-[13px] font-[600] text-[#666]">{currentTier?.label || 'Tier 1'}</span>
+                                {nextTier && (
+                                  <span className="text-[13px] font-[600] text-[#16a34a]">{nextTier.label}</span>
+                                )}
+                              </div>
+                              <div className="h-3 bg-[#f0f0f0] rounded-full overflow-hidden">
+                                <div
+                                  className="h-full bg-gradient-to-r from-[#16a34a] to-[#22c55e] rounded-full transition-all duration-500"
+                                  style={{ width: `${Math.min(progress, 100)}%` }}
+                                ></div>
+                              </div>
+                              <div className="flex items-center justify-between mt-2">
+                                <span className="text-[12px] text-[#666] font-[500]">{standardTotalQty} units</span>
+                                {nextTier && (
+                                  <span className="text-[12px] text-[#666] font-[500]">{nextTier.min} units</span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Next Tier Unlock */}
+                            {nextTier && (
+                              <div className="bg-gradient-to-r from-[#ecfdf5] to-[#d1fae5] rounded-[12px] p-4 border border-[#86efac]">
+                                <div className="flex items-start gap-3">
+                                  <div className="w-8 h-8 bg-[#16a34a] rounded-full flex items-center justify-center flex-shrink-0">
+                                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="text-[14px] font-[700] text-[#166534] tracking-[-0.01em]">
+                                      Add {unitsToNext} more unit{unitsToNext !== 1 ? 's' : ''} to unlock £{nextTier.price}/unit
+                                    </div>
+                                    {potentialSavings > 0 && (
+                                      <div className="text-[13px] text-[#16a34a] mt-1 font-[600]">
+                                        Save an additional £{potentialSavings.toFixed(2)} on your entire order!
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
+
+                      {/* Premium Tier Products */}
+                      {hasPremium && premiumItems.map((item, idx) => {
+                        const currentDiscount = item.discount_applied?.match(/(\d+)%/)?.[1] || '0';
+                        const currentTier = premiumTiers.find(t => t.discount === parseInt(currentDiscount));
+                        const nextTier = premiumTiers.find(t => t.discount > parseInt(currentDiscount));
+                        const progress = currentTier ? ((item.quantity - currentTier.min) / (currentTier.max - currentTier.min + 1)) * 100 : 0;
+                        const unitsToNext = nextTier ? nextTier.min - item.quantity : 0;
+                        const nextPrice = nextTier ? item.base_price * (1 - nextTier.discount / 100) : item.unit_price;
+                        const potentialSavings = nextTier ? (item.unit_price - nextPrice) * nextTier.min : 0;
+
+                        return (
+                          <div key={idx} className="bg-white rounded-[16px] p-6 border border-[#e8e8e8]">
+                            <div className="flex items-center justify-between mb-4">
+                              <div>
+                                <div className="text-[13px] font-[700] text-[#666] uppercase tracking-[0.05em] mb-1">Premium Product</div>
+                                <div className="text-[15px] font-[600] text-[#0a0a0a]">{item.product_code} • {item.quantity} units</div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-[13px] text-[#666] font-[500]">Current Price</div>
+                                <div className="text-[22px] font-[800] text-[#0a0a0a] tracking-[-0.02em]">£{item.unit_price.toFixed(2)}/unit</div>
+                              </div>
+                            </div>
+
+                            {/* Progress Bar */}
+                            <div className="mb-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-[13px] font-[600] text-[#666]">{currentDiscount}% Discount</span>
+                                {nextTier && (
+                                  <span className="text-[13px] font-[600] text-[#16a34a]">{nextTier.discount}% Discount</span>
+                                )}
+                              </div>
+                              <div className="h-3 bg-[#f0f0f0] rounded-full overflow-hidden">
+                                <div
+                                  className="h-full bg-gradient-to-r from-[#16a34a] to-[#22c55e] rounded-full transition-all duration-500"
+                                  style={{ width: `${Math.min(progress, 100)}%` }}
+                                ></div>
+                              </div>
+                              <div className="flex items-center justify-between mt-2">
+                                <span className="text-[12px] text-[#666] font-[500]">{item.quantity} units</span>
+                                {nextTier && (
+                                  <span className="text-[12px] text-[#666] font-[500]">{nextTier.min} units</span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Next Tier Unlock */}
+                            {nextTier && (
+                              <div className="bg-gradient-to-r from-[#ecfdf5] to-[#d1fae5] rounded-[12px] p-4 border border-[#86efac]">
+                                <div className="flex items-start gap-3">
+                                  <div className="w-8 h-8 bg-[#16a34a] rounded-full flex items-center justify-center flex-shrink-0">
+                                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="text-[14px] font-[700] text-[#166534] tracking-[-0.01em]">
+                                      Add {unitsToNext} more unit{unitsToNext !== 1 ? 's' : ''} to unlock {nextTier.discount}% discount (£{nextPrice.toFixed(2)}/unit)
+                                    </div>
+                                    {potentialSavings > 0 && (
+                                      <div className="text-[13px] text-[#16a34a] mt-1 font-[600]">
+                                        Save £{potentialSavings.toFixed(2)} on this product!
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Invoice Table */}
               {invoiceItems.length > 0 && (
                 <div className="bg-white rounded-[20px] shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8] overflow-hidden">
