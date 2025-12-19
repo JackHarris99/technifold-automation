@@ -259,7 +259,8 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
       await getStripeClient().invoiceItems.create({
         customer: stripeCustomerId,
         invoice: invoice.id, // Attach to specific invoice
-        amount: Math.round(item.unit_price * item.quantity * 100), // Convert to pence
+        quantity: item.quantity, // Stripe will show this quantity
+        unit_amount: Math.round(item.unit_price * 100), // Unit price in pence
         currency: currency.toLowerCase(),
         description: `${item.product_code} - ${item.description}`,
         metadata: {
@@ -267,7 +268,7 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
           quantity: item.quantity.toString(),
         }
       });
-      console.log('[stripe-invoices] Added item:', item.product_code, '£' + item.unit_price);
+      console.log('[stripe-invoices] Added item:', item.product_code, `x${item.quantity} @ £${item.unit_price}`);
     }
 
     // 6. Add shipping line item if applicable
