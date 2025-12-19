@@ -4,7 +4,7 @@
 
 import Stripe from 'stripe';
 import { getSupabaseClient } from './supabase';
-import { calculateCartPricing, CartItem } from './pricing';
+import { calculateCartPricing, CartItem } from './pricing-v2';
 
 // Lazy-load Stripe client to avoid build-time errors
 let stripeClient: Stripe | null = null;
@@ -44,11 +44,11 @@ export async function resolveStripePriceIds(
 ): Promise<Array<{ price_data: Stripe.Checkout.SessionCreateParams.LineItem.PriceData; quantity: number; product_code: string }>> {
   const supabase = getSupabaseClient();
 
-  // Fetch product details from database
+  // Fetch product details from database (including pricing_tier)
   const productCodes = items.map(item => item.product_code);
   const { data: products, error } = await supabase
     .from('products')
-    .select('product_code, description, price, currency, category, type, is_marketable')
+    .select('product_code, description, price, currency, category, type, pricing_tier, is_marketable')
     .in('product_code', productCodes);
 
   if (error || !products) {
@@ -74,11 +74,12 @@ export async function resolveStripePriceIds(
       category: product.category || '',
       base_price: product.price || 0,
       type: product.type,
+      pricing_tier: product.pricing_tier,
     };
   });
 
   // Calculate tiered pricing
-  const { items: pricedItems, validation_errors } = calculateCartPricing(cartItems);
+  const { items: pricedItems, validation_errors } = await calculateCartPricing(cartItems);
 
   // Throw error if validation failed
   if (validation_errors.length > 0) {

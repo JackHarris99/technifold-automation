@@ -5,7 +5,7 @@
 
 import Stripe from 'stripe';
 import { getSupabaseClient } from './supabase';
-import { calculateCartPricing, CartItem } from './pricing';
+import { calculateCartPricing, CartItem } from './pricing-v2';
 
 // Lazy-load Stripe client to avoid build-time errors
 let stripeClient: Stripe | null = null;
@@ -111,7 +111,7 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
     const productCodes = items.map(item => item.product_code);
     const { data: products } = await supabase
       .from('products')
-      .select('product_code, category, type, price')
+      .select('product_code, category, type, price, pricing_tier')
       .in('product_code', productCodes);
 
     if (products && products.length > 0) {
@@ -124,11 +124,12 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
           category: product?.category || '',
           base_price: product?.price || item.unit_price, // Use DB price or provided price
           type: product?.type,
+          pricing_tier: product?.pricing_tier,
         };
       });
 
       // Calculate tiered pricing
-      const { items: pricedItems, validation_errors } = calculateCartPricing(cartItems);
+      const { items: pricedItems, validation_errors } = await calculateCartPricing(cartItems);
 
       if (validation_errors.length > 0) {
         console.warn('[stripe-invoices] Pricing validation errors:', validation_errors);
