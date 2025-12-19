@@ -5,6 +5,7 @@
 
 import Stripe from 'stripe';
 import { getSupabaseClient } from './supabase';
+import { calculateCartPricing, CartItem } from './pricing';
 
 // Lazy-load Stripe client to avoid build-time errors
 let stripeClient: Stripe | null = null;
@@ -99,10 +100,54 @@ function calculateVAT(subtotal: number, country: string, vatNumber: string | nul
  * Create Stripe invoice for an order
  */
 export async function createStripeInvoice(params: CreateInvoiceParams): Promise<CreateInvoiceResult> {
-  const { company_id, contact_id, items, currency = 'gbp', offer_key, campaign_key, notes } = params;
+  const { company_id, contact_id, currency = 'gbp', offer_key, campaign_key, notes } = params;
+  let items = params.items; // May be recalculated with tiered pricing
 
   try {
     const supabase = getSupabaseClient();
+
+    // APPLY TIERED PRICING: Fetch product categories and recalculate prices
+    console.log('[stripe-invoices] Applying tiered pricing...');
+    const productCodes = items.map(item => item.product_code);
+    const { data: products } = await supabase
+      .from('products')
+      .select('product_code, category, type, price')
+      .in('product_code', productCodes);
+
+    if (products && products.length > 0) {
+      // Build cart items for pricing calculation
+      const cartItems: CartItem[] = items.map(item => {
+        const product = products.find(p => p.product_code === item.product_code);
+        return {
+          product_code: item.product_code,
+          quantity: item.quantity,
+          category: product?.category || '',
+          base_price: product?.price || item.unit_price, // Use DB price or provided price
+          type: product?.type,
+        };
+      });
+
+      // Calculate tiered pricing
+      const { items: pricedItems, validation_errors } = calculateCartPricing(cartItems);
+
+      if (validation_errors.length > 0) {
+        console.warn('[stripe-invoices] Pricing validation errors:', validation_errors);
+        // Continue anyway - validation errors are warnings for max qty
+      }
+
+      // Update items with calculated prices
+      items = items.map(item => {
+        const pricedItem = pricedItems.find(p => p.product_code === item.product_code);
+        if (pricedItem) {
+          console.log(`[stripe-invoices] ${item.product_code}: £${item.unit_price.toFixed(2)} → £${pricedItem.unit_price.toFixed(2)}`);
+          return {
+            ...item,
+            unit_price: pricedItem.unit_price,
+          };
+        }
+        return item;
+      });
+    }
 
     // 1. Get company and contact details (including billing address)
     const { data: company, error: companyError } = await supabase
