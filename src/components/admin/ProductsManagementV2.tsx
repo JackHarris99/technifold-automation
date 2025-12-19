@@ -120,16 +120,55 @@ export default function ProductsManagementV2({ products: initialProducts }: Prod
     setShowImageUpload(null);
   };
 
-  const handleBulkImageUploaded = (imageUrl: string, categoryKey: string) => {
+  const handleBulkImageUploaded = async (imageUrl: string, categoryKey: string) => {
     // Apply image to all products in this category that don't have an image
     const [type, category] = categoryKey.split('|||');
-    setProducts(products.map(p => {
-      if (p.type === type && (p.category || 'Uncategorized') === category && !p.image_url) {
-        return { ...p, image_url: imageUrl };
+
+    // Find all products in this category without images
+    const productsToUpdate = products.filter(p =>
+      p.type === type &&
+      (p.category || 'Uncategorized') === category &&
+      !p.image_url
+    );
+
+    const productCodes = productsToUpdate.map(p => p.product_code);
+
+    if (productCodes.length === 0) {
+      return;
+    }
+
+    // Save to database
+    try {
+      const response = await fetch('/api/admin/products/bulk-update-images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product_codes: productCodes,
+          image_url: imageUrl
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update products');
       }
-      return p;
-    }));
-    setShowBulkImageUpload(null);
+
+      console.log(`[BulkImageUpload] Updated ${result.updated_count} products in database`);
+
+      // Update local state
+      setProducts(products.map(p => {
+        if (productCodes.includes(p.product_code)) {
+          return { ...p, image_url: imageUrl };
+        }
+        return p;
+      }));
+
+      setShowBulkImageUpload(null);
+    } catch (error: any) {
+      console.error('[BulkImageUpload] Error:', error);
+      alert('Failed to update products: ' + error.message);
+    }
   };
 
   // Stats based on current tab filter
