@@ -11,13 +11,14 @@ export const revalidate = 0;
 export default async function ProductsAdminPage() {
   const supabase = getSupabaseClient();
 
-  // Fetch all products ordered by type, category, then code
+  // Fetch ALL products (override 1000 row default limit)
   const { data: products, error } = await supabase
     .from('products')
     .select('*')
     .order('type')
     .order('category')
-    .order('product_code');
+    .order('product_code')
+    .limit(10000); // Fetch up to 10,000 products
 
   if (error) {
     console.error('Error fetching products:', error);

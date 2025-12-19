@@ -36,6 +36,7 @@ interface ProductsManagementV2Props {
 export default function ProductsManagementV2({ products: initialProducts }: ProductsManagementV2Props) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTypeTab, setActiveTypeTab] = useState<string>('all');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [showImageUpload, setShowImageUpload] = useState<string | null>(null);
   const [showBulkImageUpload, setShowBulkImageUpload] = useState<string | null>(null);
@@ -66,20 +67,33 @@ export default function ProductsManagementV2({ products: initialProducts }: Prod
     return sortedGroups;
   }, [products]);
 
-  // Filter groups by search term
+  // Filter groups by type tab and search term
   const filteredGroups = useMemo(() => {
-    if (!searchTerm) return groupedProducts;
+    let filtered = groupedProducts;
 
-    return groupedProducts
-      .map(([groupKey, prods]) => {
-        const filtered = prods.filter((p) =>
-          p.product_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          p.description?.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        return [groupKey, filtered] as [string, Product[]];
-      })
-      .filter(([, prods]) => prods.length > 0);
-  }, [groupedProducts, searchTerm]);
+    // Filter by type tab
+    if (activeTypeTab !== 'all') {
+      filtered = filtered.filter(([groupKey]) => {
+        const [type] = groupKey.split('|||');
+        return type === activeTypeTab;
+      });
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered
+        .map(([groupKey, prods]) => {
+          const searchFiltered = prods.filter((p) =>
+            p.product_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.description?.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+          return [groupKey, searchFiltered] as [string, Product[]];
+        })
+        .filter(([, prods]) => prods.length > 0);
+    }
+
+    return filtered;
+  }, [groupedProducts, searchTerm, activeTypeTab]);
 
   const toggleCategory = (groupKey: string) => {
     const newExpanded = new Set(expandedCategories);
@@ -118,12 +132,94 @@ export default function ProductsManagementV2({ products: initialProducts }: Prod
     setShowBulkImageUpload(null);
   };
 
-  const getTotalProducts = () => products.length;
-  const getProductsWithImages = () => products.filter(p => p.image_url).length;
-  const getProductsWithoutImages = () => products.filter(p => !p.image_url).length;
+  // Stats based on current tab filter
+  const getFilteredProducts = () => {
+    if (activeTypeTab === 'all') return products;
+    return products.filter(p => p.type === activeTypeTab);
+  };
+
+  const getTotalProducts = () => getFilteredProducts().length;
+  const getProductsWithImages = () => getFilteredProducts().filter(p => p.image_url).length;
+  const getProductsWithoutImages = () => getFilteredProducts().filter(p => !p.image_url).length;
+
+  // Get product counts by type for tab badges
+  const getTypeCount = (type: string) => products.filter(p => p.type === type).length;
 
   return (
     <div className="space-y-6">
+      {/* Type Tabs */}
+      <div className="bg-white rounded-lg shadow">
+        <div className="border-b border-gray-200">
+          <nav className="flex -mb-px">
+            <button
+              onClick={() => setActiveTypeTab('all')}
+              className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                activeTypeTab === 'all'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              All Products
+              <span className="ml-2 px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">
+                {products.length}
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveTypeTab('tool')}
+              className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                activeTypeTab === 'tool'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Tools
+              <span className="ml-2 px-2 py-0.5 text-xs bg-blue-100 text-blue-600 rounded-full">
+                {getTypeCount('tool')}
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveTypeTab('consumable')}
+              className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                activeTypeTab === 'consumable'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Consumables
+              <span className="ml-2 px-2 py-0.5 text-xs bg-green-100 text-green-600 rounded-full">
+                {getTypeCount('consumable')}
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveTypeTab('part')}
+              className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                activeTypeTab === 'part'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Parts
+              <span className="ml-2 px-2 py-0.5 text-xs bg-orange-100 text-orange-600 rounded-full">
+                {getTypeCount('part')}
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveTypeTab('accessory')}
+              className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                activeTypeTab === 'accessory'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Accessories
+              <span className="ml-2 px-2 py-0.5 text-xs bg-purple-100 text-purple-600 rounded-full">
+                {getTypeCount('accessory')}
+              </span>
+            </button>
+          </nav>
+        </div>
+      </div>
+
       {/* Header Stats */}
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between mb-6">
