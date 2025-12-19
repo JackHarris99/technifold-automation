@@ -4,7 +4,7 @@
  */
 
 import { getSupabaseClient } from '@/lib/supabase';
-import ToolConsumableManagement from '@/components/admin/ToolConsumableManagement';
+import ToolConsumableManagementV2 from '@/components/admin/ToolConsumableManagementV2';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -15,43 +15,55 @@ export default async function ToolConsumablesAdminPage() {
   // Fetch all tool-consumable relationships
   const { data: relationships, error: relError } = await supabase
     .from('tool_consumable_map')
-    .select(`
-      tool_code,
-      consumable_code,
-      tools:products!tool_consumable_map_tool_code_fkey(product_code, description, rental_price_monthly),
-      consumables:products!tool_consumable_map_consumable_code_fkey(product_code, description, price)
-    `)
+    .select('tool_code, consumable_code')
     .order('tool_code');
 
   // Fetch all tools (products with rental_price_monthly)
   const { data: tools, error: toolsError } = await supabase
     .from('products')
-    .select('product_code, description, rental_price_monthly')
+    .select('*')
     .not('rental_price_monthly', 'is', null)
     .order('product_code');
 
-  // Fetch all consumables
-  const { data: consumables, error: consumablesError } = await supabase
-    .from('products')
-    .select('product_code, description, price, type')
-    .eq('type', 'consumable')
-    .order('product_code');
+  // Fetch all consumables in batches (Supabase 1000 row limit)
+  let allConsumables: any[] = [];
+  let start = 0;
+  const batchSize = 1000;
+  let hasMore = true;
 
-  if (relError || toolsError || consumablesError) {
-    console.error('Error fetching data:', { relError, toolsError, consumablesError });
+  while (hasMore) {
+    const { data: batch, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('type', 'consumable')
+      .order('category', { ascending: true })
+      .order('product_code', { ascending: true })
+      .range(start, start + batchSize - 1);
+
+    if (error) {
+      console.error('[tool-consumables] Error fetching consumables:', error);
+      break;
+    }
+
+    if (batch && batch.length > 0) {
+      allConsumables = allConsumables.concat(batch);
+      start += batchSize;
+      hasMore = batch.length === batchSize;
+    } else {
+      hasMore = false;
+    }
+  }
+
+  const consumables = allConsumables;
+
+  if (relError || toolsError) {
+    console.error('Error fetching data:', { relError, toolsError });
   }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Tool-Consumable Relationships</h1>
-          <p className="mt-2 text-gray-600">
-            Manage which consumables are compatible with each tool for reorder recommendations
-          </p>
-        </div>
-
-        <ToolConsumableManagement
+      <div className="max-w-[1600px] mx-auto">
+        <ToolConsumableManagementV2
           relationships={relationships || []}
           tools={tools || []}
           consumables={consumables || []}
