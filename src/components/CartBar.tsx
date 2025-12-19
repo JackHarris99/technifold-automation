@@ -8,9 +8,10 @@ interface CartBarProps {
   totalPrice: number;
   cart: CartItem[];
   onCheckout: () => void;
+  totalSavings?: number;
 }
 
-export function CartBar({ itemCount, totalPrice, cart, onCheckout }: CartBarProps) {
+export function CartBar({ itemCount, totalPrice, cart, onCheckout, totalSavings }: CartBarProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
@@ -107,6 +108,11 @@ export function CartBar({ itemCount, totalPrice, cart, onCheckout }: CartBarProp
 
             <div className="flex items-center gap-6">
               <div className="text-right">
+                {totalSavings && totalSavings > 0 && (
+                  <div className="text-xs text-green-400 font-semibold mb-1">
+                    Saving £{totalSavings.toFixed(2)}
+                  </div>
+                )}
                 <div className="text-2xl font-bold text-white">
                   £{totalPrice.toFixed(2)}
                 </div>
