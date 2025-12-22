@@ -6,6 +6,7 @@
 import Stripe from 'stripe';
 import { getSupabaseClient } from './supabase';
 import { calculateCartPricing, CartItem } from './pricing-v2';
+import { logger, prodLogger } from './logger';
 
 // Lazy-load Stripe client to avoid build-time errors
 let stripeClient: Stripe | null = null;
@@ -79,7 +80,7 @@ function calculateVAT(subtotal: number, country: string, vatNumber: string | nul
       };
     } else {
       // EU customer without VAT number - charge UK VAT as safeguard
-      console.warn(`EU customer in ${countryUpper} missing VAT number - charging UK VAT`);
+      logger.warn(`EU customer in ${countryUpper} missing VAT number - charging UK VAT`);
       return {
         vat_amount: subtotal * 0.20,
         vat_rate: 0.20,
@@ -107,7 +108,7 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
     const supabase = getSupabaseClient();
 
     // APPLY TIERED PRICING: Fetch product categories and recalculate prices
-    console.log('[stripe-invoices] Applying tiered pricing...');
+    logger.log('[stripe-invoices] Applying tiered pricing...');
     const productCodes = items.map(item => item.product_code);
     const { data: products } = await supabase
       .from('products')
@@ -132,7 +133,7 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
       const { items: pricedItems, validation_errors } = await calculateCartPricing(cartItems);
 
       if (validation_errors.length > 0) {
-        console.warn('[stripe-invoices] Pricing validation errors:', validation_errors);
+        logger.warn('[stripe-invoices] Pricing validation errors:', validation_errors);
         // Continue anyway - validation errors are warnings for max qty
       }
 
@@ -140,7 +141,7 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
       items = items.map(item => {
         const pricedItem = pricedItems.find(p => p.product_code === item.product_code);
         if (pricedItem) {
-          console.log(`[stripe-invoices] ${item.product_code}: £${item.unit_price.toFixed(2)} → £${pricedItem.unit_price.toFixed(2)}`);
+          logger.log(`[stripe-invoices] ${item.product_code}: £${item.unit_price.toFixed(2)} → £${pricedItem.unit_price.toFixed(2)}`);
           return {
             ...item,
             unit_price: pricedItem.unit_price,
@@ -260,11 +261,11 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
             type: taxIdType,
             value: company.vat_number,
           });
-          console.log(`[stripe-invoices] Added ${taxIdType} tax ID to customer:`, company.vat_number);
+          logger.log(`[stripe-invoices] Added ${taxIdType} tax ID to customer:`, company.vat_number);
         }
       } catch (error) {
         // Don't fail invoice creation if tax ID fails - just log it
-        console.error('[stripe-invoices] Failed to add tax ID:', error);
+        logger.error('[stripe-invoices] Failed to add tax ID:', error);
       }
     }
 
@@ -298,7 +299,7 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
       footer: vat_exempt_reason ? `VAT: ${vat_exempt_reason}` : undefined,
     });
 
-    console.log('[stripe-invoices] Created draft invoice:', invoice.id);
+    logger.log('[stripe-invoices] Created draft invoice:', invoice.id);
 
     // 5. Add line items to the invoice
     for (const item of items) {
@@ -314,7 +315,7 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
           quantity: item.quantity.toString(),
         }
       });
-      console.log('[stripe-invoices] Added item:', item.product_code, `x${item.quantity} @ £${item.unit_price}`);
+      logger.log('[stripe-invoices] Added item:', item.product_code, `x${item.quantity} @ £${item.unit_price}`);
     }
 
     // 6. Add shipping line item if applicable
@@ -326,7 +327,7 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
         currency: currency.toLowerCase(),
         description: `Shipping to ${destinationCountry}`,
       });
-      console.log('[stripe-invoices] Added shipping:', '£' + shippingCost.toFixed(2));
+      logger.log('[stripe-invoices] Added shipping:', '£' + shippingCost.toFixed(2));
     }
 
     // 7. Add VAT line item if applicable
@@ -338,12 +339,12 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
         currency: currency.toLowerCase(),
         description: `VAT (${(vat_rate * 100).toFixed(0)}%)`,
       });
-      console.log('[stripe-invoices] Added VAT:', '£' + vat_amount.toFixed(2));
+      logger.log('[stripe-invoices] Added VAT:', '£' + vat_amount.toFixed(2));
     }
 
     // 7. Finalize invoice (makes it immutable and sendable)
     const finalizedInvoice = await getStripeClient().invoices.finalizeInvoice(invoice.id);
-    console.log('[stripe-invoices] Finalized invoice. Total:', finalizedInvoice.amount_due / 100);
+    logger.log('[stripe-invoices] Finalized invoice. Total:', finalizedInvoice.amount_due / 100);
 
     // 8. Send invoice via Resend (NOT Stripe's automatic email)
     const { sendInvoiceEmail } = await import('./resend-client');
@@ -364,13 +365,13 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
     });
 
     if (!invoiceEmailResult.success) {
-      console.error('[stripe-invoices] Failed to send invoice email via Resend:', invoiceEmailResult.error);
+      logger.error('[stripe-invoices] Failed to send invoice email via Resend:', invoiceEmailResult.error);
       // Don't fail the whole invoice creation, just log the error
       // Invoice URL is still accessible via Stripe dashboard
     }
 
     // 9. Create invoice record in Supabase (new invoices table)
-    console.log('[stripe-invoices] Creating invoice record in Supabase...');
+    logger.log('[stripe-invoices] Creating invoice record in Supabase...');
     const { data: invoiceRecord, error: invoiceError } = await supabase
       .from('invoices')
       .insert({
@@ -398,8 +399,8 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
       .single();
 
     if (invoiceError || !invoiceRecord) {
-      console.error('[stripe-invoices] ❌ FAILED to create invoice record in Supabase:', invoiceError);
-      console.error('[stripe-invoices] Error details:', JSON.stringify(invoiceError, null, 2));
+      prodLogger.error('[stripe-invoices] ❌ FAILED to create invoice record in Supabase:', invoiceError);
+      prodLogger.error('[stripe-invoices] Error details:', JSON.stringify(invoiceError, null, 2));
       // Invoice was created in Stripe but failed to save to DB
       // We'll rely on webhooks to create the record later
       return {
@@ -410,7 +411,7 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
       };
     }
 
-    console.log('[stripe-invoices] ✅ Invoice record created:', invoiceRecord.invoice_id);
+    logger.log('[stripe-invoices] ✅ Invoice record created:', invoiceRecord.invoice_id);
 
     // 10. Create invoice line items (new invoice_items table)
     const lineItemsToInsert = items.map((item, index) => ({
@@ -428,10 +429,10 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
       .insert(lineItemsToInsert);
 
     if (itemsError) {
-      console.error('[stripe-invoices] ❌ FAILED to create invoice items:', itemsError);
-      console.error('[stripe-invoices] Error details:', JSON.stringify(itemsError, null, 2));
+      prodLogger.error('[stripe-invoices] ❌ FAILED to create invoice items:', itemsError);
+      prodLogger.error('[stripe-invoices] Error details:', JSON.stringify(itemsError, null, 2));
     } else {
-      console.log('[stripe-invoices] ✅ Created', lineItemsToInsert.length, 'invoice line items');
+      logger.log('[stripe-invoices] ✅ Created', lineItemsToInsert.length, 'invoice line items');
     }
 
     return {
@@ -443,7 +444,7 @@ export async function createStripeInvoice(params: CreateInvoiceParams): Promise<
     };
 
   } catch (error) {
-    console.error('Error creating Stripe invoice:', error);
+    prodLogger.error('Error creating Stripe invoice:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'
@@ -470,7 +471,7 @@ export async function voidStripeInvoice(stripeInvoiceId: string): Promise<{ succ
 
     return { success: true };
   } catch (error) {
-    console.error('Error voiding invoice:', error);
+    prodLogger.error('Error voiding invoice:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'

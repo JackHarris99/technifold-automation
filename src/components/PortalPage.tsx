@@ -21,6 +21,11 @@ interface PricingPreview {
     currency: string;
   }>;
   subtotal: number;
+  shipping?: number;
+  vat_amount?: number;
+  vat_rate?: number;
+  vat_exempt_reason?: string | null;
+  total?: number;
   total_savings: number;
   currency: string;
   validation_errors: string[];
@@ -165,9 +170,9 @@ export function PortalPage({ payload, contact, token }: PortalPageProps) {
         }
       `}</style>
 
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#fafafa]">
       {/* Header */}
-      <header className="bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-lg">
+      <header className="bg-[#0a0a0a] text-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-6">
@@ -186,15 +191,15 @@ export function PortalPage({ payload, contact, token }: PortalPageProps) {
                   />
                 </div>
               </div>
-              <div className="h-8 w-px bg-slate-600"></div>
+              <div className="h-8 w-px bg-[#333]"></div>
               <div>
                 <h1 className="text-lg font-bold text-white">{payload.company_name}</h1>
-                <p className="text-xs text-slate-300">Consumables Reorder Portal</p>
+                <p className="text-xs text-[#ccc]">Consumables Reorder Portal</p>
               </div>
             </div>
             {contact && (
               <div className="text-right hidden sm:block">
-                <p className="text-sm text-slate-300">Welcome back,</p>
+                <p className="text-sm text-[#ccc]">Welcome back,</p>
                 <p className="text-sm font-medium text-white">{contact.full_name}</p>
               </div>
             )}
@@ -206,9 +211,9 @@ export function PortalPage({ payload, contact, token }: PortalPageProps) {
       <div className="max-w-7xl mx-auto w-full">
         <div className="flex h-[calc(100vh-4rem)]">
           {/* Left Sidebar Navigation */}
-          <nav className="w-72 bg-white border-r border-slate-200 overflow-y-auto shadow-sm flex-shrink-0">
+          <nav className="w-72 bg-white border-r border-[#e8e8e8] overflow-y-auto shadow-sm flex-shrink-0">
           <div className="p-5">
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
+            <h2 className="text-xs font-bold text-[#999] uppercase tracking-wider mb-4">
               Browse Products
             </h2>
             <div className="space-y-1">
@@ -218,17 +223,17 @@ export function PortalPage({ payload, contact, token }: PortalPageProps) {
                   onClick={() => setActiveTab(tab.id)}
                   className={`w-full text-left px-4 py-3 rounded-xl transition-all ${
                     activeTab === tab.id
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                      : 'hover:bg-slate-100 text-slate-700'
+                      ? 'bg-[#16a34a] text-white shadow-md'
+                      : 'hover:bg-[#f5f5f5] text-[#0a0a0a]'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     {tab.icon === 'clock' ? (
-                      <svg className={`w-5 h-5 ${activeTab === tab.id ? 'text-white' : 'text-slate-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className={`w-5 h-5 ${activeTab === tab.id ? 'text-white' : 'text-[#999]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     ) : (
-                      <svg className={`w-5 h-5 ${activeTab === tab.id ? 'text-white' : 'text-slate-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className={`w-5 h-5 ${activeTab === tab.id ? 'text-white' : 'text-[#999]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
@@ -238,7 +243,7 @@ export function PortalPage({ payload, contact, token }: PortalPageProps) {
                         {tab.label}
                       </div>
                       {tab.code && (
-                        <div className={`text-xs mt-0.5 ${activeTab === tab.id ? 'text-blue-100' : 'text-slate-400'}`}>
+                        <div className={`text-xs mt-0.5 ${activeTab === tab.id ? 'text-[#ccc]' : 'text-[#999]'}`}>
                           {tab.code}
                         </div>
                       )}
@@ -250,11 +255,11 @@ export function PortalPage({ payload, contact, token }: PortalPageProps) {
           </div>
 
           {/* Help Box */}
-          <div className="p-5 border-t border-slate-200">
-            <div className="bg-slate-50 rounded-xl p-4">
-              <h3 className="text-sm font-semibold text-slate-700 mb-2">Need Help?</h3>
-              <p className="text-xs text-slate-500 mb-3">Our team is here to assist with your order.</p>
-              <a href="tel:+441455554491" className="text-sm text-blue-600 font-medium hover:text-blue-700">
+          <div className="p-5 border-t border-[#e8e8e8]">
+            <div className="bg-[#f5f5f5] rounded-xl p-4">
+              <h3 className="text-sm font-semibold text-[#0a0a0a] mb-2">Need Help?</h3>
+              <p className="text-xs text-[#666] mb-3">Our team is here to assist with your order.</p>
+              <a href="tel:+441455554491" className="text-sm text-[#16a34a] font-medium hover:text-[#15803d]">
                 +44 (0)1455 554491
               </a>
             </div>
@@ -450,6 +455,10 @@ export function PortalPage({ payload, contact, token }: PortalPageProps) {
         cart={cart}
         onCheckout={handleRequestInvoice}
         totalSavings={pricingPreview?.total_savings}
+        shipping={pricingPreview?.shipping}
+        vatAmount={pricingPreview?.vat_amount}
+        total={pricingPreview?.total}
+        pricingLineItems={pricingPreview?.line_items}
       />
 
       {/* Invoice Request Modal */}
@@ -461,6 +470,7 @@ export function PortalPage({ payload, contact, token }: PortalPageProps) {
         contactId={contact?.contact_id}
         onSuccess={handleInvoiceSuccess}
         token={token}
+        pricingPreview={pricingPreview}
       />
     </div>
     </>

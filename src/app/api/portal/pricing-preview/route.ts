@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = getSupabaseClient();
+    const company_id = payload.company_id;
 
     // 1. Fetch product details (including pricing_tier)
     const productCodes = items.map(item => item.product_code);
@@ -55,7 +56,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Build cart items for pricing calculation
+    // 2. Fetch company details for tax calculation
+    const { data: company, error: companyError } = await supabase
+      .from('companies')
+      .select('company_id, company_name, country, vat_number, billing_country')
+      .eq('company_id', company_id)
+      .single();
+
+    if (companyError || !company) {
+      return NextResponse.json(
+        { error: 'Company not found' },
+        { status: 404 }
+      );
+    }
+
+    // 3. Fetch shipping address to determine destination
+    const { data: shippingAddress } = await supabase
+      .from('shipping_addresses')
+      .select('country')
+      .eq('company_id', company_id)
+      .eq('is_default', true)
+      .single();
+
+    const destinationCountry = shippingAddress?.country || company.country || 'GB';
+
+    // 4. Build cart items for pricing calculation
     const cartItems: CartItem[] = items.map(item => {
       const product = products.find(p => p.product_code === item.product_code);
       if (!product) {
@@ -72,10 +97,10 @@ export async function POST(request: NextRequest) {
       };
     });
 
-    // 3. Calculate tiered pricing
+    // 5. Calculate tiered pricing
     const { items: pricedItems, validation_errors } = await calculateCartPricing(cartItems);
 
-    // 4. Build enriched line items with product details
+    // 6. Build enriched line items with product details
     const lineItems = pricedItems.map(item => {
       const product = products.find(p => p.product_code === item.product_code);
       return {
@@ -93,7 +118,51 @@ export async function POST(request: NextRequest) {
 
     const subtotal = pricedItems.reduce((sum, item) => sum + item.line_total, 0);
 
-    // 5. Calculate savings
+    // 7. Calculate shipping cost
+    const { data: shippingCost } = await supabase.rpc('calculate_shipping_cost', {
+      p_country_code: destinationCountry,
+      p_order_subtotal: subtotal,
+    });
+    const shipping = shippingCost || 0;
+
+    // 8. Calculate VAT (same logic as admin invoice preview)
+    const taxableAmount = subtotal + shipping;
+    let vat_amount = 0;
+    let vat_rate = 0;
+    let vat_exempt_reason: string | null = null;
+
+    const countryUpper = destinationCountry.toUpperCase();
+
+    // UK customers: 20% VAT
+    if (countryUpper === 'GB' || countryUpper === 'UK') {
+      vat_amount = taxableAmount * 0.20;
+      vat_rate = 0.20;
+    }
+    // EU customers with valid VAT number: 0% (reverse charge)
+    else {
+      const euCountries = ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE'];
+
+      if (euCountries.includes(countryUpper)) {
+        if (company.vat_number && company.vat_number.trim().length > 0) {
+          vat_amount = 0;
+          vat_rate = 0;
+          vat_exempt_reason = 'EU Reverse Charge';
+        } else {
+          // EU customer without VAT number - charge UK VAT
+          vat_amount = taxableAmount * 0.20;
+          vat_rate = 0.20;
+        }
+      } else {
+        // Rest of world: 0% VAT (export)
+        vat_amount = 0;
+        vat_rate = 0;
+        vat_exempt_reason = 'Export';
+      }
+    }
+
+    const total = subtotal + shipping + vat_amount;
+
+    // 9. Calculate savings
     const totalSavings = lineItems.reduce((sum, item) => {
       return sum + ((item.base_price - item.unit_price) * item.quantity);
     }, 0);
@@ -103,6 +172,11 @@ export async function POST(request: NextRequest) {
       preview: {
         line_items: lineItems,
         subtotal,
+        shipping,
+        vat_amount,
+        vat_rate,
+        vat_exempt_reason,
+        total,
         total_savings: totalSavings,
         currency: 'GBP',
         validation_errors,

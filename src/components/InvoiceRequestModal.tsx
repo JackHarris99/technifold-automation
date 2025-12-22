@@ -10,6 +10,24 @@ import { useState } from 'react';
 import { CartItem } from '@/types';
 import AddressCollectionModal from './portals/AddressCollectionModal';
 
+interface PricingPreview {
+  line_items: Array<{
+    product_code: string;
+    description: string;
+    quantity: number;
+    base_price: number;
+    unit_price: number;
+    line_total: number;
+    discount_applied: string | null;
+  }>;
+  subtotal: number;
+  shipping?: number;
+  vat_amount?: number;
+  vat_rate?: number;
+  total?: number;
+  total_savings: number;
+}
+
 interface InvoiceRequestModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -18,6 +36,7 @@ interface InvoiceRequestModalProps {
   contactId?: string;
   onSuccess: (orderId: string) => void;
   token: string; // HMAC token for API authentication
+  pricingPreview?: PricingPreview | null;
 }
 
 interface InvoiceResult {
@@ -48,6 +67,7 @@ export function InvoiceRequestModal({
   contactId,
   onSuccess,
   token,
+  pricingPreview,
 }: InvoiceRequestModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -109,6 +129,19 @@ export function InvoiceRequestModal({
         }),
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage = 'Failed to create invoice';
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          // If response is not JSON (e.g., HTML error page), use generic message
+          errorMessage = `Server error (${response.status})`;
+        }
+        throw new Error(errorMessage);
+      }
+
       const data = await response.json();
 
       if (!response.ok) {
@@ -160,8 +193,11 @@ export function InvoiceRequestModal({
     }
   };
 
-  // Calculate totals
-  const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  // Calculate totals from pricing preview if available
+  const subtotal = pricingPreview?.subtotal ?? cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const shipping = pricingPreview?.shipping ?? 0;
+  const vatAmount = pricingPreview?.vat_amount ?? 0;
+  const total = pricingPreview?.total ?? subtotal;
 
   // If showing address modal, render it standalone (not nested)
   if (showAddressModal) {
@@ -180,7 +216,7 @@ export function InvoiceRequestModal({
     <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-indigo-600">
+        <div className="px-6 py-4 border-b border-[#e8e8e8] bg-[#0a0a0a]">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold text-white">
               {invoiceResult ? 'Invoice Created' : 'Request Invoice'}
@@ -269,45 +305,92 @@ export function InvoiceRequestModal({
             <>
               {/* Order Summary */}
                   <div className="mb-6">
-                    <h4 className="font-semibold text-gray-900 mb-3">Order Summary</h4>
+                    <h4 className="font-semibold text-[#0a0a0a] mb-3">Order Summary</h4>
                     <div className="space-y-2 max-h-64 overflow-y-auto">
-                      {cart.map((item) => (
+                      {(pricingPreview?.line_items && pricingPreview.line_items.length > 0
+                        ? pricingPreview.line_items
+                        : cart.map(item => ({
+                            product_code: item.consumable_code,
+                            description: item.description,
+                            quantity: item.quantity,
+                            base_price: item.price,
+                            unit_price: item.price,
+                            line_total: item.price * item.quantity,
+                            discount_applied: null
+                          }))
+                      ).map((item) => (
                         <div
-                          key={item.consumable_code}
-                          className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0"
+                          key={item.product_code}
+                          className="flex justify-between items-center py-2 border-b border-[#f5f5f5] last:border-b-0"
                         >
                           <div className="flex-1">
-                            <div className="font-medium text-gray-900 text-sm">
+                            <div className="font-medium text-[#0a0a0a] text-sm">
                               {item.description}
                             </div>
-                            <div className="text-xs text-gray-400 font-mono">
-                              {item.consumable_code}
+                            <div className="text-xs text-[#999] font-mono">
+                              {item.product_code}
                             </div>
+                            {item.discount_applied && (
+                              <div className="text-xs text-[#16a34a] font-semibold mt-1">
+                                {item.discount_applied}
+                              </div>
+                            )}
                           </div>
                           <div className="flex items-center gap-4">
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-[#666]">
                               x{item.quantity}
                             </span>
-                            <span className="font-semibold text-gray-900 min-w-[80px] text-right">
-                              £{(item.price * item.quantity).toFixed(2)}
-                            </span>
+                            <div className="text-right min-w-[80px]">
+                              {item.discount_applied && item.base_price !== item.unit_price && (
+                                <div className="text-xs text-[#999] line-through">
+                                  £{(item.base_price * item.quantity).toFixed(2)}
+                                </div>
+                              )}
+                              <span className="font-semibold text-[#0a0a0a] text-sm">
+                                £{item.line_total.toFixed(2)}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  {/* Total */}
-                  <div className="border-t-2 border-gray-300 pt-4 mb-6">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-600">Subtotal:</span>
-                      <span className="font-semibold text-gray-900">
+                  {/* Pricing Breakdown */}
+                  <div className="border-t-2 border-[#e8e8e8] pt-4 mb-6 space-y-2">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-[#666]">Subtotal:</span>
+                      <span className="font-semibold text-[#0a0a0a]">
                         £{subtotal.toFixed(2)}
                       </span>
                     </div>
-                    <div className="text-xs text-gray-500 text-right mb-4">
-                      VAT will be calculated and shown on invoice
-                    </div>
+                    {pricingPreview && (
+                      <>
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-[#666]">Shipping:</span>
+                          <span className="font-semibold text-[#0a0a0a]">
+                            {shipping === 0 ? 'FREE' : `£${shipping.toFixed(2)}`}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-[#666]">VAT:</span>
+                          <span className="font-semibold text-[#0a0a0a]">
+                            £{vatAmount.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center pt-2 border-t border-[#e8e8e8]">
+                          <span className="font-bold text-[#0a0a0a]">Total:</span>
+                          <span className="font-bold text-[#16a34a] text-lg">
+                            £{total.toFixed(2)}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                    {!pricingPreview && (
+                      <div className="text-xs text-[#666] text-right">
+                        VAT & shipping will be calculated
+                      </div>
+                    )}
                   </div>
 
                   {/* Info Box */}
@@ -335,7 +418,7 @@ export function InvoiceRequestModal({
                     <button
                       onClick={handleRequestInvoice}
                       disabled={loading}
-                      className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg disabled:opacity-50"
+                      className="flex-1 bg-[#16a34a] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#15803d] transition-all shadow-lg disabled:opacity-50"
                     >
                       {loading ? (
                         <span className="flex items-center justify-center gap-2">

@@ -6,6 +6,13 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import AdminNav from '@/components/admin/AdminNav';
+import { Inter } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800'],
+  display: 'swap',
+});
 
 export default async function AdminLayout({
   children,
@@ -21,12 +28,12 @@ export default async function AdminLayout({
   }
 
   return (
-    <>
+    <div className={inter.className}>
       <AdminNav />
       <main className="ml-64 min-h-screen bg-gray-50">
         {children}
       </main>
-    </>
+    </div>
   );
 }
 
