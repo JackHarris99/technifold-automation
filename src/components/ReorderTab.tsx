@@ -63,32 +63,32 @@ export function ReorderTab({ items, cart, onAddToCart, onRemoveFromCart }: Reord
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Previously Ordered</h2>
-          <p className="text-slate-500 mt-1">Quick reorder from your purchase history</p>
+          <h2 className="text-2xl font-bold text-[#0a0a0a]">Previously Ordered</h2>
+          <p className="text-[#666] mt-1">Quick reorder from your purchase history</p>
         </div>
         {items.length > 0 && (
-          <div className="text-sm text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+          <div className="text-sm text-[#666] bg-[#f5f5f5] px-3 py-1 rounded-full border border-[#e8e8e8]">
             {items.length} item{items.length !== 1 ? 's' : ''}
           </div>
         )}
       </div>
 
       {items.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-2xl border border-slate-200">
-          <svg className="w-16 h-16 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="text-center py-16 bg-white rounded-2xl border border-[#e8e8e8]">
+          <svg className="w-16 h-16 mx-auto text-[#ccc] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <h3 className="text-lg font-semibold text-slate-700 mb-2">No Previous Orders</h3>
-          <p className="text-slate-500">Browse your tools to find compatible consumables</p>
+          <h3 className="text-lg font-semibold text-[#0a0a0a] mb-2">No Previous Orders</h3>
+          <p className="text-[#666]">Browse your tools to find compatible consumables</p>
         </div>
       ) : (
         <div className="space-y-8">
           {sortedCategories.map((category) => (
             <div key={category}>
               <div className="flex items-center gap-3 mb-4">
-                <h3 className="text-lg font-bold text-slate-800">{category}</h3>
-                <div className="flex-1 h-px bg-slate-200"></div>
-                <span className="text-sm text-slate-400">{groupedItems[category].length} items</span>
+                <h3 className="text-lg font-bold text-[#0a0a0a]">{category}</h3>
+                <div className="flex-1 h-px bg-[#e8e8e8]"></div>
+                <span className="text-sm text-[#666]">{groupedItems[category].length} items</span>
               </div>
               <div className="grid gap-3">
                 {groupedItems[category].map((item) => {
@@ -99,13 +99,13 @@ export function ReorderTab({ items, cart, onAddToCart, onRemoveFromCart }: Reord
                     <div
                       key={item.consumable_code}
                       className={`bg-white rounded-xl border-2 transition-all hover:shadow-lg ${
-                        isInCart ? 'border-green-400 shadow-md' : 'border-slate-200 hover:border-slate-300'
+                        isInCart ? 'border-[#16a34a] shadow-md' : 'border-[#e8e8e8] hover:border-[#ccc]'
                       }`}
                     >
                       <div className="p-4">
                         <div className="flex items-center gap-4">
                           {/* Product Image */}
-                          <div className="relative w-20 h-20 bg-slate-50 rounded-lg flex-shrink-0 overflow-hidden">
+                          <div className="relative w-20 h-20 bg-[#fafafa] rounded-lg flex-shrink-0 overflow-hidden border border-[#e8e8e8]">
                             <Image
                               src={`/product_images/${item.consumable_code}.jpg`}
                               alt={item.description}
@@ -121,10 +121,10 @@ export function ReorderTab({ items, cart, onAddToCart, onRemoveFromCart }: Reord
 
                           {/* Product Info */}
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-base font-semibold text-slate-900 leading-tight">
+                            <h4 className="text-base font-semibold text-[#0a0a0a] leading-tight">
                               {item.description}
                             </h4>
-                            <p className="text-sm text-slate-400 font-mono mt-1">
+                            <p className="text-sm text-[#999] font-mono mt-1">
                               {item.consumable_code}
                             </p>
                           </div>
@@ -132,11 +132,11 @@ export function ReorderTab({ items, cart, onAddToCart, onRemoveFromCart }: Reord
                           {/* Price */}
                           <div className="text-right px-4">
                             {item.price ? (
-                              <div className="text-xl font-bold text-slate-900">
+                              <div className="text-xl font-bold text-[#0a0a0a]">
                                 £{item.price.toFixed(2)}
                               </div>
                             ) : (
-                              <div className="text-sm text-slate-400">
+                              <div className="text-sm text-[#999]">
                                 Price on request
                               </div>
                             )}
@@ -153,8 +153,8 @@ export function ReorderTab({ items, cart, onAddToCart, onRemoveFromCart }: Reord
                               onClick={() => handleAddToCart(item.consumable_code)}
                               className={`px-5 py-2.5 rounded-lg font-semibold transition-all ${
                                 isInCart
-                                  ? 'bg-green-600 text-white hover:bg-green-700 shadow-sm'
-                                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-sm'
+                                  ? 'bg-[#16a34a] text-white hover:bg-[#15803d] shadow-sm'
+                                  : 'bg-[#0a0a0a] text-white hover:bg-[#1a1a1a] shadow-sm'
                               }`}
                             >
                               {isInCart ? 'In Cart' : 'Add'}

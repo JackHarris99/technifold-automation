@@ -79,9 +79,9 @@ export function ToolTab({
   return (
     <div className="space-y-6">
       {/* Tool Header Card */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 text-white shadow-lg">
+      <div className="bg-[#0a0a0a] rounded-2xl p-6 text-white shadow-lg border border-[#333]">
         <div className="flex items-center gap-5">
-          <div className="relative w-24 h-24 bg-white/20 rounded-xl flex-shrink-0 overflow-hidden backdrop-blur-sm">
+          <div className="relative w-24 h-24 bg-white/10 rounded-xl flex-shrink-0 overflow-hidden">
             <Image
               src={`/product_images/${toolTab.tool_code}.jpg`}
               alt={toolTab.tool_desc || toolTab.tool_code}
@@ -95,11 +95,11 @@ export function ToolTab({
             />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">
+            <h2 className="text-2xl font-bold text-white">
               {toolTab.tool_desc || toolTab.tool_code}
             </h2>
-            <p className="text-blue-100 font-mono text-sm mt-1">{toolTab.tool_code}</p>
-            <p className="text-blue-200 text-sm mt-2">
+            <p className="text-[#999] font-mono text-sm mt-1">{toolTab.tool_code}</p>
+            <p className="text-[#ccc] text-sm mt-2">
               {allItems.length} compatible consumable{allItems.length !== 1 ? 's' : ''}
             </p>
           </div>
@@ -128,9 +128,9 @@ export function ToolTab({
           {sortedCategories.map((category) => (
             <div key={category}>
               <div className="flex items-center gap-3 mb-4">
-                <h3 className="text-lg font-bold text-slate-800">{category}</h3>
-                <div className="flex-1 h-px bg-slate-200"></div>
-                <span className="text-sm text-slate-400">{groupedItems[category].length} items</span>
+                <h3 className="text-lg font-bold text-[#0a0a0a]">{category}</h3>
+                <div className="flex-1 h-px bg-[#e8e8e8]"></div>
+                <span className="text-sm text-[#666]">{groupedItems[category].length} items</span>
               </div>
               <div className="grid gap-3">
                 {groupedItems[category].map((item) => {
@@ -141,13 +141,13 @@ export function ToolTab({
                     <div
                       key={item.consumable_code}
                       className={`bg-white rounded-xl border-2 transition-all hover:shadow-lg ${
-                        isInCart ? 'border-green-400 shadow-md' : 'border-slate-200 hover:border-slate-300'
+                        isInCart ? 'border-[#16a34a] shadow-md' : 'border-[#e8e8e8] hover:border-[#ccc]'
                       }`}
                     >
                       <div className="p-4">
                         <div className="flex items-center gap-4">
                           {/* Product Image */}
-                          <div className="relative w-20 h-20 bg-slate-50 rounded-lg flex-shrink-0 overflow-hidden">
+                          <div className="relative w-20 h-20 bg-[#fafafa] rounded-lg flex-shrink-0 overflow-hidden border border-[#e8e8e8]">
                             <Image
                               src={`/product_images/${item.consumable_code}.jpg`}
                               alt={item.description}
@@ -163,10 +163,10 @@ export function ToolTab({
 
                           {/* Product Info */}
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-base font-semibold text-slate-900 leading-tight">
+                            <h4 className="text-base font-semibold text-[#0a0a0a] leading-tight">
                               {item.description}
                             </h4>
-                            <p className="text-sm text-slate-400 font-mono mt-1">
+                            <p className="text-sm text-[#999] font-mono mt-1">
                               {item.consumable_code}
                             </p>
                           </div>
@@ -174,11 +174,11 @@ export function ToolTab({
                           {/* Price */}
                           <div className="text-right px-4">
                             {item.price ? (
-                              <div className="text-xl font-bold text-slate-900">
+                              <div className="text-xl font-bold text-[#0a0a0a]">
                                 £{item.price.toFixed(2)}
                               </div>
                             ) : (
-                              <div className="text-sm text-slate-400">
+                              <div className="text-sm text-[#999]">
                                 Price on request
                               </div>
                             )}
@@ -195,8 +195,8 @@ export function ToolTab({
                               onClick={() => handleAddToCart(item.consumable_code)}
                               className={`px-5 py-2.5 rounded-lg font-semibold transition-all ${
                                 isInCart
-                                  ? 'bg-green-600 text-white hover:bg-green-700 shadow-sm'
-                                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-sm'
+                                  ? 'bg-[#16a34a] text-white hover:bg-[#15803d] shadow-sm'
+                                  : 'bg-[#0a0a0a] text-white hover:bg-[#1a1a1a] shadow-sm'
                               }`}
                             >
                               {isInCart ? 'In Cart' : 'Add'}
