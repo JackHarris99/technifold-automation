@@ -171,104 +171,49 @@ export function PortalPage({ payload, contact, token }: PortalPageProps) {
       `}</style>
 
     <div className="min-h-screen bg-[#fafafa]">
-      {/* Header */}
-      <header className="bg-[#0a0a0a] text-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-6">
-              {/* Logo */}
-              <div className="flex items-center">
-                <div className="relative w-36 h-10">
-                  <Image
-                    src="/technifold-logo-white.svg"
-                    alt="Technifold"
-                    fill
-                    className="object-contain"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                    }}
-                  />
-                </div>
-              </div>
-              <div className="h-8 w-px bg-[#333]"></div>
-              <div>
-                <h1 className="text-lg font-bold text-white">{payload.company_name}</h1>
-                <p className="text-xs text-[#ccc]">Consumables Reorder Portal</p>
-              </div>
+      <div className="max-w-[1600px] mx-auto px-6 py-12">
+        {/* Header */}
+        <div className="mb-16">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-[56px] font-[800] text-[#0a0a0a] mb-3 tracking-[-0.04em] leading-[1.1]">
+                {payload.company_name}
+              </h1>
+              <p className="text-[19px] text-[#666] font-[400] tracking-[-0.01em]">
+                Precision consumables ordering with intelligent tiered pricing
+              </p>
             </div>
             {contact && (
-              <div className="text-right hidden sm:block">
-                <p className="text-sm text-[#ccc]">Welcome back,</p>
-                <p className="text-sm font-medium text-white">{contact.full_name}</p>
+              <div className="text-right">
+                <p className="text-[14px] text-[#999] font-[500]">Welcome back,</p>
+                <p className="text-[21px] font-[700] text-[#0a0a0a] tracking-[-0.01em]">{contact.full_name}</p>
+                <p className="text-[14px] text-[#666] mt-1">{contact.email}</p>
               </div>
             )}
           </div>
+
+          {/* Category Tabs */}
+          <div className="flex gap-3 overflow-x-auto pb-2">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-6 py-3 rounded-[14px] font-[600] text-[15px] tracking-[-0.01em] whitespace-nowrap transition-all ${
+                  activeTab === tab.id
+                    ? 'bg-[#0a0a0a] text-white shadow-[0_4px_12px_rgba(0,0,0,0.15)]'
+                    : 'bg-white text-[#666] hover:bg-[#f5f5f5] border border-[#e8e8e8]'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto w-full">
-        <div className="flex h-[calc(100vh-4rem)]">
-          {/* Left Sidebar Navigation */}
-          <nav className="w-72 bg-white border-r border-[#e8e8e8] overflow-y-auto shadow-sm flex-shrink-0">
-          <div className="p-5">
-            <h2 className="text-xs font-bold text-[#999] uppercase tracking-wider mb-4">
-              Browse Products
-            </h2>
-            <div className="space-y-1">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`w-full text-left px-4 py-3 rounded-xl transition-all ${
-                    activeTab === tab.id
-                      ? 'bg-[#16a34a] text-white shadow-md'
-                      : 'hover:bg-[#f5f5f5] text-[#0a0a0a]'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    {tab.icon === 'clock' ? (
-                      <svg className={`w-5 h-5 ${activeTab === tab.id ? 'text-white' : 'text-[#999]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    ) : (
-                      <svg className={`w-5 h-5 ${activeTab === tab.id ? 'text-white' : 'text-[#999]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className={`font-medium text-sm truncate ${activeTab === tab.id ? 'text-white' : ''}`}>
-                        {tab.label}
-                      </div>
-                      {tab.code && (
-                        <div className={`text-xs mt-0.5 ${activeTab === tab.id ? 'text-[#ccc]' : 'text-[#999]'}`}>
-                          {tab.code}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Help Box */}
-          <div className="p-5 border-t border-[#e8e8e8]">
-            <div className="bg-[#f5f5f5] rounded-xl p-4">
-              <h3 className="text-sm font-semibold text-[#0a0a0a] mb-2">Need Help?</h3>
-              <p className="text-xs text-[#666] mb-3">Our team is here to assist with your order.</p>
-              <a href="tel:+441455554491" className="text-sm text-[#16a34a] font-medium hover:text-[#15803d]">
-                +44 (0)1455 554491
-              </a>
-            </div>
-          </div>
-        </nav>
-
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto pb-24">
-          <div className="max-w-5xl mx-auto p-6">
+        {/* Main Grid */}
+        <div className="grid grid-cols-12 gap-8">
+          {/* Main Content Area */}
+          <div className="col-span-8 space-y-6">
             {activeTab === 'reorder' ? (
               <ReorderTab
                 items={payload.reorder_items}
@@ -444,22 +389,103 @@ export function PortalPage({ payload, contact, token }: PortalPageProps) {
               );
             })()}
           </div>
-        </main>
+
+          {/* Right Sidebar */}
+          <div className="col-span-4 space-y-6">
+            {/* Company Info Card */}
+            <div className="bg-white rounded-[20px] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8] sticky top-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="text-[12px] font-[700] text-[#666] uppercase tracking-[0.05em]">Company Details</div>
+              </div>
+              <div className="space-y-5">
+                <div>
+                  <div className="text-[17px] font-[700] text-[#0a0a0a] mb-1 tracking-[-0.01em]">{payload.company_name}</div>
+                  <div className="text-[13px] text-[#999] font-mono">
+                    {payload.company_id}
+                  </div>
+                </div>
+                <div className="pt-5 border-t border-[#e8e8e8]">
+                  <div className="text-[13px] font-[600] text-[#0a0a0a] mb-3">Contact</div>
+                  {contact && (
+                    <div className="space-y-1">
+                      <div className="text-[14px] text-[#0a0a0a] font-[500]">{contact.full_name}</div>
+                      <div className="text-[13px] text-[#666]">{contact.email}</div>
+                    </div>
+                  )}
+                </div>
+                <div className="pt-5 border-t border-[#e8e8e8]">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-[13px] font-[600] text-[#0a0a0a]">Delivery Address</div>
+                  </div>
+                  <div className="text-[13px] text-[#666] leading-relaxed">
+                    <div className="p-4 bg-[#f9fafb] rounded-[12px] border border-[#e8e8e8]">
+                      <p className="text-[13px] text-[#999] italic">
+                        Address information will be confirmed during checkout
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Order Summary */}
+            {pricingPreview && pricingPreview.line_items.length > 0 && (
+              <div className="bg-[#0a0a0a] rounded-[20px] p-8 text-white sticky top-[200px] shadow-[0_16px_48px_rgba(0,0,0,0.24)]">
+                <div className="text-[12px] font-[700] text-[#999] uppercase tracking-[0.05em] mb-6">Order Summary</div>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center pb-4 border-b border-[#2a2a2a]">
+                    <span className="text-[15px] text-[#999] font-[500]">Subtotal</span>
+                    <span className="font-[700] text-[17px] tracking-[-0.01em]">£{pricingPreview.subtotal.toFixed(2)}</span>
+                  </div>
+                  {pricingPreview.shipping !== undefined && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-[15px] text-[#999] font-[500]">Shipping</span>
+                      <span className="font-[600] text-[16px]">
+                        {pricingPreview.shipping === 0 ? 'FREE' : `£${pricingPreview.shipping.toFixed(2)}`}
+                      </span>
+                    </div>
+                  )}
+                  {pricingPreview.vat_amount !== undefined && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-[15px] text-[#999] font-[500]">VAT</span>
+                      <span className="font-[600] text-[16px]">£{pricingPreview.vat_amount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  {pricingPreview.total !== undefined && (
+                    <div className="flex justify-between items-center pt-4 border-t border-[#2a2a2a]">
+                      <span className="text-[17px] font-[700]">Total</span>
+                      <span className="font-[800] text-[28px] tracking-[-0.02em] text-[#16a34a]">£{pricingPreview.total.toFixed(2)}</span>
+                    </div>
+                  )}
+                  {pricingPreview.total_savings > 0 && (
+                    <div className="mt-4 p-4 bg-[#16a34a]/10 rounded-[12px] border border-[#16a34a]/20">
+                      <div className="text-[13px] text-[#16a34a] font-[600]">
+                        You're saving £{pricingPreview.total_savings.toFixed(2)} with tiered pricing!
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={handleRequestInvoice}
+                  disabled={getCartQuantity() === 0}
+                  className="w-full mt-6 py-4 bg-[#16a34a] text-white rounded-[14px] font-[700] text-[15px] tracking-[-0.01em] hover:bg-[#15803d] transition-all shadow-[0_4px_12px_rgba(22,163,74,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Request Invoice ({getCartQuantity()} items)
+                </button>
+              </div>
+            )}
+
+            {/* Help Card */}
+            <div className="bg-white rounded-[20px] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
+              <div className="text-[12px] font-[700] text-[#666] uppercase tracking-[0.05em] mb-4">Need Help?</div>
+              <p className="text-[14px] text-[#666] mb-4">Our team is ready to assist with your order.</p>
+              <a href="tel:+441455554491" className="text-[15px] text-[#16a34a] font-[600] hover:text-[#15803d]">
+                +44 (0)1455 554491
+              </a>
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* Cart Bar */}
-      <CartBar
-        itemCount={getCartQuantity()}
-        totalPrice={getTotalPrice()}
-        cart={cart}
-        onCheckout={handleRequestInvoice}
-        totalSavings={pricingPreview?.total_savings}
-        shipping={pricingPreview?.shipping}
-        vatAmount={pricingPreview?.vat_amount}
-        total={pricingPreview?.total}
-        pricingLineItems={pricingPreview?.line_items}
-      />
 
       {/* Invoice Request Modal */}
       <InvoiceRequestModal
