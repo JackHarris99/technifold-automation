@@ -7,6 +7,7 @@ import { ReorderTab } from './ReorderTab';
 import { ToolTab } from './ToolTab';
 import { CartBar } from './CartBar';
 import { InvoiceRequestModal } from './InvoiceRequestModal';
+import PortalAddressCollectionModal from './portals/PortalAddressCollectionModal';
 
 interface PricingPreview {
   line_items: Array<{
@@ -31,6 +32,15 @@ interface PricingPreview {
   validation_errors: string[];
 }
 
+interface ShippingAddress {
+  address_line_1: string;
+  address_line_2: string;
+  city: string;
+  state_province: string;
+  postal_code: string;
+  country: string;
+}
+
 interface PortalPageProps {
   payload: CompanyPayload;
   contact?: {
@@ -47,6 +57,49 @@ export function PortalPage({ payload, contact, token }: PortalPageProps) {
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [pricingPreview, setPricingPreview] = useState<PricingPreview | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
+  const [shippingAddress, setShippingAddress] = useState<ShippingAddress | null>(null);
+  const [loadingAddress, setLoadingAddress] = useState(true);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+
+  // Fetch shipping address on mount
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const response = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
+        const data = await response.json();
+
+        if (data.success && data.address) {
+          setShippingAddress(data.address);
+        } else {
+          // No address exists - show modal to collect it
+          setShowAddressModal(true);
+        }
+      } catch (error) {
+        console.error('[PortalPage] Failed to fetch shipping address:', error);
+      } finally {
+        setLoadingAddress(false);
+      }
+    };
+
+    fetchAddress();
+  }, [token]);
+
+  // Handler for when address is successfully saved
+  const handleAddressSaved = async () => {
+    setShowAddressModal(false);
+
+    // Refetch the address
+    try {
+      const response = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
+      const data = await response.json();
+
+      if (data.success && data.address) {
+        setShippingAddress(data.address);
+      }
+    } catch (error) {
+      console.error('[PortalPage] Failed to refetch shipping address:', error);
+    }
+  };
 
   // Fetch pricing preview when cart changes
   useEffect(() => {
@@ -171,6 +224,41 @@ export function PortalPage({ payload, contact, token }: PortalPageProps) {
       `}</style>
 
     <div className="min-h-screen bg-[#fafafa]">
+      {/* Top Branding Bar */}
+      <div className="bg-white border-b border-[#e8e8e8]">
+        <div className="max-w-[1600px] mx-auto px-6 py-4">
+          <div className="flex items-center justify-center gap-8">
+            <div className="relative h-10 w-32">
+              <Image
+                src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/technifold.png"
+                alt="Technifold"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
+            <div className="relative h-10 w-32">
+              <Image
+                src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/technicrease.png"
+                alt="Technicrease"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
+            <div className="relative h-10 w-32">
+              <Image
+                src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/creasestream.png"
+                alt="Creasestream"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-[1600px] mx-auto px-6 py-12">
         {/* Header */}
         <div className="mb-16">
@@ -417,13 +505,31 @@ export function PortalPage({ payload, contact, token }: PortalPageProps) {
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-[13px] font-[600] text-[#0a0a0a]">Delivery Address</div>
                   </div>
-                  <div className="text-[13px] text-[#666] leading-relaxed">
+                  {loadingAddress ? (
                     <div className="p-4 bg-[#f9fafb] rounded-[12px] border border-[#e8e8e8]">
-                      <p className="text-[13px] text-[#999] italic">
-                        Address information will be confirmed during checkout
-                      </p>
+                      <p className="text-[13px] text-[#999] italic">Loading...</p>
                     </div>
-                  </div>
+                  ) : shippingAddress ? (
+                    <div className="text-[13px] text-[#666] leading-relaxed">
+                      <div className="p-4 bg-[#f9fafb] rounded-[12px] border border-[#e8e8e8]">
+                        <div className="font-[500] text-[#0a0a0a]">{shippingAddress.address_line_1}</div>
+                        {shippingAddress.address_line_2 && (
+                          <div>{shippingAddress.address_line_2}</div>
+                        )}
+                        <div>{shippingAddress.city}{shippingAddress.state_province ? `, ${shippingAddress.state_province}` : ''}</div>
+                        <div>{shippingAddress.postal_code}</div>
+                        <div className="font-[500] mt-1">{shippingAddress.country}</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-[13px] text-[#666] leading-relaxed">
+                      <div className="p-4 bg-[#f9fafb] rounded-[12px] border border-[#e8e8e8]">
+                        <p className="text-[13px] text-[#999] italic">
+                          Address information will be confirmed during checkout
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -486,6 +592,16 @@ export function PortalPage({ payload, contact, token }: PortalPageProps) {
           </div>
         </div>
       </div>
+
+      {/* Address Collection Modal (shown on first visit if no address) */}
+      <PortalAddressCollectionModal
+        isOpen={showAddressModal}
+        onClose={() => setShowAddressModal(false)}
+        companyId={payload.company_id}
+        companyName={payload.company_name}
+        token={token}
+        onSuccess={handleAddressSaved}
+      />
 
       {/* Invoice Request Modal */}
       <InvoiceRequestModal
