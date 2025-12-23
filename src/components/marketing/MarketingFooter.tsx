@@ -25,17 +25,52 @@ export function MarketingFooter() {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/tools/tri-creaser" className="text-gray-400 hover:text-white transition-colors">
-                  Tri-Creaser Systems
+                  Tri-Creaser
                 </Link>
               </li>
               <li>
                 <Link href="/tools/spine-creaser" className="text-gray-400 hover:text-white transition-colors">
-                  Spine-Creaser Systems
+                  Spine-Creaser
+                </Link>
+              </li>
+              <li>
+                <Link href="/tools/quad-creaser" className="text-gray-400 hover:text-white transition-colors">
+                  Quad-Creaser
+                </Link>
+              </li>
+              <li>
+                <Link href="/tools/spine-and-hinge-creaser" className="text-gray-400 hover:text-white transition-colors">
+                  Spine & Hinge Creaser
                 </Link>
               </li>
               <li>
                 <Link href="/tools/multi-tool" className="text-gray-400 hover:text-white transition-colors">
-                  Multi-Tool Systems
+                  Multi-Tool
+                </Link>
+              </li>
+              <li>
+                <Link href="/tools/web-tool" className="text-gray-400 hover:text-white transition-colors">
+                  Web-Tool
+                </Link>
+              </li>
+              <li>
+                <Link href="/tools/cp-applicator" className="text-gray-400 hover:text-white transition-colors">
+                  CP Applicator
+                </Link>
+              </li>
+              <li>
+                <Link href="/tools/gripper-boss" className="text-gray-400 hover:text-white transition-colors">
+                  Gripper Boss
+                </Link>
+              </li>
+              <li>
+                <Link href="/tools/micro-perforator" className="text-gray-400 hover:text-white transition-colors">
+                  Micro Perforator
+                </Link>
+              </li>
+              <li>
+                <Link href="/tools/section-scorer" className="text-gray-400 hover:text-white transition-colors">
+                  Section Scorer
                 </Link>
               </li>
             </ul>
