@@ -1,17 +1,23 @@
 /**
  * POST /api/trial/resend-email
- * Resend trial confirmation email to customer
+ * Resend trial email to customer
+ *
+ * Handles two cases:
+ * 1. Trial not yet converted → Queue trial request email (with checkout link)
+ * 2. Trial converted to subscription → Send trial confirmation email
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { sendTrialConfirmation } from '@/lib/resend-client';
+import { generateTrialToken } from '@/lib/tokens';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
       trial_intent_id,
+      token,
       email,
       contact_name,
       machine_brand,
@@ -27,10 +33,10 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
-    // Look up the trial intent to get company_id and stripe_subscription_id
+    // Look up the trial intent
     const { data: trialIntent, error: trialError } = await supabase
       .from('trial_intents')
-      .select('company_id, stripe_subscription_id')
+      .select('company_id, contact_id, machine_id')
       .eq('id', trial_intent_id)
       .single();
 
@@ -42,66 +48,100 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Look up the subscription to get pricing and trial end date
-    const { data: subscription, error: subError } = await supabase
+    // Check if a subscription exists for this trial (company + machine)
+    const { data: subscription } = await supabase
       .from('subscriptions')
-      .select('monthly_price, trial_end_date')
-      .eq('stripe_subscription_id', trialIntent.stripe_subscription_id)
+      .select('monthly_price, trial_end_date, company_id')
+      .eq('company_id', trialIntent.company_id)
       .single();
 
-    if (subError || !subscription) {
-      console.error('[trial/resend-email] Subscription not found:', subError);
-      return NextResponse.json(
-        { error: 'Subscription not found' },
-        { status: 404 }
-      );
+    // If subscription exists, send confirmation email
+    if (subscription) {
+      // Look up company
+      const { data: company } = await supabase
+        .from('companies')
+        .select('company_name')
+        .eq('company_id', trialIntent.company_id)
+        .single();
+
+      const machineName = machine_brand && machine_model
+        ? `${machine_brand} ${machine_model}`
+        : undefined;
+
+      const emailResult = await sendTrialConfirmation({
+        to: email,
+        contactName: contact_name || '',
+        companyName: company?.company_name || '',
+        monthlyPrice: subscription.monthly_price,
+        currency: 'GBP',
+        trialEndDate: subscription.trial_end_date ? new Date(subscription.trial_end_date) : null,
+        machineName,
+      });
+
+      if (!emailResult.success) {
+        return NextResponse.json(
+          { error: 'Failed to send confirmation email', details: emailResult.error },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: 'Trial confirmation email sent',
+        type: 'confirmation',
+      });
     }
 
-    // Look up the company
-    const { data: company, error: companyError } = await supabase
+    // No subscription found - queue trial request email with checkout link
+    // Use the existing token or generate a new one
+    const trialLink = `${process.env.NEXT_PUBLIC_BASE_URL}/t/${token}`;
+
+    const { data: machine } = await supabase
+      .from('machines')
+      .select('brand, model, slug')
+      .eq('machine_id', trialIntent.machine_id)
+      .single();
+
+    const { data: company } = await supabase
       .from('companies')
       .select('company_name')
       .eq('company_id', trialIntent.company_id)
       .single();
 
-    if (companyError || !company) {
-      console.error('[trial/resend-email] Company not found:', companyError);
+    // Queue email via outbox
+    const { error: outboxError } = await supabase
+      .from('outbox')
+      .insert({
+        job_type: 'send_trial_email',
+        status: 'pending',
+        attempts: 0,
+        payload: {
+          contact_id: trialIntent.contact_id,
+          email,
+          contact_name,
+          company_name: company?.company_name || '',
+          machine_name: machine ? `${machine.brand} ${machine.model}` : 'your machine',
+          machine_slug: machine?.slug || '',
+          offer_price: null,
+          trial_link: trialLink,
+          token,
+        }
+      });
+
+    if (outboxError) {
+      console.error('[trial/resend-email] Failed to queue email:', outboxError);
       return NextResponse.json(
-        { error: 'Company not found' },
-        { status: 404 }
-      );
-    }
-
-    // Construct machine name
-    const machineName = machine_brand && machine_model
-      ? `${machine_brand} ${machine_model}`
-      : undefined;
-
-    // Send trial confirmation email
-    const emailResult = await sendTrialConfirmation({
-      to: email,
-      contactName: contact_name || '',
-      companyName: company.company_name || '',
-      monthlyPrice: subscription.monthly_price,
-      currency: 'GBP',
-      trialEndDate: subscription.trial_end_date ? new Date(subscription.trial_end_date) : null,
-      machineName,
-    });
-
-    if (!emailResult.success) {
-      console.error('[trial/resend-email] Failed to send email:', emailResult.error);
-      return NextResponse.json(
-        { error: 'Failed to send email', details: emailResult.error },
+        { error: 'Failed to queue trial email' },
         { status: 500 }
       );
     }
 
-    console.log(`[trial/resend-email] Email sent to ${email}, messageId: ${emailResult.messageId}`);
+    console.log(`[trial/resend-email] Trial request email queued for ${email}`);
 
     return NextResponse.json({
       success: true,
-      message: 'Trial confirmation email sent successfully',
-      messageId: emailResult.messageId,
+      message: 'Trial request email queued (will be sent by outbox worker)',
+      type: 'trial_request',
     });
 
   } catch (error) {
