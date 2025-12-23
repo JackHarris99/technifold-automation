@@ -142,8 +142,8 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="/products" className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors text-center">
-                Browse Products
+              <a href="/machines" className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors text-center">
+                Find Your Machine
               </a>
               <a href="/contact" className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-lg font-semibold text-lg hover:border-gray-400 hover:bg-gray-50 transition-colors text-center">
                 Contact Us

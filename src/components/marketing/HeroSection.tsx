@@ -17,10 +17,10 @@ export function HeroSection() {
 
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/products"
+              href="/machines"
               className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors shadow-lg"
             >
-              View Products
+              Find Your Machine
             </Link>
             <Link
               href="/contact"

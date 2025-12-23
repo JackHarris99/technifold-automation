@@ -24,18 +24,18 @@ export function MarketingFooter() {
             <h3 className="font-semibold mb-4">Products</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/tri-creaser" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/tools/tri-creaser" className="text-gray-400 hover:text-white transition-colors">
                   Tri-Creaser Systems
                 </Link>
               </li>
               <li>
-                <Link href="/spine-creaser" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/tools/spine-creaser" className="text-gray-400 hover:text-white transition-colors">
                   Spine-Creaser Systems
                 </Link>
               </li>
               <li>
-                <Link href="/products" className="text-gray-400 hover:text-white transition-colors">
-                  All Products
+                <Link href="/tools/multi-tool" className="text-gray-400 hover:text-white transition-colors">
+                  Multi-Tool Systems
                 </Link>
               </li>
             </ul>
