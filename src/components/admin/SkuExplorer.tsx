@@ -57,7 +57,7 @@ export default function SkuExplorer({ allSkus }: SkuExplorerProps) {
       try {
         // URL-encode the SKU code to handle slashes
         const encodedSku = encodeURIComponent(selectedSku);
-        const response = await fetch(`/api/admin/products/${encodedSku}/details`);
+        const response = await fetch(`/api/admin/products/${encodedSku}`);
         if (!response.ok) throw new Error('Failed to fetch');
 
         const data = await response.json();
