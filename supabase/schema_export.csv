@@ -38,11 +38,11 @@ companies,zoho_account_id,text,YES,null
 companies,account_owner,text,YES,null
 companies,portal_payload,jsonb,YES,null
 companies,domain,text,YES,null
-companies,billing_address_line1,text,YES,null
-companies,billing_address_line2,text,YES,null
+companies,billing_address_line_1,text,YES,null
+companies,billing_address_line_2,text,YES,null
 companies,billing_city,text,YES,null
-companies,billing_county,text,YES,null
-companies,billing_postcode,text,YES,null
+companies,billing_state_province,text,YES,null
+companies,billing_postal_code,text,YES,null
 companies,billing_country,text,YES,null
 company_consumables,company_id,text,NO,null
 company_consumables,consumable_code,text,NO,null
@@ -115,6 +115,18 @@ contacts,token,uuid,YES,null
 contacts,marketing_status,text,YES,null
 contacts,gdpr_consent_at,timestamp with time zone,YES,null
 contacts,zoho_contact_id,text,YES,null
+customer_pricing_overrides,override_id,uuid,NO,gen_random_uuid()
+customer_pricing_overrides,company_id,text,NO,null
+customer_pricing_overrides,product_code,text,YES,null
+customer_pricing_overrides,category,text,YES,null
+customer_pricing_overrides,pricing_tier,text,YES,null
+customer_pricing_overrides,flat_discount_pct,numeric,YES,null
+customer_pricing_overrides,valid_from,timestamp with time zone,YES,now()
+customer_pricing_overrides,valid_until,timestamp with time zone,YES,null
+customer_pricing_overrides,active,boolean,YES,TRUE
+customer_pricing_overrides,notes,text,YES,null
+customer_pricing_overrides,created_at,timestamp with time zone,YES,now()
+customer_pricing_overrides,created_by,text,YES,null
 engagement_events,event_id,uuid,NO,gen_random_uuid()
 engagement_events,company_id,text,YES,null
 engagement_events,contact_id,uuid,YES,null
@@ -244,6 +256,13 @@ outbox,locked_until,timestamp with time zone,YES,null
 outbox,created_at,timestamp with time zone,NO,now()
 outbox,updated_at,timestamp with time zone,NO,now()
 outbox,completed_at,timestamp with time zone,YES,null
+premium_pricing_ladder,tier_id,integer,NO,nextval('premium_pricing_ladder_tier_id_seq'::regclass)
+premium_pricing_ladder,min_qty,integer,NO,null
+premium_pricing_ladder,max_qty,integer,NO,null
+premium_pricing_ladder,discount_pct,numeric,NO,null
+premium_pricing_ladder,active,boolean,YES,TRUE
+premium_pricing_ladder,created_at,timestamp with time zone,YES,now()
+premium_pricing_ladder,updated_at,timestamp with time zone,YES,now()
 products,product_code,text,NO,null
 products,description,text,YES,null
 products,type,text,YES,'part'::text
@@ -267,6 +286,8 @@ products,customs_value_gbp,numeric,YES,null
 products,width_cm,numeric,YES,null
 products,height_cm,numeric,YES,null
 products,depth_cm,numeric,YES,null
+products,cost_price,numeric,YES,null
+products,pricing_tier,text,YES,'standard'::text
 quote_requests,quote_request_id,uuid,NO,gen_random_uuid()
 quote_requests,company_id,character varying,NO,null
 quote_requests,contact_id,uuid,NO,null
@@ -350,6 +371,13 @@ site_branding,brand_name,text,NO,null
 site_branding,logo_url,text,YES,null
 site_branding,created_at,timestamp with time zone,YES,now()
 site_branding,updated_at,timestamp with time zone,YES,now()
+standard_pricing_ladder,tier_id,integer,NO,nextval('standard_pricing_ladder_tier_id_seq'::regclass)
+standard_pricing_ladder,min_qty,integer,NO,null
+standard_pricing_ladder,max_qty,integer,NO,null
+standard_pricing_ladder,unit_price,numeric,NO,null
+standard_pricing_ladder,active,boolean,YES,TRUE
+standard_pricing_ladder,created_at,timestamp with time zone,YES,now()
+standard_pricing_ladder,updated_at,timestamp with time zone,YES,now()
 subscription_events,event_id,uuid,NO,gen_random_uuid()
 subscription_events,subscription_id,uuid,NO,null
 subscription_events,event_type,character varying,NO,null
@@ -433,38 +461,3 @@ v_active_subscriptions,ratchet_max,numeric,YES,null
 v_active_subscriptions,created_at,timestamp without time zone,YES,null
 v_active_subscriptions,trial_days_remaining,integer,YES,null
 v_active_subscriptions,tool_count,integer,YES,null
-v_invoice_details,invoice_id,uuid,YES,null
-v_invoice_details,invoice_number,text,YES,null
-v_invoice_details,company_id,text,YES,null
-v_invoice_details,company_name,text,YES,null
-v_invoice_details,contact_id,uuid,YES,null
-v_invoice_details,contact_name,text,YES,null
-v_invoice_details,stripe_invoice_id,text,YES,null
-v_invoice_details,invoice_type,text,YES,null
-v_invoice_details,total_amount,numeric,YES,null
-v_invoice_details,currency,text,YES,null
-v_invoice_details,status,text,YES,null
-v_invoice_details,payment_status,text,YES,null
-v_invoice_details,invoice_date,date,YES,null
-v_invoice_details,paid_at,timestamp with time zone,YES,null
-v_invoice_details,created_by,text,YES,null
-v_invoice_details,line_items,jsonb,YES,null
-v_subscription_anomalies,subscription_id,uuid,YES,null
-v_subscription_anomalies,company_id,text,YES,null
-v_subscription_anomalies,contact_id,uuid,YES,null
-v_subscription_anomalies,stripe_subscription_id,character varying,YES,null
-v_subscription_anomalies,stripe_customer_id,character varying,YES,null
-v_subscription_anomalies,status,character varying,YES,null
-v_subscription_anomalies,monthly_price,numeric,YES,null
-v_subscription_anomalies,ratchet_max,numeric,YES,null
-v_subscription_anomalies,violation_amount,numeric,YES,null
-v_subscription_anomalies,violation_percent,numeric,YES,null
-v_subscription_anomalies,current_period_start,timestamp without time zone,YES,null
-v_subscription_anomalies,current_period_end,timestamp without time zone,YES,null
-v_subscription_anomalies,next_billing_date,timestamp without time zone,YES,null
-v_subscription_anomalies,trial_end_date,timestamp without time zone,YES,null
-v_subscription_anomalies,updated_at,timestamp without time zone,YES,null
-vw_company_consumable_payload,company_id,text,YES,null
-vw_company_consumable_payload,company_name,text,YES,null
-vw_company_consumable_payload,reorder_items,json,YES,null
-vw_company_consumable_payload,by_tool_tabs,json,YES,null

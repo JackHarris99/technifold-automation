@@ -11,6 +11,8 @@ company_tools,tool_code,products,product_code
 contact_interactions,company_id,companies,company_id
 contact_interactions,contact_id,contacts,contact_id
 contacts,company_id,companies,company_id
+customer_pricing_overrides,company_id,companies,company_id
+customer_pricing_overrides,product_code,products,product_code
 engagement_events,company_id,companies,company_id
 engagement_events,contact_id,contacts,contact_id
 invoice_items,invoice_id,invoices,invoice_id
