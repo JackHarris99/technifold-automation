@@ -68,36 +68,33 @@ export default async function HomePage() {
       <MarketingHeader />
       <main>
         {/* Hero with Problem Image and Machine Finder */}
-        <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-16 border-b-4 border-orange-500">
+        <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-16 border-b-4 border-blue-500">
           <div className="max-w-7xl mx-auto px-6">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              {/* Left: Problem Image */}
-              <div className="relative">
-                <div className="inline-block bg-orange-500 text-white px-3 py-1.5 text-xs font-bold uppercase tracking-wide mb-4">
-                  Trusted by 30,000+ Companies Worldwide
-                </div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight" style={{ fontFamily: "'Inter', 'system-ui', sans-serif" }}>
-                  Professional Print Finishing Solutions
-                </h1>
-                <p className="text-xl text-gray-300 mb-6 leading-relaxed">
-                  Eliminate fiber cracking, reduce waste, and handle jobs you couldn't touch before.
-                </p>
-
+            <div className="grid md:grid-cols-2 gap-12 items-start">
+              {/* Left: Problem Image and Text */}
+              <div className="space-y-6">
                 {/* Fiber Cracking Image */}
-                <div className="relative rounded-lg overflow-hidden shadow-2xl border-4 border-orange-500">
+                <div className="relative overflow-hidden shadow-xl border-4 border-blue-400">
                   <img
                     src="/images/problems/fiber-cracking.jpg"
                     alt="Fiber cracking on printed material"
                     className="w-full h-auto"
                   />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                    <p className="text-white font-bold text-lg">Stop Fiber Cracking. Start Delivering Quality.</p>
-                  </div>
                 </div>
+
+                <div className="inline-block bg-blue-500 text-white px-3 py-1.5 text-xs font-bold uppercase tracking-wide">
+                  Trusted by 30,000+ Companies Worldwide
+                </div>
+                <h1 className="text-4xl md:text-5xl font-bold leading-tight" style={{ fontFamily: "'Inter', 'system-ui', sans-serif" }}>
+                  Professional Print Finishing Solutions
+                </h1>
+                <p className="text-xl text-gray-300 leading-relaxed">
+                  Eliminate fiber cracking, reduce waste, and handle jobs you couldn't touch before.
+                </p>
               </div>
 
-              {/* Right: Modern Machine Finder */}
-              <div className="bg-white rounded-xl shadow-2xl p-8">
+              {/* Right: Machine Finder */}
+              <div className="bg-white shadow-xl border-4 border-blue-400 p-8">
                 <div className="text-center mb-6">
                   <h2 className="text-3xl font-bold text-slate-900 mb-2" style={{ fontFamily: "'Inter', 'system-ui', sans-serif" }}>
                     Find Your Machine
