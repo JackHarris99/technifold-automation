@@ -256,7 +256,7 @@ function ByToolView({ tools, consumables, relationships, searchTerm, coverage, o
           <div key={tool.product_code} className="p-6">
             <div className="flex items-start justify-between mb-4">
               <a
-                href={`/admin/tool-consumables/${tool.product_code}`}
+                href={`/admin/tool-consumables/${tool.product_code.replace(/\//g, '--')}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 hover:opacity-80 transition-opacity"
@@ -341,7 +341,7 @@ function ByConsumableView({ tools, consumables, relationships, searchTerm, onDel
                   return (
                     <div key={rel.tool_code} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
                       <a
-                        href={`/admin/tool-consumables/${rel.tool_code}`}
+                        href={`/admin/tool-consumables/${rel.tool_code.replace(/\//g, '--')}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex-1 min-w-0 hover:opacity-80 transition-opacity"

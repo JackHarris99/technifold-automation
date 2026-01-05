@@ -15,7 +15,11 @@ interface PageProps {
 }
 
 export default async function ToolConsumableDetailPage({ params }: PageProps) {
-  const { tool_code } = await params;
+  const { tool_code: encodedToolCode } = await params;
+
+  // Decode tool code: Replace "--" back to "/" for database lookup
+  const tool_code = encodedToolCode.replace(/--/g, '/');
+
   const supabase = getSupabaseClient();
 
   // Fetch the tool
