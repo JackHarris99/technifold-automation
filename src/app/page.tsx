@@ -70,31 +70,32 @@ export default async function HomePage() {
         {/* Hero with Problem Image and Machine Finder */}
         <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-16 border-b-4 border-blue-500">
           <div className="max-w-7xl mx-auto px-6">
-            <div className="grid md:grid-cols-2 gap-12 items-start">
-              {/* Left: Text and Problem Image */}
-              <div className="flex flex-col h-full">
-                <div className="inline-block bg-blue-500 text-white px-3 py-1.5 text-xs font-bold uppercase tracking-wide mb-4">
-                  Trusted by 30,000+ Companies Worldwide
-                </div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight" style={{ fontFamily: "'Inter', 'system-ui', sans-serif" }}>
-                  Professional Print Finishing Solutions
-                </h1>
-                <p className="text-xl text-gray-300 mb-6 leading-relaxed">
-                  Eliminate fiber cracking, reduce waste, and handle jobs you couldn't touch before.
-                </p>
+            {/* Top: Title and Description */}
+            <div className="mb-8">
+              <div className="inline-block bg-blue-500 text-white px-3 py-1.5 text-xs font-bold uppercase tracking-wide mb-4">
+                Trusted by 30,000+ Companies Worldwide
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight" style={{ fontFamily: "'Inter', 'system-ui', sans-serif" }}>
+                Professional Print Finishing Solutions
+              </h1>
+              <p className="text-xl text-gray-300 leading-relaxed">
+                Eliminate fiber cracking, reduce waste, and handle jobs you couldn't touch before.
+              </p>
+            </div>
 
-                {/* Fiber Cracking Image */}
-                <div className="relative overflow-hidden shadow-xl border-4 border-blue-400 flex-1">
-                  <img
-                    src="/images/problems/fiber-cracking.jpg"
-                    alt="Fiber cracking on printed material"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+            {/* Bottom: Image and Machine Finder - Equal Heights */}
+            <div className="grid md:grid-cols-2 gap-12 items-start">
+              {/* Left: Problem Image */}
+              <div className="relative overflow-hidden shadow-xl border-4 border-blue-400">
+                <img
+                  src="/images/problems/fiber-cracking.jpg"
+                  alt="Fiber cracking on printed material"
+                  className="w-full h-auto"
+                />
               </div>
 
-              {/* Right: Machine Finder */}
-              <div className="bg-white shadow-xl border-4 border-blue-400 p-8 flex flex-col h-full">
+              {/* Right: Machine Finder with Logos */}
+              <div className="bg-white shadow-xl border-4 border-blue-400 p-8 flex flex-col">
                 <div className="text-center mb-6">
                   <h2 className="text-3xl font-bold text-slate-900 mb-2" style={{ fontFamily: "'Inter', 'system-ui', sans-serif" }}>
                     Find Your Machine
@@ -104,6 +105,23 @@ export default async function HomePage() {
                   </p>
                 </div>
                 <MachineFinder />
+
+                {/* Manufacturer Logos */}
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                  <p className="text-xs text-gray-500 text-center mb-4 font-semibold uppercase tracking-wide">
+                    Compatible With Leading Brands
+                  </p>
+                  <div className="grid grid-cols-4 gap-4 items-center opacity-60">
+                    <img src="/images/logo/heidelberg.png" alt="Heidelberg" className="w-full h-8 object-contain grayscale" />
+                    <img src="/images/logo/horizon.png" alt="Horizon" className="w-full h-8 object-contain grayscale" />
+                    <img src="/images/logo/duplo.png" alt="Duplo" className="w-full h-8 object-contain grayscale" />
+                    <img src="/images/logo/mbo.png" alt="MBO" className="w-full h-8 object-contain grayscale" />
+                    <img src="/images/logo/muller-martini.png" alt="Muller Martini" className="w-full h-8 object-contain grayscale" />
+                    <img src="/images/logo/morgana.png" alt="Morgana" className="w-full h-8 object-contain grayscale" />
+                    <img src="/images/logo/kolbus.png" alt="Kolbus" className="w-full h-8 object-contain grayscale" />
+                    <img src="/images/logo/hohner.png" alt="Hohner" className="w-full h-8 object-contain grayscale" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
