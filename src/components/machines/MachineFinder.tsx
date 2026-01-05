@@ -291,36 +291,42 @@ export default function MachineFinder() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Quick Search */}
       <div ref={searchRef} className="relative">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onFocus={() => searchQuery.length >= 2 && setShowResults(true)}
-          placeholder="Quick search: type brand or model..."
-          className="w-full px-4 py-2 text-sm border border-white/20 bg-white/10 rounded text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-        />
+        <div className="relative">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => searchQuery.length >= 2 && setShowResults(true)}
+            placeholder="Quick search: type brand or model..."
+            className="w-full px-4 py-3.5 text-base border-2 border-slate-300 bg-slate-50 rounded-lg text-slate-900 placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium transition-all"
+            style={{ fontFamily: "'Inter', 'system-ui', sans-serif" }}
+          />
+          <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
 
         {/* Search Results Dropdown */}
         {showResults && searchResults.length > 0 && (
-          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+          <div className="absolute z-10 w-full mt-2 bg-white border-2 border-blue-200 rounded-lg shadow-2xl max-h-60 overflow-y-auto">
             {searchResults.map((result) => (
               <button
                 key={result.machine_id}
                 onClick={() => handleSearchSelect(result)}
-                className="w-full px-4 py-2 text-left hover:bg-orange-50 border-b border-gray-100 last:border-0"
+                className="w-full px-4 py-3 text-left hover:bg-blue-50 border-b border-slate-100 last:border-0 transition-colors"
               >
-                <div className="font-medium text-gray-900 text-sm">{result.display_name}</div>
-                <div className="text-xs text-gray-500">{result.typeDisplay}</div>
+                <div className="font-semibold text-slate-900 text-sm">{result.display_name}</div>
+                <div className="text-xs text-slate-600 mt-0.5">{result.typeDisplay}</div>
               </button>
             ))}
           </div>
         )}
       </div>
 
-      <div className="text-xs text-gray-400 text-center">or select below (any order)</div>
+      <div className="text-sm text-slate-600 text-center font-medium">or select below (any order)</div>
 
       {/* Three Dropdowns - All Independently Selectable */}
       <div className="space-y-3">
@@ -329,14 +335,15 @@ export default function MachineFinder() {
           value={selectedType?.type || ''}
           onChange={handleTypeSelect}
           disabled={loadingTypes}
-          className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:opacity-50"
+          className="w-full px-4 py-3.5 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 transition-all cursor-pointer hover:border-blue-400"
+          style={{ fontFamily: "'Inter', 'system-ui', sans-serif" }}
         >
-          <option value="" className="text-gray-900">
-            {loadingTypes ? 'Loading...' : 'Select machine type...'}
+          <option value="">
+            {loadingTypes ? 'Loading...' : '1️⃣ Select Machine Type'}
           </option>
           {filteredTypes.map((type) => (
-            <option key={type.type} value={type.type} className="text-gray-900">
-              {type.displayName} ({type.count})
+            <option key={type.type} value={type.type}>
+              {type.displayName} ({type.count} machines)
             </option>
           ))}
         </select>
@@ -346,14 +353,15 @@ export default function MachineFinder() {
           value={selectedBrand?.brand || ''}
           onChange={handleBrandSelect}
           disabled={loadingBrands}
-          className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:opacity-50"
+          className="w-full px-4 py-3.5 bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-green-500 focus:border-green-500 disabled:opacity-50 transition-all cursor-pointer hover:border-green-400"
+          style={{ fontFamily: "'Inter', 'system-ui', sans-serif" }}
         >
-          <option value="" className="text-gray-900">
-            {loadingBrands ? 'Loading...' : 'Select brand...'}
+          <option value="">
+            {loadingBrands ? 'Loading...' : '2️⃣ Select Brand'}
           </option>
           {filteredBrands.map((brand) => (
-            <option key={brand.brand} value={brand.brand} className="text-gray-900">
-              {brand.brand} ({brand.count})
+            <option key={brand.brand} value={brand.brand}>
+              {brand.brand} ({brand.count} machines)
             </option>
           ))}
         </select>
@@ -363,21 +371,22 @@ export default function MachineFinder() {
           value={selectedModel?.slug || ''}
           onChange={handleModelSelect}
           disabled={!canSelectModel || loadingModels}
-          className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full px-4 py-3.5 bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer hover:border-purple-400 disabled:hover:border-purple-300"
+          style={{ fontFamily: "'Inter', 'system-ui', sans-serif" }}
         >
-          <option value="" className="text-gray-900">
+          <option value="">
             {!canSelectModel
-              ? 'Select type or brand first...'
+              ? '3️⃣ Select Model (optional)'
               : loadingModels
               ? 'Loading models...'
-              : 'Select model...'}
+              : '3️⃣ Select Model (optional)'}
           </option>
           {isModelsGrouped ? (
             // Grouped by type (when brand-only selected)
             modelGroups.map((group) => (
-              <optgroup key={group.type} label={group.displayName} className="text-gray-900">
+              <optgroup key={group.type} label={group.displayName}>
                 {group.models.map((model) => (
-                  <option key={model.slug} value={model.slug} className="text-gray-900">
+                  <option key={model.slug} value={model.slug}>
                     {model.model}
                   </option>
                 ))}
@@ -386,7 +395,7 @@ export default function MachineFinder() {
           ) : (
             // Flat list
             models.map((model) => (
-              <option key={model.slug} value={model.slug} className="text-gray-900">
+              <option key={model.slug} value={model.slug}>
                 {model.model}
               </option>
             ))
@@ -398,15 +407,16 @@ export default function MachineFinder() {
       <button
         onClick={handleFindMachine}
         disabled={!canProceed}
-        className="w-full py-3 bg-orange-500 text-white font-bold rounded hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-lg rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]"
+        style={{ fontFamily: "'Inter', 'system-ui', sans-serif" }}
       >
         {getButtonText()}
       </button>
 
       {/* Helper text */}
       {(selectedType || selectedBrand) && !selectedModel && (
-        <p className="text-xs text-gray-400 text-center">
-          Don't know your exact model? We'll show you all compatible solutions.
+        <p className="text-sm text-slate-600 text-center bg-blue-50 border border-blue-200 rounded-lg p-3 font-medium">
+          💡 Don't know your exact model? We'll show you all compatible solutions.
         </p>
       )}
     </div>

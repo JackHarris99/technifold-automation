@@ -67,38 +67,45 @@ export default async function HomePage() {
     <div className="min-h-screen bg-white">
       <MarketingHeader />
       <main>
-        {/* Compact Hero with Machine Finder */}
-        <section className="bg-slate-900 text-white py-12 border-b-4 border-orange-500">
+        {/* Hero with Problem Image and Machine Finder */}
+        <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-16 border-b-4 border-orange-500">
           <div className="max-w-7xl mx-auto px-6">
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div>
-                <div className="inline-block bg-orange-500 text-white px-3 py-1 text-xs font-bold uppercase tracking-wide mb-3">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              {/* Left: Problem Image */}
+              <div className="relative">
+                <div className="inline-block bg-orange-500 text-white px-3 py-1.5 text-xs font-bold uppercase tracking-wide mb-4">
                   Trusted by 30,000+ Companies Worldwide
                 </div>
-                <h1 className="text-3xl font-bold mb-3 leading-tight">
+                <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight" style={{ fontFamily: "'Inter', 'system-ui', sans-serif" }}>
                   Professional Print Finishing Solutions
                 </h1>
-                <p className="text-lg text-gray-300 mb-6">
-                  Eliminate fiber cracking, reduce waste, and handle jobs you couldn't touch before. Production-proven systems engineered for your exact machine.
+                <p className="text-xl text-gray-300 mb-6 leading-relaxed">
+                  Eliminate fiber cracking, reduce waste, and handle jobs you couldn't touch before.
                 </p>
-                <div className="grid grid-cols-3 gap-4 text-center mb-6">
-                  <div className="bg-white/10 border border-white/20 px-3 py-2 rounded">
-                    <div className="text-xl font-bold">30%</div>
-                    <div className="text-xs text-gray-400">Less Waste</div>
-                  </div>
-                  <div className="bg-white/10 border border-white/20 px-3 py-2 rounded">
-                    <div className="text-xl font-bold">90%</div>
-                    <div className="text-xs text-gray-400">Faster Setup</div>
-                  </div>
-                  <div className="bg-white/10 border border-white/20 px-3 py-2 rounded">
-                    <div className="text-xl font-bold">£40k+</div>
-                    <div className="text-xs text-gray-400">Annual Savings</div>
+
+                {/* Fiber Cracking Image */}
+                <div className="relative rounded-lg overflow-hidden shadow-2xl border-4 border-orange-500">
+                  <img
+                    src="/images/problems/fiber-cracking.jpg"
+                    alt="Fiber cracking on printed material"
+                    className="w-full h-auto"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                    <p className="text-white font-bold text-lg">Stop Fiber Cracking. Start Delivering Quality.</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white/5 border border-white/10 rounded-lg p-6">
-                <h2 className="text-lg font-bold mb-3">Find Your Machine</h2>
+              {/* Right: Modern Machine Finder */}
+              <div className="bg-white rounded-xl shadow-2xl p-8">
+                <div className="text-center mb-6">
+                  <h2 className="text-3xl font-bold text-slate-900 mb-2" style={{ fontFamily: "'Inter', 'system-ui', sans-serif" }}>
+                    Find Your Machine
+                  </h2>
+                  <p className="text-slate-600">
+                    Get solutions engineered for your exact equipment
+                  </p>
+                </div>
                 <MachineFinder />
               </div>
             </div>
