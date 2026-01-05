@@ -57,7 +57,7 @@ export default function MultiToolPage() {
             Request Free Trial →
           </a>
         </div>
-            </div>
+    
 
             <div>
               <img
@@ -68,9 +68,9 @@ export default function MultiToolPage() {
               <p className="text-sm text-gray-400 text-center mt-3">
                 Multi-Tool inline cutting and trimming system
               </p>
-            </div>
-          </div>
-        </div>
+    
+  
+
       </section>
 
       {/* The Problem - Compact */}

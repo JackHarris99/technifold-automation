@@ -57,7 +57,7 @@ export default function CPApplicatorPage() {
             Request Free Trial →
           </a>
         </div>
-            </div>
+    
 
             <div>
               <img
@@ -68,9 +68,9 @@ export default function CPApplicatorPage() {
               <p className="text-sm text-gray-400 text-center mt-3">
                 CP Applicator for close proximity operations
               </p>
-            </div>
-          </div>
-        </div>
+    
+  
+
       </section>
 
       {/* The Problem - Compact */}

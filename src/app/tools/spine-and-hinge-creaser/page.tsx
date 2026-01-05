@@ -35,7 +35,6 @@ export default function SpineAndHingeCreaserPage() {
           >
             Request Free Trial →
           </a>
-        </div>
             </div>
 
             <div>
