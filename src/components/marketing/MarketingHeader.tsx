@@ -24,7 +24,7 @@ export async function MarketingHeader() {
       {/* Top Row - Logos Only (White Background) */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-center items-center h-20 gap-8">
+          <div className="flex justify-center items-end h-20 gap-8 pb-4">
             {technifold?.logo_url ? (
               <Link href="/" className="flex items-center h-12">
                 <div className="relative h-12 w-auto">
