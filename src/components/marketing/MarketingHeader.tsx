@@ -23,60 +23,49 @@ export async function MarketingHeader() {
     <header>
       {/* Top Row - Logos Only (White Background) */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-center items-end h-20 gap-8 pb-4">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-center gap-8">
             {technifold?.logo_url ? (
-              <Link href="/" className="flex items-center h-12">
-                <div className="relative h-12 w-auto">
-                  <MediaImage
-                    src={technifold.logo_url}
-                    alt="Technifold"
-                    width={150}
-                    height={48}
-                    className="h-12 w-auto object-contain"
-                  />
-                </div>
+              <Link href="/" className="relative h-10 w-32">
+                <MediaImage
+                  src={technifold.logo_url}
+                  alt="Technifold"
+                  fill
+                  className="object-contain"
+                />
               </Link>
             ) : (
-              <Link href="/" className="flex items-center h-12">
-                <div className="h-12 w-32 bg-gray-100 rounded flex items-center justify-center">
-                  <span className="text-sm text-gray-400">Technifold</span>
-                </div>
+              <Link href="/" className="h-10 w-32 bg-gray-100 rounded flex items-center justify-center">
+                <span className="text-sm text-gray-400">Technifold</span>
               </Link>
             )}
 
             {technicrease?.logo_url ? (
-              <div className="flex items-center h-12">
-                <div className="relative h-12 w-auto">
-                  <MediaImage
-                    src={technicrease.logo_url}
-                    alt="Technicrease"
-                    width={150}
-                    height={48}
-                    className="h-12 w-auto object-contain"
-                  />
-                </div>
+              <div className="relative h-10 w-32">
+                <MediaImage
+                  src={technicrease.logo_url}
+                  alt="Technicrease"
+                  fill
+                  className="object-contain"
+                />
               </div>
             ) : (
-              <div className="h-12 w-32 bg-gray-100 rounded flex items-center justify-center">
+              <div className="h-10 w-32 bg-gray-100 rounded flex items-center justify-center">
                 <span className="text-sm text-gray-400">Technicrease</span>
               </div>
             )}
 
             {creasestream?.logo_url ? (
-              <div className="flex items-center h-12">
-                <div className="relative h-12 w-auto">
-                  <MediaImage
-                    src={creasestream.logo_url}
-                    alt="CreaseStream"
-                    width={150}
-                    height={48}
-                    className="h-12 w-auto object-contain"
-                  />
-                </div>
+              <div className="relative h-10 w-32">
+                <MediaImage
+                  src={creasestream.logo_url}
+                  alt="CreaseStream"
+                  fill
+                  className="object-contain"
+                />
               </div>
             ) : (
-              <div className="h-12 w-32 bg-gray-100 rounded flex items-center justify-center">
+              <div className="h-10 w-32 bg-gray-100 rounded flex items-center justify-center">
                 <span className="text-sm text-gray-400">CreaseStream</span>
               </div>
             )}
