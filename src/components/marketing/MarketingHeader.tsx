@@ -26,7 +26,7 @@ export async function MarketingHeader() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center items-center h-20 gap-8">
             {technifold?.logo_url ? (
-              <Link href="/" className="flex items-center">
+              <Link href="/" className="flex items-center h-12">
                 <div className="relative h-12 w-auto">
                   <MediaImage
                     src={technifold.logo_url}
@@ -38,7 +38,7 @@ export async function MarketingHeader() {
                 </div>
               </Link>
             ) : (
-              <Link href="/" className="flex items-center">
+              <Link href="/" className="flex items-center h-12">
                 <div className="h-12 w-32 bg-gray-100 rounded flex items-center justify-center">
                   <span className="text-sm text-gray-400">Technifold</span>
                 </div>
@@ -46,37 +46,37 @@ export async function MarketingHeader() {
             )}
 
             {technicrease?.logo_url ? (
-              <div className="flex items-center">
-                <div className="relative h-10 w-auto">
+              <div className="flex items-center h-12">
+                <div className="relative h-12 w-auto">
                   <MediaImage
                     src={technicrease.logo_url}
                     alt="Technicrease"
                     width={150}
-                    height={40}
-                    className="h-10 w-auto object-contain"
+                    height={48}
+                    className="h-12 w-auto object-contain"
                   />
                 </div>
               </div>
             ) : (
-              <div className="h-10 w-32 bg-gray-100 rounded flex items-center justify-center">
+              <div className="h-12 w-32 bg-gray-100 rounded flex items-center justify-center">
                 <span className="text-sm text-gray-400">Technicrease</span>
               </div>
             )}
 
             {creasestream?.logo_url ? (
-              <div className="flex items-center">
-                <div className="relative h-10 w-auto">
+              <div className="flex items-center h-12">
+                <div className="relative h-12 w-auto">
                   <MediaImage
                     src={creasestream.logo_url}
                     alt="CreaseStream"
                     width={150}
-                    height={40}
-                    className="h-10 w-auto object-contain"
+                    height={48}
+                    className="h-12 w-auto object-contain"
                   />
                 </div>
               </div>
             ) : (
-              <div className="h-10 w-32 bg-gray-100 rounded flex items-center justify-center">
+              <div className="h-12 w-32 bg-gray-100 rounded flex items-center justify-center">
                 <span className="text-sm text-gray-400">CreaseStream</span>
               </div>
             )}
@@ -87,7 +87,7 @@ export async function MarketingHeader() {
       {/* Bottom Row - Navigation (Blue Background) */}
       <nav className="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-center items-center h-14 gap-6">
+          <div className="flex justify-center items-center h-14 gap-8">
             <Link
               href="/about"
               className="text-white hover:text-blue-100 font-medium tracking-wide transition-colors text-[15px] uppercase"
@@ -108,13 +108,6 @@ export async function MarketingHeader() {
               style={{ fontFamily: "'Inter', 'system-ui', sans-serif", letterSpacing: '0.5px' }}
             >
               Admin
-            </Link>
-            <Link
-              href="/contact"
-              className="bg-white text-blue-600 px-5 py-2 rounded-md font-semibold hover:bg-blue-50 transition-colors shadow-md text-[15px] uppercase"
-              style={{ fontFamily: "'Inter', 'system-ui', sans-serif", letterSpacing: '0.5px' }}
-            >
-              Get Quote
             </Link>
           </div>
         </div>
