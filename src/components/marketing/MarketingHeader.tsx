@@ -20,11 +20,11 @@ export async function MarketingHeader() {
   const creasestream = brandMap.get('creasestream');
 
   return (
-    <header className="bg-white border-b border-gray-200">
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          {/* Three Brand Logos */}
-          <div className="flex items-center gap-8">
+    <header>
+      {/* Top Row - Logos Only (White Background) */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-center items-center h-20 gap-8">
             {technifold?.logo_url ? (
               <Link href="/" className="flex items-center">
                 <div className="relative h-12 w-auto">
@@ -81,40 +81,41 @@ export async function MarketingHeader() {
               </div>
             )}
           </div>
+        </div>
+      </div>
 
-          {/* Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link href="/about" className="text-gray-700 hover:text-blue-600 font-medium">
+      {/* Bottom Row - Navigation (Blue Background) */}
+      <nav className="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-center items-center h-14 gap-6">
+            <Link
+              href="/about"
+              className="text-white hover:text-blue-100 font-medium tracking-wide transition-colors text-[15px] uppercase"
+              style={{ fontFamily: "'Inter', 'system-ui', sans-serif", letterSpacing: '0.5px' }}
+            >
               About
             </Link>
-            <Link href="/contact" className="text-gray-700 hover:text-blue-600 font-medium">
+            <Link
+              href="/contact"
+              className="text-white hover:text-blue-100 font-medium tracking-wide transition-colors text-[15px] uppercase"
+              style={{ fontFamily: "'Inter', 'system-ui', sans-serif", letterSpacing: '0.5px' }}
+            >
               Contact
             </Link>
-          </div>
-
-          {/* CTA Button */}
-          <div className="flex items-center space-x-4">
             <Link
               href="/admin"
-              className="text-gray-700 hover:text-blue-600 font-medium"
+              className="text-white hover:text-blue-100 font-medium tracking-wide transition-colors text-[15px] uppercase"
+              style={{ fontFamily: "'Inter', 'system-ui', sans-serif", letterSpacing: '0.5px' }}
             >
               Admin
             </Link>
             <Link
               href="/contact"
-              className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors"
+              className="bg-white text-blue-600 px-5 py-2 rounded-md font-semibold hover:bg-blue-50 transition-colors shadow-md text-[15px] uppercase"
+              style={{ fontFamily: "'Inter', 'system-ui', sans-serif", letterSpacing: '0.5px' }}
             >
               Get Quote
             </Link>
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <button className="text-gray-700">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
           </div>
         </div>
       </nav>
