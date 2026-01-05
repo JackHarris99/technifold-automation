@@ -255,21 +255,22 @@ function ByToolView({ tools, consumables, relationships, searchTerm, coverage, o
         return (
           <div key={tool.product_code} className="p-6">
             <div className="flex items-start justify-between mb-4">
-              <div>
+              <a
+                href={`/admin/tool-consumables/${tool.product_code}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 hover:opacity-80 transition-opacity"
+              >
                 <div className="flex items-center gap-3">
-                  <h3 className="text-lg font-semibold text-gray-900">{tool.product_code}</h3>
+                  <h3 className="text-lg font-semibold text-blue-600 hover:text-blue-700">
+                    {tool.product_code} →
+                  </h3>
                   <span className={`px-3 py-1 text-sm font-medium rounded-full ${statusColor}`}>
                     {count} consumables
                   </span>
                 </div>
                 <p className="text-sm text-gray-600 mt-1">{tool.description}</p>
-              </div>
-              <button
-                onClick={onAddClick}
-                className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                + Add
-              </button>
+              </a>
             </div>
 
             {toolRels.length > 0 && (
@@ -339,10 +340,17 @@ function ByConsumableView({ tools, consumables, relationships, searchTerm, onDel
                   const tool = tools.find((t: Product) => t.product_code === rel.tool_code);
                   return (
                     <div key={rel.tool_code} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm text-gray-900 truncate">{rel.tool_code}</p>
+                      <a
+                        href={`/admin/tool-consumables/${rel.tool_code}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 min-w-0 hover:opacity-80 transition-opacity"
+                      >
+                        <p className="font-medium text-sm text-blue-600 hover:text-blue-700 truncate">
+                          {rel.tool_code} →
+                        </p>
                         <p className="text-xs text-gray-600 truncate">{tool?.description}</p>
-                      </div>
+                      </a>
                       <button
                         onClick={() => onDelete(rel.tool_code, rel.consumable_code)}
                         className="ml-2 text-red-600 hover:text-red-800 text-sm"
