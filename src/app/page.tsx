@@ -1,6 +1,7 @@
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
 import MachineFinder from '@/components/machines/MachineFinder';
+import LogoBanner from '@/components/marketing/LogoBanner';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export const metadata = {
@@ -94,8 +95,8 @@ export default async function HomePage() {
                 />
               </div>
 
-              {/* Right: Machine Finder with Logos */}
-              <div className="bg-white shadow-xl border-4 border-blue-400 p-8 flex flex-col">
+              {/* Right: Machine Finder */}
+              <div className="bg-white shadow-xl border-4 border-blue-400 p-8">
                 <div className="text-center mb-6">
                   <h2 className="text-3xl font-bold text-slate-900 mb-2" style={{ fontFamily: "'Inter', 'system-ui', sans-serif" }}>
                     Find Your Machine
@@ -105,27 +106,13 @@ export default async function HomePage() {
                   </p>
                 </div>
                 <MachineFinder />
-
-                {/* Manufacturer Logos */}
-                <div className="mt-8 pt-6 border-t border-gray-200">
-                  <p className="text-xs text-gray-500 text-center mb-4 font-semibold uppercase tracking-wide">
-                    Compatible With Leading Brands
-                  </p>
-                  <div className="grid grid-cols-4 gap-4 items-center opacity-60">
-                    <img src="/images/logo/heidelberg.png" alt="Heidelberg" className="w-full h-8 object-contain grayscale" />
-                    <img src="/images/logo/horizon.png" alt="Horizon" className="w-full h-8 object-contain grayscale" />
-                    <img src="/images/logo/duplo.png" alt="Duplo" className="w-full h-8 object-contain grayscale" />
-                    <img src="/images/logo/mbo.png" alt="MBO" className="w-full h-8 object-contain grayscale" />
-                    <img src="/images/logo/muller-martini.png" alt="Muller Martini" className="w-full h-8 object-contain grayscale" />
-                    <img src="/images/logo/morgana.png" alt="Morgana" className="w-full h-8 object-contain grayscale" />
-                    <img src="/images/logo/kolbus.png" alt="Kolbus" className="w-full h-8 object-contain grayscale" />
-                    <img src="/images/logo/hohner.png" alt="Hohner" className="w-full h-8 object-contain grayscale" />
-                  </div>
-                </div>
               </div>
             </div>
           </div>
         </section>
+
+        {/* Rolling Manufacturer Logos Banner */}
+        <LogoBanner />
 
         {/* Dense Product Catalog Grid */}
         <section className="py-12 bg-gray-50">
