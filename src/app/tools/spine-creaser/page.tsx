@@ -12,27 +12,42 @@ export default function SpineCreaserPage() {
     <div className="min-h-screen bg-white">
       <MarketingHeader />
 
-      {/* Compact Hero */}
+      {/* Hero with Product Image */}
       <section className="bg-slate-900 text-white py-12 border-b-4 border-orange-500">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center gap-2 bg-orange-500/20 border border-orange-500/30 px-3 py-1 text-xs font-bold mb-3 text-orange-300 inline-flex">
-            Saddle Stitcher Cover Feeder
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <div className="flex items-center gap-2 bg-orange-500/20 border border-orange-500/30 px-3 py-1 text-xs font-bold mb-3 text-orange-300 inline-flex">
+                Saddle Stitcher Cover Feeder
+              </div>
+
+              <h1 className="text-4xl font-bold mb-4 leading-tight">Spine-Creaser<br />Discover the Secret to Perfect Creasing on Your Saddle Stitcher</h1>
+              <p className="text-lg text-gray-300 mb-2 leading-relaxed">
+                <strong>Transform your saddle stitcher into a powerful cylinder creasing machine.</strong> In just 30 minutes, you'll be producing perfect letterpress-quality creases inline—no more cylinder press tie-up, no more outsourcing.
+              </p>
+              <p className="text-base text-gray-400 mb-6">
+                Using the same technology as the patented Tri-Creaser, the Spine-Creaser produces results that equal or surpass those of any cylinder. Guaranteed.
+              </p>
+
+              <a
+                href="/contact"
+                className="inline-block bg-orange-500 text-white px-6 py-2 text-sm font-bold hover:bg-orange-600 transition-colors"
+              >
+                Request Free Trial →
+              </a>
+            </div>
+
+            <div>
+              <img
+                src="/images/products/spine-creaser-action.jpg"
+                alt="Spine-Creaser installed on saddle stitcher"
+                className="w-full rounded-lg shadow-2xl border border-white/20"
+              />
+              <p className="text-sm text-gray-400 text-center mt-3">
+                Spine-Creaser delivering cylinder-quality creases inline
+              </p>
+            </div>
           </div>
-
-          <h1 className="text-4xl font-bold mb-4 leading-tight">Spine-Creaser<br />Discover the Secret to Perfect Creasing on Your Saddle Stitcher</h1>
-          <p className="text-lg text-gray-300 mb-2 max-w-3xl leading-relaxed">
-            <strong>Transform your saddle stitcher into a powerful cylinder creasing machine.</strong> In just 30 minutes, you'll be producing perfect letterpress-quality creases inline—no more cylinder press tie-up, no more outsourcing.
-          </p>
-          <p className="text-base text-gray-400 mb-6 max-w-3xl">
-            Using the same technology as the patented Tri-Creaser, the Spine-Creaser produces results that equal or surpass those of any cylinder. Guaranteed.
-          </p>
-
-          <a
-            href="/contact"
-            className="inline-block bg-orange-500 text-white px-6 py-2 text-sm font-bold hover:bg-orange-600 transition-colors"
-          >
-            Request Free Trial →
-          </a>
         </div>
       </section>
 

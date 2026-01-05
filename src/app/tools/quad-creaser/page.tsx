@@ -12,27 +12,42 @@ export default function QuadCreaserPage() {
     <div className="min-h-screen bg-white">
       <MarketingHeader />
 
-      {/* Compact Hero */}
+      {/* Hero with Product Image */}
       <section className="bg-slate-900 text-white py-12 border-b-4 border-orange-500">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center gap-2 bg-orange-500/20 border border-orange-500/30 px-3 py-1 text-xs font-bold mb-3 text-orange-300 inline-flex">
-            Perfect Bound Book Finishing
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <div className="flex items-center gap-2 bg-orange-500/20 border border-orange-500/30 px-3 py-1 text-xs font-bold mb-3 text-orange-300 inline-flex">
+                Perfect Bound Book Finishing
+              </div>
+
+              <h1 className="text-4xl font-bold mb-4 leading-tight">Quad-Creaser<br />Enhances the Look of Your Perfect Bound Books</h1>
+              <p className="text-lg text-gray-300 mb-2 leading-relaxed">
+                <strong>Perfect Bound books are often judged by their cover.</strong> The Quad-Creaser replaces your OEM scoring mechanism to produce Letterpress quality creasing to the spine & hinge areas of your book covers.
+              </p>
+              <p className="text-base text-gray-400 mb-6">
+                This patented application uses specially formulated rubber & nylon creasing ribs that gently stretch the fibres—producing three times deeper crease applications to prevent print, coating and laminate from flaking away.
+              </p>
+
+              <a
+                href="/contact"
+                className="inline-block bg-orange-500 text-white px-6 py-2 text-sm font-bold hover:bg-orange-600 transition-colors"
+              >
+                Request Free Trial →
+              </a>
+            </div>
+
+            <div>
+              <img
+                src="/images/products/quad-creaser-action.jpg"
+                alt="Quad-Creaser installed on perfect binder"
+                className="w-full rounded-lg shadow-2xl border border-white/20"
+              />
+              <p className="text-sm text-gray-400 text-center mt-3">
+                Quad-Creaser delivering letterpress-quality spine and hinge creases
+              </p>
+            </div>
           </div>
-
-          <h1 className="text-4xl font-bold mb-4 leading-tight">Quad-Creaser<br />Enhances the Look of Your Perfect Bound Books</h1>
-          <p className="text-lg text-gray-300 mb-2 max-w-3xl leading-relaxed">
-            <strong>Perfect Bound books are often judged by their cover.</strong> The Quad-Creaser replaces your OEM scoring mechanism to produce Letterpress quality creasing to the spine & hinge areas of your book covers.
-          </p>
-          <p className="text-base text-gray-400 mb-6 max-w-3xl">
-            This patented application uses specially formulated rubber & nylon creasing ribs that gently stretch the fibres—producing three times deeper crease applications to prevent print, coating and laminate from flaking away.
-          </p>
-
-          <a
-            href="/contact"
-            className="inline-block bg-orange-500 text-white px-6 py-2 text-sm font-bold hover:bg-orange-600 transition-colors"
-          >
-            Request Free Trial →
-          </a>
         </div>
       </section>
 
