@@ -54,8 +54,7 @@ export default function MicroPerforatorPage() {
           >
             Request Free Trial →
           </a>
-        </div>
-    
+            </div>
 
             <div>
               <img
@@ -66,9 +65,9 @@ export default function MicroPerforatorPage() {
               <p className="text-sm text-gray-400 text-center mt-3">
                 Micro-Perforator creating precision perforations
               </p>
-    
-  
-
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* The Problem - Compact */}

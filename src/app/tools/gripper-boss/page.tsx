@@ -68,9 +68,9 @@ export default function GripperBossPage() {
               <p className="text-sm text-gray-400 text-center mt-3">
                 Gripper Boss restoring gripper performance
               </p>
-    
-  
-
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* The Problem - Compact */}

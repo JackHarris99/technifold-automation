@@ -68,9 +68,9 @@ export default function SectionScorerPage() {
               <p className="text-sm text-gray-400 text-center mt-3">
                 Section-Scorer delivering deep scoring impressions
               </p>
-    
-  
-
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* The Problem - Compact */}
