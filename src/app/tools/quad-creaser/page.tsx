@@ -106,6 +106,113 @@ export default function QuadCreaserPage() {
         </div>
       </section>
 
+      {/* Visual Proof: Before & After */}
+      <section className="py-10 bg-white border-t border-gray-300">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-8">
+            <div className="inline-block bg-green-100 text-green-800 px-3 py-1 text-xs font-bold uppercase tracking-wide mb-2">
+              Visual Proof
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900">See the Difference: OEM Scoring vs. Quad-Creaser</h2>
+            <p className="text-gray-600 mt-2">Real results on perfect bound book covers</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
+            <div className="bg-red-50 border-2 border-red-300 p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4 text-center text-gray-900">OEM Steel Scoring</h3>
+              <img
+                src="/images/results/cover-crease-before.JPG"
+                alt="Flaking problem with OEM scoring"
+                className="w-full rounded-lg shadow-lg mb-4"
+              />
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600">✕</span>
+                  <span>Print & coating flaking</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600">✕</span>
+                  <span>Shallow indentations only</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600">✕</span>
+                  <span>Hinge area weakness</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600">✕</span>
+                  <span>Cover opening problems</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-green-50 border-2 border-green-500 p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4 text-center text-gray-900">With Quad-Creaser</h3>
+              <img
+                src="/images/results/cover-crease-after.JPG"
+                alt="Letterpress quality with Quad Creaser"
+                className="w-full rounded-lg shadow-lg mb-4"
+              />
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600">✓</span>
+                  <span>Letterpress quality creasing</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600">✓</span>
+                  <span>3x deeper creases</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600">✓</span>
+                  <span>Perfect hinge flexibility</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600">✓</span>
+                  <span>No flaking or cracking</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Video Section */}
+          <div className="bg-slate-50 border-2 border-slate-300 p-8 rounded-lg">
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">See It In Action</h3>
+                <p className="text-gray-700 mb-4 leading-relaxed">
+                  Watch how the Quad-Creaser transforms perfect bound book quality with letterpress-style creasing that's 3x deeper than OEM scoring.
+                </p>
+                <ul className="space-y-2 text-sm text-gray-700">
+                  <li className="flex items-start gap-2">
+                    <span className="text-orange-500">✓</span>
+                    <span>Replaces OEM scoring mechanism</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-orange-500">✓</span>
+                    <span>Adjustable spine and hinge width</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-orange-500">✓</span>
+                    <span>Works on UV coated & laminated stocks</span>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <div className="aspect-video rounded-lg overflow-hidden shadow-lg">
+                  <iframe
+                    src="https://www.youtube.com/embed/2_76v5KYx5U"
+                    title="Quad-Creaser demonstration"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full h-full"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Benefits - Compact */}
       <section className="py-10 bg-white border-t border-gray-300">
         <div className="max-w-7xl mx-auto px-6">

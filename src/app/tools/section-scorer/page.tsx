@@ -174,8 +174,45 @@ export default function SectionScorerPage() {
         </div>
       </section>
 
-      {/* Color-Coding System - Compact */}
+      {/* Visual Proof: Before & After */}
       <section className="py-10 bg-white border-t border-gray-300">
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">Visual Proof: Before & After</h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-red-50 border-2 border-red-300 p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4 text-center text-gray-900">Without Section Score</h3>
+              <img
+                src="/images/results/section-score-before.JPG"
+                alt="Signature tears with standard scoring"
+                className="w-full rounded-lg shadow-lg mb-4"
+              />
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li>• Shallow 0.2mm impressions</li>
+                <li>• Signature tears and splits</li>
+                <li>• Speed reductions required</li>
+                <li>• High waste rates</li>
+              </ul>
+            </div>
+            <div className="bg-green-50 border-2 border-green-500 p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4 text-center text-gray-900">With Section Score</h3>
+              <img
+                src="/images/results/section-score-after.JPG"
+                alt="Perfect deep scoring channels"
+                className="w-full rounded-lg shadow-lg mb-4"
+              />
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li>• Deep 0.6mm+ channels</li>
+                <li>• Zero tears or splits</li>
+                <li>• Full speed production</li>
+                <li>• Minimal waste</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Color-Coding System - Compact */}
+      <section className="py-10 bg-gray-50 border-t border-gray-300">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between mb-6 pb-3 border-b-2 border-gray-300">
             <div>

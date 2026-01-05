@@ -282,6 +282,43 @@ export default function MultiToolPage() {
         </div>
       </section>
 
+      {/* Visual Proof: Before & After */}
+      <section className="py-10 bg-white border-t border-gray-300">
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">Visual Proof: Before & After</h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-red-50 border-2 border-red-300 p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4 text-center text-gray-900">Without Multi-Tool Cutter</h3>
+              <img
+                src="/images/results/cutting-before-1.jpg"
+                alt="Multiple tools and changeovers"
+                className="w-full rounded-lg shadow-lg mb-4"
+              />
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li>• 5-8 separate tools needed</li>
+                <li>• Constant changeovers</li>
+                <li>• Storage clutter</li>
+                <li>• Production delays</li>
+              </ul>
+            </div>
+            <div className="bg-green-50 border-2 border-green-500 p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4 text-center text-gray-900">With Multi-Tool Cutter</h3>
+              <img
+                src="/images/results/cutting-after-1.jpg"
+                alt="Single multi-function tool"
+                className="w-full rounded-lg shadow-lg mb-4"
+              />
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li>• ONE tool does it all</li>
+                <li>• Zero changeovers</li>
+                <li>• Clean workspace</li>
+                <li>• Continuous production</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Benefits - Compact */}
       <section className="py-10 bg-gray-50 border-t border-gray-300">
         <div className="max-w-7xl mx-auto px-6">

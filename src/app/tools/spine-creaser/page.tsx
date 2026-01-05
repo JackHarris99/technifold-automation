@@ -180,6 +180,59 @@ export default function SpineCreaserPage() {
         </div>
       </section>
 
+      {/* Visual Proof: Before & After */}
+      <section className="py-10 bg-white border-t border-gray-300">
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">Visual Proof: Before & After</h2>
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
+            <div className="bg-red-50 border-2 border-red-300 p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4 text-center text-gray-900">Without Spine Creaser</h3>
+              <img
+                src="/images/results/cover-crease-before.JPG"
+                alt="Manual offline creasing process"
+                className="w-full rounded-lg shadow-lg mb-4"
+              />
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li>• Manual offline process required</li>
+                <li>• Extra labor costs</li>
+                <li>• Production bottlenecks</li>
+                <li>• Inconsistent quality</li>
+              </ul>
+            </div>
+            <div className="bg-green-50 border-2 border-green-500 p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4 text-center text-gray-900">With Spine Creaser</h3>
+              <img
+                src="/images/results/cover-crease-after.JPG"
+                alt="Inline automated creasing"
+                className="w-full rounded-lg shadow-lg mb-4"
+              />
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li>• Fully automated inline</li>
+                <li>• Zero extra labor</li>
+                <li>• Continuous production</li>
+                <li>• Perfect consistency</li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Video demonstration */}
+          <div className="max-w-3xl mx-auto">
+            <h3 className="text-2xl font-bold mb-4 text-center text-gray-900">See the Spine Creaser in Action</h3>
+            <div className="aspect-w-16 aspect-h-9 bg-gray-100 rounded-lg overflow-hidden shadow-lg">
+              <iframe
+                src="https://www.youtube.com/embed/bdiPRqmoSj8"
+                title="Spine Creaser demonstration"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+                style={{ minHeight: '400px' }}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works - Compact */}
       <section className="py-10 bg-gray-50 border-t border-gray-300">
         <div className="max-w-7xl mx-auto px-6">

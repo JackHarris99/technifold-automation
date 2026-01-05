@@ -161,8 +161,45 @@ export default function CPApplicatorPage() {
         </div>
       </section>
 
-      {/* How It Works - Compact */}
+      {/* Visual Proof: Before & After */}
       <section className="py-10 bg-white border-t border-gray-300">
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">Visual Proof: Before & After</h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-red-50 border-2 border-red-300 p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4 text-center text-gray-900">Without CP Applicator</h3>
+              <img
+                src="/images/results/cp-applicator-before.jpg"
+                alt="Two-pass production required"
+                className="w-full rounded-lg shadow-lg mb-4"
+              />
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li>• Two separate passes required</li>
+                <li>• Registration challenges</li>
+                <li>• Production delays</li>
+                <li>• Higher waste rates</li>
+              </ul>
+            </div>
+            <div className="bg-green-50 border-2 border-green-500 p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4 text-center text-gray-900">With CP Applicator</h3>
+              <img
+                src="/images/results/cp-applicator-after.jpg"
+                alt="Single-pass close proximity work"
+                className="w-full rounded-lg shadow-lg mb-4"
+              />
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li>• Single-pass production</li>
+                <li>• Perfect registration</li>
+                <li>• 3mm proximity achieved</li>
+                <li>• Zero waste increase</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works - Compact */}
+      <section className="py-10 bg-gray-50 border-t border-gray-300">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between mb-6 pb-3 border-b-2 border-gray-300">
             <div>

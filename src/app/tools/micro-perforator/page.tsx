@@ -221,6 +221,43 @@ export default function MicroPerforatorPage() {
         </div>
       </section>
 
+      {/* Visual Proof: Before & After */}
+      <section className="py-10 bg-white border-t border-gray-300">
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">Visual Proof: Before & After</h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-red-50 border-2 border-red-300 p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4 text-center text-gray-900">Without Micro Perforator</h3>
+              <img
+                src="/images/results/perforation-before-1.jpg"
+                alt="Poor perforation with fibre flags"
+                className="w-full rounded-lg shadow-lg mb-4"
+              />
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li>• Visible fibre "flags"</li>
+                <li>• Uneven tear lines</li>
+                <li>• Printer jam risk</li>
+                <li>• Customer complaints</li>
+              </ul>
+            </div>
+            <div className="bg-green-50 border-2 border-green-500 p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4 text-center text-gray-900">With Micro Perforator</h3>
+              <img
+                src="/images/results/perforation-after-1.jpg"
+                alt="Clean perforation tear"
+                className="w-full rounded-lg shadow-lg mb-4"
+              />
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li>• Clean tear edge</li>
+                <li>• No fibre residue</li>
+                <li>• Laser-safe feeding</li>
+                <li>• Zero complaints</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Benefits Grid */}
       <section className="py-10 bg-gray-50 border-t border-gray-300">
         <div className="max-w-7xl mx-auto px-6">
