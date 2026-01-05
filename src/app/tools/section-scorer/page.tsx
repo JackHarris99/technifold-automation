@@ -15,6 +15,8 @@ export default function SectionScorerPage() {
       {/* Compact Hero */}
       <section className="bg-slate-900 text-white py-12 border-b-4 border-orange-500">
         <div className="max-w-7xl mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
           <div className="flex items-center gap-2 bg-orange-500/20 border border-orange-500/30 px-3 py-1 text-xs font-bold mb-3 text-orange-300 inline-flex">
             Signature & Section Specialist
           </div>
@@ -54,6 +56,20 @@ export default function SectionScorerPage() {
           >
             Request Free Trial →
           </a>
+        </div>
+            </div>
+
+            <div>
+              <img
+                src="/images/products/section-scorer-action.jpg"
+                alt="Section-Scorer installed on machine"
+                className="w-full rounded-lg shadow-2xl border border-white/20"
+              />
+              <p className="text-sm text-gray-400 text-center mt-3">
+                Section-Scorer delivering deep scoring impressions
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
