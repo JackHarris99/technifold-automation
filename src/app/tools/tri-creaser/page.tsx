@@ -12,49 +12,64 @@ export default function TriCreaserPage() {
     <div className="min-h-screen bg-white">
       <MarketingHeader />
 
-      {/* Compact Hero - Catalog Style */}
+      {/* Hero with Product Image */}
       <section className="bg-slate-900 text-white py-12 border-b-4 border-orange-500">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center gap-2 bg-orange-500/20 border border-orange-500/30 px-3 py-1 text-xs font-bold mb-3 text-orange-300 inline-flex">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
-            40,000+ Installations Worldwide
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <div className="flex items-center gap-2 bg-orange-500/20 border border-orange-500/30 px-3 py-1 text-xs font-bold mb-3 text-orange-300 inline-flex">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                40,000+ Installations Worldwide
+              </div>
+
+              <h1 className="text-4xl font-bold mb-4 leading-tight">Tri-Creaser<br />Totally Eliminates Fiber Cracking</h1>
+              <p className="text-lg text-gray-300 mb-2 leading-relaxed">
+                <strong>The revolutionary rotary creasing solution that completely eliminates fiber cracking on all popular types of folding machines.</strong>
+              </p>
+              <p className="text-base text-gray-400 mb-6">
+                The resilient rubber compound penetrates the area prone to cracking with gentle rotary action—manipulating and stretching the fibres instead of damaging them like common steel scoring methods. Results equal to letterpress quality.
+              </p>
+
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
+                  <div className="text-2xl font-bold">100%</div>
+                  <div className="text-xs text-gray-400">Cracking Eliminated</div>
+                </div>
+                <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
+                  <div className="text-2xl font-bold">Seconds</div>
+                  <div className="text-xs text-gray-400">Change Settings</div>
+                </div>
+                <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
+                  <div className="text-2xl font-bold">1-3 Jobs</div>
+                  <div className="text-xs text-gray-400">Payback Period</div>
+                </div>
+                <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
+                  <div className="text-2xl font-bold">£10k+</div>
+                  <div className="text-xs text-gray-400">Annual Savings</div>
+                </div>
+              </div>
+
+              <a
+                href="/contact"
+                className="inline-block bg-orange-500 text-white px-6 py-2 text-sm font-bold hover:bg-orange-600 transition-colors"
+              >
+                Request Free Trial →
+              </a>
+            </div>
+
+            <div>
+              <img
+                src="/images/products/tri-creaser-action.jpg"
+                alt="Tri-Creaser Fast-Fit installed on folding machine"
+                className="w-full rounded-lg shadow-2xl border border-white/20"
+              />
+              <p className="text-sm text-gray-400 text-center mt-3">
+                Tri-Creaser Fast-Fit creating letterpress-quality creases inline
+              </p>
+            </div>
           </div>
-
-          <h1 className="text-4xl font-bold mb-4 leading-tight">Tri-Creaser<br />Totally Eliminates Fiber Cracking</h1>
-          <p className="text-lg text-gray-300 mb-2 max-w-3xl leading-relaxed">
-            <strong>The revolutionary rotary creasing solution that completely eliminates fiber cracking on all popular types of folding machines.</strong>
-          </p>
-          <p className="text-base text-gray-400 mb-6 max-w-3xl">
-            The resilient rubber compound penetrates the area prone to cracking with gentle rotary action—manipulating and stretching the fibres instead of damaging them like common steel scoring methods. Results equal to letterpress quality.
-          </p>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
-              <div className="text-2xl font-bold">100%</div>
-              <div className="text-xs text-gray-400">Cracking Eliminated</div>
-            </div>
-            <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
-              <div className="text-2xl font-bold">Seconds</div>
-              <div className="text-xs text-gray-400">Change Settings</div>
-            </div>
-            <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
-              <div className="text-2xl font-bold">1-3 Jobs</div>
-              <div className="text-xs text-gray-400">Payback Period</div>
-            </div>
-            <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
-              <div className="text-2xl font-bold">£10k+</div>
-              <div className="text-xs text-gray-400">Annual Savings</div>
-            </div>
-          </div>
-
-          <a
-            href="/contact"
-            className="inline-block bg-orange-500 text-white px-6 py-2 text-sm font-bold hover:bg-orange-600 transition-colors"
-          >
-            Request Free Trial →
-          </a>
         </div>
       </section>
 
@@ -206,6 +221,89 @@ export default function TriCreaserPage() {
                 <p className="text-sm text-gray-700 leading-relaxed">
                   Founder Graham Harris tested the 5 leading scoring devices worldwide before inventing Tri-Creaser. The breakthrough: <strong>crease on the TOP (outside) so the bulge is visible on the INSIDE after folding</strong>. This "reverse crease" method matched the proven Heidelberg Cylinder letterpress technique—achieving quality that rotary scoring was thought impossible to deliver.
                 </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Visual Proof: Before & After */}
+      <section className="py-10 bg-white border-t border-gray-300">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-8">
+            <div className="inline-block bg-green-100 text-green-800 px-3 py-1 text-xs font-bold uppercase tracking-wide mb-2">
+              Visual Proof
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900">See the Difference: Metal Scoring vs. Tri-Creaser</h2>
+            <p className="text-gray-600 mt-2">Real results from actual production runs</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
+            <div className="bg-red-50 border-2 border-red-300 p-6 rounded-lg">
+              <img
+                src="/images/results/fiber-crack-before.JPG"
+                alt="Fiber cracking with traditional metal scoring"
+                className="w-full rounded-lg shadow-lg mb-4"
+              />
+              <div className="flex items-center gap-2 mb-2">
+                <span className="bg-red-500 text-white px-2 py-1 text-xs font-bold rounded">BEFORE</span>
+                <span className="text-sm font-bold text-gray-900">Traditional Metal Scoring</span>
+              </div>
+              <p className="text-sm text-gray-700">
+                Visible fiber cracking and surface damage along the fold line. This is the inevitable result of V-shaped steel blades crushing paper fibers.
+              </p>
+            </div>
+
+            <div className="bg-green-50 border-2 border-green-500 p-6 rounded-lg">
+              <img
+                src="/images/results/fiber-crack-after.JPG"
+                alt="Perfect crease with Tri-Creaser"
+                className="w-full rounded-lg shadow-lg mb-4"
+              />
+              <div className="flex items-center gap-2 mb-2">
+                <span className="bg-green-500 text-white px-2 py-1 text-xs font-bold rounded">AFTER</span>
+                <span className="text-sm font-bold text-gray-900">Tri-Creaser Technology</span>
+              </div>
+              <p className="text-sm text-gray-700">
+                Zero fiber cracking. Clean, professional fold that maintains coating integrity. The rubber creasing rib gently stretches fibers instead of breaking them.
+              </p>
+            </div>
+          </div>
+
+          {/* Video Section */}
+          <div className="bg-slate-50 border-2 border-slate-300 p-8 rounded-lg">
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">See It In Action</h3>
+                <p className="text-gray-700 mb-4 leading-relaxed">
+                  Watch how the Tri-Creaser Fast-Fit installs in seconds and delivers letterpress-quality creases at full production speed.
+                </p>
+                <ul className="space-y-2 text-sm text-gray-700">
+                  <li className="flex items-start gap-2">
+                    <span className="text-orange-500">✓</span>
+                    <span>Color-coded setup system</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-orange-500">✓</span>
+                    <span>No machine modifications required</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-orange-500">✓</span>
+                    <span>Change settings in seconds</span>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <div className="aspect-video rounded-lg overflow-hidden shadow-lg">
+                  <iframe
+                    src="https://www.youtube.com/embed/QEZVzxka01U"
+                    title="Tri-Creaser Fast-Fit demonstration"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full h-full"
+                  />
+                </div>
               </div>
             </div>
           </div>

@@ -123,16 +123,30 @@ export default async function HomePage() {
                 <a
                   key={solution.slug}
                   href={`/tools/${solution.slug}`}
-                  className="bg-white border-2 border-gray-200 hover:border-orange-500 transition-all group"
+                  className="bg-white border-2 border-gray-200 hover:border-orange-500 transition-all group overflow-hidden"
                 >
-                  {/* Product Image Placeholder */}
-                  <div className="h-48 bg-gradient-to-br from-slate-100 to-slate-200 border-b-2 border-gray-200 flex items-center justify-center">
-                    <div className="text-slate-400 text-center">
-                      <svg className="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                      <div className="text-xs text-slate-500">Product Image</div>
-                    </div>
+                  {/* Product Image */}
+                  <div className="h-48 bg-gradient-to-br from-slate-100 to-slate-200 border-b-2 border-gray-200 overflow-hidden">
+                    <img
+                      src={`/images/products/${solution.slug}-action.jpg`}
+                      alt={`${solution.name} installed on machine`}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        // Fallback to placeholder if image doesn't exist
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = `
+                            <div class="w-full h-full flex items-center justify-center text-slate-400">
+                              <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                              </svg>
+                            </div>
+                          `;
+                        }
+                      }}
+                    />
                   </div>
 
                   <div className="p-5">
