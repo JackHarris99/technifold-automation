@@ -155,6 +155,21 @@ export default function TestReorderLinkPage() {
             Generate a real tokenized URL to see exactly what customers see. Use this to test and troubleshoot customer issues.
           </p>
 
+          {/* Warning Banner */}
+          <div className="mb-6 p-4 bg-red-50 border-2 border-red-500 rounded-lg">
+            <div className="flex items-start gap-3">
+              <div className="text-red-600 text-2xl">⚠️</div>
+              <div>
+                <h3 className="font-bold text-red-900 mb-1">For Internal Testing Only</h3>
+                <p className="text-sm text-red-800">
+                  Test links bypass address collection and are for internal preview purposes only.
+                  <strong className="block mt-1">Do NOT send test links to customers.</strong>
+                  Use "Send Reorder Email" from the admin panel to send proper customer links.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Company Search */}
           <div className="mb-6">
             <label className="block text-sm font-semibold text-gray-700 mb-2">
