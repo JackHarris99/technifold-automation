@@ -20,17 +20,17 @@ export async function GET(request: NextRequest) {
   // Build query with optional type filter
   let dbQuery = supabase
     .from('products')
-    .select('product_code, description, price, currency, product_type, category, image_url')
+    .select('product_code, description, price, currency, type, category, image_url')
     .or(`product_code.ilike.*${query}*,description.ilike.*${query}*`)
     .eq('active', true);
 
   // Filter by types if provided
   if (typesParam) {
     const types = typesParam.split(',').map(t => t.trim());
-    dbQuery = dbQuery.in('product_type', types);
+    dbQuery = dbQuery.in('type', types);
   }
 
-  const { data, error } = await dbQuery.limit(20);
+  const { data, error } = await dbQuery.limit(10);
 
   if (error) {
     console.error('[API] Product search error:', error);

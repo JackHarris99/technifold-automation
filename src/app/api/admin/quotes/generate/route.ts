@@ -20,7 +20,7 @@ interface QuoteLineItem {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { company_id, contact_id, line_items, pricing_mode, quote_type } = body;
+    const { company_id, contact_id, line_items, pricing_mode, quote_type, is_test } = body;
 
     if (!company_id || !contact_id || !line_items || !Array.isArray(line_items) || line_items.length === 0) {
       return NextResponse.json(
@@ -45,6 +45,7 @@ export async function POST(request: NextRequest) {
       })),
       pricing_mode: pricing_mode || 'standard',
       quote_type: quote_type || 'consumable_interactive', // Default to consumable
+      is_test: is_test || false, // Test tokens bypass address collection
     }, 720); // 30 days
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.technifold.com';

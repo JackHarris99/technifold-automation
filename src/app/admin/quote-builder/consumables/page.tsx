@@ -36,7 +36,7 @@ interface Product {
   price: number;
   category?: string;
   image_url?: string;
-  product_type: string;
+  type: string;
 }
 
 interface QuoteLineItem {
@@ -87,6 +87,7 @@ export default function ConsumablesQuoteBuilderPage() {
 
   const [quoteUrl, setQuoteUrl] = useState('');
   const [generating, setGenerating] = useState(false);
+  const [isTestToken, setIsTestToken] = useState(false);
 
   useEffect(() => {
     loadCompanies();
