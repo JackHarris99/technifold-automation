@@ -1,10 +1,11 @@
 /**
  * POST /api/admin/quotes/generate
- * Generates a tokenized quote URL with embedded line items
+ * Creates quote in database and generates tokenized URL (SHORT token with quote_id reference)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { generateToken } from '@/lib/tokens';
+import { getSupabaseClient } from '@/lib/supabase';
 
 interface QuoteLineItem {
   product_code: string;
@@ -20,7 +21,7 @@ interface QuoteLineItem {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { company_id, contact_id, line_items, pricing_mode, quote_type, is_test } = body;
+    const { company_id, contact_id, line_items, pricing_mode, quote_type, is_test, created_by } = body;
 
     if (!company_id || !contact_id || !line_items || !Array.isArray(line_items) || line_items.length === 0) {
       return NextResponse.json(
@@ -29,29 +30,90 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate token with quote data embedded (30 days TTL)
+    const supabase = getSupabaseClient();
+
+    // Calculate totals
+    const subtotal = line_items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
+    const discountAmount = line_items.reduce((sum, item) =>
+      sum + ((item.unit_price * item.quantity * item.discount_percent) / 100), 0
+    );
+    const total = subtotal - discountAmount;
+
+    // 1. Create quote in database
+    const { data: quote, error: quoteError } = await supabase
+      .from('quotes')
+      .insert({
+        company_id,
+        contact_id,
+        quote_type: quote_type || 'consumable_interactive',
+        pricing_mode: pricing_mode || 'standard',
+        status: 'draft',
+        currency: 'GBP',
+        subtotal,
+        discount_amount: discountAmount,
+        total_amount: total,
+        is_test: is_test || false,
+        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+        created_by: created_by || 'system',
+      })
+      .select('quote_id')
+      .single();
+
+    if (quoteError || !quote) {
+      console.error('[generate-quote] Database error:', quoteError);
+      return NextResponse.json(
+        { error: 'Failed to create quote in database' },
+        { status: 500 }
+      );
+    }
+
+    // 2. Create quote line items
+    const quoteItems = line_items.map((item: QuoteLineItem, index: number) => ({
+      quote_id: quote.quote_id,
+      product_code: item.product_code,
+      line_number: index + 1,
+      description: item.description,
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+      discount_percent: item.discount_percent || 0,
+      line_total: (item.unit_price * item.quantity) - ((item.unit_price * item.quantity * (item.discount_percent || 0)) / 100),
+      product_type: item.product_type,
+      category: item.category,
+      image_url: item.image_url,
+    }));
+
+    const { error: itemsError } = await supabase
+      .from('quote_items')
+      .insert(quoteItems);
+
+    if (itemsError) {
+      console.error('[generate-quote] Line items error:', itemsError);
+      // Rollback quote if items fail
+      await supabase.from('quotes').delete().eq('quote_id', quote.quote_id);
+      return NextResponse.json(
+        { error: 'Failed to create quote line items' },
+        { status: 500 }
+      );
+    }
+
+    // 3. Generate SHORT token with just IDs (like reorder tokens)
     const token = generateToken({
+      quote_id: quote.quote_id,
       company_id,
       contact_id,
-      quote_items: line_items.map((item: QuoteLineItem) => ({
-        product_code: item.product_code,
-        description: item.description,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-        discount_percent: item.discount_percent,
-        product_type: item.product_type,
-        category: item.category,
-        image_url: item.image_url,
-      })),
-      pricing_mode: pricing_mode || 'standard',
-      quote_type: quote_type || 'consumable_interactive', // Default to consumable
-      is_test: is_test || false, // Test tokens bypass address collection
+      is_test: is_test || false,
     }, 720); // 30 days
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.technifold.com';
     const url = `${baseUrl}/q/${token}`;
 
-    return NextResponse.json({ url });
+    // 4. Update quote with sent_at timestamp
+    await supabase
+      .from('quotes')
+      .update({ status: 'sent', sent_at: new Date().toISOString() })
+      .eq('quote_id', quote.quote_id);
+
+    return NextResponse.json({ url, quote_id: quote.quote_id });
   } catch (error) {
     console.error('[generate-quote] Error:', error);
     return NextResponse.json(

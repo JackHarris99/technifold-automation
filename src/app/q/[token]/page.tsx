@@ -1,14 +1,13 @@
 /**
  * Quote Viewer Route
- * /q/[token] - HMAC-signed token for viewing custom quotes
- * Supports both new interactive quotes (with quote_items) and legacy quotes (with products)
+ * /q/[token] - HMAC-signed token containing quote_id + company_id + contact_id
+ * Fetches quote from database and displays in PortalPage-style UI
  */
 
 import { notFound } from 'next/navigation';
 import { verifyToken } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
-import InteractiveQuoteViewer from '@/components/InteractiveQuoteViewer';
-import StaticToolQuoteViewer from '@/components/StaticToolQuoteViewer';
+import { QuotePortalPage } from '@/components/QuotePortalPage';
 
 interface QuoteViewerProps {
   params: Promise<{
@@ -19,7 +18,7 @@ interface QuoteViewerProps {
 export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
   const { token } = await params;
 
-  // 1. Verify HMAC token
+  // 1. Verify and decode HMAC token
   const payload = verifyToken(token);
 
   if (!payload) {
@@ -41,97 +40,75 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
     );
   }
 
-  const { company_id, contact_id, products = [], quote_items, pricing_mode, quote_type, is_test } = payload;
+  const { quote_id, company_id, contact_id, is_test } = payload;
+
+  if (!quote_id) {
+    console.error('[Quote] Token missing quote_id');
+    notFound();
+  }
+
   const supabase = getSupabaseClient();
 
-  // 2. Fetch company
-  const { data: company } = await supabase
+  // 2. Fetch quote from database
+  const { data: quote, error: quoteError } = await supabase
+    .from('quotes')
+    .select('*')
+    .eq('quote_id', quote_id)
+    .single();
+
+  if (quoteError || !quote) {
+    console.error('[Quote] Quote not found:', quote_id, quoteError);
+    notFound();
+  }
+
+  // 3. Fetch quote line items
+  const { data: lineItems, error: itemsError } = await supabase
+    .from('quote_items')
+    .select('*')
+    .eq('quote_id', quote_id)
+    .order('line_number', { ascending: true });
+
+  if (itemsError || !lineItems) {
+    console.error('[Quote] Line items error:', itemsError);
+    notFound();
+  }
+
+  // 4. Fetch company
+  const { data: company, error: companyError } = await supabase
     .from('companies')
     .select('company_id, company_name')
     .eq('company_id', company_id)
     .single();
 
-  if (!company) {
+  if (companyError || !company) {
+    console.error('[Quote] Company not found:', company_id);
     notFound();
   }
 
-  // 3. Fetch contact
+  // 5. Fetch contact
   let contact = null;
   if (contact_id) {
-    const { data } = await supabase
+    const { data: contactData } = await supabase
       .from('contacts')
-      .select('contact_id, full_name, email')
+      .select('contact_id, full_name, email, company_id')
       .eq('contact_id', contact_id)
       .single();
-    contact = data;
-  }
 
-  // NEW: If this is a quote with line items, render appropriate viewer
-  if (quote_items && Array.isArray(quote_items) && quote_items.length > 0) {
-    // Track quote view
-    if (contact) {
-      supabase
-        .from('engagement_events')
-        .insert({
-          contact_id: contact.contact_id,
-          company_id: company.company_id,
-          event_type: 'quote_view',
-          event_name: quote_type === 'tool_static' ? 'static_tool_quote_view' : 'interactive_consumable_quote_view',
-          source: 'vercel',
-          url: `/q/${token}`,
-          meta: {
-            contact_name: contact.full_name,
-            company_name: company.company_name,
-            item_count: quote_items.length,
-            quote_type: quote_type || 'unknown'
-          }
-        })
-        .then(() => console.log(`[Quote] Tracked ${quote_type} view by ${contact.full_name}`))
-        .catch(err => console.error('[Quote] Tracking failed:', err));
+    // Verify contact belongs to company
+    if (contactData && contactData.company_id === company.company_id) {
+      contact = contactData;
     }
-
-    // Render static viewer for tool quotes, interactive for consumable quotes
-    if (quote_type === 'tool_static') {
-      return (
-        <StaticToolQuoteViewer
-          items={quote_items}
-          companyName={company.company_name}
-          companyId={company_id}
-          contactName={contact?.full_name}
-          token={token}
-          isTest={is_test || false}
-        />
-      );
-    }
-
-    // Default to interactive viewer for consumables
-    return (
-      <InteractiveQuoteViewer
-        initialItems={quote_items}
-        pricingMode={pricing_mode || 'standard'}
-        companyName={company.company_name}
-        companyId={company_id}
-        contactName={contact?.full_name}
-        token={token}
-        isTest={is_test || false}
-      />
-    );
   }
 
-  // 4. Fetch products from payload
-  const productCodes = Array.isArray(products) ? products : [];
-  let quoteProducts: any[] = [];
-
-  if (productCodes.length > 0) {
-    const { data } = await supabase
-      .from('products')
-      .select('product_code, description, price, rental_price_monthly, currency, type, category')
-      .in('product_code', productCodes);
-
-    quoteProducts = data || [];
+  // 6. Update quote viewed_at timestamp on first view
+  if (!quote.viewed_at) {
+    await supabase
+      .from('quotes')
+      .update({ status: 'viewed', viewed_at: new Date().toISOString() })
+      .eq('quote_id', quote_id);
   }
 
-  // 5. Track quote view
+  // 7. Track quote view engagement event
   if (contact) {
     supabase
       .from('engagement_events')
@@ -139,101 +116,32 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
         contact_id: contact.contact_id,
         company_id: company.company_id,
         event_type: 'quote_view',
-        event_name: 'quote_page_view',
+        event_name: 'quote_portal_view',
         source: 'vercel',
         url: `/q/${token}`,
         meta: {
+          quote_id,
           contact_name: contact.full_name,
           company_name: company.company_name,
-          product_count: quoteProducts.length
+          item_count: lineItems.length,
+          quote_type: quote.quote_type,
+          total_amount: quote.total_amount
         }
       })
       .then(() => console.log(`[Quote] Tracked view by ${contact.full_name}`))
       .catch(err => console.error('[Quote] Tracking failed:', err));
   }
 
-  // 6. Calculate totals
-  const subtotal = quoteProducts.reduce((sum, p) => sum + (p.rental_price_monthly || p.price || 0), 0);
-  const currency = quoteProducts[0]?.currency || 'GBP';
-
+  // 8. Render QuotePortalPage with quote data
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
-          <div className="flex justify-between items-start mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Quote</h1>
-              <p className="text-gray-600">For {company.company_name}</p>
-              {contact && <p className="text-gray-500 text-sm">Attn: {contact.full_name}</p>}
-            </div>
-            <div className="text-right">
-              <div className="text-sm text-gray-500">Valid for 7 days</div>
-              <div className="text-sm text-gray-500">{new Date().toLocaleDateString()}</div>
-            </div>
-          </div>
-
-          {/* Products */}
-          <div className="border-t border-gray-200 pt-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Items</h2>
-
-            {quoteProducts.length === 0 ? (
-              <p className="text-gray-500 py-8 text-center">No products in this quote</p>
-            ) : (
-              <div className="space-y-4">
-                {quoteProducts.map((product) => (
-                  <div key={product.product_code} className="flex justify-between py-3 border-b border-gray-100">
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-900">{product.description}</div>
-                      <div className="text-sm text-gray-500">Code: {product.product_code}</div>
-                      {product.type === 'tool' && product.rental_price_monthly && (
-                        <div className="text-sm text-blue-600 font-medium mt-1">Monthly Rental</div>
-                      )}
-                    </div>
-                    <div className="text-right ml-4">
-                      <div className="font-semibold text-gray-900">
-                        {currency} {(product.rental_price_monthly || product.price || 0).toFixed(2)}
-                        {product.rental_price_monthly && <span className="text-sm font-normal">/mo</span>}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Total */}
-            {quoteProducts.length > 0 && (
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <div className="flex justify-between text-lg font-bold">
-                  <span>Total</span>
-                  <span>{currency} {subtotal.toFixed(2)}{quoteProducts.some(p => p.rental_price_monthly) && '/mo'}</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* CTA */}
-          {quoteProducts.length > 0 && (
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              <a
-                href="/contact"
-                className="w-full block text-center bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition"
-              >
-                Accept Quote & Start Order
-              </a>
-              <p className="text-center text-sm text-gray-500 mt-3">
-                Or contact us to discuss further
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="text-center text-sm text-gray-500">
-          <p>Tech-ni-Fold Ltd • World-Leading Print Finishing Solutions</p>
-        </div>
-      </div>
-    </div>
+    <QuotePortalPage
+      quote={quote}
+      lineItems={lineItems}
+      company={company}
+      contact={contact}
+      token={token}
+      isTest={is_test || false}
+    />
   );
 }
 
