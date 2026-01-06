@@ -69,6 +69,7 @@ export default function ConsumablesQuoteBuilderPage() {
   const [productSearch, setProductSearch] = useState('');
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [searching, setSearching] = useState(false);
+  const [showProductDropdown, setShowProductDropdown] = useState(false);
 
   const [lineItems, setLineItems] = useState<QuoteLineItem[]>([]);
 
@@ -102,6 +103,21 @@ export default function ConsumablesQuoteBuilderPage() {
       loadContacts(selectedCompany.company_id);
     }
   }, [selectedCompany]);
+
+  // Auto-search with debounce
+  useEffect(() => {
+    if (!productSearch.trim()) {
+      setSearchResults([]);
+      setShowProductDropdown(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      searchProducts();
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [productSearch]);
 
   async function loadCompanies() {
     try {
@@ -147,6 +163,7 @@ export default function ConsumablesQuoteBuilderPage() {
       const response = await fetch(`/api/admin/products/search?q=${encodeURIComponent(productSearch)}&types=consumable`);
       const data = await response.json();
       setSearchResults(data.products || []);
+      setShowProductDropdown(true);
     } catch (err) {
       console.error('Failed to search products:', err);
     } finally {
@@ -158,6 +175,9 @@ export default function ConsumablesQuoteBuilderPage() {
     const existing = lineItems.find(li => li.product_code === product.product_code);
     if (existing) {
       updateQuantity(product.product_code, existing.quantity + 1);
+      setProductSearch('');
+      setSearchResults([]);
+      setShowProductDropdown(false);
       return;
     }
 
@@ -173,6 +193,9 @@ export default function ConsumablesQuoteBuilderPage() {
     };
 
     setLineItems([...lineItems, newItem]);
+    setProductSearch('');
+    setSearchResults([]);
+    setShowProductDropdown(false);
   }
 
   function updateQuantity(productCode: string, quantity: number) {
@@ -483,54 +506,48 @@ export default function ConsumablesQuoteBuilderPage() {
                 </h2>
               </div>
 
-              <div className="flex gap-2 mb-4">
+              <div className="relative">
                 <input
                   type="text"
                   value={productSearch}
                   onChange={(e) => setProductSearch(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && searchProducts()}
-                  placeholder="Search consumables..."
-                  className="flex-1 px-4 py-3 border border-[#e8e8e8] rounded-[14px] text-[15px] text-[#0a0a0a] font-[500] focus:outline-none focus:ring-2 focus:ring-[#0a0a0a] focus:border-transparent"
+                  onFocus={() => searchResults.length > 0 && setShowProductDropdown(true)}
+                  placeholder="Start typing to search consumables..."
+                  className="w-full px-4 py-3 border border-[#e8e8e8] rounded-[14px] text-[15px] text-[#0a0a0a] font-[500] focus:outline-none focus:ring-2 focus:ring-[#0a0a0a] focus:border-transparent"
                 />
-                <button
-                  onClick={searchProducts}
-                  disabled={searching}
-                  className="px-6 py-3 bg-[#0a0a0a] text-white rounded-[14px] text-[15px] font-[700] hover:bg-[#222] transition-colors disabled:opacity-50"
-                >
-                  {searching ? 'Searching...' : 'Search'}
-                </button>
-              </div>
+                {searching && (
+                  <div className="absolute right-3 top-3 text-[13px] text-[#666]">Searching...</div>
+                )}
 
-              {searchResults.length > 0 && (
-                <div className="space-y-2">
-                  {searchResults.map((product) => (
-                    <div
-                      key={product.product_code}
-                      className="flex items-center gap-4 p-3 border border-[#e8e8e8] rounded-[14px] hover:bg-[#fafafa] transition-colors"
-                    >
-                      {product.image_url && (
-                        <img
-                          src={product.image_url}
-                          alt={product.description}
-                          className="w-12 h-12 object-cover rounded-[8px]"
-                        />
-                      )}
-                      <div className="flex-1">
-                        <div className="text-[15px] font-[600] text-[#0a0a0a]">{product.description}</div>
-                        <div className="text-[13px] text-[#666]">
-                          {product.product_code} • £{product.price.toFixed(2)}
-                        </div>
-                      </div>
+                {showProductDropdown && searchResults.length > 0 && (
+                  <div className="absolute z-50 w-full mt-2 bg-white border border-[#e8e8e8] rounded-[14px] shadow-[0_8px_24px_rgba(0,0,0,0.08)] max-h-[400px] overflow-y-auto">
+                    {searchResults.map((product) => (
                       <button
+                        key={product.product_code}
                         onClick={() => addLineItem(product)}
-                        className="px-4 py-2 bg-[#0a0a0a] text-white rounded-[10px] text-[13px] font-[600] hover:bg-[#222] transition-colors"
+                        className="w-full flex items-center gap-4 p-3 hover:bg-[#fafafa] border-b border-[#e8e8e8] last:border-b-0 transition-colors text-left"
                       >
-                        Add
+                        {product.image_url && (
+                          <img
+                            src={product.image_url}
+                            alt={product.description}
+                            className="w-12 h-12 object-cover rounded-[8px]"
+                          />
+                        )}
+                        <div className="flex-1">
+                          <div className="text-[15px] font-[600] text-[#0a0a0a]">{product.description}</div>
+                          <div className="text-[13px] text-[#666]">
+                            {product.product_code} • £{product.price.toFixed(2)}
+                          </div>
+                        </div>
+                        <div className="px-3 py-1 bg-[#0a0a0a] text-white rounded-[8px] text-[13px] font-[600]">
+                          Add
+                        </div>
                       </button>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Quote Line Items */}
@@ -630,7 +647,7 @@ export default function ConsumablesQuoteBuilderPage() {
                 rel="noopener noreferrer"
                 className="px-6 py-3 bg-[#0a0a0a] text-white rounded-[14px] text-[15px] font-[700] hover:bg-[#222] transition-colors"
               >
-                Open Quote
+                👁️ Preview as Customer
               </a>
               <button
                 onClick={() => {

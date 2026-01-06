@@ -215,14 +215,24 @@ export default function AdminNav() {
             Test Reorder Link
           </Link>
           <Link
-            href="/admin/quote-builder"
+            href="/admin/quote-builder/tools"
             className={`block px-4 py-2 text-sm transition-colors ${
-              pathname === '/admin/quote-builder'
+              pathname?.startsWith('/admin/quote-builder/tools')
                 ? 'bg-blue-600 text-white'
                 : 'text-gray-300 hover:bg-gray-800 hover:text-white'
             }`}
           >
-            Quote Builder
+            🔧 Tools Quote Builder
+          </Link>
+          <Link
+            href="/admin/quote-builder/consumables"
+            className={`block px-4 py-2 text-sm transition-colors ${
+              pathname?.startsWith('/admin/quote-builder/consumables')
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            📦 Consumables Quote Builder
           </Link>
         </div>
 

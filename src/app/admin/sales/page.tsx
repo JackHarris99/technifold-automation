@@ -273,18 +273,6 @@ export default async function SalesCenterPage() {
               >
                 + Create Invoice
               </Link>
-              <Link
-                href="/admin/quote-builder/tools"
-                className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-sm shadow-sm"
-              >
-                🔧 Tools Quote
-              </Link>
-              <Link
-                href="/admin/quote-builder/consumables"
-                className="px-4 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold text-sm shadow-sm"
-              >
-                📦 Consumables Quote
-              </Link>
             </div>
           </div>
         </div>
