@@ -70,6 +70,10 @@ export default function ToolsQuoteBuilderPage() {
   const [searching, setSearching] = useState(false);
   const [showProductDropdown, setShowProductDropdown] = useState(false);
 
+  const [allTools, setAllTools] = useState<Product[]>([]);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [loadingProducts, setLoadingProducts] = useState(false);
+
   const [lineItems, setLineItems] = useState<QuoteLineItem[]>([]);
   const [blanketDiscount, setBlanketDiscount] = useState<number>(0);
 
@@ -81,6 +85,7 @@ export default function ToolsQuoteBuilderPage() {
   useEffect(() => {
     loadCompanies();
     loadPricingTiers();
+    loadAllTools();
   }, []);
 
   useEffect(() => {
@@ -159,6 +164,41 @@ export default function ToolsQuoteBuilderPage() {
     } catch (err) {
       console.error('Failed to load pricing tiers:', err);
     }
+  }
+
+  async function loadAllTools() {
+    setLoadingProducts(true);
+    try {
+      const response = await fetch('/api/admin/products/search?q=&types=tool');
+      const data = await response.json();
+      setAllTools(data.products || []);
+    } catch (err) {
+      console.error('Failed to load tools:', err);
+    } finally {
+      setLoadingProducts(false);
+    }
+  }
+
+  // Group tools by category
+  const toolsByCategory = allTools.reduce((acc, product) => {
+    const category = product.category || 'Uncategorized';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(product);
+    return acc;
+  }, {} as Record<string, Product[]>);
+
+  const categoryNames = Object.keys(toolsByCategory).sort();
+
+  function toggleCategory(category: string) {
+    const newExpanded = new Set(expandedCategories);
+    if (newExpanded.has(category)) {
+      newExpanded.delete(category);
+    } else {
+      newExpanded.add(category);
+    }
+    setExpandedCategories(newExpanded);
   }
 
   async function searchProducts() {
@@ -511,6 +551,100 @@ export default function ToolsQuoteBuilderPage() {
                         </div>
                       </button>
                     ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Product Browser by Category */}
+              <div className="mt-6 pt-6 border-t border-[#e8e8e8]">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-[15px] font-[600] text-[#0a0a0a]">Browse by Category</h3>
+                  {categoryNames.length > 0 && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setExpandedCategories(new Set(categoryNames))}
+                        className="text-[13px] text-[#666] hover:text-[#0a0a0a]"
+                      >
+                        Expand All
+                      </button>
+                      <span className="text-[#e8e8e8]">|</span>
+                      <button
+                        onClick={() => setExpandedCategories(new Set())}
+                        className="text-[13px] text-[#666] hover:text-[#0a0a0a]"
+                      >
+                        Collapse All
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {loadingProducts ? (
+                  <div className="text-center py-8 text-[#666]">Loading products...</div>
+                ) : categoryNames.length === 0 ? (
+                  <div className="text-center py-8 text-[#666]">No tools found</div>
+                ) : (
+                  <div className="space-y-2">
+                    {categoryNames.map((category) => {
+                      const products = toolsByCategory[category];
+                      const isExpanded = expandedCategories.has(category);
+
+                      return (
+                        <div key={category} className="border border-[#e8e8e8] rounded-[14px] overflow-hidden">
+                          {/* Category Header */}
+                          <button
+                            onClick={() => toggleCategory(category)}
+                            className="w-full px-4 py-3 bg-[#fafafa] hover:bg-[#f0f0f0] flex items-center justify-between transition-colors"
+                          >
+                            <div className="flex items-center gap-2">
+                              <svg
+                                className={`w-4 h-4 text-[#666] transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                              <span className="text-[15px] font-[600] text-[#0a0a0a]">{category}</span>
+                            </div>
+                            <span className="text-[13px] text-[#666]">{products.length} items</span>
+                          </button>
+
+                          {/* Category Products */}
+                          {isExpanded && (
+                            <div className="p-3 space-y-2">
+                              {products.map((product) => (
+                                <div
+                                  key={product.product_code}
+                                  className="flex items-center gap-3 p-3 border border-[#e8e8e8] rounded-[10px] hover:bg-[#fafafa] transition-colors"
+                                >
+                                  {product.image_url && (
+                                    <img
+                                      src={product.image_url}
+                                      alt={product.description}
+                                      className="w-12 h-12 object-cover rounded-[8px]"
+                                    />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-[14px] font-[600] text-[#0a0a0a] truncate">
+                                      {product.description}
+                                    </div>
+                                    <div className="text-[12px] text-[#666] mt-0.5">
+                                      {product.product_code} • £{product.price.toFixed(2)}
+                                    </div>
+                                  </div>
+                                  <button
+                                    onClick={() => addLineItem(product)}
+                                    className="px-3 py-1.5 bg-[#0a0a0a] text-white rounded-[8px] text-[13px] font-[600] hover:bg-[#222] transition-colors whitespace-nowrap"
+                                  >
+                                    Add
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
