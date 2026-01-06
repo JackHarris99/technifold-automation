@@ -188,7 +188,7 @@ export default function ConsumablesQuoteBuilderPage() {
   async function loadAllConsumables() {
     setLoadingProducts(true);
     try {
-      const response = await fetch('/api/admin/products/search?q=&types=consumable');
+      const response = await fetch('/api/admin/products/list?type=consumable&limit=500&sort=category');
       const data = await response.json();
       setAllConsumables(data.products || []);
     } catch (err) {
@@ -603,7 +603,7 @@ export default function ConsumablesQuoteBuilderPage() {
                         <div className="flex-1">
                           <div className="text-[15px] font-[600] text-[#0a0a0a]">{product.description}</div>
                           <div className="text-[13px] text-[#666]">
-                            {product.product_code} • £{product.price.toFixed(2)}
+                            {product.product_code} • £{(product.price || 0).toFixed(2)}
                           </div>
                         </div>
                         <div className="px-3 py-1 bg-[#0a0a0a] text-white rounded-[8px] text-[13px] font-[600]">
@@ -689,7 +689,7 @@ export default function ConsumablesQuoteBuilderPage() {
                                       {product.description}
                                     </div>
                                     <div className="text-[12px] text-[#666] mt-0.5">
-                                      {product.product_code} • £{product.price.toFixed(2)}
+                                      {product.product_code} • £{(product.price || 0).toFixed(2)}
                                     </div>
                                   </div>
                                   <button
