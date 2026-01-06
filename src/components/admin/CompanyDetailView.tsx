@@ -70,12 +70,24 @@ export default function CompanyDetailView({
               <h1 className="text-3xl font-bold text-gray-900">{company.company_name}</h1>
               <p className="text-gray-500 mt-1">{company.company_id}</p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <Link
                 href={`/admin/send-reorder?company_id=${company.company_id}`}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium inline-block"
               >
                 Send Reorder Email
+              </Link>
+              <Link
+                href={`/admin/quote-builder/tools?company_id=${company.company_id}`}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium inline-block"
+              >
+                🔧 Create Tools Quote
+              </Link>
+              <Link
+                href={`/admin/quote-builder/consumables?company_id=${company.company_id}`}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium inline-block"
+              >
+                📦 Create Consumables Quote
               </Link>
               <Link
                 href={`/admin/invoices/new?company_id=${company.company_id}`}

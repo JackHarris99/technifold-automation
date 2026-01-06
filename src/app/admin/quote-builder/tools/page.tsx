@@ -8,6 +8,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Inter } from 'next/font/google';
 
 const inter = Inter({
@@ -56,6 +57,9 @@ interface PricingTier {
 }
 
 export default function ToolsQuoteBuilderPage() {
+  const searchParams = useSearchParams();
+  const companyIdParam = searchParams.get('company_id');
+
   const [companies, setCompanies] = useState<Company[]>([]);
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
   const [companySearch, setCompanySearch] = useState('');
@@ -87,6 +91,17 @@ export default function ToolsQuoteBuilderPage() {
     loadPricingTiers();
     loadAllTools();
   }, []);
+
+  // Pre-select company if company_id is in URL
+  useEffect(() => {
+    if (companyIdParam && companies.length > 0) {
+      const company = companies.find(c => c.company_id === companyIdParam);
+      if (company) {
+        setSelectedCompany(company);
+        setShowCompanyDropdown(false);
+      }
+    }
+  }, [companyIdParam, companies]);
 
   useEffect(() => {
     if (companySearch.trim() === '') {
