@@ -112,8 +112,18 @@ export default function ConsumablesQuoteBuilderPage() {
       return;
     }
 
-    const timer = setTimeout(() => {
-      searchProducts();
+    const timer = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const response = await fetch(`/api/admin/products/search?q=${encodeURIComponent(productSearch)}&types=consumable`);
+        const data = await response.json();
+        setSearchResults(data.products || []);
+        setShowProductDropdown(true);
+      } catch (err) {
+        console.error('Failed to search products:', err);
+      } finally {
+        setSearching(false);
+      }
     }, 300);
 
     return () => clearTimeout(timer);
