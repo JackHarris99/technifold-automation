@@ -27,6 +27,7 @@ export interface TokenPayload {
   email?: string; // For trial links
   company_name?: string; // For trial links
   contact_name?: string; // For trial links
+  isTest?: boolean; // For test tokens that bypass address collection
   expires_at: number; // Unix timestamp
 }
 
@@ -126,11 +127,13 @@ export function generateReorderUrl(
   contactId: string,
   options: {
     ttlHours?: number;
+    isTest?: boolean;
   } = {}
 ): string {
   const token = generateToken({
     company_id: companyId,
     contact_id: contactId,
+    isTest: options.isTest,
   }, options.ttlHours || 720); // 30 days default for reorder links
 
   return `${baseUrl}/r/${token}`;

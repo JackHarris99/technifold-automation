@@ -274,7 +274,7 @@ export default async function ReorderPortalPage({ params }: ReorderPortalProps) 
   }
 
   // 6. Render portal with token for API authentication
-  return <PortalPage payload={portalPayload} contact={contact} token={token} />;
+  return <PortalPage payload={portalPayload} contact={contact} token={token} isTest={payload.isTest} />;
 }
 
 export async function generateMetadata({ params }: ReorderPortalProps) {

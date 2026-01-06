@@ -20,8 +20,8 @@ export async function POST(request: NextRequest) {
     // Use the production URL
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.technifold.com';
 
-    // Generate the tokenized URL (30 days TTL)
-    const url = generateReorderUrl(baseUrl, company_id, contact_id);
+    // Generate the tokenized URL (30 days TTL) with test flag to bypass address collection
+    const url = generateReorderUrl(baseUrl, company_id, contact_id, { isTest: true });
 
     return NextResponse.json({ url });
   } catch (error) {

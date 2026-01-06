@@ -49,9 +49,10 @@ interface PortalPageProps {
     email: string;
   };
   token: string; // HMAC token for API authentication
+  isTest?: boolean; // Test tokens bypass address collection
 }
 
-export function PortalPage({ payload, contact, token }: PortalPageProps) {
+export function PortalPage({ payload, contact, token, isTest }: PortalPageProps) {
   const [activeTab, setActiveTab] = useState<string>('reorder');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
@@ -71,8 +72,10 @@ export function PortalPage({ payload, contact, token }: PortalPageProps) {
         if (data.success && data.address) {
           setShippingAddress(data.address);
         } else {
-          // No address exists - show modal to collect it
-          setShowAddressModal(true);
+          // No address exists - show modal to collect it (unless this is a test token)
+          if (!isTest) {
+            setShowAddressModal(true);
+          }
         }
       } catch (error) {
         console.error('[PortalPage] Failed to fetch shipping address:', error);
@@ -82,7 +85,7 @@ export function PortalPage({ payload, contact, token }: PortalPageProps) {
     };
 
     fetchAddress();
-  }, [token]);
+  }, [token, isTest]);
 
   // Handler for when address is successfully saved
   const handleAddressSaved = async () => {
