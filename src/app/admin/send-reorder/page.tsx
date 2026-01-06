@@ -23,9 +23,37 @@ export default function SendReorderPage() {
   const [loading, setLoading] = useState(true);
   const [showPreview, setShowPreview] = useState(false);
 
+  // Company search state (for when no company_id provided)
+  const [companies, setCompanies] = useState<any[]>([]);
+  const [filteredCompanies, setFilteredCompanies] = useState<any[]>([]);
+  const [companySearch, setCompanySearch] = useState('');
+  const [showCompanyDropdown, setShowCompanyDropdown] = useState(false);
+  const [loadingCompanies, setLoadingCompanies] = useState(false);
+
+  // Load companies list if no company_id provided
   useEffect(() => {
     if (!companyId) {
-      setError('No company ID provided');
+      loadCompanies();
+    }
+  }, [companyId]);
+
+  // Filter companies based on search
+  useEffect(() => {
+    if (companySearch.trim() === '') {
+      setFilteredCompanies(companies.slice(0, 20));
+    } else {
+      const searchLower = companySearch.toLowerCase();
+      const filtered = companies.filter(c =>
+        c.company_name?.toLowerCase().includes(searchLower) ||
+        c.company_id?.toLowerCase().includes(searchLower)
+      ).slice(0, 20);
+      setFilteredCompanies(filtered);
+    }
+  }, [companySearch, companies]);
+
+  // Load company data when company_id is provided
+  useEffect(() => {
+    if (!companyId) {
       setLoading(false);
       return;
     }
@@ -54,6 +82,25 @@ export default function SendReorderPage() {
 
     fetchData();
   }, [companyId]);
+
+  async function loadCompanies() {
+    setLoadingCompanies(true);
+    try {
+      const response = await fetch('/api/admin/companies/all');
+      const data = await response.json();
+      setCompanies(data.companies || []);
+      setFilteredCompanies((data.companies || []).slice(0, 20));
+    } catch (err) {
+      console.error('Failed to load companies:', err);
+    } finally {
+      setLoadingCompanies(false);
+    }
+  }
+
+  function selectCompany(company: any) {
+    // Navigate to this page with the company_id parameter
+    router.push(`/admin/send-reorder?company_id=${company.company_id}`);
+  }
 
   const toggleContact = (contactId: string) => {
     setSelectedContacts(prev =>
@@ -106,6 +153,66 @@ export default function SendReorderPage() {
       setSending(false);
     }
   };
+
+  // Show company search if no company_id provided
+  if (!companyId) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              Send Reorder Email
+            </h1>
+            <p className="text-gray-600 mb-6">
+              Search for a company to send personalized reorder emails
+            </p>
+
+            {/* Company Search */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Search Company
+              </label>
+              {loadingCompanies ? (
+                <div className="text-gray-500">Loading companies...</div>
+              ) : (
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={companySearch}
+                    onChange={(e) => {
+                      setCompanySearch(e.target.value);
+                      setShowCompanyDropdown(true);
+                    }}
+                    onFocus={() => setShowCompanyDropdown(true)}
+                    placeholder="Type company name to search..."
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                  />
+
+                  {/* Company Dropdown */}
+                  {showCompanyDropdown && filteredCompanies.length > 0 && (
+                    <div className="absolute z-50 w-full mt-1 bg-white border-2 border-gray-300 rounded-lg shadow-lg max-h-96 overflow-y-auto">
+                      {filteredCompanies.map((company) => (
+                        <button
+                          key={company.company_id}
+                          onClick={() => selectCompany(company)}
+                          className="w-full px-4 py-3 text-left hover:bg-blue-50 border-b border-gray-100 last:border-b-0"
+                        >
+                          <div className="font-semibold text-gray-900">{company.company_name}</div>
+                          <div className="text-sm text-gray-600">
+                            {company.company_id} • {company.country || 'UK'} • {company.machine_count || 0} tools
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
