@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import PortalAddressCollectionModal from './portals/PortalAddressCollectionModal';
 
 interface QuoteItem {
   product_code: string;
@@ -20,25 +21,39 @@ interface PricingTier {
   unit_price?: number;
 }
 
+interface ShippingAddress {
+  address_line_1: string;
+  city: string;
+  country: string;
+}
+
 interface InteractiveQuoteViewerProps {
   initialItems: QuoteItem[];
   pricingMode: 'standard' | 'premium';
   companyName: string;
+  companyId: string;
   contactName?: string;
   token: string;
+  isTest: boolean;
 }
 
 export default function InteractiveQuoteViewer({
   initialItems,
   pricingMode,
   companyName,
+  companyId,
   contactName,
   token,
+  isTest,
 }: InteractiveQuoteViewerProps) {
   const [lineItems, setLineItems] = useState<QuoteItem[]>(initialItems);
   const [standardTiers, setStandardTiers] = useState<PricingTier[]>([]);
   const [premiumTiers, setPremiumTiers] = useState<PricingTier[]>([]);
   const [toolTiers, setToolTiers] = useState<PricingTier[]>([]);
+
+  const [shippingAddress, setShippingAddress] = useState<ShippingAddress | null>(null);
+  const [loadingAddress, setLoadingAddress] = useState(true);
+  const [showAddressModal, setShowAddressModal] = useState(false);
 
   // Load pricing tiers on mount
   useEffect(() => {
@@ -55,6 +70,46 @@ export default function InteractiveQuoteViewer({
     }
     loadTiers();
   }, []);
+
+  // Fetch shipping address on mount
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const response = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
+        const data = await response.json();
+
+        if (data.success && data.address) {
+          setShippingAddress(data.address);
+        } else if (!isTest) {
+          // No address exists - show modal to collect it (unless this is a test token)
+          setShowAddressModal(true);
+        }
+      } catch (error) {
+        console.error('Failed to fetch shipping address:', error);
+      } finally {
+        setLoadingAddress(false);
+      }
+    };
+
+    fetchAddress();
+  }, [token, isTest]);
+
+  // Handler for when address is successfully saved
+  const handleAddressSaved = async () => {
+    setShowAddressModal(false);
+
+    // Refetch the address
+    try {
+      const response = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
+      const data = await response.json();
+
+      if (data.success && data.address) {
+        setShippingAddress(data.address);
+      }
+    } catch (error) {
+      console.error('Failed to refetch shipping address:', error);
+    }
+  };
 
   function updateQuantity(productCode: string, newQuantity: number) {
     if (newQuantity < 1) return;
@@ -297,6 +352,16 @@ export default function InteractiveQuoteViewer({
           <p>Tech-ni-Fold Ltd • World-Leading Print Finishing Solutions</p>
         </div>
       </div>
+
+      {/* Address Collection Modal */}
+      <PortalAddressCollectionModal
+        isOpen={showAddressModal}
+        onClose={() => setShowAddressModal(false)}
+        companyId={companyId}
+        companyName={companyName}
+        token={token}
+        onSuccess={handleAddressSaved}
+      />
     </div>
   );
 }

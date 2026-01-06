@@ -41,7 +41,7 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
     );
   }
 
-  const { company_id, contact_id, products = [], quote_items, pricing_mode, quote_type } = payload;
+  const { company_id, contact_id, products = [], quote_items, pricing_mode, quote_type, is_test } = payload;
   const supabase = getSupabaseClient();
 
   // 2. Fetch company
@@ -96,8 +96,10 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
         <StaticToolQuoteViewer
           items={quote_items}
           companyName={company.company_name}
+          companyId={company_id}
           contactName={contact?.full_name}
           token={token}
+          isTest={is_test || false}
         />
       );
     }
@@ -108,8 +110,10 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
         initialItems={quote_items}
         pricingMode={pricing_mode || 'standard'}
         companyName={company.company_name}
+        companyId={company_id}
         contactName={contact?.full_name}
         token={token}
+        isTest={is_test || false}
       />
     );
   }

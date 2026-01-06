@@ -1,5 +1,14 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import PortalAddressCollectionModal from './portals/PortalAddressCollectionModal';
+
+interface ShippingAddress {
+  address_line_1: string;
+  city: string;
+  country: string;
+}
+
 interface QuoteItem {
   product_code: string;
   description: string;
@@ -14,16 +23,64 @@ interface QuoteItem {
 interface StaticToolQuoteViewerProps {
   items: QuoteItem[];
   companyName: string;
+  companyId: string;
   contactName?: string;
   token: string;
+  isTest: boolean;
 }
 
 export default function StaticToolQuoteViewer({
   items,
   companyName,
+  companyId,
   contactName,
   token,
+  isTest,
 }: StaticToolQuoteViewerProps) {
+  const [shippingAddress, setShippingAddress] = useState<ShippingAddress | null>(null);
+  const [loadingAddress, setLoadingAddress] = useState(true);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+
+  // Fetch shipping address on mount
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const response = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
+        const data = await response.json();
+
+        if (data.success && data.address) {
+          setShippingAddress(data.address);
+        } else if (!isTest) {
+          // No address exists - show modal to collect it (unless this is a test token)
+          setShowAddressModal(true);
+        }
+      } catch (error) {
+        console.error('Failed to fetch shipping address:', error);
+      } finally {
+        setLoadingAddress(false);
+      }
+    };
+
+    fetchAddress();
+  }, [token, isTest]);
+
+  // Handler for when address is successfully saved
+  const handleAddressSaved = async () => {
+    setShowAddressModal(false);
+
+    // Refetch the address
+    try {
+      const response = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
+      const data = await response.json();
+
+      if (data.success && data.address) {
+        setShippingAddress(data.address);
+      }
+    } catch (error) {
+      console.error('Failed to refetch shipping address:', error);
+    }
+  };
+
   const subtotal = items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
   const totalDiscount = items.reduce((sum, item) =>
     sum + ((item.unit_price * item.quantity * item.discount_percent) / 100), 0
@@ -135,6 +192,16 @@ export default function StaticToolQuoteViewer({
           <p>Tech-ni-Fold Ltd • World-Leading Print Finishing Solutions</p>
         </div>
       </div>
+
+      {/* Address Collection Modal */}
+      <PortalAddressCollectionModal
+        isOpen={showAddressModal}
+        onClose={() => setShowAddressModal(false)}
+        companyId={companyId}
+        companyName={companyName}
+        token={token}
+        onSuccess={handleAddressSaved}
+      />
     </div>
   );
 }
