@@ -1,7 +1,7 @@
 /**
- * Quote Builder
- * Create professional quotes for tool and consumable sales
- * Supports tiered pricing and generates tokenized customer links
+ * Consumables Quote Builder
+ * Creates interactive quotes for consumables with customer-facing tiered pricing
+ * Customers can adjust quantities and see live pricing updates
  */
 
 'use client';
@@ -35,7 +35,7 @@ interface Product {
   price: number;
   category?: string;
   image_url?: string;
-  product_type: 'tool' | 'consumable' | 'part';
+  product_type: string;
 }
 
 interface QuoteLineItem {
@@ -44,7 +44,7 @@ interface QuoteLineItem {
   quantity: number;
   unit_price: number;
   discount_percent: number;
-  product_type: 'tool' | 'consumable';
+  product_type: 'consumable';
   category?: string;
   image_url?: string;
 }
@@ -56,8 +56,7 @@ interface PricingTier {
   unit_price?: number;
 }
 
-export default function QuoteBuilderPage() {
-  // Step 1: Company & Contact
+export default function ConsumablesQuoteBuilderPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
   const [companySearch, setCompanySearch] = useState('');
@@ -67,31 +66,24 @@ export default function QuoteBuilderPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
-  // Step 2: Product Selection
   const [productSearch, setProductSearch] = useState('');
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [searching, setSearching] = useState(false);
 
-  // Step 3: Quote Line Items
   const [lineItems, setLineItems] = useState<QuoteLineItem[]>([]);
 
-  // Step 4: Tiered Pricing
   const [standardTiers, setStandardTiers] = useState<PricingTier[]>([]);
   const [premiumTiers, setPremiumTiers] = useState<PricingTier[]>([]);
-  const [toolTiers, setToolTiers] = useState<PricingTier[]>([]);
   const [pricingMode, setPricingMode] = useState<'standard' | 'premium'>('standard');
 
-  // Quote Generation
   const [quoteUrl, setQuoteUrl] = useState('');
   const [generating, setGenerating] = useState(false);
 
-  // Load companies on mount
   useEffect(() => {
     loadCompanies();
     loadPricingTiers();
   }, []);
 
-  // Filter companies based on search
   useEffect(() => {
     if (companySearch.trim() === '') {
       setFilteredCompanies(companies.slice(0, 20));
@@ -105,7 +97,6 @@ export default function QuoteBuilderPage() {
     }
   }, [companySearch, companies]);
 
-  // Load contacts when company selected
   useEffect(() => {
     if (selectedCompany) {
       loadContacts(selectedCompany.company_id);
@@ -142,7 +133,6 @@ export default function QuoteBuilderPage() {
       const data = await response.json();
       setStandardTiers(data.standard || []);
       setPremiumTiers(data.premium || []);
-      setToolTiers(data.tool || []);
     } catch (err) {
       console.error('Failed to load pricing tiers:', err);
     }
@@ -153,7 +143,8 @@ export default function QuoteBuilderPage() {
 
     setSearching(true);
     try {
-      const response = await fetch(`/api/admin/products/search?q=${encodeURIComponent(productSearch)}&types=tool,consumable`);
+      // Only search for consumables
+      const response = await fetch(`/api/admin/products/search?q=${encodeURIComponent(productSearch)}&types=consumable`);
       const data = await response.json();
       setSearchResults(data.products || []);
     } catch (err) {
@@ -176,7 +167,7 @@ export default function QuoteBuilderPage() {
       quantity: 1,
       unit_price: product.price,
       discount_percent: 0,
-      product_type: product.product_type as 'tool' | 'consumable',
+      product_type: 'consumable',
       category: product.category,
       image_url: product.image_url,
     };
@@ -205,18 +196,14 @@ export default function QuoteBuilderPage() {
   }
 
   function calculateTotals() {
-    const consumableItems = lineItems.filter(li => li.product_type === 'consumable');
-    const toolItems = lineItems.filter(li => li.product_type === 'tool');
-
     let subtotal = 0;
     let totalDiscount = 0;
 
-    // Calculate consumable pricing with tiers
     if (pricingMode === 'standard') {
-      const totalConsumableQty = consumableItems.reduce((sum, li) => sum + li.quantity, 0);
-      const tier = [...standardTiers].reverse().find(t => totalConsumableQty >= t.min_quantity);
+      const totalQty = lineItems.reduce((sum, li) => sum + li.quantity, 0);
+      const tier = [...standardTiers].reverse().find(t => totalQty >= t.min_quantity);
 
-      consumableItems.forEach(li => {
+      lineItems.forEach(li => {
         const tierPrice = tier?.unit_price || li.unit_price;
         const itemSubtotal = tierPrice * li.quantity;
         const itemDiscount = (itemSubtotal * li.discount_percent) / 100;
@@ -224,8 +211,7 @@ export default function QuoteBuilderPage() {
         totalDiscount += itemDiscount;
       });
     } else {
-      // Premium tier - per-SKU discounts
-      consumableItems.forEach(li => {
+      lineItems.forEach(li => {
         const tier = [...premiumTiers].reverse().find(t => li.quantity >= t.min_quantity);
         const tierDiscount = tier?.discount_percent || 0;
         const combinedDiscount = Math.min(100, tierDiscount + li.discount_percent);
@@ -236,22 +222,7 @@ export default function QuoteBuilderPage() {
       });
     }
 
-    // Tools have tiered volume discounts based on total tool quantity
-    const totalToolQty = toolItems.reduce((sum, li) => sum + li.quantity, 0);
-    const toolTier = [...toolTiers].reverse().find(t => totalToolQty >= t.min_quantity);
-    const toolTierDiscount = toolTier?.discount_percent || 0;
-
-    toolItems.forEach(li => {
-      const itemSubtotal = li.unit_price * li.quantity;
-      // Apply tier discount + any manual discount
-      const combinedDiscount = Math.min(100, toolTierDiscount + li.discount_percent);
-      const itemDiscount = (itemSubtotal * combinedDiscount) / 100;
-      subtotal += itemSubtotal;
-      totalDiscount += itemDiscount;
-    });
-
     const total = subtotal - totalDiscount;
-
     return { subtotal, totalDiscount, total };
   }
 
@@ -271,6 +242,7 @@ export default function QuoteBuilderPage() {
           contact_id: selectedContact.contact_id,
           line_items: lineItems,
           pricing_mode: pricingMode,
+          quote_type: 'consumable_interactive', // Mark as interactive consumable quote
         }),
       });
 
@@ -289,14 +261,10 @@ export default function QuoteBuilderPage() {
   }
 
   const { subtotal, totalDiscount, total } = calculateTotals();
-  const consumableQty = lineItems.filter(li => li.product_type === 'consumable').reduce((sum, li) => sum + li.quantity, 0);
-  const toolQty = lineItems.filter(li => li.product_type === 'tool').reduce((sum, li) => sum + li.quantity, 0);
-
-  const nextConsumableTier = pricingMode === 'standard'
+  const consumableQty = lineItems.reduce((sum, li) => sum + li.quantity, 0);
+  const nextTier = pricingMode === 'standard'
     ? standardTiers.find(t => consumableQty < t.min_quantity)
     : premiumTiers.find(t => consumableQty < t.min_quantity);
-
-  const nextToolTier = toolTiers.find(t => toolQty < t.min_quantity);
 
   return (
     <div className={`${inter.className} min-h-screen bg-[#fafafa]`}>
@@ -304,18 +272,18 @@ export default function QuoteBuilderPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-[32px] font-[800] text-[#0a0a0a] tracking-[-0.04em] mb-2">
-            Quote Builder
+            Consumables Quote Builder
           </h1>
           <p className="text-[15px] text-[#666] font-[400] tracking-[-0.01em]">
-            Create professional quotes for tool and consumable sales
+            Create interactive quotes with automatic tiered pricing • Customers can adjust quantities
           </p>
         </div>
 
         {/* Main Grid */}
         <div className="grid grid-cols-12 gap-6">
-          {/* Left Sidebar - Company & Contact Selection */}
+          {/* Left Sidebar */}
           <div className="col-span-4 space-y-6">
-            {/* Step 1: Company */}
+            {/* Company Selection */}
             <div className="bg-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)]">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-[32px] h-[32px] rounded-full bg-[#0a0a0a] flex items-center justify-center">
@@ -371,7 +339,7 @@ export default function QuoteBuilderPage() {
               )}
             </div>
 
-            {/* Step 2: Contact */}
+            {/* Contact Selection */}
             {selectedCompany && (
               <div className="bg-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)]">
                 <div className="flex items-center gap-3 mb-4">
@@ -426,7 +394,7 @@ export default function QuoteBuilderPage() {
                   </div>
                   <div className="flex justify-between text-[15px]">
                     <span className="text-white/70 font-[400]">Quantity</span>
-                    <span className="font-[600]">{lineItems.reduce((sum, li) => sum + li.quantity, 0)}</span>
+                    <span className="font-[600]">{consumableQty}</span>
                   </div>
                   <div className="h-px bg-white/20 my-3"></div>
                   <div className="flex justify-between text-[15px]">
@@ -448,7 +416,7 @@ export default function QuoteBuilderPage() {
 
                 {/* Pricing Mode Toggle */}
                 <div className="mb-4">
-                  <div className="text-[13px] text-white/70 font-[500] mb-2">Pricing Mode</div>
+                  <div className="text-[13px] text-white/70 font-[500] mb-2">Pricing Tier</div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => setPricingMode('standard')}
@@ -473,38 +441,20 @@ export default function QuoteBuilderPage() {
                   </div>
                 </div>
 
-                {/* Consumable Tier Progress */}
-                {nextConsumableTier && consumableQty > 0 && (
+                {/* Tier Progress */}
+                {nextTier && consumableQty > 0 && (
                   <div className="mt-4 p-3 bg-white/10 rounded-[14px]">
-                    <div className="text-[13px] font-[500] mb-2">Next Consumable Tier</div>
+                    <div className="text-[13px] font-[500] mb-2">Next Tier Unlock</div>
                     <div className="flex items-center gap-2 mb-1">
                       <div className="flex-1 h-2 bg-white/20 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-green-400 transition-all duration-300"
-                          style={{ width: `${Math.min(100, (consumableQty / nextConsumableTier.min_quantity) * 100)}%` }}
+                          style={{ width: `${Math.min(100, (consumableQty / nextTier.min_quantity) * 100)}%` }}
                         ></div>
                       </div>
                     </div>
                     <div className="text-[12px] text-white/70">
-                      {nextConsumableTier.min_quantity - consumableQty} more for {nextConsumableTier.tier_name}
-                    </div>
-                  </div>
-                )}
-
-                {/* Tool Tier Progress */}
-                {nextToolTier && toolQty > 0 && (
-                  <div className="mt-4 p-3 bg-white/10 rounded-[14px]">
-                    <div className="text-[13px] font-[500] mb-2">Next Tool Tier</div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="flex-1 h-2 bg-white/20 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-blue-400 transition-all duration-300"
-                          style={{ width: `${Math.min(100, (toolQty / nextToolTier.min_quantity) * 100)}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                    <div className="text-[12px] text-white/70">
-                      {nextToolTier.min_quantity - toolQty} more for {nextToolTier.tier_name} ({nextToolTier.discount_percent}% off)
+                      {nextTier.min_quantity - consumableQty} more for {nextTier.tier_name}
                     </div>
                   </div>
                 )}
@@ -514,22 +464,22 @@ export default function QuoteBuilderPage() {
                   disabled={!selectedCompany || !selectedContact || lineItems.length === 0 || generating}
                   className="w-full mt-6 py-3 bg-white text-[#0a0a0a] rounded-[14px] text-[15px] font-[700] tracking-[-0.01em] hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {generating ? 'Generating...' : 'Generate Quote'}
+                  {generating ? 'Generating...' : 'Generate Interactive Quote'}
                 </button>
               </div>
             )}
           </div>
 
-          {/* Right Main Area - Product Selection & Line Items */}
+          {/* Right Main Area */}
           <div className="col-span-8 space-y-6">
-            {/* Step 3: Add Products */}
+            {/* Product Search */}
             <div className="bg-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)]">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-[32px] h-[32px] rounded-full bg-[#0a0a0a] flex items-center justify-center">
                   <span className="text-[14px] font-[700] text-white">3</span>
                 </div>
                 <h2 className="text-[18px] font-[700] text-[#0a0a0a] tracking-[-0.02em]">
-                  Add Products
+                  Add Consumables
                 </h2>
               </div>
 
@@ -539,7 +489,7 @@ export default function QuoteBuilderPage() {
                   value={productSearch}
                   onChange={(e) => setProductSearch(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && searchProducts()}
-                  placeholder="Search tools or consumables..."
+                  placeholder="Search consumables..."
                   className="flex-1 px-4 py-3 border border-[#e8e8e8] rounded-[14px] text-[15px] text-[#0a0a0a] font-[500] focus:outline-none focus:ring-2 focus:ring-[#0a0a0a] focus:border-transparent"
                 />
                 <button
@@ -551,7 +501,6 @@ export default function QuoteBuilderPage() {
                 </button>
               </div>
 
-              {/* Search Results */}
               {searchResults.length > 0 && (
                 <div className="space-y-2">
                   {searchResults.map((product) => (
@@ -569,7 +518,7 @@ export default function QuoteBuilderPage() {
                       <div className="flex-1">
                         <div className="text-[15px] font-[600] text-[#0a0a0a]">{product.description}</div>
                         <div className="text-[13px] text-[#666]">
-                          {product.product_code} • {product.product_type} • £{product.price.toFixed(2)}
+                          {product.product_code} • £{product.price.toFixed(2)}
                         </div>
                       </div>
                       <button
@@ -584,7 +533,7 @@ export default function QuoteBuilderPage() {
               )}
             </div>
 
-            {/* Step 4: Quote Line Items */}
+            {/* Quote Line Items */}
             {lineItems.length > 0 && (
               <div className="bg-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)]">
                 <div className="flex items-center gap-3 mb-4">
@@ -612,7 +561,7 @@ export default function QuoteBuilderPage() {
                       <div className="flex-1">
                         <div className="text-[15px] font-[600] text-[#0a0a0a] mb-1">{item.description}</div>
                         <div className="text-[13px] text-[#666] mb-2">
-                          {item.product_code} • {item.product_type} • £{item.unit_price.toFixed(2)}/unit
+                          {item.product_code} • £{item.unit_price.toFixed(2)}/unit
                         </div>
                         <div className="flex gap-3">
                           <div>
@@ -626,7 +575,7 @@ export default function QuoteBuilderPage() {
                             />
                           </div>
                           <div>
-                            <label className="text-[12px] text-[#666] font-[500] block mb-1">Discount %</label>
+                            <label className="text-[12px] text-[#666] font-[500] block mb-1">Extra Discount %</label>
                             <input
                               type="number"
                               min="0"
@@ -660,8 +609,11 @@ export default function QuoteBuilderPage() {
         {/* Generated Quote URL */}
         {quoteUrl && (
           <div className="mt-6 bg-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)]">
-            <h3 className="text-[18px] font-[700] text-[#0a0a0a] tracking-[-0.02em] mb-4">Quote Generated</h3>
-            <div className="bg-[#fafafa] p-4 rounded-[14px] border border-[#e8e8e8] mb-4">
+            <h3 className="text-[18px] font-[700] text-[#0a0a0a] tracking-[-0.02em] mb-4">Interactive Quote Generated</h3>
+            <div className="bg-green-50 p-4 rounded-[14px] border border-green-200 mb-4">
+              <p className="text-[14px] text-green-800 mb-2">
+                ✓ Customer can adjust quantities and see live pricing updates
+              </p>
               <a
                 href={quoteUrl}
                 target="_blank"

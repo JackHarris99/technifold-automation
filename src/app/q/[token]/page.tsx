@@ -1,11 +1,14 @@
 /**
  * Quote Viewer Route
  * /q/[token] - HMAC-signed token for viewing custom quotes
+ * Supports both new interactive quotes (with quote_items) and legacy quotes (with products)
  */
 
 import { notFound } from 'next/navigation';
 import { verifyToken } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
+import InteractiveQuoteViewer from '@/components/InteractiveQuoteViewer';
+import StaticToolQuoteViewer from '@/components/StaticToolQuoteViewer';
 
 interface QuoteViewerProps {
   params: Promise<{
@@ -38,7 +41,7 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
     );
   }
 
-  const { company_id, contact_id, products = [] } = payload;
+  const { company_id, contact_id, products = [], quote_items, pricing_mode, quote_type } = payload;
   const supabase = getSupabaseClient();
 
   // 2. Fetch company
@@ -61,6 +64,54 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
       .eq('contact_id', contact_id)
       .single();
     contact = data;
+  }
+
+  // NEW: If this is a quote with line items, render appropriate viewer
+  if (quote_items && Array.isArray(quote_items) && quote_items.length > 0) {
+    // Track quote view
+    if (contact) {
+      supabase
+        .from('engagement_events')
+        .insert({
+          contact_id: contact.contact_id,
+          company_id: company.company_id,
+          event_type: 'quote_view',
+          event_name: quote_type === 'tool_static' ? 'static_tool_quote_view' : 'interactive_consumable_quote_view',
+          source: 'vercel',
+          url: `/q/${token}`,
+          meta: {
+            contact_name: contact.full_name,
+            company_name: company.company_name,
+            item_count: quote_items.length,
+            quote_type: quote_type || 'unknown'
+          }
+        })
+        .then(() => console.log(`[Quote] Tracked ${quote_type} view by ${contact.full_name}`))
+        .catch(err => console.error('[Quote] Tracking failed:', err));
+    }
+
+    // Render static viewer for tool quotes, interactive for consumable quotes
+    if (quote_type === 'tool_static') {
+      return (
+        <StaticToolQuoteViewer
+          items={quote_items}
+          companyName={company.company_name}
+          contactName={contact?.full_name}
+          token={token}
+        />
+      );
+    }
+
+    // Default to interactive viewer for consumables
+    return (
+      <InteractiveQuoteViewer
+        initialItems={quote_items}
+        pricingMode={pricing_mode || 'standard'}
+        companyName={company.company_name}
+        contactName={contact?.full_name}
+        token={token}
+      />
+    );
   }
 
   // 4. Fetch products from payload
