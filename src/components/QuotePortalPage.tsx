@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { CartItem } from '@/types';
-import { CartBar } from './CartBar';
 import { InvoiceRequestModal } from './InvoiceRequestModal';
 import PortalAddressCollectionModal from './portals/PortalAddressCollectionModal';
 
@@ -290,17 +289,63 @@ export function QuotePortalPage({ quote, lineItems, company, contact, token, isT
             </div>
           </div>
 
-          {/* Right Panel - Cart Bar */}
+          {/* Right Panel - Cart Sidebar */}
           <div className="col-span-4">
-            <CartBar
-              cart={cart}
-              pricingPreview={pricingPreview}
-              loadingPreview={loadingPreview}
-              onUpdateQuantity={updateQuantity}
-              onRemoveItem={removeFromCart}
-              onCheckout={() => setIsInvoiceModalOpen(true)}
-              onClearCart={clearCart}
-            />
+            <div className="bg-white rounded-[20px] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] sticky top-24">
+              <div className="text-[12px] font-[700] text-[#666] uppercase tracking-[0.05em] mb-6">Your Quote</div>
+
+              {/* Cart Items Summary */}
+              {cart.length > 0 && pricingPreview && (
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[15px] text-[#999] font-[500]">Subtotal</span>
+                      <span className="font-[600] text-[16px]">£{pricingPreview.subtotal.toFixed(2)}</span>
+                    </div>
+                    {pricingPreview.shipping !== undefined && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-[15px] text-[#999] font-[500]">Shipping</span>
+                        <span className="font-[600] text-[16px]">
+                          {pricingPreview.shipping === 0 ? 'FREE' : `£${pricingPreview.shipping.toFixed(2)}`}
+                        </span>
+                      </div>
+                    )}
+                    {pricingPreview.vat_amount !== undefined && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-[15px] text-[#999] font-[500]">VAT</span>
+                        <span className="font-[600] text-[16px]">£{pricingPreview.vat_amount.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {pricingPreview.total !== undefined && (
+                      <div className="flex justify-between items-center pt-4 border-t border-[#e5e7eb]">
+                        <span className="text-[17px] font-[700]">Total</span>
+                        <span className="font-[800] text-[28px] tracking-[-0.02em] text-[#16a34a]">£{pricingPreview.total.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {pricingPreview.total_savings > 0 && (
+                      <div className="mt-4 p-4 bg-[#16a34a]/10 rounded-[12px] border border-[#16a34a]/20">
+                        <div className="text-[13px] text-[#16a34a] font-[600]">
+                          Saving £{pricingPreview.total_savings.toFixed(2)} with tiered pricing!
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setIsInvoiceModalOpen(true)}
+                    disabled={cart.length === 0}
+                    className="w-full py-4 bg-[#16a34a] text-white rounded-[14px] font-[700] text-[15px] tracking-[-0.01em] hover:bg-[#15803d] transition-all shadow-[0_4px_12px_rgba(22,163,74,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Request Invoice ({cart.length} items)
+                  </button>
+                </div>
+              )}
+
+              {cart.length === 0 && (
+                <div className="text-center py-8 text-[#9ca3af]">
+                  <p className="text-sm">No items in quote</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
