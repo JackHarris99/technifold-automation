@@ -104,7 +104,7 @@ export function QuotePortalPage({ quote, lineItems, company, contact, token, isT
     const initialCart: CartItem[] = lineItems.map(item => ({
       consumable_code: item.product_code,
       description: item.description,
-      price: item.unit_price,
+      price: item.unit_price || 0, // Handle null prices
       quantity: item.quantity,
       category: item.category,
       image_url: item.image_url,
@@ -274,7 +274,7 @@ export function QuotePortalPage({ quote, lineItems, company, contact, token, isT
                         </button>
                       </div>
                       <div className="text-[16px] font-[700] text-[#111827] w-24 text-right">
-                        £{(item.price * item.quantity).toFixed(2)}
+                        £{((item.price || 0) * item.quantity).toFixed(2)}
                       </div>
                     </div>
                   </div>
