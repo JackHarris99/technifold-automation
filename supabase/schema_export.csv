@@ -288,6 +288,17 @@ products,height_cm,numeric,YES,null
 products,depth_cm,numeric,YES,null
 products,cost_price,numeric,YES,null
 products,pricing_tier,text,YES,'standard'::text
+quote_items,quote_id,uuid,NO,null
+quote_items,product_code,text,NO,null
+quote_items,line_number,integer,NO,null
+quote_items,description,text,NO,null
+quote_items,quantity,integer,NO,null
+quote_items,unit_price,numeric,NO,null
+quote_items,discount_percent,numeric,YES,0
+quote_items,line_total,numeric,NO,null
+quote_items,product_type,text,YES,null
+quote_items,category,text,YES,null
+quote_items,image_url,text,YES,null
 quote_requests,quote_request_id,uuid,NO,gen_random_uuid()
 quote_requests,company_id,character varying,NO,null
 quote_requests,contact_id,uuid,NO,null
@@ -305,6 +316,26 @@ quote_requests,created_at,timestamp with time zone,YES,now()
 quote_requests,updated_at,timestamp with time zone,YES,now()
 quote_requests,quote_sent_at,timestamp with time zone,YES,null
 quote_requests,closed_at,timestamp with time zone,YES,null
+quotes,quote_id,uuid,NO,gen_random_uuid()
+quotes,company_id,text,NO,null
+quotes,contact_id,uuid,NO,null
+quotes,quote_type,text,NO,null
+quotes,pricing_mode,text,YES,null
+quotes,status,text,NO,'draft'::text
+quotes,currency,text,NO,'GBP'::text
+quotes,subtotal,numeric,NO,null
+quotes,discount_amount,numeric,YES,0
+quotes,total_amount,numeric,NO,null
+quotes,invoice_id,uuid,YES,null
+quotes,expires_at,timestamp with time zone,YES,null
+quotes,sent_at,timestamp with time zone,YES,null
+quotes,viewed_at,timestamp with time zone,YES,null
+quotes,accepted_at,timestamp with time zone,YES,null
+quotes,is_test,boolean,YES,FALSE
+quotes,notes,text,YES,null
+quotes,created_by,text,YES,null
+quotes,created_at,timestamp with time zone,NO,now()
+quotes,updated_at,timestamp with time zone,NO,now()
 rental_agreements,rental_id,uuid,NO,gen_random_uuid()
 rental_agreements,serial_number,text,NO,null
 rental_agreements,company_id,text,NO,null
@@ -419,6 +450,13 @@ subscriptions,created_by,text,YES,null
 subscriptions,updated_by,text,YES,null
 tool_consumable_map,tool_code,text,NO,null
 tool_consumable_map,consumable_code,text,NO,null
+tool_pricing_ladder,id,integer,NO,nextval('tool_pricing_ladder_id_seq'::regclass)
+tool_pricing_ladder,min_qty,integer,NO,null
+tool_pricing_ladder,max_qty,integer,NO,null
+tool_pricing_ladder,discount_pct,numeric,NO,null
+tool_pricing_ladder,active,boolean,YES,TRUE
+tool_pricing_ladder,created_at,timestamp with time zone,YES,now()
+tool_pricing_ladder,updated_at,timestamp with time zone,YES,now()
 trial_intents,id,uuid,NO,gen_random_uuid()
 trial_intents,token,text,NO,null
 trial_intents,company_id,text,YES,null

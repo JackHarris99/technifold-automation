@@ -23,8 +23,13 @@ invoices,shipping_address_id,shipping_addresses,address_id
 order_items,order_id,orders,order_id
 orders,rental_agreement_id,rental_agreements,rental_id
 orders,shipping_address_id,shipping_addresses,address_id
+quote_items,product_code,products,product_code
+quote_items,quote_id,quotes,quote_id
 quote_requests,company_id,companies,company_id
 quote_requests,contact_id,contacts,contact_id
+quotes,company_id,companies,company_id
+quotes,contact_id,contacts,contact_id
+quotes,invoice_id,invoices,invoice_id
 rental_agreements,company_id,companies,company_id
 rental_agreements,company_id,companies,company_id
 rental_agreements,contact_id,contacts,contact_id

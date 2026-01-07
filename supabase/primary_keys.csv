@@ -24,7 +24,11 @@ orders,order_id
 outbox,job_id
 premium_pricing_ladder,tier_id
 products,product_code
+quote_items,quote_id
+quote_items,product_code
+quote_items,line_number
 quote_requests,quote_request_id
+quotes,quote_id
 rental_agreements,rental_id
 shipping_addresses,address_id
 shipping_manifests,manifest_id
@@ -38,5 +42,6 @@ subscription_tools,added_at
 subscriptions,subscription_id
 tool_consumable_map,tool_code
 tool_consumable_map,consumable_code
+tool_pricing_ladder,id
 trial_intents,id
 users,user_id

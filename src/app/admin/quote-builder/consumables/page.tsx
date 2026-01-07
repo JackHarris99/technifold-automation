@@ -1,7 +1,7 @@
 /**
  * Consumables Quote Builder
- * Creates interactive quotes for consumables with customer-facing tiered pricing
- * Customers can adjust quantities and see live pricing updates
+ * Creates quotes with either STATIC (locked) or INTERACTIVE (tiered) pricing
+ * Supports both fixed pricing quotes and volume discount quotes
  */
 
 'use client';
@@ -88,6 +88,9 @@ export default function ConsumablesQuoteBuilderPage() {
   const [quoteUrl, setQuoteUrl] = useState('');
   const [generating, setGenerating] = useState(false);
   const [isTestToken, setIsTestToken] = useState(false);
+  const [quoteId, setQuoteId] = useState('');
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [quoteType, setQuoteType] = useState<'interactive' | 'static'>('interactive');
 
   useEffect(() => {
     loadCompanies();
@@ -330,8 +333,8 @@ export default function ConsumablesQuoteBuilderPage() {
           company_id: selectedCompany.company_id,
           contact_id: selectedContact.contact_id,
           line_items: lineItems,
-          pricing_mode: pricingMode,
-          quote_type: 'consumable_interactive', // Mark as interactive consumable quote
+          pricing_mode: quoteType === 'interactive' ? pricingMode : null,
+          quote_type: quoteType, // 'static' or 'interactive'
           is_test: isTestToken, // Test tokens bypass address collection
         }),
       });
@@ -339,6 +342,9 @@ export default function ConsumablesQuoteBuilderPage() {
       const data = await response.json();
       if (data.url) {
         setQuoteUrl(data.url);
+        if (data.quote_id) {
+          setQuoteId(data.quote_id);
+        }
       } else {
         alert('Failed to generate quote: ' + (data.error || 'Unknown error'));
       }
@@ -347,6 +353,39 @@ export default function ConsumablesQuoteBuilderPage() {
       console.error(err);
     } finally {
       setGenerating(false);
+    }
+  }
+
+  async function sendQuoteEmail() {
+    if (!selectedCompany || !selectedContact || !quoteId || !quoteUrl) {
+      alert('Missing required information for sending email');
+      return;
+    }
+
+    setSendingEmail(true);
+    try {
+      const response = await fetch('/api/admin/quote/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company_id: selectedCompany.company_id,
+          contact_id: selectedContact.contact_id,
+          quote_id: quoteId,
+          quote_url: quoteUrl,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert(`Quote email sent successfully to ${selectedContact.email}!`);
+      } else {
+        alert('Failed to send email: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err) {
+      alert('Error sending email');
+      console.error(err);
+    } finally {
+      setSendingEmail(false);
     }
   }
 
@@ -365,7 +404,7 @@ export default function ConsumablesQuoteBuilderPage() {
             Consumables Quote Builder
           </h1>
           <p className="text-[15px] text-[#666] font-[400] tracking-[-0.01em]">
-            Create interactive quotes with automatic tiered pricing • Customers can adjust quantities
+            Create quotes with static (locked) or interactive (tiered) pricing modes
           </p>
         </div>
 
@@ -477,6 +516,41 @@ export default function ConsumablesQuoteBuilderPage() {
               <div className="bg-[#0a0a0a] rounded-[20px] p-6 text-white sticky top-6">
                 <h3 className="text-[18px] font-[700] tracking-[-0.02em] mb-4">Quote Summary</h3>
 
+                {/* Quote Type Toggle */}
+                <div className="mb-6 pb-6 border-b border-white/20">
+                  <div className="text-[13px] text-white/70 font-[500] mb-3">Quote Type</div>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-3 p-3 bg-white/5 border border-white/20 rounded-[10px] cursor-pointer hover:bg-white/10 transition-colors">
+                      <input
+                        type="radio"
+                        name="quote-type"
+                        value="interactive"
+                        checked={quoteType === 'interactive'}
+                        onChange={() => setQuoteType('interactive')}
+                        className="w-4 h-4"
+                      />
+                      <div className="flex-1">
+                        <div className="text-[14px] font-[600] text-white">Interactive Quote</div>
+                        <div className="text-[12px] text-white/60">Prices recalculate with tiered discounts</div>
+                      </div>
+                    </label>
+                    <label className="flex items-center gap-3 p-3 bg-white/5 border border-white/20 rounded-[10px] cursor-pointer hover:bg-white/10 transition-colors">
+                      <input
+                        type="radio"
+                        name="quote-type"
+                        value="static"
+                        checked={quoteType === 'static'}
+                        onChange={() => setQuoteType('static')}
+                        className="w-4 h-4"
+                      />
+                      <div className="flex-1">
+                        <div className="text-[14px] font-[600] text-white">Static Quote</div>
+                        <div className="text-[12px] text-white/60">Fixed prices, customer can adjust quantities</div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between text-[15px]">
                     <span className="text-white/70 font-[400]">Items</span>
@@ -504,35 +578,37 @@ export default function ConsumablesQuoteBuilderPage() {
                   </div>
                 </div>
 
-                {/* Pricing Mode Toggle */}
-                <div className="mb-4">
-                  <div className="text-[13px] text-white/70 font-[500] mb-2">Pricing Tier</div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setPricingMode('standard')}
-                      className={`flex-1 px-3 py-2 rounded-[10px] text-[13px] font-[600] transition-colors ${
-                        pricingMode === 'standard'
-                          ? 'bg-white text-[#0a0a0a]'
-                          : 'bg-white/10 text-white/70 hover:bg-white/20'
-                      }`}
-                    >
-                      Standard
-                    </button>
-                    <button
-                      onClick={() => setPricingMode('premium')}
-                      className={`flex-1 px-3 py-2 rounded-[10px] text-[13px] font-[600] transition-colors ${
-                        pricingMode === 'premium'
-                          ? 'bg-white text-[#0a0a0a]'
-                          : 'bg-white/10 text-white/70 hover:bg-white/20'
-                      }`}
-                    >
-                      Premium
-                    </button>
+                {/* Pricing Mode Toggle (only for interactive quotes) */}
+                {quoteType === 'interactive' && (
+                  <div className="mb-4">
+                    <div className="text-[13px] text-white/70 font-[500] mb-2">Pricing Tier</div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setPricingMode('standard')}
+                        className={`flex-1 px-3 py-2 rounded-[10px] text-[13px] font-[600] transition-colors ${
+                          pricingMode === 'standard'
+                            ? 'bg-white text-[#0a0a0a]'
+                            : 'bg-white/10 text-white/70 hover:bg-white/20'
+                        }`}
+                      >
+                        Standard
+                      </button>
+                      <button
+                        onClick={() => setPricingMode('premium')}
+                        className={`flex-1 px-3 py-2 rounded-[10px] text-[13px] font-[600] transition-colors ${
+                          pricingMode === 'premium'
+                            ? 'bg-white text-[#0a0a0a]'
+                            : 'bg-white/10 text-white/70 hover:bg-white/20'
+                        }`}
+                      >
+                        Premium
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* Tier Progress */}
-                {nextTier && consumableQty > 0 && (
+                {/* Tier Progress (only for interactive quotes) */}
+                {quoteType === 'interactive' && nextTier && consumableQty > 0 && (
                   <div className="mt-4 p-3 bg-white/10 rounded-[14px]">
                     <div className="text-[13px] font-[500] mb-2">Next Tier Unlock</div>
                     <div className="flex items-center gap-2 mb-1">
@@ -549,26 +625,28 @@ export default function ConsumablesQuoteBuilderPage() {
                   </div>
                 )}
 
-                <div className="flex items-center gap-2 mt-4">
-                  <input
-                    type="checkbox"
-                    id="test-token"
-                    checked={isTestToken}
-                    onChange={(e) => setIsTestToken(e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300"
-                  />
-                  <label htmlFor="test-token" className="text-sm text-white/70">
-                    Generate test link (skips address collection)
-                  </label>
-                </div>
-
+                {/* Generate Test Link Button */}
                 <button
-                  onClick={generateQuote}
+                  onClick={() => {
+                    setIsTestToken(true);
+                    setTimeout(() => generateQuote(), 100);
+                  }}
                   disabled={!selectedCompany || !selectedContact || lineItems.length === 0 || generating}
-                  className="w-full mt-2 py-3 bg-white text-[#0a0a0a] rounded-[14px] text-[15px] font-[700] tracking-[-0.01em] hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full mt-4 py-3 bg-white text-[#0a0a0a] rounded-[14px] text-[15px] font-[700] tracking-[-0.01em] hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {generating ? 'Generating...' : 'Generate Interactive Quote'}
+                  {generating ? 'Generating...' : '🔗 Generate Test Link'}
                 </button>
+
+                {/* Send Quote Email Button (only for non-test quotes) */}
+                {quoteUrl && !isTestToken && quoteId && (
+                  <button
+                    onClick={sendQuoteEmail}
+                    disabled={sendingEmail}
+                    className="w-full mt-2 py-3 bg-green-600 text-white rounded-[14px] text-[15px] font-[700] tracking-[-0.01em] hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {sendingEmail ? 'Sending...' : '📧 Send Quote Email'}
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -800,20 +878,42 @@ export default function ConsumablesQuoteBuilderPage() {
         {/* Generated Quote URL */}
         {quoteUrl && (
           <div className="mt-6 bg-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)]">
-            <h3 className="text-[18px] font-[700] text-[#0a0a0a] tracking-[-0.02em] mb-4">Interactive Quote Generated</h3>
-            <div className="bg-green-50 p-4 rounded-[14px] border border-green-200 mb-4">
-              <p className="text-[14px] text-green-800 mb-2">
-                ✓ Customer can adjust quantities and see live pricing updates
-              </p>
-              <a
-                href={quoteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[15px] text-blue-600 hover:text-blue-700 font-[500] break-all"
-              >
-                {quoteUrl}
-              </a>
-            </div>
+            <h3 className="text-[18px] font-[700] text-[#0a0a0a] tracking-[-0.02em] mb-4">
+              {quoteType === 'interactive' ? 'Interactive Quote Generated' : 'Static Quote Generated'}
+            </h3>
+
+            {isTestToken ? (
+              <div className="bg-yellow-50 p-4 rounded-[14px] border border-yellow-200 mb-4">
+                <p className="text-[14px] text-yellow-800 mb-2">
+                  ⚠️ Test Link - For internal preview only (not stored in database)
+                </p>
+                <a
+                  href={quoteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[15px] text-blue-600 hover:text-blue-700 font-[500] break-all"
+                >
+                  {quoteUrl}
+                </a>
+              </div>
+            ) : (
+              <div className="bg-green-50 p-4 rounded-[14px] border border-green-200 mb-4">
+                <p className="text-[14px] text-green-800 mb-2">
+                  ✓ {quoteType === 'interactive'
+                    ? 'Customer can adjust quantities and see live pricing updates'
+                    : 'Customer can adjust quantities but prices remain locked'}
+                </p>
+                <a
+                  href={quoteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[15px] text-blue-600 hover:text-blue-700 font-[500] break-all"
+                >
+                  {quoteUrl}
+                </a>
+              </div>
+            )}
+
             <div className="flex gap-3">
               <a
                 href={quoteUrl}
@@ -830,7 +930,7 @@ export default function ConsumablesQuoteBuilderPage() {
                 }}
                 className="px-6 py-3 border-2 border-[#0a0a0a] text-[#0a0a0a] rounded-[14px] text-[15px] font-[700] hover:bg-[#fafafa] transition-colors"
               >
-                Copy Link
+                📋 Copy Link
               </button>
             </div>
           </div>

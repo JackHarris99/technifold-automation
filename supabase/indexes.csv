@@ -92,12 +92,19 @@ public,premium_pricing_ladder,unique_qty_range_premium,"CREATE UNIQUE INDEX uniq
 public,products,idx_products_hs_code,CREATE INDEX idx_products_hs_code ON public.products USING btree (hs_code)
 public,products,idx_products_origin,CREATE INDEX idx_products_origin ON public.products USING btree (country_of_origin)
 public,products,products_pkey,CREATE UNIQUE INDEX products_pkey ON public.products USING btree (product_code)
+public,quote_items,idx_quote_items_quote_id,CREATE INDEX idx_quote_items_quote_id ON public.quote_items USING btree (quote_id)
+public,quote_items,quote_items_pkey,"CREATE UNIQUE INDEX quote_items_pkey ON public.quote_items USING btree (quote_id, product_code, line_number)"
 public,quote_requests,idx_quote_requests_assigned,CREATE INDEX idx_quote_requests_assigned ON public.quote_requests USING btree (assigned_to)
 public,quote_requests,idx_quote_requests_company,CREATE INDEX idx_quote_requests_company ON public.quote_requests USING btree (company_id)
 public,quote_requests,idx_quote_requests_contact,CREATE INDEX idx_quote_requests_contact ON public.quote_requests USING btree (contact_id)
 public,quote_requests,idx_quote_requests_created,CREATE INDEX idx_quote_requests_created ON public.quote_requests USING btree (created_at DESC)
 public,quote_requests,idx_quote_requests_status,CREATE INDEX idx_quote_requests_status ON public.quote_requests USING btree (status)
 public,quote_requests,quote_requests_pkey,CREATE UNIQUE INDEX quote_requests_pkey ON public.quote_requests USING btree (quote_request_id)
+public,quotes,idx_quotes_company_id,CREATE INDEX idx_quotes_company_id ON public.quotes USING btree (company_id)
+public,quotes,idx_quotes_contact_id,CREATE INDEX idx_quotes_contact_id ON public.quotes USING btree (contact_id)
+public,quotes,idx_quotes_created_at,CREATE INDEX idx_quotes_created_at ON public.quotes USING btree (created_at DESC)
+public,quotes,idx_quotes_status,CREATE INDEX idx_quotes_status ON public.quotes USING btree (status)
+public,quotes,quotes_pkey,CREATE UNIQUE INDEX quotes_pkey ON public.quotes USING btree (quote_id)
 public,rental_agreements,idx_rental_agreements_company,CREATE INDEX idx_rental_agreements_company ON public.rental_agreements USING btree (company_id)
 public,rental_agreements,idx_rental_agreements_company_id,CREATE INDEX idx_rental_agreements_company_id ON public.rental_agreements USING btree (company_id)
 public,rental_agreements,idx_rental_agreements_contact,CREATE INDEX idx_rental_agreements_contact ON public.rental_agreements USING btree (contact_id) WHERE (contact_id IS NOT NULL)
@@ -141,6 +148,8 @@ public,subscriptions,subscriptions_stripe_subscription_id_key,CREATE UNIQUE INDE
 public,tool_consumable_map,idx_tcm_consumable,CREATE INDEX idx_tcm_consumable ON public.tool_consumable_map USING btree (consumable_code)
 public,tool_consumable_map,idx_tcm_tool,CREATE INDEX idx_tcm_tool ON public.tool_consumable_map USING btree (tool_code)
 public,tool_consumable_map,tool_consumable_map_pkey,"CREATE UNIQUE INDEX tool_consumable_map_pkey ON public.tool_consumable_map USING btree (tool_code, consumable_code)"
+public,tool_pricing_ladder,idx_tool_pricing_ladder_qty,"CREATE INDEX idx_tool_pricing_ladder_qty ON public.tool_pricing_ladder USING btree (min_qty, max_qty) WHERE (active = true)"
+public,tool_pricing_ladder,tool_pricing_ladder_pkey,CREATE UNIQUE INDEX tool_pricing_ladder_pkey ON public.tool_pricing_ladder USING btree (id)
 public,trial_intents,trial_intents_pkey,CREATE UNIQUE INDEX trial_intents_pkey ON public.trial_intents USING btree (id)
 public,trial_intents,trial_intents_token_key,CREATE UNIQUE INDEX trial_intents_token_key ON public.trial_intents USING btree (token)
 public,users,idx_users_email,CREATE INDEX idx_users_email ON public.users USING btree (email) WHERE (is_active = true)
