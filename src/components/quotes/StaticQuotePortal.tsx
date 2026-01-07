@@ -170,9 +170,9 @@ export function StaticQuotePortal({ quote, lineItems, company, contact, token, i
           </div>
         </div>
 
-        <div className="grid grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* Main Product List */}
-          <div className="col-span-8 space-y-4">
+          <div className="col-span-1 md:col-span-8 space-y-4">
             {cart.map((item) => {
               const previewItem = pricingPreview?.line_items.find(li => li.product_code === item.consumable_code);
               const displayPrice = previewItem?.unit_price || item.price;
@@ -253,7 +253,7 @@ export function StaticQuotePortal({ quote, lineItems, company, contact, token, i
           </div>
 
           {/* Sticky Sidebar */}
-          <div className="col-span-4">
+          <div className="col-span-1 md:col-span-4">
             <div className="sticky top-6 bg-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)]">
               <h2 className="text-[20px] font-[800] text-[#0a0a0a] mb-6">Order Summary</h2>
 

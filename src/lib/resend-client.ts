@@ -796,25 +796,6 @@ export async function sendQuoteEmail({
             ${descriptionText}
           </p>
 
-          ${totalAmount ? `
-          <!-- Quote Total Box -->
-          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
-            <tr>
-              <td style="background-color: #f0f9ff; border: 2px solid #3b82f6; padding: 20px; font-family: Arial, sans-serif;">
-                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                  <tr>
-                    <td>
-                      <p style="margin: 0 0 4px 0; font-size: 14px; color: #1e40af;">Quote Total${isInteractive ? ' (estimated)' : ''}</p>
-                      <p style="margin: 0; font-size: 28px; font-weight: 700; color: #1e40af;">${currencySymbol}${totalAmount.toFixed(2)}</p>
-                      ${itemCount ? `<p style="margin: 4px 0 0 0; font-size: 14px; color: #3b82f6;">${itemCount} ${itemCount === 1 ? 'item' : 'items'}</p>` : ''}
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-          ` : ''}
-
           <!-- View Quote Button -->
           <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
             <tr>
@@ -897,7 +878,7 @@ export async function sendQuoteEmail({
     const { data, error } = await resend.emails.send({
       from: fromEmail,
       to: [to],
-      subject: `Your Custom Quote from Technifold${totalAmount ? ` - ${currencySymbol}${totalAmount.toFixed(2)}` : ''}`,
+      subject: `Your Custom Quote from Technifold`,
       html
     });
 

@@ -264,10 +264,7 @@ export default function ToolsQuoteBuilderPage() {
   }
 
   function updateQuantity(productCode: string, quantity: number) {
-    if (quantity < 1) {
-      removeLineItem(productCode);
-      return;
-    }
+    // Allow quantity 0 for "curated" quotes (show product but don't include in total)
     setLineItems(lineItems.map(li =>
       li.product_code === productCode ? { ...li, quantity } : li
     ));
