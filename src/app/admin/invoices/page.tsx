@@ -97,12 +97,6 @@ export default async function InvoicesPage() {
                 {isDirector ? 'All Territories' : 'My Territory'}
               </p>
             </div>
-            <Link
-              href="/admin/invoices/new"
-              className="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold text-sm shadow-sm"
-            >
-              + Create Invoice
-            </Link>
           </div>
         </div>
       </div>

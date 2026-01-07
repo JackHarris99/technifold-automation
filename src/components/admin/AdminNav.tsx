@@ -113,16 +113,6 @@ export default function AdminNav() {
           >
             Invoices
           </Link>
-          <Link
-            href="/admin/invoices/new"
-            className={`block px-4 py-2 text-sm transition-colors ${
-              pathname === '/admin/invoices/new'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-            }`}
-          >
-            Create Invoice
-          </Link>
         </div>
 
         {/* Subscriptions */}

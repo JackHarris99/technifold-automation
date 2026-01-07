@@ -89,12 +89,6 @@ export default function CompanyDetailView({
               >
                 📦 Create Consumables Quote
               </Link>
-              <Link
-                href={`/admin/invoices/new?company_id=${company.company_id}`}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
-              >
-                Create Invoice
-              </Link>
             </div>
           </div>
 
