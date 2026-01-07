@@ -84,8 +84,11 @@ export default function ToolsQuoteBuilderPage() {
   const [toolTiers, setToolTiers] = useState<PricingTier[]>([]);
 
   const [quoteUrl, setQuoteUrl] = useState('');
+  const [quoteId, setQuoteId] = useState('');
   const [generating, setGenerating] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
   const [isTestToken, setIsTestToken] = useState(false);
+  const [quoteType, setQuoteType] = useState<'interactive' | 'static'>('static');
 
   useEffect(() => {
     loadCompanies();
@@ -295,18 +298,20 @@ export default function ToolsQuoteBuilderPage() {
         body: JSON.stringify({
           company_id: selectedCompany.company_id,
           contact_id: selectedContact.contact_id,
+          pricing_mode: quoteType === 'interactive' ? 'standard' : null,
           line_items: lineItems.map(li => ({
             ...li,
-            discount_percent: blanketDiscount, // Apply blanket discount to all
+            discount_percent: blanketDiscount,
           })),
-          quote_type: 'tool_static', // Mark as static tool quote
-          is_test: isTestToken, // Test tokens bypass address collection
+          quote_type: quoteType, // Use selected quote type
+          is_test: isTestToken,
         }),
       });
 
       const data = await response.json();
-      if (data.url) {
+      if (data.url && data.quote_id) {
         setQuoteUrl(data.url);
+        setQuoteId(data.quote_id);
       } else {
         alert('Failed to generate quote: ' + (data.error || 'Unknown error'));
       }
@@ -315,6 +320,39 @@ export default function ToolsQuoteBuilderPage() {
       console.error(err);
     } finally {
       setGenerating(false);
+    }
+  }
+
+  async function sendQuoteEmail() {
+    if (!selectedCompany || !selectedContact || !quoteUrl || !quoteId) {
+      alert('Please generate a quote first');
+      return;
+    }
+
+    setSendingEmail(true);
+    try {
+      const response = await fetch('/api/admin/quote/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company_id: selectedCompany.company_id,
+          contact_id: selectedContact.contact_id,
+          quote_id: quoteId,
+          quote_url: quoteUrl,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert(`✓ Quote email sent successfully to ${selectedContact.email}`);
+      } else {
+        alert('Failed to send email: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err) {
+      alert('Error sending email');
+      console.error(err);
+    } finally {
+      setSendingEmail(false);
     }
   }
 
@@ -332,7 +370,7 @@ export default function ToolsQuoteBuilderPage() {
             Tools Quote Builder
           </h1>
           <p className="text-[15px] text-[#666] font-[400] tracking-[-0.01em]">
-            Sales-controlled quotes with tier guidance • Generates static quotes for customers
+            Create static (fixed pricing) or interactive (tiered pricing) quotes • Send via professional email
           </p>
         </div>
 
@@ -505,7 +543,44 @@ export default function ToolsQuoteBuilderPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 mt-4">
+                {/* Quote Type Selector */}
+                <div className="mb-4">
+                  <label className="text-[13px] text-white/70 font-[500] block mb-2">
+                    Quote Type
+                  </label>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-3 p-3 bg-white/5 border border-white/20 rounded-[10px] cursor-pointer hover:bg-white/10 transition-colors">
+                      <input
+                        type="radio"
+                        name="quote-type"
+                        value="static"
+                        checked={quoteType === 'static'}
+                        onChange={() => setQuoteType('static')}
+                        className="w-4 h-4"
+                      />
+                      <div>
+                        <div className="text-[14px] font-[600] text-white">Static Quote</div>
+                        <div className="text-[12px] text-white/60">Fixed prices, customer can adjust quantities</div>
+                      </div>
+                    </label>
+                    <label className="flex items-center gap-3 p-3 bg-white/5 border border-white/20 rounded-[10px] cursor-pointer hover:bg-white/10 transition-colors">
+                      <input
+                        type="radio"
+                        name="quote-type"
+                        value="interactive"
+                        checked={quoteType === 'interactive'}
+                        onChange={() => setQuoteType('interactive')}
+                        className="w-4 h-4"
+                      />
+                      <div>
+                        <div className="text-[14px] font-[600] text-white">Interactive Quote</div>
+                        <div className="text-[12px] text-white/60">Prices recalculate with tiered discounts</div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 mb-4">
                   <input
                     type="checkbox"
                     id="test-token"
@@ -514,17 +589,35 @@ export default function ToolsQuoteBuilderPage() {
                     className="w-4 h-4 rounded border-gray-300"
                   />
                   <label htmlFor="test-token" className="text-sm text-white/70">
-                    Generate test link (skips address collection)
+                    Test link (internal preview only)
                   </label>
                 </div>
 
-                <button
-                  onClick={generateQuote}
-                  disabled={!selectedCompany || !selectedContact || lineItems.length === 0 || generating}
-                  className="w-full mt-2 py-3 bg-white text-[#0a0a0a] rounded-[14px] text-[15px] font-[700] tracking-[-0.01em] hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {generating ? 'Generating...' : 'Generate Static Quote'}
-                </button>
+                <div className="space-y-2">
+                  <button
+                    onClick={generateQuote}
+                    disabled={!selectedCompany || !selectedContact || lineItems.length === 0 || generating}
+                    className="w-full py-3 bg-white text-[#0a0a0a] rounded-[14px] text-[15px] font-[700] tracking-[-0.01em] hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {generating ? 'Generating...' : '🔗 Generate Test Link'}
+                  </button>
+
+                  {quoteUrl && !isTestToken && (
+                    <button
+                      onClick={sendQuoteEmail}
+                      disabled={sendingEmail}
+                      className="w-full py-3 bg-green-500 text-white rounded-[14px] text-[15px] font-[700] tracking-[-0.01em] hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {sendingEmail ? 'Sending...' : '📧 Send Quote Email'}
+                    </button>
+                  )}
+
+                  {isTestToken && quoteUrl && (
+                    <div className="text-[12px] text-white/60 text-center">
+                      Test links are for internal preview only - not sent to customers
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -759,10 +852,19 @@ export default function ToolsQuoteBuilderPage() {
         {/* Generated Quote URL */}
         {quoteUrl && (
           <div className="mt-6 bg-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)]">
-            <h3 className="text-[18px] font-[700] text-[#0a0a0a] tracking-[-0.02em] mb-4">Static Quote Generated</h3>
-            <div className="bg-blue-50 p-4 rounded-[14px] border border-blue-200 mb-4">
+            <h3 className="text-[18px] font-[700] text-[#0a0a0a] tracking-[-0.02em] mb-4">
+              {quoteType === 'static' ? 'Static' : 'Interactive'} Quote Generated{isTestToken ? ' (Test)' : ''}
+            </h3>
+            <div className={`p-4 rounded-[14px] border mb-4 ${isTestToken ? 'bg-yellow-50 border-yellow-200' : 'bg-blue-50 border-blue-200'}`}>
+              {isTestToken && (
+                <p className="text-[14px] text-yellow-800 mb-2 font-[600]">
+                  ⚠️ Test Link - For internal preview only
+                </p>
+              )}
               <p className="text-[14px] text-blue-800 mb-2">
-                ✓ Customer will see fixed prices (no quantity adjustments)
+                {quoteType === 'static'
+                  ? '✓ Customer can adjust quantities, prices stay locked at quoted amounts'
+                  : '✓ Customer can adjust quantities, prices recalculate based on tiered rules'}
               </p>
               <a
                 href={quoteUrl}
