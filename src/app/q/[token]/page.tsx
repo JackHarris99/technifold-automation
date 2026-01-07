@@ -7,7 +7,8 @@
 import { notFound } from 'next/navigation';
 import { verifyToken } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
-import { QuotePortalPage } from '@/components/QuotePortalPage';
+import { StaticQuotePortal } from '@/components/quotes/StaticQuotePortal';
+import { InteractiveQuotePortal } from '@/components/quotes/InteractiveQuotePortal';
 
 interface QuoteViewerProps {
   params: Promise<{
@@ -132,17 +133,22 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
       .catch(err => console.error('[Quote] Tracking failed:', err));
   }
 
-  // 8. Render QuotePortalPage with quote data
-  return (
-    <QuotePortalPage
-      quote={quote}
-      lineItems={lineItems}
-      company={company}
-      contact={contact}
-      token={token}
-      isTest={is_test || false}
-    />
-  );
+  // 8. Render correct portal component based on quote_type
+  const portalProps = {
+    quote,
+    lineItems,
+    company,
+    contact,
+    token,
+    isTest: is_test || false,
+  };
+
+  // Load StaticQuotePortal for static quotes, InteractiveQuotePortal for interactive
+  if (quote.quote_type === 'static') {
+    return <StaticQuotePortal {...portalProps} />;
+  } else {
+    return <InteractiveQuotePortal {...portalProps} />;
+  }
 }
 
 export async function generateMetadata({ params }: QuoteViewerProps) {
