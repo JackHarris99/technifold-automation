@@ -17,7 +17,7 @@ interface CartItemInput {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { token, items } = body as { token: string; items: CartItemInput[] };
+    const { token, items, skip_tiered_pricing } = body as { token: string; items: CartItemInput[]; skip_tiered_pricing?: boolean };
 
     // Verify HMAC token
     const payload = verifyToken(token);
@@ -56,6 +56,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if all products are tools (type='tool') - if so, skip tiered pricing
+    const allTools = products.every(p => p.type === 'tool');
+    const shouldSkipTieredPricing = skip_tiered_pricing || allTools;
+
     // 2. Fetch company details for tax calculation
     const { data: company, error: companyError } = await supabase
       .from('companies')
@@ -80,43 +84,76 @@ export async function POST(request: NextRequest) {
 
     const destinationCountry = shippingAddress?.country || company.country || 'GB';
 
-    // 4. Build cart items for pricing calculation
-    const cartItems: CartItem[] = items.map(item => {
-      const product = products.find(p => p.product_code === item.product_code);
-      if (!product) {
-        throw new Error(`Product not found: ${item.product_code}`);
-      }
+    // 4. Calculate pricing - SKIP tiered pricing for tools
+    let lineItems;
+    let subtotal;
+    let validation_errors: string[] = [];
 
-      return {
-        product_code: item.product_code,
-        quantity: item.quantity,
-        category: product.category || '',
-        base_price: product.price || 0,
-        type: product.type,
-        pricing_tier: product.pricing_tier,
-      };
-    });
+    if (shouldSkipTieredPricing) {
+      // For TOOLS: Use base price directly, no tiered pricing
+      lineItems = items.map(item => {
+        const product = products.find(p => p.product_code === item.product_code);
+        if (!product) {
+          throw new Error(`Product not found: ${item.product_code}`);
+        }
 
-    // 5. Calculate tiered pricing
-    const { items: pricedItems, validation_errors } = await calculateCartPricing(cartItems);
+        const base_price = product.price || 0;
+        const unit_price = base_price; // No discount for tools
+        const line_total = unit_price * item.quantity;
 
-    // 6. Build enriched line items with product details
-    const lineItems = pricedItems.map(item => {
-      const product = products.find(p => p.product_code === item.product_code);
-      return {
-        product_code: item.product_code,
-        description: product?.description || '',
-        quantity: item.quantity,
-        base_price: item.base_price,
-        unit_price: item.unit_price,
-        line_total: item.line_total,
-        discount_applied: item.discount_applied,
-        image_url: product?.image_url || null,
-        currency: product?.currency || 'GBP',
-      };
-    });
+        return {
+          product_code: item.product_code,
+          description: product.description || '',
+          quantity: item.quantity,
+          base_price,
+          unit_price,
+          line_total,
+          discount_applied: null,
+          image_url: product.image_url || null,
+          currency: product.currency || 'GBP',
+        };
+      });
 
-    const subtotal = pricedItems.reduce((sum, item) => sum + item.line_total, 0);
+      subtotal = lineItems.reduce((sum, item) => sum + item.line_total, 0);
+    } else {
+      // For CONSUMABLES: Apply tiered pricing
+      const cartItems: CartItem[] = items.map(item => {
+        const product = products.find(p => p.product_code === item.product_code);
+        if (!product) {
+          throw new Error(`Product not found: ${item.product_code}`);
+        }
+
+        return {
+          product_code: item.product_code,
+          quantity: item.quantity,
+          category: product.category || '',
+          base_price: product.price || 0,
+          type: product.type,
+          pricing_tier: product.pricing_tier,
+        };
+      });
+
+      const pricingResult = await calculateCartPricing(cartItems);
+      const pricedItems = pricingResult.items;
+      validation_errors = pricingResult.validation_errors;
+
+      lineItems = pricedItems.map(item => {
+        const product = products.find(p => p.product_code === item.product_code);
+        return {
+          product_code: item.product_code,
+          description: product?.description || '',
+          quantity: item.quantity,
+          base_price: item.base_price,
+          unit_price: item.unit_price,
+          line_total: item.line_total,
+          discount_applied: item.discount_applied,
+          image_url: product?.image_url || null,
+          currency: product?.currency || 'GBP',
+        };
+      });
+
+      subtotal = pricedItems.reduce((sum, item) => sum + item.line_total, 0);
+    }
 
     // 7. Calculate shipping cost
     const { data: shippingCost } = await supabase.rpc('calculate_shipping_cost', {

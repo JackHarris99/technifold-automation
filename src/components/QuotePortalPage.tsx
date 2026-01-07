@@ -117,13 +117,13 @@ export function QuotePortalPage({ quote, lineItems, company, contact, token, isT
       return;
     }
 
-    // For TOOLS quotes, still fetch pricing from API to get VAT/shipping calculations
-    // (but tools won't have tiered pricing discounts)
-
-    // For CONSUMABLES quotes, fetch tiered pricing from API
     const fetchPricing = async () => {
       setLoadingPreview(true);
       try {
+        // For TOOLS: skip tiered pricing but still calc VAT/shipping
+        // For CONSUMABLES: apply tiered pricing
+        const isToolQuote = quote.quote_type === 'tool_static';
+
         const response = await fetch('/api/portal/pricing-preview', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -133,6 +133,7 @@ export function QuotePortalPage({ quote, lineItems, company, contact, token, isT
               product_code: item.consumable_code,
               quantity: item.quantity,
             })),
+            skip_tiered_pricing: isToolQuote, // Tell API to skip tiered pricing for tools
           }),
         });
 
