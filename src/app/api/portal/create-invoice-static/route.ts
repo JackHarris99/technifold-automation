@@ -234,13 +234,25 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create Stripe Invoice
+    // Create Stripe Invoice with billing and shipping addresses
     const invoice = await getStripeClient().invoices.create({
       customer: stripeCustomerId,
       currency: currency.toLowerCase(),
       auto_advance: false,
       collection_method: 'send_invoice',
       days_until_due: 30,
+      // Include shipping address on invoice
+      customer_shipping: shippingAddress ? {
+        name: company.company_name,
+        address: {
+          line1: shippingAddress.address_line_1,
+          line2: shippingAddress.address_line_2 || undefined,
+          city: shippingAddress.city || undefined,
+          state: shippingAddress.state_province || undefined,
+          postal_code: shippingAddress.postal_code || undefined,
+          country: shippingAddress.country || undefined,
+        },
+      } : undefined,
       metadata: {
         company_id,
         contact_id,
@@ -295,6 +307,7 @@ export async function POST(request: NextRequest) {
     await getStripeClient().invoices.sendInvoice(finalizedInvoice.id);
 
     // Store order in database
+    // Note: If this fails, invoice was still sent successfully - don't fail the whole request
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
@@ -316,16 +329,24 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (orderError || !order) {
-      console.error('[create-invoice-static] Failed to create order:', orderError);
-      return NextResponse.json(
-        { error: 'Failed to create order record' },
-        { status: 500 }
-      );
+      // Log error but still return success since invoice was created
+      console.error('[create-invoice-static] Failed to create order record:', orderError);
+      console.error('[create-invoice-static] Invoice was still sent:', finalizedInvoice.id);
+
+      // Return success with invoice info but no order_id
+      return NextResponse.json({
+        success: true,
+        order_id: null,
+        invoice_id: finalizedInvoice.id,
+        invoice_url: finalizedInvoice.hosted_invoice_url,
+        invoice_pdf_url: finalizedInvoice.invoice_pdf,
+        warning: 'Invoice created successfully but order record failed to save',
+      });
     }
 
     // Store order items
     for (const item of items) {
-      await supabase.from('order_items').insert({
+      const { error: itemError } = await supabase.from('order_items').insert({
         order_id: order.order_id,
         product_code: item.product_code,
         description: item.description,
@@ -333,6 +354,10 @@ export async function POST(request: NextRequest) {
         unit_price: item.unit_price,
         line_total: item.unit_price * item.quantity,
       });
+
+      if (itemError) {
+        console.error('[create-invoice-static] Failed to create order item:', itemError);
+      }
     }
 
     return NextResponse.json({

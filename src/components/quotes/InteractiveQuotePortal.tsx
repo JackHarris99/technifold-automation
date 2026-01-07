@@ -68,8 +68,11 @@ export function InteractiveQuotePortal({ quote, lineItems, company, contact, tok
   }, [lineItems]);
 
   // Fetch pricing when cart changes (recalculates with tiered rules)
+  // Only include items with quantity > 0
   useEffect(() => {
-    if (cart.length === 0) {
+    const activeItems = cart.filter(item => item.quantity > 0);
+
+    if (activeItems.length === 0) {
       setPricingPreview(null);
       return;
     }
@@ -82,7 +85,7 @@ export function InteractiveQuotePortal({ quote, lineItems, company, contact, tok
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             token,
-            items: cart.map(item => ({
+            items: activeItems.map(item => ({
               product_code: item.consumable_code,
               quantity: item.quantity,
             })),
@@ -107,15 +110,12 @@ export function InteractiveQuotePortal({ quote, lineItems, company, contact, tok
   const updateQuantity = (productCode: string, newQuantity: number) => {
     if (newQuantity < 0) return;
 
-    if (newQuantity === 0) {
-      setCart(cart.filter(item => item.consumable_code !== productCode));
-    } else {
-      setCart(cart.map(item =>
-        item.consumable_code === productCode
-          ? { ...item, quantity: newQuantity }
-          : item
-      ));
-    }
+    // Keep items at 0 quantity instead of removing them
+    setCart(cart.map(item =>
+      item.consumable_code === productCode
+        ? { ...item, quantity: newQuantity }
+        : item
+    ));
   };
 
   return (
@@ -127,7 +127,42 @@ export function InteractiveQuotePortal({ quote, lineItems, company, contact, tok
         </div>
       )}
 
-      <div className="max-w-[1600px] mx-auto px-6 py-12">
+      <div className="max-w-[1600px] mx-auto px-6 py-12 relative">
+        {/* Tool Pricing Tier Guide - Sticky in top right */}
+        <div className="fixed top-6 right-6 bg-white rounded-[16px] p-5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] border-2 border-blue-200 max-w-[280px] z-40">
+          <div className="flex items-center gap-2 mb-3">
+            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+            <h3 className="text-[14px] font-[800] text-[#0a0a0a]">Tool Volume Discounts</h3>
+          </div>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center text-[13px]">
+              <span className="text-[#666]">1 tool</span>
+              <span className="font-[600] text-[#0a0a0a]">Full price</span>
+            </div>
+            <div className="flex justify-between items-center text-[13px]">
+              <span className="text-[#666]">2 tools</span>
+              <span className="font-[700] text-green-600">10% off</span>
+            </div>
+            <div className="flex justify-between items-center text-[13px]">
+              <span className="text-[#666]">3 tools</span>
+              <span className="font-[700] text-green-600">20% off</span>
+            </div>
+            <div className="flex justify-between items-center text-[13px]">
+              <span className="text-[#666]">4 tools</span>
+              <span className="font-[700] text-green-600">30% off</span>
+            </div>
+            <div className="flex justify-between items-center text-[13px] bg-green-50 -mx-2 px-2 py-1.5 rounded-[8px]">
+              <span className="text-[#666] font-[600]">5+ tools</span>
+              <span className="font-[800] text-green-700">40% off</span>
+            </div>
+          </div>
+          <p className="text-[11px] text-[#999] mt-3 italic">
+            Discounts apply across all tools in your order
+          </p>
+        </div>
+
         {/* Header with logos */}
         <div className="flex items-center justify-center gap-8 mb-8">
           <div className="relative h-10 w-32">
@@ -194,11 +229,12 @@ export function InteractiveQuotePortal({ quote, lineItems, company, contact, tok
               const lineTotal = previewItem?.line_total || (discountedPrice * item.quantity);
               const hasDiscount = basePrice > discountedPrice;
               const savingsPerUnit = basePrice - discountedPrice;
+              const isRemoved = item.quantity === 0;
 
               return (
                 <div
                   key={item.consumable_code}
-                  className="bg-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] flex gap-6"
+                  className={`bg-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] flex gap-6 ${isRemoved ? 'opacity-50' : ''}`}
                 >
                   {item.image_url && (
                     <div className="flex-shrink-0">
@@ -277,12 +313,21 @@ export function InteractiveQuotePortal({ quote, lineItems, company, contact, tok
                     <div className="text-[24px] font-[800] text-[#0a0a0a]">
                       £{lineTotal.toFixed(2)}
                     </div>
-                    <button
-                      onClick={() => updateQuantity(item.consumable_code, 0)}
-                      className="text-[14px] text-red-600 hover:text-red-700 font-[600]"
-                    >
-                      Remove
-                    </button>
+                    {isRemoved ? (
+                      <button
+                        onClick={() => updateQuantity(item.consumable_code, 1)}
+                        className="text-[14px] text-green-600 hover:text-green-700 font-[600]"
+                      >
+                        Add Back
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => updateQuantity(item.consumable_code, 0)}
+                        className="text-[14px] text-red-600 hover:text-red-700 font-[600]"
+                      >
+                        Remove
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -329,7 +374,7 @@ export function InteractiveQuotePortal({ quote, lineItems, company, contact, tok
 
               <button
                 onClick={() => setIsInvoiceModalOpen(true)}
-                disabled={cart.length === 0 || loadingPreview}
+                disabled={cart.filter(item => item.quantity > 0).length === 0 || loadingPreview}
                 className="w-full py-4 bg-[#16a34a] text-white rounded-[14px] text-[16px] font-[700] hover:bg-[#15803d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Request Invoice

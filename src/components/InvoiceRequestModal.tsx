@@ -115,19 +115,24 @@ export function InvoiceRequestModal({
     try {
       // Use pricing preview if available (contains calculated tiered pricing)
       // Otherwise fall back to cart prices
+      // IMPORTANT: Filter out items with quantity 0
       const invoiceItems = pricingPreview?.line_items && pricingPreview.line_items.length > 0
-        ? pricingPreview.line_items.map(item => ({
-            product_code: item.product_code,
-            description: item.description,
-            quantity: item.quantity,
-            unit_price: item.unit_price, // Use CALCULATED price from pricing preview
-          }))
-        : cart.map(item => ({
-            product_code: item.consumable_code,
-            description: item.description,
-            quantity: item.quantity,
-            unit_price: item.price, // Fallback to cart price if no preview
-          }));
+        ? pricingPreview.line_items
+            .filter(item => item.quantity > 0)
+            .map(item => ({
+              product_code: item.product_code,
+              description: item.description,
+              quantity: item.quantity,
+              unit_price: item.unit_price, // Use CALCULATED price from pricing preview
+            }))
+        : cart
+            .filter(item => item.quantity > 0)
+            .map(item => ({
+              product_code: item.consumable_code,
+              description: item.description,
+              quantity: item.quantity,
+              unit_price: item.price, // Fallback to cart price if no preview
+            }));
 
       // Call correct API based on quote type
       const apiEndpoint = quoteType === 'static'

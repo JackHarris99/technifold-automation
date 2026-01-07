@@ -21,15 +21,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Either quote_id or quote_url is required' }, { status: 400 });
     }
 
-    // Check territory permission
-    const { canActOnCompany } = await import('@/lib/auth');
-    const permission = await canActOnCompany(company_id);
-    if (!permission.allowed) {
-      return NextResponse.json(
-        { error: permission.error },
-        { status: 403 }
-      );
-    }
+    // Territory restriction removed - all sales reps can help each other
+    // No permission check needed
 
     if (!isResendConfigured()) {
       return NextResponse.json(
