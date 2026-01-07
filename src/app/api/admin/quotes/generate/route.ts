@@ -39,14 +39,18 @@ export async function POST(request: NextRequest) {
     );
     const total = subtotal - discountAmount;
 
+    // Validate quote_type
+    const validQuoteTypes = ['interactive', 'static'];
+    const finalQuoteType = validQuoteTypes.includes(quote_type) ? quote_type : 'interactive';
+
     // 1. Create quote in database
     const { data: quote, error: quoteError } = await supabase
       .from('quotes')
       .insert({
         company_id,
         contact_id,
-        quote_type: quote_type || 'consumable_interactive',
-        pricing_mode: pricing_mode || 'standard',
+        quote_type: finalQuoteType,
+        pricing_mode: pricing_mode || (finalQuoteType === 'interactive' ? 'standard' : null),
         status: 'draft',
         currency: 'GBP',
         subtotal,
@@ -107,11 +111,8 @@ export async function POST(request: NextRequest) {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.technifold.com';
     const url = `${baseUrl}/q/${token}`;
 
-    // 4. Update quote with sent_at timestamp
-    await supabase
-      .from('quotes')
-      .update({ status: 'sent', sent_at: new Date().toISOString() })
-      .eq('quote_id', quote.quote_id);
+    // 4. DO NOT update status to 'sent' here - that happens when email is sent
+    // Test links stay as 'draft', real quotes get 'sent' status when email sent via /api/admin/quote/send-email
 
     return NextResponse.json({ url, quote_id: quote.quote_id });
   } catch (error) {
