@@ -117,29 +117,8 @@ export function QuotePortalPage({ quote, lineItems, company, contact, token, isT
       return;
     }
 
-    // For TOOLS quotes, calculate pricing directly from cart (no tiered pricing)
-    if (quote.quote_type === 'tool_static') {
-      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      setPricingPreview({
-        line_items: cart.map(item => ({
-          product_code: item.consumable_code,
-          description: item.description,
-          quantity: item.quantity,
-          base_price: item.price || 0,
-          unit_price: item.price || 0,
-          line_total: (item.price || 0) * item.quantity,
-          discount_applied: null,
-          image_url: item.image_url || null,
-          currency: 'GBP',
-        })),
-        subtotal,
-        total: subtotal, // Tools don't have VAT/shipping calculated here
-        total_savings: 0,
-        currency: 'GBP',
-        validation_errors: [],
-      });
-      return;
-    }
+    // For TOOLS quotes, still fetch pricing from API to get VAT/shipping calculations
+    // (but tools won't have tiered pricing discounts)
 
     // For CONSUMABLES quotes, fetch tiered pricing from API
     const fetchPricing = async () => {
@@ -432,11 +411,14 @@ export function QuotePortalPage({ quote, lineItems, company, contact, token, isT
         isOpen={isInvoiceModalOpen}
         onClose={() => setIsInvoiceModalOpen(false)}
         cart={cart}
-        pricingPreview={pricingPreview}
+        companyId={company.company_id}
+        contactId={contact?.contact_id}
+        onSuccess={(orderId) => {
+          console.log('[QuotePortal] Invoice created:', orderId);
+          // Could redirect or show success message
+        }}
         token={token}
-        companyName={company.company_name}
-        contactName={contact?.full_name}
-        shippingAddress={shippingAddress}
+        pricingPreview={pricingPreview}
       />
 
       {/* Address Collection Modal */}
