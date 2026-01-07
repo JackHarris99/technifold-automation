@@ -54,6 +54,10 @@ export function InteractiveQuotePortal({ quote, lineItems, company, contact, tok
   const [pricingPreview, setPricingPreview] = useState<PricingPreview | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
 
+  // Detect product type from line items
+  const productType = lineItems[0]?.product_type || 'consumable';
+  const isToolQuote = productType === 'tool';
+
   // Pre-populate cart with quote items on mount
   useEffect(() => {
     const initialCart = lineItems.map(item => ({
@@ -128,39 +132,68 @@ export function InteractiveQuotePortal({ quote, lineItems, company, contact, tok
       )}
 
       <div className="max-w-[1600px] mx-auto px-6 py-12 relative">
-        {/* Tool Pricing Tier Guide - Sticky in top right */}
+        {/* Pricing Tier Guide - Sticky in top right */}
         <div className="fixed top-6 right-6 bg-white rounded-[16px] p-5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] border-2 border-blue-200 max-w-[280px] z-40">
           <div className="flex items-center gap-2 mb-3">
             <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             </svg>
-            <h3 className="text-[14px] font-[800] text-[#0a0a0a]">Tool Volume Discounts</h3>
+            <h3 className="text-[14px] font-[800] text-[#0a0a0a]">
+              {isToolQuote ? 'Tool Volume Discounts' : 'Consumable Pricing'}
+            </h3>
           </div>
-          <div className="space-y-2">
-            <div className="flex justify-between items-center text-[13px]">
-              <span className="text-[#666]">1 tool</span>
-              <span className="font-[600] text-[#0a0a0a]">Full price</span>
-            </div>
-            <div className="flex justify-between items-center text-[13px]">
-              <span className="text-[#666]">2 tools</span>
-              <span className="font-[700] text-green-600">10% off</span>
-            </div>
-            <div className="flex justify-between items-center text-[13px]">
-              <span className="text-[#666]">3 tools</span>
-              <span className="font-[700] text-green-600">20% off</span>
-            </div>
-            <div className="flex justify-between items-center text-[13px]">
-              <span className="text-[#666]">4 tools</span>
-              <span className="font-[700] text-green-600">30% off</span>
-            </div>
-            <div className="flex justify-between items-center text-[13px] bg-green-50 -mx-2 px-2 py-1.5 rounded-[8px]">
-              <span className="text-[#666] font-[600]">5+ tools</span>
-              <span className="font-[800] text-green-700">40% off</span>
-            </div>
-          </div>
-          <p className="text-[11px] text-[#999] mt-3 italic">
-            Discounts apply across all tools in your order
-          </p>
+
+          {isToolQuote ? (
+            // Tool pricing tiers
+            <>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-[13px]">
+                  <span className="text-[#666]">1 tool</span>
+                  <span className="font-[600] text-[#0a0a0a]">Full price</span>
+                </div>
+                <div className="flex justify-between items-center text-[13px]">
+                  <span className="text-[#666]">2 tools</span>
+                  <span className="font-[700] text-green-600">10% off</span>
+                </div>
+                <div className="flex justify-between items-center text-[13px]">
+                  <span className="text-[#666]">3 tools</span>
+                  <span className="font-[700] text-green-600">20% off</span>
+                </div>
+                <div className="flex justify-between items-center text-[13px]">
+                  <span className="text-[#666]">4 tools</span>
+                  <span className="font-[700] text-green-600">30% off</span>
+                </div>
+                <div className="flex justify-between items-center text-[13px] bg-green-50 -mx-2 px-2 py-1.5 rounded-[8px]">
+                  <span className="text-[#666] font-[600]">5+ tools</span>
+                  <span className="font-[800] text-green-700">40% off</span>
+                </div>
+              </div>
+              <p className="text-[11px] text-[#999] mt-3 italic">
+                Discounts apply across all tools in your order
+              </p>
+            </>
+          ) : (
+            // Consumable pricing guidance
+            <>
+              <div className="space-y-3">
+                <div className="bg-blue-50 -mx-2 px-2 py-2 rounded-[8px]">
+                  <div className="text-[13px] font-[700] text-[#0a0a0a] mb-1">Standard Pricing</div>
+                  <div className="text-[12px] text-[#666]">
+                    Volume-based discounts on total quantity
+                  </div>
+                </div>
+                <div className="bg-purple-50 -mx-2 px-2 py-2 rounded-[8px]">
+                  <div className="text-[13px] font-[700] text-[#0a0a0a] mb-1">Premium Pricing</div>
+                  <div className="text-[12px] text-[#666]">
+                    Per-item discounts based on individual quantities
+                  </div>
+                </div>
+              </div>
+              <p className="text-[11px] text-[#999] mt-3 italic">
+                Prices adjust automatically as you change quantities
+              </p>
+            </>
+          )}
         </div>
 
         {/* Header with logos */}

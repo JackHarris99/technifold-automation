@@ -625,28 +625,44 @@ export default function ConsumablesQuoteBuilderPage() {
                   </div>
                 )}
 
-                {/* Generate Test Link Button */}
-                <button
-                  onClick={() => {
-                    setIsTestToken(true);
-                    setTimeout(() => generateQuote(), 100);
-                  }}
-                  disabled={!selectedCompany || !selectedContact || lineItems.length === 0 || generating}
-                  className="w-full mt-4 py-3 bg-white text-[#0a0a0a] rounded-[14px] text-[15px] font-[700] tracking-[-0.01em] hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {generating ? 'Generating...' : '🔗 Generate Test Link'}
-                </button>
+                <div className="flex items-center gap-2 mb-4">
+                  <input
+                    type="checkbox"
+                    id="test-token"
+                    checked={isTestToken}
+                    onChange={(e) => setIsTestToken(e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-300"
+                  />
+                  <label htmlFor="test-token" className="text-sm text-white/70">
+                    Test link (internal preview only)
+                  </label>
+                </div>
 
-                {/* Send Quote Email Button (only for non-test quotes) */}
-                {quoteUrl && !isTestToken && quoteId && (
+                <div className="space-y-2">
                   <button
-                    onClick={sendQuoteEmail}
-                    disabled={sendingEmail}
-                    className="w-full mt-2 py-3 bg-green-600 text-white rounded-[14px] text-[15px] font-[700] tracking-[-0.01em] hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={generateQuote}
+                    disabled={!selectedCompany || !selectedContact || lineItems.length === 0 || generating}
+                    className="w-full py-3 bg-white text-[#0a0a0a] rounded-[14px] text-[15px] font-[700] tracking-[-0.01em] hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {sendingEmail ? 'Sending...' : '📧 Send Quote Email'}
+                    {generating ? 'Generating...' : '🔗 Generate Test Link'}
                   </button>
-                )}
+
+                  {quoteUrl && !isTestToken && (
+                    <button
+                      onClick={sendQuoteEmail}
+                      disabled={sendingEmail}
+                      className="w-full py-3 bg-green-500 text-white rounded-[14px] text-[15px] font-[700] tracking-[-0.01em] hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {sendingEmail ? 'Sending...' : '📧 Send Quote Email'}
+                    </button>
+                  )}
+
+                  {isTestToken && quoteUrl && (
+                    <div className="text-[12px] text-white/60 text-center">
+                      Test links are for internal preview only - not sent to customers
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
