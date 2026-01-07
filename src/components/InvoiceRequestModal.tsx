@@ -111,18 +111,29 @@ export function InvoiceRequestModal({
 
   const createInvoice = async () => {
     try {
+      // Use pricing preview if available (contains calculated tiered pricing for consumables, base pricing for tools)
+      // Otherwise fall back to cart prices
+      const invoiceItems = pricingPreview?.line_items && pricingPreview.line_items.length > 0
+        ? pricingPreview.line_items.map(item => ({
+            product_code: item.product_code,
+            description: item.description,
+            quantity: item.quantity,
+            unit_price: item.unit_price, // Use CALCULATED price from pricing preview
+          }))
+        : cart.map(item => ({
+            product_code: item.consumable_code,
+            description: item.description,
+            quantity: item.quantity,
+            unit_price: item.price, // Fallback to cart price if no preview
+          }));
+
       const response = await fetch('/api/portal/create-invoice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           token, // Token for authentication
           contact_id: contactId,
-          items: cart.map(item => ({
-            product_code: item.consumable_code,
-            description: item.description,
-            quantity: item.quantity,
-            unit_price: item.price,
-          })),
+          items: invoiceItems,
           currency: 'gbp',
           offer_key: 'portal_reorder',
           campaign_key: `portal_${new Date().toISOString().split('T')[0]}`,
