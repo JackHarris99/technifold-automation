@@ -740,6 +740,180 @@ export async function sendInvoiceEmail({
 }
 
 /**
+ * Send quote email with link to view and accept quote
+ */
+export async function sendQuoteEmail({
+  to,
+  contactName,
+  companyName,
+  quoteUrl,
+  quoteType,
+  expiryDate,
+  totalAmount,
+  currency,
+  itemCount
+}: {
+  to: string;
+  contactName: string;
+  companyName: string;
+  quoteUrl: string;
+  quoteType: 'interactive' | 'static';
+  expiryDate?: Date | null;
+  totalAmount?: number;
+  currency?: string;
+  itemCount?: number;
+}): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  const resend = getResendClient();
+
+  if (!resend) {
+    return { success: false, error: 'Resend not configured' };
+  }
+
+  try {
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+    const currencySymbol = currency === 'GBP' ? '£' : currency || 'GBP';
+    const expiryFormatted = expiryDate
+      ? expiryDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+      : '30 days';
+
+    const isInteractive = quoteType === 'interactive';
+    const subtitle = isInteractive
+      ? 'Adjust quantities and see live pricing updates'
+      : 'Custom pricing prepared just for you';
+
+    const descriptionText = isInteractive
+      ? "We've prepared a personalized quote with flexible pricing. You can adjust quantities to see how volume pricing affects your total."
+      : "We've prepared a custom quote with special pricing locked in just for you. Review the products and request an invoice when ready.";
+
+    const html = emailWrapper(`
+      ${emailHeader(`Your Quote from Technifold`, subtitle, '#2563eb')}
+      <tr>
+        <td style="background-color: #ffffff; padding: 30px 40px;" class="mobile-padding">
+          <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 24px; color: #333333; font-family: Arial, sans-serif;">
+            Hi${contactName ? ` ${contactName}` : ''},
+          </p>
+          <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 24px; color: #333333; font-family: Arial, sans-serif;">
+            ${descriptionText}
+          </p>
+
+          ${totalAmount ? `
+          <!-- Quote Total Box -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td style="background-color: #f0f9ff; border: 2px solid #3b82f6; padding: 20px; font-family: Arial, sans-serif;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td>
+                      <p style="margin: 0 0 4px 0; font-size: 14px; color: #1e40af;">Quote Total${isInteractive ? ' (estimated)' : ''}</p>
+                      <p style="margin: 0; font-size: 28px; font-weight: 700; color: #1e40af;">${currencySymbol}${totalAmount.toFixed(2)}</p>
+                      ${itemCount ? `<p style="margin: 4px 0 0 0; font-size: 14px; color: #3b82f6;">${itemCount} ${itemCount === 1 ? 'item' : 'items'}</p>` : ''}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+          ` : ''}
+
+          <!-- View Quote Button -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td align="center">
+                ${emailButton('View Your Quote', quoteUrl, '#16a34a')}
+              </td>
+            </tr>
+          </table>
+
+          <!-- Quote Features -->
+          <h2 style="margin: 0 0 16px 0; font-size: 18px; color: #333333; font-family: Arial, sans-serif;">What's Included:</h2>
+
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+            ${isInteractive ? `
+            <tr>
+              <td style="padding: 0 0 12px 20px; color: #666666; font-size: 14px; line-height: 20px; font-family: Arial, sans-serif;">
+                ✓ Interactive quantity controls - adjust on the fly
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0 0 12px 20px; color: #666666; font-size: 14px; line-height: 20px; font-family: Arial, sans-serif;">
+                ✓ Live pricing updates based on volume
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0 0 12px 20px; color: #666666; font-size: 14px; line-height: 20px; font-family: Arial, sans-serif;">
+                ✓ Transparent tiered pricing discounts
+              </td>
+            </tr>
+            ` : `
+            <tr>
+              <td style="padding: 0 0 12px 20px; color: #666666; font-size: 14px; line-height: 20px; font-family: Arial, sans-serif;">
+                ✓ Fixed pricing locked in just for you
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0 0 12px 20px; color: #666666; font-size: 14px; line-height: 20px; font-family: Arial, sans-serif;">
+                ✓ Adjust quantities if needed
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0 0 12px 20px; color: #666666; font-size: 14px; line-height: 20px; font-family: Arial, sans-serif;">
+                ✓ Special pricing negotiated for your order
+              </td>
+            </tr>
+            `}
+            <tr>
+              <td style="padding: 0 0 12px 20px; color: #666666; font-size: 14px; line-height: 20px; font-family: Arial, sans-serif;">
+                ✓ Request an invoice instantly when ready
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0 0 12px 20px; color: #666666; font-size: 14px; line-height: 20px; font-family: Arial, sans-serif;">
+                ✓ Secure payment via Stripe (card or bank transfer)
+              </td>
+            </tr>
+          </table>
+
+          ${expiryDate ? `
+          <!-- Expiry Notice -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 24px 0;">
+            <tr>
+              <td style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; font-family: Arial, sans-serif;">
+                <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 20px;">
+                  <strong>Valid until ${expiryFormatted}</strong> - This quote link will expire after this date.
+                </p>
+              </td>
+            </tr>
+          </table>
+          ` : ''}
+
+          <p style="margin: 24px 0 0 0; font-size: 14px; line-height: 20px; color: #666666; font-family: Arial, sans-serif; text-align: center;">
+            This quote is personalized for ${companyName}. Have questions? Just reply to this email.
+          </p>
+        </td>
+      </tr>
+      ${emailFooter()}
+    `);
+
+    const { data, error } = await resend.emails.send({
+      from: fromEmail,
+      to: [to],
+      subject: `Your Custom Quote from Technifold${totalAmount ? ` - ${currencySymbol}${totalAmount.toFixed(2)}` : ''}`,
+      html
+    });
+
+    if (error) {
+      console.error('[Resend] Quote email error:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, messageId: data?.id };
+  } catch (err: any) {
+    console.error('[Resend] Unexpected error:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
  * Send trial confirmation email when subscription is created
  */
 export async function sendTrialConfirmation({

@@ -1,19 +1,24 @@
 /**
  * POST /api/admin/quote/send-email
  * Send quote link via email to customer
+ * Expects quote_id to fetch quote details, or quote_url if quote already generated
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
-import { sendMarketingEmail, isResendConfigured } from '@/lib/resend-client';
+import { sendQuoteEmail, isResendConfigured } from '@/lib/resend-client';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { company_id, contact_id, quote_url } = body;
+    const { company_id, contact_id, quote_id, quote_url } = body;
 
-    if (!company_id || !contact_id || !quote_url) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!company_id || !contact_id) {
+      return NextResponse.json({ error: 'company_id and contact_id are required' }, { status: 400 });
+    }
+
+    if (!quote_id && !quote_url) {
+      return NextResponse.json({ error: 'Either quote_id or quote_url is required' }, { status: 400 });
     }
 
     // Check territory permission
@@ -57,18 +62,60 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Contact not found' }, { status: 404 });
     }
 
-    // Send email with quote link
-    const result = await sendMarketingEmail({
+    // Get quote details if quote_id provided
+    let quoteDetails = null;
+    let finalQuoteUrl = quote_url;
+
+    if (quote_id) {
+      const { data: quote } = await supabase
+        .from('quotes')
+        .select('quote_id, quote_type, total_amount, currency, expires_at')
+        .eq('quote_id', quote_id)
+        .single();
+
+      if (quote) {
+        quoteDetails = quote;
+
+        // Get quote items count
+        const { count } = await supabase
+          .from('quote_items')
+          .select('*', { count: 'exact', head: true })
+          .eq('quote_id', quote_id);
+
+        quoteDetails.itemCount = count || 0;
+
+        // If no quote_url provided, we need the token to construct it
+        // This assumes the quote was already generated and has a token
+        // If not, the quote_url must be provided
+        if (!finalQuoteUrl) {
+          return NextResponse.json({ error: 'quote_url required when using quote_id' }, { status: 400 });
+        }
+      }
+    }
+
+    // Send professional quote email
+    const result = await sendQuoteEmail({
       to: contact.email,
       contactName: contact.full_name || contact.first_name || '',
       companyName: company.company_name,
-      tokenUrl: quote_url,
-      subject: `Your personalized quote from Technifold`,
-      preview: `We've prepared a custom quote just for ${company.company_name}. View pricing and complete your order online.`,
+      quoteUrl: finalQuoteUrl,
+      quoteType: quoteDetails?.quote_type || 'interactive',
+      expiryDate: quoteDetails?.expires_at ? new Date(quoteDetails.expires_at) : null,
+      totalAmount: quoteDetails?.total_amount,
+      currency: quoteDetails?.currency,
+      itemCount: quoteDetails?.itemCount
     });
 
     if (!result.success) {
       return NextResponse.json({ error: result.error || 'Failed to send email' }, { status: 500 });
+    }
+
+    // Update quote status to 'sent' if we have quote_id
+    if (quote_id) {
+      await supabase
+        .from('quotes')
+        .update({ status: 'sent', sent_at: new Date().toISOString() })
+        .eq('quote_id', quote_id);
     }
 
     // Track the send
@@ -77,12 +124,14 @@ export async function POST(request: NextRequest) {
       contact_id,
       source: 'vercel',
       event_type: 'email_sent',
-      event_name: 'manual_quote_sent',
-      campaign_key: 'manual_quote',
-      url: quote_url,
+      event_name: 'quote_sent',
+      campaign_key: 'quote_builder',
+      url: finalQuoteUrl,
       meta: {
         message_id: result.messageId,
-        sent_by: 'admin_quote_generator'
+        sent_by: 'admin_quote_builder',
+        quote_id: quote_id || null,
+        quote_type: quoteDetails?.quote_type || null
       },
     });
 
