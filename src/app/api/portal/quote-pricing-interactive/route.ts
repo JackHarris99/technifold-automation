@@ -1,7 +1,9 @@
 /**
  * POST /api/portal/quote-pricing-interactive
- * Interactive quote pricing - recalculates prices based on tiered rules + VAT/shipping
- * Prices change dynamically as customer adjusts quantities
+ * Interactive quote pricing - recalculates prices based on product type:
+ * - TOOLS: Quantity-based discounts (1=0%, 2=10%, 3=20%, 4=30%, 5+=40%)
+ * - CONSUMABLES: Tiered pricing via pricing-v2
+ * - OTHER: Fixed price from products table
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -88,44 +90,123 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build cart items for pricing calculation
-    const cartItems: CartItem[] = items.map(item => {
+    // Separate items by product type for different pricing logic
+    const toolItems = items.filter(item => {
       const product = products.find(p => p.product_code === item.product_code);
-      if (!product) {
-        throw new Error(`Product not found: ${item.product_code}`);
-      }
-
-      return {
-        product_code: item.product_code,
-        quantity: item.quantity,
-        category: product.category || '',
-        base_price: product.price || 0,
-        type: product.type,
-        pricing_tier: product.pricing_tier,
-      };
+      return product?.type === 'tool';
     });
 
-    // Calculate tiered pricing using pricing-v2 library
-    const pricingResult = await calculateCartPricing(cartItems);
-    const pricedItems = pricingResult.items;
+    const consumableItems = items.filter(item => {
+      const product = products.find(p => p.product_code === item.product_code);
+      return product?.type === 'consumable';
+    });
 
-    // Enrich with product details from quote items
-    const lineItems = pricedItems.map(item => {
+    const otherItems = items.filter(item => {
+      const product = products.find(p => p.product_code === item.product_code);
+      return product?.type !== 'tool' && product?.type !== 'consumable';
+    });
+
+    const lineItems = [];
+
+    // TOOLS: Apply quantity-based discount tiers
+    // 1 tool = 0%, 2 = 10%, 3 = 20%, 4 = 30%, 5+ = 40% off
+    const totalToolQuantity = toolItems.reduce((sum, item) => sum + item.quantity, 0);
+    let toolDiscountPercent = 0;
+    let toolDiscountLabel = '';
+
+    if (totalToolQuantity >= 5) {
+      toolDiscountPercent = 40;
+      toolDiscountLabel = '5+ tools - 40% off';
+    } else if (totalToolQuantity === 4) {
+      toolDiscountPercent = 30;
+      toolDiscountLabel = '4 tools - 30% off';
+    } else if (totalToolQuantity === 3) {
+      toolDiscountPercent = 20;
+      toolDiscountLabel = '3 tools - 20% off';
+    } else if (totalToolQuantity === 2) {
+      toolDiscountPercent = 10;
+      toolDiscountLabel = '2 tools - 10% off';
+    }
+
+    for (const item of toolItems) {
+      const product = products.find(p => p.product_code === item.product_code);
       const quoteItem = quoteItems?.find(qi => qi.product_code === item.product_code);
-      return {
+
+      if (!product) continue;
+
+      const base_price = product.price || 0;
+      const unit_price = base_price * (1 - toolDiscountPercent / 100);
+      const line_total = unit_price * item.quantity;
+
+      lineItems.push({
         product_code: item.product_code,
-        description: quoteItem?.description || '',
+        description: quoteItem?.description || product.product_code,
         quantity: item.quantity,
-        base_price: item.base_price,
-        unit_price: item.unit_price, // CALCULATED from tiered pricing
-        line_total: item.line_total,
-        discount_applied: item.discount_applied,
+        base_price,
+        unit_price,
+        line_total,
+        discount_applied: toolDiscountPercent > 0 ? toolDiscountLabel : null,
         image_url: quoteItem?.image_url || null,
         currency: 'GBP',
-      };
-    });
+      });
+    }
 
-    const subtotal = pricedItems.reduce((sum, item) => sum + item.line_total, 0);
+    // CONSUMABLES: Apply tiered pricing via pricing-v2
+    if (consumableItems.length > 0) {
+      const cartItems: CartItem[] = consumableItems.map(item => {
+        const product = products.find(p => p.product_code === item.product_code);
+        return {
+          product_code: item.product_code,
+          quantity: item.quantity,
+          category: product?.category || '',
+          base_price: product?.price || 0,
+          type: product?.type || 'consumable',
+          pricing_tier: product?.pricing_tier,
+        };
+      });
+
+      const pricingResult = await calculateCartPricing(cartItems);
+
+      for (const pricedItem of pricingResult.items) {
+        const quoteItem = quoteItems?.find(qi => qi.product_code === pricedItem.product_code);
+        lineItems.push({
+          product_code: pricedItem.product_code,
+          description: quoteItem?.description || pricedItem.product_code,
+          quantity: pricedItem.quantity,
+          base_price: pricedItem.base_price,
+          unit_price: pricedItem.unit_price,
+          line_total: pricedItem.line_total,
+          discount_applied: pricedItem.discount_applied,
+          image_url: quoteItem?.image_url || null,
+          currency: 'GBP',
+        });
+      }
+    }
+
+    // OTHER PRODUCTS: Fixed price, no discounts
+    for (const item of otherItems) {
+      const product = products.find(p => p.product_code === item.product_code);
+      const quoteItem = quoteItems?.find(qi => qi.product_code === item.product_code);
+
+      if (!product) continue;
+
+      const unit_price = product.price || 0;
+      const line_total = unit_price * item.quantity;
+
+      lineItems.push({
+        product_code: item.product_code,
+        description: quoteItem?.description || product.product_code,
+        quantity: item.quantity,
+        base_price: unit_price,
+        unit_price,
+        line_total,
+        discount_applied: null,
+        image_url: quoteItem?.image_url || null,
+        currency: 'GBP',
+      });
+    }
+
+    const subtotal = lineItems.reduce((sum, item) => sum + item.line_total, 0);
 
     // Fetch company shipping address to determine VAT
     const { data: company } = await supabase
@@ -179,7 +260,7 @@ export async function POST(request: NextRequest) {
         vat_rate,
         shipping_amount,
         total,
-        total_savings: pricingResult.items.reduce((sum, item) => {
+        total_savings: lineItems.reduce((sum, item) => {
           const savings = (item.base_price - item.unit_price) * item.quantity;
           return sum + Math.max(0, savings);
         }, 0),

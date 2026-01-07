@@ -355,6 +355,7 @@ export function InteractiveQuotePortal({ quote, lineItems, company, contact, tok
         }}
         token={token}
         pricingPreview={pricingPreview}
+        quoteType="interactive"
       />
     </div>
   );

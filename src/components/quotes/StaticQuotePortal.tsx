@@ -311,6 +311,7 @@ export function StaticQuotePortal({ quote, lineItems, company, contact, token, i
         }}
         token={token}
         pricingPreview={pricingPreview}
+        quoteType="static"
       />
     </div>
   );

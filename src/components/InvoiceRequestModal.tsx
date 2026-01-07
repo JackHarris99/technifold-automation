@@ -37,6 +37,7 @@ interface InvoiceRequestModalProps {
   onSuccess: (orderId: string) => void;
   token: string; // HMAC token for API authentication
   pricingPreview?: PricingPreview | null;
+  quoteType?: 'static' | 'interactive'; // Determines which invoice API to call
 }
 
 interface InvoiceResult {
@@ -68,6 +69,7 @@ export function InvoiceRequestModal({
   onSuccess,
   token,
   pricingPreview,
+  quoteType = 'interactive', // Default to interactive for backwards compatibility
 }: InvoiceRequestModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -111,7 +113,7 @@ export function InvoiceRequestModal({
 
   const createInvoice = async () => {
     try {
-      // Use pricing preview if available (contains calculated tiered pricing for consumables, base pricing for tools)
+      // Use pricing preview if available (contains calculated tiered pricing)
       // Otherwise fall back to cart prices
       const invoiceItems = pricingPreview?.line_items && pricingPreview.line_items.length > 0
         ? pricingPreview.line_items.map(item => ({
@@ -127,7 +129,12 @@ export function InvoiceRequestModal({
             unit_price: item.price, // Fallback to cart price if no preview
           }));
 
-      const response = await fetch('/api/portal/create-invoice', {
+      // Call correct API based on quote type
+      const apiEndpoint = quoteType === 'static'
+        ? '/api/portal/create-invoice-static'
+        : '/api/portal/create-invoice-interactive';
+
+      const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -135,8 +142,8 @@ export function InvoiceRequestModal({
           contact_id: contactId,
           items: invoiceItems,
           currency: 'gbp',
-          offer_key: 'portal_reorder',
-          campaign_key: `portal_${new Date().toISOString().split('T')[0]}`,
+          offer_key: quoteType === 'static' ? 'portal_quote_static' : 'portal_quote_interactive',
+          campaign_key: `quote_${new Date().toISOString().split('T')[0]}`,
         }),
       });
 
