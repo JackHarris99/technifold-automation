@@ -361,23 +361,16 @@ export async function POST(request: NextRequest) {
       auto_advance: false,
       collection_method: 'send_invoice',
       days_until_due: 30,
-      // Include shipping address on invoice
-      customer_shipping: shippingAddress ? {
-        name: company.company_name,
-        address: {
-          line1: shippingAddress.address_line_1,
-          line2: shippingAddress.address_line_2 || undefined,
-          city: shippingAddress.city || undefined,
-          state: shippingAddress.state_province || undefined,
-          postal_code: shippingAddress.postal_code || undefined,
-          country: shippingAddress.country || undefined,
-        },
-      } : undefined,
+      // Note: customer_shipping was removed from Stripe API - shipping address is on customer record
       metadata: {
         company_id,
         contact_id,
         offer_key: offer_key || 'portal_quote_interactive',
         campaign_key: campaign_key || `quote_${new Date().toISOString().split('T')[0]}`,
+        // Store shipping address in metadata for reference
+        shipping_address_line_1: shippingAddress?.address_line_1 || '',
+        shipping_city: shippingAddress?.city || '',
+        shipping_country: shippingAddress?.country || '',
       },
     });
 
@@ -426,64 +419,80 @@ export async function POST(request: NextRequest) {
     // Send invoice via email
     await getStripeClient().invoices.sendInvoice(finalizedInvoice.id);
 
-    // Store order in database
-    // Note: If this fails, invoice was still sent successfully - don't fail the whole request
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
+    // Store invoice in database
+    // Note: If this fails, Stripe invoice was still sent successfully - don't fail the whole request
+    const invoiceNotes = [
+      vat_exempt_reason ? `VAT: ${vat_exempt_reason}` : null,
+      offer_key ? `Offer: ${offer_key}` : null,
+      campaign_key ? `Campaign: ${campaign_key}` : null,
+    ].filter(Boolean).join(', ') || null;
+
+    const { data: dbInvoice, error: invoiceError } = await supabase
+      .from('invoices')
       .insert({
         company_id,
         contact_id,
         stripe_invoice_id: finalizedInvoice.id,
-        status: 'pending_payment',
-        currency: currency.toUpperCase(),
+        stripe_customer_id: stripeCustomerId,
+        invoice_type: 'sale',
+        status: 'open',
+        payment_status: 'unpaid',
+        currency: currency.toLowerCase(),
         subtotal,
-        shipping_cost: shippingCost,
-        vat_amount,
-        vat_rate,
-        vat_exempt_reason,
+        shipping_amount: shippingCost,
+        tax_amount: vat_amount,
         total_amount: total,
-        offer_key: offer_key || 'portal_quote_interactive',
-        campaign_key: campaign_key || `quote_${new Date().toISOString().split('T')[0]}`,
+        shipping_address_id: shippingAddress ? undefined : null, // Can link if you have address_id
+        shipping_country: destinationCountry,
+        invoice_url: finalizedInvoice.hosted_invoice_url || undefined,
+        invoice_pdf_url: finalizedInvoice.invoice_pdf || undefined,
+        sent_at: new Date().toISOString(),
+        notes: invoiceNotes,
       })
-      .select('order_id')
+      .select('invoice_id')
       .single();
 
-    if (orderError || !order) {
-      // Log error but still return success since invoice was created
-      console.error('[create-invoice-interactive] Failed to create order record:', orderError);
-      console.error('[create-invoice-interactive] Invoice was still sent:', finalizedInvoice.id);
+    if (invoiceError || !dbInvoice) {
+      // Log error but still return success since Stripe invoice was created
+      console.error('[create-invoice-interactive] Failed to create invoice record:', invoiceError);
+      console.error('[create-invoice-interactive] Stripe invoice was still sent:', finalizedInvoice.id);
 
-      // Return success with invoice info but no order_id
+      // Return success with Stripe invoice info but no DB invoice_id
       return NextResponse.json({
         success: true,
-        order_id: null,
         invoice_id: finalizedInvoice.id,
         invoice_url: finalizedInvoice.hosted_invoice_url,
         invoice_pdf_url: finalizedInvoice.invoice_pdf,
-        warning: 'Invoice created successfully but order record failed to save',
+        warning: 'Stripe invoice created successfully but database record failed to save',
       });
     }
 
-    // Store order items
-    for (const item of calculatedItems) {
-      const { error: itemError } = await supabase.from('order_items').insert({
-        order_id: order.order_id,
-        product_code: item.product_code,
-        description: item.description,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-        line_total: item.line_total,
-      });
+    // Store invoice items
+    const invoiceItems = calculatedItems.map((item, index) => ({
+      invoice_id: dbInvoice.invoice_id,
+      product_code: item.product_code,
+      line_number: index + 1,
+      description: item.description,
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+      line_total: item.line_total,
+    }));
 
-      if (itemError) {
-        console.error('[create-invoice-interactive] Failed to create order item:', itemError);
-      }
+    const { error: itemsError } = await supabase
+      .from('invoice_items')
+      .insert(invoiceItems);
+
+    if (itemsError) {
+      console.error('[create-invoice-interactive] Failed to create invoice items:', itemsError);
+    } else {
+      console.log('[create-invoice-interactive] Created', invoiceItems.length, 'invoice line items');
+      // company_product_history will auto-update via trigger when invoice is paid
     }
 
     return NextResponse.json({
       success: true,
-      order_id: order.order_id,
       invoice_id: finalizedInvoice.id,
+      db_invoice_id: dbInvoice.invoice_id,
       invoice_url: finalizedInvoice.hosted_invoice_url,
       invoice_pdf_url: finalizedInvoice.invoice_pdf,
     });
