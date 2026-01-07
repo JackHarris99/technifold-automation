@@ -320,18 +320,34 @@ export async function POST(request: NextRequest) {
     // Create or retrieve Stripe Customer
     let stripeCustomerId = company.stripe_customer_id;
 
+    const billingAddress = company.billing_address_line_1 ? {
+      line1: company.billing_address_line_1,
+      line2: company.billing_address_line_2 || undefined,
+      city: company.billing_city || undefined,
+      state: company.billing_state_province || undefined,
+      postal_code: company.billing_postal_code || undefined,
+      country: company.billing_country || undefined,
+    } : undefined;
+
+    const shippingDetails = shippingAddress ? {
+      name: company.company_name,
+      address: {
+        line1: shippingAddress.address_line_1,
+        line2: shippingAddress.address_line_2 || undefined,
+        city: shippingAddress.city || undefined,
+        state: shippingAddress.state_province || undefined,
+        postal_code: shippingAddress.postal_code || undefined,
+        country: shippingAddress.country || undefined,
+      }
+    } : undefined;
+
     if (!stripeCustomerId) {
+      // Create new customer with addresses
       const customer = await getStripeClient().customers.create({
         email: contact.email,
         name: company.company_name,
-        address: company.billing_address_line_1 ? {
-          line1: company.billing_address_line_1,
-          line2: company.billing_address_line_2 || undefined,
-          city: company.billing_city || undefined,
-          state: company.billing_state_province || undefined,
-          postal_code: company.billing_postal_code || undefined,
-          country: company.billing_country || undefined,
-        } : undefined,
+        address: billingAddress,
+        shipping: shippingDetails,
         metadata: {
           company_id,
           contact_id,
@@ -343,6 +359,14 @@ export async function POST(request: NextRequest) {
         .from('companies')
         .update({ stripe_customer_id: stripeCustomerId })
         .eq('company_id', company_id);
+    } else {
+      // Update existing customer's billing and shipping addresses
+      await getStripeClient().customers.update(stripeCustomerId, {
+        email: contact.email,
+        name: company.company_name,
+        address: billingAddress,
+        shipping: shippingDetails,
+      });
     }
 
     // Add VAT number to Stripe if provided
