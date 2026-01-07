@@ -300,29 +300,29 @@ export function QuotePortalPage({ quote, lineItems, company, contact, token, isT
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <span className="text-[15px] text-[#999] font-[500]">Subtotal</span>
-                      <span className="font-[600] text-[16px]">£{pricingPreview.subtotal.toFixed(2)}</span>
+                      <span className="font-[600] text-[16px]">£{(pricingPreview.subtotal || 0).toFixed(2)}</span>
                     </div>
                     {pricingPreview.shipping !== undefined && (
                       <div className="flex justify-between items-center">
                         <span className="text-[15px] text-[#999] font-[500]">Shipping</span>
                         <span className="font-[600] text-[16px]">
-                          {pricingPreview.shipping === 0 ? 'FREE' : `£${pricingPreview.shipping.toFixed(2)}`}
+                          {pricingPreview.shipping === 0 ? 'FREE' : `£${(pricingPreview.shipping || 0).toFixed(2)}`}
                         </span>
                       </div>
                     )}
                     {pricingPreview.vat_amount !== undefined && (
                       <div className="flex justify-between items-center">
                         <span className="text-[15px] text-[#999] font-[500]">VAT</span>
-                        <span className="font-[600] text-[16px]">£{pricingPreview.vat_amount.toFixed(2)}</span>
+                        <span className="font-[600] text-[16px]">£{(pricingPreview.vat_amount || 0).toFixed(2)}</span>
                       </div>
                     )}
                     {pricingPreview.total !== undefined && (
                       <div className="flex justify-between items-center pt-4 border-t border-[#e5e7eb]">
                         <span className="text-[17px] font-[700]">Total</span>
-                        <span className="font-[800] text-[28px] tracking-[-0.02em] text-[#16a34a]">£{pricingPreview.total.toFixed(2)}</span>
+                        <span className="font-[800] text-[28px] tracking-[-0.02em] text-[#16a34a]">£{(pricingPreview.total || 0).toFixed(2)}</span>
                       </div>
                     )}
-                    {pricingPreview.total_savings > 0 && (
+                    {pricingPreview.total_savings !== undefined && pricingPreview.total_savings > 0 && (
                       <div className="mt-4 p-4 bg-[#16a34a]/10 rounded-[12px] border border-[#16a34a]/20">
                         <div className="text-[13px] text-[#16a34a] font-[600]">
                           Saving £{pricingPreview.total_savings.toFixed(2)} with tiered pricing!
