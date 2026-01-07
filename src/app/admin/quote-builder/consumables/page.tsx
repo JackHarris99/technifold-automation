@@ -291,11 +291,14 @@ export default function ConsumablesQuoteBuilderPage() {
     let subtotal = 0;
     let totalDiscount = 0;
 
+    // Only include items with quantity > 0 in total calculation
+    const itemsWithQty = lineItems.filter(li => li.quantity > 0);
+
     if (pricingMode === 'standard') {
-      const totalQty = lineItems.reduce((sum, li) => sum + li.quantity, 0);
+      const totalQty = itemsWithQty.reduce((sum, li) => sum + li.quantity, 0);
       const tier = [...standardTiers].reverse().find(t => totalQty >= t.min_quantity);
 
-      lineItems.forEach(li => {
+      itemsWithQty.forEach(li => {
         const tierPrice = tier?.unit_price || li.unit_price;
         const itemSubtotal = tierPrice * li.quantity;
         const itemDiscount = (itemSubtotal * li.discount_percent) / 100;
@@ -303,7 +306,7 @@ export default function ConsumablesQuoteBuilderPage() {
         totalDiscount += itemDiscount;
       });
     } else {
-      lineItems.forEach(li => {
+      itemsWithQty.forEach(li => {
         const tier = [...premiumTiers].reverse().find(t => li.quantity >= t.min_quantity);
         const tierDiscount = tier?.discount_percent || 0;
         const combinedDiscount = Math.min(100, tierDiscount + li.discount_percent);
@@ -837,9 +840,9 @@ export default function ConsumablesQuoteBuilderPage() {
                             <label className="text-[12px] text-[#666] font-[500] block mb-1">Quantity</label>
                             <input
                               type="number"
-                              min="1"
+                              min="0"
                               value={item.quantity}
-                              onChange={(e) => updateQuantity(item.product_code, parseInt(e.target.value) || 1)}
+                              onChange={(e) => updateQuantity(item.product_code, parseInt(e.target.value) || 0)}
                               className="w-24 px-3 py-1.5 border border-[#e8e8e8] rounded-[8px] text-[14px] text-[#0a0a0a] font-[500] focus:outline-none focus:ring-2 focus:ring-[#0a0a0a]"
                             />
                           </div>

@@ -278,7 +278,10 @@ export default function ToolsQuoteBuilderPage() {
   }
 
   function calculateTotals() {
-    const subtotal = lineItems.reduce((sum, li) => sum + (li.unit_price * li.quantity), 0);
+    // Only include items with quantity > 0 in total calculation
+    const subtotal = lineItems
+      .filter(li => li.quantity > 0)
+      .reduce((sum, li) => sum + (li.unit_price * li.quantity), 0);
     const totalDiscount = (subtotal * blanketDiscount) / 100;
     const total = subtotal - totalDiscount;
     return { subtotal, totalDiscount, total };
@@ -817,9 +820,9 @@ export default function ToolsQuoteBuilderPage() {
                             <label className="text-[12px] text-[#666] font-[500] block mb-1">Quantity</label>
                             <input
                               type="number"
-                              min="1"
+                              min="0"
                               value={item.quantity}
-                              onChange={(e) => updateQuantity(item.product_code, parseInt(e.target.value) || 1)}
+                              onChange={(e) => updateQuantity(item.product_code, parseInt(e.target.value) || 0)}
                               className="w-24 px-3 py-1.5 border border-[#e8e8e8] rounded-[8px] text-[14px] text-[#0a0a0a] font-[500] focus:outline-none focus:ring-2 focus:ring-[#0a0a0a]"
                             />
                           </div>

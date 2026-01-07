@@ -152,21 +152,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Filter out zero-quantity items (used for quote display only, not invoicing)
+    const itemsWithQuantity = items.filter((item: InvoiceLineItemInput) => item.quantity > 0);
+
+    if (itemsWithQuantity.length === 0) {
+      return NextResponse.json(
+        { error: 'No items with quantity > 0 to invoice' },
+        { status: 400 }
+      );
+    }
+
     // RECALCULATE PRICES based on product type
     const calculatedItems: InvoiceLineItem[] = [];
 
-    // Separate items by product type
-    const toolItems = items.filter((item: InvoiceLineItemInput) => {
+    // Separate items by product type (only items with quantity > 0)
+    const toolItems = itemsWithQuantity.filter((item: InvoiceLineItemInput) => {
       const product = products.find(p => p.product_code === item.product_code);
       return product?.type === 'tool';
     });
 
-    const consumableItems = items.filter((item: InvoiceLineItemInput) => {
+    const consumableItems = itemsWithQuantity.filter((item: InvoiceLineItemInput) => {
       const product = products.find(p => p.product_code === item.product_code);
       return product?.type === 'consumable';
     });
 
-    const otherItems = items.filter((item: InvoiceLineItemInput) => {
+    const otherItems = itemsWithQuantity.filter((item: InvoiceLineItemInput) => {
       const product = products.find(p => p.product_code === item.product_code);
       return product?.type !== 'tool' && product?.type !== 'consumable';
     });

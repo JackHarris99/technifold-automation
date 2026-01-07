@@ -258,29 +258,57 @@ export function StaticQuotePortal({ quote, lineItems, company, contact, token, i
               <h2 className="text-[20px] font-[800] text-[#0a0a0a] mb-6">Order Summary</h2>
 
               <div className="space-y-3 mb-6">
-                <div className="flex justify-between text-[15px]">
-                  <span className="text-[#666]">Subtotal</span>
-                  <span className="font-[600]">£{(pricingPreview?.subtotal || 0).toFixed(2)}</span>
-                </div>
+                {(() => {
+                  // Calculate original total (before any discounts)
+                  const originalTotal = pricingPreview?.line_items.reduce((sum, item) => {
+                    const originalItem = lineItems.find(li => li.product_code === item.product_code);
+                    const originalPrice = originalItem?.unit_price || item.unit_price;
+                    return sum + (originalPrice * item.quantity);
+                  }, 0) || 0;
 
-                <div className="flex justify-between text-[15px]">
-                  <span className="text-[#666]">Shipping</span>
-                  <span className="font-[600]">
-                    {(pricingPreview?.shipping_amount || 0) === 0 ? 'Free' : `£${(pricingPreview?.shipping_amount || 0).toFixed(2)}`}
-                  </span>
-                </div>
+                  const subtotal = pricingPreview?.subtotal || 0;
+                  const volumeSavings = originalTotal - subtotal;
 
-                <div className="flex justify-between text-[15px]">
-                  <span className="text-[#666]">VAT ({((pricingPreview?.vat_rate || 0) * 100).toFixed(0)}%)</span>
-                  <span className="font-[600]">£{(pricingPreview?.vat_amount || 0).toFixed(2)}</span>
-                </div>
+                  return (
+                    <>
+                      <div className="flex justify-between text-[15px]">
+                        <span className="text-[#666]">Total</span>
+                        <span className="font-[600]">£{originalTotal.toFixed(2)}</span>
+                      </div>
 
-                <div className="h-px bg-[#e8e8e8] my-4"></div>
+                      {volumeSavings > 0 && (
+                        <div className="flex justify-between text-[15px]">
+                          <span className="text-green-600">Volume Savings</span>
+                          <span className="font-[600] text-green-600">-£{volumeSavings.toFixed(2)}</span>
+                        </div>
+                      )}
 
-                <div className="flex justify-between text-[20px]">
-                  <span className="font-[800]">Total</span>
-                  <span className="font-[800]">£{(pricingPreview?.total || 0).toFixed(2)}</span>
-                </div>
+                      <div className="flex justify-between text-[15px]">
+                        <span className="text-[#666]">Subtotal</span>
+                        <span className="font-[600]">£{subtotal.toFixed(2)}</span>
+                      </div>
+
+                      <div className="flex justify-between text-[15px]">
+                        <span className="text-[#666]">Shipping</span>
+                        <span className="font-[600]">
+                          {(pricingPreview?.shipping_amount || 0) === 0 ? 'Free' : `£${(pricingPreview?.shipping_amount || 0).toFixed(2)}`}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between text-[15px]">
+                        <span className="text-[#666]">VAT ({((pricingPreview?.vat_rate || 0) * 100).toFixed(0)}%)</span>
+                        <span className="font-[600]">£{(pricingPreview?.vat_amount || 0).toFixed(2)}</span>
+                      </div>
+
+                      <div className="h-px bg-[#e8e8e8] my-4"></div>
+
+                      <div className="flex justify-between text-[20px]">
+                        <span className="font-[800]">Final Total</span>
+                        <span className="font-[800]">£{(pricingPreview?.total || 0).toFixed(2)}</span>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
 
               <button

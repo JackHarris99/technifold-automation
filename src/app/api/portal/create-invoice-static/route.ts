@@ -170,8 +170,18 @@ export async function POST(request: NextRequest) {
 
     const destinationCountry = shippingAddress?.country || company.country || 'GB';
 
+    // Filter out zero-quantity items (used for quote display only, not invoicing)
+    const itemsWithQuantity = items.filter(item => item.quantity > 0);
+
+    if (itemsWithQuantity.length === 0) {
+      return NextResponse.json(
+        { error: 'No items with quantity > 0 to invoice' },
+        { status: 400 }
+      );
+    }
+
     // Calculate subtotal using LOCKED prices (no recalculation)
-    const subtotal = items.reduce((sum: number, item: InvoiceLineItem) =>
+    const subtotal = itemsWithQuantity.reduce((sum: number, item: InvoiceLineItem) =>
       sum + (item.unit_price * item.quantity), 0
     );
 
@@ -254,8 +264,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Add line items to invoice using LOCKED prices
-    for (const item of items) {
+    // Add line items to invoice using LOCKED prices (only items with quantity > 0)
+    for (const item of itemsWithQuantity) {
       await getStripeClient().invoiceItems.create({
         customer: stripeCustomerId,
         invoice: invoice.id,
@@ -347,8 +357,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Store invoice items
-    const invoiceItems = items.map((item, index) => ({
+    // Store invoice items (only items with quantity > 0)
+    const invoiceItems = itemsWithQuantity.map((item, index) => ({
       invoice_id: dbInvoice.invoice_id,
       product_code: item.product_code,
       line_number: index + 1,
