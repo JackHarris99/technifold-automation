@@ -7,7 +7,7 @@
 import crypto from 'crypto';
 import { getSupabaseClient } from '@/lib/supabase';
 
-const TOKEN_SECRET = process.env.ACTION_TOKEN_SECRET || process.env.CUSTOMER_TOKEN_SECRET || 'default-secret';
+const TOKEN_SECRET = process.env.TOKEN_HMAC_SECRET || process.env.CUSTOMER_TOKEN_SECRET || 'default-secret';
 
 interface CreateTokenParams {
   user_id: string;
