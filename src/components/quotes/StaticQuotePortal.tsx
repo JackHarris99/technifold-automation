@@ -154,21 +154,9 @@ export function StaticQuotePortal({ quote, lineItems, company, contact, token, i
         </div>
 
         {/* Company Name */}
-        <h1 className="text-[56px] font-[800] text-[#0a0a0a] mb-3 tracking-[-0.04em] leading-[1.1] text-center">
+        <h1 className="text-[56px] font-[800] text-[#0a0a0a] mb-8 tracking-[-0.04em] leading-[1.1] text-center">
           {company.company_name}
         </h1>
-
-        {/* Static Quote Badge */}
-        <div className="flex justify-center mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border-2 border-blue-200 rounded-[12px]">
-            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            <span className="text-[14px] font-[600] text-blue-800">
-              Fixed Pricing - Prices locked at quoted amounts
-            </span>
-          </div>
-        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* Main Product List */}
@@ -229,10 +217,6 @@ export function StaticQuotePortal({ quote, lineItems, company, contact, token, i
                           £{displayPrice.toFixed(2)}
                         </div>
                       </div>
-                    </div>
-
-                    <div className="text-[14px] text-blue-600 font-[500]">
-                      🔒 Price locked - will not change with quantity
                     </div>
                   </div>
 
