@@ -20,7 +20,7 @@ export default function AdminNav() {
   }
 
   return (
-    <nav className="fixed left-0 top-0 h-screen w-64 bg-gray-900 text-white overflow-y-auto z-50">
+    <nav className="fixed left-0 top-0 h-screen w-64 bg-gray-900 text-white flex flex-col z-50">
       {/* Header */}
       <div className="p-4 border-b border-gray-800">
         <h1 className="text-lg font-bold">Technifold Admin</h1>
@@ -32,8 +32,8 @@ export default function AdminNav() {
         <CompanySearchBar />
       </div>
 
-      {/* Navigation */}
-      <div className="py-4">
+      {/* Navigation - Scrollable */}
+      <div className="py-4 flex-1 overflow-y-auto">
         {/* Dashboard */}
         <div className="mb-6">
           <div className="px-4 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
@@ -275,7 +275,7 @@ export default function AdminNav() {
       </div>
 
       {/* Footer - Logout */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-800">
+      <div className="p-4 border-t border-gray-800 bg-gray-900">
         <button
           onClick={handleLogout}
           className="w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white rounded transition-colors"
