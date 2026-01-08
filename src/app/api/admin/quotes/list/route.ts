@@ -13,14 +13,17 @@ export async function GET(request: NextRequest) {
     const sessionCookie = cookieStore.get('session');
 
     if (!sessionCookie) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      console.error('[quotes/list] No session cookie found');
+      return NextResponse.json({ error: 'Unauthorized - No session cookie' }, { status: 401 });
     }
 
     // Parse session to get user info
     let session;
     try {
       session = JSON.parse(sessionCookie.value);
-    } catch {
+      console.log('[quotes/list] Session parsed successfully for user:', session.user_id || session.sales_rep_id);
+    } catch (e) {
+      console.error('[quotes/list] Failed to parse session cookie:', e);
       return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
     }
 
@@ -31,11 +34,9 @@ export async function GET(request: NextRequest) {
     const supabase = getSupabaseClient();
 
     // Build query - fetch quotes without nested company select to avoid issues
-    // Exclude test quotes by default
     let query = supabase
       .from('quotes')
       .select('*')
-      .eq('is_test', false)
       .order('created_at', { ascending: false });
 
     // Apply status filter
