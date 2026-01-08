@@ -32,9 +32,13 @@ export default function AdminNav() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  function handleViewModeChange(mode: ViewMode) {
+  async function handleViewModeChange(mode: ViewMode) {
     setViewMode(mode);
     setViewModeState(mode);
+
+    // Also set cookie for server components
+    document.cookie = `view_mode=${mode}; path=/; max-age=31536000`; // 1 year
+
     // Trigger page refresh to apply new filter
     window.location.reload();
   }

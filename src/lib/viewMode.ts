@@ -46,3 +46,17 @@ export function addViewModeToUrl(url: string, viewMode: ViewMode): string {
   const separator = url.includes('?') ? '&' : '?';
   return viewMode === 'my_customers' ? `${url}${separator}viewMode=my_customers` : url;
 }
+
+/**
+ * Get view mode from cookies (for server components)
+ */
+export async function getViewModeFromCookies(): Promise<ViewMode> {
+  try {
+    const { cookies } = await import('next/headers');
+    const cookieStore = await cookies();
+    const viewModeCookie = cookieStore.get('view_mode');
+    return (viewModeCookie?.value === 'my_customers' ? 'my_customers' : 'all') as ViewMode;
+  } catch {
+    return 'all';
+  }
+}

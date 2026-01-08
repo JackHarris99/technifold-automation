@@ -7,6 +7,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { getCurrentUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 
 interface ReorderOpportunity {
   company_id: string;
@@ -55,19 +56,31 @@ export default async function SalesCenterPage() {
     redirect('/login');
   }
 
+  // Get view mode from cookies
+  const cookieStore = await cookies();
+  const viewModeCookie = cookieStore.get('view_mode');
+  const viewMode = viewModeCookie?.value === 'my_customers' ? 'my_customers' : 'all';
+
   const supabase = getSupabaseClient();
 
-  // Fetch ALL companies (bypass 1000 row limit with batching)
+  // Fetch companies (filtered by view mode)
   let allCompanies: any[] = [];
   let start = 0;
   const batchSize = 1000;
   let hasMore = true;
 
   while (hasMore) {
-    const { data: batch, error } = await supabase
+    let query = supabase
       .from('companies')
       .select('company_id, company_name, account_owner')
       .range(start, start + batchSize - 1);
+
+    // Apply view mode filter
+    if (viewMode === 'my_customers') {
+      query = query.eq('account_owner', currentUser.user_id);
+    }
+
+    const { data: batch, error } = await query;
 
     if (error) {
       console.error('[Sales Center] Companies query error:', error);
@@ -263,7 +276,7 @@ export default async function SalesCenterPage() {
                 Sales Control Center
               </h1>
               <p className="text-sm text-gray-600 mt-1">
-                {currentUser.full_name} • All Companies View
+                {currentUser.full_name} • {viewMode === 'my_customers' ? 'My Customers Only' : 'All Companies (Team View)'}
               </p>
             </div>
           </div>
