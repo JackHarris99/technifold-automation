@@ -7,6 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { getViewMode, addViewModeToUrl } from '@/lib/viewMode';
 
 interface Quote {
   quote_id: string;
@@ -31,18 +32,18 @@ interface Quote {
 export default function QuotesPage() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'my_customers'>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   useEffect(() => {
     fetchQuotes();
-  }, [filter, statusFilter]);
+  }, [statusFilter]);
 
   async function fetchQuotes() {
     setLoading(true);
     try {
+      const viewMode = getViewMode();
       const params = new URLSearchParams();
-      if (filter === 'my_customers') params.set('filter', 'my_customers');
+      if (viewMode === 'my_customers') params.set('viewMode', 'my_customers');
       if (statusFilter !== 'all') params.set('status', statusFilter);
 
       const response = await fetch(`/api/admin/quotes/list?${params}`);
@@ -163,36 +164,22 @@ export default function QuotesPage() {
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Status Filter */}
       <div className="bg-white rounded-lg border-2 border-blue-200 p-5 mb-6 shadow-sm">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-bold text-gray-800">View:</label>
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value as any)}
-              className="px-4 py-2 border-2 border-gray-300 rounded-lg text-sm font-semibold bg-white hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-            >
-              <option value="all">🌍 All Quotes (Team View)</option>
-              <option value="my_customers">👤 My Customers Only</option>
-            </select>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-bold text-gray-800">Status:</label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border-2 border-gray-300 rounded-lg text-sm font-semibold bg-white hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-            >
-              <option value="all">All Statuses</option>
-              <option value="sent">Sent</option>
-              <option value="viewed">Viewed</option>
-              <option value="accepted">Accepted</option>
-              <option value="expired">Expired</option>
-              <option value="need_followup">Need Follow-up</option>
-            </select>
-          </div>
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-bold text-gray-800">Filter by Status:</label>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-4 py-2 border-2 border-gray-300 rounded-lg text-sm font-semibold bg-white hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+          >
+            <option value="all">All Statuses</option>
+            <option value="sent">Sent</option>
+            <option value="viewed">Viewed</option>
+            <option value="accepted">Accepted</option>
+            <option value="expired">Expired</option>
+            <option value="need_followup">Need Follow-up</option>
+          </select>
         </div>
       </div>
 

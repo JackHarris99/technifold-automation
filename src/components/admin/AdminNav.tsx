@@ -8,11 +8,36 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import CompanySearchBar from './CompanySearchBar';
+import { getViewMode, setViewMode, type ViewMode } from '@/lib/viewMode';
 
 export default function AdminNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const [viewMode, setViewModeState] = useState<ViewMode>('all');
+
+  useEffect(() => {
+    // Load view mode from localStorage on mount
+    setViewModeState(getViewMode());
+
+    // Listen for changes from other tabs/components
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'admin_view_mode') {
+        setViewModeState(getViewMode());
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  function handleViewModeChange(mode: ViewMode) {
+    setViewMode(mode);
+    setViewModeState(mode);
+    // Trigger page refresh to apply new filter
+    window.location.reload();
+  }
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -25,6 +50,24 @@ export default function AdminNav() {
       <div className="p-4 border-b border-gray-800">
         <h1 className="text-lg font-bold">Technifold Admin</h1>
         <p className="text-xs text-gray-400">Sales Engine</p>
+      </div>
+
+      {/* GLOBAL VIEW MODE TOGGLE */}
+      <div className="p-4 border-b border-gray-800 bg-gray-800">
+        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+          View Mode
+        </label>
+        <select
+          value={viewMode}
+          onChange={(e) => handleViewModeChange(e.target.value as ViewMode)}
+          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-sm font-semibold text-white hover:bg-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="all">🌍 All Companies (Team)</option>
+          <option value="my_customers">👤 My Customers Only</option>
+        </select>
+        <p className="text-xs text-gray-500 mt-2">
+          {viewMode === 'all' ? 'Viewing all team data' : 'Viewing your customers only'}
+        </p>
       </div>
 
       {/* Universal Company Search */}

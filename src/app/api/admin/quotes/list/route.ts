@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const filter = searchParams.get('filter'); // 'my_customers' or null (all)
+    const viewMode = searchParams.get('viewMode'); // 'my_customers' or null (all)
     const statusFilter = searchParams.get('status'); // 'sent', 'viewed', 'accepted', 'expired', 'need_followup'
 
     const supabase = getSupabaseClient();
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     // Apply "My Customers" filter if requested
-    if (filter === 'my_customers' && session.sales_rep_id) {
+    if (viewMode === 'my_customers') {
       query = query.eq('created_by', session.user_id);
     }
 
