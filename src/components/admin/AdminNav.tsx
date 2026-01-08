@@ -98,6 +98,43 @@ export default function AdminNav() {
           </Link>
         </div>
 
+        {/* Quotes */}
+        <div className="mb-6">
+          <div className="px-4 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            Quotes
+          </div>
+          <Link
+            href="/admin/quotes"
+            className={`block px-4 py-2 text-sm transition-colors ${
+              pathname === '/admin/quotes' || pathname?.startsWith('/admin/quotes/')
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            All Quotes
+          </Link>
+          <Link
+            href="/admin/quote-builder/tools"
+            className={`block px-4 py-2 text-sm transition-colors ${
+              pathname?.startsWith('/admin/quote-builder/tools')
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            🔧 Tools Quote Builder
+          </Link>
+          <Link
+            href="/admin/quote-builder/consumables"
+            className={`block px-4 py-2 text-sm transition-colors ${
+              pathname?.startsWith('/admin/quote-builder/consumables')
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            📦 Consumables Quote Builder
+          </Link>
+        </div>
+
         {/* Invoicing */}
         <div className="mb-6">
           <div className="px-4 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
@@ -203,26 +240,6 @@ export default function AdminNav() {
             }`}
           >
             Test Reorder Link
-          </Link>
-          <Link
-            href="/admin/quote-builder/tools"
-            className={`block px-4 py-2 text-sm transition-colors ${
-              pathname?.startsWith('/admin/quote-builder/tools')
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-            }`}
-          >
-            🔧 Tools Quote Builder
-          </Link>
-          <Link
-            href="/admin/quote-builder/consumables"
-            className={`block px-4 py-2 text-sm transition-colors ${
-              pathname?.startsWith('/admin/quote-builder/consumables')
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-            }`}
-          >
-            📦 Consumables Quote Builder
           </Link>
         </div>
 
