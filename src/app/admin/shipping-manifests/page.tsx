@@ -7,6 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { getViewMode } from '@/lib/viewMode';
 
 interface ShippingManifest {
   manifest_id: string;
@@ -43,9 +44,14 @@ export default function ShippingManifestsPage() {
   async function loadManifests() {
     setLoading(true);
     try {
-      const url = filter === 'all'
-        ? '/api/admin/shipping-manifests'
-        : `/api/admin/shipping-manifests?status=${filter}`;
+      const viewMode = getViewMode();
+      const params = new URLSearchParams();
+      if (filter !== 'all') params.set('status', filter);
+      if (viewMode === 'my_customers') params.set('viewMode', 'my_customers');
+
+      const url = params.toString()
+        ? `/api/admin/shipping-manifests?${params}`
+        : '/api/admin/shipping-manifests';
 
       const response = await fetch(url);
       const data = await response.json();

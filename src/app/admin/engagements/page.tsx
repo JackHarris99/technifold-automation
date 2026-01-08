@@ -1,31 +1,28 @@
 /**
  * Engagements Page
- * /admin/engagements - All engagement events filtered by ownership
- * Sales reps: Only their companies
- * Directors: All companies with rep filter
+ * /admin/engagements - All engagement events filtered by global view mode
  */
 
 import { getSupabaseClient } from '@/lib/supabase';
-import { getCurrentUser, isDirector } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import EngagementsTable from '@/components/admin/EngagementsTable';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 export default async function EngagementsPage() {
   const supabase = getSupabaseClient();
   const currentUser = await getCurrentUser();
-  const isDir = await isDirector();
 
   if (!currentUser) {
-    return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Please Log In</h1>
-            <a href="/admin/login" className="text-blue-600 hover:underline">Go to Login</a>
-          </div>
-        </div>
-    );
+    redirect('/login');
   }
 
-  // Build query based on role
+  // Get view mode from cookies
+  const cookieStore = await cookies();
+  const viewModeCookie = cookieStore.get('view_mode');
+  const viewMode = viewModeCookie?.value === 'my_customers' ? 'my_customers' : 'all';
+
+  // Fetch all engagement events
   let query = supabase
     .from('engagement_events')
     .select(`
@@ -46,39 +43,36 @@ export default async function EngagementsPage() {
     `)
     .order('occurred_at', { ascending: false });
 
-  // Sales reps only see their companies' engagements
-  if (!isDir && currentUser.rep_id) {
-    // We need to filter by companies.account_owner
-    // Since we can't directly filter on joined tables in Supabase,
-    // we'll fetch all and filter client-side or use a view
-    // For now, let's fetch all and filter in component
-  }
-
   const { data: allEngagements } = await query.limit(1000);
 
+  // Filter by account ownership if in "my_customers" mode
+  let filteredEngagements = allEngagements || [];
+  if (viewMode === 'my_customers') {
+    filteredEngagements = filteredEngagements.filter(event =>
+      event.companies?.account_owner === currentUser.sales_rep_id
+    );
+  }
+
   // Get unique engagement types for filtering
-  const engagementTypes = [...new Set(allEngagements?.map(e => e.event_type).filter(Boolean) || [])].sort();
+  const engagementTypes = [...new Set(filteredEngagements.map(e => e.event_type).filter(Boolean) || [])].sort();
 
   return (
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900">
-            {isDir ? 'All Engagements' : 'My Engagements'}
+            Engagement Events
           </h1>
           <p className="text-gray-600 mt-2">
-            {isDir
-              ? 'Complete engagement history across all companies and territories'
-              : `Engagement history for companies owned by ${currentUser.rep_name}`
-            }
+            {filteredEngagements.length} events • {viewMode === 'my_customers' ? 'My Customers Only' : 'All Companies (Team View)'}
           </p>
         </div>
 
         <EngagementsTable
-          engagements={allEngagements || []}
+          engagements={filteredEngagements}
           engagementTypes={engagementTypes}
-          isDirector={isDir}
-          currentRepId={currentUser.rep_id}
+          isDirector={viewMode === 'all'}
+          currentRepId={currentUser.sales_rep_id}
         />
       </div>
     </div>

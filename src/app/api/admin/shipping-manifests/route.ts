@@ -5,21 +5,38 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { cookies } from 'next/headers';
 
 /**
  * GET - Fetch all shipping manifests or filter by status
  */
 export async function GET(request: NextRequest) {
   try {
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get('session');
+
+    if (!sessionCookie) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Parse session to get user info
+    let session;
+    try {
+      session = JSON.parse(sessionCookie.value);
+    } catch {
+      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status'); // 'pending', 'shipped', 'delivered'
+    const viewMode = searchParams.get('viewMode'); // 'my_customers' or null (all)
 
     const supabase = getSupabaseClient();
     let query = supabase
       .from('shipping_manifests')
       .select(`
         *,
-        companies:company_id (company_name, country),
+        companies:company_id (company_name, country, account_owner),
         orders:order_id (order_id, invoice_number, total_amount)
       `)
       .order('created_at', { ascending: false });
@@ -39,7 +56,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch manifests' }, { status: 500 });
     }
 
-    return NextResponse.json({ manifests: manifests || [] });
+    // Filter by account ownership if needed
+    let filteredManifests = manifests || [];
+    if (viewMode === 'my_customers') {
+      filteredManifests = filteredManifests.filter(manifest =>
+        manifest.companies?.account_owner === session.sales_rep_id
+      );
+    }
+
+    return NextResponse.json({ manifests: filteredManifests });
   } catch (err) {
     console.error('[shipping-manifests] Unexpected error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
