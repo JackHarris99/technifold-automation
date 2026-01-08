@@ -47,13 +47,24 @@ export default function QuotesPage() {
       if (statusFilter !== 'all') params.set('status', statusFilter);
 
       const response = await fetch(`/api/admin/quotes/list?${params}`);
+
+      if (!response.ok) {
+        console.error(`API error: ${response.status} ${response.statusText}`);
+        setQuotes([]);
+        return;
+      }
+
       const data = await response.json();
 
       if (data.success) {
-        setQuotes(data.quotes);
+        setQuotes(data.quotes || []);
+      } else {
+        console.error('API returned error:', data.error);
+        setQuotes([]);
       }
     } catch (error) {
       console.error('Failed to fetch quotes:', error);
+      setQuotes([]);
     } finally {
       setLoading(false);
     }

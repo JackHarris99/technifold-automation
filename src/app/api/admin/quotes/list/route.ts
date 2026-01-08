@@ -89,12 +89,24 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Early return if no quotes after filtering
+    if (!ownerFilteredQuotes || ownerFilteredQuotes.length === 0) {
+      return NextResponse.json({
+        success: true,
+        quotes: [],
+      });
+    }
+
     // Fetch company names and account owners
     const companyIds = [...new Set(ownerFilteredQuotes.map(q => q.company_id))];
-    const { data: companies } = await supabase
+    const { data: companies, error: companiesError } = await supabase
       .from('companies')
       .select('company_id, company_name, account_owner')
       .in('company_id', companyIds);
+
+    if (companiesError) {
+      console.error('[quotes/list] Error fetching companies:', companiesError);
+    }
 
     // Fetch contact names
     const quoteIds = ownerFilteredQuotes.map(q => q.quote_id);
@@ -106,10 +118,14 @@ export async function GET(request: NextRequest) {
 
     // Get user names for created_by
     const userIds = [...new Set(ownerFilteredQuotes.map(q => q.created_by))];
-    const { data: users } = await supabase
+    const { data: users, error: usersError } = await supabase
       .from('users')
       .select('user_id, full_name')
       .in('user_id', userIds);
+
+    if (usersError) {
+      console.error('[quotes/list] Error fetching users:', usersError);
+    }
 
     // Merge data
     const enrichedQuotes = ownerFilteredQuotes.map(quote => {

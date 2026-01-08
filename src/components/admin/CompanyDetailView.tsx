@@ -24,6 +24,7 @@ interface CompanyDetailViewProps {
   engagement: any[];
   subscriptions: any[];
   shippingAddresses: any[];
+  quotes: any[];
 }
 
 export default function CompanyDetailView({
@@ -37,6 +38,7 @@ export default function CompanyDetailView({
   engagement,
   subscriptions,
   shippingAddresses,
+  quotes,
 }: CompanyDetailViewProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const [showAddContactModal, setShowAddContactModal] = useState(false);
@@ -50,6 +52,7 @@ export default function CompanyDetailView({
     { id: 'overview', label: 'Overview', count: null },
     { id: 'products', label: 'Products', count: purchasedTools.length + purchasedConsumables.length + purchasedParts.length },
     { id: 'subscriptions', label: 'Subscriptions', count: subscriptionTools.length },
+    { id: 'quotes', label: 'Quotes', count: quotes.length },
     { id: 'invoices', label: 'Invoices', count: invoices.length },
     { id: 'engagement', label: 'Engagement', count: engagement.length },
   ];
@@ -153,6 +156,10 @@ export default function CompanyDetailView({
             companyId={company.company_id}
             onAddTool={() => setShowAddSubToolModal(true)}
           />
+        )}
+
+        {activeTab === 'quotes' && (
+          <QuotesTab quotes={quotes} companyId={company.company_id} />
         )}
 
         {activeTab === 'invoices' && (
@@ -663,6 +670,117 @@ function InvoicesTab({ invoices, companyId }: any) {
             </table>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+// Quotes Tab
+function QuotesTab({ quotes, companyId }: { quotes: any[]; companyId: string }) {
+  function getStatusBadge(quote: any) {
+    const now = new Date();
+    const expiresAt = quote.expires_at ? new Date(quote.expires_at) : null;
+    const isExpired = expiresAt && expiresAt < now;
+
+    if (isExpired) {
+      return <span className="px-2 py-1 text-xs font-semibold rounded bg-gray-200 text-gray-700">Expired</span>;
+    }
+
+    if (quote.accepted_at) {
+      return <span className="px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-700">Accepted</span>;
+    }
+
+    if (quote.viewed_at) {
+      const daysSinceViewed = Math.floor((now.getTime() - new Date(quote.viewed_at).getTime()) / (1000 * 60 * 60 * 24));
+      if (daysSinceViewed === 0) {
+        return <span className="px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-700">Active</span>;
+      } else if (daysSinceViewed <= 3) {
+        return <span className="px-2 py-1 text-xs font-semibold rounded bg-blue-100 text-blue-700">Viewed</span>;
+      } else {
+        return <span className="px-2 py-1 text-xs font-semibold rounded bg-orange-100 text-orange-700">Follow-up</span>;
+      }
+    }
+
+    if (quote.sent_at) {
+      const daysSinceSent = Math.floor((now.getTime() - new Date(quote.sent_at).getTime()) / (1000 * 60 * 60 * 24));
+      if (daysSinceSent >= 7) {
+        return <span className="px-2 py-1 text-xs font-semibold rounded bg-red-100 text-red-700">Stale</span>;
+      } else if (daysSinceSent >= 3) {
+        return <span className="px-2 py-1 text-xs font-semibold rounded bg-yellow-100 text-yellow-700">Not Viewed</span>;
+      } else {
+        return <span className="px-2 py-1 text-xs font-semibold rounded bg-yellow-100 text-yellow-700">Sent</span>;
+      }
+    }
+
+    return <span className="px-2 py-1 text-xs font-semibold rounded bg-gray-200 text-gray-700">Draft</span>;
+  }
+
+  function formatDate(dateString: string | null) {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString();
+  }
+
+  return (
+    <div className="bg-white rounded-lg shadow">
+      <div className="px-6 py-4 border-b border-gray-200">
+        <h2 className="text-lg font-semibold">Quotes ({quotes.length})</h2>
+      </div>
+      <div className="overflow-x-auto">
+        {quotes.length === 0 ? (
+          <div className="p-6 text-gray-500 text-sm">No quotes yet</div>
+        ) : (
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quote ID</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sent</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {quotes.map((quote: any) => (
+                <tr key={quote.quote_id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-600">
+                    {quote.quote_id.substring(0, 8)}...
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      quote.quote_type === 'interactive'
+                        ? 'bg-purple-100 text-purple-700'
+                        : 'bg-blue-100 text-blue-700'
+                    }`}>
+                      {quote.quote_type}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    £{quote.total_amount?.toLocaleString() || '0'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    {formatDate(quote.created_at)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    {formatDate(quote.sent_at)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {getStatusBadge(quote)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <Link
+                      href={`/admin/quotes/${quote.quote_id}`}
+                      className="text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      View
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

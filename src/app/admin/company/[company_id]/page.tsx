@@ -29,6 +29,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
     engagementResult,
     subscriptionsResult,
     shippingAddressesResult,
+    quotesResult,
   ] = await Promise.all([
     // Company
     supabase
@@ -141,6 +142,13 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
       .select('*')
       .eq('company_id', company_id)
       .order('is_default', { ascending: false }),
+
+    // Quotes
+    supabase
+      .from('quotes')
+      .select('*')
+      .eq('company_id', company_id)
+      .order('created_at', { ascending: false }),
   ]);
 
   if (companyResult.error || !companyResult.data) {
@@ -160,6 +168,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
       engagement={engagementResult.data || []}
       subscriptions={subscriptionsResult.data || []}
       shippingAddresses={shippingAddressesResult.data || []}
+      quotes={quotesResult.data || []}
     />
   );
 }
