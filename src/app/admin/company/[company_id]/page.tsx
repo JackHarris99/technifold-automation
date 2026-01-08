@@ -143,11 +143,12 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
       .eq('company_id', company_id)
       .order('is_default', { ascending: false }),
 
-    // Quotes
+    // Quotes (exclude test quotes by default)
     supabase
       .from('quotes')
       .select('*')
       .eq('company_id', company_id)
+      .eq('is_test', false)
       .order('created_at', { ascending: false }),
   ]);
 

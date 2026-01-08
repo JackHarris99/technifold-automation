@@ -30,26 +30,13 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
-    // Build query
+    // Build query - fetch quotes without nested company select to avoid issues
+    // Exclude test quotes by default
     let query = supabase
       .from('quotes')
-      .select(`
-        quote_id,
-        company_id,
-        created_by,
-        quote_type,
-        status,
-        total_amount,
-        created_at,
-        sent_at,
-        viewed_at,
-        accepted_at,
-        expires_at,
-        companies:company_id(account_owner)
-      `)
+      .select('*')
+      .eq('is_test', false)
       .order('created_at', { ascending: false });
-
-    // Note: We'll filter by company account_owner after fetching
 
     // Apply status filter
     if (statusFilter) {
@@ -81,32 +68,52 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Filter by company account_owner if in "my_customers" mode
-    let ownerFilteredQuotes = quotes;
-    if (viewMode === 'my_customers') {
-      ownerFilteredQuotes = quotes.filter((quote: any) =>
-        quote.companies?.account_owner === session.sales_rep_id
-      );
-    }
+    console.log('[quotes/list] Fetched quotes count:', quotes?.length || 0);
 
-    // Early return if no quotes after filtering
-    if (!ownerFilteredQuotes || ownerFilteredQuotes.length === 0) {
+    // Early return if no quotes
+    if (!quotes || quotes.length === 0) {
+      console.log('[quotes/list] No quotes found in database');
       return NextResponse.json({
         success: true,
         quotes: [],
       });
     }
 
-    // Fetch company names and account owners
-    const companyIds = [...new Set(ownerFilteredQuotes.map(q => q.company_id))];
+    // Fetch ALL company data first
+    const allCompanyIds = [...new Set(quotes.map(q => q.company_id))];
+    console.log('[quotes/list] Company IDs to fetch:', allCompanyIds.length);
+
     const { data: companies, error: companiesError } = await supabase
       .from('companies')
       .select('company_id, company_name, account_owner')
-      .in('company_id', companyIds);
+      .in('company_id', allCompanyIds);
 
     if (companiesError) {
       console.error('[quotes/list] Error fetching companies:', companiesError);
     }
+
+    console.log('[quotes/list] Fetched companies count:', companies?.length || 0);
+
+    // Filter by company account_owner if in "my_customers" mode
+    let ownerFilteredQuotes = quotes;
+    if (viewMode === 'my_customers') {
+      ownerFilteredQuotes = quotes.filter((quote: any) => {
+        const company = companies?.find(c => c.company_id === quote.company_id);
+        return company?.account_owner === session.sales_rep_id;
+      });
+      console.log('[quotes/list] After owner filter:', ownerFilteredQuotes.length);
+    }
+
+    // Early return if no quotes after filtering
+    if (!ownerFilteredQuotes || ownerFilteredQuotes.length === 0) {
+      console.log('[quotes/list] No quotes after filtering');
+      return NextResponse.json({
+        success: true,
+        quotes: [],
+      });
+    }
+
+    // Companies already fetched above, no need to fetch again
 
     // Fetch contact names
     const quoteIds = ownerFilteredQuotes.map(q => q.quote_id);
