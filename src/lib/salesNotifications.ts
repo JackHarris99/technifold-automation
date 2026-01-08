@@ -7,7 +7,8 @@ import { getResendClient } from './resend-client';
 import { createActionToken, getActionUrl } from './actionTokens';
 import { getSupabaseClient } from './supabase';
 
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+// Use separate email for internal notifications vs customer-facing emails
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL_NOTIFICATIONS || process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
 /**
