@@ -7,6 +7,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { getCurrentUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 
 interface ReorderOpportunity {
   company_id: string;
@@ -24,17 +25,29 @@ export default async function ReorderOpportunitiesPage() {
     redirect('/login');
   }
 
+  // Get view mode from cookies
+  const cookieStore = await cookies();
+  const viewModeCookie = cookieStore.get('view_mode');
+  const viewMode = viewModeCookie?.value === 'my_customers' ? 'my_customers' : 'all';
+
   const supabase = getSupabaseClient();
 
-  // All companies with order history (no territory filtering)
+  // Fetch companies with order history
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
 
-  const { data: companies } = await supabase
+  let query = supabase
     .from('companies')
     .select('company_id, company_name, account_owner, last_invoice_at, total_revenue')
     .not('last_invoice_at', 'is', null)
     .lt('last_invoice_at', ninetyDaysAgo)
     .order('last_invoice_at', { ascending: true });
+
+  // Apply "My Customers" filter
+  if (viewMode === 'my_customers') {
+    query = query.eq('account_owner', currentUser.sales_rep_id);
+  }
+
+  const { data: companies } = await query;
 
   // Get invoice counts for each company
   const companyIds = companies?.map(c => c.company_id) || [];
@@ -85,7 +98,7 @@ export default async function ReorderOpportunitiesPage() {
                 Reorder Opportunities
               </h1>
               <p className="text-sm text-gray-600 mt-1">
-                {reorderOpportunities.length} compan{reorderOpportunities.length !== 1 ? 'ies' : 'y'} with 90+ days since last order
+                {reorderOpportunities.length} compan{reorderOpportunities.length !== 1 ? 'ies' : 'y'} with 90+ days since last order • {viewMode === 'my_customers' ? 'My Customers Only' : 'All Companies (Team View)'}
               </p>
             </div>
           </div>

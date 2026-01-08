@@ -7,6 +7,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { getCurrentUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 
 interface UnpaidInvoice {
   invoice_id: string;
@@ -25,12 +26,24 @@ export default async function UnpaidInvoicesPage() {
     redirect('/login');
   }
 
+  // Get view mode from cookies
+  const cookieStore = await cookies();
+  const viewModeCookie = cookieStore.get('view_mode');
+  const viewMode = viewModeCookie?.value === 'my_customers' ? 'my_customers' : 'all';
+
   const supabase = getSupabaseClient();
 
-  // Get all companies (no territory filtering)
-  const { data: companies } = await supabase
+  // Get companies based on view mode
+  let companiesQuery = supabase
     .from('companies')
     .select('company_id, company_name, account_owner');
+
+  // Apply "My Customers" filter
+  if (viewMode === 'my_customers') {
+    companiesQuery = companiesQuery.eq('account_owner', currentUser.sales_rep_id);
+  }
+
+  const { data: companies } = await companiesQuery;
   const companyIds = companies?.map(c => c.company_id) || [];
   const companyMap = new Map(companies?.map(c => [c.company_id, c.company_name]) || []);
 
@@ -86,6 +99,7 @@ export default async function UnpaidInvoicesPage() {
                 <span className="font-bold text-orange-600">
                   £{totalUnpaid.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
+                {' '}• {viewMode === 'my_customers' ? 'My Customers Only' : 'All Companies (Team View)'}
               </p>
             </div>
           </div>
