@@ -21,6 +21,7 @@ interface Company {
   company_id: string;
   company_name: string;
   country?: string;
+  account_owner?: string;
 }
 
 interface Contact {
@@ -418,7 +419,14 @@ export default function ToolsQuoteBuilderPage() {
                         }}
                         className="w-full px-4 py-3 text-left hover:bg-[#fafafa] border-b border-[#e8e8e8] last:border-b-0 transition-colors"
                       >
-                        <div className="text-[15px] font-[600] text-[#0a0a0a]">{company.company_name}</div>
+                        <div className="flex items-center justify-between">
+                          <div className="text-[15px] font-[600] text-[#0a0a0a]">{company.company_name}</div>
+                          {company.account_owner && (
+                            <span className="px-2 py-0.5 text-[11px] font-[600] bg-blue-100 text-blue-700 rounded-md uppercase">
+                              {company.account_owner}
+                            </span>
+                          )}
+                        </div>
                         <div className="text-[13px] text-[#666] mt-0.5">{company.company_id} • {company.country || 'UK'}</div>
                       </button>
                     ))}
