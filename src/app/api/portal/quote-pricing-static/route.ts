@@ -123,17 +123,7 @@ export async function POST(request: NextRequest) {
 
     const country = (defaultAddress?.country || company?.country || 'GB').toUpperCase();
 
-    // Calculate VAT (20% for UK, 0% for exports/reverse charge)
-    let vat_amount = 0;
-    let vat_rate = 0;
-
-    if (country === 'GB' || country === 'UK') {
-      vat_rate = 0.20;
-      vat_amount = subtotal * vat_rate;
-    }
-    // For EU/international, VAT is 0 (reverse charge or export)
-
-    // Calculate shipping
+    // Calculate shipping first
     const { data: shippingRate } = await supabase
       .from('shipping_rates')
       .select('rate_gbp, free_shipping_threshold')
@@ -147,6 +137,16 @@ export async function POST(request: NextRequest) {
     if (subtotal < freeShippingThreshold) {
       shipping_amount = shippingRate?.rate_gbp || 15; // Default £15 if no rate found
     }
+
+    // Calculate VAT on subtotal + shipping (20% for UK, 0% for exports/reverse charge)
+    let vat_amount = 0;
+    let vat_rate = 0;
+
+    if (country === 'GB' || country === 'UK') {
+      vat_rate = 0.20;
+      vat_amount = (subtotal + shipping_amount) * vat_rate;
+    }
+    // For EU/international, VAT is 0 (reverse charge or export)
 
     const total = subtotal + vat_amount + shipping_amount;
 
