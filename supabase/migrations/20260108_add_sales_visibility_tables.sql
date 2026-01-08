@@ -1,6 +1,7 @@
 -- Sales Visibility System Tables
 -- Created: 2026-01-08
--- Purpose: Quote notes, tasks, notifications, and tokenized actions
+-- Purpose: Quote notes, tasks, and notification preferences
+-- Note: Action tokens are stateless (no DB storage needed)
 
 -- ============================================================================
 -- 1. QUOTE NOTES
@@ -83,63 +84,7 @@ CREATE TABLE IF NOT EXISTS notification_preferences (
 );
 
 -- ============================================================================
--- 4. ACTION TOKENS
--- Tokenized magic links for quick actions from emails
--- ============================================================================
-CREATE TABLE IF NOT EXISTS action_tokens (
-  token_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  token_hash TEXT UNIQUE NOT NULL, -- SHA-256 hash of the token
-  user_id TEXT NOT NULL,
-  action_type TEXT NOT NULL, -- 'log_call', 'add_note', 'send_followup', 'view_quote', etc.
-
-  -- Context
-  quote_id UUID REFERENCES quotes(quote_id) ON DELETE CASCADE,
-  company_id TEXT,
-  contact_id TEXT,
-  metadata JSONB,
-
-  -- Security
-  expires_at TIMESTAMPTZ NOT NULL,
-  used_at TIMESTAMPTZ,
-  single_use BOOLEAN DEFAULT FALSE,
-  ip_address TEXT,
-
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE INDEX idx_action_tokens_hash ON action_tokens(token_hash);
-CREATE INDEX idx_action_tokens_user_id ON action_tokens(user_id);
-CREATE INDEX idx_action_tokens_expires_at ON action_tokens(expires_at);
-
--- ============================================================================
--- 5. NOTIFICATION LOG
--- Track all notifications sent (for debugging and analytics)
--- ============================================================================
-CREATE TABLE IF NOT EXISTS notification_log (
-  notification_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id TEXT NOT NULL,
-  notification_type TEXT NOT NULL, -- 'instant', 'daily_digest', 'weekly_summary'
-  event_type TEXT NOT NULL, -- 'quote_viewed', 'trial_ending', etc.
-
-  -- Related entities
-  company_id TEXT,
-  quote_id UUID,
-  invoice_id UUID,
-
-  -- Email details
-  email_subject TEXT,
-  email_sent_at TIMESTAMPTZ,
-  email_opened_at TIMESTAMPTZ,
-  email_clicked_at TIMESTAMPTZ,
-
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE INDEX idx_notification_log_user_id ON notification_log(user_id);
-CREATE INDEX idx_notification_log_created_at ON notification_log(created_at DESC);
-
--- ============================================================================
--- 6. UPDATE TRIGGERS
+-- 4. UPDATE TRIGGERS
 -- Auto-update updated_at timestamps
 -- ============================================================================
 
@@ -173,5 +118,3 @@ CREATE TRIGGER update_notification_preferences_updated_at
 COMMENT ON TABLE quote_notes IS 'Internal notes that sales reps can add to quotes';
 COMMENT ON TABLE tasks IS 'Auto-generated and manual tasks for sales reps';
 COMMENT ON TABLE notification_preferences IS 'User email notification settings';
-COMMENT ON TABLE action_tokens IS 'Tokenized magic links for quick actions from emails';
-COMMENT ON TABLE notification_log IS 'Audit log of all notifications sent';

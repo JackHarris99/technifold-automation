@@ -1,13 +1,18 @@
 /**
  * Action Token System
- * Secure, expiring magic links for quick actions from emails
- * Uses HMAC-SHA256 for token generation and validation
+ * Stateless HMAC-signed tokens for quick actions from emails
+ * Works exactly like customer tokens (/r/[token], /q/[token])
  */
 
 import crypto from 'crypto';
-import { getSupabaseClient } from '@/lib/supabase';
 
-const TOKEN_SECRET = process.env.TOKEN_HMAC_SECRET || process.env.CUSTOMER_TOKEN_SECRET || 'default-secret';
+function getTokenSecret(): string {
+  const secret = process.env.TOKEN_HMAC_SECRET;
+  if (!secret) {
+    throw new Error('TOKEN_HMAC_SECRET environment variable is required');
+  }
+  return secret;
+}
 
 interface CreateTokenParams {
   user_id: string;
@@ -17,30 +22,26 @@ interface CreateTokenParams {
   contact_id?: string;
   metadata?: Record<string, any>;
   expires_in_hours?: number;
-  single_use?: boolean;
 }
 
 interface TokenPayload {
-  token_id: string;
   user_id: string;
   action_type: string;
   quote_id?: string;
   company_id?: string;
   contact_id?: string;
   metadata?: Record<string, any>;
-  expires_at: string;
-  single_use: boolean;
+  expires_at: number;
 }
 
 /**
  * Generate a secure action token
- * Returns both the token string (to embed in URLs) and token_id (for database)
+ * Returns just the token string (stateless, no database storage)
  */
-export async function createActionToken(params: CreateTokenParams): Promise<{
+export function createActionToken(params: CreateTokenParams): {
   token: string;
-  token_id: string;
   expires_at: string;
-}> {
+} {
   const {
     user_id,
     action_type,
@@ -49,147 +50,74 @@ export async function createActionToken(params: CreateTokenParams): Promise<{
     contact_id,
     metadata,
     expires_in_hours = 72, // 3 days default
-    single_use = false,
   } = params;
 
-  // Generate unique token ID
-  const token_id = crypto.randomUUID();
-
-  // Calculate expiration
-  const expires_at = new Date();
-  expires_at.setHours(expires_at.getHours() + expires_in_hours);
-  const expires_at_iso = expires_at.toISOString();
+  // Calculate expiration timestamp
+  const expiresAt = Date.now() + (expires_in_hours * 60 * 60 * 1000);
 
   // Create token payload
   const payload: TokenPayload = {
-    token_id,
     user_id,
     action_type,
     quote_id,
     company_id,
     contact_id,
     metadata,
-    expires_at: expires_at_iso,
-    single_use,
+    expires_at: expiresAt,
   };
 
+  // Encode payload as base64
+  const payloadStr = JSON.stringify(payload);
+  const payloadB64 = Buffer.from(payloadStr).toString('base64url');
+
   // Generate HMAC signature
-  const payloadString = JSON.stringify(payload);
-  const hmac = crypto.createHmac('sha256', TOKEN_SECRET);
-  hmac.update(payloadString);
-  const signature = hmac.digest('hex');
+  const hmac = crypto.createHmac('sha256', getTokenSecret());
+  hmac.update(payloadB64);
+  const signature = hmac.digest('base64url');
 
-  // Combine payload and signature
-  const token = Buffer.from(`${payloadString}.${signature}`).toString('base64url');
-
-  // Store token hash in database
-  const token_hash = crypto.createHash('sha256').update(token).digest('hex');
-
-  const supabase = getSupabaseClient();
-  const { error } = await supabase.from('action_tokens').insert({
-    token_id,
-    token_hash,
-    user_id,
-    action_type,
-    quote_id,
-    company_id,
-    contact_id,
-    metadata: metadata || null,
-    expires_at: expires_at_iso,
-    single_use,
-  });
-
-  if (error) {
-    console.error('[actionTokens] Failed to store token:', error);
-    throw new Error('Failed to create action token');
-  }
-
+  // Return token as: payload.signature (same format as customer tokens)
   return {
-    token,
-    token_id,
-    expires_at: expires_at_iso,
+    token: `${payloadB64}.${signature}`,
+    expires_at: new Date(expiresAt).toISOString(),
   };
 }
 
 /**
  * Validate and decode an action token
- * Returns the payload if valid, null if invalid/expired/used
+ * Returns the payload if valid, null if invalid/expired
  */
-export async function validateActionToken(
-  token: string,
-  ip_address?: string
-): Promise<TokenPayload | null> {
+export function validateActionToken(token: string): TokenPayload | null {
   try {
-    // Decode token
-    const decoded = Buffer.from(token, 'base64url').toString('utf-8');
-    const [payloadString, signature] = decoded.split('.');
+    const [payloadB64, signature] = token.split('.');
 
-    if (!payloadString || !signature) {
+    if (!payloadB64 || !signature) {
       return null;
     }
 
-    // Verify signature
-    const hmac = crypto.createHmac('sha256', TOKEN_SECRET);
-    hmac.update(payloadString);
-    const expectedSignature = hmac.digest('hex');
+    // Verify HMAC signature
+    const hmac = crypto.createHmac('sha256', getTokenSecret());
+    hmac.update(payloadB64);
+    const expectedSignature = hmac.digest('base64url');
 
-    if (signature !== expectedSignature) {
-      console.error('[actionTokens] Invalid signature');
+    // Constant-time comparison to prevent timing attacks
+    if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
+      console.warn('[actionTokens] Invalid signature');
       return null;
     }
 
-    // Parse payload
-    const payload: TokenPayload = JSON.parse(payloadString);
+    // Decode payload
+    const payloadStr = Buffer.from(payloadB64, 'base64url').toString('utf-8');
+    const payload = JSON.parse(payloadStr) as TokenPayload;
 
     // Check expiration
-    if (new Date(payload.expires_at) < new Date()) {
-      console.error('[actionTokens] Token expired');
+    if (Date.now() > payload.expires_at) {
+      console.warn('[actionTokens] Token expired');
       return null;
-    }
-
-    // Check database record
-    const token_hash = crypto.createHash('sha256').update(token).digest('hex');
-    const supabase = getSupabaseClient();
-
-    const { data: tokenRecord, error } = await supabase
-      .from('action_tokens')
-      .select('*')
-      .eq('token_hash', token_hash)
-      .single();
-
-    if (error || !tokenRecord) {
-      console.error('[actionTokens] Token not found in database');
-      return null;
-    }
-
-    // Check if already used (for single-use tokens)
-    if (tokenRecord.single_use && tokenRecord.used_at) {
-      console.error('[actionTokens] Token already used');
-      return null;
-    }
-
-    // Mark as used if single-use
-    if (tokenRecord.single_use) {
-      await supabase
-        .from('action_tokens')
-        .update({
-          used_at: new Date().toISOString(),
-          ip_address: ip_address || null,
-        })
-        .eq('token_hash', token_hash);
-    } else {
-      // For multi-use tokens, just update IP address
-      await supabase
-        .from('action_tokens')
-        .update({
-          ip_address: ip_address || null,
-        })
-        .eq('token_hash', token_hash);
     }
 
     return payload;
   } catch (error) {
-    console.error('[actionTokens] Validation error:', error);
+    console.error('[actionTokens] Error verifying token:', error);
     return null;
   }
 }
@@ -214,24 +142,3 @@ export function getActionUrl(token: string, action_type: string): string {
   return `${baseUrl}${path}/${token}`;
 }
 
-/**
- * Revoke a token (mark as used)
- */
-export async function revokeActionToken(token: string): Promise<boolean> {
-  try {
-    const token_hash = crypto.createHash('sha256').update(token).digest('hex');
-    const supabase = getSupabaseClient();
-
-    const { error } = await supabase
-      .from('action_tokens')
-      .update({
-        used_at: new Date().toISOString(),
-      })
-      .eq('token_hash', token_hash);
-
-    return !error;
-  } catch (error) {
-    console.error('[actionTokens] Revoke error:', error);
-    return false;
-  }
-}

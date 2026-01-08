@@ -19,13 +19,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get client IP
-    const ip_address = request.headers.get('x-forwarded-for') ||
-                       request.headers.get('x-real-ip') ||
-                       'unknown';
-
-    // Validate token
-    const payload = await validateActionToken(token, ip_address);
+    // Validate token (stateless, no DB lookup)
+    const payload = validateActionToken(token);
 
     if (!payload) {
       return NextResponse.json(

@@ -71,25 +71,24 @@ export async function notifyQuoteViewed({
   if (!resend) return { success: false, error: 'Resend not configured' };
 
   try {
-    // Create action tokens
-    const [logCallToken, addNoteToken] = await Promise.all([
-      createActionToken({
-        user_id,
-        action_type: 'log_call',
-        quote_id,
-        company_id,
-        metadata: { company_name, contact_name },
-        expires_in_hours: 72,
-      }),
-      createActionToken({
-        user_id,
-        action_type: 'add_note',
-        quote_id,
-        company_id,
-        metadata: { company_name },
-        expires_in_hours: 72,
-      }),
-    ]);
+    // Create action tokens (stateless, no DB storage)
+    const logCallToken = createActionToken({
+      user_id,
+      action_type: 'log_call',
+      quote_id,
+      company_id,
+      metadata: { company_name, contact_name },
+      expires_in_hours: 72,
+    });
+
+    const addNoteToken = createActionToken({
+      user_id,
+      action_type: 'add_note',
+      quote_id,
+      company_id,
+      metadata: { company_name },
+      expires_in_hours: 72,
+    });
 
     const logCallUrl = getActionUrl(logCallToken.token, 'log_call');
     const addNoteUrl = getActionUrl(addNoteToken.token, 'add_note');
@@ -154,18 +153,6 @@ export async function notifyQuoteViewed({
       console.error('[salesNotifications] Quote viewed error:', error);
       return { success: false, error: error.message };
     }
-
-    // Log notification
-    const supabase = getSupabaseClient();
-    await supabase.from('notification_log').insert({
-      user_id,
-      notification_type: 'instant',
-      event_type: 'quote_viewed',
-      company_id,
-      quote_id,
-      email_subject: `${company_name} viewed their quote`,
-      email_sent_at: new Date().toISOString(),
-    });
 
     return { success: true };
   } catch (err: any) {
@@ -263,18 +250,6 @@ export async function notifyQuoteAccepted({
       return { success: false, error: error.message };
     }
 
-    // Log notification
-    const supabase = getSupabaseClient();
-    await supabase.from('notification_log').insert({
-      user_id,
-      notification_type: 'instant',
-      event_type: 'quote_accepted',
-      company_id,
-      quote_id,
-      email_subject: `${company_name} accepted quote`,
-      email_sent_at: new Date().toISOString(),
-    });
-
     return { success: true };
   } catch (err: any) {
     console.error('[salesNotifications] Error:', err);
@@ -363,18 +338,6 @@ export async function notifyInvoicePaid({
       console.error('[salesNotifications] Invoice paid error:', error);
       return { success: false, error: error.message };
     }
-
-    // Log notification
-    const supabase = getSupabaseClient();
-    await supabase.from('notification_log').insert({
-      user_id,
-      notification_type: 'instant',
-      event_type: 'invoice_paid',
-      company_id,
-      invoice_id,
-      email_subject: `Payment received from ${company_name}`,
-      email_sent_at: new Date().toISOString(),
-    });
 
     return { success: true };
   } catch (err: any) {
@@ -511,15 +474,6 @@ export async function sendDailyDigest({
       console.error('[salesNotifications] Daily digest error:', error);
       return { success: false, error: error.message };
     }
-
-    // Log notification
-    await supabase.from('notification_log').insert({
-      user_id,
-      notification_type: 'daily_digest',
-      event_type: 'daily_digest',
-      email_subject: 'Daily sales digest',
-      email_sent_at: new Date().toISOString(),
-    });
 
     return { success: true };
   } catch (err: any) {
