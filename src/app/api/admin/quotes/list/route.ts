@@ -82,22 +82,22 @@ export async function GET(request: NextRequest) {
     }
 
     // Filter by company account_owner if in "my_customers" mode
-    let filteredQuotes = quotes;
+    let ownerFilteredQuotes = quotes;
     if (viewMode === 'my_customers') {
-      filteredQuotes = quotes.filter((quote: any) =>
+      ownerFilteredQuotes = quotes.filter((quote: any) =>
         quote.companies?.account_owner === session.sales_rep_id
       );
     }
 
     // Fetch company names and account owners
-    const companyIds = [...new Set(filteredQuotes.map(q => q.company_id))];
+    const companyIds = [...new Set(ownerFilteredQuotes.map(q => q.company_id))];
     const { data: companies } = await supabase
       .from('companies')
       .select('company_id, company_name, account_owner')
       .in('company_id', companyIds);
 
     // Fetch contact names
-    const quoteIds = filteredQuotes.map(q => q.quote_id);
+    const quoteIds = ownerFilteredQuotes.map(q => q.quote_id);
     const { data: quoteItems } = await supabase
       .from('quote_items')
       .select('quote_id')
@@ -105,14 +105,14 @@ export async function GET(request: NextRequest) {
       .limit(1);
 
     // Get user names for created_by
-    const userIds = [...new Set(filteredQuotes.map(q => q.created_by))];
+    const userIds = [...new Set(ownerFilteredQuotes.map(q => q.created_by))];
     const { data: users } = await supabase
       .from('users')
       .select('user_id, full_name')
       .in('user_id', userIds);
 
     // Merge data
-    const enrichedQuotes = filteredQuotes.map(quote => {
+    const enrichedQuotes = ownerFilteredQuotes.map(quote => {
       const company = companies?.find(c => c.company_id === quote.company_id);
       const creator = users?.find(u => u.user_id === quote.created_by);
 
@@ -127,10 +127,10 @@ export async function GET(request: NextRequest) {
     });
 
     // Apply "need_followup" filter post-fetch (requires date calculations)
-    let filteredQuotes = enrichedQuotes;
+    let finalQuotes = enrichedQuotes;
     if (statusFilter === 'need_followup') {
       const now = new Date();
-      filteredQuotes = enrichedQuotes.filter(q => {
+      finalQuotes = enrichedQuotes.filter(q => {
         if (!q.sent_at || q.accepted_at) return false;
 
         const daysSinceSent = Math.floor((now.getTime() - new Date(q.sent_at).getTime()) / 86400000);
@@ -143,7 +143,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      quotes: filteredQuotes,
+      quotes: finalQuotes,
     });
   } catch (error) {
     console.error('[quotes/list] Unexpected error:', error);
