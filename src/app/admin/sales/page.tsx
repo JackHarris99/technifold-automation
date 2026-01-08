@@ -77,7 +77,7 @@ export default async function SalesCenterPage() {
 
     // Apply view mode filter
     if (viewMode === 'my_customers') {
-      query = query.eq('account_owner', currentUser.user_id);
+      query = query.eq('account_owner', currentUser.sales_rep_id);
     }
 
     const { data: batch, error } = await query;
