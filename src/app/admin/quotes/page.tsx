@@ -132,20 +132,11 @@ export default function QuotesPage() {
   return (
     <div className="p-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Quotes</h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Track and manage all customer quotes
-          </p>
-        </div>
-
-        <Link
-          href="/admin/quote-builder"
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-        >
-          + Create New Quote
-        </Link>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Quotes</h1>
+        <p className="text-sm text-gray-600 mt-1">
+          Track and manage all customer quotes
+        </p>
       </div>
 
       {/* Stats Cards */}
@@ -173,26 +164,26 @@ export default function QuotesPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
-        <div className="flex items-center gap-4">
-          <div>
-            <label className="text-sm font-medium text-gray-700 mr-2">View:</label>
+      <div className="bg-white rounded-lg border-2 border-blue-200 p-5 mb-6 shadow-sm">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-bold text-gray-800">View:</label>
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value as any)}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              className="px-4 py-2 border-2 border-gray-300 rounded-lg text-sm font-semibold bg-white hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
             >
-              <option value="all">🌍 All Quotes</option>
-              <option value="my_customers">👤 My Customers</option>
+              <option value="all">🌍 All Quotes (Team View)</option>
+              <option value="my_customers">👤 My Customers Only</option>
             </select>
           </div>
 
-          <div>
-            <label className="text-sm font-medium text-gray-700 mr-2">Status:</label>
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-bold text-gray-800">Status:</label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              className="px-4 py-2 border-2 border-gray-300 rounded-lg text-sm font-semibold bg-white hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
             >
               <option value="all">All Statuses</option>
               <option value="sent">Sent</option>
