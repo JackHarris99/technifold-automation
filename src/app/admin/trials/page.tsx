@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { getViewMode } from '@/lib/viewMode';
 
 interface TrialIntent {
   id: string;
@@ -31,7 +32,11 @@ export default function TrialsAdminPage() {
   async function loadTrials() {
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/trials/list');
+      const viewMode = getViewMode();
+      const params = new URLSearchParams();
+      if (viewMode === 'my_customers') params.set('viewMode', 'my_customers');
+
+      const response = await fetch(`/api/admin/trials/list?${params}`);
       const data = await response.json();
 
       if (!response.ok) {

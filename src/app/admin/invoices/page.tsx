@@ -7,6 +7,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { getCurrentUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 
 interface Invoice {
   invoice_id: string;
@@ -26,12 +27,16 @@ export default async function InvoicesPage() {
     redirect('/login');
   }
 
-  const supabase = getSupabaseClient();
-  const isDirector = currentUser.role === 'director';
+  // Get view mode from cookies
+  const cookieStore = await cookies();
+  const viewModeCookie = cookieStore.get('view_mode');
+  const viewMode = viewModeCookie?.value === 'my_customers' ? 'my_customers' : 'all';
 
-  // Get company IDs for territory filtering
+  const supabase = getSupabaseClient();
+
+  // Get company IDs for filtering
   let companyIds: string[] = [];
-  if (!isDirector && currentUser.sales_rep_id) {
+  if (viewMode === 'my_customers' && currentUser.sales_rep_id) {
     const { data: companies } = await supabase
       .from('companies')
       .select('company_id')
@@ -54,11 +59,11 @@ export default async function InvoicesPage() {
     .order('invoice_date', { ascending: false })
     .limit(100);
 
-  // Territory filter for non-directors
-  if (!isDirector && companyIds.length > 0) {
+  // Apply "My Customers" filter
+  if (viewMode === 'my_customers' && companyIds.length > 0) {
     invoicesQuery = invoicesQuery.in('company_id', companyIds);
-  } else if (!isDirector && companyIds.length === 0) {
-    // Non-director with no companies - show nothing
+  } else if (viewMode === 'my_customers' && companyIds.length === 0) {
+    // My customers mode with no companies - show nothing
     invoicesQuery = invoicesQuery.eq('company_id', 'none');
   }
 
@@ -94,7 +99,7 @@ export default async function InvoicesPage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Invoices</h1>
               <p className="text-sm text-gray-600 mt-1">
-                {isDirector ? 'All Territories' : 'My Territory'}
+                {viewMode === 'my_customers' ? 'My Customers Only' : 'All Companies (Team View)'}
               </p>
             </div>
           </div>

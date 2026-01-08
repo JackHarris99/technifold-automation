@@ -3,11 +3,30 @@
  * Fetch all subscriptions and anomalies
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { cookies } from 'next/headers';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get('session');
+
+    if (!sessionCookie) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Parse session to get user info
+    let session;
+    try {
+      session = JSON.parse(sessionCookie.value);
+    } catch {
+      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const viewMode = searchParams.get('viewMode'); // 'my_customers' or null (all)
+
     const supabase = getSupabaseClient();
 
     // Load subscriptions
@@ -35,10 +54,32 @@ export async function GET() {
       // Don't fail if view doesn't exist
     }
 
+    // Filter by account ownership if needed
+    let filteredSubscriptions = subscriptions || [];
+    let filteredAnomalies = anomalies || [];
+
+    if (viewMode === 'my_customers') {
+      // Get company IDs owned by this user
+      const { data: companies } = await supabase
+        .from('companies')
+        .select('company_id')
+        .eq('account_owner', session.sales_rep_id);
+
+      const myCompanyIds = new Set(companies?.map(c => c.company_id) || []);
+
+      filteredSubscriptions = filteredSubscriptions.filter(sub =>
+        myCompanyIds.has(sub.company_id)
+      );
+
+      filteredAnomalies = filteredAnomalies.filter(anomaly =>
+        myCompanyIds.has(anomaly.company_id)
+      );
+    }
+
     return NextResponse.json({
       success: true,
-      subscriptions: subscriptions || [],
-      anomalies: anomalies || [],
+      subscriptions: filteredSubscriptions,
+      anomalies: filteredAnomalies,
     });
   } catch (error) {
     console.error('[subscriptions/list] Error:', error);

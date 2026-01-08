@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { getViewMode } from '@/lib/viewMode';
 
 interface Subscription {
   subscription_id: string;
@@ -55,7 +56,11 @@ export default function SubscriptionsAdminPage() {
   async function loadSubscriptions() {
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/subscriptions/list');
+      const viewMode = getViewMode();
+      const params = new URLSearchParams();
+      if (viewMode === 'my_customers') params.set('viewMode', 'my_customers');
+
+      const response = await fetch(`/api/admin/subscriptions/list?${params}`);
       const data = await response.json();
 
       if (!response.ok) {

@@ -7,6 +7,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { getCurrentUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 
 export default async function CompaniesPage() {
   const user = await getCurrentUser();
@@ -15,20 +16,32 @@ export default async function CompaniesPage() {
     redirect('/login');
   }
 
+  // Get view mode from cookies
+  const cookieStore = await cookies();
+  const viewModeCookie = cookieStore.get('view_mode');
+  const viewMode = viewModeCookie?.value === 'my_customers' ? 'my_customers' : 'all';
+
   const supabase = getSupabaseClient();
 
-  // Fetch ALL companies (bypass 1000 row limit with batching)
+  // Fetch companies (bypass 1000 row limit with batching)
   let allCompanies: any[] = [];
   let start = 0;
   const batchSize = 1000;
   let hasMore = true;
 
   while (hasMore) {
-    const { data: batch, error } = await supabase
+    let query = supabase
       .from('companies')
       .select('company_id, company_name, account_owner, category, country, last_invoice_at')
       .order('company_name')
       .range(start, start + batchSize - 1);
+
+    // Apply "My Customers" filter
+    if (viewMode === 'my_customers') {
+      query = query.eq('account_owner', user.sales_rep_id);
+    }
+
+    const { data: batch, error } = await query;
 
     if (error) {
       console.error('[Companies] Query error:', error);
@@ -52,7 +65,7 @@ export default async function CompaniesPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">All Companies</h1>
         <p className="text-gray-600 mt-2">
-          {totalCompanies} companies • All reps can view and manage
+          {totalCompanies} companies • {viewMode === 'my_customers' ? 'My Customers Only' : 'All Companies (Team View)'}
         </p>
       </div>
 
