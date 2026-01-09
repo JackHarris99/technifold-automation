@@ -10,20 +10,20 @@ import { cookies } from 'next/headers';
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session');
+    const userCookie = cookieStore.get('current_user');
 
-    if (!sessionCookie) {
-      console.error('[quotes/list] No session cookie found');
-      return NextResponse.json({ error: 'Unauthorized - No session cookie' }, { status: 401 });
+    if (!userCookie) {
+      console.error('[quotes/list] No current_user cookie found');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Parse session to get user info
+    // Parse user to get info
     let session;
     try {
-      session = JSON.parse(sessionCookie.value);
-      console.log('[quotes/list] Session parsed successfully for user:', session.user_id || session.sales_rep_id);
+      session = JSON.parse(userCookie.value);
+      console.log('[quotes/list] User authenticated:', session.sales_rep_id);
     } catch (e) {
-      console.error('[quotes/list] Failed to parse session cookie:', e);
+      console.error('[quotes/list] Failed to parse current_user cookie:', e);
       return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
     }
 

@@ -15,16 +15,16 @@ export async function GET(
     const { quote_id } = await params;
 
     const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session');
+    const userCookie = cookieStore.get('current_user');
 
-    if (!sessionCookie) {
+    if (!userCookie) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Parse session to get user info
+    // Parse user to get info
     let session;
     try {
-      session = JSON.parse(sessionCookie.value);
+      session = JSON.parse(userCookie.value);
     } catch {
       return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
     }
