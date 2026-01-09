@@ -86,7 +86,6 @@ export default function ConsumablesQuoteBuilderPage() {
 
   const [standardTiers, setStandardTiers] = useState<PricingTier[]>([]);
   const [premiumTiers, setPremiumTiers] = useState<PricingTier[]>([]);
-  const [pricingMode, setPricingMode] = useState<'standard' | 'premium'>('standard');
 
   const [quoteUrl, setQuoteUrl] = useState('');
   const [generating, setGenerating] = useState(false);
@@ -356,7 +355,6 @@ export default function ConsumablesQuoteBuilderPage() {
           company_id: selectedCompany.company_id,
           contact_id: selectedContact.contact_id,
           line_items: lineItems,
-          pricing_mode: quoteType === 'interactive' ? pricingMode : null,
           quote_type: quoteType, // 'static' or 'interactive'
           is_test: isTestToken, // Test tokens bypass address collection
         }),
@@ -414,9 +412,6 @@ export default function ConsumablesQuoteBuilderPage() {
 
   const { subtotal, totalDiscount, total } = calculateTotals();
   const consumableQty = lineItems.reduce((sum, li) => sum + li.quantity, 0);
-  const nextTier = pricingMode === 'standard'
-    ? standardTiers.find(t => consumableQty < t.min_quantity)
-    : premiumTiers.find(t => consumableQty < t.min_quantity);
 
   return (
     <div className={`${inter.className} min-h-screen bg-[#fafafa]`}>
@@ -608,52 +603,6 @@ export default function ConsumablesQuoteBuilderPage() {
                   </div>
                 </div>
 
-                {/* Pricing Mode Toggle (only for interactive quotes) */}
-                {quoteType === 'interactive' && (
-                  <div className="mb-4">
-                    <div className="text-[13px] text-white/70 font-[500] mb-2">Pricing Tier</div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setPricingMode('standard')}
-                        className={`flex-1 px-3 py-2 rounded-[10px] text-[13px] font-[600] transition-colors ${
-                          pricingMode === 'standard'
-                            ? 'bg-white text-[#0a0a0a]'
-                            : 'bg-white/10 text-white/70 hover:bg-white/20'
-                        }`}
-                      >
-                        Standard
-                      </button>
-                      <button
-                        onClick={() => setPricingMode('premium')}
-                        className={`flex-1 px-3 py-2 rounded-[10px] text-[13px] font-[600] transition-colors ${
-                          pricingMode === 'premium'
-                            ? 'bg-white text-[#0a0a0a]'
-                            : 'bg-white/10 text-white/70 hover:bg-white/20'
-                        }`}
-                      >
-                        Premium
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Tier Progress (only for interactive quotes) */}
-                {quoteType === 'interactive' && nextTier && consumableQty > 0 && (
-                  <div className="mt-4 p-3 bg-white/10 rounded-[14px]">
-                    <div className="text-[13px] font-[500] mb-2">Next Tier Unlock</div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="flex-1 h-2 bg-white/20 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-green-400 transition-all duration-300"
-                          style={{ width: `${Math.min(100, (consumableQty / nextTier.min_quantity) * 100)}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                    <div className="text-[12px] text-white/70">
-                      {nextTier.min_quantity - consumableQty} more for {nextTier.tier_name}
-                    </div>
-                  </div>
-                )}
 
                 <div className="flex items-center gap-2 mb-4">
                   <input
