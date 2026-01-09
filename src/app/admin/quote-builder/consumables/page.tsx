@@ -38,6 +38,7 @@ interface Product {
   category?: string;
   image_url?: string;
   type: string;
+  pricing_tier?: string | null;
 }
 
 interface QuoteLineItem {
@@ -49,6 +50,7 @@ interface QuoteLineItem {
   product_type: 'consumable';
   category?: string;
   image_url?: string;
+  pricing_tier?: string | null;
 }
 
 interface PricingTier {
@@ -260,6 +262,7 @@ export default function ConsumablesQuoteBuilderPage() {
       product_type: 'consumable',
       category: product.category,
       image_url: product.image_url,
+      pricing_tier: product.pricing_tier,
     };
 
     setLineItems([...lineItems, newItem]);
@@ -292,24 +295,43 @@ export default function ConsumablesQuoteBuilderPage() {
     // Only include items with quantity > 0 in total calculation
     const itemsWithQty = lineItems.filter(li => li.quantity > 0);
 
-    if (pricingMode === 'standard') {
-      const totalQty = itemsWithQty.reduce((sum, li) => sum + li.quantity, 0);
+    // Separate items by their pricing_tier (per-product rule)
+    const standardItems = itemsWithQty.filter(li => li.pricing_tier === 'standard');
+    const premiumItems = itemsWithQty.filter(li => li.pricing_tier === 'premium');
+    const otherItems = itemsWithQty.filter(li => !li.pricing_tier || (li.pricing_tier !== 'standard' && li.pricing_tier !== 'premium'));
+
+    // STANDARD tier: Total quantity across all standard items determines unit price
+    if (standardItems.length > 0) {
+      const totalQty = standardItems.reduce((sum, li) => sum + li.quantity, 0);
       const tier = [...standardTiers].reverse().find(t => totalQty >= t.min_quantity);
 
-      itemsWithQty.forEach(li => {
+      standardItems.forEach(li => {
         const tierPrice = tier?.unit_price || li.unit_price;
         const itemSubtotal = tierPrice * li.quantity;
         const itemDiscount = (itemSubtotal * li.discount_percent) / 100;
         subtotal += itemSubtotal;
         totalDiscount += itemDiscount;
       });
-    } else {
-      itemsWithQty.forEach(li => {
+    }
+
+    // PREMIUM tier: Per-SKU quantity determines discount percentage
+    if (premiumItems.length > 0) {
+      premiumItems.forEach(li => {
         const tier = [...premiumTiers].reverse().find(t => li.quantity >= t.min_quantity);
         const tierDiscount = tier?.discount_percent || 0;
         const combinedDiscount = Math.min(100, tierDiscount + li.discount_percent);
         const itemSubtotal = li.unit_price * li.quantity;
         const itemDiscount = (itemSubtotal * combinedDiscount) / 100;
+        subtotal += itemSubtotal;
+        totalDiscount += itemDiscount;
+      });
+    }
+
+    // OTHER products: No tiered pricing, use base price only
+    if (otherItems.length > 0) {
+      otherItems.forEach(li => {
+        const itemSubtotal = li.unit_price * li.quantity;
+        const itemDiscount = (itemSubtotal * li.discount_percent) / 100;
         subtotal += itemSubtotal;
         totalDiscount += itemDiscount;
       });

@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   // Build query with optional type filter
   let dbQuery = supabase
     .from('products')
-    .select('product_code, description, price, currency, type, category, image_url')
+    .select('product_code, description, price, currency, type, category, image_url, pricing_tier')
     .or(`product_code.ilike.*${query}*,description.ilike.*${query}*`)
     .eq('active', true);
 

@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
   // Build query
   let query = supabase
     .from('products')
-    .select('product_code, description, price, currency, type, category, image_url', { count: 'exact' });
+    .select('product_code, description, price, currency, type, category, image_url, pricing_tier', { count: 'exact' });
 
   // Apply filters
   if (activeOnly) {
