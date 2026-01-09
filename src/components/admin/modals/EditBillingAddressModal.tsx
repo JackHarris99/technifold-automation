@@ -183,6 +183,7 @@ export default function EditBillingAddressModal({
               >
                 <option value="GB">United Kingdom</option>
                 <option value="IE">Ireland</option>
+                <option value="IS">Iceland</option>
                 <option value="FR">France</option>
                 <option value="DE">Germany</option>
                 <option value="ES">Spain</option>
