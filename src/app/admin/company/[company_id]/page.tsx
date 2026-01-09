@@ -4,7 +4,8 @@
  */
 
 import { getSupabaseClient } from '@/lib/supabase';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
+import { getCurrentUser } from '@/lib/auth';
 import CompanyDetailView from '@/components/admin/CompanyDetailView';
 
 interface CompanyPageProps {
@@ -15,6 +16,12 @@ interface CompanyPageProps {
 
 export default async function CompanyPage({ params }: CompanyPageProps) {
   const { company_id } = await params;
+  const user = await getCurrentUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
   const supabase = getSupabaseClient();
 
   // Fetch all data in parallel
@@ -169,6 +176,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
       subscriptions={subscriptionsResult.data || []}
       shippingAddresses={shippingAddressesResult.data || []}
       quotes={quotesResult.data || []}
+      currentUser={user}
     />
   );
 }

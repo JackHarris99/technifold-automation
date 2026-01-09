@@ -12,6 +12,7 @@ import AddToolModal from './modals/AddToolModal';
 import AddSubscriptionToolModal from './modals/AddSubscriptionToolModal';
 import ManageAddressModal from './modals/ManageAddressModal';
 import EditBillingAddressModal from './modals/EditBillingAddressModal';
+import CompanyStatusControl from './CompanyStatusControl';
 
 interface CompanyDetailViewProps {
   company: any;
@@ -25,6 +26,7 @@ interface CompanyDetailViewProps {
   subscriptions: any[];
   shippingAddresses: any[];
   quotes: any[];
+  currentUser: any;
 }
 
 export default function CompanyDetailView({
@@ -39,6 +41,7 @@ export default function CompanyDetailView({
   subscriptions,
   shippingAddresses,
   quotes,
+  currentUser,
 }: CompanyDetailViewProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const [showAddContactModal, setShowAddContactModal] = useState(false);
@@ -72,6 +75,13 @@ export default function CompanyDetailView({
               </Link>
               <h1 className="text-3xl font-bold text-gray-900">{company.company_name}</h1>
               <p className="text-gray-500 mt-1">{company.company_id}</p>
+              <CompanyStatusControl
+                companyId={company.company_id}
+                companyName={company.company_name}
+                currentStatus={company.status}
+                accountOwner={company.account_owner}
+                currentUserSalesRepId={currentUser.sales_rep_id}
+              />
             </div>
             <div className="flex gap-3 flex-wrap">
               <Link
