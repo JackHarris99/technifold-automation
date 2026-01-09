@@ -290,6 +290,7 @@ export default function PortalAddressCollectionModal({
                     <option value="AT">Austria</option>
                     <option value="PL">Poland</option>
                     <option value="SE">Sweden</option>
+                    <option value="SK">Slovakia</option>
                     <option value="DK">Denmark</option>
                     <option value="FI">Finland</option>
                     <option value="US">United States</option>
@@ -455,6 +456,7 @@ export default function PortalAddressCollectionModal({
                       <option value="AT">Austria</option>
                       <option value="PL">Poland</option>
                       <option value="SE">Sweden</option>
+                      <option value="SK">Slovakia</option>
                       <option value="DK">Denmark</option>
                       <option value="FI">Finland</option>
                       <option value="US">United States</option>

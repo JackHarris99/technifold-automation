@@ -266,6 +266,7 @@ export default function ManageAddressModal({
                 <option value="NL">Netherlands</option>
                 <option value="BE">Belgium</option>
                 <option value="PL">Poland</option>
+                <option value="SK">Slovakia</option>
               </select>
             </div>
           </div>
