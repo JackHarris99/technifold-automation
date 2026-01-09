@@ -96,10 +96,14 @@ export async function POST(request: NextRequest) {
     console.log('[companies/create] Assignment counts:', repCounts);
     console.log('[companies/create] Assigned to:', assignedRep);
 
-    // 6. Create company with assigned rep
+    // 6. Generate unique company_id (MAN prefix for manually created)
+    const companyId = `MAN${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
+
+    // 7. Create company with assigned rep
     const { data: newCompany, error: createError } = await supabase
       .from('companies')
       .insert({
+        company_id: companyId,
         company_name,
         website: website || null,
         country: country || null,
@@ -127,7 +131,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 7. Get assigned rep name for response
+    // 8. Get assigned rep name for response
     const assignedRepData = salesReps.find(r => r.sales_rep_id === assignedRep);
 
     return NextResponse.json({
