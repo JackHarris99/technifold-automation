@@ -99,6 +99,9 @@ export default async function SalesCenterPage() {
   const companies = allCompanies;
   const companyMap = new Map(companies?.map(c => [c.company_id, c.company_name]) || []);
 
+  // Extract company IDs for filtering data queries
+  const companyIds = companies.map(c => c.company_id);
+
   // Build metrics
   let salesMetrics: SalesMetrics = {
     total_revenue: 0,
@@ -129,50 +132,56 @@ export default async function SalesCenterPage() {
       endingTrialsResult,
       lastContactsResult,
     ] = await Promise.all([
-      // Revenue from paid invoices (last 30 days) - ALL companies
+      // Revenue from paid invoices (last 30 days) - filtered by company
       supabase
         .from('invoices')
         .select('total_amount')
+        .in('company_id', companyIds)
         .eq('payment_status', 'paid')
         .gte('invoice_date', thirtyDaysAgo),
 
-      // Unpaid invoices with details - ALL companies
+      // Unpaid invoices with details - filtered by company
       supabase
         .from('invoices')
         .select('invoice_id, company_id, total_amount, invoice_date, invoice_url')
+        .in('company_id', companyIds)
         .eq('payment_status', 'unpaid')
         .order('invoice_date', { ascending: true })
         .limit(10),
 
-      // Active trials count - ALL companies
+      // Active trials count - filtered by company
       supabase
         .from('subscriptions')
         .select('*', { count: 'exact', head: true })
+        .in('company_id', companyIds)
         .eq('status', 'trial'),
 
-      // Reorder opportunities (90+ days since last order) - ALL companies
+      // Reorder opportunities (90+ days since last order) - filtered by company
       supabase
         .from('companies')
         .select('company_id, company_name, last_invoice_at')
+        .in('company_id', companyIds)
         .not('last_invoice_at', 'is', null)
         .lt('last_invoice_at', ninetyDaysAgo)
         .order('last_invoice_at', { ascending: true })
         .limit(10),
 
-      // Trials ending soon (within 7 days) - ALL companies
+      // Trials ending soon (within 7 days) - filtered by company
       supabase
         .from('subscriptions')
         .select('subscription_id, company_id, trial_end_date')
+        .in('company_id', companyIds)
         .eq('status', 'trial')
         .lt('trial_end_date', sevenDaysFromNow)
         .gt('trial_end_date', new Date().toISOString())
         .order('trial_end_date', { ascending: true })
         .limit(10),
 
-      // Last manual contact for each company (ALL companies)
+      // Last manual contact for each company - filtered by company
       supabase
         .from('engagement_events')
         .select('company_id, occurred_at, event_name')
+        .in('company_id', companyIds)
         .ilike('event_name', 'manual_contact%')
         .order('occurred_at', { ascending: false })
         .limit(1000), // Limit to most recent 1000 contact events
