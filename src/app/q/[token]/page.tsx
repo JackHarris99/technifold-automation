@@ -74,10 +74,10 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
     notFound();
   }
 
-  // 4. Fetch company
+  // 4. Fetch company with billing address and VAT
   const { data: company, error: companyError } = await supabase
     .from('companies')
-    .select('company_id, company_name')
+    .select('company_id, company_name, billing_address_line_1, billing_address_line_2, billing_city, billing_state_province, billing_postal_code, billing_country, vat_number')
     .eq('company_id', company_id)
     .single();
 
@@ -85,6 +85,14 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
     console.error('[Quote] Company not found:', company_id);
     notFound();
   }
+
+  // 4b. Fetch default shipping address
+  const { data: shippingAddress } = await supabase
+    .from('shipping_addresses')
+    .select('address_id, address_line_1, address_line_2, city, state_province, postal_code, country, is_default')
+    .eq('company_id', company_id)
+    .eq('is_default', true)
+    .single();
 
   // 5. Fetch contact
   let contact = null;
@@ -141,6 +149,7 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
     contact,
     token,
     isTest: is_test || false,
+    shippingAddress: shippingAddress || null,
   };
 
   // Load StaticQuotePortal for static quotes, InteractiveQuotePortal for interactive

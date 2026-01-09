@@ -9,6 +9,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { InvoiceRequestModal } from '../InvoiceRequestModal';
+import AddressCollectionModal from '../portals/AddressCollectionModal';
 
 interface LineItem {
   product_code: string;
@@ -35,6 +36,13 @@ interface StaticQuotePortalProps {
   company: {
     company_id: string;
     company_name: string;
+    billing_address_line_1?: string;
+    billing_address_line_2?: string;
+    billing_city?: string;
+    billing_state_province?: string;
+    billing_postal_code?: string;
+    billing_country?: string;
+    vat_number?: string;
   };
   contact: {
     contact_id: string;
@@ -43,13 +51,24 @@ interface StaticQuotePortalProps {
   } | null;
   token: string;
   isTest: boolean;
+  shippingAddress?: {
+    address_id: string;
+    address_line_1: string;
+    address_line_2?: string;
+    city: string;
+    state_province?: string;
+    postal_code: string;
+    country: string;
+    is_default: boolean;
+  } | null;
 }
 
-export function StaticQuotePortal({ quote, lineItems, company, contact, token, isTest }: StaticQuotePortalProps) {
+export function StaticQuotePortal({ quote, lineItems, company, contact, token, isTest, shippingAddress }: StaticQuotePortalProps) {
   const [cart, setCart] = useState<any[]>([]);
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [pricingPreview, setPricingPreview] = useState<PricingPreview | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
+  const [showAddressModal, setShowAddressModal] = useState(false);
 
   // Pre-populate cart with quote items on mount
   useEffect(() => {
@@ -295,6 +314,79 @@ export function StaticQuotePortal({ quote, lineItems, company, contact, token, i
                 })()}
               </div>
 
+              {/* Address Details Section */}
+              <div className="mb-6 pb-6 border-t border-gray-200 pt-6">
+                <h3 className="text-[16px] font-[700] text-[#0a0a0a] mb-4">Delivery & Billing Details</h3>
+
+                {/* Billing Address */}
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[13px] font-[600] text-[#666]">Billing Address</span>
+                    <button
+                      onClick={() => setShowAddressModal(true)}
+                      className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  {company.billing_address_line_1 ? (
+                    <div className="text-[13px] text-[#0a0a0a] leading-relaxed">
+                      <div>{company.billing_address_line_1}</div>
+                      {company.billing_address_line_2 && <div>{company.billing_address_line_2}</div>}
+                      <div>{company.billing_city}{company.billing_state_province ? `, ${company.billing_state_province}` : ''}</div>
+                      <div>{company.billing_postal_code}</div>
+                      <div>{company.billing_country}</div>
+                    </div>
+                  ) : (
+                    <div className="text-[13px] text-red-600 italic">
+                      No billing address - <button onClick={() => setShowAddressModal(true)} className="underline font-[600]">Add now</button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Shipping Address */}
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[13px] font-[600] text-[#666]">Shipping Address</span>
+                    <button
+                      onClick={() => setShowAddressModal(true)}
+                      className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  {shippingAddress ? (
+                    <div className="text-[13px] text-[#0a0a0a] leading-relaxed">
+                      <div>{shippingAddress.address_line_1}</div>
+                      {shippingAddress.address_line_2 && <div>{shippingAddress.address_line_2}</div>}
+                      <div>{shippingAddress.city}{shippingAddress.state_province ? `, ${shippingAddress.state_province}` : ''}</div>
+                      <div>{shippingAddress.postal_code}</div>
+                      <div>{shippingAddress.country}</div>
+                    </div>
+                  ) : (
+                    <div className="text-[13px] text-red-600 italic">
+                      No shipping address - <button onClick={() => setShowAddressModal(true)} className="underline font-[600]">Add now</button>
+                    </div>
+                  )}
+                </div>
+
+                {/* VAT Number */}
+                {company.vat_number && (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[13px] font-[600] text-[#666]">VAT Number</span>
+                      <button
+                        onClick={() => setShowAddressModal(true)}
+                        className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                    <div className="text-[13px] text-[#0a0a0a]">{company.vat_number}</div>
+                  </div>
+                )}
+              </div>
+
               <button
                 onClick={() => setIsInvoiceModalOpen(true)}
                 disabled={cart.length === 0 || loadingPreview}
@@ -324,6 +416,19 @@ export function StaticQuotePortal({ quote, lineItems, company, contact, token, i
         token={token}
         pricingPreview={pricingPreview}
         quoteType="static"
+      />
+
+      {/* Address Collection/Edit Modal */}
+      <AddressCollectionModal
+        isOpen={showAddressModal}
+        onClose={() => setShowAddressModal(false)}
+        companyId={company.company_id}
+        companyName={company.company_name}
+        onSuccess={() => {
+          setShowAddressModal(false);
+          // Refresh the page to show updated addresses
+          window.location.reload();
+        }}
       />
     </div>
   );
