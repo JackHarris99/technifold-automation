@@ -31,7 +31,8 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('companies')
-      .select('company_id, company_name')
+      .select('company_id, company_name, account_owner')
+      .neq('status', 'dead')  // Hide dead customers from dropdowns
       .order('company_name')
       .limit(1000);
 

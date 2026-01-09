@@ -73,6 +73,7 @@ export default async function SalesCenterPage() {
     let query = supabase
       .from('companies')
       .select('company_id, company_name, account_owner')
+      .neq('status', 'dead')  // Exclude dead customers from sales metrics
       .range(start, start + batchSize - 1);
 
     // Apply view mode filter

@@ -27,11 +27,13 @@ export async function GET(request: NextRequest) {
     console.log('[companies/search] Supabase client obtained');
 
     // All users can see all companies (no territory filter on search)
+    // But exclude dead customers from search results
     console.log('[companies/search] Running query...');
     const { data, error } = await supabase
       .from('companies')
-      .select('company_id, company_name, account_owner')
+      .select('company_id, company_name, account_owner, status')
       .ilike('company_name', `%${q}%`)
+      .neq('status', 'dead')  // Hide dead customers from search
       .order('company_name')
       .limit(20);
 
