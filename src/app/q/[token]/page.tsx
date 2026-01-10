@@ -110,7 +110,39 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
     }
   }
 
-  // 6. Update quote viewed_at timestamp on first view
+  // 6. Check if quote has already been accepted
+  if (quote.accepted_at && quote.invoice_id) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md px-4">
+          <div className="mb-6">
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-4xl">✅</span>
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Quote Already Accepted</h1>
+            <p className="text-gray-600 mb-2">
+              This quote was accepted on {new Date(quote.accepted_at).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              })}.
+            </p>
+            <p className="text-gray-600 mb-8">
+              Your invoice has been sent. If you need assistance or have questions, please contact us.
+            </p>
+          </div>
+          <a
+            href="/contact"
+            className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+          >
+            Contact Us
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  // 7. Update quote viewed_at timestamp on first view
   if (!quote.viewed_at) {
     await supabase
       .from('quotes')

@@ -819,6 +819,45 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   if (newInvoice) {
     console.log('[stripe-webhook] New invoice table updated (fact tables auto-updated via trigger):', newInvoice.invoice_id);
 
+    // AUTO-WON: Mark related quote as won when invoice is paid
+    const { data: relatedQuote } = await supabase
+      .from('quotes')
+      .select('quote_id, won_at, total_amount')
+      .eq('invoice_id', newInvoice.invoice_id)
+      .is('won_at', null) // Not already marked won
+      .single();
+
+    if (relatedQuote) {
+      const { error: wonError } = await supabase
+        .from('quotes')
+        .update({
+          won_at: new Date().toISOString(),
+          status: 'won',
+        })
+        .eq('quote_id', relatedQuote.quote_id);
+
+      if (wonError) {
+        console.error('[stripe-webhook] Failed to mark quote as won:', wonError);
+      } else {
+        console.log(`[stripe-webhook] Quote ${relatedQuote.quote_id} automatically marked as WON (payment received)`);
+
+        // Log activity for audit trail
+        await supabase.from('activity_log').insert({
+          action_type: 'quote_auto_won',
+          entity_type: 'quote',
+          entity_id: relatedQuote.quote_id,
+          description: `Quote automatically marked as won (Stripe invoice ${invoice.id} paid)`,
+          metadata: {
+            quote_id: relatedQuote.quote_id,
+            invoice_id: newInvoice.invoice_id,
+            stripe_invoice_id: invoice.id,
+            amount_paid: newInvoice.total_amount,
+            auto_marked: true,
+          },
+        });
+      }
+    }
+
     // Notify sales rep that invoice was paid
     const { data: company } = await supabase
       .from('companies')

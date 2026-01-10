@@ -19,6 +19,8 @@ function getTokenSecret(): string {
 export interface TokenPayload {
   company_id: string;
   contact_id?: string;
+  quote_id?: string; // For quote links - links to specific quote object
+  object_type?: 'quote' | 'reorder' | 'offer' | 'trial' | 'unsubscribe'; // Distinguishes link types
   offer_key?: string;
   campaign_key?: string;
   products?: string[]; // Product codes to include in quote
@@ -28,6 +30,7 @@ export interface TokenPayload {
   company_name?: string; // For trial links
   contact_name?: string; // For trial links
   isTest?: boolean; // For test tokens that bypass address collection
+  is_test?: boolean; // Legacy field for backward compatibility
   expires_at: number; // Unix timestamp
 }
 
@@ -133,6 +136,7 @@ export function generateReorderUrl(
   const token = generateToken({
     company_id: companyId,
     contact_id: contactId,
+    object_type: 'reorder', // Marks this as a reorder portal link (not quote)
     isTest: options.isTest,
   }, options.ttlHours || 720); // 30 days default for reorder links
 

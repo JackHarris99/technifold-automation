@@ -105,6 +105,7 @@ export async function POST(request: NextRequest) {
       quote_id: quote.quote_id,
       company_id,
       contact_id,
+      object_type: 'quote', // Marks this as a quote link (not reorder)
       is_test: is_test || false,
     }, 720); // 30 days
 

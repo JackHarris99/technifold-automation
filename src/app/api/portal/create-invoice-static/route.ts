@@ -91,6 +91,40 @@ export async function POST(request: NextRequest) {
 
     const company_id = payload.company_id;
 
+    // IDEMPOTENCY CHECK: If this is a quote request, check if invoice already exists
+    if (payload.quote_id && payload.object_type === 'quote') {
+      console.log(`[create-invoice-static] Checking idempotency for quote ${payload.quote_id}`);
+
+      const supabase = getSupabaseClient();
+      const { data: existingQuote } = await supabase
+        .from('quotes')
+        .select('quote_id, invoice_id, accepted_at, status')
+        .eq('quote_id', payload.quote_id)
+        .single();
+
+      if (existingQuote?.invoice_id) {
+        // Invoice already exists - return it instead of creating duplicate
+        const { data: existingInvoice } = await supabase
+          .from('invoices')
+          .select('invoice_id, stripe_invoice_id, invoice_url, invoice_pdf_url, total_amount')
+          .eq('invoice_id', existingQuote.invoice_id)
+          .single();
+
+        if (existingInvoice) {
+          console.log(`[create-invoice-static] Quote ${payload.quote_id} already has invoice ${existingInvoice.invoice_id} - returning existing`);
+          return NextResponse.json({
+            success: true,
+            invoice_id: existingInvoice.stripe_invoice_id,
+            db_invoice_id: existingInvoice.invoice_id,
+            invoice_url: existingInvoice.invoice_url,
+            invoice_pdf_url: existingInvoice.invoice_pdf_url,
+            message: 'Invoice already exists for this quote',
+            idempotent: true,
+          });
+        }
+      }
+    }
+
     // Validate input
     if (!contact_id || !items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
@@ -404,49 +438,53 @@ export async function POST(request: NextRequest) {
       // company_product_history will auto-update via trigger when invoice is paid
     }
 
-    // Find and notify quote acceptance (if this was from a quote)
-    const { data: pendingQuote } = await supabase
-      .from('quotes')
-      .select('quote_id, created_by, total_amount, accepted_at')
-      .eq('company_id', company_id)
-      .eq('status', 'sent')
-      .is('accepted_at', null)
-      .order('sent_at', { ascending: false })
-      .limit(1)
-      .single();
+    // Link to quote if this request came from a quote (not reorder portal)
+    if (payload.object_type === 'quote' && payload.quote_id) {
+      console.log(`[create-invoice-static] Linking invoice to quote ${payload.quote_id}`);
 
-    if (pendingQuote && !pendingQuote.accepted_at) {
-      // Update quote as accepted
-      await supabase
+      // Update THE SPECIFIC QUOTE from token (not searching for one)
+      const { data: updatedQuote, error: quoteUpdateError } = await supabase
         .from('quotes')
         .update({
           status: 'accepted',
           accepted_at: new Date().toISOString(),
           invoice_id: dbInvoice.invoice_id,
         })
-        .eq('quote_id', pendingQuote.quote_id);
+        .eq('quote_id', payload.quote_id)
+        .select('quote_id, created_by, total_amount')
+        .single();
 
-      // Notify sales rep
-      if (pendingQuote.created_by) {
-        const { data: user } = await supabase
-          .from('users')
-          .select('user_id, email, full_name')
-          .eq('sales_rep_id', pendingQuote.created_by)
-          .single();
+      if (quoteUpdateError) {
+        console.error('[create-invoice-static] Failed to update quote:', quoteUpdateError);
+      } else if (updatedQuote) {
+        console.log(`[create-invoice-static] Quote ${updatedQuote.quote_id} marked as accepted`);
 
-        if (user) {
-          notifyQuoteAccepted({
-            user_id: user.user_id,
-            user_email: user.email,
-            user_name: user.full_name || user.email,
-            quote_id: pendingQuote.quote_id,
-            company_id: company_id,
-            company_name: company.company_name,
-            contact_name: contact.full_name,
-            total_amount: pendingQuote.total_amount || total,
-          }).catch(err => console.error('[create-invoice-static] Notification failed:', err));
+        // Notify sales rep
+        if (updatedQuote.created_by) {
+          const { data: user } = await supabase
+            .from('users')
+            .select('user_id, email, full_name')
+            .eq('sales_rep_id', updatedQuote.created_by)
+            .single();
+
+          if (user) {
+            notifyQuoteAccepted({
+              user_id: user.user_id,
+              user_email: user.email,
+              user_name: user.full_name || user.email,
+              quote_id: updatedQuote.quote_id,
+              company_id: company_id,
+              company_name: company.company_name,
+              contact_name: contact.full_name,
+              total_amount: total, // Use actual invoice amount, not quote amount
+            }).catch(err => console.error('[create-invoice-static] Notification failed:', err));
+          }
         }
       }
+    } else if (payload.object_type === 'reorder') {
+      console.log('[create-invoice-static] Reorder portal invoice created (no quote linkage)');
+    } else {
+      console.log('[create-invoice-static] Invoice created without quote linkage (object_type:', payload.object_type, ')');
     }
 
     return NextResponse.json({
