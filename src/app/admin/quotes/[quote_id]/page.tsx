@@ -381,6 +381,13 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
             <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
 
             <div className="space-y-2">
+              <Link
+                href={`/admin/quotes/${quote_id}/preview`}
+                target="_blank"
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 block text-center"
+              >
+                🔍 Preview as Customer
+              </Link>
               <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">
                 📧 Resend Quote
               </button>

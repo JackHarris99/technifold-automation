@@ -54,6 +54,8 @@ interface InteractiveQuotePortalProps {
   } | null;
   token: string;
   isTest: boolean;
+  readOnly?: boolean;
+  previewMode?: 'admin' | 'original';
   shippingAddress?: {
     address_id: string;
     address_line_1: string;
@@ -66,7 +68,7 @@ interface InteractiveQuotePortalProps {
   } | null;
 }
 
-export function InteractiveQuotePortal({ quote, lineItems, company, contact, token, isTest, shippingAddress }: InteractiveQuotePortalProps) {
+export function InteractiveQuotePortal({ quote, lineItems, company, contact, token, isTest, readOnly = false, previewMode, shippingAddress }: InteractiveQuotePortalProps) {
   const [cart, setCart] = useState<any[]>([]);
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [pricingPreview, setPricingPreview] = useState<PricingPreview | null>(null);
@@ -144,8 +146,19 @@ export function InteractiveQuotePortal({ quote, lineItems, company, contact, tok
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
+      {/* Preview Mode Banner */}
+      {readOnly && previewMode === 'admin' && (
+        <div className="bg-blue-600 text-white py-3 px-4 text-center font-[600]">
+          🔍 ADMIN PREVIEW MODE - This is how the customer will see the quote
+        </div>
+      )}
+      {readOnly && previewMode === 'original' && (
+        <div className="bg-purple-600 text-white py-3 px-4 text-center font-[600]">
+          📄 ORIGINAL QUOTE - What was sent to the customer
+        </div>
+      )}
       {/* Test Mode Banner */}
-      {isTest && (
+      {isTest && !readOnly && (
         <div className="bg-yellow-500 text-white py-2 px-4 text-center font-[600]">
           ⚠️ TEST MODE - This is an internal preview link
         </div>
@@ -306,27 +319,33 @@ export function InteractiveQuotePortal({ quote, lineItems, company, contact, tok
                     <div className="flex items-center gap-4 mb-4">
                       <div>
                         <div className="text-[13px] text-[#666] mb-1">Quantity</div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => updateQuantity(item.consumable_code, item.quantity - 1)}
-                            className="w-8 h-8 rounded-[8px] bg-[#f0f0f0] hover:bg-[#e0e0e0] flex items-center justify-center text-[18px] font-[600]"
-                          >
-                            −
-                          </button>
-                          <input
-                            type="number"
-                            value={item.quantity}
-                            onChange={(e) => updateQuantity(item.consumable_code, parseInt(e.target.value) || 0)}
-                            className="w-16 px-3 py-2 border border-[#e8e8e8] rounded-[8px] text-center text-[15px] font-[600]"
-                            min="0"
-                          />
-                          <button
-                            onClick={() => updateQuantity(item.consumable_code, item.quantity + 1)}
-                            className="w-8 h-8 rounded-[8px] bg-[#f0f0f0] hover:bg-[#e0e0e0] flex items-center justify-center text-[18px] font-[600]"
-                          >
-                            +
-                          </button>
-                        </div>
+                        {readOnly ? (
+                          <div className="text-[18px] font-[700] text-[#0a0a0a]">
+                            {item.quantity}
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => updateQuantity(item.consumable_code, item.quantity - 1)}
+                              className="w-8 h-8 rounded-[8px] bg-[#f0f0f0] hover:bg-[#e0e0e0] flex items-center justify-center text-[18px] font-[600]"
+                            >
+                              −
+                            </button>
+                            <input
+                              type="number"
+                              value={item.quantity}
+                              onChange={(e) => updateQuantity(item.consumable_code, parseInt(e.target.value) || 0)}
+                              className="w-16 px-3 py-2 border border-[#e8e8e8] rounded-[8px] text-center text-[15px] font-[600]"
+                              min="0"
+                            />
+                            <button
+                              onClick={() => updateQuantity(item.consumable_code, item.quantity + 1)}
+                              className="w-8 h-8 rounded-[8px] bg-[#f0f0f0] hover:bg-[#e0e0e0] flex items-center justify-center text-[18px] font-[600]"
+                            >
+                              +
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       <div>
@@ -366,20 +385,24 @@ export function InteractiveQuotePortal({ quote, lineItems, company, contact, tok
                     <div className="text-[24px] font-[800] text-[#0a0a0a]">
                       £{lineTotal.toFixed(2)}
                     </div>
-                    {isRemoved ? (
-                      <button
-                        onClick={() => updateQuantity(item.consumable_code, 1)}
-                        className="text-[14px] text-green-600 hover:text-green-700 font-[600]"
-                      >
-                        Add Back
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => updateQuantity(item.consumable_code, 0)}
-                        className="text-[14px] text-red-600 hover:text-red-700 font-[600]"
-                      >
-                        Remove
-                      </button>
+                    {!readOnly && (
+                      <>
+                        {isRemoved ? (
+                          <button
+                            onClick={() => updateQuantity(item.consumable_code, 1)}
+                            className="text-[14px] text-green-600 hover:text-green-700 font-[600]"
+                          >
+                            Add Back
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => updateQuantity(item.consumable_code, 0)}
+                            className="text-[14px] text-red-600 hover:text-red-700 font-[600]"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -448,12 +471,14 @@ export function InteractiveQuotePortal({ quote, lineItems, company, contact, tok
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[13px] font-[600] text-[#666]">Billing Address</span>
-                    <button
-                      onClick={() => setShowAddressModal(true)}
-                      className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]"
-                    >
-                      Edit
-                    </button>
+                    {!readOnly && (
+                      <button
+                        onClick={() => setShowAddressModal(true)}
+                        className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]"
+                      >
+                        Edit
+                      </button>
+                    )}
                   </div>
                   {company.billing_address_line_1 ? (
                     <div className="text-[13px] text-[#0a0a0a] leading-relaxed">
@@ -474,12 +499,14 @@ export function InteractiveQuotePortal({ quote, lineItems, company, contact, tok
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[13px] font-[600] text-[#666]">Shipping Address</span>
-                    <button
-                      onClick={() => setShowAddressModal(true)}
-                      className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]"
-                    >
-                      Edit
-                    </button>
+                    {!readOnly && (
+                      <button
+                        onClick={() => setShowAddressModal(true)}
+                        className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]"
+                      >
+                        Edit
+                      </button>
+                    )}
                   </div>
                   {shippingAddress ? (
                     <div className="text-[13px] text-[#0a0a0a] leading-relaxed">
@@ -501,29 +528,39 @@ export function InteractiveQuotePortal({ quote, lineItems, company, contact, tok
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[13px] font-[600] text-[#666]">VAT Number</span>
-                      <button
-                        onClick={() => setShowAddressModal(true)}
-                        className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]"
-                      >
-                        Edit
-                      </button>
+                      {!readOnly && (
+                        <button
+                          onClick={() => setShowAddressModal(true)}
+                          className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]"
+                        >
+                          Edit
+                        </button>
+                      )}
                     </div>
                     <div className="text-[13px] text-[#0a0a0a]">{company.vat_number}</div>
                   </div>
                 )}
               </div>
 
-              <button
-                onClick={() => setIsInvoiceModalOpen(true)}
-                disabled={cart.filter(item => item.quantity > 0).length === 0 || loadingPreview}
-                className="w-full py-4 bg-[#16a34a] text-white rounded-[14px] text-[16px] font-[700] hover:bg-[#15803d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Request Invoice
-              </button>
+              {readOnly ? (
+                <div className="w-full py-4 bg-gray-100 text-gray-600 rounded-[14px] text-[16px] font-[700] text-center border-2 border-dashed border-gray-300">
+                  {previewMode === 'admin' ? 'Customers will see "Request Invoice" button here' : 'Quote Accepted - Invoice Sent'}
+                </div>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setIsInvoiceModalOpen(true)}
+                    disabled={cart.filter(item => item.quantity > 0).length === 0 || loadingPreview}
+                    className="w-full py-4 bg-[#16a34a] text-white rounded-[14px] text-[16px] font-[700] hover:bg-[#15803d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Request Invoice
+                  </button>
 
-              <p className="text-[12px] text-[#666] mt-4 text-center">
-                You'll receive a Stripe invoice via email to complete payment
-              </p>
+                  <p className="text-[12px] text-[#666] mt-4 text-center">
+                    You'll receive a Stripe invoice via email to complete payment
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
