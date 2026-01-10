@@ -31,6 +31,9 @@ interface QuoteDetail {
   viewed_at: string | null;
   accepted_at: string | null;
   expires_at: string | null;
+  won_at: string | null;
+  lost_at: string | null;
+  lost_reason: string | null;
   created_by_name: string;
   line_items: any[];
   notes: QuoteNote[];
@@ -42,6 +45,9 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
   const [loading, setLoading] = useState(true);
   const [newNote, setNewNote] = useState('');
   const [savingNote, setSavingNote] = useState(false);
+  const [showLostModal, setShowLostModal] = useState(false);
+  const [lostReason, setLostReason] = useState('');
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   useEffect(() => {
     fetchQuoteDetail();
@@ -83,6 +89,74 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
       console.error('Failed to add note:', error);
     } finally {
       setSavingNote(false);
+    }
+  }
+
+  async function handleMarkAsWon() {
+    if (!confirm('Mark this quote as WON? This will record the deal as closed.')) {
+      return;
+    }
+
+    setUpdatingStatus(true);
+    try {
+      const response = await fetch(`/api/admin/quotes/${quote_id}/update-status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'won' }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('✅ Quote marked as WON! Congratulations on closing the deal!');
+        fetchQuoteDetail(); // Refresh to show updated status
+      } else {
+        alert(`Failed to update: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Failed to mark as won:', error);
+      alert('An error occurred. Please try again.');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  }
+
+  async function handleMarkAsLost() {
+    setShowLostModal(true);
+  }
+
+  async function confirmMarkAsLost() {
+    if (!lostReason.trim()) {
+      alert('Please provide a reason for marking this quote as lost.');
+      return;
+    }
+
+    setUpdatingStatus(true);
+    try {
+      const response = await fetch(`/api/admin/quotes/${quote_id}/update-status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'lost',
+          lost_reason: lostReason,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Quote marked as LOST. Better luck next time!');
+        setShowLostModal(false);
+        setLostReason('');
+        fetchQuoteDetail(); // Refresh to show updated status
+      } else {
+        alert(`Failed to update: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Failed to mark as lost:', error);
+      alert('An error occurred. Please try again.');
+    } finally {
+      setUpdatingStatus(false);
     }
   }
 
@@ -310,10 +384,18 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
               <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">
                 📧 Resend Quote
               </button>
-              <button className="w-full px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700">
+              <button
+                onClick={handleMarkAsWon}
+                disabled={updatingStatus}
+                className="w-full px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 ✅ Mark as Won
               </button>
-              <button className="w-full px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700">
+              <button
+                onClick={handleMarkAsLost}
+                disabled={updatingStatus}
+                className="w-full px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 ❌ Mark as Lost
               </button>
               <button className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50">
@@ -377,6 +459,60 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
           </div>
         </div>
       </div>
+
+      {/* Mark as Lost Modal */}
+      {showLostModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Mark Quote as Lost</h3>
+
+            <p className="text-sm text-gray-600 mb-4">
+              Please provide a reason why this quote was lost. This helps us improve our sales process.
+            </p>
+
+            <div className="mb-4">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Reason <span className="text-red-600">*</span>
+              </label>
+              <select
+                value={lostReason}
+                onChange={(e) => setLostReason(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="">Select a reason...</option>
+                <option value="Price too high">Price too high</option>
+                <option value="Went with competitor">Went with competitor</option>
+                <option value="Budget constraints">Budget constraints</option>
+                <option value="Timing not right">Timing not right</option>
+                <option value="No longer interested">No longer interested</option>
+                <option value="Requirements changed">Requirements changed</option>
+                <option value="No response from customer">No response from customer</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowLostModal(false);
+                  setLostReason('');
+                }}
+                disabled={updatingStatus}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmMarkAsLost}
+                disabled={!lostReason.trim() || updatingStatus}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {updatingStatus ? 'Saving...' : 'Mark as Lost'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
