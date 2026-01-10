@@ -56,9 +56,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if all products are tools (type='tool') - if so, skip tiered pricing
-    const allTools = products.every(p => p.type === 'tool');
-    const shouldSkipTieredPricing = skip_tiered_pricing || allTools;
+    // Separate items by product type for different pricing logic
+    const toolItems = items.filter(item => {
+      const product = products.find(p => p.product_code === item.product_code);
+      return product?.type === 'tool';
+    });
+
+    const consumableItems = items.filter(item => {
+      const product = products.find(p => p.product_code === item.product_code);
+      return product?.type === 'consumable';
+    });
+
+    const otherItems = items.filter(item => {
+      const product = products.find(p => p.product_code === item.product_code);
+      return product?.type !== 'tool' && product?.type !== 'consumable';
+    });
 
     // 2. Fetch company details for tax calculation
     const { data: company, error: companyError } = await supabase
@@ -84,40 +96,54 @@ export async function POST(request: NextRequest) {
 
     const destinationCountry = shippingAddress?.country || company.country || 'GB';
 
-    // 4. Calculate pricing - SKIP tiered pricing for tools
-    let lineItems;
-    let subtotal;
+    // 4. Calculate pricing by product type
+    let lineItems: any[] = [];
     let validation_errors: string[] = [];
 
-    if (shouldSkipTieredPricing) {
-      // For TOOLS: Use base price directly, no tiered pricing
-      lineItems = items.map(item => {
-        const product = products.find(p => p.product_code === item.product_code);
-        if (!product) {
-          throw new Error(`Product not found: ${item.product_code}`);
-        }
+    // TOOLS: Apply quantity-based discount tiers (matching quote logic)
+    // 1 tool = 0%, 2 = 10%, 3 = 20%, 4 = 30%, 5+ = 40% off
+    const totalToolQuantity = toolItems.reduce((sum, item) => sum + item.quantity, 0);
+    let toolDiscountPercent = 0;
+    let toolDiscountLabel = '';
 
-        const base_price = product.price || 0;
-        const unit_price = base_price; // No discount for tools
-        const line_total = unit_price * item.quantity;
+    if (totalToolQuantity >= 5) {
+      toolDiscountPercent = 40;
+      toolDiscountLabel = '5+ tools - 40% off';
+    } else if (totalToolQuantity === 4) {
+      toolDiscountPercent = 30;
+      toolDiscountLabel = '4 tools - 30% off';
+    } else if (totalToolQuantity === 3) {
+      toolDiscountPercent = 20;
+      toolDiscountLabel = '3 tools - 20% off';
+    } else if (totalToolQuantity === 2) {
+      toolDiscountPercent = 10;
+      toolDiscountLabel = '2 tools - 10% off';
+    }
 
-        return {
-          product_code: item.product_code,
-          description: product.description || '',
-          quantity: item.quantity,
-          base_price,
-          unit_price,
-          line_total,
-          discount_applied: null,
-          image_url: product.image_url || null,
-          currency: product.currency || 'GBP',
-        };
+    for (const item of toolItems) {
+      const product = products.find(p => p.product_code === item.product_code);
+      if (!product) continue;
+
+      const base_price = product.price || 0;
+      const unit_price = base_price * (1 - toolDiscountPercent / 100);
+      const line_total = unit_price * item.quantity;
+
+      lineItems.push({
+        product_code: item.product_code,
+        description: product.description || '',
+        quantity: item.quantity,
+        base_price,
+        unit_price,
+        line_total,
+        discount_applied: toolDiscountPercent > 0 ? toolDiscountLabel : null,
+        image_url: product.image_url || null,
+        currency: product.currency || 'GBP',
       });
+    }
 
-      subtotal = lineItems.reduce((sum, item) => sum + item.line_total, 0);
-    } else {
-      // For CONSUMABLES: Apply tiered pricing
-      const cartItems: CartItem[] = items.map(item => {
+    // CONSUMABLES: Apply tiered pricing via pricing-v2
+    if (consumableItems.length > 0) {
+      const cartItems: CartItem[] = consumableItems.map(item => {
         const product = products.find(p => p.product_code === item.product_code);
         if (!product) {
           throw new Error(`Product not found: ${item.product_code}`);
@@ -134,26 +160,46 @@ export async function POST(request: NextRequest) {
       });
 
       const pricingResult = await calculateCartPricing(cartItems);
-      const pricedItems = pricingResult.items;
       validation_errors = pricingResult.validation_errors;
 
-      lineItems = pricedItems.map(item => {
-        const product = products.find(p => p.product_code === item.product_code);
-        return {
-          product_code: item.product_code,
+      for (const pricedItem of pricingResult.items) {
+        const product = products.find(p => p.product_code === pricedItem.product_code);
+        lineItems.push({
+          product_code: pricedItem.product_code,
           description: product?.description || '',
-          quantity: item.quantity,
-          base_price: item.base_price,
-          unit_price: item.unit_price,
-          line_total: item.line_total,
-          discount_applied: item.discount_applied,
+          quantity: pricedItem.quantity,
+          base_price: pricedItem.base_price,
+          unit_price: pricedItem.unit_price,
+          line_total: pricedItem.line_total,
+          discount_applied: pricedItem.discount_applied,
           image_url: product?.image_url || null,
           currency: product?.currency || 'GBP',
-        };
-      });
-
-      subtotal = pricedItems.reduce((sum, item) => sum + item.line_total, 0);
+        });
+      }
     }
+
+    // OTHER PRODUCTS: Fixed price, no discounts
+    for (const item of otherItems) {
+      const product = products.find(p => p.product_code === item.product_code);
+      if (!product) continue;
+
+      const unit_price = product.price || 0;
+      const line_total = unit_price * item.quantity;
+
+      lineItems.push({
+        product_code: item.product_code,
+        description: product.description || '',
+        quantity: item.quantity,
+        base_price: unit_price,
+        unit_price,
+        line_total,
+        discount_applied: null,
+        image_url: product.image_url || null,
+        currency: product.currency || 'GBP',
+      });
+    }
+
+    const subtotal = lineItems.reduce((sum, item) => sum + item.line_total, 0);
 
     // 7. Calculate shipping cost
     const { data: shippingCost } = await supabase.rpc('calculate_shipping_cost', {
