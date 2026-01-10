@@ -149,7 +149,7 @@ export function ToolTab({
                           {/* Product Image */}
                           <div className="relative w-20 h-20 bg-[#fafafa] rounded-lg flex-shrink-0 overflow-hidden border border-[#e8e8e8]">
                             <Image
-                              src={`/product_images/${item.consumable_code}.jpg`}
+                              src={(item as any).image_url || `/product_images/${item.consumable_code}.jpg`}
                               alt={item.description}
                               fill
                               className="object-contain p-2"

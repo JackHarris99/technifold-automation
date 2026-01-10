@@ -199,7 +199,7 @@ export default function SendReorderPage() {
                         >
                           <div className="font-semibold text-gray-900">{company.company_name}</div>
                           <div className="text-sm text-gray-600">
-                            {company.company_id} • {company.country || 'UK'} • {company.machine_count || 0} tools
+                            {company.company_id} • {company.country || 'UK'} • {company.machine_count || 0} {(company.machine_count || 0) === 1 ? 'tool' : 'tools'}
                           </div>
                         </button>
                       ))}

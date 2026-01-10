@@ -507,6 +507,14 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                 <div className="pt-5 border-t border-[#e8e8e8]">
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-[13px] font-[600] text-[#0a0a0a]">Delivery Address</div>
+                    {shippingAddress && (
+                      <button
+                        onClick={() => setShowAddressModal(true)}
+                        className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]"
+                      >
+                        Edit
+                      </button>
+                    )}
                   </div>
                   {loadingAddress ? (
                     <div className="p-4 bg-[#f9fafb] rounded-[12px] border border-[#e8e8e8]">
