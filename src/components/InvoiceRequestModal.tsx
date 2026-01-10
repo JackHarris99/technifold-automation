@@ -280,10 +280,12 @@ export function InvoiceRequestModal({
                   </svg>
                 </div>
                 <h4 className="text-2xl font-bold text-gray-900 mb-2">
-                  Invoice Sent!
+                  {invoiceResult.idempotent ? 'Invoice Already Created' : 'Invoice Sent!'}
                 </h4>
                 <p className="text-gray-600">
-                  Your invoice has been created and sent to your email.
+                  {invoiceResult.idempotent
+                    ? 'This quote already has an invoice. You can view or pay it below.'
+                    : 'Your invoice has been created and sent to your email.'}
                 </p>
               </div>
 
