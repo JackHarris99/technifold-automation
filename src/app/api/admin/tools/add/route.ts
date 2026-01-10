@@ -98,6 +98,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Also sync to company_tools table (for send-reorder builder)
+    const { error: toolsError } = await supabase
+      .from('company_tools')
+      .upsert(
+        {
+          company_id,
+          tool_code: product_code,
+          first_seen_at: first_purchased_at,
+          last_seen_at: last_purchased_at,
+          total_units: total_quantity || 1,
+        },
+        {
+          onConflict: 'company_id,tool_code',
+          ignoreDuplicates: false,
+        }
+      );
+
+    if (toolsError) {
+      console.error('[tools/add] Failed to sync to company_tools:', toolsError);
+      // Don't fail the request - company_product_history is the source of truth
+    }
+
     console.log('[tools/add] Added tool to company:', company_id, product_code);
 
     return NextResponse.json({

@@ -22,10 +22,8 @@ export async function GET(
       .select(`
         tool_code,
         total_units,
-        first_purchased_at,
-        last_purchased_at,
-        total_purchases,
-        last_purchase_amount,
+        first_seen_at,
+        last_seen_at,
         products:tool_code (
           description,
           category,
@@ -33,7 +31,7 @@ export async function GET(
         )
       `)
       .eq('company_id', companyId)
-      .order('last_purchased_at', { ascending: false });
+      .order('last_seen_at', { ascending: false });
 
     if (error) {
       console.error('[companies/tools] Error:', error);
@@ -85,6 +83,7 @@ export async function POST(
     }
 
     // Otherwise, upsert the tool
+    const today = new Date().toISOString().split('T')[0];
     const { data, error } = await supabase
       .from('company_tools')
       .upsert(
@@ -92,11 +91,8 @@ export async function POST(
           company_id: companyId,
           tool_code: tool_code,
           total_units: total_units,
-          first_purchased_at: new Date().toISOString().split('T')[0],
-          last_purchased_at: new Date().toISOString().split('T')[0],
-          total_purchases: 1,
-          last_purchase_amount: null,
-          last_invoice_id: null,
+          first_seen_at: today,
+          last_seen_at: today,
         },
         {
           onConflict: 'company_id,tool_code',
