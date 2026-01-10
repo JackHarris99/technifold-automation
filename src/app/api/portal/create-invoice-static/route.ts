@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
+import { notifyQuoteAccepted } from '@/lib/salesNotifications';
 import Stripe from 'stripe';
 
 let stripeClient: Stripe | null = null;
@@ -401,6 +402,51 @@ export async function POST(request: NextRequest) {
     } else {
       console.log('[create-invoice-static] Created', invoiceItems.length, 'invoice line items');
       // company_product_history will auto-update via trigger when invoice is paid
+    }
+
+    // Find and notify quote acceptance (if this was from a quote)
+    const { data: pendingQuote } = await supabase
+      .from('quotes')
+      .select('quote_id, created_by, total_amount, accepted_at')
+      .eq('company_id', company_id)
+      .eq('status', 'sent')
+      .is('accepted_at', null)
+      .order('sent_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (pendingQuote && !pendingQuote.accepted_at) {
+      // Update quote as accepted
+      await supabase
+        .from('quotes')
+        .update({
+          status: 'accepted',
+          accepted_at: new Date().toISOString(),
+          invoice_id: dbInvoice.invoice_id,
+        })
+        .eq('quote_id', pendingQuote.quote_id);
+
+      // Notify sales rep
+      if (pendingQuote.created_by) {
+        const { data: user } = await supabase
+          .from('users')
+          .select('user_id, email, full_name')
+          .eq('sales_rep_id', pendingQuote.created_by)
+          .single();
+
+        if (user) {
+          notifyQuoteAccepted({
+            user_id: user.user_id,
+            user_email: user.email,
+            user_name: user.full_name || user.email,
+            quote_id: pendingQuote.quote_id,
+            company_id: company_id,
+            company_name: company.company_name,
+            contact_name: contact.full_name,
+            total_amount: pendingQuote.total_amount || total,
+          }).catch(err => console.error('[create-invoice-static] Notification failed:', err));
+        }
+      }
     }
 
     return NextResponse.json({

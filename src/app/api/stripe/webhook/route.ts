@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyWebhookSignature, stripe } from '@/lib/stripe-client';
 import { getSupabaseClient } from '@/lib/supabase';
 import { sendOrderConfirmation, sendTrialConfirmation } from '@/lib/resend-client';
+import { notifyInvoicePaid } from '@/lib/salesNotifications';
 import Stripe from 'stripe';
 
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -817,6 +818,33 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
 
   if (newInvoice) {
     console.log('[stripe-webhook] New invoice table updated (fact tables auto-updated via trigger):', newInvoice.invoice_id);
+
+    // Notify sales rep that invoice was paid
+    const { data: company } = await supabase
+      .from('companies')
+      .select('company_name, account_owner')
+      .eq('company_id', newInvoice.company_id)
+      .single();
+
+    if (company?.account_owner) {
+      const { data: user } = await supabase
+        .from('users')
+        .select('user_id, email, full_name')
+        .eq('sales_rep_id', company.account_owner)
+        .single();
+
+      if (user) {
+        notifyInvoicePaid({
+          user_id: user.user_id,
+          user_email: user.email,
+          user_name: user.full_name || user.email,
+          invoice_id: newInvoice.invoice_id,
+          company_id: newInvoice.company_id,
+          company_name: company.company_name,
+          amount_paid: newInvoice.total_amount || 0,
+        }).catch(err => console.error('[stripe-webhook] Notification failed:', err));
+      }
+    }
   }
 
   // Update OLD orders table (legacy - can remove once fully migrated)

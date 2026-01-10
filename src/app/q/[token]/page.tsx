@@ -9,6 +9,7 @@ import { verifyToken } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 import { StaticQuotePortal } from '@/components/quotes/StaticQuotePortal';
 import { InteractiveQuotePortal } from '@/components/quotes/InteractiveQuotePortal';
+import { notifyQuoteViewed } from '@/lib/salesNotifications';
 
 interface QuoteViewerProps {
   params: Promise<{
@@ -115,6 +116,30 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
       .from('quotes')
       .update({ status: 'viewed', viewed_at: new Date().toISOString() })
       .eq('quote_id', quote_id);
+
+    // Notify sales rep that quote was viewed
+    if (quote.created_by) {
+      // Fetch user details for notification
+      const { data: user } = await supabase
+        .from('users')
+        .select('user_id, email, full_name')
+        .eq('sales_rep_id', quote.created_by)
+        .single();
+
+      if (user) {
+        // Fire-and-forget notification (don't block page render)
+        notifyQuoteViewed({
+          user_id: user.user_id,
+          user_email: user.email,
+          user_name: user.full_name || user.email,
+          quote_id: quote.quote_id,
+          company_id: company.company_id,
+          company_name: company.company_name,
+          contact_name: contact?.full_name,
+          total_amount: quote.total_amount || 0,
+        }).catch(err => console.error('[Quote] Notification failed:', err));
+      }
+    }
   }
 
   // 7. Track quote view engagement event
