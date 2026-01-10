@@ -16,6 +16,17 @@ interface QuoteNote {
   created_at: string;
 }
 
+interface EngagementEvent {
+  event_id: string;
+  contact_id: string;
+  contact_name: string;
+  contact_email: string | null;
+  event_type: string;
+  event_name: string;
+  created_at: string;
+  meta: any;
+}
+
 interface QuoteDetail {
   quote_id: string;
   company_id: string;
@@ -37,6 +48,7 @@ interface QuoteDetail {
   created_by_name: string;
   line_items: any[];
   notes: QuoteNote[];
+  engagement_events: EngagementEvent[];
 }
 
 export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id: string }> }) {
@@ -366,6 +378,47 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
                     </div>
                     <div className="text-sm text-gray-700 whitespace-pre-wrap">
                       {note.note_text}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Engagement Events */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">
+              Contact Engagement ({quote.engagement_events.length})
+            </h2>
+
+            <div className="space-y-3">
+              {quote.engagement_events.length === 0 ? (
+                <div className="text-sm text-gray-500 text-center py-4">
+                  No engagement events yet. Events are tracked when contacts view the quote.
+                </div>
+              ) : (
+                quote.engagement_events.map((event) => (
+                  <div key={event.event_id} className="flex gap-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                      <span className="text-sm">
+                        {event.event_type === 'quote_view' ? '👁️' : '📧'}
+                      </span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between mb-1">
+                        <div className="font-semibold text-gray-900 text-sm">
+                          {event.contact_name}
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          {formatDate(event.created_at)}
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-600 mb-1">
+                        {event.contact_email}
+                      </div>
+                      <div className="text-sm text-gray-700">
+                        {event.event_name === 'quote_portal_view' ? 'Viewed quote' : event.event_name}
+                      </div>
                     </div>
                   </div>
                 ))

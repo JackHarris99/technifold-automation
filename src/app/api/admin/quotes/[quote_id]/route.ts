@@ -93,6 +93,37 @@ export async function GET(
       console.error('[quotes/[quote_id]] Error fetching notes:', notesError);
     }
 
+    // Fetch engagement events for this quote
+    const { data: engagementEvents, error: engagementError } = await supabase
+      .from('engagement_events')
+      .select('event_id, contact_id, event_type, event_name, created_at, meta')
+      .contains('meta', { quote_id: quote_id })
+      .order('created_at', { ascending: false });
+
+    if (engagementError) {
+      console.error('[quotes/[quote_id]] Error fetching engagement events:', engagementError);
+    }
+
+    // Enrich engagement events with contact names
+    const engagementContactIds = [...new Set((engagementEvents || []).map(e => e.contact_id).filter(Boolean))];
+    let engagementContacts: any[] = [];
+    if (engagementContactIds.length > 0) {
+      const { data: contactsData } = await supabase
+        .from('contacts')
+        .select('contact_id, full_name, email')
+        .in('contact_id', engagementContactIds);
+      engagementContacts = contactsData || [];
+    }
+
+    const enrichedEngagementEvents = (engagementEvents || []).map(event => {
+      const eventContact = engagementContacts.find(c => c.contact_id === event.contact_id);
+      return {
+        ...event,
+        contact_name: eventContact?.full_name || 'Unknown',
+        contact_email: eventContact?.email || null,
+      };
+    });
+
     // Build enriched quote response
     const enrichedQuote = {
       ...quote,
@@ -102,6 +133,7 @@ export async function GET(
       created_by_name: creator?.full_name || quote.created_by,
       line_items: lineItems || [],
       notes: notes || [],
+      engagement_events: enrichedEngagementEvents,
     };
 
     return NextResponse.json({

@@ -116,13 +116,42 @@ export async function GET(request: NextRequest) {
 
     // Companies already fetched above, no need to fetch again
 
-    // Fetch contact names
+    // Fetch contact names for quotes that have contact_id
+    const contactIds = [...new Set(ownerFilteredQuotes.map(q => q.contact_id).filter(Boolean))];
+    let contacts: any[] = [];
+    if (contactIds.length > 0) {
+      const { data: contactsData, error: contactsError } = await supabase
+        .from('contacts')
+        .select('contact_id, full_name, email')
+        .in('contact_id', contactIds);
+
+      if (contactsError) {
+        console.error('[quotes/list] Error fetching contacts:', contactsError);
+      } else {
+        contacts = contactsData || [];
+      }
+    }
+
+    // Fetch engagement events to count unique contacts per quote
     const quoteIds = ownerFilteredQuotes.map(q => q.quote_id);
-    const { data: quoteItems } = await supabase
-      .from('quote_items')
-      .select('quote_id')
-      .in('quote_id', quoteIds)
-      .limit(1);
+    const { data: engagementEvents } = await supabase
+      .from('engagement_events')
+      .select('contact_id, meta')
+      .in('contact_id', contactIds.length > 0 ? contactIds : ['']);
+
+    // Count unique contacts per quote from engagement events
+    const quoteContactCounts: { [key: string]: Set<string> } = {};
+    if (engagementEvents) {
+      engagementEvents.forEach(event => {
+        const quoteId = event.meta?.quote_id;
+        if (quoteId && event.contact_id) {
+          if (!quoteContactCounts[quoteId]) {
+            quoteContactCounts[quoteId] = new Set();
+          }
+          quoteContactCounts[quoteId].add(event.contact_id);
+        }
+      });
+    }
 
     // Get user names for created_by
     const userIds = [...new Set(ownerFilteredQuotes.map(q => q.created_by))];
@@ -139,14 +168,27 @@ export async function GET(request: NextRequest) {
     const enrichedQuotes = ownerFilteredQuotes.map(quote => {
       const company = companies?.find(c => c.company_id === quote.company_id);
       const creator = users?.find(u => u.user_id === quote.created_by);
+      const contact = contacts?.find(c => c.contact_id === quote.contact_id);
+      const uniqueContactCount = quoteContactCounts[quote.quote_id]?.size || 0;
+
+      // Determine contact display
+      let contactName = null;
+      let contactEmail = null;
+
+      if (uniqueContactCount > 1) {
+        contactName = 'Multiple contacts';
+      } else if (contact) {
+        contactName = contact.full_name;
+        contactEmail = contact.email;
+      }
 
       return {
         ...quote,
         company_name: company?.company_name || 'Unknown Company',
         account_owner: company?.account_owner === session.sales_rep_id ? 'current_user' : company?.account_owner,
         created_by_name: creator?.full_name || quote.created_by,
-        contact_name: null, // TODO: Get from quote metadata or contact table
-        contact_email: null,
+        contact_name: contactName,
+        contact_email: contactEmail,
       };
     });
 
