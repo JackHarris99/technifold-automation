@@ -11,6 +11,7 @@ public,companies,idx_companies_domain,CREATE INDEX idx_companies_domain ON publi
 public,companies,idx_companies_id_trgm,CREATE INDEX idx_companies_id_trgm ON public.companies USING gin (company_id gin_trgm_ops)
 public,companies,idx_companies_name,CREATE INDEX idx_companies_name ON public.companies USING btree (company_name)
 public,companies,idx_companies_name_trgm,CREATE INDEX idx_companies_name_trgm ON public.companies USING gin (company_name gin_trgm_ops)
+public,companies,idx_companies_status,CREATE INDEX idx_companies_status ON public.companies USING btree (status)
 public,companies,idx_companies_stripe_customer_id,CREATE INDEX idx_companies_stripe_customer_id ON public.companies USING btree (stripe_customer_id) WHERE (stripe_customer_id IS NOT NULL)
 public,companies,idx_companies_type,CREATE INDEX idx_companies_type ON public.companies USING btree (type)
 public,companies,idx_companies_zoho_account_id,CREATE INDEX idx_companies_zoho_account_id ON public.companies USING btree (zoho_account_id) WHERE (zoho_account_id IS NOT NULL)
@@ -70,6 +71,7 @@ public,machines,idx_machines_shaft_config,CREATE INDEX idx_machines_shaft_config
 public,machines,idx_machines_slug,CREATE INDEX idx_machines_slug ON public.machines USING btree (slug)
 public,machines,machines_pkey,CREATE UNIQUE INDEX machines_pkey ON public.machines USING btree (machine_id)
 public,machines,machines_slug_key,CREATE UNIQUE INDEX machines_slug_key ON public.machines USING btree (slug)
+public,notification_preferences,notification_preferences_pkey,CREATE UNIQUE INDEX notification_preferences_pkey ON public.notification_preferences USING btree (user_id)
 public,order_items,order_items_pkey,"CREATE UNIQUE INDEX order_items_pkey ON public.order_items USING btree (order_id, product_code)"
 public,orders,idx_orders_company,"CREATE INDEX idx_orders_company ON public.orders USING btree (company_id, created_at DESC)"
 public,orders,idx_orders_invoice_number,CREATE INDEX idx_orders_invoice_number ON public.orders USING btree (invoice_number) WHERE (invoice_number IS NOT NULL)
@@ -94,6 +96,9 @@ public,products,idx_products_origin,CREATE INDEX idx_products_origin ON public.p
 public,products,products_pkey,CREATE UNIQUE INDEX products_pkey ON public.products USING btree (product_code)
 public,quote_items,idx_quote_items_quote_id,CREATE INDEX idx_quote_items_quote_id ON public.quote_items USING btree (quote_id)
 public,quote_items,quote_items_pkey,"CREATE UNIQUE INDEX quote_items_pkey ON public.quote_items USING btree (quote_id, product_code, line_number)"
+public,quote_notes,idx_quote_notes_created_at,CREATE INDEX idx_quote_notes_created_at ON public.quote_notes USING btree (created_at DESC)
+public,quote_notes,idx_quote_notes_quote_id,CREATE INDEX idx_quote_notes_quote_id ON public.quote_notes USING btree (quote_id)
+public,quote_notes,quote_notes_pkey,CREATE UNIQUE INDEX quote_notes_pkey ON public.quote_notes USING btree (note_id)
 public,quote_requests,idx_quote_requests_assigned,CREATE INDEX idx_quote_requests_assigned ON public.quote_requests USING btree (assigned_to)
 public,quote_requests,idx_quote_requests_company,CREATE INDEX idx_quote_requests_company ON public.quote_requests USING btree (company_id)
 public,quote_requests,idx_quote_requests_contact,CREATE INDEX idx_quote_requests_contact ON public.quote_requests USING btree (contact_id)
@@ -145,6 +150,13 @@ public,subscriptions,idx_subscriptions_stripe_customer,CREATE INDEX idx_subscrip
 public,subscriptions,idx_subscriptions_stripe_sub,CREATE INDEX idx_subscriptions_stripe_sub ON public.subscriptions USING btree (stripe_subscription_id)
 public,subscriptions,subscriptions_pkey,CREATE UNIQUE INDEX subscriptions_pkey ON public.subscriptions USING btree (subscription_id)
 public,subscriptions,subscriptions_stripe_subscription_id_key,CREATE UNIQUE INDEX subscriptions_stripe_subscription_id_key ON public.subscriptions USING btree (stripe_subscription_id)
+public,tasks,idx_tasks_company_id,CREATE INDEX idx_tasks_company_id ON public.tasks USING btree (company_id)
+public,tasks,idx_tasks_due_date,CREATE INDEX idx_tasks_due_date ON public.tasks USING btree (due_date)
+public,tasks,idx_tasks_priority,CREATE INDEX idx_tasks_priority ON public.tasks USING btree (priority DESC)
+public,tasks,idx_tasks_quote_id,CREATE INDEX idx_tasks_quote_id ON public.tasks USING btree (quote_id)
+public,tasks,idx_tasks_status,CREATE INDEX idx_tasks_status ON public.tasks USING btree (status)
+public,tasks,idx_tasks_user_id,CREATE INDEX idx_tasks_user_id ON public.tasks USING btree (user_id)
+public,tasks,tasks_pkey,CREATE UNIQUE INDEX tasks_pkey ON public.tasks USING btree (task_id)
 public,tool_consumable_map,idx_tcm_consumable,CREATE INDEX idx_tcm_consumable ON public.tool_consumable_map USING btree (consumable_code)
 public,tool_consumable_map,idx_tcm_tool,CREATE INDEX idx_tcm_tool ON public.tool_consumable_map USING btree (tool_code)
 public,tool_consumable_map,tool_consumable_map_pkey,"CREATE UNIQUE INDEX tool_consumable_map_pkey ON public.tool_consumable_map USING btree (tool_code, consumable_code)"

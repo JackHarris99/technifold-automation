@@ -25,6 +25,7 @@ orders,rental_agreement_id,rental_agreements,rental_id
 orders,shipping_address_id,shipping_addresses,address_id
 quote_items,product_code,products,product_code
 quote_items,quote_id,quotes,quote_id
+quote_notes,quote_id,quotes,quote_id
 quote_requests,company_id,companies,company_id
 quote_requests,contact_id,contacts,contact_id
 quotes,company_id,companies,company_id
@@ -43,6 +44,8 @@ subscription_tools,subscription_id,subscriptions,subscription_id
 subscription_tools,tool_code,products,product_code
 subscriptions,company_id,companies,company_id
 subscriptions,contact_id,contacts,contact_id
+tasks,invoice_id,invoices,invoice_id
+tasks,quote_id,quotes,quote_id
 tool_consumable_map,consumable_code,products,product_code
 trial_intents,company_id,companies,company_id
 trial_intents,contact_id,contacts,contact_id

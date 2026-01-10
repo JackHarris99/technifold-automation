@@ -18,6 +18,7 @@ invoice_items,product_code
 invoice_items,line_number
 invoices,invoice_id
 machines,machine_id
+notification_preferences,user_id
 order_items,order_id
 order_items,product_code
 orders,order_id
@@ -27,6 +28,7 @@ products,product_code
 quote_items,quote_id
 quote_items,product_code
 quote_items,line_number
+quote_notes,note_id
 quote_requests,quote_request_id
 quotes,quote_id
 rental_agreements,rental_id
@@ -40,6 +42,7 @@ subscription_tools,subscription_id
 subscription_tools,tool_code
 subscription_tools,added_at
 subscriptions,subscription_id
+tasks,task_id
 tool_consumable_map,tool_code
 tool_consumable_map,consumable_code
 tool_pricing_ladder,id

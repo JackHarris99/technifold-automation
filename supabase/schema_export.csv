@@ -44,6 +44,7 @@ companies,billing_city,text,YES,null
 companies,billing_state_province,text,YES,null
 companies,billing_postal_code,text,YES,null
 companies,billing_country,text,YES,null
+companies,status,text,YES,'active'::text
 company_consumables,company_id,text,NO,null
 company_consumables,consumable_code,text,NO,null
 company_consumables,first_ordered_at,date,NO,null
@@ -196,6 +197,18 @@ machines,type_canonical,text,YES,null
 machines,outer_diameter_mm,numeric,YES,null
 machines,shaft_specs,jsonb,YES,null
 machines,shaft_config_id,integer,YES,null
+notification_preferences,user_id,text,NO,null
+notification_preferences,notify_quote_viewed,boolean,YES,TRUE
+notification_preferences,notify_quote_accepted,boolean,YES,TRUE
+notification_preferences,notify_invoice_paid,boolean,YES,TRUE
+notification_preferences,notify_trial_ending,boolean,YES,TRUE
+notification_preferences,daily_digest_enabled,boolean,YES,TRUE
+notification_preferences,daily_digest_time,time without time zone,YES,'09:00:00'::time without time zone
+notification_preferences,weekly_summary_enabled,boolean,YES,TRUE
+notification_preferences,weekly_summary_day,integer,YES,5
+notification_preferences,weekly_summary_time,time without time zone,YES,'17:00:00'::time without time zone
+notification_preferences,created_at,timestamp with time zone,YES,now()
+notification_preferences,updated_at,timestamp with time zone,YES,now()
 order_items,order_id,uuid,NO,null
 order_items,product_code,text,NO,null
 order_items,description,text,YES,null
@@ -299,6 +312,13 @@ quote_items,line_total,numeric,NO,null
 quote_items,product_type,text,YES,null
 quote_items,category,text,YES,null
 quote_items,image_url,text,YES,null
+quote_notes,note_id,uuid,NO,gen_random_uuid()
+quote_notes,quote_id,uuid,NO,null
+quote_notes,user_id,text,NO,null
+quote_notes,user_name,text,NO,null
+quote_notes,note_text,text,NO,null
+quote_notes,created_at,timestamp with time zone,YES,now()
+quote_notes,updated_at,timestamp with time zone,YES,now()
 quote_requests,quote_request_id,uuid,NO,gen_random_uuid()
 quote_requests,company_id,character varying,NO,null
 quote_requests,contact_id,uuid,NO,null
@@ -448,6 +468,24 @@ subscriptions,updated_at,timestamp without time zone,YES,CURRENT_TIMESTAMP
 subscriptions,notes,text,YES,null
 subscriptions,created_by,text,YES,null
 subscriptions,updated_by,text,YES,null
+tasks,task_id,uuid,NO,gen_random_uuid()
+tasks,user_id,text,NO,null
+tasks,task_type,text,NO,null
+tasks,priority,integer,YES,50
+tasks,status,text,YES,'pending'::text
+tasks,title,text,NO,null
+tasks,description,text,YES,null
+tasks,company_id,text,YES,null
+tasks,contact_id,text,YES,null
+tasks,quote_id,uuid,YES,null
+tasks,invoice_id,uuid,YES,null
+tasks,subscription_id,uuid,YES,null
+tasks,due_date,timestamp with time zone,YES,null
+tasks,completed_at,timestamp with time zone,YES,null
+tasks,dismissed_at,timestamp with time zone,YES,null
+tasks,auto_generated,boolean,YES,FALSE
+tasks,created_at,timestamp with time zone,YES,now()
+tasks,updated_at,timestamp with time zone,YES,now()
 tool_consumable_map,tool_code,text,NO,null
 tool_consumable_map,consumable_code,text,NO,null
 tool_pricing_ladder,id,integer,NO,nextval('tool_pricing_ladder_id_seq'::regclass)
