@@ -78,7 +78,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
         total_purchases,
         total_quantity,
         source,
-        products:product_code (description, category, price)
+        products:product_code (description, category, price, image_url)
       `)
       .eq('company_id', company_id)
       .eq('product_type', 'consumable')
@@ -94,7 +94,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
         total_purchases,
         total_quantity,
         source,
-        products:product_code (description, price)
+        products:product_code (description, price, image_url)
       `)
       .eq('company_id', company_id)
       .eq('product_type', 'part')

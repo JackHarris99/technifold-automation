@@ -7,6 +7,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import AddContactModal from './modals/AddContactModal';
 import AddToolModal from './modals/AddToolModal';
 import AddSubscriptionToolModal from './modals/AddSubscriptionToolModal';
@@ -464,17 +465,34 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {tools.map((item: any) => (
                 <div key={item.product_code} className="border border-gray-200 rounded-lg p-4">
-                  <div className="font-medium">{item.products?.description || item.product_code}</div>
-                  <div className="text-xs text-gray-500 mt-1">SKU: {item.product_code}</div>
-                  <div className="text-sm text-gray-600 mt-2">Qty: {item.total_quantity}</div>
-                  <div className="text-xs text-gray-400 mt-1">
-                    Last: {item.last_purchased_at}
+                  <div className="flex items-start gap-3">
+                    <div className="relative w-16 h-16 bg-gray-50 rounded-lg flex-shrink-0 overflow-hidden border border-gray-200">
+                      <Image
+                        src={item.products?.image_url || `/product_images/${item.product_code}.jpg`}
+                        alt={item.products?.description || item.product_code}
+                        fill
+                        className="object-contain p-1"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.onerror = null;
+                          target.src = '/product-placeholder.svg';
+                        }}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium">{item.products?.description || item.product_code}</div>
+                      <div className="text-xs text-gray-500 mt-1">SKU: {item.product_code}</div>
+                      <div className="text-sm text-gray-600 mt-2">Qty: {item.total_quantity}</div>
+                      <div className="text-xs text-gray-400 mt-1">
+                        Last: {item.last_purchased_at}
+                      </div>
+                      {item.source === 'manual' && (
+                        <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded mt-2 inline-block">
+                          Manually Added
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  {item.source === 'manual' && (
-                    <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded mt-2 inline-block">
-                      Manually Added
-                    </span>
-                  )}
                 </div>
               ))}
             </div>
@@ -494,12 +512,29 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {consumables.map((item: any) => (
                 <div key={item.product_code} className="border border-gray-200 rounded-lg p-4">
-                  <div className="font-medium text-sm">{item.products?.description || item.product_code}</div>
-                  <div className="text-xs text-gray-500 mt-1">{item.product_code}</div>
-                  <div className="text-xs text-gray-600 mt-2">
-                    {item.total_purchases} orders • {item.total_quantity} total
+                  <div className="flex items-start gap-3">
+                    <div className="relative w-16 h-16 bg-gray-50 rounded-lg flex-shrink-0 overflow-hidden border border-gray-200">
+                      <Image
+                        src={item.products?.image_url || `/product_images/${item.product_code}.jpg`}
+                        alt={item.products?.description || item.product_code}
+                        fill
+                        className="object-contain p-1"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.onerror = null;
+                          target.src = '/product-placeholder.svg';
+                        }}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm">{item.products?.description || item.product_code}</div>
+                      <div className="text-xs text-gray-500 mt-1">{item.product_code}</div>
+                      <div className="text-xs text-gray-600 mt-2">
+                        {item.total_purchases} orders • {item.total_quantity} total
+                      </div>
+                      <div className="text-xs text-gray-400 mt-1">Last: {item.last_purchased_at}</div>
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-400 mt-1">Last: {item.last_purchased_at}</div>
                 </div>
               ))}
             </div>
@@ -517,10 +552,27 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {parts.map((item: any) => (
                 <div key={item.product_code} className="border border-gray-200 rounded-lg p-4">
-                  <div className="font-medium text-sm">{item.products?.description || item.product_code}</div>
-                  <div className="text-xs text-gray-500 mt-1">{item.product_code}</div>
-                  <div className="text-xs text-gray-600 mt-2">Qty: {item.total_quantity}</div>
-                  <div className="text-xs text-gray-400 mt-1">Last: {item.last_purchased_at}</div>
+                  <div className="flex items-start gap-3">
+                    <div className="relative w-16 h-16 bg-gray-50 rounded-lg flex-shrink-0 overflow-hidden border border-gray-200">
+                      <Image
+                        src={item.products?.image_url || `/product_images/${item.product_code}.jpg`}
+                        alt={item.products?.description || item.product_code}
+                        fill
+                        className="object-contain p-1"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.onerror = null;
+                          target.src = '/product-placeholder.svg';
+                        }}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm">{item.products?.description || item.product_code}</div>
+                      <div className="text-xs text-gray-500 mt-1">{item.product_code}</div>
+                      <div className="text-xs text-gray-600 mt-2">Qty: {item.total_quantity}</div>
+                      <div className="text-xs text-gray-400 mt-1">Last: {item.last_purchased_at}</div>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
