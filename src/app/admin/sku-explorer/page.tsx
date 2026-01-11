@@ -23,7 +23,7 @@ export default async function SkuExplorerPage() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             SKU Explorer
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-800">
             Search products, view associations, and edit descriptions
           </p>
         </div>

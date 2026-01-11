@@ -89,7 +89,7 @@ export default async function ReorderOpportunitiesPage() {
               <div className="flex items-center gap-3 mb-1">
                 <Link
                   href="/admin/sales"
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-700 hover:text-gray-700"
                 >
                   ← Sales Center
                 </Link>
@@ -97,7 +97,7 @@ export default async function ReorderOpportunitiesPage() {
               <h1 className="text-2xl font-bold text-gray-900">
                 Reorder Opportunities
               </h1>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-800 mt-1">
                 {reorderOpportunities.length} compan{reorderOpportunities.length !== 1 ? 'ies' : 'y'} with 90+ days since last order • {viewMode === 'my_customers' ? 'My Customers Only' : 'All Companies (Team View)'}
               </p>
             </div>
@@ -110,7 +110,7 @@ export default async function ReorderOpportunitiesPage() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
             <div className="text-5xl mb-4">📦</div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">No Reorder Opportunities</h2>
-            <p className="text-gray-600">All customers have ordered within the last 90 days.</p>
+            <p className="text-gray-800">All customers have ordered within the last 90 days.</p>
           </div>
         ) : (
           <div className="space-y-8">
@@ -185,14 +185,14 @@ function OpportunityRow({ opportunity, urgency }: { opportunity: ReorderOpportun
     >
       <div className="flex-1">
         <h3 className="font-semibold text-gray-900">{opportunity.company_name}</h3>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-700">
           Last order: {new Date(opportunity.last_invoice_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
           {opportunity.order_count > 0 && ` • ${opportunity.order_count} total order${opportunity.order_count !== 1 ? 's' : ''}`}
         </p>
       </div>
       <div className="flex items-center gap-4">
         {opportunity.total_spent > 0 && (
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-700">
             £{opportunity.total_spent.toLocaleString('en-GB', { minimumFractionDigits: 0 })} lifetime
           </span>
         )}

@@ -117,7 +117,7 @@ export default function SubscriptionsAdminPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading subscriptions...</p>
+          <p className="mt-4 text-gray-800">Loading subscriptions...</p>
         </div>
       </div>
     );
@@ -131,7 +131,7 @@ export default function SubscriptionsAdminPage() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Subscriptions</h1>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-700">
                 Manage tool rental subscriptions and track recurring revenue
               </p>
             </div>
@@ -171,7 +171,7 @@ export default function SubscriptionsAdminPage() {
                   ? 'bg-red-600 text-white'
                   : anomalies.length > 0
                     ? 'bg-red-50 text-red-700 border border-red-300 hover:bg-red-100'
-                    : 'bg-white text-gray-400 border border-gray-200'
+                    : 'bg-white text-gray-800 border border-gray-200'
               }`}
             >
               Anomalies
@@ -207,7 +207,7 @@ export default function SubscriptionsAdminPage() {
                   </svg>
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-1">No Anomalies Found</h3>
-                <p className="text-gray-500">All subscriptions are within their ratchet limits</p>
+                <p className="text-gray-700">All subscriptions are within their ratchet limits</p>
               </div>
             ) : (
               <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -229,12 +229,12 @@ export default function SubscriptionsAdminPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">{anomaly.company_name}</div>
                           {anomaly.stripe_subscription_id && (
-                            <div className="text-xs text-gray-500 font-mono">{anomaly.stripe_subscription_id.substring(0, 20)}...</div>
+                            <div className="text-xs text-gray-700 font-mono">{anomaly.stripe_subscription_id.substring(0, 20)}...</div>
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">{anomaly.contact_name || '—'}</div>
-                          <div className="text-xs text-gray-500">{anomaly.contact_email || '—'}</div>
+                          <div className="text-xs text-gray-700">{anomaly.contact_email || '—'}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-red-600">
@@ -274,7 +274,7 @@ export default function SubscriptionsAdminPage() {
         {/* Subscriptions Table */}
         {!showAnomalies && filteredSubscriptions.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-            <div className="text-gray-400 mb-4">
+            <div className="text-gray-800 mb-4">
               <svg
                 className="mx-auto h-12 w-12"
                 fill="none"
@@ -292,7 +292,7 @@ export default function SubscriptionsAdminPage() {
             <h3 className="text-lg font-medium text-gray-900 mb-1">
               No {filter !== 'all' ? filter : ''} subscriptions found
             </h3>
-            <p className="text-gray-500 mb-6">
+            <p className="text-gray-700 mb-6">
               Get started by creating your first subscription
             </p>
             <Link
@@ -307,25 +307,25 @@ export default function SubscriptionsAdminPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                     Company
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                     Contact
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                     Tools
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                     Price
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                     Next Billing
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -340,7 +340,7 @@ export default function SubscriptionsAdminPage() {
                             {subscription.company_name}
                           </div>
                           {subscription.stripe_subscription_id && (
-                            <div className="text-xs text-gray-500 font-mono">
+                            <div className="text-xs text-gray-700 font-mono">
                               {subscription.stripe_subscription_id.substring(0, 20)}...
                             </div>
                           )}
@@ -351,7 +351,7 @@ export default function SubscriptionsAdminPage() {
                       <div className="text-sm text-gray-900">
                         {subscription.contact_name || '—'}
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-700">
                         {subscription.contact_email || '—'}
                       </div>
                     </td>
@@ -360,7 +360,7 @@ export default function SubscriptionsAdminPage() {
                         {subscription.tool_count} {subscription.tool_count === 1 ? 'tool' : 'tools'}
                       </div>
                       {subscription.tools && subscription.tools.length > 0 && (
-                        <div className="text-xs text-gray-500 mt-1">
+                        <div className="text-xs text-gray-700 mt-1">
                           {subscription.tools.slice(0, 2).join(', ')}
                           {subscription.tools.length > 2 && ` +${subscription.tools.length - 2} more`}
                         </div>
@@ -371,7 +371,7 @@ export default function SubscriptionsAdminPage() {
                         {formatCurrency(subscription.monthly_price, subscription.currency)}/mo
                       </div>
                       {subscription.ratchet_max && subscription.ratchet_max > subscription.monthly_price && (
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-700">
                           Peak: {formatCurrency(subscription.ratchet_max, subscription.currency)}
                         </div>
                       )}
@@ -380,13 +380,13 @@ export default function SubscriptionsAdminPage() {
                       <div className="flex flex-col gap-1">
                         {getStatusBadge(subscription.status)}
                         {subscription.status === 'trial' && subscription.trial_days_remaining > 0 && (
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-gray-700">
                             {subscription.trial_days_remaining} days left
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                       {subscription.status === 'trial'
                         ? formatDate(subscription.trial_end_date)
                         : formatDate(subscription.next_billing_date)}
@@ -411,13 +411,13 @@ export default function SubscriptionsAdminPage() {
           <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-4">
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
-                <dt className="text-sm font-medium text-gray-500 truncate">Total Subscriptions</dt>
+                <dt className="text-sm font-medium text-gray-700 truncate">Total Subscriptions</dt>
                 <dd className="mt-1 text-3xl font-semibold text-gray-900">{subscriptions.length}</dd>
               </div>
             </div>
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
-                <dt className="text-sm font-medium text-gray-500 truncate">Active Trials</dt>
+                <dt className="text-sm font-medium text-gray-700 truncate">Active Trials</dt>
                 <dd className="mt-1 text-3xl font-semibold text-blue-600">
                   {subscriptions.filter(s => s.status === 'trial').length}
                 </dd>
@@ -425,7 +425,7 @@ export default function SubscriptionsAdminPage() {
             </div>
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
-                <dt className="text-sm font-medium text-gray-500 truncate">Active Paying</dt>
+                <dt className="text-sm font-medium text-gray-700 truncate">Active Paying</dt>
                 <dd className="mt-1 text-3xl font-semibold text-green-600">
                   {subscriptions.filter(s => s.status === 'active').length}
                 </dd>
@@ -433,7 +433,7 @@ export default function SubscriptionsAdminPage() {
             </div>
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
-                <dt className="text-sm font-medium text-gray-500 truncate">Monthly MRR</dt>
+                <dt className="text-sm font-medium text-gray-700 truncate">Monthly MRR</dt>
                 <dd className="mt-1 text-3xl font-semibold text-gray-900">
                   {formatCurrency(
                     subscriptions

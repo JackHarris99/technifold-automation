@@ -146,7 +146,7 @@ export default function QuotesPage() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Quotes</h1>
-        <p className="text-sm text-gray-600 mt-1">
+        <p className="text-sm text-gray-800 mt-1">
           Track and manage all customer quotes
         </p>
       </div>
@@ -154,7 +154,7 @@ export default function QuotesPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
         <div className="bg-white rounded-lg p-4 border border-gray-200">
-          <div className="text-sm text-gray-600">Total Quotes</div>
+          <div className="text-sm text-gray-800">Total Quotes</div>
           <div className="text-2xl font-bold text-gray-900 mt-1">{stats.total}</div>
         </div>
         <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
@@ -197,9 +197,9 @@ export default function QuotesPage() {
       {/* Quotes Table */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-gray-500">Loading quotes...</div>
+          <div className="p-8 text-center text-gray-700">Loading quotes...</div>
         ) : quotes.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">No quotes found</div>
+          <div className="p-8 text-center text-gray-700">No quotes found</div>
         ) : (
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
@@ -240,10 +240,10 @@ export default function QuotesPage() {
                   <td className="px-4 py-3 text-sm font-semibold text-gray-900 text-right">
                     £{quote.total_amount?.toLocaleString() || '0'}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
+                  <td className="px-4 py-3 text-sm text-gray-800">
                     {getTimeAgo(quote.sent_at)}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
+                  <td className="px-4 py-3 text-sm text-gray-800">
                     {getTimeAgo(quote.viewed_at)}
                   </td>
                   <td className="px-4 py-3">
@@ -266,7 +266,7 @@ export default function QuotesPage() {
 
       {/* Summary */}
       {!loading && quotes.length > 0 && (
-        <div className="mt-4 text-sm text-gray-600 text-center">
+        <div className="mt-4 text-sm text-gray-800 text-center">
           Showing {quotes.length} quotes • Total pipeline value: £{stats.totalValue.toLocaleString()}
         </div>
       )}

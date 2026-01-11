@@ -86,7 +86,7 @@ export default async function UnpaidInvoicesPage() {
               <div className="flex items-center gap-3 mb-1">
                 <Link
                   href="/admin/sales"
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-700 hover:text-gray-700"
                 >
                   ← Sales Center
                 </Link>
@@ -94,7 +94,7 @@ export default async function UnpaidInvoicesPage() {
               <h1 className="text-2xl font-bold text-gray-900">
                 Unpaid Invoices
               </h1>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-800 mt-1">
                 {unpaidInvoices.length} unpaid invoice{unpaidInvoices.length !== 1 ? 's' : ''} totalling{' '}
                 <span className="font-bold text-orange-600">
                   £{totalUnpaid.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -111,7 +111,7 @@ export default async function UnpaidInvoicesPage() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
             <div className="text-5xl mb-4">💰</div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">All Invoices Paid!</h2>
-            <p className="text-gray-600">No outstanding invoices in your territory.</p>
+            <p className="text-gray-800">No outstanding invoices in your territory.</p>
           </div>
         ) : (
           <div className="space-y-8">
@@ -190,7 +190,7 @@ function InvoiceRow({ invoice, urgency }: { invoice: UnpaidInvoice; urgency: 'ov
         >
           {invoice.company_name}
         </Link>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-700">
           Invoice #{invoice.invoice_id.slice(-8)} • {new Date(invoice.invoice_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
         </p>
       </div>

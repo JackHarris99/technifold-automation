@@ -132,7 +132,7 @@ export default function ShippingManifestsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Shipping Manifests</h1>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-800 mt-1">
                 Manage international shipments and customs declarations
               </p>
             </div>
@@ -166,10 +166,10 @@ export default function ShippingManifestsPage() {
       {/* Manifests List */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         {loading ? (
-          <div className="text-center py-12 text-gray-600">Loading manifests...</div>
+          <div className="text-center py-12 text-gray-800">Loading manifests...</div>
         ) : manifests.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-            <p className="text-gray-600">No manifests found for this filter</p>
+            <p className="text-gray-800">No manifests found for this filter</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -188,19 +188,19 @@ export default function ShippingManifestsPage() {
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
-                        <span className="text-gray-600">Destination:</span>
+                        <span className="text-gray-800">Destination:</span>
                         <div className="font-semibold">{manifest.destination_country}</div>
                       </div>
                       <div>
-                        <span className="text-gray-600">Type:</span>
+                        <span className="text-gray-800">Type:</span>
                         <div className="font-semibold">{manifest.shipment_type}</div>
                       </div>
                       <div>
-                        <span className="text-gray-600">Value:</span>
+                        <span className="text-gray-800">Value:</span>
                         <div className="font-semibold">£{manifest.total_customs_value_gbp.toFixed(2)}</div>
                       </div>
                       <div>
-                        <span className="text-gray-600">Weight:</span>
+                        <span className="text-gray-800">Weight:</span>
                         <div className="font-semibold">{manifest.total_weight_kg.toFixed(2)} kg</div>
                       </div>
                     </div>
@@ -212,12 +212,12 @@ export default function ShippingManifestsPage() {
                   <div className="mb-4 p-3 bg-blue-50 rounded border border-blue-200">
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="text-gray-600">Courier:</span>
+                        <span className="text-gray-800">Courier:</span>
                         <div className="font-semibold">{manifest.courier}</div>
                       </div>
                       {manifest.tracking_number && (
                         <div>
-                          <span className="text-gray-600">Tracking:</span>
+                          <span className="text-gray-800">Tracking:</span>
                           <div className="font-semibold">{manifest.tracking_number}</div>
                         </div>
                       )}
@@ -232,7 +232,7 @@ export default function ShippingManifestsPage() {
                   </div>
                   <div className="space-y-1">
                     {manifest.items.map((item: any, idx: number) => (
-                      <div key={idx} className="text-sm text-gray-600">
+                      <div key={idx} className="text-sm text-gray-800">
                         {item.quantity}x {item.description} ({item.product_code}) - HS: {item.hs_code}
                       </div>
                     ))}
@@ -241,7 +241,7 @@ export default function ShippingManifestsPage() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-gray-700">
                     Customs Invoice: {manifest.customs_invoice_number}
                   </div>
                   <div className="flex-1"></div>
@@ -279,7 +279,7 @@ export default function ShippingManifestsPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full p-8">
             <h2 className="text-2xl font-bold mb-4">Create Shipping Manifest</h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-800 mb-6">
               Manifest creation UI coming soon. For now, manifests are created automatically when orders are marked as
               shipped internationally.
             </p>

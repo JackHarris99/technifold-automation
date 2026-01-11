@@ -63,7 +63,7 @@ export default async function EngagementsPage() {
           <h1 className="text-3xl font-bold text-gray-900">
             Engagement Events
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-800 mt-2">
             {filteredEngagements.length} events • {viewMode === 'my_customers' ? 'My Customers Only' : 'All Companies (Team View)'}
           </p>
         </div>

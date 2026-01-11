@@ -98,7 +98,7 @@ export default async function InvoicesPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Invoices</h1>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-800 mt-1">
                 {viewMode === 'my_customers' ? 'My Customers Only' : 'All Companies (Team View)'}
               </p>
             </div>
@@ -110,25 +110,25 @@ export default async function InvoicesPage() {
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-white border border-gray-200 border-l-4 border-l-orange-500 rounded-lg p-5">
-            <div className="text-sm text-gray-600 mb-1">Unpaid</div>
+            <div className="text-sm text-gray-800 mb-1">Unpaid</div>
             <div className="text-2xl font-bold text-gray-900">
               £{unpaidTotal.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
             </div>
-            <div className="text-sm text-gray-500">{unpaidInvoices.length} invoice{unpaidInvoices.length !== 1 ? 's' : ''}</div>
+            <div className="text-sm text-gray-700">{unpaidInvoices.length} invoice{unpaidInvoices.length !== 1 ? 's' : ''}</div>
           </div>
           <div className="bg-white border border-gray-200 border-l-4 border-l-green-500 rounded-lg p-5">
-            <div className="text-sm text-gray-600 mb-1">Paid (last 100)</div>
+            <div className="text-sm text-gray-800 mb-1">Paid (last 100)</div>
             <div className="text-2xl font-bold text-gray-900">
               £{paidTotal.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
             </div>
-            <div className="text-sm text-gray-500">{paidInvoices.length} invoice{paidInvoices.length !== 1 ? 's' : ''}</div>
+            <div className="text-sm text-gray-700">{paidInvoices.length} invoice{paidInvoices.length !== 1 ? 's' : ''}</div>
           </div>
           <div className="bg-white border border-gray-200 border-l-4 border-l-blue-500 rounded-lg p-5">
-            <div className="text-sm text-gray-600 mb-1">Total Shown</div>
+            <div className="text-sm text-gray-800 mb-1">Total Shown</div>
             <div className="text-2xl font-bold text-gray-900">
               {enrichedInvoices.length}
             </div>
-            <div className="text-sm text-gray-500">invoices</div>
+            <div className="text-sm text-gray-700">invoices</div>
           </div>
         </div>
 
@@ -155,7 +155,7 @@ export default async function InvoicesPage() {
               <tbody className="divide-y divide-gray-100">
                 {enrichedInvoices.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-gray-500">
+                    <td colSpan={6} className="py-12 text-center text-gray-700">
                       No invoices found
                     </td>
                   </tr>
@@ -175,7 +175,7 @@ export default async function InvoicesPage() {
                         {invoice.company_name}
                       </Link>
                     </td>
-                    <td className="py-3 px-4 text-sm text-gray-600">
+                    <td className="py-3 px-4 text-sm text-gray-800">
                       {new Date(invoice.invoice_date).toLocaleDateString('en-GB', {
                         day: 'numeric',
                         month: 'short',

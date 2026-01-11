@@ -309,7 +309,7 @@ export default function SubscriptionManagePage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading subscription...</p>
+          <p className="mt-4 text-gray-800">Loading subscription...</p>
         </div>
       </div>
     );
@@ -331,7 +331,7 @@ export default function SubscriptionManagePage() {
           <div className="flex justify-between items-start">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{company?.company_name}</h1>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-700">
                 Subscription ID: {subscription.subscription_id}
               </p>
             </div>
@@ -349,29 +349,29 @@ export default function SubscriptionManagePage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-sm font-medium text-gray-500">Monthly Price</div>
+                  <div className="text-sm font-medium text-gray-700">Monthly Price</div>
                   <div className="mt-1 text-2xl font-bold text-gray-900">
                     {formatCurrency(subscription.monthly_price, subscription.currency)}
                   </div>
                   {subscription.ratchet_max && subscription.ratchet_max > subscription.monthly_price && (
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-gray-700 mt-1">
                       Peak: {formatCurrency(subscription.ratchet_max, subscription.currency)}
                     </div>
                   )}
                 </div>
 
                 <div>
-                  <div className="text-sm font-medium text-gray-500">Status</div>
+                  <div className="text-sm font-medium text-gray-700">Status</div>
                   <div className="mt-2">{getStatusBadge(subscription.status)}</div>
                 </div>
 
                 <div>
-                  <div className="text-sm font-medium text-gray-500">Contact</div>
+                  <div className="text-sm font-medium text-gray-700">Contact</div>
                   <div className="mt-1 text-sm text-gray-900">
                     {contact ? (
                       <>
                         <div>{contact.full_name}</div>
-                        <div className="text-gray-500">{contact.email}</div>
+                        <div className="text-gray-700">{contact.email}</div>
                       </>
                     ) : (
                       '—'
@@ -380,7 +380,7 @@ export default function SubscriptionManagePage() {
                 </div>
 
                 <div>
-                  <div className="text-sm font-medium text-gray-500">Created</div>
+                  <div className="text-sm font-medium text-gray-700">Created</div>
                   <div className="mt-1 text-sm text-gray-900">
                     {formatDate(subscription.created_at)}
                   </div>
@@ -388,7 +388,7 @@ export default function SubscriptionManagePage() {
 
                 {subscription.trial_end_date && (
                   <div>
-                    <div className="text-sm font-medium text-gray-500">Trial Ends</div>
+                    <div className="text-sm font-medium text-gray-700">Trial Ends</div>
                     <div className="mt-1 text-sm text-gray-900">
                       {formatDate(subscription.trial_end_date)}
                     </div>
@@ -397,7 +397,7 @@ export default function SubscriptionManagePage() {
 
                 {subscription.next_billing_date && (
                   <div>
-                    <div className="text-sm font-medium text-gray-500">Next Billing</div>
+                    <div className="text-sm font-medium text-gray-700">Next Billing</div>
                     <div className="mt-1 text-sm text-gray-900">
                       {formatDate(subscription.next_billing_date)}
                     </div>
@@ -406,7 +406,7 @@ export default function SubscriptionManagePage() {
 
                 {subscription.stripe_subscription_id && (
                   <div className="col-span-2">
-                    <div className="text-sm font-medium text-gray-500">Stripe Subscription ID</div>
+                    <div className="text-sm font-medium text-gray-700">Stripe Subscription ID</div>
                     <div className="mt-1 text-sm text-gray-900 font-mono">
                       {subscription.stripe_subscription_id}
                     </div>
@@ -416,7 +416,7 @@ export default function SubscriptionManagePage() {
 
               {subscription.notes && (
                 <div className="mt-4 pt-4 border-t">
-                  <div className="text-sm font-medium text-gray-500 mb-1">Internal Notes</div>
+                  <div className="text-sm font-medium text-gray-700 mb-1">Internal Notes</div>
                   <div className="text-sm text-gray-700">{subscription.notes}</div>
                 </div>
               )}
@@ -487,14 +487,14 @@ export default function SubscriptionManagePage() {
                           <div className="text-sm font-medium text-gray-900">
                             {product?.description || toolCode}
                           </div>
-                          <div className="text-xs text-gray-500">{toolCode}</div>
+                          <div className="text-xs text-gray-700">{toolCode}</div>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <p className="text-sm text-gray-500">No tools assigned</p>
+                <p className="text-sm text-gray-700">No tools assigned</p>
               )}
             </div>
 
@@ -508,16 +508,16 @@ export default function SubscriptionManagePage() {
                       <div className="flex-shrink-0 w-2 h-2 mt-1.5 rounded-full bg-blue-500"></div>
                       <div className="flex-1">
                         <div className="font-medium text-gray-900">{event.event_name}</div>
-                        <div className="text-xs text-gray-500">{formatDate(event.performed_at)}</div>
+                        <div className="text-xs text-gray-700">{formatDate(event.performed_at)}</div>
                         {event.notes && (
-                          <div className="text-xs text-gray-600 mt-1">{event.notes}</div>
+                          <div className="text-xs text-gray-800 mt-1">{event.notes}</div>
                         )}
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-gray-500">No activity yet</p>
+                <p className="text-sm text-gray-700">No activity yet</p>
               )}
             </div>
           </div>
@@ -617,7 +617,7 @@ export default function SubscriptionManagePage() {
                   </div>
                   <div>
                     <div className="font-medium text-green-700">Connected</div>
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-gray-700 mt-1">
                       Billing is handled by Stripe
                     </div>
                   </div>
@@ -635,7 +635,7 @@ export default function SubscriptionManagePage() {
                   </div>
                   <div>
                     <div className="font-medium text-yellow-700">Not Connected</div>
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-gray-700 mt-1">
                       Customer needs to enter payment details before billing starts
                     </div>
                   </div>

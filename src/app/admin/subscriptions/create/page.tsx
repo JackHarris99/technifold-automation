@@ -184,7 +184,7 @@ export default function CreateSubscriptionPage() {
             ← Back to Subscriptions
           </Link>
           <h1 className="text-3xl font-bold text-gray-900">Create Subscription</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-700">
             Set up a new tool rental subscription for a customer
           </p>
         </div>
@@ -246,7 +246,7 @@ export default function CreateSubscriptionPage() {
             </label>
             <div className="border border-gray-300 rounded-md p-4 max-h-64 overflow-y-auto">
               {products.length === 0 ? (
-                <p className="text-sm text-gray-500">Loading tools...</p>
+                <p className="text-sm text-gray-700">Loading tools...</p>
               ) : (
                 <div className="space-y-2">
                   {products.map((product) => (
@@ -264,7 +264,7 @@ export default function CreateSubscriptionPage() {
                         <div className="text-sm font-medium text-gray-900">
                           {product.description}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-700">
                           {product.product_code}
                           {product.price > 0 && ` • Retail: £${product.price.toFixed(2)}`}
                         </div>
@@ -275,7 +275,7 @@ export default function CreateSubscriptionPage() {
               )}
             </div>
             {formData.tools.length > 0 && (
-              <p className="mt-2 text-sm text-gray-500">
+              <p className="mt-2 text-sm text-gray-700">
                 {formData.tools.length} tool{formData.tools.length !== 1 ? 's' : ''} selected
               </p>
             )}
@@ -288,7 +288,7 @@ export default function CreateSubscriptionPage() {
                 Monthly Price *
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-2 text-gray-500">£</span>
+                <span className="absolute left-3 top-2 text-gray-700">£</span>
                 <input
                   type="number"
                   step="0.01"
@@ -331,7 +331,7 @@ export default function CreateSubscriptionPage() {
               onChange={(e) => setFormData({ ...formData, trial_days: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-700">
               Set to 0 for immediate billing, or 30-90 days for typical trials
             </p>
           </div>

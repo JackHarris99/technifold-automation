@@ -102,7 +102,7 @@ export default async function TrialsEndingPage() {
               <div className="flex items-center gap-3 mb-1">
                 <Link
                   href="/admin/sales"
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-700 hover:text-gray-700"
                 >
                   ← Sales Center
                 </Link>
@@ -110,7 +110,7 @@ export default async function TrialsEndingPage() {
               <h1 className="text-2xl font-bold text-gray-900">
                 Trials Ending Soon
               </h1>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-800 mt-1">
                 {trialsEnding.length} trial{trialsEnding.length !== 1 ? 's' : ''} ending in the next 30 days • {viewMode === 'my_customers' ? 'My Customers Only' : 'All Companies (Team View)'}
               </p>
             </div>
@@ -123,7 +123,7 @@ export default async function TrialsEndingPage() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
             <div className="text-5xl mb-4">✅</div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">No Trials Ending Soon</h2>
-            <p className="text-gray-600">All active trials have more than 30 days remaining.</p>
+            <p className="text-gray-800">All active trials have more than 30 days remaining.</p>
           </div>
         ) : (
           <div className="space-y-8">
@@ -198,7 +198,7 @@ function TrialRow({ trial, urgency }: { trial: TrialEnding; urgency: 'critical' 
     >
       <div>
         <h3 className="font-semibold text-gray-900">{trial.company_name}</h3>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-700">
           {trial.machine_name || 'Unknown machine'} • Ends {new Date(trial.trial_end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
         </p>
       </div>

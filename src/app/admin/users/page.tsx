@@ -56,7 +56,7 @@ export default function UsersPage() {
   if (loading) {
     return (
         <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">Loading users...</div>
+          <div className="text-gray-700">Loading users...</div>
         </div>
     );
   }
@@ -78,13 +78,13 @@ export default function UsersPage() {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Territory</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Login</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Name</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Email</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Role</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Territory</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Last Login</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -94,7 +94,7 @@ export default function UsersPage() {
                     <div className="font-semibold text-gray-900">{user.full_name}</div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-sm text-gray-600">{user.email}</div>
+                    <div className="text-sm text-gray-800">{user.email}</div>
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
@@ -106,12 +106,12 @@ export default function UsersPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-800">
                       {user.sales_rep_id || '—'}
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-800">
                       {user.last_login_at
                         ? formatDistanceToNow(new Date(user.last_login_at), { addSuffix: true })
                         : 'Never'}

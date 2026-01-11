@@ -151,7 +151,7 @@ export default function TestReorderLinkPage() {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
             Test Reorder Link Generator
           </h1>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-800 mb-6">
             Generate a real tokenized URL to see exactly what customers see. Use this to test and troubleshoot customer issues.
           </p>
 
@@ -176,7 +176,7 @@ export default function TestReorderLinkPage() {
               1. Search Company
             </label>
             {loadingCompanies ? (
-              <div className="text-gray-500">Loading companies...</div>
+              <div className="text-gray-700">Loading companies...</div>
             ) : (
               <div className="relative">
                 <input
@@ -206,7 +206,7 @@ export default function TestReorderLinkPage() {
                         className="w-full px-4 py-3 text-left hover:bg-blue-50 border-b border-gray-100 last:border-b-0"
                       >
                         <div className="font-semibold text-gray-900">{company.company_name}</div>
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm text-gray-800">
                           {company.company_id} • {company.country || 'UK'} • {company.machine_count || 0} tools ({company.unique_tool_count || 0} unique)
                         </div>
                       </button>
@@ -237,7 +237,7 @@ export default function TestReorderLinkPage() {
                 2. Select Contact
               </label>
               {loadingContacts ? (
-                <div className="text-gray-500">Loading contacts...</div>
+                <div className="text-gray-700">Loading contacts...</div>
               ) : contacts.length === 0 ? (
                 <div className="text-yellow-600 p-3 bg-yellow-50 rounded-lg">
                   No contacts found for this company
@@ -323,7 +323,7 @@ export default function TestReorderLinkPage() {
         {/* Help Section */}
         <div className="mt-6 bg-white rounded-lg shadow p-6">
           <h3 className="font-semibold text-gray-900 mb-3">Troubleshooting Guide</h3>
-          <ul className="text-sm text-gray-600 space-y-2">
+          <ul className="text-sm text-gray-800 space-y-2">
             <li><strong>Empty portal?</strong> Company has no tools assigned in company_tools table.</li>
             <li><strong>No products?</strong> Check tool_consumable_map has consumables mapped to their tools.</li>
             <li><strong>Missing prices?</strong> Check products table has prices set for consumables.</li>

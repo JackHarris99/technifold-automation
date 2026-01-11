@@ -837,7 +837,7 @@ export default function ToolsQuoteBuilderPage() {
                             £{itemTotal.toFixed(2)}
                           </div>
                           {blanketDiscount > 0 && (
-                            <div className="text-[13px] text-gray-500 line-through mb-2">
+                            <div className="text-[13px] text-gray-700 line-through mb-2">
                               £{itemSubtotal.toFixed(2)}
                             </div>
                           )}

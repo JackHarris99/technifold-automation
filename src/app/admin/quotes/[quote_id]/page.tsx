@@ -224,7 +224,7 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
   if (loading) {
     return (
       <div className="p-8">
-        <div className="text-center text-gray-500">Loading quote...</div>
+        <div className="text-center text-gray-700">Loading quote...</div>
       </div>
     );
   }
@@ -232,7 +232,7 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
   if (!quote) {
     return (
       <div className="p-8">
-        <div className="text-center text-gray-500">Quote not found</div>
+        <div className="text-center text-gray-700">Quote not found</div>
       </div>
     );
   }
@@ -253,7 +253,7 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
             <h1 className="text-3xl font-bold text-gray-900">
               {quote.company_name}
             </h1>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-gray-800 mt-1">
               Quote #{quote.quote_id.slice(0, 8)} • Created by {quote.created_by_name}
             </p>
           </div>
@@ -264,7 +264,7 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
               <div className="text-2xl font-bold text-gray-900">
                 £{quote.total_amount?.toLocaleString() || '0'}
               </div>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-gray-800">
                 {quote.quote_type === 'interactive' ? 'Interactive' : 'Static'} Quote
               </div>
             </div>
@@ -281,23 +281,23 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
 
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <div className="text-gray-600">Sent</div>
+                <div className="text-gray-800">Sent</div>
                 <div className="font-semibold text-gray-900">{formatDate(quote.sent_at)}</div>
               </div>
               <div>
-                <div className="text-gray-600">Last Viewed</div>
+                <div className="text-gray-800">Last Viewed</div>
                 <div className="font-semibold text-gray-900">{formatDate(quote.viewed_at)}</div>
               </div>
               <div>
-                <div className="text-gray-600">Expires</div>
+                <div className="text-gray-800">Expires</div>
                 <div className="font-semibold text-gray-900">{formatDate(quote.expires_at)}</div>
               </div>
               <div>
-                <div className="text-gray-600">Contact</div>
+                <div className="text-gray-800">Contact</div>
                 <div className="font-semibold text-gray-900">
                   {quote.contact_name || 'No contact'}
                   {quote.contact_email && (
-                    <div className="text-xs text-gray-600">{quote.contact_email}</div>
+                    <div className="text-xs text-gray-800">{quote.contact_email}</div>
                   )}
                 </div>
               </div>
@@ -324,7 +324,7 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
                 <div key={index} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
                   <div className="flex-1">
                     <div className="font-medium text-gray-900">{item.description}</div>
-                    <div className="text-sm text-gray-600">{item.product_code}</div>
+                    <div className="text-sm text-gray-800">{item.product_code}</div>
                   </div>
                   <div className="text-right">
                     <div className="font-semibold text-gray-900">
@@ -364,7 +364,7 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
             {/* Notes List */}
             <div className="space-y-4">
               {quote.notes.length === 0 ? (
-                <div className="text-sm text-gray-500 text-center py-4">
+                <div className="text-sm text-gray-700 text-center py-4">
                   No notes yet. Add the first one above.
                 </div>
               ) : (
@@ -372,7 +372,7 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
                   <div key={note.note_id} className="bg-gray-50 rounded-lg p-4">
                     <div className="flex items-start justify-between mb-2">
                       <div className="font-semibold text-gray-900">{note.user_name}</div>
-                      <div className="text-xs text-gray-600">
+                      <div className="text-xs text-gray-800">
                         {formatDate(note.created_at)}
                       </div>
                     </div>
@@ -393,7 +393,7 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
 
             <div className="space-y-3">
               {quote.engagement_events.length === 0 ? (
-                <div className="text-sm text-gray-500 text-center py-4">
+                <div className="text-sm text-gray-700 text-center py-4">
                   No engagement events yet. Events are tracked when contacts view the quote.
                 </div>
               ) : (
@@ -409,11 +409,11 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
                         <div className="font-semibold text-gray-900 text-sm">
                           {event.contact_name}
                         </div>
-                        <div className="text-xs text-gray-600">
+                        <div className="text-xs text-gray-800">
                           {formatDate(event.created_at)}
                         </div>
                       </div>
-                      <div className="text-xs text-gray-600 mb-1">
+                      <div className="text-xs text-gray-800 mb-1">
                         {event.contact_email}
                       </div>
                       <div className="text-sm text-gray-700">
@@ -476,7 +476,7 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
                   </div>
                   <div>
                     <div className="text-sm font-semibold text-gray-900">Quote Accepted</div>
-                    <div className="text-xs text-gray-600">{formatDate(quote.accepted_at)}</div>
+                    <div className="text-xs text-gray-800">{formatDate(quote.accepted_at)}</div>
                   </div>
                 </div>
               )}
@@ -488,7 +488,7 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
                   </div>
                   <div>
                     <div className="text-sm font-semibold text-gray-900">Quote Viewed</div>
-                    <div className="text-xs text-gray-600">{formatDate(quote.viewed_at)}</div>
+                    <div className="text-xs text-gray-800">{formatDate(quote.viewed_at)}</div>
                   </div>
                 </div>
               )}
@@ -500,7 +500,7 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
                   </div>
                   <div>
                     <div className="text-sm font-semibold text-gray-900">Quote Sent</div>
-                    <div className="text-xs text-gray-600">{formatDate(quote.sent_at)}</div>
+                    <div className="text-xs text-gray-800">{formatDate(quote.sent_at)}</div>
                   </div>
                 </div>
               )}
@@ -511,8 +511,8 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
                 </div>
                 <div>
                   <div className="text-sm font-semibold text-gray-900">Quote Created</div>
-                  <div className="text-xs text-gray-600">{formatDate(quote.created_at)}</div>
-                  <div className="text-xs text-gray-500">by {quote.created_by_name}</div>
+                  <div className="text-xs text-gray-800">{formatDate(quote.created_at)}</div>
+                  <div className="text-xs text-gray-700">by {quote.created_by_name}</div>
                 </div>
               </div>
             </div>
@@ -526,7 +526,7 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
           <div className="bg-white rounded-lg max-w-md w-full p-6">
             <h3 className="text-lg font-bold text-gray-900 mb-4">Mark Quote as Lost</h3>
 
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-gray-800 mb-4">
               Please provide a reason why this quote was lost. This helps us improve our sales process.
             </p>
 

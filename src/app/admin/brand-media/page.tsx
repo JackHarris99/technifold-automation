@@ -62,7 +62,7 @@ export default function BrandMediaPage() {
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold mb-6">Brand Media</h1>
-          <div className="text-center py-12 text-gray-500">Loading brands...</div>
+          <div className="text-center py-12 text-gray-700">Loading brands...</div>
         </div>
       </div>
     );
@@ -84,7 +84,7 @@ export default function BrandMediaPage() {
         <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Brand Media</h1>
-          <p className="text-gray-600">Upload and manage brand logos and hero images</p>
+          <p className="text-gray-800">Upload and manage brand logos and hero images</p>
         </div>
 
         {/* Search */}
@@ -103,7 +103,7 @@ export default function BrandMediaPage() {
           {filteredBrands.map((brand) => (
             <div key={brand.brand_slug} className="bg-white border border-gray-200 rounded-xl p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-1">{brand.brand_name}</h3>
-              <p className="text-sm text-gray-500 mb-4 font-mono">{brand.brand_slug}</p>
+              <p className="text-sm text-gray-700 mb-4 font-mono">{brand.brand_slug}</p>
 
               <div className="space-y-4">
                 {/* Logo Section */}
@@ -162,7 +162,7 @@ export default function BrandMediaPage() {
         </div>
 
         {filteredBrands.length === 0 && (
-          <div className="text-center py-12 text-gray-500">No brands found matching "{searchTerm}"</div>
+          <div className="text-center py-12 text-gray-700">No brands found matching "{searchTerm}"</div>
         )}
       </div>
     </div>

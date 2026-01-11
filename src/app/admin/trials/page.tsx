@@ -87,7 +87,7 @@ export default function TrialsAdminPage() {
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
           ACTIVE
         </span>
-        <span className="text-xs text-gray-500">{daysRemaining} days left</span>
+        <span className="text-xs text-gray-700">{daysRemaining} days left</span>
       </div>
     );
   }
@@ -145,7 +145,7 @@ export default function TrialsAdminPage() {
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading trial intents...</p>
+            <p className="mt-4 text-gray-800">Loading trial intents...</p>
           </div>
         </div>
     );
@@ -159,7 +159,7 @@ export default function TrialsAdminPage() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Trial Intents</h1>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-700">
                 Track trial offer links sent to prospects
               </p>
             </div>
@@ -195,7 +195,7 @@ export default function TrialsAdminPage() {
         {/* Trials Table */}
         {filteredTrials.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-            <div className="text-gray-400 mb-4">
+            <div className="text-gray-800 mb-4">
               <svg
                 className="mx-auto h-12 w-12"
                 fill="none"
@@ -213,7 +213,7 @@ export default function TrialsAdminPage() {
             <h3 className="text-lg font-medium text-gray-900 mb-1">
               No {filter !== 'all' ? filter : ''} trial intents found
             </h3>
-            <p className="text-gray-500">
+            <p className="text-gray-700">
               Trial intents are created when prospects request a trial from machine pages
             </p>
           </div>
@@ -222,22 +222,22 @@ export default function TrialsAdminPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                     Contact
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                     Company
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                     Machine
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                     Created
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -249,7 +249,7 @@ export default function TrialsAdminPage() {
                       <div className="text-sm font-medium text-gray-900">
                         {trial.contact_name || '—'}
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-700">
                         {trial.contact_email || '—'}
                       </div>
                     </td>
@@ -270,11 +270,11 @@ export default function TrialsAdminPage() {
                       <div className="text-sm text-gray-900">
                         {trial.machine_brand} {trial.machine_model}
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-700">
                         {formatMachineType(trial.machine_type)}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                       {formatDate(trial.created_at)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -297,7 +297,7 @@ export default function TrialsAdminPage() {
                             navigator.clipboard.writeText(offerUrl);
                             alert('Offer link copied to clipboard!');
                           }}
-                          className="text-gray-600 hover:text-gray-900"
+                          className="text-gray-800 hover:text-gray-900"
                         >
                           Copy Link
                         </button>
@@ -315,13 +315,13 @@ export default function TrialsAdminPage() {
           <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
-                <dt className="text-sm font-medium text-gray-500 truncate">Total Trial Intents</dt>
+                <dt className="text-sm font-medium text-gray-700 truncate">Total Trial Intents</dt>
                 <dd className="mt-1 text-3xl font-semibold text-gray-900">{trials.length}</dd>
               </div>
             </div>
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
-                <dt className="text-sm font-medium text-gray-500 truncate">Active (7 days)</dt>
+                <dt className="text-sm font-medium text-gray-700 truncate">Active (7 days)</dt>
                 <dd className="mt-1 text-3xl font-semibold text-green-600">
                   {trials.filter(t => getTrialStatus(t.created_at) === 'active').length}
                 </dd>
@@ -329,8 +329,8 @@ export default function TrialsAdminPage() {
             </div>
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
-                <dt className="text-sm font-medium text-gray-500 truncate">Expired</dt>
-                <dd className="mt-1 text-3xl font-semibold text-gray-600">
+                <dt className="text-sm font-medium text-gray-700 truncate">Expired</dt>
+                <dd className="mt-1 text-3xl font-semibold text-gray-800">
                   {trials.filter(t => getTrialStatus(t.created_at) === 'expired').length}
                 </dd>
               </div>

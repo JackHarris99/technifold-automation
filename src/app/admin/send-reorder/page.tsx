@@ -163,7 +163,7 @@ export default function SendReorderPage() {
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
               Send Reorder Email
             </h1>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-800 mb-6">
               Search for a company to send personalized reorder emails
             </p>
 
@@ -173,7 +173,7 @@ export default function SendReorderPage() {
                 Search Company
               </label>
               {loadingCompanies ? (
-                <div className="text-gray-500">Loading companies...</div>
+                <div className="text-gray-700">Loading companies...</div>
               ) : (
                 <div className="relative">
                   <input
@@ -198,7 +198,7 @@ export default function SendReorderPage() {
                           className="w-full px-4 py-3 text-left hover:bg-blue-50 border-b border-gray-100 last:border-b-0"
                         >
                           <div className="font-semibold text-gray-900">{company.company_name}</div>
-                          <div className="text-sm text-gray-600">
+                          <div className="text-sm text-gray-800">
                             {company.company_id} • {company.country || 'UK'} • {company.machine_count || 0} {(company.machine_count || 0) === 1 ? 'tool' : 'tools'}
                           </div>
                         </button>
@@ -217,7 +217,7 @@ export default function SendReorderPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
+        <div className="text-gray-800">Loading...</div>
       </div>
     );
   }
@@ -239,14 +239,14 @@ export default function SendReorderPage() {
             <div>
               <Link
                 href={`/admin/company/${companyId}`}
-                className="text-sm text-gray-500 hover:text-gray-700 mb-2 inline-block"
+                className="text-sm text-gray-700 hover:text-gray-700 mb-2 inline-block"
               >
                 ← Back to {company?.company_name}
               </Link>
               <h1 className="text-2xl font-bold text-gray-900">
                 Send Reorder Email
               </h1>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-800 mt-1">
                 Select contacts to receive personalized reorder emails with tokenized links
               </p>
             </div>
@@ -271,8 +271,8 @@ export default function SendReorderPage() {
             {/* Company Info */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
               <h2 className="text-lg font-bold text-gray-900 mb-2">Company</h2>
-              <p className="text-gray-600">{company?.company_name}</p>
-              <p className="text-sm text-gray-500">{company?.company_id}</p>
+              <p className="text-gray-800">{company?.company_name}</p>
+              <p className="text-sm text-gray-700">{company?.company_id}</p>
             </div>
 
             {/* Contact Selection */}
@@ -288,18 +288,18 @@ export default function SendReorderPage() {
                   </button>
                   <button
                     onClick={() => setSelectedContacts([])}
-                    className="text-sm text-gray-600 hover:text-gray-700"
+                    className="text-sm text-gray-800 hover:text-gray-700"
                   >
                     Clear
                   </button>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-700">
                     {selectedContacts.length} of {contacts.length} selected
                   </span>
                 </div>
               </div>
 
               {contacts.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-gray-700">
                   <p>No contacts found for this company.</p>
                   <Link
                     href={`/admin/company/${companyId}`}
@@ -323,7 +323,7 @@ export default function SendReorderPage() {
                       />
                       <div className="flex-1">
                         <div className="font-medium text-gray-900">{contact.full_name}</div>
-                        <div className="text-sm text-gray-500">{contact.email}</div>
+                        <div className="text-sm text-gray-700">{contact.email}</div>
                       </div>
                     </label>
                   ))}
@@ -349,7 +349,7 @@ export default function SendReorderPage() {
                     {/* Email Preview */}
                     <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                       <h3 className="font-bold text-gray-900 mb-3">📧 Email Preview</h3>
-                      <div className="text-sm text-gray-600 mb-4">
+                      <div className="text-sm text-gray-800 mb-4">
                         <p><strong>From:</strong> sales@technifold.com</p>
                         <p><strong>To:</strong> {selectedContacts.length} contact{selectedContacts.length !== 1 ? 's' : ''}</p>
                         <p><strong>Subject:</strong> Time to Restock Your Technifold Supplies</p>
@@ -411,7 +411,7 @@ export default function SendReorderPage() {
                         <strong>The Technifold Team</strong>
                       </p>
 
-                      <div className="mt-6 pt-6 border-t border-gray-200 text-xs text-gray-500">
+                      <div className="mt-6 pt-6 border-t border-gray-200 text-xs text-gray-700">
                         <p>This is a personalized email sent to {company?.company_name}</p>
                       </div>
                     </div>
@@ -420,7 +420,7 @@ export default function SendReorderPage() {
                     {/* Portal Content Preview */}
                     <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                       <h3 className="font-bold text-gray-900 mb-3">🛒 Reorder Portal Preview</h3>
-                      <p className="text-sm text-gray-600 mb-4">
+                      <p className="text-sm text-gray-800 mb-4">
                         This is what customers see when they click the link in their email:
                       </p>
 
@@ -433,7 +433,7 @@ export default function SendReorderPage() {
                               <div className="h-6 w-px bg-slate-600"></div>
                               <div>
                                 <div className="font-bold text-sm">{company?.company_name}</div>
-                                <div className="text-xs text-slate-300">Consumables Reorder Portal</div>
+                                <div className="text-xs text-slate-600">Consumables Reorder Portal</div>
                               </div>
                             </div>
                           </div>
@@ -443,7 +443,7 @@ export default function SendReorderPage() {
                         <div className="flex h-96">
                           {/* Left Sidebar */}
                           <div className="w-48 bg-white border-r border-slate-200 p-3">
-                            <div className="text-xs font-bold text-slate-400 uppercase mb-2">Browse Products</div>
+                            <div className="text-xs font-bold text-slate-700 uppercase mb-2">Browse Products</div>
                             <div className="space-y-1">
                               <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-2">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -452,7 +452,7 @@ export default function SendReorderPage() {
                                 Previously Ordered
                               </div>
                               <div className="px-3 py-2 text-xs text-slate-600 flex items-center gap-2">
-                                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                                 </svg>
                                 <span className="truncate">Tool Tabs (if owned)</span>
@@ -469,7 +469,7 @@ export default function SendReorderPage() {
                           {/* Main Content Area */}
                           <div className="flex-1 bg-white p-4 overflow-y-auto">
                             <h2 className="text-lg font-bold text-gray-900 mb-3">Previously Ordered Consumables</h2>
-                            <p className="text-sm text-gray-600 mb-4">
+                            <p className="text-sm text-gray-800 mb-4">
                               Quick reorder based on your purchase history
                             </p>
 
@@ -479,7 +479,7 @@ export default function SendReorderPage() {
                                 <div className="flex justify-between items-start">
                                   <div className="flex-1">
                                     <div className="font-medium text-sm text-gray-900">Consumable Item</div>
-                                    <div className="text-xs text-gray-500">Product Code • Last ordered: [date]</div>
+                                    <div className="text-xs text-gray-700">Product Code • Last ordered: [date]</div>
                                     <div className="text-sm font-semibold text-gray-900 mt-1">£[price]</div>
                                   </div>
                                   <button className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-medium">
@@ -488,7 +488,7 @@ export default function SendReorderPage() {
                                 </div>
                               </div>
 
-                              <div className="text-xs text-gray-500 italic">+ More items based on order history...</div>
+                              <div className="text-xs text-gray-700 italic">+ More items based on order history...</div>
                             </div>
                           </div>
                         </div>

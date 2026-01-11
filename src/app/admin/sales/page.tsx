@@ -291,7 +291,7 @@ export default async function SalesCenterPage() {
               <h1 className="text-3xl font-bold text-gray-900">
                 Sales Control Center
               </h1>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-800 mt-1">
                 {currentUser.full_name} • {viewMode === 'my_customers' ? 'My Customers Only' : 'All Companies (Team View)'}
               </p>
             </div>
@@ -378,7 +378,7 @@ export default async function SalesCenterPage() {
                 >
                   <div>
                     <h4 className="font-semibold text-gray-900">{company.company_name}</h4>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-700">
                       {company.last_contact_at
                         ? `Last contact: ${new Date(company.last_contact_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`
                         : 'Never contacted'}
@@ -411,7 +411,7 @@ export default async function SalesCenterPage() {
                 >
                   <div>
                     <h4 className="font-semibold text-gray-900">{invoice.company_name}</h4>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-700">
                       {new Date(invoice.invoice_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                     </p>
                   </div>
@@ -455,7 +455,7 @@ export default async function SalesCenterPage() {
                 >
                   <div>
                     <h4 className="font-semibold text-gray-900">{opp.company_name}</h4>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-700">
                       Last order: {new Date(opp.last_invoice_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </p>
                   </div>
@@ -481,7 +481,7 @@ export default async function SalesCenterPage() {
                   <span className="text-2xl">🏢</span>
                   <div>
                     <h4 className="font-semibold text-gray-900">My Territory</h4>
-                    <p className="text-sm text-gray-500">View all companies in your territory</p>
+                    <p className="text-sm text-gray-700">View all companies in your territory</p>
                   </div>
                 </Link>
                 <Link
@@ -491,7 +491,7 @@ export default async function SalesCenterPage() {
                   <span className="text-2xl">🔍</span>
                   <div>
                     <h4 className="font-semibold text-gray-900">Search All Companies</h4>
-                    <p className="text-sm text-gray-500">Cross-territory lookup (CRM)</p>
+                    <p className="text-sm text-gray-700">Cross-territory lookup (CRM)</p>
                   </div>
                 </Link>
                 <Link
@@ -501,7 +501,7 @@ export default async function SalesCenterPage() {
                   <span className="text-2xl">📄</span>
                   <div>
                     <h4 className="font-semibold text-gray-900">All Invoices</h4>
-                    <p className="text-sm text-gray-500">View and manage invoices</p>
+                    <p className="text-sm text-gray-700">View and manage invoices</p>
                   </div>
                 </Link>
               </div>
@@ -532,7 +532,7 @@ function MetricCard({
   return (
     <div className={`bg-white border border-gray-200 border-l-4 ${colorClasses[color]} rounded-lg p-4`}>
       <div className="text-2xl font-bold text-gray-900">{value}</div>
-      <div className="text-sm text-gray-600">{label}</div>
+      <div className="text-sm text-gray-800">{label}</div>
     </div>
   );
 }
@@ -600,7 +600,7 @@ function ActionSection({
       {count === 0 ? (
         <div className="p-8 text-center">
           <div className="text-4xl mb-2">{emptyIcon}</div>
-          <p className="text-gray-500">{emptyMessage}</p>
+          <p className="text-gray-700">{emptyMessage}</p>
         </div>
       ) : (
         <div className="divide-y divide-gray-100">
