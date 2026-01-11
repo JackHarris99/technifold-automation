@@ -664,8 +664,18 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
 
             {/* Pricing Tiers Card */}
             {pricingPreview && !loadingPreview && pricingPreview.line_items.length > 0 && standardTiers.length > 0 && (() => {
-              const standardItems = pricingPreview.line_items.filter(item => item.discount_applied?.includes('total units'));
-              const standardTotalQty = standardItems.reduce((sum, item) => sum + item.quantity, 0);
+              // Show card for ANY standard items in cart (even if qty=1, no discount yet)
+              const allStandardItems = Array.from(itemQuantities.entries())
+                .filter(([code, qty]) => {
+                  const item = [...payload.reorder_items, ...(payload.by_tool_tabs?.flatMap(t => t.items) || [])]
+                    .find(i => i.consumable_code === code);
+                  return item?.pricing_tier === 'standard' && qty > 0;
+                });
+
+              const hasStandardItems = allStandardItems.length > 0;
+              if (!hasStandardItems) return null;
+
+              const standardTotalQty = allStandardItems.reduce((sum, [_, qty]) => sum + qty, 0);
 
               const tiersForDisplay = standardTiers.map((tier, idx) => ({
                 min: tier.min_quantity,
@@ -673,10 +683,6 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                 price: tier.unit_price || 0,
                 label: `Tier ${idx + 1}`
               }));
-
-              const hasStandardItems = standardItems.length > 0;
-
-              if (!hasStandardItems) return null;
 
               const currentTier = tiersForDisplay.find(t => standardTotalQty >= t.min && standardTotalQty <= t.max);
               const nextTier = tiersForDisplay.find(t => t.min > standardTotalQty);
@@ -736,9 +742,28 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
 
             {/* Premium Pricing Card */}
             {pricingPreview && !loadingPreview && pricingPreview.line_items.length > 0 && premiumTiers.length > 0 && (() => {
-              const premiumItems = pricingPreview.line_items.filter(item => item.discount_applied && !item.discount_applied.includes('total units'));
+              // Show card for ANY premium items in cart (even if qty=1, no discount yet)
+              const allPremiumItems = Array.from(itemQuantities.entries())
+                .filter(([code, qty]) => {
+                  const item = [...payload.reorder_items, ...(payload.by_tool_tabs?.flatMap(t => t.items) || [])]
+                    .find(i => i.consumable_code === code);
+                  return item?.pricing_tier === 'premium' && qty > 0;
+                })
+                .map(([code, qty]) => {
+                  const item = [...payload.reorder_items, ...(payload.by_tool_tabs?.flatMap(t => t.items) || [])]
+                    .find(i => i.consumable_code === code);
+                  const previewItem = pricingPreview.line_items.find(li => li.product_code === code);
+                  return {
+                    product_code: code,
+                    description: item?.description || code,
+                    quantity: qty,
+                    base_price: previewItem?.base_price || item?.price || 0,
+                    unit_price: previewItem?.unit_price || item?.price || 0,
+                    discount_applied: previewItem?.discount_applied || null
+                  };
+                });
 
-              if (premiumItems.length === 0) return null;
+              if (allPremiumItems.length === 0) return null;
 
               return (
                 <div className="bg-gradient-to-br from-[#faf5ff] to-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border-2 border-[#a855f7]/20">
@@ -748,14 +773,18 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                   </div>
 
                   <div className="space-y-2 mb-4">
-                    {premiumItems.map((item) => (
+                    {allPremiumItems.map((item) => (
                       <div key={item.product_code} className="p-3 bg-white rounded-[10px] border border-[#e8e8e8]">
                         <div className="text-[12px] font-[600] text-[#0a0a0a] mb-1">{item.description}</div>
                         <div className="flex items-center justify-between">
                           <span className="text-[11px] text-[#666]">{item.quantity} units</span>
                           <div className="flex items-center gap-2">
-                            <span className="text-[13px] text-[#999] line-through">£{item.base_price.toFixed(2)}</span>
-                            <span className="text-[15px] font-[700] text-[#a855f7]">£{item.unit_price.toFixed(2)}</span>
+                            {item.unit_price < item.base_price && (
+                              <span className="text-[13px] text-[#999] line-through">£{item.base_price.toFixed(2)}</span>
+                            )}
+                            <span className={`text-[15px] font-[700] ${item.unit_price < item.base_price ? 'text-[#a855f7]' : 'text-[#0a0a0a]'}`}>
+                              £{item.unit_price.toFixed(2)}
+                            </span>
                           </div>
                         </div>
                         {item.discount_applied && (
@@ -792,31 +821,47 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
               <div className="bg-[#0a0a0a] rounded-[20px] p-8 text-white shadow-[0_16px_48px_rgba(0,0,0,0.24)]">
                 <div className="text-[12px] font-[700] text-[#999] uppercase tracking-[0.05em] mb-6">Order Summary</div>
                 <div className="space-y-4">
+                  {/* Total (before discounts) */}
+                  <div className="flex justify-between items-center">
+                    <span className="text-[15px] text-[#999] font-[500]">Total</span>
+                    <span className="font-[600] text-[16px]">£{(pricingPreview.subtotal + pricingPreview.total_savings).toFixed(2)}</span>
+                  </div>
+
+                  {/* Discount */}
+                  {pricingPreview.total_savings > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-[15px] text-[#16a34a] font-[500]">Discount</span>
+                      <span className="font-[600] text-[16px] text-[#16a34a]">-£{pricingPreview.total_savings.toFixed(2)}</span>
+                    </div>
+                  )}
+
+                  {/* Subtotal (after discounts) */}
                   <div className="flex justify-between items-center pb-4 border-b border-[#2a2a2a]">
                     <span className="text-[15px] text-[#999] font-[500]">Subtotal</span>
                     <span className="font-[700] text-[17px] tracking-[-0.01em]">£{pricingPreview.subtotal.toFixed(2)}</span>
                   </div>
+
+                  {/* Shipping */}
                   {pricingPreview.shipping !== undefined && (
                     <div className="flex justify-between items-center">
                       <span className="text-[15px] text-[#999] font-[500]">Shipping</span>
                       <span className="font-[600] text-[16px]">{pricingPreview.shipping === 0 ? 'FREE' : `£${pricingPreview.shipping.toFixed(2)}`}</span>
                     </div>
                   )}
+
+                  {/* VAT */}
                   {pricingPreview.vat_amount !== undefined && (
                     <div className="flex justify-between items-center">
                       <span className="text-[15px] text-[#999] font-[500]">VAT</span>
                       <span className="font-[600] text-[16px]">£{pricingPreview.vat_amount.toFixed(2)}</span>
                     </div>
                   )}
+
+                  {/* Final Total */}
                   {pricingPreview.total !== undefined && (
                     <div className="flex justify-between items-center pt-4 border-t border-[#2a2a2a]">
-                      <span className="text-[17px] font-[700]">Total</span>
+                      <span className="text-[17px] font-[700]">Final Total</span>
                       <span className="font-[800] text-[28px] tracking-[-0.02em] text-[#16a34a]">£{pricingPreview.total.toFixed(2)}</span>
-                    </div>
-                  )}
-                  {pricingPreview.total_savings > 0 && (
-                    <div className="mt-4 p-4 bg-[#16a34a]/10 rounded-[12px] border border-[#16a34a]/20">
-                      <div className="text-[13px] text-[#16a34a] font-[600]">You're saving £{pricingPreview.total_savings.toFixed(2)} with tiered pricing!</div>
                     </div>
                   )}
                 </div>
