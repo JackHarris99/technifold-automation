@@ -21,25 +21,28 @@ export default async function MyPerformancePage() {
   const monthName = currentDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#f8fafc]">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-6xl mx-auto px-6 py-6">
+      <div className="bg-white border-b border-[#e8e8e8] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+        <div className="max-w-6xl mx-auto px-8 py-8">
           <div className="flex items-center justify-between">
             <div>
-              <div className="flex items-center gap-3 mb-1">
+              <div className="flex items-center gap-3 mb-2">
                 <Link
                   href="/admin/sales"
-                  className="text-gray-700 hover:text-gray-700"
+                  className="text-[13px] text-[#475569] hover:text-[#1e40af] font-[500] transition-colors flex items-center gap-2"
                 >
-                  ← Sales Center
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Sales Center
                 </Link>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                My Performance - {monthName}
+              <h1 className="text-[32px] font-[700] text-[#0a0a0a] tracking-[-0.02em]">
+                My Performance
               </h1>
-              <p className="text-sm text-gray-800 mt-1">
-                {currentUser.full_name}
+              <p className="text-[15px] text-[#475569] font-[500] mt-2">
+                {currentUser.full_name} • {monthName}
               </p>
             </div>
           </div>
@@ -47,7 +50,7 @@ export default async function MyPerformancePage() {
       </div>
 
       {/* Dashboard Content */}
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-6xl mx-auto px-8 py-8">
         <PerformanceDashboard />
       </div>
     </div>
