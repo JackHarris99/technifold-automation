@@ -172,12 +172,29 @@ export default function PortalAddressCollectionModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4"
+      onClick={(e) => {
+        // Close if clicking the backdrop
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
       <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-semibold">Delivery Address Required</h2>
+        <div className="p-6 border-b border-gray-200 relative">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            type="button"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <h2 className="text-2xl font-semibold">Edit Addresses</h2>
           <p className="text-sm text-gray-800 mt-2">
-            Before you can see accurate pricing and place orders, we need your company's address for shipping and tax calculation.
+            Update your company's billing and delivery addresses for shipping and tax calculation.
           </p>
           <p className="text-sm text-gray-700 mt-1">{companyName}</p>
         </div>
@@ -473,6 +490,14 @@ export default function PortalAddressCollectionModal({
 
           {/* Buttons */}
           <div className="flex justify-end gap-3 pt-4 border-t">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
             <button
               type="submit"
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50"
