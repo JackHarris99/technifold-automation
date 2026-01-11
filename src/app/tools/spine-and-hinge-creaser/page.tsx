@@ -25,7 +25,7 @@ export default function SpineAndHingeCreaserPage() {
           <p className="text-lg text-gray-300 mb-2 max-w-3xl leading-relaxed">
             <strong>Apply up to four deep creases—ideal for Perfect Bound book covers, folders, capacity wallets, or any product that requires multiple creasing.</strong> Deep penetrating crease application delivers flawless results.
           </p>
-          <p className="text-base text-gray-400 mb-6 max-w-3xl">
+          <p className="text-base text-gray-600 mb-6 max-w-3xl">
             Eliminating cracking is just the start. Works first time every time, avoiding unnecessary crease depth adjustment.
           </p>
 
@@ -43,7 +43,7 @@ export default function SpineAndHingeCreaserPage() {
                 alt="Spine & Hinge Creaser installed on machine"
                 className="w-full rounded-lg shadow-2xl border border-white/20"
               />
-              <p className="text-sm text-gray-400 text-center mt-3">
+              <p className="text-sm text-gray-600 text-center mt-3">
                 Spine & Hinge Creaser for lay-flat binding
               </p>
             </div>

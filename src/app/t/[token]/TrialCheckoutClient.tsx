@@ -175,13 +175,13 @@ export default function TrialCheckoutClient({
             )}
           </button>
 
-          <p className="text-center text-sm text-gray-500 mt-4">
+          <p className="text-center text-sm text-gray-700 mt-4">
             You'll be redirected to our secure payment page
           </p>
         </div>
 
         {/* Trust Signals */}
-        <div className="text-center text-gray-500 text-sm">
+        <div className="text-center text-gray-700 text-sm">
           <p className="mb-2">Secure checkout powered by Stripe</p>
           <p>Questions? Call +44 (0)1455 55 44 91</p>
         </div>

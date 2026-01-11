@@ -127,7 +127,7 @@ function TrialPageContent() {
               </ol>
             </div>
 
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-700">
               <p className="mb-2">Didn't receive the email? Check your spam folder.</p>
               <p>Need help? Call us: <strong>01707 275 114</strong></p>
             </div>
@@ -150,7 +150,7 @@ function TrialPageContent() {
               {machine.brand} {machine.model} • £{offerPrice}/month after trial
             </p>
           )}
-          <p className="text-gray-500 mt-2">
+          <p className="text-gray-700 mt-2">
             30-day free trial • Cancel anytime
           </p>
         </div>
@@ -257,7 +257,7 @@ function TrialPageContent() {
               {loading ? 'Sending...' : 'Request Trial →'}
             </button>
 
-            <p className="text-xs text-center text-gray-500">
+            <p className="text-xs text-center text-gray-700">
               By submitting, you agree to receive our trial email. You can unsubscribe anytime.
             </p>
           </form>
@@ -266,7 +266,7 @@ function TrialPageContent() {
         {/* Trust Signals */}
         <div className="mt-12 text-center">
           <p className="text-gray-600 mb-4">Trusted by 2,800+ printers worldwide</p>
-          <div className="flex justify-center items-center gap-8 text-gray-400">
+          <div className="flex justify-center items-center gap-8 text-gray-600">
             <div>🏆 Award Winning</div>
             <div>•</div>
             <div>🌍 Global Shipping</div>

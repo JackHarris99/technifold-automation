@@ -194,7 +194,7 @@ function SuccessPageContent() {
               <div>
                 <div className="font-semibold text-gray-900">Call Us</div>
                 <div className="text-gray-600">01707 275 114</div>
-                <div className="text-sm text-gray-500">Mon-Fri, 9am-5pm GMT</div>
+                <div className="text-sm text-gray-700">Mon-Fri, 9am-5pm GMT</div>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -204,7 +204,7 @@ function SuccessPageContent() {
               <div>
                 <div className="font-semibold text-gray-900">Email Us</div>
                 <div className="text-gray-600">sales@technifold.co.uk</div>
-                <div className="text-sm text-gray-500">Response within 24 hours</div>
+                <div className="text-sm text-gray-700">Response within 24 hours</div>
               </div>
             </div>
           </div>

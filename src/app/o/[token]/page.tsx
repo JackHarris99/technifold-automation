@@ -110,7 +110,7 @@ export default async function OrderTrackingPage({ params }: OrderTrackingProps) 
         <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Tracking</h1>
           <p className="text-gray-600">{company.company_name}</p>
-          {contact && <p className="text-gray-500 text-sm">{contact.full_name}</p>}
+          {contact && <p className="text-gray-700 text-sm">{contact.full_name}</p>}
         </div>
 
         {/* Orders List */}
@@ -120,7 +120,7 @@ export default async function OrderTrackingPage({ params }: OrderTrackingProps) 
           </div>
 
           {!orders || orders.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-gray-700">
               No orders found
             </div>
           ) : (
@@ -140,7 +140,7 @@ export default async function OrderTrackingPage({ params }: OrderTrackingProps) 
                           {order.payment_status || 'Pending'}
                         </span>
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-gray-700">
                         {new Date(order.created_at).toLocaleDateString('en-GB', {
                           day: 'numeric',
                           month: 'long',

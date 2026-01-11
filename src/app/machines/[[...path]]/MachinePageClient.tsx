@@ -119,7 +119,7 @@ export default function MachinePageClient({
             <div className="text-orange-400 text-sm">
               <Link href="/machines" className="hover:text-orange-300">All Machines</Link>
               {' / '}
-              <span className="text-gray-400">{machine.brand} {machine.model}</span>
+              <span className="text-gray-600">{machine.brand} {machine.model}</span>
             </div>
           </div>
         </section>
@@ -140,7 +140,7 @@ export default function MachinePageClient({
             <div className="text-orange-400 text-sm">
               <Link href="/machines" className="hover:text-orange-300">All Machines</Link>
               {' / '}
-              <span className="text-gray-400">{machine.brand} {machine.model}</span>
+              <span className="text-gray-600">{machine.brand} {machine.model}</span>
             </div>
           </div>
         </section>
@@ -161,7 +161,7 @@ export default function MachinePageClient({
             <div className="text-orange-400 text-sm">
               <Link href="/machines" className="hover:text-orange-300">All Machines</Link>
               {' / '}
-              <span className="text-gray-400">{machine.brand} {machine.model}</span>
+              <span className="text-gray-600">{machine.brand} {machine.model}</span>
             </div>
           </div>
         </section>
@@ -182,7 +182,7 @@ export default function MachinePageClient({
           <div className="text-orange-400 text-sm mb-4">
             <Link href="/machines" className="hover:text-orange-300">All Machines</Link>
             {' / '}
-            <span className="text-gray-400">{machine.brand} {machine.model}</span>
+            <span className="text-gray-600">{machine.brand} {machine.model}</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
             {renderedCopy.hero_headline}
@@ -283,7 +283,7 @@ export default function MachinePageClient({
           <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200 max-w-lg mx-auto">
             {/* Machine Context */}
             <div className="bg-slate-900 text-white -mx-8 -mt-8 px-8 py-4 rounded-t-lg mb-6">
-              <div className="text-sm text-gray-400">Free trial for your</div>
+              <div className="text-sm text-gray-600">Free trial for your</div>
               <div className="text-xl font-bold">{machine.brand} {machine.model}</div>
             </div>
 
@@ -299,7 +299,7 @@ export default function MachinePageClient({
                 <p className="text-gray-600 mb-4">
                   Check your email for your personalized trial link.
                 </p>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-700">
                   Didn't get it? Check spam or call <strong>01707 275 114</strong>
                 </div>
               </div>
@@ -308,7 +308,7 @@ export default function MachinePageClient({
               <>
                 <div className="text-5xl font-bold text-gray-900 mb-2">
                   {basePricing.display}
-                  <span className="text-lg text-gray-500 font-normal">/month</span>
+                  <span className="text-lg text-gray-700 font-normal">/month</span>
                 </div>
                 <p className="text-gray-600 mb-6">
                   Typical systems: {basePricing.typicalRange}/month
@@ -346,7 +346,7 @@ export default function MachinePageClient({
                     <span className="text-2xl font-bold text-gray-900">{basePricing.display}/month</span>
                     <span className="text-sm text-green-600 font-medium">30 days free</span>
                   </div>
-                  <p className="text-sm text-gray-500">Card required after trial. Cancel anytime.</p>
+                  <p className="text-sm text-gray-700">Card required after trial. Cancel anytime.</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4 text-left">
@@ -414,7 +414,7 @@ export default function MachinePageClient({
                     {loading ? 'Sending...' : 'Request Trial'}
                   </button>
 
-                  <p className="text-xs text-center text-gray-500">
+                  <p className="text-xs text-center text-gray-700">
                     We'll email you a secure link to complete your trial signup.
                   </p>
                 </form>

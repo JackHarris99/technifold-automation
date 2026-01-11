@@ -102,9 +102,9 @@ export default async function InvoiceViewerPage({ params }: InvoiceViewerProps) 
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Invoices</h1>
               <p className="text-gray-600">{company.company_name}</p>
-              {contact && <p className="text-gray-500 text-sm">{contact.full_name}</p>}
+              {contact && <p className="text-gray-700 text-sm">{contact.full_name}</p>}
             </div>
-            <div className="text-right text-sm text-gray-500">
+            <div className="text-right text-sm text-gray-700">
               <div className="font-semibold text-gray-900">Technifold Ltd</div>
               <div>World-Leading Print Finishing</div>
             </div>
@@ -132,7 +132,7 @@ export default async function InvoiceViewerPage({ params }: InvoiceViewerProps) 
           </div>
 
           {!invoices || invoices.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-gray-700">
               No invoices found
             </div>
           ) : (
@@ -144,7 +144,7 @@ export default async function InvoiceViewerPage({ params }: InvoiceViewerProps) 
                       <div className="font-medium text-gray-900 mb-1">
                         Invoice #{invoice.order_id.substring(0, 12).toUpperCase()}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-gray-700">
                         {new Date(invoice.created_at).toLocaleDateString('en-GB', {
                           day: 'numeric',
                           month: 'long',
@@ -188,7 +188,7 @@ export default async function InvoiceViewerPage({ params }: InvoiceViewerProps) 
         </div>
 
         {/* Footer */}
-        <div className="mt-6 text-center text-sm text-gray-500">
+        <div className="mt-6 text-center text-sm text-gray-700">
           <p>Questions about an invoice? <a href="/contact" className="text-blue-600 hover:text-blue-700">Contact us</a></p>
         </div>
       </div>

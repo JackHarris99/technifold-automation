@@ -189,7 +189,7 @@ export default function AddressCollectionModal({
           <p className="text-sm text-gray-600 mt-2">
             Before creating your invoice, we need your company's billing address to calculate tax and shipping correctly.
           </p>
-          <p className="text-sm text-gray-500 mt-1">{companyName}</p>
+          <p className="text-sm text-gray-700 mt-1">{companyName}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -325,7 +325,7 @@ export default function AddressCollectionModal({
                     placeholder={`${formData.billing_country}123456789`}
                     required
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-700 mt-1">
                     Required for EU companies to apply 0% reverse charge. Format: {formData.billing_country}123456789
                   </p>
 

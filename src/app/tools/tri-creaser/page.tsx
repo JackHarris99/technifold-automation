@@ -28,26 +28,26 @@ export default function TriCreaserPage() {
               <p className="text-lg text-gray-300 mb-2 leading-relaxed">
                 <strong>The revolutionary rotary creasing solution that completely eliminates fiber cracking on all popular types of folding machines.</strong>
               </p>
-              <p className="text-base text-gray-400 mb-6">
+              <p className="text-base text-gray-600 mb-6">
                 The resilient rubber compound penetrates the area prone to cracking with gentle rotary action—manipulating and stretching the fibres instead of damaging them like common steel scoring methods. Results equal to letterpress quality.
               </p>
 
               <div className="grid grid-cols-2 gap-3 mb-6">
                 <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
                   <div className="text-2xl font-bold">100%</div>
-                  <div className="text-xs text-gray-400">Cracking Eliminated</div>
+                  <div className="text-xs text-gray-600">Cracking Eliminated</div>
                 </div>
                 <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
                   <div className="text-2xl font-bold">Seconds</div>
-                  <div className="text-xs text-gray-400">Change Settings</div>
+                  <div className="text-xs text-gray-600">Change Settings</div>
                 </div>
                 <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
                   <div className="text-2xl font-bold">1-3 Jobs</div>
-                  <div className="text-xs text-gray-400">Payback Period</div>
+                  <div className="text-xs text-gray-600">Payback Period</div>
                 </div>
                 <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
                   <div className="text-2xl font-bold">£10k+</div>
-                  <div className="text-xs text-gray-400">Annual Savings</div>
+                  <div className="text-xs text-gray-600">Annual Savings</div>
                 </div>
               </div>
 
@@ -65,7 +65,7 @@ export default function TriCreaserPage() {
                 alt="Tri-Creaser Fast-Fit installed on folding machine"
                 className="w-full rounded-lg shadow-2xl border border-white/20"
               />
-              <p className="text-sm text-gray-400 text-center mt-3">
+              <p className="text-sm text-gray-600 text-center mt-3">
                 Tri-Creaser Fast-Fit creating letterpress-quality creases inline
               </p>
             </div>
@@ -563,7 +563,7 @@ export default function TriCreaserPage() {
               </p>
               <div className="text-sm">
                 <div className="font-bold text-white">Andy Coles</div>
-                <div className="text-xs text-gray-400">Wyndeham Westway, Luton, UK</div>
+                <div className="text-xs text-gray-600">Wyndeham Westway, Luton, UK</div>
               </div>
             </div>
 
@@ -580,7 +580,7 @@ export default function TriCreaserPage() {
               </p>
               <div className="text-sm">
                 <div className="font-bold text-white">Bob Humphrys</div>
-                <div className="text-xs text-gray-400">Wessex Binding Services, Wimbourne</div>
+                <div className="text-xs text-gray-600">Wessex Binding Services, Wimbourne</div>
               </div>
             </div>
 
@@ -597,7 +597,7 @@ export default function TriCreaserPage() {
               </p>
               <div className="text-sm">
                 <div className="font-bold text-white">Jim Navulis</div>
-                <div className="text-xs text-gray-400">Haapanen Brothers, Illinois, USA</div>
+                <div className="text-xs text-gray-600">Haapanen Brothers, Illinois, USA</div>
               </div>
             </div>
           </div>
@@ -616,7 +616,7 @@ export default function TriCreaserPage() {
               </p>
               <div className="text-sm">
                 <div className="font-bold text-white">Jake Whitford</div>
-                <div className="text-xs text-gray-400">Pepper Communications Ltd</div>
+                <div className="text-xs text-gray-600">Pepper Communications Ltd</div>
               </div>
             </div>
 
@@ -633,7 +633,7 @@ export default function TriCreaserPage() {
               </p>
               <div className="text-sm">
                 <div className="font-bold text-white">Tony Puxty</div>
-                <div className="text-xs text-gray-400">Fontain, London, UK</div>
+                <div className="text-xs text-gray-600">Fontain, London, UK</div>
               </div>
             </div>
           </div>

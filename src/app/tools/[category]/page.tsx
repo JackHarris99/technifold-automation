@@ -99,7 +99,7 @@ export default async function CategoryPage({ params }: PageProps) {
                     </h3>
                     
                     {tool.product_code && (
-                      <p className="text-sm text-gray-500 font-mono mb-3">
+                      <p className="text-sm text-gray-700 font-mono mb-3">
                         Code: {tool.product_code}
                       </p>
                     )}
@@ -125,7 +125,7 @@ export default async function CategoryPage({ params }: PageProps) {
                           <span className="text-lg font-bold text-gray-900">
                             £{tool.price}
                           </span>
-                          <span className="text-gray-500 text-sm ml-1">ex VAT</span>
+                          <span className="text-gray-700 text-sm ml-1">ex VAT</span>
                         </div>
                       )}
                       

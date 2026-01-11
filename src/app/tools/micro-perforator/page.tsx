@@ -25,26 +25,26 @@ export default function MicroPerforatorPage() {
           <p className="text-lg text-gray-300 mb-2 max-w-3xl leading-relaxed">
             <strong>Are you fed up with broken perf blades, outsourcing delays, and sheets that jam laser printers?</strong> The Micro-Perforator produces nearly invisible micro-perfs up to 72 teeth per inch—inline on your folder.
           </p>
-          <p className="text-base text-gray-400 mb-6 max-w-3xl">
+          <p className="text-base text-gray-600 mb-6 max-w-3xl">
             Kiss-cut technology. Break-resistant double-bevel blades. Cuts against soft nylon, not destructive steel. Sheets lie perfectly flat and run through any digital device without jamming.
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">72 TPI</div>
-              <div className="text-xs text-gray-400">Nearly Invisible</div>
+              <div className="text-xs text-gray-600">Nearly Invisible</div>
             </div>
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">2 Jobs</div>
-              <div className="text-xs text-gray-400">Recover Cost</div>
+              <div className="text-xs text-gray-600">Recover Cost</div>
             </div>
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">Zero</div>
-              <div className="text-xs text-gray-400">Broken Blades</div>
+              <div className="text-xs text-gray-600">Broken Blades</div>
             </div>
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">£1000s</div>
-              <div className="text-xs text-gray-400">Saved on Blankets</div>
+              <div className="text-xs text-gray-600">Saved on Blankets</div>
             </div>
           </div>
 
@@ -62,7 +62,7 @@ export default function MicroPerforatorPage() {
                 alt="Micro-Perforator installed on machine"
                 className="w-full rounded-lg shadow-2xl border border-white/20"
               />
-              <p className="text-sm text-gray-400 text-center mt-3">
+              <p className="text-sm text-gray-600 text-center mt-3">
                 Micro-Perforator creating precision perforations
               </p>
             </div>

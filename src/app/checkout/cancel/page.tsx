@@ -60,7 +60,7 @@ export default function CheckoutCancelPage() {
         </div>
 
         {/* Footer Note */}
-        <p className="text-xs text-gray-500 mt-6">
+        <p className="text-xs text-gray-700 mt-6">
           Changed your mind? We're here to help with any questions.
         </p>
       </div>

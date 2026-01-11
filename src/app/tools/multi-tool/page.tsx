@@ -27,26 +27,26 @@ export default function MultiToolPage() {
           <p className="text-lg text-gray-300 mb-2 max-w-3xl leading-relaxed">
             <strong>Tired of shuttling jobs between your folder, guillotine, and letterpress?</strong> The Multi-Tool delivers guillotine-quality cutting and letterpress-quality perforation—inline on your folder.
           </p>
-          <p className="text-base text-gray-400 mb-6 max-w-3xl">
+          <p className="text-base text-gray-600 mb-6 max-w-3xl">
             This revolutionary modular system gives you 6 finishing applications in one device: Slit, Trim, Kiss-cut, Micro-perforate, Edge-trim, and Double-cut. Mix and match operations to handle jobs you used to send offline.
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">6</div>
-              <div className="text-xs text-gray-400">Applications in One</div>
+              <div className="text-xs text-gray-600">Applications in One</div>
             </div>
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">5x</div>
-              <div className="text-xs text-gray-400">Blade Longevity</div>
+              <div className="text-xs text-gray-600">Blade Longevity</div>
             </div>
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">100%</div>
-              <div className="text-xs text-gray-400">Guillotine Quality</div>
+              <div className="text-xs text-gray-600">Guillotine Quality</div>
             </div>
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">£20k+</div>
-              <div className="text-xs text-gray-400">Annual Savings</div>
+              <div className="text-xs text-gray-600">Annual Savings</div>
             </div>
           </div>
 
@@ -65,7 +65,7 @@ export default function MultiToolPage() {
                 alt="Multi-Tool installed on machine"
                 className="w-full rounded-lg shadow-2xl border border-white/20"
               />
-              <p className="text-sm text-gray-400 text-center mt-3">
+              <p className="text-sm text-gray-600 text-center mt-3">
                 Multi-Tool inline cutting and trimming system
               </p>
             </div>
@@ -499,7 +499,7 @@ export default function MultiToolPage() {
             </p>
             <div className="text-sm border-t border-white/20 pt-4">
               <div className="font-bold text-white">Tony Morgan</div>
-              <div className="text-xs text-gray-400">Bindery Manager, Bezier Corporate Print, Dorset</div>
+              <div className="text-xs text-gray-600">Bindery Manager, Bezier Corporate Print, Dorset</div>
             </div>
           </div>
         </div>

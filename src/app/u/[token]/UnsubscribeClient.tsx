@@ -73,7 +73,7 @@ export default function UnsubscribeClient({
               ? 'This email address was already unsubscribed from marketing communications.'
               : 'You have been unsubscribed from marketing emails from Technifold USA.'}
           </p>
-          <p className="text-sm text-gray-500 mb-6">
+          <p className="text-sm text-gray-700 mb-6">
             You will still receive important transactional emails about your orders and account.
           </p>
           <a
@@ -136,7 +136,7 @@ export default function UnsubscribeClient({
           {status === 'loading' ? 'Unsubscribing...' : 'Unsubscribe'}
         </button>
 
-        <p className="mt-6 text-sm text-gray-500">
+        <p className="mt-6 text-sm text-gray-700">
           Changed your mind?{' '}
           <a href="https://technifoldusa.com/contact" className="text-blue-600 hover:text-blue-700">
             Contact us

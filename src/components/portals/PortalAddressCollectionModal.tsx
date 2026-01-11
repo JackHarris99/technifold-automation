@@ -179,7 +179,7 @@ export default function PortalAddressCollectionModal({
           <p className="text-sm text-gray-600 mt-2">
             Before you can see accurate pricing and place orders, we need your company's address for shipping and tax calculation.
           </p>
-          <p className="text-sm text-gray-500 mt-1">{companyName}</p>
+          <p className="text-sm text-gray-700 mt-1">{companyName}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -314,7 +314,7 @@ export default function PortalAddressCollectionModal({
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder={`${formData.billing_country}123456789`}
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-700 mt-1">
                     Required for EU companies to apply 0% reverse charge. Format: {formData.billing_country}123456789
                   </p>
 

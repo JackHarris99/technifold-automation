@@ -67,11 +67,11 @@ export function TechnicalDataSheet({ tool, consumables }: TechnicalDataSheetProp
                   />
                 ) : (
                   <div className="text-center">
-                    <svg className="w-24 h-24 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-24 h-24 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
-                    <p className="text-gray-500 text-sm">Product Image</p>
-                    <p className="text-xs text-gray-400">{tool.product_code}</p>
+                    <p className="text-gray-700 text-sm">Product Image</p>
+                    <p className="text-xs text-gray-600">{tool.product_code}</p>
                   </div>
                 )}
               </div>
@@ -80,19 +80,19 @@ export function TechnicalDataSheet({ tool, consumables }: TechnicalDataSheetProp
               <div className="p-6">
                 <div className="space-y-3">
                   <div>
-                    <dt className="text-sm font-medium text-gray-500">Category</dt>
+                    <dt className="text-sm font-medium text-gray-700">Category</dt>
                     <dd className="text-sm text-gray-900">{tool.category}</dd>
                   </div>
                   
                   {tool.price && (
                     <div>
-                      <dt className="text-sm font-medium text-gray-500">List Price</dt>
+                      <dt className="text-sm font-medium text-gray-700">List Price</dt>
                       <dd className="text-sm text-gray-900">£{tool.price} ex VAT</dd>
                     </div>
                   )}
                   
                   <div>
-                    <dt className="text-sm font-medium text-gray-500">Status</dt>
+                    <dt className="text-sm font-medium text-gray-700">Status</dt>
                     <dd>
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         In Production
@@ -109,7 +109,7 @@ export function TechnicalDataSheet({ tool, consumables }: TechnicalDataSheetProp
                   >
                     Request Quote
                   </Link>
-                  <p className="text-xs text-gray-500 text-center mt-2">
+                  <p className="text-xs text-gray-700 text-center mt-2">
                     Technical consultation available
                   </p>
                 </div>
@@ -136,60 +136,60 @@ export function TechnicalDataSheet({ tool, consumables }: TechnicalDataSheetProp
                 <table className="min-w-full">
                   <tbody className="divide-y divide-gray-200">
                     <tr>
-                      <td className="py-3 pr-6 text-sm font-medium text-gray-500">Product Code</td>
+                      <td className="py-3 pr-6 text-sm font-medium text-gray-700">Product Code</td>
                       <td className="py-3 text-sm text-gray-900 font-mono">{tool.product_code}</td>
                     </tr>
                     
                     <tr>
-                      <td className="py-3 pr-6 text-sm font-medium text-gray-500">Category</td>
+                      <td className="py-3 pr-6 text-sm font-medium text-gray-700">Category</td>
                       <td className="py-3 text-sm text-gray-900">{tool.category}</td>
                     </tr>
 
                     {tool.specifications && (
                       <tr>
-                        <td className="py-3 pr-6 text-sm font-medium text-gray-500">Specifications</td>
+                        <td className="py-3 pr-6 text-sm font-medium text-gray-700">Specifications</td>
                         <td className="py-3 text-sm text-gray-900">{tool.specifications}</td>
                       </tr>
                     )}
 
                     {tool.dimensions && (
                       <tr>
-                        <td className="py-3 pr-6 text-sm font-medium text-gray-500">Dimensions</td>
+                        <td className="py-3 pr-6 text-sm font-medium text-gray-700">Dimensions</td>
                         <td className="py-3 text-sm text-gray-900">{tool.dimensions}</td>
                       </tr>
                     )}
 
                     {tool.weight && (
                       <tr>
-                        <td className="py-3 pr-6 text-sm font-medium text-gray-500">Weight</td>
+                        <td className="py-3 pr-6 text-sm font-medium text-gray-700">Weight</td>
                         <td className="py-3 text-sm text-gray-900">{tool.weight}</td>
                       </tr>
                     )}
 
                     {tool.material && (
                       <tr>
-                        <td className="py-3 pr-6 text-sm font-medium text-gray-500">Material</td>
+                        <td className="py-3 pr-6 text-sm font-medium text-gray-700">Material</td>
                         <td className="py-3 text-sm text-gray-900">{tool.material}</td>
                       </tr>
                     )}
 
                     {tool.compatibility && (
                       <tr>
-                        <td className="py-3 pr-6 text-sm font-medium text-gray-500">Compatibility</td>
+                        <td className="py-3 pr-6 text-sm font-medium text-gray-700">Compatibility</td>
                         <td className="py-3 text-sm text-gray-900">{tool.compatibility}</td>
                       </tr>
                     )}
 
                     {tool.features && (
                       <tr>
-                        <td className="py-3 pr-6 text-sm font-medium text-gray-500">Features</td>
+                        <td className="py-3 pr-6 text-sm font-medium text-gray-700">Features</td>
                         <td className="py-3 text-sm text-gray-900">{tool.features}</td>
                       </tr>
                     )}
 
                     {tool.applications && (
                       <tr>
-                        <td className="py-3 pr-6 text-sm font-medium text-gray-500">Applications</td>
+                        <td className="py-3 pr-6 text-sm font-medium text-gray-700">Applications</td>
                         <td className="py-3 text-sm text-gray-900">{tool.applications}</td>
                       </tr>
                     )}
@@ -204,11 +204,11 @@ export function TechnicalDataSheet({ tool, consumables }: TechnicalDataSheetProp
               
               {consumables.length === 0 ? (
                 <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-                  <svg className="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-12 h-12 text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
-                  <p className="text-gray-500">Compatible consumables will be listed here</p>
-                  <p className="text-xs text-gray-400 mt-1">Consumable relationships being configured</p>
+                  <p className="text-gray-700">Compatible consumables will be listed here</p>
+                  <p className="text-xs text-gray-600 mt-1">Consumable relationships being configured</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -234,7 +234,7 @@ export function TechnicalDataSheet({ tool, consumables }: TechnicalDataSheetProp
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
-                                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                 </svg>
                               </div>
@@ -252,7 +252,7 @@ export function TechnicalDataSheet({ tool, consumables }: TechnicalDataSheetProp
                               )}
                             </div>
 
-                            <p className="text-xs text-gray-500 font-mono">
+                            <p className="text-xs text-gray-700 font-mono">
                               {consumable.product_code}
                             </p>
 
@@ -309,7 +309,7 @@ export function TechnicalDataSheet({ tool, consumables }: TechnicalDataSheetProp
               Technical Support
             </button>
           </div>
-          <p className="text-xs text-gray-400 mt-4">
+          <p className="text-xs text-gray-600 mt-4">
             Technical data sheet generated from product database • {new Date().toLocaleDateString()}
           </p>
         </div>

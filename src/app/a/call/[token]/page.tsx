@@ -161,7 +161,7 @@ export default function LogCallPage({ params }: { params: Promise<{ token: strin
             {context?.user_name} • {context?.company_name}
           </div>
           {context?.contact_name && (
-            <div className="text-sm text-gray-500 mt-1">
+            <div className="text-sm text-gray-700 mt-1">
               Contact: {context.contact_name}
             </div>
           )}

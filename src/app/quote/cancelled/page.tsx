@@ -52,7 +52,7 @@ export default function QuoteCancelledPage() {
             </Link>
           </div>
 
-          <p className="text-sm text-gray-500 mt-8">
+          <p className="text-sm text-gray-700 mt-8">
             Email: info@technifold.co.uk | Phone: +44 (0)1455 554491
           </p>
         </div>

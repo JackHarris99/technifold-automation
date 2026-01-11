@@ -66,7 +66,7 @@ export default function CheckoutSuccessPage() {
         </Link>
 
         {/* Footer Note */}
-        <p className="text-xs text-gray-500 mt-6">
+        <p className="text-xs text-gray-700 mt-6">
           Need help? <a href="/contact" className="text-blue-600 hover:text-blue-700">Contact us</a>
         </p>
       </div>

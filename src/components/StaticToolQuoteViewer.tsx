@@ -96,11 +96,11 @@ export default function StaticToolQuoteViewer({
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Tool Quote</h1>
               <p className="text-gray-600">{companyName}</p>
-              {contactName && <p className="text-gray-500 text-sm">Attn: {contactName}</p>}
+              {contactName && <p className="text-gray-700 text-sm">Attn: {contactName}</p>}
             </div>
             <div className="text-right">
-              <div className="text-sm text-gray-500">Valid for 30 days</div>
-              <div className="text-sm text-gray-500">{new Date().toLocaleDateString()}</div>
+              <div className="text-sm text-gray-700">Valid for 30 days</div>
+              <div className="text-sm text-gray-700">{new Date().toLocaleDateString()}</div>
             </div>
           </div>
 
@@ -125,7 +125,7 @@ export default function StaticToolQuoteViewer({
                     )}
                     <div className="flex-1">
                       <div className="font-semibold text-gray-900 text-lg">{item.description}</div>
-                      <div className="text-sm text-gray-500 mt-1">
+                      <div className="text-sm text-gray-700 mt-1">
                         {item.product_code} • Quantity: {item.quantity}
                       </div>
                       <div className="text-sm text-gray-600 mt-1">
@@ -142,7 +142,7 @@ export default function StaticToolQuoteViewer({
                         £{itemTotal.toFixed(2)}
                       </div>
                       {item.discount_percent > 0 && (
-                        <div className="text-sm text-gray-500 line-through mt-1">
+                        <div className="text-sm text-gray-700 line-through mt-1">
                           £{itemSubtotal.toFixed(2)}
                         </div>
                       )}
@@ -181,14 +181,14 @@ export default function StaticToolQuoteViewer({
             >
               Accept Quote & Proceed to Checkout
             </button>
-            <p className="text-center text-sm text-gray-500 mt-3">
+            <p className="text-center text-sm text-gray-700 mt-3">
               Fixed pricing • Valid for 30 days
             </p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="text-center text-sm text-gray-500">
+        <div className="text-center text-sm text-gray-700">
           <p>Tech-ni-Fold Ltd • World-Leading Print Finishing Solutions</p>
         </div>
       </div>

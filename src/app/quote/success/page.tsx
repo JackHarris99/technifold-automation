@@ -74,7 +74,7 @@ export default function QuoteSuccessPage() {
             </Link>
           </div>
 
-          <p className="text-sm text-gray-500 mt-8">
+          <p className="text-sm text-gray-700 mt-8">
             Need help? Email us at info@technifold.co.uk
           </p>
         </div>

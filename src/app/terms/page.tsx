@@ -15,7 +15,7 @@ export default function TermsPage() {
       <div className="max-w-4xl mx-auto px-4 py-12">
         <div className="bg-white rounded-lg shadow-sm p-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Terms and Conditions</h1>
-          <p className="text-sm text-gray-500 mb-8">Last Updated: February 2025</p>
+          <p className="text-sm text-gray-700 mb-8">Last Updated: February 2025</p>
 
           {/* Purchase Terms */}
           <section className="mb-10">

@@ -25,7 +25,7 @@ export default function QuadCreaserPage() {
               <p className="text-lg text-gray-300 mb-2 leading-relaxed">
                 <strong>Perfect Bound books are often judged by their cover.</strong> The Quad-Creaser replaces your OEM scoring mechanism to produce Letterpress quality creasing to the spine & hinge areas of your book covers.
               </p>
-              <p className="text-base text-gray-400 mb-6">
+              <p className="text-base text-gray-600 mb-6">
                 This patented application uses specially formulated rubber & nylon creasing ribs that gently stretch the fibres—producing three times deeper crease applications to prevent print, coating and laminate from flaking away.
               </p>
 
@@ -43,7 +43,7 @@ export default function QuadCreaserPage() {
                 alt="Quad-Creaser installed on perfect binder"
                 className="w-full rounded-lg shadow-2xl border border-white/20"
               />
-              <p className="text-sm text-gray-400 text-center mt-3">
+              <p className="text-sm text-gray-600 text-center mt-3">
                 Quad-Creaser delivering letterpress-quality spine and hinge creases
               </p>
             </div>
@@ -307,7 +307,7 @@ export default function QuadCreaserPage() {
               </p>
               <div className="text-sm">
                 <div className="font-bold text-white">Jonathan Ellis</div>
-                <div className="text-xs text-gray-400">Printed Easy</div>
+                <div className="text-xs text-gray-600">Printed Easy</div>
               </div>
             </div>
 
@@ -317,7 +317,7 @@ export default function QuadCreaserPage() {
               </p>
               <div className="text-sm">
                 <div className="font-bold text-white">Eugen Mayer</div>
-                <div className="text-xs text-gray-400">Book-binding Department Manager, Kosel GmbH, Germany</div>
+                <div className="text-xs text-gray-600">Book-binding Department Manager, Kosel GmbH, Germany</div>
               </div>
             </div>
           </div>

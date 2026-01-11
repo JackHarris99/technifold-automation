@@ -75,7 +75,7 @@ export default function TrackOrderPage() {
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
-                <p className="text-xs text-gray-500 mt-1">Found in your order confirmation email</p>
+                <p className="text-xs text-gray-700 mt-1">Found in your order confirmation email</p>
               </div>
 
               <div>
@@ -133,25 +133,25 @@ export default function TrackOrderPage() {
               {/* Progress Tracker */}
               <div className="relative pt-8 pb-4">
                 <div className="flex justify-between mb-2">
-                  <div className={`flex flex-col items-center ${order.status === 'paid' ? 'text-green-600' : order.status === 'cancelled' ? 'text-gray-400' : 'text-green-600'}`}>
+                  <div className={`flex flex-col items-center ${order.status === 'paid' ? 'text-green-600' : order.status === 'cancelled' ? 'text-gray-600' : 'text-green-600'}`}>
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${order.status === 'paid' ? 'bg-green-100' : 'bg-green-500 text-white'}`}>
                       ✓
                     </div>
                     <span className="text-xs font-semibold">Paid</span>
                   </div>
-                  <div className={`flex flex-col items-center ${['processing', 'shipped', 'completed'].includes(order.status) ? 'text-blue-600' : 'text-gray-400'}`}>
+                  <div className={`flex flex-col items-center ${['processing', 'shipped', 'completed'].includes(order.status) ? 'text-blue-600' : 'text-gray-600'}`}>
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${['processing', 'shipped', 'completed'].includes(order.status) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>
                       {['processing', 'shipped', 'completed'].includes(order.status) ? '✓' : '2'}
                     </div>
                     <span className="text-xs font-semibold">Processing</span>
                   </div>
-                  <div className={`flex flex-col items-center ${['shipped', 'completed'].includes(order.status) ? 'text-purple-600' : 'text-gray-400'}`}>
+                  <div className={`flex flex-col items-center ${['shipped', 'completed'].includes(order.status) ? 'text-purple-600' : 'text-gray-600'}`}>
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${['shipped', 'completed'].includes(order.status) ? 'bg-purple-500 text-white' : 'bg-gray-200'}`}>
                       {['shipped', 'completed'].includes(order.status) ? '✓' : '3'}
                     </div>
                     <span className="text-xs font-semibold">Shipped</span>
                   </div>
-                  <div className={`flex flex-col items-center ${order.status === 'completed' ? 'text-green-600' : 'text-gray-400'}`}>
+                  <div className={`flex flex-col items-center ${order.status === 'completed' ? 'text-green-600' : 'text-gray-600'}`}>
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${order.status === 'completed' ? 'bg-green-500 text-white' : 'bg-gray-200'}`}>
                       {order.status === 'completed' ? '✓' : '4'}
                     </div>
@@ -193,11 +193,11 @@ export default function TrackOrderPage() {
 
               <div className="grid grid-cols-2 gap-6 mb-6">
                 <div>
-                  <span className="text-sm text-gray-500">Order ID</span>
+                  <span className="text-sm text-gray-700">Order ID</span>
                   <p className="font-mono text-sm mt-1">{order.order_id}</p>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-500">Order Date</span>
+                  <span className="text-sm text-gray-700">Order Date</span>
                   <p className="mt-1">{new Date(order.created_at).toLocaleDateString()}</p>
                 </div>
               </div>

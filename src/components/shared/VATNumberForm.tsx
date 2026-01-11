@@ -108,7 +108,7 @@ export default function VATNumberForm({
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             required
           />
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-xs text-gray-700">
             Format: Country code + number (e.g., DE123456789, FR12345678901)
           </p>
         </div>

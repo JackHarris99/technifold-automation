@@ -27,26 +27,26 @@ export default function CPApplicatorPage() {
           <p className="text-lg text-gray-300 mb-2 max-w-3xl leading-relaxed">
             <strong>Need perforations RIGHT NEXT to your crease line for vouchers, tickets, or coupons?</strong> CP-Applicator is the world's only inline system that produces crease + double perforation with spacing as tight as 5mm—replicating letterpress quality at 5x the speed.
           </p>
-          <p className="text-base text-gray-400 mb-6 max-w-3xl">
+          <p className="text-base text-gray-600 mb-6 max-w-3xl">
             No other manufacturer offers this capability. Stop sending work to letterpress. Produce "perf-crease-perf" configurations inline on your folder.
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">5mm</div>
-              <div className="text-xs text-gray-400">Closest Perf to Crease</div>
+              <div className="text-xs text-gray-600">Closest Perf to Crease</div>
             </div>
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">5x</div>
-              <div className="text-xs text-gray-400">Faster Than Letterpress</div>
+              <div className="text-xs text-gray-600">Faster Than Letterpress</div>
             </div>
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">World's</div>
-              <div className="text-xs text-gray-400">Only Solution</div>
+              <div className="text-xs text-gray-600">Only Solution</div>
             </div>
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">100%</div>
-              <div className="text-xs text-gray-400">Money-Back</div>
+              <div className="text-xs text-gray-600">Money-Back</div>
             </div>
           </div>
 
@@ -64,7 +64,7 @@ export default function CPApplicatorPage() {
                 alt="CP Applicator installed on machine"
                 className="w-full rounded-lg shadow-2xl border border-white/20"
               />
-              <p className="text-sm text-gray-400 text-center mt-3">
+              <p className="text-sm text-gray-600 text-center mt-3">
                 CP Applicator for close proximity operations
               </p>
             </div>

@@ -239,19 +239,19 @@ export default async function HomePage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white/10 border border-white/20 p-4 text-center">
                   <div className="text-3xl font-bold mb-1">30,000+</div>
-                  <div className="text-xs text-gray-400">Companies Worldwide</div>
+                  <div className="text-xs text-gray-600">Companies Worldwide</div>
                 </div>
                 <div className="bg-white/10 border border-white/20 p-4 text-center">
                   <div className="text-3xl font-bold mb-1">40,000+</div>
-                  <div className="text-xs text-gray-400">Installations</div>
+                  <div className="text-xs text-gray-600">Installations</div>
                 </div>
                 <div className="bg-white/10 border border-white/20 p-4 text-center">
                   <div className="text-3xl font-bold mb-1">25+</div>
-                  <div className="text-xs text-gray-400">Years Innovation</div>
+                  <div className="text-xs text-gray-600">Years Innovation</div>
                 </div>
                 <div className="bg-white/10 border border-white/20 p-4 text-center">
                   <div className="text-3xl font-bold mb-1">100%</div>
-                  <div className="text-xs text-gray-400">Quality Guarantee</div>
+                  <div className="text-xs text-gray-600">Quality Guarantee</div>
                 </div>
               </div>
             </div>

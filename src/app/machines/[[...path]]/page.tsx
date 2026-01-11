@@ -341,15 +341,15 @@ function MachinesIndexPage() {
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div className="bg-white/10 border border-white/20 px-3 py-2 rounded">
                   <div className="text-xl font-bold">170+</div>
-                  <div className="text-xs text-gray-400">Machines</div>
+                  <div className="text-xs text-gray-600">Machines</div>
                 </div>
                 <div className="bg-white/10 border border-white/20 px-3 py-2 rounded">
                   <div className="text-xl font-bold">15+</div>
-                  <div className="text-xs text-gray-400">Brands</div>
+                  <div className="text-xs text-gray-600">Brands</div>
                 </div>
                 <div className="bg-white/10 border border-white/20 px-3 py-2 rounded">
                   <div className="text-xl font-bold">30-day</div>
-                  <div className="text-xs text-gray-400">Free Trial</div>
+                  <div className="text-xs text-gray-600">Free Trial</div>
                 </div>
               </div>
             </div>

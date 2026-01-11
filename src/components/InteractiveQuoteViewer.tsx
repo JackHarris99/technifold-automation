@@ -188,11 +188,11 @@ export default function InteractiveQuoteViewer({
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Quote</h1>
               <p className="text-gray-600">{companyName}</p>
-              {contactName && <p className="text-gray-500 text-sm">Attn: {contactName}</p>}
+              {contactName && <p className="text-gray-700 text-sm">Attn: {contactName}</p>}
             </div>
             <div className="text-right">
-              <div className="text-sm text-gray-500">Valid for 30 days</div>
-              <div className="text-sm text-gray-500">{new Date().toLocaleDateString()}</div>
+              <div className="text-sm text-gray-700">Valid for 30 days</div>
+              <div className="text-sm text-gray-700">{new Date().toLocaleDateString()}</div>
             </div>
           </div>
 
@@ -268,7 +268,7 @@ export default function InteractiveQuoteViewer({
                     )}
                     <div className="flex-1">
                       <div className="font-semibold text-gray-900">{item.description}</div>
-                      <div className="text-sm text-gray-500 mb-2">
+                      <div className="text-sm text-gray-700 mb-2">
                         {item.product_code} • {item.product_type}
                         {appliedDiscount > 0 && (
                           <span className="ml-2 text-green-600 font-semibold">({appliedDiscount.toFixed(0)}% off)</span>
@@ -298,13 +298,13 @@ export default function InteractiveQuoteViewer({
                             +
                           </button>
                         </div>
-                        <div className="text-sm text-gray-500">× £{item.unit_price.toFixed(2)}</div>
+                        <div className="text-sm text-gray-700">× £{item.unit_price.toFixed(2)}</div>
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="text-xl font-bold text-gray-900">£{itemTotal.toFixed(2)}</div>
                       {appliedDiscount > 0 && (
-                        <div className="text-sm text-gray-500 line-through">£{itemSubtotal.toFixed(2)}</div>
+                        <div className="text-sm text-gray-700 line-through">£{itemSubtotal.toFixed(2)}</div>
                       )}
                     </div>
                   </div>
@@ -341,14 +341,14 @@ export default function InteractiveQuoteViewer({
             >
               Accept Quote & Proceed to Checkout
             </button>
-            <p className="text-center text-sm text-gray-500 mt-3">
+            <p className="text-center text-sm text-gray-700 mt-3">
               Adjust quantities above to see live pricing • Valid for 30 days
             </p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="text-center text-sm text-gray-500">
+        <div className="text-center text-sm text-gray-700">
           <p>Tech-ni-Fold Ltd • World-Leading Print Finishing Solutions</p>
         </div>
       </div>

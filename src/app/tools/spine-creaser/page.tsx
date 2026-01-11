@@ -25,7 +25,7 @@ export default function SpineCreaserPage() {
               <p className="text-lg text-gray-300 mb-2 leading-relaxed">
                 <strong>Transform your saddle stitcher into a powerful cylinder creasing machine.</strong> In just 30 minutes, you'll be producing perfect letterpress-quality creases inline—no more cylinder press tie-up, no more outsourcing.
               </p>
-              <p className="text-base text-gray-400 mb-6">
+              <p className="text-base text-gray-600 mb-6">
                 Using the same technology as the patented Tri-Creaser, the Spine-Creaser produces results that equal or surpass those of any cylinder. Guaranteed.
               </p>
 
@@ -43,7 +43,7 @@ export default function SpineCreaserPage() {
                 alt="Spine-Creaser installed on saddle stitcher"
                 className="w-full rounded-lg shadow-2xl border border-white/20"
               />
-              <p className="text-sm text-gray-400 text-center mt-3">
+              <p className="text-sm text-gray-600 text-center mt-3">
                 Spine-Creaser delivering cylinder-quality creases inline
               </p>
             </div>
@@ -333,7 +333,7 @@ export default function SpineCreaserPage() {
               <p className="text-sm text-gray-300 mb-4 leading-relaxed">
                 <strong className="text-white">"In just minutes, the Spine-Creaser will be producing the perfect crease and your company will begin saving thousands of pounds. Guaranteed."</strong>
               </p>
-              <p className="text-xs text-gray-400 italic">
+              <p className="text-xs text-gray-600 italic">
                 A small investment is guaranteed to begin saving you money from your very first job. And what price do you put on customer satisfaction?
               </p>
             </div>

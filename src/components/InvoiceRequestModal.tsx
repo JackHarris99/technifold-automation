@@ -321,7 +321,7 @@ export function InvoiceRequestModal({
                 </button>
               </div>
 
-              <p className="text-xs text-center text-gray-500">
+              <p className="text-xs text-center text-gray-700">
                 Invoice ID: {invoiceResult.invoice_id}
               </p>
             </div>

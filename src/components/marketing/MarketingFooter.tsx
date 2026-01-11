@@ -13,7 +13,7 @@ export function MarketingFooter() {
               </div>
               <span className="text-xl font-bold">Technifold</span>
             </div>
-            <p className="text-gray-400 text-sm leading-relaxed">
+            <p className="text-gray-600 text-sm leading-relaxed">
               Professional print finishing solutions for the graphic arts industry. 
               Trusted by thousands worldwide.
             </p>
@@ -24,52 +24,52 @@ export function MarketingFooter() {
             <h3 className="font-semibold mb-4">Products</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/tools/tri-creaser" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/tools/tri-creaser" className="text-gray-600 hover:text-white transition-colors">
                   Tri-Creaser
                 </Link>
               </li>
               <li>
-                <Link href="/tools/spine-creaser" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/tools/spine-creaser" className="text-gray-600 hover:text-white transition-colors">
                   Spine-Creaser
                 </Link>
               </li>
               <li>
-                <Link href="/tools/quad-creaser" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/tools/quad-creaser" className="text-gray-600 hover:text-white transition-colors">
                   Quad-Creaser
                 </Link>
               </li>
               <li>
-                <Link href="/tools/spine-and-hinge-creaser" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/tools/spine-and-hinge-creaser" className="text-gray-600 hover:text-white transition-colors">
                   Spine & Hinge Creaser
                 </Link>
               </li>
               <li>
-                <Link href="/tools/multi-tool" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/tools/multi-tool" className="text-gray-600 hover:text-white transition-colors">
                   Multi-Tool
                 </Link>
               </li>
               <li>
-                <Link href="/tools/web-tool" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/tools/web-tool" className="text-gray-600 hover:text-white transition-colors">
                   Web-Tool
                 </Link>
               </li>
               <li>
-                <Link href="/tools/cp-applicator" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/tools/cp-applicator" className="text-gray-600 hover:text-white transition-colors">
                   CP Applicator
                 </Link>
               </li>
               <li>
-                <Link href="/tools/gripper-boss" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/tools/gripper-boss" className="text-gray-600 hover:text-white transition-colors">
                   Gripper Boss
                 </Link>
               </li>
               <li>
-                <Link href="/tools/micro-perforator" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/tools/micro-perforator" className="text-gray-600 hover:text-white transition-colors">
                   Micro Perforator
                 </Link>
               </li>
               <li>
-                <Link href="/tools/section-scorer" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/tools/section-scorer" className="text-gray-600 hover:text-white transition-colors">
                   Section Scorer
                 </Link>
               </li>
@@ -81,17 +81,17 @@ export function MarketingFooter() {
             <h3 className="font-semibold mb-4">Company</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/about" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/about" className="text-gray-600 hover:text-white transition-colors">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/contact" className="text-gray-600 hover:text-white transition-colors">
                   Contact
                 </Link>
               </li>
               <li>
-                <Link href="/admin" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/admin" className="text-gray-600 hover:text-white transition-colors">
                   Partner Portal
                 </Link>
               </li>
@@ -101,7 +101,7 @@ export function MarketingFooter() {
           {/* Contact */}
           <div>
             <h3 className="font-semibold mb-4">Contact</h3>
-            <div className="text-sm text-gray-400 space-y-2">
+            <div className="text-sm text-gray-600 space-y-2">
               <p>Email: info@technifold.co.uk</p>
               <p>Phone: +44 (0)1455 554491</p>
             </div>
@@ -109,14 +109,14 @@ export function MarketingFooter() {
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col sm:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-600 text-sm">
             © 2025 Technifold. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 sm:mt-0">
-            <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
+            <Link href="/privacy" className="text-gray-600 hover:text-white text-sm transition-colors">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
+            <Link href="/terms" className="text-gray-600 hover:text-white text-sm transition-colors">
               Terms of Service
             </Link>
           </div>
