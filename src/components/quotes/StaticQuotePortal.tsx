@@ -2,6 +2,7 @@
  * Static Quote Portal
  * Customer-facing portal for static quotes with FIXED PRICING
  * Customers can adjust quantities but unit prices stay locked at quoted amounts
+ * Layout matches PortalPage for consistent branding
  */
 
 'use client';
@@ -9,7 +10,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { InvoiceRequestModal } from '../InvoiceRequestModal';
-import AddressCollectionModal from '../portals/AddressCollectionModal';
+import PortalAddressCollectionModal from '../portals/PortalAddressCollectionModal';
 
 interface LineItem {
   product_code: string;
@@ -65,30 +66,43 @@ interface StaticQuotePortalProps {
   } | null;
 }
 
-export function StaticQuotePortal({ quote, lineItems, company, contact, token, isTest, readOnly = false, previewMode, shippingAddress }: StaticQuotePortalProps) {
-  const [cart, setCart] = useState<any[]>([]);
+export function StaticQuotePortal({
+  quote,
+  lineItems,
+  company,
+  contact,
+  token,
+  isTest,
+  readOnly = false,
+  previewMode,
+  shippingAddress
+}: StaticQuotePortalProps) {
+  const [itemQuantities, setItemQuantities] = useState<Map<string, number>>(new Map());
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [pricingPreview, setPricingPreview] = useState<PricingPreview | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [showAddressModal, setShowAddressModal] = useState(false);
 
-  // Pre-populate cart with quote items on mount
+  // Detect product type from line items
+  const productType = lineItems[0]?.product_type || 'consumable';
+  const isToolQuote = productType === 'tool';
+
+  // Pre-populate quantities from quote items on mount
   useEffect(() => {
-    const initialCart = lineItems.map(item => ({
-      consumable_code: item.product_code,
-      description: item.description,
-      quantity: item.quantity,
-      price: item.unit_price, // LOCKED price from quote
-      category: item.category || '',
-      image_url: item.image_url || null,
-      pricing_tier: item.pricing_tier || null,
-    }));
-    setCart(initialCart);
+    const quantityMap = new Map();
+    lineItems.forEach(item => {
+      quantityMap.set(item.product_code, item.quantity);
+    });
+    setItemQuantities(quantityMap);
   }, [lineItems]);
 
-  // Fetch pricing when cart changes (for VAT/shipping only - prices stay locked)
+  // Fetch pricing preview when quantities change (for VAT/shipping only - prices stay locked)
   useEffect(() => {
-    if (cart.length === 0) {
+    const itemsWithQty = Array.from(itemQuantities.entries())
+      .filter(([_, qty]) => qty > 0)
+      .map(([product_code, quantity]) => ({ product_code, quantity }));
+
+    if (itemsWithQty.length === 0) {
       setPricingPreview(null);
       return;
     }
@@ -99,13 +113,7 @@ export function StaticQuotePortal({ quote, lineItems, company, contact, token, i
         const response = await fetch('/api/portal/quote-pricing-static', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            token,
-            items: cart.map(item => ({
-              product_code: item.consumable_code,
-              quantity: item.quantity,
-            })),
-          }),
+          body: JSON.stringify({ token, items: itemsWithQty }),
         });
 
         const data = await response.json();
@@ -121,347 +129,384 @@ export function StaticQuotePortal({ quote, lineItems, company, contact, token, i
 
     const timeoutId = setTimeout(fetchPricing, 300);
     return () => clearTimeout(timeoutId);
-  }, [cart, token]);
+  }, [itemQuantities, token]);
 
-  const updateQuantity = (productCode: string, newQuantity: number) => {
-    if (newQuantity < 0) return;
+  const updateQuantity = (productCode: string, quantity: number) => {
+    setItemQuantities(prev => {
+      const newMap = new Map(prev);
+      if (quantity <= 0) {
+        newMap.delete(productCode);
+      } else {
+        newMap.set(productCode, quantity);
+      }
+      return newMap;
+    });
+  };
 
-    if (newQuantity === 0) {
-      setCart(cart.filter(item => item.consumable_code !== productCode));
-    } else {
-      setCart(cart.map(item =>
-        item.consumable_code === productCode
-          ? { ...item, quantity: newQuantity }
-          : item
-      ));
-    }
+  const getTotalQuantity = () => {
+    return Array.from(itemQuantities.values()).reduce((sum, qty) => sum + qty, 0);
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa]">
-      {/* Preview Mode Banner */}
-      {readOnly && previewMode === 'admin' && (
-        <div className="bg-blue-600 text-white py-3 px-4 text-center font-[600]">
-          🔍 ADMIN PREVIEW MODE - This is how the customer will see the quote
-        </div>
-      )}
-      {readOnly && previewMode === 'original' && (
-        <div className="bg-purple-600 text-white py-3 px-4 text-center font-[600]">
-          📄 ORIGINAL QUOTE - What was sent to the customer
-        </div>
-      )}
-      {/* Test Mode Banner */}
-      {isTest && !readOnly && (
-        <div className="bg-yellow-500 text-white py-2 px-4 text-center font-[600]">
-          ⚠️ TEST MODE - This is an internal preview link
-        </div>
-      )}
+    <>
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-      <div className="max-w-[1600px] mx-auto px-6 py-12">
-        {/* Header with logos */}
-        <div className="flex items-center justify-center gap-8 mb-8">
-          <div className="relative h-10 w-32">
-            <Image
-              src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/technifold.png"
-              alt="Technifold"
-              fill
-              className="object-contain"
-            />
+        * {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          letter-spacing: -0.011em;
+        }
+
+        body {
+          font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+        }
+      `}</style>
+
+      <div className="min-h-screen bg-[#fafafa]">
+        {/* Preview Mode Banners */}
+        {readOnly && previewMode === 'admin' && (
+          <div className="bg-blue-600 text-white py-3 px-4 text-center font-[600]">
+            🔍 ADMIN PREVIEW MODE - This is how the customer will see the quote
           </div>
-          <div className="relative h-10 w-32">
-            <Image
-              src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/technicrease.png"
-              alt="Technicrease"
-              fill
-              className="object-contain"
-            />
+        )}
+        {readOnly && previewMode === 'original' && (
+          <div className="bg-purple-600 text-white py-3 px-4 text-center font-[600]">
+            📄 ORIGINAL QUOTE - What was sent to the customer
           </div>
-          <div className="relative h-10 w-32">
-            <Image
-              src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/creasestream.png"
-              alt="Creasestream"
-              fill
-              className="object-contain"
-            />
+        )}
+        {isTest && !readOnly && (
+          <div className="bg-yellow-500 text-white py-2 px-4 text-center font-[600]">
+            ⚠️ TEST MODE - This is an internal preview link
           </div>
-        </div>
+        )}
 
-        {/* Company Name */}
-        <h1 className="text-[56px] font-[800] text-[#0a0a0a] mb-8 tracking-[-0.04em] leading-[1.1] text-center">
-          {company.company_name}
-        </h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-          {/* Main Product List */}
-          <div className="col-span-1 md:col-span-8 space-y-4">
-            {cart.map((item) => {
-              const previewItem = pricingPreview?.line_items.find(li => li.product_code === item.consumable_code);
-              const displayPrice = previewItem?.unit_price || item.price;
-              const lineTotal = previewItem?.line_total || (displayPrice * item.quantity);
-
-              return (
-                <div
-                  key={item.consumable_code}
-                  className={`bg-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] flex gap-6 ${
-                    item.pricing_tier === 'standard'
-                      ? 'border-2 border-green-200 bg-green-50/30'
-                      : item.pricing_tier === 'premium'
-                      ? 'border-2 border-purple-200 bg-purple-50/30'
-                      : 'border border-[#e8e8e8]'
-                  }`}
-                >
-                  {item.image_url && (
-                    <div className="flex-shrink-0">
-                      <img
-                        src={item.image_url}
-                        alt={item.description}
-                        className="w-40 h-40 object-cover rounded-[12px]"
-                      />
-                    </div>
-                  )}
-
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-[20px] font-[700] text-[#0a0a0a]">{item.description}</h3>
-                      {item.pricing_tier === 'standard' && (
-                        <span className="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-[600] rounded-[4px] uppercase tracking-wide">
-                          Standard
-                        </span>
-                      )}
-                      {item.pricing_tier === 'premium' && (
-                        <span className="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-[600] rounded-[4px] uppercase tracking-wide">
-                          Premium
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[14px] text-[#666] mb-4">{item.consumable_code}</p>
-
-                    <div className="flex items-center gap-4 mb-4">
-                      <div>
-                        <div className="text-[13px] text-[#666] mb-1">Quantity</div>
-                        {readOnly ? (
-                          <div className="text-[18px] font-[700] text-[#0a0a0a]">
-                            {item.quantity}
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => updateQuantity(item.consumable_code, item.quantity - 1)}
-                              className="w-8 h-8 rounded-[8px] bg-[#f0f0f0] hover:bg-[#e0e0e0] flex items-center justify-center text-[18px] font-[600]"
-                            >
-                              −
-                            </button>
-                            <input
-                              type="number"
-                              value={item.quantity}
-                              onChange={(e) => updateQuantity(item.consumable_code, parseInt(e.target.value) || 0)}
-                              className="w-16 px-3 py-2 border border-[#e8e8e8] rounded-[8px] text-center text-[15px] font-[600]"
-                              min="0"
-                            />
-                            <button
-                              onClick={() => updateQuantity(item.consumable_code, item.quantity + 1)}
-                              className="w-8 h-8 rounded-[8px] bg-[#f0f0f0] hover:bg-[#e0e0e0] flex items-center justify-center text-[18px] font-[600]"
-                            >
-                              +
-                            </button>
-                          </div>
-                        )}
-                      </div>
-
-                      <div>
-                        <div className="text-[13px] text-[#666] mb-1">Price per unit</div>
-                        <div className="text-[18px] font-[700] text-[#0a0a0a]">
-                          £{displayPrice.toFixed(2)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col items-end justify-between">
-                    <div className="text-[24px] font-[800] text-[#0a0a0a]">
-                      £{lineTotal.toFixed(2)}
-                    </div>
-                    {!readOnly && (
-                      <button
-                        onClick={() => updateQuantity(item.consumable_code, 0)}
-                        className="text-[14px] text-red-600 hover:text-red-700 font-[600]"
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Sticky Sidebar */}
-          <div className="col-span-1 md:col-span-4">
-            <div className="sticky top-6 bg-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)]">
-              <h2 className="text-[20px] font-[800] text-[#0a0a0a] mb-6">Order Summary</h2>
-
-              <div className="space-y-3 mb-6">
-                {(() => {
-                  // Calculate original total (before any discounts)
-                  const originalTotal = pricingPreview?.line_items.reduce((sum, item) => {
-                    const originalItem = lineItems.find(li => li.product_code === item.product_code);
-                    const originalPrice = originalItem?.unit_price || item.unit_price;
-                    return sum + (originalPrice * item.quantity);
-                  }, 0) || 0;
-
-                  const subtotal = pricingPreview?.subtotal || 0;
-                  const volumeSavings = originalTotal - subtotal;
-
-                  return (
-                    <>
-                      <div className="flex justify-between text-[15px]">
-                        <span className="text-[#666]">Total</span>
-                        <span className="font-[600]">£{originalTotal.toFixed(2)}</span>
-                      </div>
-
-                      {volumeSavings > 0 && (
-                        <div className="flex justify-between text-[15px]">
-                          <span className="text-green-600">Volume Savings</span>
-                          <span className="font-[600] text-green-600">-£{volumeSavings.toFixed(2)}</span>
-                        </div>
-                      )}
-
-                      <div className="flex justify-between text-[15px]">
-                        <span className="text-[#666]">Subtotal</span>
-                        <span className="font-[600]">£{subtotal.toFixed(2)}</span>
-                      </div>
-
-                      <div className="flex justify-between text-[15px]">
-                        <span className="text-[#666]">Shipping</span>
-                        <span className="font-[600]">
-                          {(pricingPreview?.shipping_amount || 0) === 0 ? 'Free' : `£${(pricingPreview?.shipping_amount || 0).toFixed(2)}`}
-                        </span>
-                      </div>
-
-                      <div className="flex justify-between text-[15px]">
-                        <span className="text-[#666]">VAT ({((pricingPreview?.vat_rate || 0) * 100).toFixed(0)}%)</span>
-                        <span className="font-[600]">£{(pricingPreview?.vat_amount || 0).toFixed(2)}</span>
-                      </div>
-
-                      <div className="h-px bg-[#e8e8e8] my-4"></div>
-
-                      <div className="flex justify-between text-[20px]">
-                        <span className="font-[800]">Final Total</span>
-                        <span className="font-[800]">£{(pricingPreview?.total || 0).toFixed(2)}</span>
-                      </div>
-                    </>
-                  );
-                })()}
+        {/* Top Branding Bar */}
+        <div className="bg-white border-b border-[#e8e8e8]">
+          <div className="max-w-[1600px] mx-auto px-6 py-4">
+            <div className="flex items-center justify-center gap-8">
+              <div className="relative h-10 w-32">
+                <Image
+                  src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/technifold.png"
+                  alt="Technifold"
+                  fill
+                  className="object-contain"
+                  priority
+                />
               </div>
+              <div className="relative h-10 w-32">
+                <Image
+                  src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/technicrease.png"
+                  alt="Technicrease"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <div className="relative h-10 w-32">
+                <Image
+                  src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/creasestream.png"
+                  alt="Creasestream"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
-              {/* Address Details Section */}
-              <div className="mb-6 pb-6 border-t border-gray-200 pt-6">
-                <h3 className="text-[16px] font-[700] text-[#0a0a0a] mb-4">Delivery & Billing Details</h3>
-
-                {/* Billing Address */}
-                <div className="mb-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[13px] font-[600] text-[#666]">Billing Address</span>
-                    {!readOnly && (
-                      <button
-                        onClick={() => setShowAddressModal(true)}
-                        className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]"
-                      >
-                        Edit
-                      </button>
-                    )}
-                  </div>
-                  {company.billing_address_line_1 ? (
-                    <div className="text-[13px] text-[#0a0a0a] leading-relaxed">
-                      <div>{company.billing_address_line_1}</div>
-                      {company.billing_address_line_2 && <div>{company.billing_address_line_2}</div>}
-                      <div>{company.billing_city}{company.billing_state_province ? `, ${company.billing_state_province}` : ''}</div>
-                      <div>{company.billing_postal_code}</div>
-                      <div>{company.billing_country}</div>
-                    </div>
-                  ) : (
-                    <div className="text-[13px] text-red-600 italic">
-                      No billing address - <button onClick={() => setShowAddressModal(true)} className="underline font-[600]">Add now</button>
-                    </div>
-                  )}
+        <div className="max-w-[1600px] mx-auto px-6 py-12">
+          {/* Main Grid */}
+          <div className="grid grid-cols-12 gap-8">
+            {/* Main Content Area */}
+            <div className="col-span-7 space-y-4">
+              {/* Customer Information Card */}
+              <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8] p-6">
+                <div className="mb-6">
+                  <h1 className="text-[28px] font-[600] text-[#1e40af] mb-1 tracking-[-0.02em] leading-[1.2]">
+                    {company.company_name}
+                  </h1>
+                  <p className="text-[13px] text-[#334155] font-[400]">
+                    {isToolQuote ? 'Fixed-price tooling quotation' : 'Fixed-price consumables quotation'}
+                  </p>
                 </div>
 
-                {/* Shipping Address */}
-                <div className="mb-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[13px] font-[600] text-[#666]">Shipping Address</span>
-                    {!readOnly && (
-                      <button
-                        onClick={() => setShowAddressModal(true)}
-                        className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]"
-                      >
-                        Edit
-                      </button>
+                <div className="grid grid-cols-3 gap-4">
+                  {/* Contact Info */}
+                  <div>
+                    <div className="text-[11px] font-[600] text-[#475569] mb-2 uppercase tracking-wider">Contact</div>
+                    {contact ? (
+                      <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                        <div className="text-[13px] text-[#1e293b] font-[600]">{contact.full_name}</div>
+                        <div className="text-[12px] text-[#334155] mt-0.5">{contact.email}</div>
+                      </div>
+                    ) : (
+                      <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                        <p className="text-[12px] text-[#475569] italic">No contact assigned</p>
+                      </div>
                     )}
                   </div>
-                  {shippingAddress ? (
-                    <div className="text-[13px] text-[#0a0a0a] leading-relaxed">
-                      <div>{shippingAddress.address_line_1}</div>
-                      {shippingAddress.address_line_2 && <div>{shippingAddress.address_line_2}</div>}
-                      <div>{shippingAddress.city}{shippingAddress.state_province ? `, ${shippingAddress.state_province}` : ''}</div>
-                      <div>{shippingAddress.postal_code}</div>
-                      <div>{shippingAddress.country}</div>
-                    </div>
-                  ) : (
-                    <div className="text-[13px] text-red-600 italic">
-                      No shipping address - <button onClick={() => setShowAddressModal(true)} className="underline font-[600]">Add now</button>
-                    </div>
-                  )}
-                </div>
 
-                {/* VAT Number */}
-                {company.vat_number && (
+                  {/* Billing Address */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[13px] font-[600] text-[#666]">VAT Number</span>
+                      <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider">Billing Address</div>
                       {!readOnly && (
-                        <button
-                          onClick={() => setShowAddressModal(true)}
-                          className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]"
-                        >
-                          Edit
-                        </button>
+                        <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
                       )}
                     </div>
-                    <div className="text-[13px] text-[#0a0a0a]">{company.vat_number}</div>
+                    {company.billing_address_line_1 ? (
+                      <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                        <div className="text-[12px] font-[500] text-[#1e293b]">{company.billing_address_line_1}</div>
+                        {company.billing_address_line_2 && <div className="text-[11px] text-[#334155]">{company.billing_address_line_2}</div>}
+                        <div className="text-[11px] text-[#334155]">{company.billing_city}{company.billing_state_province ? `, ${company.billing_state_province}` : ''}</div>
+                        <div className="text-[11px] text-[#334155]">{company.billing_postal_code}</div>
+                        <div className="text-[12px] font-[500] text-[#1e293b] mt-1">{company.billing_country}</div>
+                      </div>
+                    ) : (
+                      <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                        <p className="text-[11px] text-red-600 italic">No billing address - <button onClick={() => setShowAddressModal(true)} className="underline font-[600]">Add now</button></p>
+                      </div>
+                    )}
                   </div>
-                )}
+
+                  {/* Delivery Address */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider">Delivery Address</div>
+                      {!readOnly && (
+                        <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
+                      )}
+                    </div>
+                    {shippingAddress ? (
+                      <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                        <div className="text-[12px] font-[500] text-[#1e293b]">{shippingAddress.address_line_1}</div>
+                        {shippingAddress.address_line_2 && <div className="text-[11px] text-[#334155]">{shippingAddress.address_line_2}</div>}
+                        <div className="text-[11px] text-[#334155]">{shippingAddress.city}{shippingAddress.state_province ? `, ${shippingAddress.state_province}` : ''}</div>
+                        <div className="text-[11px] text-[#334155]">{shippingAddress.postal_code}</div>
+                        <div className="text-[12px] font-[500] text-[#1e293b] mt-1">{shippingAddress.country}</div>
+                      </div>
+                    ) : (
+                      <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                        <p className="text-[11px] text-[#475569] italic">Address confirmed at checkout</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              {readOnly ? (
-                <div className="w-full py-4 bg-gray-100 text-gray-800 rounded-[14px] text-[16px] font-[700] text-center border-2 border-dashed border-gray-300">
-                  {previewMode === 'admin' ? 'Customers will see "Request Invoice" button here' : 'Quote Accepted - Invoice Sent'}
+              {/* Quote Items Section */}
+              <div className="bg-white rounded-[16px] shadow-sm border-2 border-blue-100 overflow-hidden">
+                <div className="px-6 py-4 bg-gradient-to-r from-blue-50/50 to-transparent border-b border-[#e8e8e8]">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-[17px] font-[600] text-[#1e40af] tracking-[-0.01em]">Quote Items</h2>
+                      <p className="text-[12px] text-[#334155] mt-0.5 font-[500]">{lineItems.length} item{lineItems.length !== 1 ? 's' : ''} quoted • Fixed pricing</p>
+                    </div>
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-[8px]">
+                      <svg className="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-[11px] font-[600] text-amber-800">Prices Locked</span>
+                    </div>
+                  </div>
                 </div>
-              ) : (
-                <>
-                  <button
-                    onClick={() => setIsInvoiceModalOpen(true)}
-                    disabled={cart.length === 0 || loadingPreview}
-                    className="w-full py-4 bg-[#16a34a] text-white rounded-[14px] text-[16px] font-[700] hover:bg-[#15803d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Request Invoice
-                  </button>
 
-                  <p className="text-[12px] text-[#666] mt-4 text-center">
-                    You'll receive a Stripe invoice via email to complete payment
-                  </p>
-                </>
-              )}
+                <div className="px-8 pb-8 pt-4 space-y-4">
+                  {lineItems.map((item) => {
+                    const currentQty = itemQuantities.get(item.product_code) || 0;
+                    const lineTotal = item.unit_price * currentQty;
+
+                    return (
+                      <div key={item.product_code} className={`flex items-center gap-4 p-4 rounded-[12px] transition-colors ${
+                        isToolQuote
+                          ? 'border-2 border-blue-200 hover:border-blue-300 bg-blue-50/30'
+                          : item.pricing_tier === 'standard'
+                          ? 'border-2 border-green-200 hover:border-green-300 bg-green-50/30'
+                          : item.pricing_tier === 'premium'
+                          ? 'border-2 border-purple-200 hover:border-purple-300 bg-purple-50/30'
+                          : 'border border-[#e8e8e8] hover:border-[#16a34a]'
+                      }`}>
+                        <div className="relative w-20 h-20 bg-[#f9fafb] rounded-[8px] flex-shrink-0 overflow-hidden">
+                          <Image
+                            src={item.image_url || `/product_images/${item.product_code}.jpg`}
+                            alt={item.description}
+                            fill
+                            className="object-contain p-2"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.onerror = null;
+                              target.src = '/product-placeholder.svg';
+                            }}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <div className="font-[600] text-[15px] text-[#0a0a0a]">{item.description}</div>
+                            {isToolQuote && (
+                              <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-[600] rounded-[4px] uppercase tracking-wide">
+                                Tool
+                              </span>
+                            )}
+                            {!isToolQuote && item.pricing_tier === 'standard' && (
+                              <span className="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-[600] rounded-[4px] uppercase tracking-wide">
+                                Standard
+                              </span>
+                            )}
+                            {!isToolQuote && item.pricing_tier === 'premium' && (
+                              <span className="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-[600] rounded-[4px] uppercase tracking-wide">
+                                Premium
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[13px] text-[#1e293b] mt-1">
+                            {item.product_code}
+                          </div>
+                          <div className="mt-2">
+                            <div className="text-[13px] text-[#334155] mb-1">Price per unit (locked)</div>
+                            <div className="text-[18px] font-[700] text-[#0a0a0a]">
+                              £{item.unit_price.toFixed(2)}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-3">
+                          <div className="text-[20px] font-[800] text-[#0a0a0a]">
+                            £{lineTotal.toFixed(2)}
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <label className="text-[13px] text-[#1e293b] font-[500]">Qty:</label>
+                            {readOnly ? (
+                              <div className="w-20 px-3 py-2 text-center font-[600]">{currentQty}</div>
+                            ) : (
+                              <input
+                                type="number"
+                                min="0"
+                                value={currentQty}
+                                onChange={(e) => updateQuantity(item.product_code, parseInt(e.target.value) || 0)}
+                                className="w-20 px-3 py-2 border border-[#e8e8e8] rounded-[8px] text-center font-[600] focus:ring-2 focus:ring-[#16a34a] focus:border-[#16a34a] outline-none"
+                              />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Sidebar */}
+            <div className="col-span-5">
+              <div className="sticky top-6 space-y-6">
+                {/* Info Card */}
+                <div className="bg-gradient-to-br from-amber-50 to-white rounded-[16px] p-5 shadow-sm border-2 border-amber-200">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-amber-100 rounded-[8px]">
+                      <svg className="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-[14px] font-[700] text-[#0a0a0a] mb-1">Static Quote</h3>
+                      <p className="text-[12px] text-[#334155] leading-relaxed">
+                        Prices are locked at the quoted amounts. You can adjust quantities, but unit prices will not change.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Order Summary Card */}
+                {pricingPreview && pricingPreview.line_items.length > 0 && (
+                  <div className="bg-[#0a0a0a] rounded-[20px] p-8 text-white shadow-[0_16px_48px_rgba(0,0,0,0.24)]">
+                    <div className="text-[12px] font-[700] text-[#999] uppercase tracking-[0.05em] mb-6">Order Summary</div>
+                    <div className="space-y-4">
+                      {/* Subtotal */}
+                      <div className="flex justify-between items-center">
+                        <span className="text-[15px] text-[#999] font-[500]">Subtotal</span>
+                        <span className="font-[700] text-[17px] tracking-[-0.01em]">£{pricingPreview.subtotal.toFixed(2)}</span>
+                      </div>
+
+                      {/* Shipping */}
+                      {pricingPreview.shipping_amount !== undefined && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-[15px] text-[#999] font-[500]">Shipping</span>
+                          <span className="font-[600] text-[16px]">{pricingPreview.shipping_amount === 0 ? 'FREE' : `£${pricingPreview.shipping_amount.toFixed(2)}`}</span>
+                        </div>
+                      )}
+
+                      {/* VAT */}
+                      {pricingPreview.vat_amount !== undefined && (
+                        <div className="flex justify-between items-center pb-4 border-b border-[#2a2a2a]">
+                          <span className="text-[15px] text-[#999] font-[500]">VAT</span>
+                          <span className="font-[600] text-[16px]">£{pricingPreview.vat_amount.toFixed(2)}</span>
+                        </div>
+                      )}
+
+                      {/* Final Total */}
+                      {pricingPreview.total !== undefined && (
+                        <div className="flex justify-between items-center pt-4 border-t border-[#2a2a2a]">
+                          <span className="text-[17px] font-[700]">Final Total</span>
+                          <span className="font-[800] text-[28px] tracking-[-0.02em] text-[#16a34a]">£{pricingPreview.total.toFixed(2)}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {readOnly ? (
+                      <div className="w-full mt-6 py-4 bg-gray-700 text-gray-300 rounded-[14px] text-[15px] font-[700] text-center border-2 border-dashed border-gray-600">
+                        {previewMode === 'admin' ? 'Customers will see "Request Invoice" button here' : 'Quote Accepted - Invoice Sent'}
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setIsInvoiceModalOpen(true)}
+                        disabled={getTotalQuantity() === 0}
+                        className="w-full mt-6 py-4 bg-[#16a34a] text-white rounded-[14px] font-[700] text-[15px] tracking-[-0.01em] hover:bg-[#15803d] transition-all shadow-[0_4px_12px_rgba(22,163,74,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Request Invoice ({getTotalQuantity()} items)
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Need Help Card */}
+                <div className="bg-white rounded-[20px] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
+                  <div className="text-[12px] font-[700] text-[#334155] uppercase tracking-[0.05em] mb-4">Need Help?</div>
+                  <p className="text-[14px] text-[#334155] mb-4">Our team is ready to assist with your order.</p>
+                  <a href="tel:+441455554491" className="text-[15px] text-[#16a34a] font-[600] hover:text-[#15803d]">+44 (0)1455 554491</a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Invoice Request Modal */}
+      <PortalAddressCollectionModal
+        isOpen={showAddressModal}
+        onClose={() => setShowAddressModal(false)}
+        companyId={company.company_id}
+        companyName={company.company_name}
+        token={token}
+        onSuccess={() => {
+          setShowAddressModal(false);
+          window.location.reload();
+        }}
+      />
+
       <InvoiceRequestModal
         isOpen={isInvoiceModalOpen}
         onClose={() => setIsInvoiceModalOpen(false)}
-        cart={cart}
+        cart={Array.from(itemQuantities.entries())
+          .filter(([_, qty]) => qty > 0)
+          .map(([product_code, quantity]) => {
+            const item = lineItems.find(i => i.product_code === product_code);
+            return {
+              consumable_code: product_code,
+              description: item?.description || product_code,
+              price: item?.unit_price || 0,
+              quantity
+            };
+          })}
         companyId={company.company_id}
         contactId={contact?.contact_id}
         onSuccess={(orderId) => {
@@ -471,19 +516,6 @@ export function StaticQuotePortal({ quote, lineItems, company, contact, token, i
         pricingPreview={pricingPreview}
         quoteType="static"
       />
-
-      {/* Address Collection/Edit Modal */}
-      <AddressCollectionModal
-        isOpen={showAddressModal}
-        onClose={() => setShowAddressModal(false)}
-        companyId={company.company_id}
-        companyName={company.company_name}
-        onSuccess={() => {
-          setShowAddressModal(false);
-          // Refresh the page to show updated addresses
-          window.location.reload();
-        }}
-      />
-    </div>
+    </>
   );
 }
