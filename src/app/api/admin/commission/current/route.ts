@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
           )
         ),
         products!inner (
-          product_name,
+          description,
           type
         )
       `)
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
       // Track top products
       if (!topProductsMap.has(item.product_code)) {
         topProductsMap.set(item.product_code, {
-          name: item.products.product_name || item.product_code,
+          name: item.products.description || item.product_code,
           units: 0,
           revenue: 0,
         });
