@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     // Fetch ALL shipping addresses for the company
     const { data: shippingAddresses, error: addressError } = await supabase
       .from('shipping_addresses')
-      .select('shipping_address_id, address_line_1, address_line_2, city, state_province, postal_code, country, is_default, address_label')
+      .select('address_id, address_line_1, address_line_2, city, state_province, postal_code, country, is_default, label')
       .eq('company_id', company_id)
       .order('is_default', { ascending: false }); // Default address first
 

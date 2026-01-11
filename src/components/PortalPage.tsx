@@ -72,7 +72,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [pricingPreview, setPricingPreview] = useState<PricingPreview | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
-  const [shippingAddresses, setShippingAddresses] = useState<(ShippingAddress & { shipping_address_id: string; is_default: boolean; address_label?: string })[]>([]);
+  const [shippingAddresses, setShippingAddresses] = useState<(ShippingAddress & { address_id: string; is_default: boolean; label?: string })[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [billingAddress, setBillingAddress] = useState<BillingAddress | null>(null);
   const [loadingAddress, setLoadingAddress] = useState(true);
@@ -109,10 +109,10 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
           // Set default address as selected
           const defaultAddress = shippingData.addresses.find((addr: any) => addr.is_default);
           if (defaultAddress) {
-            setSelectedAddressId(defaultAddress.shipping_address_id);
+            setSelectedAddressId(defaultAddress.address_id);
           } else if (shippingData.addresses.length > 0) {
             // If no default, select the first one
-            setSelectedAddressId(shippingData.addresses[0].shipping_address_id);
+            setSelectedAddressId(shippingData.addresses[0].address_id);
           }
         } else {
           if (!isTest) {
@@ -147,7 +147,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
         // Select the newly added address (likely the default one)
         const defaultAddress = data.addresses.find((addr: any) => addr.is_default);
         if (defaultAddress) {
-          setSelectedAddressId(defaultAddress.shipping_address_id);
+          setSelectedAddressId(defaultAddress.address_id);
         }
       }
     } catch (error) {
@@ -397,10 +397,10 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                     <div className="space-y-2 max-h-[120px] overflow-y-auto pr-1">
                       {shippingAddresses.map((addr) => (
                         <div
-                          key={addr.shipping_address_id}
-                          onClick={() => setSelectedAddressId(addr.shipping_address_id)}
+                          key={addr.address_id}
+                          onClick={() => setSelectedAddressId(addr.address_id)}
                           className={`p-2 rounded-[8px] border cursor-pointer transition-all ${
-                            selectedAddressId === addr.shipping_address_id
+                            selectedAddressId === addr.address_id
                               ? 'border-blue-500 bg-blue-50'
                               : 'border-[#e2e8f0] bg-[#f8fafc] hover:border-blue-300'
                           }`}
@@ -408,14 +408,14 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                           <div className="flex items-start gap-2">
                             <input
                               type="radio"
-                              checked={selectedAddressId === addr.shipping_address_id}
-                              onChange={() => setSelectedAddressId(addr.shipping_address_id)}
+                              checked={selectedAddressId === addr.address_id}
+                              onChange={() => setSelectedAddressId(addr.address_id)}
                               className="mt-0.5 text-blue-600"
                             />
                             <div className="flex-1 min-w-0">
-                              {addr.address_label && (
+                              {addr.label && (
                                 <div className="text-[11px] font-[600] text-[#1e293b] mb-0.5">
-                                  {addr.address_label}
+                                  {addr.label}
                                   {addr.is_default && <span className="ml-1 text-[9px] text-blue-600">(Default)</span>}
                                 </div>
                               )}
