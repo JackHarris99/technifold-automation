@@ -56,14 +56,6 @@ export default async function AdminQuotePreviewPage({ params }: AdminQuotePrevie
     notFound();
   }
 
-  // 4. Fetch default shipping address
-  const { data: shippingAddress } = await supabase
-    .from('shipping_addresses')
-    .select('address_id, address_line_1, address_line_2, city, state_province, postal_code, country, is_default')
-    .eq('company_id', quote.company_id)
-    .eq('is_default', true)
-    .single();
-
   // 5. Fetch contact (if available)
   let contact = null;
   if (quote.contact_id) {
@@ -89,7 +81,6 @@ export default async function AdminQuotePreviewPage({ params }: AdminQuotePrevie
     isTest: false,
     readOnly: true,
     previewMode: 'admin' as const,
-    shippingAddress: shippingAddress || null,
   };
 
   // Load StaticQuotePortal for static quotes, InteractiveQuotePortal for interactive

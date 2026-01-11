@@ -87,14 +87,6 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
     notFound();
   }
 
-  // 4b. Fetch default shipping address
-  const { data: shippingAddress } = await supabase
-    .from('shipping_addresses')
-    .select('address_id, address_line_1, address_line_2, city, state_province, postal_code, country, is_default')
-    .eq('company_id', company_id)
-    .eq('is_default', true)
-    .single();
-
   // 5. Fetch contact
   let contact = null;
   if (contact_id) {
@@ -206,7 +198,6 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
     contact,
     token,
     isTest: is_test || false,
-    shippingAddress: shippingAddress || null,
   };
 
   // Load StaticQuotePortal for static quotes, InteractiveQuotePortal for interactive
