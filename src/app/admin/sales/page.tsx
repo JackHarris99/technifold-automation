@@ -128,7 +128,7 @@ export default async function SalesCenterPage() {
     // Build queries conditionally based on viewMode
     let paidInvoicesQuery = supabase
       .from('invoices')
-      .select('total_amount')
+      .select('subtotal')  // Use subtotal for commission (excludes VAT & shipping)
       .eq('payment_status', 'paid')
       .gte('invoice_date', thirtyDaysAgo);
 
@@ -196,7 +196,7 @@ export default async function SalesCenterPage() {
 
     // Process metrics
     const paidInvoices = paidInvoicesResult.data || [];
-    salesMetrics.total_revenue = paidInvoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0);
+    salesMetrics.total_revenue = paidInvoices.reduce((sum, inv) => sum + (inv.subtotal || 0), 0);
     salesMetrics.deals_closed = paidInvoices.length;
     salesMetrics.active_trials = trialsResult.count || 0;
 
