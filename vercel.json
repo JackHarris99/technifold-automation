@@ -6,18 +6,11 @@
     "src/app/api/outbox/run/route.ts": {
       "maxDuration": 60
     },
-    "src/app/api/cron/update-rfm-scores/route.ts": {
-      "maxDuration": 60
-    },
     "src/app/api/cron/generate-reorder-reminders/route.ts": {
       "maxDuration": 60
     }
   },
   "crons": [
-    {
-      "path": "/api/cron/update-rfm-scores",
-      "schedule": "0 6 * * *"
-    },
     {
       "path": "/api/cron/generate-reorder-reminders",
       "schedule": "0 10 * * *"
