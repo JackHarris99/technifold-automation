@@ -452,7 +452,272 @@ export function StaticQuotePortal({
 
             {/* Right Sidebar */}
             <div className="col-span-5">
-              <div className="sticky top-6 space-y-6">
+              <div className="sticky top-6 space-y-6 max-h-[calc(100vh-3rem)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+
+                {/* TOOL QUOTES: Selected Tools Cart */}
+                {isToolQuote && (() => {
+                  const toolItems = Array.from(itemQuantities.entries())
+                    .filter(([code, qty]) => qty > 0);
+
+                  if (toolItems.length === 0) return null;
+
+                  return (
+                    <div className="bg-white rounded-[16px] p-5 shadow-sm border-2 border-blue-200">
+                      <div className="mb-4">
+                        <h3 className="text-[15px] font-[700] text-[#0a0a0a] tracking-tight">Selected Tools</h3>
+                        <p className="text-[11px] text-[#334155] mt-1">{toolItems.length} tool{toolItems.length !== 1 ? 's' : ''} selected</p>
+                      </div>
+
+                      <div className="space-y-3">
+                        {toolItems.map(([code, qty]) => {
+                          const item = lineItems.find(i => i.product_code === code);
+                          const lineTotal = (item?.unit_price || 0) * qty;
+
+                          return (
+                            <div key={code} className="p-3 bg-blue-50/50 rounded-[10px] border border-blue-200">
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-[11px] font-mono text-[#1e293b] mb-0.5">{code}</div>
+                                  <div className="text-[13px] font-[600] text-[#0a0a0a] leading-tight">{item?.description}</div>
+                                </div>
+                                {!readOnly && (
+                                  <button
+                                    onClick={() => updateQuantity(code, 0)}
+                                    className="ml-2 text-red-600 hover:text-red-700 flex-shrink-0"
+                                    title="Remove"
+                                  >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
+                                )}
+                              </div>
+
+                              <div className="flex items-center gap-3 mt-2">
+                                {!readOnly && (
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={() => updateQuantity(code, Math.max(0, qty - 1))}
+                                      className="w-6 h-6 rounded-[6px] bg-white border border-[#e8e8e8] flex items-center justify-center hover:bg-gray-50"
+                                    >
+                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                                      </svg>
+                                    </button>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      value={qty}
+                                      onChange={(e) => updateQuantity(code, parseInt(e.target.value) || 0)}
+                                      className="w-16 px-2 py-1 border border-[#e8e8e8] rounded-[6px] text-center text-[13px] font-[600]"
+                                    />
+                                    <button
+                                      onClick={() => updateQuantity(code, qty + 1)}
+                                      className="w-6 h-6 rounded-[6px] bg-white border border-[#e8e8e8] flex items-center justify-center hover:bg-gray-50"
+                                    >
+                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                )}
+                                {readOnly && (
+                                  <div className="text-[13px] font-[600] text-[#0a0a0a]">Qty: {qty}</div>
+                                )}
+                                <div className="flex-1 text-right">
+                                  <div className="text-[11px] text-[#334155]">
+                                    <span className="font-[600] text-[#3b82f6]">£{(item?.unit_price || 0).toFixed(2)}</span>
+                                    <span className="text-[#475569]"> /unit</span>
+                                  </div>
+                                  <div className="text-[14px] font-[700] text-[#0a0a0a] mt-0.5">£{lineTotal.toFixed(2)}</div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* CONSUMABLE QUOTES: Standard Selected Products */}
+                {!isToolQuote && (() => {
+                  const standardItems = Array.from(itemQuantities.entries())
+                    .filter(([code, qty]) => {
+                      const item = lineItems.find(i => i.product_code === code);
+                      return item?.pricing_tier === 'standard' && qty > 0;
+                    });
+
+                  if (standardItems.length === 0) return null;
+
+                  return (
+                    <div className="bg-white rounded-[16px] p-5 shadow-sm border-2 border-green-200">
+                      <div className="mb-4">
+                        <h3 className="text-[15px] font-[700] text-[#0a0a0a] tracking-tight">Standard Products</h3>
+                        <p className="text-[11px] text-[#334155] mt-1">{standardItems.length} item{standardItems.length !== 1 ? 's' : ''} selected</p>
+                      </div>
+
+                      <div className="space-y-3">
+                        {standardItems.map(([code, qty]) => {
+                          const item = lineItems.find(i => i.product_code === code);
+                          const lineTotal = (item?.unit_price || 0) * qty;
+
+                          return (
+                            <div key={code} className="p-3 bg-green-50/50 rounded-[10px] border border-green-200">
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-[11px] font-mono text-[#1e293b] mb-0.5">{code}</div>
+                                  <div className="text-[13px] font-[600] text-[#0a0a0a] leading-tight">{item?.description}</div>
+                                </div>
+                                {!readOnly && (
+                                  <button
+                                    onClick={() => updateQuantity(code, 0)}
+                                    className="ml-2 text-red-600 hover:text-red-700 flex-shrink-0"
+                                    title="Remove"
+                                  >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
+                                )}
+                              </div>
+
+                              <div className="flex items-center gap-3 mt-2">
+                                {!readOnly && (
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={() => updateQuantity(code, Math.max(0, qty - 1))}
+                                      className="w-6 h-6 rounded-[6px] bg-white border border-[#e8e8e8] flex items-center justify-center hover:bg-gray-50"
+                                    >
+                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                                      </svg>
+                                    </button>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      value={qty}
+                                      onChange={(e) => updateQuantity(code, parseInt(e.target.value) || 0)}
+                                      className="w-16 px-2 py-1 border border-[#e8e8e8] rounded-[6px] text-center text-[13px] font-[600]"
+                                    />
+                                    <button
+                                      onClick={() => updateQuantity(code, qty + 1)}
+                                      className="w-6 h-6 rounded-[6px] bg-white border border-[#e8e8e8] flex items-center justify-center hover:bg-gray-50"
+                                    >
+                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                )}
+                                {readOnly && (
+                                  <div className="text-[13px] font-[600] text-[#0a0a0a]">Qty: {qty}</div>
+                                )}
+                                <div className="flex-1 text-right">
+                                  <div className="text-[11px] text-[#334155]">
+                                    <span className="font-[600] text-[#16a34a]">£{(item?.unit_price || 0).toFixed(2)}</span>
+                                    <span className="text-[#475569]"> /unit</span>
+                                  </div>
+                                  <div className="text-[14px] font-[700] text-[#0a0a0a] mt-0.5">£{lineTotal.toFixed(2)}</div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* CONSUMABLE QUOTES: Premium Selected Products */}
+                {!isToolQuote && (() => {
+                  const premiumItems = Array.from(itemQuantities.entries())
+                    .filter(([code, qty]) => {
+                      const item = lineItems.find(i => i.product_code === code);
+                      return item?.pricing_tier === 'premium' && qty > 0;
+                    });
+
+                  if (premiumItems.length === 0) return null;
+
+                  return (
+                    <div className="bg-white rounded-[16px] p-5 shadow-sm border-2 border-purple-200">
+                      <div className="mb-4">
+                        <h3 className="text-[15px] font-[700] text-[#0a0a0a] tracking-tight">Premium Products</h3>
+                        <p className="text-[11px] text-[#334155] mt-1">{premiumItems.length} item{premiumItems.length !== 1 ? 's' : ''} selected</p>
+                      </div>
+
+                      <div className="space-y-3">
+                        {premiumItems.map(([code, qty]) => {
+                          const item = lineItems.find(i => i.product_code === code);
+                          const lineTotal = (item?.unit_price || 0) * qty;
+
+                          return (
+                            <div key={code} className="p-3 bg-purple-50/50 rounded-[10px] border border-purple-200">
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-[11px] font-mono text-[#1e293b] mb-0.5">{code}</div>
+                                  <div className="text-[13px] font-[600] text-[#0a0a0a] leading-tight">{item?.description}</div>
+                                </div>
+                                {!readOnly && (
+                                  <button
+                                    onClick={() => updateQuantity(code, 0)}
+                                    className="ml-2 text-red-600 hover:text-red-700 flex-shrink-0"
+                                    title="Remove"
+                                  >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
+                                )}
+                              </div>
+
+                              <div className="flex items-center gap-3 mt-2">
+                                {!readOnly && (
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={() => updateQuantity(code, Math.max(0, qty - 1))}
+                                      className="w-6 h-6 rounded-[6px] bg-white border border-[#e8e8e8] flex items-center justify-center hover:bg-gray-50"
+                                    >
+                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                                      </svg>
+                                    </button>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      value={qty}
+                                      onChange={(e) => updateQuantity(code, parseInt(e.target.value) || 0)}
+                                      className="w-16 px-2 py-1 border border-[#e8e8e8] rounded-[6px] text-center text-[13px] font-[600]"
+                                    />
+                                    <button
+                                      onClick={() => updateQuantity(code, qty + 1)}
+                                      className="w-6 h-6 rounded-[6px] bg-white border border-[#e8e8e8] flex items-center justify-center hover:bg-gray-50"
+                                    >
+                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                )}
+                                {readOnly && (
+                                  <div className="text-[13px] font-[600] text-[#0a0a0a]">Qty: {qty}</div>
+                                )}
+                                <div className="flex-1 text-right">
+                                  <div className="text-[11px] text-[#334155]">
+                                    <span className="font-[600] text-[#a855f7]">£{(item?.unit_price || 0).toFixed(2)}</span>
+                                    <span className="text-[#475569]"> /unit</span>
+                                  </div>
+                                  <div className="text-[14px] font-[700] text-[#0a0a0a] mt-0.5">£{lineTotal.toFixed(2)}</div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 {/* Order Summary Card */}
                 {pricingPreview && pricingPreview.line_items.length > 0 && (
                   <div className="bg-[#0a0a0a] rounded-[20px] p-8 text-white shadow-[0_16px_48px_rgba(0,0,0,0.24)]">
