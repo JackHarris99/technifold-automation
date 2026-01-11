@@ -84,9 +84,11 @@ Insert into `engagement_events`:
 │                                                     │
 │  💰 COMMISSION THIS MONTH                          │
 │  ┌──────────────────────────────────────────────┐ │
-│  │  Revenue (Subtotal):  £12,450                │ │
-│  │  Commission Rate:     5%                     │ │
-│  │  Commission Earned:   £622.50                │ │
+│  │  🔧 Tool Sales:       £8,450 → £845.00 (10%)│ │
+│  │  📦 Consumables:      £4,000 → £40.00  (1%) │ │
+│  │  🔄 Subscriptions:    £0     → £0.00   (10%)│ │
+│  │  ─────────────────────────────────────────   │ │
+│  │  TOTAL COMMISSION:    £885.00                │ │
 │  │                                              │ │
 │  │  Progress: [████████░░] 62% of month        │ │
 │  └──────────────────────────────────────────────┘ │
@@ -112,9 +114,38 @@ Insert into `engagement_events`:
 **Key Sections:**
 
 #### A. Current Month Commission
-- Query: `invoices` WHERE `payment_status = 'paid'` AND `invoice_date >= first day of month` AND company's `account_owner = current_user`
-- Sum: `subtotal` (excludes VAT/shipping)
-- Commission: `subtotal * commission_rate`
+**Complex calculation by product type:**
+
+```sql
+-- Get all paid invoices this month with items and product types
+SELECT
+  ii.invoice_id,
+  ii.product_code,
+  p.type as product_type,
+  ii.quantity,
+  ii.unit_price,
+  (ii.quantity * ii.unit_price) as item_subtotal,
+  i.company_id,
+  c.account_owner,
+  CASE
+    WHEN p.type = 'tool' THEN (ii.quantity * ii.unit_price) * 0.10
+    WHEN p.type = 'consumable' AND c.account_owner = 'current_rep_id'
+      THEN (ii.quantity * ii.unit_price) * 0.01
+    ELSE 0
+  END as commission
+FROM invoice_items ii
+JOIN invoices i ON ii.invoice_id = i.invoice_id
+JOIN products p ON ii.product_code = p.product_code
+JOIN companies c ON i.company_id = c.company_id
+WHERE i.payment_status = 'paid'
+  AND i.invoice_date >= '2026-01-01'  -- First day of current month
+  AND i.invoice_date < '2026-02-01'   -- First day of next month
+```
+
+**Breakdown display:**
+- Tool revenue → Commission @ 10%
+- Consumable revenue (only assigned customers) → Commission @ 1%
+- Subscription revenue (future) → Commission @ 10%
 - Progress bar: Days into month
 
 #### B. Activity Metrics (Competitive!)
@@ -173,26 +204,37 @@ TEAM ACTIVITY - JANUARY 2026
 
 ---
 
-### 4. Commission Rate Configuration
-**Location:** Settings or admin config
+### 4. Commission Rate Structure (ACTUAL)
 
-**Structure:**
-```typescript
-interface CommissionStructure {
-  rep_id: string;
-  commission_rate: number; // e.g., 0.05 for 5%
-  // Future: tiered rates
-  tiers?: Array<{
-    threshold: number;
-    rate: number;
-  }>;
-}
+**Commission is product-type based:**
+
+| Product Type | Commission Rate | Condition |
+|--------------|----------------|-----------|
+| **Tools** | 10% | All tool sales |
+| **Tool Subscriptions** | 10% | Recurring revenue (future) |
+| **Consumables** | 1% | ONLY for customers assigned to rep (account_owner) |
+
+**Logic:**
+1. For each paid invoice, get invoice_items
+2. Join with products table to get product.type
+3. Calculate commission per item:
+   - If `type = 'tool'` → `subtotal × 0.10`
+   - If `type = 'consumable'` AND `invoice.company_id.account_owner = rep` → `subtotal × 0.01`
+   - If `type = 'consumable'` but customer NOT assigned → £0 commission
+4. Sum all item commissions = total commission for invoice
+
+**Example:**
+```
+Invoice ABC-123 (Company: XYZ001, account_owner: john)
+  Item 1: MOULD-161 (tool)       - £500 → Commission: £50 (10%)
+  Item 2: CP-NY/SL-35 (consumable) - £200 → Commission: £2 (1%, customer assigned to john)
+  Item 3: 317-SS-BLUE (tool)      - £150 → Commission: £15 (10%)
+
+Total commission for john: £67
 ```
 
-**Options:**
-- Flat rate per rep (e.g., 5% of subtotal)
-- Tiered rates (future): "5% up to £20k, 7% above"
-- Different rates per rep (if needed)
+**Edge case:**
+If Jane sells consumables to XYZ001 (john's customer), john still gets the 1% commission (customer assignment, not who created the invoice).
 
 ---
 
@@ -272,9 +314,25 @@ Get current month performance for logged-in rep
 ```json
 {
   "month": "2026-01",
-  "revenue": 12450.00,
-  "commission_rate": 0.05,
-  "commission_earned": 622.50,
+  "commission_breakdown": {
+    "tools": {
+      "revenue": 8450.00,
+      "commission": 845.00,
+      "rate": 0.10
+    },
+    "consumables": {
+      "revenue": 4000.00,
+      "commission": 40.00,
+      "rate": 0.01,
+      "note": "Only from assigned customers"
+    },
+    "subscriptions": {
+      "revenue": 0,
+      "commission": 0,
+      "rate": 0.10
+    }
+  },
+  "total_commission": 885.00,
   "invoices_closed": 8,
   "activities": {
     "calls": 42,
@@ -323,11 +381,28 @@ Get team activity metrics (not revenue)
 
 ## Questions to Answer
 
-1. **Commission rate:** What % of subtotal? Same for all reps?
-2. **Activity outcomes:** What outcomes matter? (successful call vs voicemail)
-3. **Quotes that become invoices:** Track conversion rate?
+1. ~~**Commission rate:**~~ ✅ ANSWERED - 10% tools/subscriptions, 1% consumables (assigned customers only)
+2. **Activity outcomes:** What outcomes matter? (successful call vs voicemail) - Do we track both or just successful?
+3. **Quotes that become invoices:** Track conversion rate? (Good metric for dashboard)
 4. **Split commissions:** If account_owner changes mid-month, how to handle?
+   - Option A: Commission goes to whoever owns customer at month-end
+   - Option B: Commission split based on days owned
+   - Option C: Commission goes to whoever owned customer when invoice was paid
 5. **Historical cutoff:** When did current commission system start? (for history view)
+6. **Consumable commission clarification:** If a rep creates an invoice for a customer NOT assigned to them, who gets consumable commission?
+   - Current assumption: Always goes to account_owner (customer assignment)
+   - Alternative: Goes to whoever created the invoice
+
+---
+
+## Important for Stripe Import
+
+When importing historical Stripe invoices tomorrow, ensure:
+1. **invoice_items.unit_price is populated** - Needed for commission calculations
+2. **Products have correct `type`** - Must be 'tool' or 'consumable' for commission logic
+3. **Companies have `account_owner` set** - Required for consumable commission attribution
+
+Without these, commission calculations will be £0 or incorrect!
 
 ---
 
