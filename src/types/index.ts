@@ -5,6 +5,7 @@ export type ReorderItem = {
   last_purchased: string | null; // 'YYYY-MM-DD'
   category?: string;
   image_url?: string | null;
+  pricing_tier?: string | null; // 'standard' or 'premium'
 };
 
 export type ToolTab = {

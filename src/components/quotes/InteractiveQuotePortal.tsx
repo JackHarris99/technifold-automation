@@ -89,6 +89,7 @@ export function InteractiveQuotePortal({ quote, lineItems, company, contact, tok
       price: item.unit_price,
       category: item.category || '',
       image_url: item.image_url || null,
+      pricing_tier: item.pricing_tier || null,
     }));
     setCart(initialCart);
   }, [lineItems]);
@@ -313,7 +314,19 @@ export function InteractiveQuotePortal({ quote, lineItems, company, contact, tok
                   )}
 
                   <div className="flex-1">
-                    <h3 className="text-[20px] font-[700] text-[#0a0a0a] mb-2">{item.description}</h3>
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="text-[20px] font-[700] text-[#0a0a0a]">{item.description}</h3>
+                      {item.pricing_tier === 'standard' && (
+                        <span className="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-[600] rounded-[4px] uppercase tracking-wide">
+                          Standard
+                        </span>
+                      )}
+                      {item.pricing_tier === 'premium' && (
+                        <span className="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-[600] rounded-[4px] uppercase tracking-wide">
+                          Premium
+                        </span>
+                      )}
+                    </div>
                     <p className="text-[14px] text-[#666] mb-4">{item.consumable_code}</p>
 
                     <div className="flex items-center gap-4 mb-4">

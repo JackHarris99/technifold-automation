@@ -117,7 +117,7 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
       // Get consumable details with prices
       const { data: consumables } = await supabase
         .from('products')
-        .select('product_code, description, price, category, image_url')
+        .select('product_code, description, price, category, image_url, pricing_tier')
         .in('product_code', consumableCodes)
         .limit(500);
 
@@ -128,7 +128,8 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
         price: cons.price,
         last_purchased: consumableLastOrdered.get(cons.product_code)?.split('T')[0] || null,
         category: cons.category,
-        image_url: cons.image_url
+        image_url: cons.image_url,
+        pricing_tier: cons.pricing_tier
       }));
 
       return {
@@ -150,7 +151,7 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
     // Get product details for all ordered consumables
     const { data: orderedProducts } = await supabase
       .from('products')
-      .select('product_code, description, price, category, image_url')
+      .select('product_code, description, price, category, image_url, pricing_tier')
       .in('product_code', orderedProductCodes);
 
     if (orderedProducts) {
@@ -160,7 +161,8 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
         price: prod.price,
         last_purchased: consumableLastOrdered.get(prod.product_code)?.split('T')[0] || null,
         category: prod.category,
-        image_url: prod.image_url
+        image_url: prod.image_url,
+        pricing_tier: prod.pricing_tier
       }));
 
       // Sort by most recently ordered

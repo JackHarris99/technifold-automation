@@ -377,23 +377,16 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <div className="font-[600] text-[15px] text-[#0a0a0a]">{item.description}</div>
-                              {(() => {
-                                const pricing = getPricingInfo(item.consumable_code);
-                                if (pricing?.discountLabel?.includes('total units')) {
-                                  return (
-                                    <span className="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-[600] rounded-[4px] uppercase tracking-wide">
-                                      Standard
-                                    </span>
-                                  );
-                                } else if (pricing?.discountLabel) {
-                                  return (
-                                    <span className="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-[600] rounded-[4px] uppercase tracking-wide">
-                                      Premium
-                                    </span>
-                                  );
-                                }
-                                return null;
-                              })()}
+                              {item.pricing_tier === 'standard' && (
+                                <span className="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-[600] rounded-[4px] uppercase tracking-wide">
+                                  Standard
+                                </span>
+                              )}
+                              {item.pricing_tier === 'premium' && (
+                                <span className="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-[600] rounded-[4px] uppercase tracking-wide">
+                                  Premium
+                                </span>
+                              )}
                             </div>
                             <div className="text-[13px] text-[#666] mt-1">
                               {item.consumable_code}
@@ -503,23 +496,16 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <div className="font-[600] text-[15px] text-[#0a0a0a]">{item.description}</div>
-                              {(() => {
-                                const pricing = getPricingInfo(item.consumable_code);
-                                if (pricing?.discountLabel?.includes('total units')) {
-                                  return (
-                                    <span className="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-[600] rounded-[4px] uppercase tracking-wide">
-                                      Standard
-                                    </span>
-                                  );
-                                } else if (pricing?.discountLabel) {
-                                  return (
-                                    <span className="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-[600] rounded-[4px] uppercase tracking-wide">
-                                      Premium
-                                    </span>
-                                  );
-                                }
-                                return null;
-                              })()}
+                              {item.pricing_tier === 'standard' && (
+                                <span className="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-[600] rounded-[4px] uppercase tracking-wide">
+                                  Standard
+                                </span>
+                              )}
+                              {item.pricing_tier === 'premium' && (
+                                <span className="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-[600] rounded-[4px] uppercase tracking-wide">
+                                  Premium
+                                </span>
+                              )}
                             </div>
                             <div className="text-[13px] text-[#666] mt-1">
                               {item.consumable_code}
