@@ -333,7 +333,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                 <h1 className="text-[28px] font-[600] text-[#1e40af] mb-1 tracking-[-0.02em] leading-[1.2]">
                   {payload.company_name}
                 </h1>
-                <p className="text-[13px] text-[#64748b] font-[400]">
+                <p className="text-[13px] text-[#334155] font-[400]">
                   Precision consumables ordering with intelligent tiered pricing
                 </p>
               </div>
@@ -341,15 +341,15 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
               <div className="grid grid-cols-3 gap-4">
                 {/* Contact Info */}
                 <div>
-                  <div className="text-[11px] font-[600] text-[#94a3b8] mb-2 uppercase tracking-wider">Contact</div>
+                  <div className="text-[11px] font-[600] text-[#475569] mb-2 uppercase tracking-wider">Contact</div>
                   {contact ? (
                     <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
                       <div className="text-[13px] text-[#1e293b] font-[600]">{contact.full_name}</div>
-                      <div className="text-[12px] text-[#64748b] mt-0.5">{contact.email}</div>
+                      <div className="text-[12px] text-[#334155] mt-0.5">{contact.email}</div>
                     </div>
                   ) : (
                     <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
-                      <p className="text-[12px] text-[#94a3b8] italic">No contact assigned</p>
+                      <p className="text-[12px] text-[#475569] italic">No contact assigned</p>
                     </div>
                   )}
                 </div>
@@ -357,21 +357,21 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                 {/* Billing Address */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <div className="text-[11px] font-[600] text-[#94a3b8] uppercase tracking-wider">Billing Address</div>
+                    <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider">Billing Address</div>
                     {billingAddress && (
                       <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
                     )}
                   </div>
                   {loadingAddress ? (
                     <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
-                      <p className="text-[12px] text-[#94a3b8] italic">Loading...</p>
+                      <p className="text-[12px] text-[#475569] italic">Loading...</p>
                     </div>
                   ) : billingAddress && billingAddress.billing_address_line_1 ? (
                     <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
                       <div className="text-[12px] font-[500] text-[#1e293b]">{billingAddress.billing_address_line_1}</div>
-                      {billingAddress.billing_address_line_2 && <div className="text-[11px] text-[#64748b]">{billingAddress.billing_address_line_2}</div>}
-                      <div className="text-[11px] text-[#64748b]">{billingAddress.billing_city}{billingAddress.billing_state_province ? `, ${billingAddress.billing_state_province}` : ''}</div>
-                      <div className="text-[11px] text-[#64748b]">{billingAddress.billing_postal_code}</div>
+                      {billingAddress.billing_address_line_2 && <div className="text-[11px] text-[#334155]">{billingAddress.billing_address_line_2}</div>}
+                      <div className="text-[11px] text-[#334155]">{billingAddress.billing_city}{billingAddress.billing_state_province ? `, ${billingAddress.billing_state_province}` : ''}</div>
+                      <div className="text-[11px] text-[#334155]">{billingAddress.billing_postal_code}</div>
                       <div className="text-[12px] font-[500] text-[#1e293b] mt-1">{billingAddress.billing_country}</div>
                     </div>
                   ) : (
@@ -384,14 +384,14 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                 {/* Delivery Addresses */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <div className="text-[11px] font-[600] text-[#94a3b8] uppercase tracking-wider">Delivery Addresses</div>
+                    <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider">Delivery Addresses</div>
                     <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">
                       {shippingAddresses.length > 0 ? 'Add New' : 'Add'}
                     </button>
                   </div>
                   {loadingAddress ? (
                     <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
-                      <p className="text-[12px] text-[#94a3b8] italic">Loading...</p>
+                      <p className="text-[12px] text-[#475569] italic">Loading...</p>
                     </div>
                   ) : shippingAddresses.length > 0 ? (
                     <div className="space-y-2 max-h-[120px] overflow-y-auto pr-1">
@@ -419,11 +419,11 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                                   {addr.is_default && <span className="ml-1 text-[9px] text-blue-600">(Default)</span>}
                                 </div>
                               )}
-                              <div className="text-[10px] text-[#64748b]">
+                              <div className="text-[10px] text-[#334155]">
                                 {addr.address_line_1}
                                 {addr.address_line_2 && `, ${addr.address_line_2}`}
                               </div>
-                              <div className="text-[10px] text-[#64748b]">
+                              <div className="text-[10px] text-[#334155]">
                                 {addr.city}{addr.state_province ? `, ${addr.state_province}` : ''} {addr.postal_code}
                               </div>
                               <div className="text-[10px] font-[500] text-[#1e293b]">{addr.country}</div>
@@ -434,7 +434,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                     </div>
                   ) : (
                     <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
-                      <p className="text-[11px] text-[#94a3b8] italic">Address confirmed at checkout</p>
+                      <p className="text-[11px] text-[#475569] italic">Address confirmed at checkout</p>
                     </div>
                   )}
                 </div>
@@ -449,7 +449,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                 >
                   <div>
                     <h2 className="text-[17px] font-[600] text-[#1e40af] tracking-[-0.01em]">Previously Ordered</h2>
-                    <p className="text-[12px] text-[#64748b] mt-0.5 font-[500]">{payload.reorder_items.length} items available</p>
+                    <p className="text-[12px] text-[#334155] mt-0.5 font-[500]">{payload.reorder_items.length} items available</p>
                   </div>
                   <svg
                     className={`w-5 h-5 text-[#3b82f6] transition-transform ${expandedSections.has('reorder') ? 'rotate-180' : ''}`}
@@ -501,11 +501,11 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                                 </span>
                               )}
                             </div>
-                            <div className="text-[13px] text-[#666] mt-1">
+                            <div className="text-[13px] text-[#1e293b] mt-1">
                               {item.consumable_code}
                             </div>
                             <div className="mt-2">
-                              <div className="text-[13px] text-[#666] mb-1">Price per unit</div>
+                              <div className="text-[13px] text-[#334155] mb-1">Price per unit</div>
                               {(() => {
                                 const pricing = getPricingInfo(item.consumable_code);
                                 const basePrice = item.price || 0;
@@ -538,7 +538,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                             </div>
                           </div>
                           <div className="flex items-center gap-3">
-                            <label className="text-[13px] text-[#666] font-[500]">Qty:</label>
+                            <label className="text-[13px] text-[#1e293b] font-[500]">Qty:</label>
                             <input
                               type="number"
                               min="0"
@@ -566,10 +566,10 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                     <h2 className="text-[17px] font-[600] text-[#1e40af] tracking-[-0.01em]">
                       {toolTab.tool_desc || toolTab.tool_code}
                       {toolTab.quantity && toolTab.quantity > 1 && (
-                        <span className="text-[#64748b] font-[500] text-[15px]"> (x{toolTab.quantity})</span>
+                        <span className="text-[#334155] font-[500] text-[15px]"> (x{toolTab.quantity})</span>
                       )}
                     </h2>
-                    <p className="text-[12px] text-[#64748b] mt-0.5 font-[500]">
+                    <p className="text-[12px] text-[#334155] mt-0.5 font-[500]">
                       {toolTab.items.length} consumable{toolTab.items.length !== 1 ? 's' : ''} available
                     </p>
                   </div>
@@ -623,12 +623,12 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                                 </span>
                               )}
                             </div>
-                            <div className="text-[13px] text-[#666] mt-1">
+                            <div className="text-[13px] text-[#1e293b] mt-1">
                               {item.consumable_code}
                               {item.category && <span className="ml-2">• {item.category}</span>}
                             </div>
                             <div className="mt-2">
-                              <div className="text-[13px] text-[#666] mb-1">Price per unit</div>
+                              <div className="text-[13px] text-[#334155] mb-1">Price per unit</div>
                               {(() => {
                                 const pricing = getPricingInfo(item.consumable_code);
                                 const basePrice = item.price || 0;
@@ -661,7 +661,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                             </div>
                           </div>
                           <div className="flex items-center gap-3">
-                            <label className="text-[13px] text-[#666] font-[500]">Qty:</label>
+                            <label className="text-[13px] text-[#1e293b] font-[500]">Qty:</label>
                             <input
                               type="number"
                               min="0"
@@ -706,7 +706,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                 <div className="bg-gradient-to-br from-[#ecfdf5] to-white rounded-[16px] p-5 shadow-sm border-2 border-[#16a34a]/20">
                   <div className="mb-3">
                     <h3 className="text-[15px] font-[700] text-[#0a0a0a] tracking-tight">Standard Volume Pricing</h3>
-                    <p className="text-[12px] text-[#666] mt-1">All standard items combine for tier pricing</p>
+                    <p className="text-[12px] text-[#334155] mt-1">All standard items combine for tier pricing</p>
                   </div>
 
                   {standardTotalQty > 0 && (
@@ -719,10 +719,10 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                   )}
 
                   <div>
-                    <h4 className="text-[10px] font-[600] text-[#666] uppercase tracking-wider mb-2">Tier Guide</h4>
+                    <h4 className="text-[10px] font-[600] text-[#334155] uppercase tracking-wider mb-2">Tier Guide</h4>
                     <div className="grid grid-cols-4 gap-1">
                       {tiersForDisplay.map((tier, idx) => (
-                        <div key={idx} className={`text-center p-1 rounded-[4px] transition-all ${currentTier?.label === tier.label && standardTotalQty > 0 ? 'bg-[#16a34a] text-white' : 'bg-[#f5f5f5] text-[#666]'}`}>
+                        <div key={idx} className={`text-center p-1 rounded-[4px] transition-all ${currentTier?.label === tier.label && standardTotalQty > 0 ? 'bg-[#16a34a] text-white' : 'bg-[#f5f5f5] text-[#1e293b]'}`}>
                           <div className="text-[8px] font-[600] opacity-80">{tier.label}</div>
                           <div className="text-[11px] font-[800] mt-0.5">£{tier.price}</div>
                           <div className="text-[7px] opacity-70 mt-0.5">{tier.max === Infinity ? `${tier.min}+` : `${tier.min}-${tier.max}`}</div>
@@ -766,7 +766,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                 <div className="bg-white rounded-[16px] p-5 shadow-sm border-2 border-green-200">
                   <div className="mb-4">
                     <h3 className="text-[15px] font-[700] text-[#0a0a0a] tracking-tight">Standard Products</h3>
-                    <p className="text-[11px] text-[#666] mt-1">{standardProducts.length} item{standardProducts.length !== 1 ? 's' : ''} selected</p>
+                    <p className="text-[11px] text-[#334155] mt-1">{standardProducts.length} item{standardProducts.length !== 1 ? 's' : ''} selected</p>
                   </div>
 
                   <div className="space-y-3">
@@ -778,7 +778,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                         <div key={item.product_code} className="p-3 bg-green-50/50 rounded-[10px] border border-green-200">
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex-1 min-w-0">
-                              <div className="text-[11px] font-mono text-[#666] mb-0.5">{item.product_code}</div>
+                              <div className="text-[11px] font-mono text-[#1e293b] mb-0.5">{item.product_code}</div>
                               <div className="text-[13px] font-[600] text-[#0a0a0a] leading-tight">{item.description}</div>
                             </div>
                             <button
@@ -819,12 +819,12 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                               </button>
                             </div>
                             <div className="flex-1 text-right">
-                              <div className="text-[11px] text-[#666]">
+                              <div className="text-[11px] text-[#334155]">
                                 {item.unit_price !== item.base_price && (
                                   <span className="line-through mr-1">£{item.base_price.toFixed(2)}</span>
                                 )}
                                 <span className="font-[600] text-[#16a34a]">£{item.unit_price.toFixed(2)}</span>
-                                <span className="text-[#999]"> /unit</span>
+                                <span className="text-[#475569]"> /unit</span>
                               </div>
                               <div className="text-[14px] font-[700] text-[#0a0a0a] mt-0.5">£{lineTotal.toFixed(2)}</div>
                             </div>
@@ -842,17 +842,17 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
               <div className="bg-gradient-to-br from-[#faf5ff] to-white rounded-[16px] p-5 shadow-sm border-2 border-[#a855f7]/20">
                 <div className="mb-3">
                   <h3 className="text-[15px] font-[700] text-[#0a0a0a] tracking-tight">Premium Pricing</h3>
-                  <p className="text-[12px] text-[#666] mt-1">Each item priced by its own quantity</p>
+                  <p className="text-[12px] text-[#334155] mt-1">Each item priced by its own quantity</p>
                 </div>
 
                 <div>
-                  <h4 className="text-[10px] font-[600] text-[#666] uppercase tracking-wider mb-2">Tier Guide</h4>
+                  <h4 className="text-[10px] font-[600] text-[#334155] uppercase tracking-wider mb-2">Tier Guide</h4>
                   <div className="space-y-1.5">
                     {premiumTiers.map((tier, idx) => {
                       const discount = tier.discount_percent || 0;
                       return (
                         <div key={idx} className="flex items-center justify-between p-2 bg-white rounded-[8px] border border-[#e8e8e8]">
-                          <span className="text-[11px] text-[#666]">
+                          <span className="text-[11px] text-[#334155]">
                             {tier.max_quantity === 999 ? `${tier.min_quantity}+` : `${tier.min_quantity}-${tier.max_quantity}`} units
                           </span>
                           <span className="text-[12px] font-[700] text-[#a855f7]">
@@ -898,7 +898,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                 <div className="bg-white rounded-[16px] p-5 shadow-sm border-2 border-purple-200">
                   <div className="mb-4">
                     <h3 className="text-[15px] font-[700] text-[#0a0a0a] tracking-tight">Premium Products</h3>
-                    <p className="text-[11px] text-[#666] mt-1">{premiumProducts.length} item{premiumProducts.length !== 1 ? 's' : ''} selected</p>
+                    <p className="text-[11px] text-[#334155] mt-1">{premiumProducts.length} item{premiumProducts.length !== 1 ? 's' : ''} selected</p>
                   </div>
 
                   <div className="space-y-3">
@@ -910,7 +910,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                         <div key={item.product_code} className="p-3 bg-purple-50/50 rounded-[10px] border border-purple-200">
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex-1 min-w-0">
-                              <div className="text-[11px] font-mono text-[#666] mb-0.5">{item.product_code}</div>
+                              <div className="text-[11px] font-mono text-[#1e293b] mb-0.5">{item.product_code}</div>
                               <div className="text-[13px] font-[600] text-[#0a0a0a] leading-tight">{item.description}</div>
                             </div>
                             <button
@@ -951,12 +951,12 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                               </button>
                             </div>
                             <div className="flex-1 text-right">
-                              <div className="text-[11px] text-[#666]">
+                              <div className="text-[11px] text-[#334155]">
                                 {item.unit_price !== item.base_price && (
                                   <span className="line-through mr-1">£{item.base_price.toFixed(2)}</span>
                                 )}
                                 <span className="font-[600] text-[#a855f7]">£{item.unit_price.toFixed(2)}</span>
-                                <span className="text-[#999]"> /unit</span>
+                                <span className="text-[#475569]"> /unit</span>
                               </div>
                               <div className="text-[14px] font-[700] text-[#0a0a0a] mt-0.5">£{lineTotal.toFixed(2)}</div>
                             </div>
@@ -1036,8 +1036,8 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
 
             {/* Need Help Card */}
             <div className="bg-white rounded-[20px] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
-              <div className="text-[12px] font-[700] text-[#666] uppercase tracking-[0.05em] mb-4">Need Help?</div>
-              <p className="text-[14px] text-[#666] mb-4">Our team is ready to assist with your order.</p>
+              <div className="text-[12px] font-[700] text-[#334155] uppercase tracking-[0.05em] mb-4">Need Help?</div>
+              <p className="text-[14px] text-[#334155] mb-4">Our team is ready to assist with your order.</p>
               <a href="tel:+441455554491" className="text-[15px] text-[#16a34a] font-[600] hover:text-[#15803d]">+44 (0)1455 554491</a>
             </div>
 
