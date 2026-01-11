@@ -72,7 +72,8 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [pricingPreview, setPricingPreview] = useState<PricingPreview | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
-  const [shippingAddress, setShippingAddress] = useState<ShippingAddress | null>(null);
+  const [shippingAddresses, setShippingAddresses] = useState<(ShippingAddress & { shipping_address_id: string; is_default: boolean; address_label?: string })[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [billingAddress, setBillingAddress] = useState<BillingAddress | null>(null);
   const [loadingAddress, setLoadingAddress] = useState(true);
   const [showAddressModal, setShowAddressModal] = useState(false);
@@ -98,12 +99,21 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
   useEffect(() => {
     const fetchAddresses = async () => {
       try {
-        // Fetch shipping address
+        // Fetch ALL shipping addresses
         const shippingResponse = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
         const shippingData = await shippingResponse.json();
 
-        if (shippingData.success && shippingData.address) {
-          setShippingAddress(shippingData.address);
+        if (shippingData.success && shippingData.addresses) {
+          setShippingAddresses(shippingData.addresses);
+
+          // Set default address as selected
+          const defaultAddress = shippingData.addresses.find((addr: any) => addr.is_default);
+          if (defaultAddress) {
+            setSelectedAddressId(defaultAddress.shipping_address_id);
+          } else if (shippingData.addresses.length > 0) {
+            // If no default, select the first one
+            setSelectedAddressId(shippingData.addresses[0].shipping_address_id);
+          }
         } else {
           if (!isTest) {
             setShowAddressModal(true);
@@ -132,11 +142,16 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
     try {
       const response = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
       const data = await response.json();
-      if (data.success && data.address) {
-        setShippingAddress(data.address);
+      if (data.success && data.addresses) {
+        setShippingAddresses(data.addresses);
+        // Select the newly added address (likely the default one)
+        const defaultAddress = data.addresses.find((addr: any) => addr.is_default);
+        if (defaultAddress) {
+          setSelectedAddressId(defaultAddress.shipping_address_id);
+        }
       }
     } catch (error) {
-      console.error('[PortalPage] Failed to refetch shipping address:', error);
+      console.error('[PortalPage] Failed to refetch shipping addresses:', error);
     }
   };
 
@@ -366,25 +381,56 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                   )}
                 </div>
 
-                {/* Delivery Address */}
+                {/* Delivery Addresses */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <div className="text-[11px] font-[600] text-[#94a3b8] uppercase tracking-wider">Delivery Address</div>
-                    {shippingAddress && (
-                      <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
-                    )}
+                    <div className="text-[11px] font-[600] text-[#94a3b8] uppercase tracking-wider">Delivery Addresses</div>
+                    <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">
+                      {shippingAddresses.length > 0 ? 'Add New' : 'Add'}
+                    </button>
                   </div>
                   {loadingAddress ? (
                     <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
                       <p className="text-[12px] text-[#94a3b8] italic">Loading...</p>
                     </div>
-                  ) : shippingAddress ? (
-                    <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
-                      <div className="text-[12px] font-[500] text-[#1e293b]">{shippingAddress.address_line_1}</div>
-                      {shippingAddress.address_line_2 && <div className="text-[11px] text-[#64748b]">{shippingAddress.address_line_2}</div>}
-                      <div className="text-[11px] text-[#64748b]">{shippingAddress.city}{shippingAddress.state_province ? `, ${shippingAddress.state_province}` : ''}</div>
-                      <div className="text-[11px] text-[#64748b]">{shippingAddress.postal_code}</div>
-                      <div className="text-[12px] font-[500] text-[#1e293b] mt-1">{shippingAddress.country}</div>
+                  ) : shippingAddresses.length > 0 ? (
+                    <div className="space-y-2 max-h-[120px] overflow-y-auto pr-1">
+                      {shippingAddresses.map((addr) => (
+                        <div
+                          key={addr.shipping_address_id}
+                          onClick={() => setSelectedAddressId(addr.shipping_address_id)}
+                          className={`p-2 rounded-[8px] border cursor-pointer transition-all ${
+                            selectedAddressId === addr.shipping_address_id
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-[#e2e8f0] bg-[#f8fafc] hover:border-blue-300'
+                          }`}
+                        >
+                          <div className="flex items-start gap-2">
+                            <input
+                              type="radio"
+                              checked={selectedAddressId === addr.shipping_address_id}
+                              onChange={() => setSelectedAddressId(addr.shipping_address_id)}
+                              className="mt-0.5 text-blue-600"
+                            />
+                            <div className="flex-1 min-w-0">
+                              {addr.address_label && (
+                                <div className="text-[11px] font-[600] text-[#1e293b] mb-0.5">
+                                  {addr.address_label}
+                                  {addr.is_default && <span className="ml-1 text-[9px] text-blue-600">(Default)</span>}
+                                </div>
+                              )}
+                              <div className="text-[10px] text-[#64748b]">
+                                {addr.address_line_1}
+                                {addr.address_line_2 && `, ${addr.address_line_2}`}
+                              </div>
+                              <div className="text-[10px] text-[#64748b]">
+                                {addr.city}{addr.state_province ? `, ${addr.state_province}` : ''} {addr.postal_code}
+                              </div>
+                              <div className="text-[10px] font-[500] text-[#1e293b]">{addr.country}</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   ) : (
                     <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
@@ -457,9 +503,6 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                             </div>
                             <div className="text-[13px] text-[#666] mt-1">
                               {item.consumable_code}
-                              {item.last_purchased && (
-                                <span className="ml-2">• Last ordered: {new Date(item.last_purchased).toLocaleDateString()}</span>
-                              )}
                             </div>
                             <div className="mt-2">
                               <div className="text-[13px] text-[#666] mb-1">Price per unit</div>
@@ -583,9 +626,6 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                             <div className="text-[13px] text-[#666] mt-1">
                               {item.consumable_code}
                               {item.category && <span className="ml-2">• {item.category}</span>}
-                              {item.last_purchased && (
-                                <span className="ml-2">• Last ordered: {new Date(item.last_purchased).toLocaleDateString()}</span>
-                              )}
                             </div>
                             <div className="mt-2">
                               <div className="text-[13px] text-[#666] mb-1">Price per unit</div>

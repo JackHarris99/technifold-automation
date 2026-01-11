@@ -30,27 +30,25 @@ export async function GET(request: NextRequest) {
     const supabase = getSupabaseClient();
     const company_id = payload.company_id;
 
-    // Fetch default shipping address
-    const { data: shippingAddress, error: addressError } = await supabase
+    // Fetch ALL shipping addresses for the company
+    const { data: shippingAddresses, error: addressError } = await supabase
       .from('shipping_addresses')
-      .select('address_line_1, address_line_2, city, state_province, postal_code, country')
+      .select('shipping_address_id, address_line_1, address_line_2, city, state_province, postal_code, country, is_default, address_label')
       .eq('company_id', company_id)
-      .eq('is_default', true)
-      .single();
+      .order('is_default', { ascending: false }); // Default address first
 
-    if (addressError && addressError.code !== 'PGRST116') {
-      // PGRST116 is "not found" - that's okay, just means no address
-      console.error('[portal/shipping-address] Error fetching address:', addressError);
+    if (addressError) {
+      console.error('[portal/shipping-address] Error fetching addresses:', addressError);
       return NextResponse.json(
-        { error: 'Failed to fetch shipping address' },
+        { error: 'Failed to fetch shipping addresses' },
         { status: 500 }
       );
     }
 
-    // Return null if no address found, otherwise return the address
+    // Return all addresses (empty array if none found)
     return NextResponse.json({
       success: true,
-      address: shippingAddress || null,
+      addresses: shippingAddresses || [],
     });
 
   } catch (error) {
