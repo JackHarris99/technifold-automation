@@ -650,6 +650,59 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
               );
             })()}
 
+            {/* Premium Pricing Card */}
+            {pricingPreview && !loadingPreview && pricingPreview.line_items.length > 0 && premiumTiers.length > 0 && (() => {
+              const premiumItems = pricingPreview.line_items.filter(item => item.discount_applied && !item.discount_applied.includes('total units'));
+
+              if (premiumItems.length === 0) return null;
+
+              return (
+                <div className="bg-gradient-to-br from-[#faf5ff] to-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border-2 border-[#a855f7]/20">
+                  <div className="mb-4">
+                    <h3 className="text-[18px] font-[700] text-[#0a0a0a] tracking-tight">Premium Pricing</h3>
+                    <p className="text-[13px] text-[#666] mt-1 font-[500]">Per-item quantity discounts</p>
+                  </div>
+
+                  <div className="space-y-2 mb-4">
+                    {premiumItems.map((item) => (
+                      <div key={item.product_code} className="p-3 bg-white rounded-[10px] border border-[#e8e8e8]">
+                        <div className="text-[12px] font-[600] text-[#0a0a0a] mb-1">{item.description}</div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] text-[#666]">{item.quantity} units</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[13px] text-[#999] line-through">£{item.base_price.toFixed(2)}</span>
+                            <span className="text-[15px] font-[700] text-[#a855f7]">£{item.unit_price.toFixed(2)}</span>
+                          </div>
+                        </div>
+                        {item.discount_applied && (
+                          <div className="mt-1 text-[11px] font-[600] text-[#a855f7]">{item.discount_applied}</div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div>
+                    <h4 className="text-[11px] font-[600] text-[#666] uppercase tracking-wider mb-2">Premium Tiers</h4>
+                    <div className="space-y-1.5">
+                      {premiumTiers.map((tier, idx) => {
+                        const discount = tier.discount_percent || 0;
+                        return (
+                          <div key={idx} className="flex items-center justify-between p-2 bg-[#faf5ff] rounded-[8px]">
+                            <span className="text-[11px] text-[#666]">
+                              {tier.max_quantity === 999 ? `${tier.min_quantity}+` : `${tier.min_quantity}-${tier.max_quantity}`} units
+                            </span>
+                            <span className="text-[12px] font-[700] text-[#a855f7]">
+                              {discount === 0 ? 'Standard price' : `${discount}% off`}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Order Summary Card */}
             {pricingPreview && pricingPreview.line_items.length > 0 && (
               <div className="bg-[#0a0a0a] rounded-[20px] p-8 text-white shadow-[0_16px_48px_rgba(0,0,0,0.24)]">
