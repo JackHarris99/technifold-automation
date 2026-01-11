@@ -56,16 +56,6 @@ interface InteractiveQuotePortalProps {
   isTest: boolean;
   readOnly?: boolean;
   previewMode?: 'admin' | 'original';
-  shippingAddress?: {
-    address_id: string;
-    address_line_1: string;
-    address_line_2?: string;
-    city: string;
-    state_province?: string;
-    postal_code: string;
-    country: string;
-    is_default: boolean;
-  } | null;
 }
 
 export function InteractiveQuotePortal({
@@ -77,7 +67,6 @@ export function InteractiveQuotePortal({
   isTest,
   readOnly = false,
   previewMode,
-  shippingAddress
 }: InteractiveQuotePortalProps) {
   const [itemQuantities, setItemQuantities] = useState<Map<string, number>>(new Map());
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
@@ -86,10 +75,41 @@ export function InteractiveQuotePortal({
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [standardTiers, setStandardTiers] = useState<any[]>([]);
   const [premiumTiers, setPremiumTiers] = useState<any[]>([]);
+  const [shippingAddresses, setShippingAddresses] = useState<any[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [loadingAddresses, setLoadingAddresses] = useState(true);
 
   // Detect product type from line items
   const productType = lineItems[0]?.product_type || 'consumable';
   const isToolQuote = productType === 'tool';
+
+  // Fetch shipping addresses on mount
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const response = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
+        const data = await response.json();
+
+        if (data.success && data.addresses) {
+          setShippingAddresses(data.addresses);
+
+          // Set default address as selected
+          const defaultAddress = data.addresses.find((addr: any) => addr.is_default);
+          if (defaultAddress) {
+            setSelectedAddressId(defaultAddress.address_id);
+          } else if (data.addresses.length > 0) {
+            setSelectedAddressId(data.addresses[0].address_id);
+          }
+        }
+      } catch (error) {
+        console.error('[InteractiveQuotePortal] Failed to fetch shipping addresses:', error);
+      } finally {
+        setLoadingAddresses(false);
+      }
+    };
+
+    fetchAddresses();
+  }, [token]);
 
   // Load pricing tiers on mount (for consumable quotes)
   useEffect(() => {
@@ -180,6 +200,25 @@ export function InteractiveQuotePortal({
       savingsPerUnit: lineItem.base_price - lineItem.unit_price,
       discountLabel: lineItem.discount_applied
     };
+  };
+
+  // Refetch addresses after adding a new one
+  const handleAddressSaved = async () => {
+    setShowAddressModal(false);
+    try {
+      const response = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
+      const data = await response.json();
+      if (data.success && data.addresses) {
+        setShippingAddresses(data.addresses);
+        // Select the newly added address (should be default)
+        const defaultAddress = data.addresses.find((addr: any) => addr.is_default);
+        if (defaultAddress) {
+          setSelectedAddressId(defaultAddress.address_id);
+        }
+      }
+    } catch (error) {
+      console.error('[InteractiveQuotePortal] Failed to refetch shipping addresses:', error);
+    }
   };
 
   return (
@@ -307,21 +346,46 @@ export function InteractiveQuotePortal({
                     )}
                   </div>
 
-                  {/* Delivery Address */}
+                  {/* Delivery Addresses */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider">Delivery Address</div>
+                      <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider">Delivery Addresses</div>
                       {!readOnly && (
-                        <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
+                        <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">+ Add</button>
                       )}
                     </div>
-                    {shippingAddress ? (
+
+                    {loadingAddresses ? (
                       <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
-                        <div className="text-[12px] font-[500] text-[#1e293b]">{shippingAddress.address_line_1}</div>
-                        {shippingAddress.address_line_2 && <div className="text-[11px] text-[#334155]">{shippingAddress.address_line_2}</div>}
-                        <div className="text-[11px] text-[#334155]">{shippingAddress.city}{shippingAddress.state_province ? `, ${shippingAddress.state_province}` : ''}</div>
-                        <div className="text-[11px] text-[#334155]">{shippingAddress.postal_code}</div>
-                        <div className="text-[12px] font-[500] text-[#1e293b] mt-1">{shippingAddress.country}</div>
+                        <p className="text-[12px] text-[#475569] italic">Loading...</p>
+                      </div>
+                    ) : shippingAddresses.length > 0 ? (
+                      <div className="space-y-2">
+                        {shippingAddresses.map((addr) => (
+                          <div
+                            key={addr.address_id}
+                            onClick={() => !readOnly && setSelectedAddressId(addr.address_id)}
+                            className={`p-2 rounded-[10px] border transition-all cursor-pointer ${
+                              selectedAddressId === addr.address_id
+                                ? 'border-[#1e40af] bg-blue-50'
+                                : 'border-[#e2e8f0] bg-[#f8fafc] hover:border-[#cbd5e1]'
+                            }`}
+                          >
+                            {addr.label && (
+                              <div className="text-[11px] font-[600] text-[#1e293b] mb-0.5">
+                                {addr.label}
+                                {addr.is_default && <span className="ml-1 text-[9px] text-blue-600">(Default)</span>}
+                              </div>
+                            )}
+                            <div className="text-[10px] text-[#334155]">
+                              {addr.address_line_1}
+                              {addr.address_line_2 && `, ${addr.address_line_2}`}
+                            </div>
+                            <div className="text-[10px] text-[#334155]">
+                              {addr.city}{addr.state_province ? `, ${addr.state_province}` : ''} {addr.postal_code}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     ) : (
                       <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
@@ -964,10 +1028,7 @@ export function InteractiveQuotePortal({
         companyId={company.company_id}
         companyName={company.company_name}
         token={token}
-        onSuccess={() => {
-          setShowAddressModal(false);
-          window.location.reload();
-        }}
+        onSuccess={handleAddressSaved}
       />
 
       <InvoiceRequestModal
