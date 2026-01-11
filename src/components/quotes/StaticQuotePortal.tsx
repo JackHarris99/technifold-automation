@@ -1,7 +1,6 @@
 /**
  * Static Quote Portal
- * Customer-facing portal for static quotes with FIXED PRICING
- * Customers can adjust quantities but unit prices stay locked at quoted amounts
+ * Customer-facing portal for quotes with pre-negotiated pricing
  * Layout matches PortalPage for consistent branding
  */
 
@@ -116,7 +115,7 @@ export function StaticQuotePortal({
     setItemQuantities(quantityMap);
   }, [lineItems]);
 
-  // Fetch pricing preview when quantities change (for VAT/shipping only - prices stay locked)
+  // Fetch pricing preview when quantities change
   useEffect(() => {
     const itemsWithQty = Array.from(itemQuantities.entries())
       .filter(([_, qty]) => qty > 0)
@@ -268,7 +267,7 @@ export function StaticQuotePortal({
                     {company.company_name}
                   </h1>
                   <p className="text-[13px] text-[#334155] font-[400]">
-                    {isToolQuote ? 'Fixed-price tooling quotation' : 'Fixed-price consumables quotation'}
+                    {isToolQuote ? 'Tooling quotation' : 'Consumables quotation'}
                   </p>
                 </div>
 
@@ -364,18 +363,8 @@ export function StaticQuotePortal({
               {/* Quote Items Section */}
               <div className="bg-white rounded-[16px] shadow-sm border-2 border-blue-100 overflow-hidden">
                 <div className="px-6 py-4 bg-gradient-to-r from-blue-50/50 to-transparent border-b border-[#e8e8e8]">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-[17px] font-[600] text-[#1e40af] tracking-[-0.01em]">Quote Items</h2>
-                      <p className="text-[12px] text-[#334155] mt-0.5 font-[500]">{lineItems.length} item{lineItems.length !== 1 ? 's' : ''} quoted • Fixed pricing</p>
-                    </div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-[8px]">
-                      <svg className="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                      </svg>
-                      <span className="text-[11px] font-[600] text-amber-800">Prices Locked</span>
-                    </div>
-                  </div>
+                  <h2 className="text-[17px] font-[600] text-[#1e40af] tracking-[-0.01em]">Quote Items</h2>
+                  <p className="text-[12px] text-[#334155] mt-0.5 font-[500]">{lineItems.length} item{lineItems.length !== 1 ? 's' : ''} quoted</p>
                 </div>
 
                 <div className="px-8 pb-8 pt-4 space-y-4">
@@ -429,7 +418,7 @@ export function StaticQuotePortal({
                             {item.product_code}
                           </div>
                           <div className="mt-2">
-                            <div className="text-[13px] text-[#334155] mb-1">Price per unit (locked)</div>
+                            <div className="text-[13px] text-[#334155] mb-1">Price per unit</div>
                             <div className="text-[18px] font-[700] text-[#0a0a0a]">
                               £{item.unit_price.toFixed(2)}
                             </div>
@@ -464,23 +453,6 @@ export function StaticQuotePortal({
             {/* Right Sidebar */}
             <div className="col-span-5">
               <div className="sticky top-6 space-y-6">
-                {/* Info Card */}
-                <div className="bg-gradient-to-br from-amber-50 to-white rounded-[16px] p-5 shadow-sm border-2 border-amber-200">
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 bg-amber-100 rounded-[8px]">
-                      <svg className="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="text-[14px] font-[700] text-[#0a0a0a] mb-1">Static Quote</h3>
-                      <p className="text-[12px] text-[#334155] leading-relaxed">
-                        Prices are locked at the quoted amounts. You can adjust quantities, but unit prices will not change.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Order Summary Card */}
                 {pricingPreview && pricingPreview.line_items.length > 0 && (
                   <div className="bg-[#0a0a0a] rounded-[20px] p-8 text-white shadow-[0_16px_48px_rgba(0,0,0,0.24)]">
