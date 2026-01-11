@@ -38,6 +38,15 @@ interface ShippingAddress {
   country: string;
 }
 
+interface BillingAddress {
+  billing_address_line_1: string;
+  billing_address_line_2: string;
+  billing_city: string;
+  billing_state_province: string;
+  billing_postal_code: string;
+  billing_country: string;
+}
+
 interface PortalPageProps {
   payload: CompanyPayload;
   contact?: {
@@ -64,6 +73,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
   const [pricingPreview, setPricingPreview] = useState<PricingPreview | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress | null>(null);
+  const [billingAddress, setBillingAddress] = useState<BillingAddress | null>(null);
   const [loadingAddress, setLoadingAddress] = useState(true);
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [standardTiers, setStandardTiers] = useState<PricingTier[]>([]);
@@ -84,28 +94,37 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
     loadTiers();
   }, []);
 
-  // Fetch shipping address on mount
+  // Fetch shipping and billing addresses on mount
   useEffect(() => {
-    const fetchAddress = async () => {
+    const fetchAddresses = async () => {
       try {
-        const response = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
-        const data = await response.json();
+        // Fetch shipping address
+        const shippingResponse = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
+        const shippingData = await shippingResponse.json();
 
-        if (data.success && data.address) {
-          setShippingAddress(data.address);
+        if (shippingData.success && shippingData.address) {
+          setShippingAddress(shippingData.address);
         } else {
           if (!isTest) {
             setShowAddressModal(true);
           }
         }
+
+        // Fetch billing address from company
+        const billingResponse = await fetch(`/api/portal/company-details?token=${encodeURIComponent(token)}`);
+        const billingData = await billingResponse.json();
+
+        if (billingData.success && billingData.company) {
+          setBillingAddress(billingData.company);
+        }
       } catch (error) {
-        console.error('[PortalPage] Failed to fetch shipping address:', error);
+        console.error('[PortalPage] Failed to fetch addresses:', error);
       } finally {
         setLoadingAddress(false);
       }
     };
 
-    fetchAddress();
+    fetchAddresses();
   }, [token, isTest]);
 
   const handleAddressSaved = async () => {
@@ -356,7 +375,26 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                             />
                           </div>
                           <div className="flex-1">
-                            <div className="font-[600] text-[15px] text-[#0a0a0a]">{item.description}</div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <div className="font-[600] text-[15px] text-[#0a0a0a]">{item.description}</div>
+                              {(() => {
+                                const pricing = getPricingInfo(item.consumable_code);
+                                if (pricing?.discountLabel?.includes('total units')) {
+                                  return (
+                                    <span className="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-[600] rounded-[4px] uppercase tracking-wide">
+                                      Standard
+                                    </span>
+                                  );
+                                } else if (pricing?.discountLabel) {
+                                  return (
+                                    <span className="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-[600] rounded-[4px] uppercase tracking-wide">
+                                      Premium
+                                    </span>
+                                  );
+                                }
+                                return null;
+                              })()}
+                            </div>
                             <div className="text-[13px] text-[#666] mt-1">
                               {item.consumable_code}
                               {item.last_purchased && (
@@ -463,7 +501,26 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                             />
                           </div>
                           <div className="flex-1">
-                            <div className="font-[600] text-[15px] text-[#0a0a0a]">{item.description}</div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <div className="font-[600] text-[15px] text-[#0a0a0a]">{item.description}</div>
+                              {(() => {
+                                const pricing = getPricingInfo(item.consumable_code);
+                                if (pricing?.discountLabel?.includes('total units')) {
+                                  return (
+                                    <span className="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-[600] rounded-[4px] uppercase tracking-wide">
+                                      Standard
+                                    </span>
+                                  );
+                                } else if (pricing?.discountLabel) {
+                                  return (
+                                    <span className="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-[600] rounded-[4px] uppercase tracking-wide">
+                                      Premium
+                                    </span>
+                                  );
+                                }
+                                return null;
+                              })()}
+                            </div>
                             <div className="text-[13px] text-[#666] mt-1">
                               {item.consumable_code}
                               {item.category && <span className="ml-2">• {item.category}</span>}
@@ -543,6 +600,35 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                     <div className="space-y-1">
                       <div className="text-[14px] text-[#0a0a0a] font-[500]">{contact.full_name}</div>
                       <div className="text-[13px] text-[#666]">{contact.email}</div>
+                    </div>
+                  )}
+                </div>
+                <div className="pt-5 border-t border-[#e8e8e8]">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-[13px] font-[600] text-[#0a0a0a]">Billing Address</div>
+                    {billingAddress && (
+                      <button onClick={() => setShowAddressModal(true)} className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
+                    )}
+                  </div>
+                  {loadingAddress ? (
+                    <div className="p-4 bg-[#f9fafb] rounded-[12px] border border-[#e8e8e8]">
+                      <p className="text-[13px] text-[#999] italic">Loading...</p>
+                    </div>
+                  ) : billingAddress && billingAddress.billing_address_line_1 ? (
+                    <div className="text-[13px] text-[#666] leading-relaxed">
+                      <div className="p-4 bg-[#f9fafb] rounded-[12px] border border-[#e8e8e8]">
+                        <div className="font-[500] text-[#0a0a0a]">{billingAddress.billing_address_line_1}</div>
+                        {billingAddress.billing_address_line_2 && <div>{billingAddress.billing_address_line_2}</div>}
+                        <div>{billingAddress.billing_city}{billingAddress.billing_state_province ? `, ${billingAddress.billing_state_province}` : ''}</div>
+                        <div>{billingAddress.billing_postal_code}</div>
+                        <div className="font-[500] mt-1">{billingAddress.billing_country}</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-[13px] text-[#666] leading-relaxed">
+                      <div className="p-4 bg-[#f9fafb] rounded-[12px] border border-[#e8e8e8]">
+                        <p className="text-[13px] text-red-600 italic">No billing address - <button onClick={() => setShowAddressModal(true)} className="underline font-[600]">Add now</button></p>
+                      </div>
                     </div>
                   )}
                 </div>

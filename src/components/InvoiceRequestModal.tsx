@@ -218,7 +218,7 @@ export function InvoiceRequestModal({
 
   // Calculate totals from pricing preview if available
   const subtotal = pricingPreview?.subtotal ?? cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = pricingPreview?.shipping_amount ?? 0;
+  const shipping = pricingPreview?.shipping ?? 0;
   const vatAmount = pricingPreview?.vat_amount ?? 0;
   const total = pricingPreview?.total ?? subtotal;
 
