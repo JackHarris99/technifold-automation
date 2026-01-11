@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
             price_data: {
               currency: 'gbp',
               product_data: {
-                name: products[0].description,
+                name: `${products[0].product_code} - ${products[0].description}`,
                 description: '30-day free trial, then £50/month',
                 metadata: {
                   product_code: products[0].product_code,
@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
             price_data: {
               currency: products[0].currency || 'gbp',
               product_data: {
-                name: products[0].description,
+                name: `${products[0].product_code} - ${products[0].description}`,
                 description: 'One-time purchase - own it outright',
                 metadata: {
                   product_code: products[0].product_code,
