@@ -14,6 +14,7 @@ import AddSubscriptionToolModal from './modals/AddSubscriptionToolModal';
 import ManageAddressModal from './modals/ManageAddressModal';
 import EditBillingAddressModal from './modals/EditBillingAddressModal';
 import CompanyStatusControl from './CompanyStatusControl';
+import { LogActivityModal } from './LogActivityModal';
 
 interface CompanyDetailViewProps {
   company: any;
@@ -51,6 +52,10 @@ export default function CompanyDetailView({
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [editingAddress, setEditingAddress] = useState<any>(null);
   const [showBillingAddressModal, setShowBillingAddressModal] = useState(false);
+
+  // Activity logging state
+  const [showActivityModal, setShowActivityModal] = useState(false);
+  const [activityType, setActivityType] = useState<'call' | 'visit' | 'email' | 'followup' | 'meeting'>('call');
 
   const tabs = [
     { id: 'overview', label: 'Overview', count: null },
@@ -147,6 +152,10 @@ export default function CompanyDetailView({
               setShowAddressModal(true);
             }}
             onEditBillingAddress={() => setShowBillingAddressModal(true)}
+            onLogActivity={(type) => {
+              setActivityType(type);
+              setShowActivityModal(true);
+            }}
           />
         )}
 
@@ -223,6 +232,15 @@ export default function CompanyDetailView({
           billing_country: company.billing_country,
         }}
       />
+      <LogActivityModal
+        isOpen={showActivityModal}
+        onClose={() => setShowActivityModal(false)}
+        companyId={company.company_id}
+        companyName={company.company_name}
+        activityType={activityType}
+        context="general"
+        onSuccess={() => window.location.reload()}
+      />
     </div>
   );
 }
@@ -235,7 +253,8 @@ function OverviewTab({
   onAddContact,
   onAddAddress,
   onEditAddress,
-  onEditBillingAddress
+  onEditBillingAddress,
+  onLogActivity
 }: {
   company: any;
   contacts: any[];
@@ -244,6 +263,7 @@ function OverviewTab({
   onAddAddress: () => void;
   onEditAddress: (address: any) => void;
   onEditBillingAddress: () => void;
+  onLogActivity: (type: 'call' | 'visit' | 'email' | 'followup' | 'meeting') => void;
 }) {
   const defaultAddress = shippingAddresses.find(addr => addr.is_default);
 
@@ -289,6 +309,48 @@ function OverviewTab({
 
   return (
     <div className="space-y-6">
+      {/* Quick Actions */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold mb-4 text-gray-900">Quick Actions</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <button
+            onClick={() => onLogActivity('call')}
+            className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+          >
+            <span className="text-3xl">📞</span>
+            <span className="text-sm font-medium text-gray-900">Log Call</span>
+          </button>
+          <button
+            onClick={() => onLogActivity('visit')}
+            className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+          >
+            <span className="text-3xl">🚗</span>
+            <span className="text-sm font-medium text-gray-900">Log Visit</span>
+          </button>
+          <button
+            onClick={() => onLogActivity('email')}
+            className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+          >
+            <span className="text-3xl">✉️</span>
+            <span className="text-sm font-medium text-gray-900">Log Email</span>
+          </button>
+          <button
+            onClick={() => onLogActivity('followup')}
+            className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+          >
+            <span className="text-3xl">🔄</span>
+            <span className="text-sm font-medium text-gray-900">Log Follow-up</span>
+          </button>
+          <button
+            onClick={() => onLogActivity('meeting')}
+            className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+          >
+            <span className="text-3xl">🤝</span>
+            <span className="text-sm font-medium text-gray-900">Log Meeting</span>
+          </button>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Company Info */}
         <div className="bg-white rounded-lg shadow p-6">
