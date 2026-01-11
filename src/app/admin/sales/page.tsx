@@ -249,7 +249,7 @@ export default async function SalesCenterPage() {
     });
 
     // Calculate days since contact for all companies
-    const now = Date.now();
+    const nowTimestamp = Date.now();
     const ninetyDays = 90 * 24 * 60 * 60 * 1000;
 
     needsContact = companies
@@ -267,7 +267,7 @@ export default async function SalesCenterPage() {
           };
         }
 
-        const daysSince = Math.floor((now - new Date(lastContact.occurred_at).getTime()) / (1000 * 60 * 60 * 24));
+        const daysSince = Math.floor((nowTimestamp - new Date(lastContact.occurred_at).getTime()) / (1000 * 60 * 60 * 24));
 
         if (daysSince >= 90) {
           return {
