@@ -120,8 +120,12 @@ export default async function SalesCenterPage() {
   let needsContact: NeedsContact[] = [];
 
   if (companies.length > 0) {
-    // Batch fetch all data in parallel
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    // Get current month boundaries
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthStart = firstDayOfMonth.toISOString();
+
+    // Other date ranges
     const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
     const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -130,7 +134,7 @@ export default async function SalesCenterPage() {
       .from('invoices')
       .select('subtotal')  // Use subtotal for commission (excludes VAT & shipping)
       .eq('payment_status', 'paid')
-      .gte('invoice_date', thirtyDaysAgo);
+      .gte('invoice_date', monthStart);  // Changed to current month
 
     let unpaidInvoicesQuery = supabase
       .from('invoices')
@@ -309,7 +313,7 @@ export default async function SalesCenterPage() {
         {/* Performance Metrics */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <MetricCard
-            label="Revenue (30d)"
+            label="Revenue (This Month)"
             value={`£${salesMetrics.total_revenue.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
             color="green"
           />
