@@ -312,18 +312,18 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
         <div className="mb-8">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-[56px] font-[800] text-[#0a0a0a] mb-3 tracking-[-0.04em] leading-[1.1]">
+              <h1 className="text-[32px] font-[600] text-[#1e40af] mb-2 tracking-[-0.02em] leading-[1.2]">
                 {payload.company_name}
               </h1>
-              <p className="text-[19px] text-[#666] font-[400] tracking-[-0.01em]">
+              <p className="text-[15px] text-[#64748b] font-[400] tracking-[-0.01em]">
                 Precision consumables ordering with intelligent tiered pricing
               </p>
             </div>
             {contact && (
               <div className="text-right">
-                <p className="text-[14px] text-[#999] font-[500]">Welcome back,</p>
-                <p className="text-[21px] font-[700] text-[#0a0a0a] tracking-[-0.01em]">{contact.full_name}</p>
-                <p className="text-[14px] text-[#666] mt-1">{contact.email}</p>
+                <p className="text-[12px] text-[#94a3b8] font-[500] uppercase tracking-wider">Welcome back,</p>
+                <p className="text-[17px] font-[600] text-[#1e293b] tracking-[-0.01em] mt-1">{contact.full_name}</p>
+                <p className="text-[13px] text-[#64748b] mt-0.5">{contact.email}</p>
               </div>
             )}
           </div>
@@ -404,20 +404,20 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
         {/* Main Grid */}
         <div className="grid grid-cols-12 gap-8">
           {/* Main Content Area */}
-          <div className="col-span-8 space-y-6">
+          <div className="col-span-7 space-y-4">
             {/* Previously Ordered Section */}
             {payload.reorder_items && payload.reorder_items.length > 0 && (
-              <div className="bg-white rounded-[20px] shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
+              <div className="bg-white rounded-[16px] shadow-sm border-2 border-blue-100 overflow-hidden">
                 <button
                   onClick={() => toggleSection('reorder')}
-                  className="w-full px-8 py-6 flex items-center justify-between text-left hover:bg-[#fafafa] transition-colors rounded-t-[20px]"
+                  className="w-full px-6 py-4 flex items-center justify-between text-left bg-gradient-to-r from-blue-50/50 to-transparent hover:from-blue-50 transition-colors"
                 >
                   <div>
-                    <h2 className="text-[22px] font-[700] text-[#0a0a0a] tracking-tight">Previously Ordered</h2>
-                    <p className="text-[14px] text-[#666] mt-1">{payload.reorder_items.length} items</p>
+                    <h2 className="text-[17px] font-[600] text-[#1e40af] tracking-[-0.01em]">Previously Ordered</h2>
+                    <p className="text-[12px] text-[#64748b] mt-0.5 font-[500]">{payload.reorder_items.length} items available</p>
                   </div>
                   <svg
-                    className={`w-6 h-6 text-[#666] transition-transform ${expandedSections.has('reorder') ? 'rotate-180' : ''}`}
+                    className={`w-5 h-5 text-[#3b82f6] transition-transform ${expandedSections.has('reorder') ? 'rotate-180' : ''}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -525,24 +525,24 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
 
             {/* Tool Sections */}
             {(payload.by_tool_tabs || []).map((toolTab) => (
-              <div key={toolTab.tool_code} className="bg-white rounded-[20px] shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
+              <div key={toolTab.tool_code} className="bg-white rounded-[16px] shadow-sm border-2 border-blue-100 overflow-hidden">
                 <button
                   onClick={() => toggleSection(toolTab.tool_code)}
-                  className="w-full px-8 py-6 flex items-center justify-between text-left hover:bg-[#fafafa] transition-colors rounded-t-[20px]"
+                  className="w-full px-6 py-4 flex items-center justify-between text-left bg-gradient-to-r from-blue-50/50 to-transparent hover:from-blue-50 transition-colors"
                 >
                   <div>
-                    <h2 className="text-[22px] font-[700] text-[#0a0a0a] tracking-tight">
+                    <h2 className="text-[17px] font-[600] text-[#1e40af] tracking-[-0.01em]">
                       {toolTab.tool_desc || toolTab.tool_code}
                       {toolTab.quantity && toolTab.quantity > 1 && (
-                        <span className="text-[#666] font-[500]"> (x{toolTab.quantity})</span>
+                        <span className="text-[#64748b] font-[500] text-[15px]"> (x{toolTab.quantity})</span>
                       )}
                     </h2>
-                    <p className="text-[14px] text-[#666] mt-1">
-                      {toolTab.items.length} consumable{toolTab.items.length !== 1 ? 's' : ''}
+                    <p className="text-[12px] text-[#64748b] mt-0.5 font-[500]">
+                      {toolTab.items.length} consumable{toolTab.items.length !== 1 ? 's' : ''} available
                     </p>
                   </div>
                   <svg
-                    className={`w-6 h-6 text-[#666] transition-transform ${expandedSections.has(toolTab.tool_code) ? 'rotate-180' : ''}`}
+                    className={`w-5 h-5 text-[#3b82f6] transition-transform ${expandedSections.has(toolTab.tool_code) ? 'rotate-180' : ''}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -651,7 +651,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
           </div>
 
           {/* Right Sidebar - Single Sticky Container with Internal Scroll */}
-          <div className="col-span-4">
+          <div className="col-span-5">
             <div className="sticky top-6 space-y-6 max-h-[calc(100vh-3rem)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
 
             {/* Standard Pricing Guide - Always Visible */}
