@@ -184,11 +184,18 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
     return Array.from(itemQuantities.values()).reduce((sum, qty) => sum + qty, 0);
   };
 
-  // Get current unit price for a product (with discounts applied)
-  const getCurrentUnitPrice = (productCode: string): number | null => {
+  // Get pricing info for a product from preview
+  const getPricingInfo = (productCode: string) => {
     if (!pricingPreview) return null;
     const lineItem = pricingPreview.line_items.find(item => item.product_code === productCode);
-    return lineItem ? lineItem.unit_price : null;
+    if (!lineItem) return null;
+    return {
+      basePrice: lineItem.base_price,
+      discountedPrice: lineItem.unit_price,
+      hasDiscount: lineItem.base_price > lineItem.unit_price,
+      savingsPerUnit: lineItem.base_price - lineItem.unit_price,
+      discountLabel: lineItem.discount_applied
+    };
   };
 
   const handleRequestInvoice = () => {
@@ -356,19 +363,37 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                                 <span className="ml-2">• Last ordered: {new Date(item.last_purchased).toLocaleDateString()}</span>
                               )}
                             </div>
-                            <div className="text-[14px] font-[600] text-[#0a0a0a] mt-2">
+                            <div className="mt-2">
+                              <div className="text-[13px] text-[#666] mb-1">Price per unit</div>
                               {(() => {
-                                const currentPrice = getCurrentUnitPrice(item.consumable_code);
+                                const pricing = getPricingInfo(item.consumable_code);
                                 const basePrice = item.price || 0;
-                                if (currentPrice !== null && currentPrice < basePrice) {
+
+                                if (pricing && pricing.hasDiscount) {
                                   return (
                                     <>
-                                      <span className="text-[#999] line-through mr-2">£{basePrice.toFixed(2)}</span>
-                                      <span className="text-[#16a34a]">£{currentPrice.toFixed(2)} per unit</span>
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <div className="text-[16px] font-[700] text-[#16a34a]">
+                                          £{pricing.discountedPrice.toFixed(2)}
+                                        </div>
+                                        <div className="text-[13px] text-[#999] line-through">
+                                          £{pricing.basePrice.toFixed(2)}
+                                        </div>
+                                      </div>
+                                      <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-50 border border-green-200 rounded-[6px]">
+                                        <span className="text-[11px] font-[600] text-green-700">
+                                          Saving £{pricing.savingsPerUnit.toFixed(2)}/unit
+                                        </span>
+                                      </div>
                                     </>
                                   );
                                 }
-                                return `£${basePrice.toFixed(2)} per unit`;
+
+                                return (
+                                  <div className="text-[16px] font-[700] text-[#0a0a0a]">
+                                    £{basePrice.toFixed(2)}
+                                  </div>
+                                );
                               })()}
                             </div>
                           </div>
@@ -447,19 +472,37 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                                 <span className="ml-2">• Last ordered: {new Date(item.last_purchased).toLocaleDateString()}</span>
                               )}
                             </div>
-                            <div className="text-[14px] font-[600] text-[#0a0a0a] mt-2">
+                            <div className="mt-2">
+                              <div className="text-[13px] text-[#666] mb-1">Price per unit</div>
                               {(() => {
-                                const currentPrice = getCurrentUnitPrice(item.consumable_code);
+                                const pricing = getPricingInfo(item.consumable_code);
                                 const basePrice = item.price || 0;
-                                if (currentPrice !== null && currentPrice < basePrice) {
+
+                                if (pricing && pricing.hasDiscount) {
                                   return (
                                     <>
-                                      <span className="text-[#999] line-through mr-2">£{basePrice.toFixed(2)}</span>
-                                      <span className="text-[#16a34a]">£{currentPrice.toFixed(2)} per unit</span>
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <div className="text-[16px] font-[700] text-[#16a34a]">
+                                          £{pricing.discountedPrice.toFixed(2)}
+                                        </div>
+                                        <div className="text-[13px] text-[#999] line-through">
+                                          £{pricing.basePrice.toFixed(2)}
+                                        </div>
+                                      </div>
+                                      <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-50 border border-green-200 rounded-[6px]">
+                                        <span className="text-[11px] font-[600] text-green-700">
+                                          Saving £{pricing.savingsPerUnit.toFixed(2)}/unit
+                                        </span>
+                                      </div>
                                     </>
                                   );
                                 }
-                                return `£${basePrice.toFixed(2)} per unit`;
+
+                                return (
+                                  <div className="text-[16px] font-[700] text-[#0a0a0a]">
+                                    £{basePrice.toFixed(2)}
+                                  </div>
+                                );
                               })()}
                             </div>
                           </div>
@@ -484,7 +527,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
 
           {/* Right Sidebar */}
           <div className="col-span-4 space-y-6">
-            <div className="bg-white rounded-[20px] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8] sticky top-6">
+            <div className="bg-white rounded-[20px] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8] sticky top-6 z-10">
               <div className="flex items-center justify-between mb-6">
                 <div className="text-[12px] font-[700] text-[#666] uppercase tracking-[0.05em]">Company Details</div>
               </div>
@@ -557,7 +600,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
               const potentialSavings = nextTier ? (currentTier!.price - nextTier.price) * standardTotalQty : 0;
 
               return (
-                <div className="bg-gradient-to-br from-[#ecfdf5] to-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border-2 border-[#16a34a]/20 sticky top-[380px]">
+                <div className="bg-gradient-to-br from-[#ecfdf5] to-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border-2 border-[#16a34a]/20 sticky top-[380px] z-10">
                   <div className="mb-4">
                     <h3 className="text-[18px] font-[700] text-[#0a0a0a] tracking-tight">Volume Pricing</h3>
                     <p className="text-[13px] text-[#666] mt-1 font-[500]">Order more, save more!</p>
@@ -607,7 +650,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
             })()}
 
             {pricingPreview && pricingPreview.line_items.length > 0 && (
-              <div className="bg-[#0a0a0a] rounded-[20px] p-8 text-white sticky top-[660px] shadow-[0_16px_48px_rgba(0,0,0,0.24)]">
+              <div className="bg-[#0a0a0a] rounded-[20px] p-8 text-white sticky top-[660px] shadow-[0_16px_48px_rgba(0,0,0,0.24)] z-20">
                 <div className="text-[12px] font-[700] text-[#999] uppercase tracking-[0.05em] mb-6">Order Summary</div>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center pb-4 border-b border-[#2a2a2a]">
