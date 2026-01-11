@@ -8,6 +8,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { UnpaidInvoiceRow } from '@/components/admin/UnpaidInvoiceRow';
 
 interface UnpaidInvoice {
   invoice_id: string;
@@ -124,7 +125,7 @@ export default async function UnpaidInvoicesPage() {
                 </h2>
                 <div className="bg-white rounded-lg shadow-sm border border-red-200 overflow-hidden">
                   {overdue30.map((invoice) => (
-                    <InvoiceRow key={invoice.invoice_id} invoice={invoice} urgency="overdue" />
+                    <UnpaidInvoiceRow key={invoice.invoice_id} invoice={invoice} urgency="overdue" />
                   ))}
                 </div>
               </div>
@@ -139,7 +140,7 @@ export default async function UnpaidInvoicesPage() {
                 </h2>
                 <div className="bg-white rounded-lg shadow-sm border border-orange-200 overflow-hidden">
                   {overdue14.map((invoice) => (
-                    <InvoiceRow key={invoice.invoice_id} invoice={invoice} urgency="warning" />
+                    <UnpaidInvoiceRow key={invoice.invoice_id} invoice={invoice} urgency="warning" />
                   ))}
                 </div>
               </div>
@@ -154,62 +155,12 @@ export default async function UnpaidInvoicesPage() {
                 </h2>
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                   {recent.map((invoice) => (
-                    <InvoiceRow key={invoice.invoice_id} invoice={invoice} urgency="recent" />
+                    <UnpaidInvoiceRow key={invoice.invoice_id} invoice={invoice} urgency="recent" />
                   ))}
                 </div>
               </div>
             )}
           </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function InvoiceRow({ invoice, urgency }: { invoice: UnpaidInvoice; urgency: 'overdue' | 'warning' | 'recent' }) {
-  const hoverColors = {
-    overdue: 'hover:bg-red-50',
-    warning: 'hover:bg-orange-50',
-    recent: 'hover:bg-gray-50',
-  };
-
-  const badgeColors = {
-    overdue: 'bg-red-100 text-red-700',
-    warning: 'bg-orange-100 text-orange-700',
-    recent: 'bg-gray-100 text-gray-700',
-  };
-
-  return (
-    <div
-      className={`flex items-center justify-between p-4 ${hoverColors[urgency]} transition-colors border-b border-gray-100 last:border-b-0`}
-    >
-      <div className="flex-1">
-        <Link
-          href={`/admin/company/${invoice.company_id}`}
-          className="font-semibold text-gray-900 hover:text-blue-600"
-        >
-          {invoice.company_name}
-        </Link>
-        <p className="text-sm text-gray-700">
-          Invoice #{invoice.invoice_id.slice(-8)} • {new Date(invoice.invoice_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-        </p>
-      </div>
-      <div className="flex items-center gap-4">
-        <span className="font-bold text-gray-900 text-lg">
-          £{invoice.total_amount.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
-        </span>
-        <span className={`px-3 py-1 rounded-full text-sm font-bold ${badgeColors[urgency]}`}>
-          {invoice.days_old}d old
-        </span>
-        {invoice.invoice_url && (
-          <a
-            href={invoice.invoice_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200"
-          >
-            View Invoice
-          </a>
         )}
       </div>
     </div>

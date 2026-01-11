@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { use } from 'react';
+import { LogActivityModal } from '@/components/admin/LogActivityModal';
 
 interface QuoteNote {
   note_id: string;
@@ -60,6 +61,10 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
   const [showLostModal, setShowLostModal] = useState(false);
   const [lostReason, setLostReason] = useState('');
   const [updatingStatus, setUpdatingStatus] = useState(false);
+
+  // Activity logging state
+  const [showActivityModal, setShowActivityModal] = useState(false);
+  const [activityType, setActivityType] = useState<'call' | 'visit' | 'email' | 'followup' | 'meeting'>('call');
 
   useEffect(() => {
     fetchQuoteDetail();
@@ -170,6 +175,15 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
     } finally {
       setUpdatingStatus(false);
     }
+  }
+
+  function openActivityModal(type: 'call' | 'visit' | 'email' | 'followup' | 'meeting') {
+    setActivityType(type);
+    setShowActivityModal(true);
+  }
+
+  function handleActivitySuccess() {
+    fetchQuoteDetail(); // Refresh to show new activity in timeline
   }
 
   function getStatusBadge() {
@@ -458,9 +472,30 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
               >
                 ❌ Mark as Lost
               </button>
-              <button className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50">
-                📞 Log Call
-              </button>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">Follow-up Actions</h3>
+              <div className="space-y-2">
+                <button
+                  onClick={() => openActivityModal('call')}
+                  className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50"
+                >
+                  📞 Log Call About Quote
+                </button>
+                <button
+                  onClick={() => openActivityModal('email')}
+                  className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50"
+                >
+                  ✉️ Log Email Follow-up
+                </button>
+                <button
+                  onClick={() => openActivityModal('meeting')}
+                  className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50"
+                >
+                  🤝 Log Meeting
+                </button>
+              </div>
             </div>
           </div>
 
@@ -572,6 +607,20 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
             </div>
           </div>
         </div>
+      )}
+
+      {/* Activity Logging Modal */}
+      {quote && (
+        <LogActivityModal
+          isOpen={showActivityModal}
+          onClose={() => setShowActivityModal(false)}
+          companyId={quote.company_id}
+          companyName={quote.company_name}
+          activityType={activityType}
+          context="quote_followup"
+          quoteId={quote_id}
+          onSuccess={handleActivitySuccess}
+        />
       )}
     </div>
   );
