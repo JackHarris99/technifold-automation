@@ -654,16 +654,14 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
           <div className="col-span-4">
             <div className="sticky top-6 space-y-6 max-h-[calc(100vh-3rem)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
 
-            {/* Standard Pricing Guide */}
-            {pricingPreview && !loadingPreview && pricingPreview.line_items.length > 0 && standardTiers.length > 0 && (() => {
+            {/* Standard Pricing Guide - Always Visible */}
+            {standardTiers.length > 0 && (() => {
               const allStandardItems = Array.from(itemQuantities.entries())
                 .filter(([code, qty]) => {
                   const item = [...payload.reorder_items, ...(payload.by_tool_tabs?.flatMap(t => t.items) || [])]
                     .find(i => i.consumable_code === code);
                   return item?.pricing_tier === 'standard' && qty > 0;
                 });
-
-              if (allStandardItems.length === 0) return null;
 
               const standardTotalQty = allStandardItems.reduce((sum, [_, qty]) => sum + qty, 0);
               const tiersForDisplay = standardTiers.map((tier, idx) => ({
@@ -682,18 +680,20 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                     <p className="text-[12px] text-[#666] mt-1">All standard items combine for tier pricing</p>
                   </div>
 
-                  <div className="p-3 bg-white rounded-[10px] border border-[#e8e8e8] mb-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[12px] font-[600] text-[#0a0a0a]">{standardTotalQty} total units</span>
-                      <span className="text-[15px] font-[800] text-[#16a34a]">£{currentTier?.price || 33}/unit</span>
+                  {standardTotalQty > 0 && (
+                    <div className="p-3 bg-white rounded-[10px] border border-[#e8e8e8] mb-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[12px] font-[600] text-[#0a0a0a]">{standardTotalQty} total units</span>
+                        <span className="text-[15px] font-[800] text-[#16a34a]">£{currentTier?.price || 33}/unit</span>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div>
                     <h4 className="text-[10px] font-[600] text-[#666] uppercase tracking-wider mb-2">Tier Guide</h4>
                     <div className="grid grid-cols-2 gap-1.5">
                       {tiersForDisplay.map((tier, idx) => (
-                        <div key={idx} className={`text-center p-1.5 rounded-[6px] transition-all ${currentTier?.label === tier.label ? 'bg-[#16a34a] text-white' : 'bg-[#f5f5f5] text-[#666]'}`}>
+                        <div key={idx} className={`text-center p-1.5 rounded-[6px] transition-all ${currentTier?.label === tier.label && standardTotalQty > 0 ? 'bg-[#16a34a] text-white' : 'bg-[#f5f5f5] text-[#666]'}`}>
                           <div className="text-[9px] font-[600] opacity-80">{tier.label}</div>
                           <div className="text-[12px] font-[800] mt-0.5">£{tier.price}</div>
                           <div className="text-[8px] opacity-70 mt-0.5">{tier.max === Infinity ? `${tier.min}+` : `${tier.min}-${tier.max}`}</div>
@@ -706,14 +706,32 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
             })()}
 
             {/* Standard Selected Products */}
-            {pricingPreview && !loadingPreview && pricingPreview.line_items.length > 0 && (() => {
-              const standardProducts = pricingPreview.line_items.filter(item => {
-                const fullItem = [...payload.reorder_items, ...(payload.by_tool_tabs?.flatMap(t => t.items) || [])]
-                  .find(i => i.consumable_code === item.product_code);
-                return fullItem?.pricing_tier === 'standard';
-              });
+            {(() => {
+              // Always check itemQuantities Map for standard items
+              const standardItems = Array.from(itemQuantities.entries())
+                .filter(([code, qty]) => {
+                  const item = [...payload.reorder_items, ...(payload.by_tool_tabs?.flatMap(t => t.items) || [])]
+                    .find(i => i.consumable_code === code);
+                  return item?.pricing_tier === 'standard' && qty > 0;
+                });
 
-              if (standardProducts.length === 0) return null;
+              if (standardItems.length === 0) return null;
+
+              // Get full product info from pricingPreview if available
+              const standardProducts = standardItems.map(([code, qty]) => {
+                const item = [...payload.reorder_items, ...(payload.by_tool_tabs?.flatMap(t => t.items) || [])]
+                  .find(i => i.consumable_code === code);
+                const previewItem = pricingPreview?.line_items.find(li => li.product_code === code);
+
+                return {
+                  product_code: code,
+                  description: item?.description || code,
+                  quantity: qty,
+                  base_price: previewItem?.base_price || item?.price || 0,
+                  unit_price: previewItem?.unit_price || item?.price || 0,
+                  discount_applied: previewItem?.discount_applied || null
+                };
+              });
 
               return (
                 <div className="bg-white rounded-[16px] p-5 shadow-sm border-2 border-green-200">
@@ -790,55 +808,62 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
               );
             })()}
 
-            {/* Premium Pricing Guide */}
-            {pricingPreview && !loadingPreview && pricingPreview.line_items.length > 0 && premiumTiers.length > 0 && (() => {
-              const allPremiumItems = Array.from(itemQuantities.entries())
+            {/* Premium Pricing Guide - Always Visible */}
+            {premiumTiers.length > 0 && (
+              <div className="bg-gradient-to-br from-[#faf5ff] to-white rounded-[16px] p-5 shadow-sm border-2 border-[#a855f7]/20">
+                <div className="mb-3">
+                  <h3 className="text-[15px] font-[700] text-[#0a0a0a] tracking-tight">Premium Pricing</h3>
+                  <p className="text-[12px] text-[#666] mt-1">Each item priced by its own quantity</p>
+                </div>
+
+                <div>
+                  <h4 className="text-[10px] font-[600] text-[#666] uppercase tracking-wider mb-2">Tier Guide</h4>
+                  <div className="space-y-1.5">
+                    {premiumTiers.map((tier, idx) => {
+                      const discount = tier.discount_percent || 0;
+                      return (
+                        <div key={idx} className="flex items-center justify-between p-2 bg-white rounded-[8px] border border-[#e8e8e8]">
+                          <span className="text-[11px] text-[#666]">
+                            {tier.max_quantity === 999 ? `${tier.min_quantity}+` : `${tier.min_quantity}-${tier.max_quantity}`} units
+                          </span>
+                          <span className="text-[12px] font-[700] text-[#a855f7]">
+                            {discount === 0 ? 'Base price' : `${discount}% off`}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Premium Selected Products */}
+            {(() => {
+              // Always check itemQuantities Map for premium items
+              const premiumItems = Array.from(itemQuantities.entries())
                 .filter(([code, qty]) => {
                   const item = [...payload.reorder_items, ...(payload.by_tool_tabs?.flatMap(t => t.items) || [])]
                     .find(i => i.consumable_code === code);
                   return item?.pricing_tier === 'premium' && qty > 0;
                 });
 
-              if (allPremiumItems.length === 0) return null;
+              if (premiumItems.length === 0) return null;
 
-              return (
-                <div className="bg-gradient-to-br from-[#faf5ff] to-white rounded-[16px] p-5 shadow-sm border-2 border-[#a855f7]/20">
-                  <div className="mb-3">
-                    <h3 className="text-[15px] font-[700] text-[#0a0a0a] tracking-tight">Premium Pricing</h3>
-                    <p className="text-[12px] text-[#666] mt-1">Each item priced by its own quantity</p>
-                  </div>
+              // Get full product info from pricingPreview if available
+              const premiumProducts = premiumItems.map(([code, qty]) => {
+                const item = [...payload.reorder_items, ...(payload.by_tool_tabs?.flatMap(t => t.items) || [])]
+                  .find(i => i.consumable_code === code);
+                const previewItem = pricingPreview?.line_items.find(li => li.product_code === code);
 
-                  <div>
-                    <h4 className="text-[10px] font-[600] text-[#666] uppercase tracking-wider mb-2">Tier Guide</h4>
-                    <div className="space-y-1.5">
-                      {premiumTiers.map((tier, idx) => {
-                        const discount = tier.discount_percent || 0;
-                        return (
-                          <div key={idx} className="flex items-center justify-between p-2 bg-white rounded-[8px] border border-[#e8e8e8]">
-                            <span className="text-[11px] text-[#666]">
-                              {tier.max_quantity === 999 ? `${tier.min_quantity}+` : `${tier.min_quantity}-${tier.max_quantity}`} units
-                            </span>
-                            <span className="text-[12px] font-[700] text-[#a855f7]">
-                              {discount === 0 ? 'Base price' : `${discount}% off`}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Premium Selected Products */}
-            {pricingPreview && !loadingPreview && pricingPreview.line_items.length > 0 && (() => {
-              const premiumProducts = pricingPreview.line_items.filter(item => {
-                const fullItem = [...payload.reorder_items, ...(payload.by_tool_tabs?.flatMap(t => t.items) || [])]
-                  .find(i => i.consumable_code === item.product_code);
-                return fullItem?.pricing_tier === 'premium';
+                return {
+                  product_code: code,
+                  description: item?.description || code,
+                  quantity: qty,
+                  base_price: previewItem?.base_price || item?.price || 0,
+                  unit_price: previewItem?.unit_price || item?.price || 0,
+                  discount_applied: previewItem?.discount_applied || null
+                };
               });
-
-              if (premiumProducts.length === 0) return null;
 
               return (
                 <div className="bg-white rounded-[16px] p-5 shadow-sm border-2 border-purple-200">
