@@ -51,14 +51,6 @@ export async function GET(request: NextRequest) {
       .gte('invoices.invoice_date', monthStart)
       .lt('invoices.invoice_date', monthEnd);
 
-    console.log('[Commission API] Month range:', monthStart, 'to', monthEnd);
-    console.log('[Commission API] Rep ID:', repId);
-    console.log('[Commission API] Invoice items error:', invoiceItemsError);
-    console.log('[Commission API] Invoice items count:', invoiceItems?.length || 0);
-    if (invoiceItems && invoiceItems.length > 0) {
-      console.log('[Commission API] Sample item:', JSON.stringify(invoiceItems[0], null, 2));
-    }
-
     // Calculate commission by product type
     let toolRevenue = 0;
     let toolCommission = 0;
@@ -70,15 +62,6 @@ export async function GET(request: NextRequest) {
       const itemSubtotal = item.quantity * item.unit_price;
       const productType = item.products.type;
       const accountOwner = item.invoices.companies.account_owner;
-
-      console.log('[Commission API] Processing item:', {
-        product: item.product_code,
-        type: productType,
-        accountOwner,
-        repId,
-        subtotal: itemSubtotal,
-        matches: accountOwner === repId
-      });
 
       // Only process items for customers assigned to this rep
       if (accountOwner !== repId) {

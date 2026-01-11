@@ -25,10 +25,12 @@ export async function GET(request: NextRequest) {
     const monthStart = firstDayOfMonth.toISOString();
     const monthEnd = firstDayOfNextMonth.toISOString();
 
-    // Get all sales reps
+    // Get all sales reps (from users table where role = sales_rep)
     const { data: reps } = await supabase
-      .from('sales_reps')
+      .from('users')
       .select('sales_rep_id, full_name')
+      .eq('role', 'sales_rep')
+      .not('sales_rep_id', 'is', null)
       .order('full_name');
 
     if (!reps || reps.length === 0) {
