@@ -356,6 +356,9 @@ quotes,notes,text,YES,null
 quotes,created_by,text,YES,null
 quotes,created_at,timestamp with time zone,NO,now()
 quotes,updated_at,timestamp with time zone,NO,now()
+quotes,won_at,timestamp with time zone,YES,null
+quotes,lost_at,timestamp with time zone,YES,null
+quotes,lost_reason,text,YES,null
 rental_agreements,rental_id,uuid,NO,gen_random_uuid()
 rental_agreements,serial_number,text,NO,null
 rental_agreements,company_id,text,NO,null
