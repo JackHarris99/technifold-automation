@@ -116,7 +116,7 @@ export default function TasksWidget({ userId }: { userId: string }) {
     if (diffDays < 0) return <span className="text-red-600 font-semibold">Overdue</span>;
     if (diffDays === 0) return <span className="text-orange-600 font-semibold">Today</span>;
     if (diffDays === 1) return <span className="text-yellow-600">Tomorrow</span>;
-    return <span className="text-gray-600">{diffDays} days</span>;
+    return <span className="text-gray-800">{diffDays} days</span>;
   }
 
   if (loading) {
@@ -136,7 +136,7 @@ export default function TasksWidget({ userId }: { userId: string }) {
       <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-gray-900">Your Tasks</h2>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-gray-800 mt-1">
             {tasks.length === 0 ? 'No pending tasks' : `${urgentTasks.length} urgent, ${normalTasks.length} normal`}
           </p>
         </div>
@@ -155,7 +155,7 @@ export default function TasksWidget({ userId }: { userId: string }) {
         {tasks.length === 0 ? (
           <div className="px-6 py-12 text-center">
             <div className="text-4xl mb-3">✅</div>
-            <div className="text-sm text-gray-600">All caught up! No pending tasks.</div>
+            <div className="text-sm text-gray-800">All caught up! No pending tasks.</div>
           </div>
         ) : (
           <>
@@ -180,7 +180,7 @@ export default function TasksWidget({ userId }: { userId: string }) {
                           </div>
                         </div>
                         {task.description && (
-                          <div className="text-sm text-gray-600 mb-2 line-clamp-2">
+                          <div className="text-sm text-gray-800 mb-2 line-clamp-2">
                             {task.description}
                           </div>
                         )}
@@ -215,7 +215,7 @@ export default function TasksWidget({ userId }: { userId: string }) {
                         <button
                           onClick={() => dismissTask(task.task_id)}
                           disabled={dismissing === task.task_id}
-                          className="text-xs text-gray-600 hover:text-gray-800 px-2 py-1 border border-gray-300 rounded disabled:opacity-50"
+                          className="text-xs text-gray-800 hover:text-gray-800 px-2 py-1 border border-gray-300 rounded disabled:opacity-50"
                         >
                           {dismissing === task.task_id ? '...' : '✕'}
                         </button>
@@ -267,7 +267,7 @@ export default function TasksWidget({ userId }: { userId: string }) {
                         <button
                           onClick={() => dismissTask(task.task_id)}
                           disabled={dismissing === task.task_id}
-                          className="text-xs text-gray-600 hover:text-gray-800 px-2 py-1 border border-gray-300 rounded disabled:opacity-50"
+                          className="text-xs text-gray-800 hover:text-gray-800 px-2 py-1 border border-gray-300 rounded disabled:opacity-50"
                         >
                           {dismissing === task.task_id ? '...' : '✕'}
                         </button>

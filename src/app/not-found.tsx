@@ -3,9 +3,9 @@ export default function NotFound() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="max-w-md w-full bg-white rounded-lg shadow-sm p-6 text-center">
         <div className="mb-4">
-          <h1 className="text-6xl font-bold text-gray-600 mb-2">404</h1>
+          <h1 className="text-6xl font-bold text-gray-800 mb-2">404</h1>
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Portal Not Found</h2>
-          <p className="text-gray-600 text-sm">
+          <p className="text-gray-800 text-sm">
             The portal token you&apos;re looking for doesn&apos;t exist or has expired.
           </p>
         </div>

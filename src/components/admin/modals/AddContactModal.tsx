@@ -66,7 +66,7 @@ export default function AddContactModal({ isOpen, onClose, companyId }: AddConta
           <h2 className="text-xl font-bold">Add Contact</h2>
           <button
             onClick={onClose}
-            className="text-gray-600 hover:text-gray-600"
+            className="text-gray-800 hover:text-gray-800"
           >
             ✕
           </button>

@@ -65,10 +65,10 @@ export default function UnsubscribeClient({
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             {alreadyUnsubscribed ? 'Already Unsubscribed' : 'Successfully Unsubscribed'}
           </h1>
-          <p className="text-gray-600 mb-2">
+          <p className="text-gray-800 mb-2">
             <strong>{contactEmail}</strong>
           </p>
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-800 mb-8">
             {alreadyUnsubscribed
               ? 'This email address was already unsubscribed from marketing communications.'
               : 'You have been unsubscribed from marketing emails from Technifold USA.'}
@@ -101,23 +101,23 @@ export default function UnsubscribeClient({
         </h1>
 
         <div className="bg-gray-100 rounded-lg p-4 mb-6">
-          <p className="text-sm text-gray-600 mb-1">Email address:</p>
+          <p className="text-sm text-gray-800 mb-1">Email address:</p>
           <p className="font-medium text-gray-900">{contactEmail}</p>
           {contactName && (
             <>
-              <p className="text-sm text-gray-600 mt-2 mb-1">Name:</p>
+              <p className="text-sm text-gray-800 mt-2 mb-1">Name:</p>
               <p className="font-medium text-gray-900">{contactName}</p>
             </>
           )}
           {companyName && (
             <>
-              <p className="text-sm text-gray-600 mt-2 mb-1">Company:</p>
+              <p className="text-sm text-gray-800 mt-2 mb-1">Company:</p>
               <p className="font-medium text-gray-900">{companyName}</p>
             </>
           )}
         </div>
 
-        <p className="text-gray-600 mb-6">
+        <p className="text-gray-800 mb-6">
           Click the button below to unsubscribe from marketing emails. You will still receive
           important transactional emails about your orders and account.
         </p>

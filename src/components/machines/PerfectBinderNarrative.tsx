@@ -41,7 +41,7 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
             The cover-feeder's rotary metal scoring system.
           </p>
 
-          <div className="text-slate-600 leading-relaxed space-y-4 mb-8">
+          <div className="text-slate-800 leading-relaxed space-y-4 mb-8">
             <p>It wasn't engineered for modern coated stocks. It wasn't engineered for premium finishes. And it certainly wasn't engineered for digital, laminated or short-grain work.</p>
 
             <p>If your operators are fighting fibre-cracking along the spine, laminate lifting on premium covers, weak shallow hinge lines, spine splitting during setup, covers tearing at the fold during feeding, slow makeready whenever stock changes, or inconsistent creases from run to run — none of that is because your {machine.display_name} is "old" or "fussy."</p>
@@ -54,7 +54,7 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
 
         {/* Video Reference */}
         <aside className="mb-12 bg-slate-50 border border-slate-200 p-6">
-          <p className="text-sm text-slate-500 uppercase tracking-wide mb-3">Technical Demonstration</p>
+          <p className="text-sm text-slate-700 uppercase tracking-wide mb-3">Technical Demonstration</p>
           <div className="aspect-video">
             <iframe
               src="https://www.youtube.com/embed/2_76v5KYx5U"
@@ -73,15 +73,15 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
             Why Metal Scoring Fails — and Always Will
           </h2>
 
-          <p className="text-slate-600 leading-relaxed mb-6">
+          <p className="text-slate-800 leading-relaxed mb-6">
             Rotary metal scoring wheels are fundamentally flawed because they slice through fibres, instead of working with them. That action causes fibre cracking, laminate delamination, cover weakness at the hinge, excessive operator intervention, and spine "popping" shortly after folding.
           </p>
 
-          <p className="text-slate-600 leading-relaxed mb-6">
+          <p className="text-slate-800 leading-relaxed mb-6">
             And because the metal wheel can only cut in one way, there's no meaningful control over crease width, crease depth, stock compensation, coating sensitivity, or digital toner behaviour.
           </p>
 
-          <p className="text-slate-600 leading-relaxed">
+          <p className="text-slate-800 leading-relaxed">
             Operators are forced to "fight" the cover every time the substrate changes.
           </p>
         </section>
@@ -94,11 +94,11 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
 
           <div className="md:flex md:gap-8 mb-6">
             <div className="md:flex-1">
-              <p className="text-slate-600 leading-relaxed mb-4">
+              <p className="text-slate-800 leading-relaxed mb-4">
                 The Technifold Quad Creaser replaces the metal scoring wheel with a true fibre-friendly creasing mechanism engineered around gentle rotary action, substrate-responsive rubber profiles, adjustable crease width and depth, adjustable hinge width, non-destructive pressure distribution, and replaceable split-band design for consumable renewal.
               </p>
 
-              <p className="text-slate-600 leading-relaxed mb-4">
+              <p className="text-slate-800 leading-relaxed mb-4">
                 The result is the closest thing to a letterpress-quality hinge you can achieve on a rotary perfect binder — without damaging fibres or lifting laminate.
               </p>
 
@@ -113,7 +113,7 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
                 alt="Quad Creaser installed on perfect binder"
                 className="w-full border border-slate-200"
               />
-              <figcaption className="text-xs text-slate-400 mt-2">Fig. 1 — Quad Creaser module</figcaption>
+              <figcaption className="text-xs text-slate-700 mt-2">Fig. 1 — Quad Creaser module</figcaption>
             </figure>
           </div>
         </section>
@@ -132,11 +132,11 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
 
             <div className="md:flex md:gap-8">
               <div className="md:flex-1">
-                <p className="text-slate-600 leading-relaxed mb-4">
+                <p className="text-slate-800 leading-relaxed mb-4">
                   The Quad Creaser completely eliminates fibre cracking 100%. This applies to coated stocks, laminated covers, UV varnished covers, digital short-grain work, and heavy 300–400gsm materials.
                 </p>
 
-                <p className="text-slate-600 leading-relaxed">
+                <p className="text-slate-800 leading-relaxed">
                   Where metal scoring destroys fibres, the Quad Creaser uses gentle, controlled, rubber-based pressure to create a strong, flexible hinge without any surface damage.
                 </p>
               </div>
@@ -144,11 +144,11 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
               <div className="md:w-48 mt-4 md:mt-0 flex-shrink-0 space-y-3">
                 <figure>
                   <img src="/images/results/cover-crease-before.JPG" alt="Cover cracking before" className="w-full border border-slate-300" />
-                  <figcaption className="text-xs text-slate-400 mt-1">Before: OEM scoring</figcaption>
+                  <figcaption className="text-xs text-slate-700 mt-1">Before: OEM scoring</figcaption>
                 </figure>
                 <figure>
                   <img src="/images/results/cover-crease-after.JPG" alt="Perfect crease after" className="w-full border border-slate-300" />
-                  <figcaption className="text-xs text-slate-400 mt-1">After: Quad Creaser</figcaption>
+                  <figcaption className="text-xs text-slate-700 mt-1">After: Quad Creaser</figcaption>
                 </figure>
               </div>
             </div>
@@ -160,7 +160,7 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
               2. Eliminates Laminate Lifting Permanently
             </h3>
 
-            <p className="text-slate-600 leading-relaxed mb-4">
+            <p className="text-slate-800 leading-relaxed mb-4">
               Metal scoring knives pull laminate apart. The Quad Creaser supports the surface layer during hinge formation to prevent film break, film lift, and film curl. This unlocks premium cover options without risk.
             </p>
           </div>
@@ -171,11 +171,11 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
               3. Creates Stronger, Deeper and More Consistent Hinges
             </h3>
 
-            <p className="text-slate-600 leading-relaxed mb-4">
+            <p className="text-slate-800 leading-relaxed mb-4">
               Metal scoring gives you one crease. The Quad Creaser gives precise control over crease width, crease depth, and hinge width. Operators can create soft creases for lighter stocks, deeper reinforced hinges for heavy covers, and adjust hinge width for laminate behaviour — achieving consistent results over long runs.
             </p>
 
-            <p className="text-slate-600 leading-relaxed">
+            <p className="text-slate-800 leading-relaxed">
               This is genuine tooling control — not "press harder / press softer."
             </p>
           </div>
@@ -186,7 +186,7 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
               4. Stops Setup Waste Dead
             </h3>
 
-            <p className="text-slate-600 leading-relaxed">
+            <p className="text-slate-800 leading-relaxed">
               OEM scoring regularly splits, tears or ruins covers during setup. With Quad Creaser: no tearing, no splitting, no bursting, no laminate lift, no reprint cascade. From sheet one, results are sale-ready.
             </p>
           </div>
@@ -197,7 +197,7 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
               5. Works at Full Machine Speed
             </h3>
 
-            <p className="text-slate-600 leading-relaxed">
+            <p className="text-slate-800 leading-relaxed">
               Most finishing tools slow a machine down. The Quad Creaser does not. It works as fast as the machine can run. If your {machine.display_name} can run 6,000 cycles/hour, the Quad Creaser runs 6,000.
             </p>
           </div>
@@ -209,7 +209,7 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
             What This Means for Your Business
           </h2>
 
-          <div className="grid md:grid-cols-2 gap-x-8 gap-y-4 text-slate-600 mb-8">
+          <div className="grid md:grid-cols-2 gap-x-8 gap-y-4 text-slate-800 mb-8">
             <div className="flex gap-3">
               <span className="text-cyan-600 flex-shrink-0">—</span>
               <span>Fewer reprints from cracked or delaminated covers</span>
@@ -240,7 +240,7 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
             </div>
           </div>
 
-          <p className="text-slate-600 leading-relaxed">
+          <p className="text-slate-800 leading-relaxed">
             Your perfect binder becomes a reliable high-end finishing asset — not a bottleneck.
           </p>
         </section>
@@ -253,19 +253,19 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div>
               <p className="text-2xl font-light">100K+</p>
-              <p className="text-slate-400 text-sm">Installations</p>
+              <p className="text-slate-700 text-sm">Installations</p>
             </div>
             <div>
               <p className="text-2xl font-light">20+</p>
-              <p className="text-slate-400 text-sm">Years in Field</p>
+              <p className="text-slate-700 text-sm">Years in Field</p>
             </div>
             <div>
               <p className="text-2xl font-light">£5K+</p>
-              <p className="text-slate-400 text-sm">Monthly Savings</p>
+              <p className="text-slate-700 text-sm">Monthly Savings</p>
             </div>
             <div>
               <p className="text-2xl font-light">30</p>
-              <p className="text-slate-400 text-sm">Day Trial Period</p>
+              <p className="text-slate-700 text-sm">Day Trial Period</p>
             </div>
           </div>
         </section>
@@ -276,7 +276,7 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
             Request Your 30-Day Trial
           </h2>
 
-          <p className="text-slate-600 leading-relaxed mb-6">
+          <p className="text-slate-800 leading-relaxed mb-6">
             Every Technifold tool is available for a 30-day evaluation on your {machine.display_name}. There is no obligation and no charge for the trial period. If the results don't meet expectations, return the tooling at no cost.
           </p>
 
@@ -285,7 +285,7 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
               <TrialRequestForm machine={machine} />
             </div>
             <div className="flex flex-col justify-center">
-              <p className="text-slate-600 mb-4">
+              <p className="text-slate-800 mb-4">
                 Prefer to speak with someone?
               </p>
               <a href="tel:+441455381538" className="inline-flex items-center gap-2 text-slate-900 font-medium hover:text-cyan-600 transition-colors">
@@ -294,7 +294,7 @@ export function PerfectBinderNarrative({ machine }: PerfectBinderNarrativeProps)
                 </svg>
                 +44 (0)1455 381 538
               </a>
-              <p className="text-sm text-slate-500 mt-2">
+              <p className="text-sm text-slate-700 mt-2">
                 Technical enquiries welcome
               </p>
             </div>

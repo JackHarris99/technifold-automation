@@ -26,7 +26,7 @@ export default async function MarketingFollowUpPage({ params }: MarketingPagePro
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center max-w-md">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Invalid or Expired Link</h1>
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-800 mb-8">
             This link is no longer valid. Please contact us for more information.
           </p>
           <a
@@ -124,10 +124,10 @@ export default async function MarketingFollowUpPage({ params }: MarketingPagePro
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
             Hi {firstName} 👋
           </h1>
-          <p className="text-xl text-slate-300 mb-2">
+          <p className="text-xl text-slate-600 mb-2">
             Personalized solutions for {company.company_name}
           </p>
-          <p className="text-slate-400">
+          <p className="text-slate-700">
             Discover how Technifold can transform your print finishing
           </p>
         </div>
@@ -152,7 +152,7 @@ export default async function MarketingFollowUpPage({ params }: MarketingPagePro
                   <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition">
                     {solution.title}
                   </h3>
-                  <p className="text-gray-600 mb-4">{solution.description}</p>
+                  <p className="text-gray-800 mb-4">{solution.description}</p>
                   <div className="text-blue-600 font-semibold flex items-center gap-2">
                     Learn More
                     <span className="group-hover:translate-x-1 transition">→</span>
@@ -189,8 +189,8 @@ export default async function MarketingFollowUpPage({ params }: MarketingPagePro
 
         {/* Social Proof */}
         <div className="mt-12 text-center">
-          <p className="text-slate-400 mb-4">Trusted by industry leaders worldwide</p>
-          <div className="flex flex-wrap justify-center gap-8 text-slate-500 text-sm">
+          <p className="text-slate-700 mb-4">Trusted by industry leaders worldwide</p>
+          <div className="flex flex-wrap justify-center gap-8 text-slate-700 text-sm">
             <span>40,000+ Installations</span>
             <span>•</span>
             <span>27 Years Experience</span>
@@ -202,7 +202,7 @@ export default async function MarketingFollowUpPage({ params }: MarketingPagePro
 
       {/* Footer */}
       <div className="border-t border-slate-700 bg-slate-900 py-8">
-        <div className="max-w-6xl mx-auto px-4 text-center text-slate-400 text-sm">
+        <div className="max-w-6xl mx-auto px-4 text-center text-slate-700 text-sm">
           <p>Technifold Ltd • Professional Print Finishing Solutions</p>
         </div>
       </div>

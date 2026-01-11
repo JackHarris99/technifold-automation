@@ -32,7 +32,7 @@ export default function CompaniesPageWrapper({ companies, totalCompanies, viewMo
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">All Companies</h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-800 mt-2">
             {totalCompanies} companies • {viewMode === 'my_customers' ? 'My Customers Only' : 'All Companies (Team View)'}
           </p>
         </div>

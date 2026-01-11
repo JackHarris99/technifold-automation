@@ -19,7 +19,7 @@ export default function WebToolPage() {
           </div>
 
           <h1 className="text-3xl font-bold mb-3">Web-Tool</h1>
-          <p className="text-lg text-gray-300 mb-6 max-w-3xl">
+          <p className="text-lg text-gray-600 mb-6 max-w-3xl">
             Precision creasing for high-speed web-fed production. Zero cracking at production speeds.
           </p>
 

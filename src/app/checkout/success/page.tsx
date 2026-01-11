@@ -32,7 +32,7 @@ export default function CheckoutSuccessPage() {
         <h1 className="text-2xl font-bold text-gray-900 mb-3">
           Order Confirmed!
         </h1>
-        <p className="text-gray-600 mb-6">
+        <p className="text-gray-800 mb-6">
           Thank you for your order. We've received your payment and will begin processing your order shortly.
         </p>
 
@@ -41,7 +41,7 @@ export default function CheckoutSuccessPage() {
           <p className="text-sm text-gray-700 mb-2">
             <strong>What happens next?</strong>
           </p>
-          <ul className="text-sm text-gray-600 text-left space-y-2">
+          <ul className="text-sm text-gray-800 text-left space-y-2">
             <li className="flex items-start">
               <span className="text-blue-600 mr-2">•</span>
               <span>You'll receive an email confirmation within minutes</span>

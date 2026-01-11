@@ -311,7 +311,7 @@ function OverviewTab({
             <div className="border-t pt-3">
               <dt className="text-sm text-gray-700 mb-1">VAT Number</dt>
               <dd className="text-sm font-medium">
-                {company.vat_number || <span className="text-gray-600 italic">Not set - click to add</span>}
+                {company.vat_number || <span className="text-gray-800 italic">Not set - click to add</span>}
               </dd>
               <button
                 onClick={handleUpdateVAT}
@@ -334,7 +334,7 @@ function OverviewTab({
                     {company.billing_country && <div className="font-medium">{company.billing_country}</div>}
                   </div>
                 ) : (
-                  <span className="text-gray-600 italic">Not set - click to add</span>
+                  <span className="text-gray-800 italic">Not set - click to add</span>
                 )}
               </dd>
               <button
@@ -357,7 +357,7 @@ function OverviewTab({
             </div>
             <div>
               <dt className="text-sm text-gray-700">Stripe Customer ID</dt>
-              <dd className="text-sm font-mono text-gray-600">{company.stripe_customer_id || 'Not set'}</dd>
+              <dd className="text-sm font-mono text-gray-800">{company.stripe_customer_id || 'Not set'}</dd>
             </div>
           </dl>
         </div>
@@ -381,7 +381,7 @@ function OverviewTab({
                 <div key={contact.contact_id} className="border-b border-gray-100 pb-3 last:border-0">
                   <div className="font-medium text-sm">{contact.full_name || `${contact.first_name} ${contact.last_name}`}</div>
                   <div className="text-sm text-gray-700">{contact.email}</div>
-                  {contact.role && <div className="text-xs text-gray-600 mt-1">{contact.role}</div>}
+                  {contact.role && <div className="text-xs text-gray-800 mt-1">{contact.role}</div>}
                 </div>
               ))}
             </div>
@@ -421,7 +421,7 @@ function OverviewTab({
                 {address.label && (
                   <div className="font-medium text-sm text-gray-900 mb-2">{address.label}</div>
                 )}
-                <div className="text-sm text-gray-600 space-y-1 mb-3">
+                <div className="text-sm text-gray-800 space-y-1 mb-3">
                   <div>{address.address_line_1}</div>
                   {address.address_line_2 && <div>{address.address_line_2}</div>}
                   <div>{address.city}{address.state_province && `, ${address.state_province}`}</div>
@@ -482,8 +482,8 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
                     <div className="flex-1 min-w-0">
                       <div className="font-medium">{item.products?.description || item.product_code}</div>
                       <div className="text-xs text-gray-700 mt-1">SKU: {item.product_code}</div>
-                      <div className="text-sm text-gray-600 mt-2">Qty: {item.total_quantity}</div>
-                      <div className="text-xs text-gray-600 mt-1">
+                      <div className="text-sm text-gray-800 mt-2">Qty: {item.total_quantity}</div>
+                      <div className="text-xs text-gray-800 mt-1">
                         Last: {item.last_purchased_at}
                       </div>
                       {item.source === 'manual' && (
@@ -529,10 +529,10 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-sm">{item.products?.description || item.product_code}</div>
                       <div className="text-xs text-gray-700 mt-1">{item.product_code}</div>
-                      <div className="text-xs text-gray-600 mt-2">
+                      <div className="text-xs text-gray-800 mt-2">
                         {item.total_purchases} orders • {item.total_quantity} total
                       </div>
-                      <div className="text-xs text-gray-600 mt-1">Last: {item.last_purchased_at}</div>
+                      <div className="text-xs text-gray-800 mt-1">Last: {item.last_purchased_at}</div>
                     </div>
                   </div>
                 </div>
@@ -569,8 +569,8 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-sm">{item.products?.description || item.product_code}</div>
                       <div className="text-xs text-gray-700 mt-1">{item.product_code}</div>
-                      <div className="text-xs text-gray-600 mt-2">Qty: {item.total_quantity}</div>
-                      <div className="text-xs text-gray-600 mt-1">Last: {item.last_purchased_at}</div>
+                      <div className="text-xs text-gray-800 mt-2">Qty: {item.total_quantity}</div>
+                      <div className="text-xs text-gray-800 mt-1">Last: {item.last_purchased_at}</div>
                     </div>
                   </div>
                 </div>
@@ -631,7 +631,7 @@ function SubscriptionsTab({ subscriptionTools, subscriptions, companyId, onAddTo
                   <div>
                     <div className="font-medium">{item.products?.description || item.tool_code}</div>
                     <div className="text-xs text-gray-700 mt-1">SKU: {item.tool_code}</div>
-                    <div className="text-xs text-gray-600 mt-1">
+                    <div className="text-xs text-gray-800 mt-1">
                       Added: {item.added_at} {item.added_by && `by ${item.added_by}`}
                     </div>
                   </div>
@@ -806,7 +806,7 @@ function QuotesTab({ quotes, companyId }: { quotes: any[]; companyId: string }) 
             <tbody className="bg-white divide-y divide-gray-200">
               {quotes.map((quote: any) => (
                 <tr key={quote.quote_id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-600">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-800">
                     {quote.quote_id.substring(0, 8)}...
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -821,10 +821,10 @@ function QuotesTab({ quotes, companyId }: { quotes: any[]; companyId: string }) 
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     £{quote.total_amount?.toLocaleString() || '0'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
                     {formatDate(quote.created_at)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
                     {formatDate(quote.sent_at)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -873,7 +873,7 @@ function EngagementTab({ engagement }: { engagement: any[] }) {
                     {new Date(event.occurred_at).toLocaleString()}
                   </div>
                   {event.url && (
-                    <div className="text-xs text-gray-600 mt-1 truncate">{event.url}</div>
+                    <div className="text-xs text-gray-800 mt-1 truncate">{event.url}</div>
                   )}
                 </div>
               </div>

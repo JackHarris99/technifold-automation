@@ -24,7 +24,7 @@ export default async function OrderTrackingPage({ params }: OrderTrackingProps) 
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center max-w-md">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Invalid or Expired Link</h1>
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-800 mb-8">
             This order tracking link is no longer valid.
           </p>
           <a
@@ -109,7 +109,7 @@ export default async function OrderTrackingPage({ params }: OrderTrackingProps) 
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Tracking</h1>
-          <p className="text-gray-600">{company.company_name}</p>
+          <p className="text-gray-800">{company.company_name}</p>
           {contact && <p className="text-gray-700 text-sm">{contact.full_name}</p>}
         </div>
 

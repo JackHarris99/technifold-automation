@@ -40,7 +40,7 @@ export function CompanyList({ companies }: CompanyListProps) {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-5 w-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
@@ -130,7 +130,7 @@ export function CompanyList({ companies }: CompanyListProps) {
                     <div className="flex items-center justify-end space-x-2">
                       <a
                         href={`/admin/customer/${company.company_id}`}
-                        className="text-gray-600 hover:text-gray-900 flex items-center"
+                        className="text-gray-800 hover:text-gray-900 flex items-center"
                       >
                         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -159,7 +159,7 @@ export function CompanyList({ companies }: CompanyListProps) {
         
         {filteredCompanies.length === 0 && (
           <div className="text-center py-8">
-            <svg className="mx-auto h-12 w-12 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="mx-auto h-12 w-12 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <h3 className="mt-2 text-sm font-medium text-gray-900">No companies found</h3>

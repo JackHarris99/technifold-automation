@@ -74,7 +74,7 @@ function FeaturesSection({ features }: { features: ContentBlock[] }) {
                 {feature.title && (
                   <h4 className="font-bold text-lg text-gray-900 mb-2">{feature.title}</h4>
                 )}
-                <div className="prose prose-sm max-w-none text-gray-600">
+                <div className="prose prose-sm max-w-none text-gray-800">
                   <ReactMarkdown>{feature.content}</ReactMarkdown>
                 </div>
               </div>
@@ -123,7 +123,7 @@ function StatsSection({ stats }: { stats: ContentBlock[] }) {
               <div className="text-4xl mb-2">{stat.icon}</div>
             )}
             <div className="text-3xl font-bold text-purple-600 mb-2">{stat.title}</div>
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-gray-800">
               <ReactMarkdown>{stat.content}</ReactMarkdown>
             </div>
           </div>

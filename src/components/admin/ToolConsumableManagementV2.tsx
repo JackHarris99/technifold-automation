@@ -94,7 +94,7 @@ export default function ToolConsumableManagementV2({
         <div className="grid grid-cols-5 gap-4 mb-6">
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
             <div className="text-3xl font-bold text-gray-900">{tools.length}</div>
-            <div className="text-sm text-gray-600 mt-1">Total Tools</div>
+            <div className="text-sm text-gray-800 mt-1">Total Tools</div>
           </div>
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="text-3xl font-bold text-red-900">{toolCoverage.stats.zero}</div>
@@ -143,7 +143,7 @@ export default function ToolConsumableManagementV2({
               }`}
             >
               By Tool
-              <span className="ml-2 px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">
+              <span className="ml-2 px-2 py-0.5 text-xs bg-gray-100 text-gray-800 rounded-full">
                 {tools.length}
               </span>
             </button>
@@ -156,7 +156,7 @@ export default function ToolConsumableManagementV2({
               }`}
             >
               By Consumable
-              <span className="ml-2 px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">
+              <span className="ml-2 px-2 py-0.5 text-xs bg-gray-100 text-gray-800 rounded-full">
                 {consumables.length}
               </span>
             </button>
@@ -269,7 +269,7 @@ function ByToolView({ tools, consumables, relationships, searchTerm, coverage, o
                     {count} consumables
                   </span>
                 </div>
-                <p className="text-sm text-gray-600 mt-1">{tool.description}</p>
+                <p className="text-sm text-gray-800 mt-1">{tool.description}</p>
               </a>
             </div>
 
@@ -281,7 +281,7 @@ function ByToolView({ tools, consumables, relationships, searchTerm, coverage, o
                     <div key={rel.consumable_code} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm text-gray-900 truncate">{rel.consumable_code}</p>
-                        <p className="text-xs text-gray-600 truncate">{consumable?.description}</p>
+                        <p className="text-xs text-gray-800 truncate">{consumable?.description}</p>
                       </div>
                       <button
                         onClick={() => onDelete(rel.tool_code, rel.consumable_code)}
@@ -329,7 +329,7 @@ function ByConsumableView({ tools, consumables, relationships, searchTerm, onDel
                     {consRels.length} tools
                   </span>
                 </div>
-                <p className="text-sm text-gray-600 mt-1">{consumable.description}</p>
+                <p className="text-sm text-gray-800 mt-1">{consumable.description}</p>
                 {consumable.price && <p className="text-xs text-gray-700 mt-1">£{consumable.price}</p>}
               </div>
             </div>
@@ -349,7 +349,7 @@ function ByConsumableView({ tools, consumables, relationships, searchTerm, onDel
                         <p className="font-medium text-sm text-blue-600 hover:text-blue-700 truncate">
                           {rel.tool_code} →
                         </p>
-                        <p className="text-xs text-gray-600 truncate">{tool?.description}</p>
+                        <p className="text-xs text-gray-800 truncate">{tool?.description}</p>
                       </a>
                       <button
                         onClick={() => onDelete(rel.tool_code, rel.consumable_code)}
@@ -423,7 +423,7 @@ function AddConsumablesModal({ tools, consumables, relationships, onClose, onSuc
       <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-bold">Add Consumables to Tool</h2>
-          <button onClick={onClose} className="text-gray-600 hover:text-gray-600 text-2xl">✕</button>
+          <button onClick={onClose} className="text-gray-800 hover:text-gray-800 text-2xl">✕</button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -469,7 +469,7 @@ function AddConsumablesModal({ tools, consumables, relationships, onClose, onSuc
                       >
                         <span className="font-medium">{category}</span>
                         <div className="flex items-center gap-3">
-                          <span className="text-sm text-gray-600">{selectedInCategory}/{items.length}</span>
+                          <span className="text-sm text-gray-800">{selectedInCategory}/{items.length}</span>
                           <span>{isExpanded ? '▼' : '▶'}</span>
                         </div>
                       </button>
@@ -500,7 +500,7 @@ function AddConsumablesModal({ tools, consumables, relationships, onClose, onSuc
                                 />
                                 <div className="ml-3 flex-1">
                                   <p className="font-medium text-sm">{c.product_code}</p>
-                                  <p className="text-xs text-gray-600">{c.description}</p>
+                                  <p className="text-xs text-gray-800">{c.description}</p>
                                 </div>
                               </label>
                             );
@@ -572,7 +572,7 @@ function BulkCopyModal({ tools, relationships, onClose, onSuccess }: any) {
       <div className="bg-white rounded-lg w-full max-w-2xl">
         <div className="border-b px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-bold">Bulk Copy Consumables</h2>
-          <button onClick={onClose} className="text-gray-600 hover:text-gray-600 text-2xl">✕</button>
+          <button onClick={onClose} className="text-gray-800 hover:text-gray-800 text-2xl">✕</button>
         </div>
 
         <div className="p-6 space-y-6">

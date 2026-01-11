@@ -107,7 +107,7 @@ export function OfferPageClient({
             <span className="font-medium">{machine.brand} {machine.model}</span>
           </h1>
           {company?.company_name && (
-            <p className="text-slate-400 mt-2">{company.company_name}</p>
+            <p className="text-slate-700 mt-2">{company.company_name}</p>
           )}
         </div>
       </section>
@@ -129,7 +129,7 @@ export function OfferPageClient({
             <h2 className="text-3xl font-bold text-slate-900 mb-4">
               Choose Your Plan
             </h2>
-            <p className="text-slate-600">
+            <p className="text-slate-800">
               30-day free trial on all plans. Cancel anytime.
             </p>
           </div>
@@ -156,10 +156,10 @@ export function OfferPageClient({
                   </p>
                   <div className="flex items-baseline justify-center gap-1">
                     <span className="text-4xl font-bold text-slate-900">£{pricing.basePrice}</span>
-                    <span className="text-slate-500">/month</span>
+                    <span className="text-slate-700">/month</span>
                   </div>
-                  <p className="text-sm text-slate-500 mt-2">after 30-day free trial</p>
-                  <p className="text-sm text-slate-600 mt-3">{pricing.baseDescription}</p>
+                  <p className="text-sm text-slate-700 mt-2">after 30-day free trial</p>
+                  <p className="text-sm text-slate-800 mt-3">{pricing.baseDescription}</p>
                 </div>
 
                 <ul className="space-y-3 mb-8">
@@ -206,15 +206,15 @@ export function OfferPageClient({
               {/* Base Plan */}
               <div className="bg-white border border-slate-200 rounded-lg p-8">
                 <div className="text-center mb-6">
-                  <p className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-2">
+                  <p className="text-sm font-medium text-slate-700 uppercase tracking-wide mb-2">
                     {pricing.baseLabel}
                   </p>
                   <div className="flex items-baseline justify-center gap-1">
                     <span className="text-4xl font-bold text-slate-900">£{pricing.basePrice}</span>
-                    <span className="text-slate-500">/month</span>
+                    <span className="text-slate-700">/month</span>
                   </div>
-                  <p className="text-sm text-slate-500 mt-2">after 30-day free trial</p>
-                  <p className="text-sm text-slate-600 mt-3">{pricing.baseDescription}</p>
+                  <p className="text-sm text-slate-700 mt-2">after 30-day free trial</p>
+                  <p className="text-sm text-slate-800 mt-3">{pricing.baseDescription}</p>
                 </div>
 
                 <ul className="space-y-3 mb-8">
@@ -267,10 +267,10 @@ export function OfferPageClient({
                   </p>
                   <div className="flex items-baseline justify-center gap-1">
                     <span className="text-4xl font-bold text-slate-900">£{pricing.premiumPrice}</span>
-                    <span className="text-slate-500">/month</span>
+                    <span className="text-slate-700">/month</span>
                   </div>
-                  <p className="text-sm text-slate-500 mt-2">after 30-day free trial</p>
-                  <p className="text-sm text-slate-600 mt-3">{pricing.premiumDescription}</p>
+                  <p className="text-sm text-slate-700 mt-2">after 30-day free trial</p>
+                  <p className="text-sm text-slate-800 mt-3">{pricing.premiumDescription}</p>
                 </div>
 
                 <ul className="space-y-3 mb-8">
@@ -317,7 +317,7 @@ export function OfferPageClient({
             </div>
           )}
 
-          <p className="text-center text-sm text-slate-500 mt-8">
+          <p className="text-center text-sm text-slate-700 mt-8">
             Card required to start trial. You won't be charged until the trial ends.
           </p>
         </div>
@@ -333,7 +333,7 @@ export function OfferPageClient({
           <div className="space-y-6">
             <div className="border-b border-slate-200 pb-6">
               <h3 className="font-medium text-slate-900 mb-2">How does the 30-day trial work?</h3>
-              <p className="text-slate-600">
+              <p className="text-slate-800">
                 You'll receive the full tooling package for your {machine.brand} {machine.model}.
                 Use it in production for 30 days. If you're not satisfied with the results,
                 return it at no cost. Otherwise, billing begins automatically.
@@ -342,7 +342,7 @@ export function OfferPageClient({
 
             <div className="border-b border-slate-200 pb-6">
               <h3 className="font-medium text-slate-900 mb-2">What if I need to cancel?</h3>
-              <p className="text-slate-600">
+              <p className="text-slate-800">
                 Cancel anytime with no penalties. Return the tooling and your subscription ends.
                 We'll even arrange collection at no extra charge.
               </p>
@@ -350,7 +350,7 @@ export function OfferPageClient({
 
             <div className="border-b border-slate-200 pb-6">
               <h3 className="font-medium text-slate-900 mb-2">Is installation included?</h3>
-              <p className="text-slate-600">
+              <p className="text-slate-800">
                 Yes. All plans include remote installation support. For Enhanced plans,
                 we offer priority scheduling and extended support hours.
               </p>
@@ -358,7 +358,7 @@ export function OfferPageClient({
 
             <div className="pb-6">
               <h3 className="font-medium text-slate-900 mb-2">Can I upgrade later?</h3>
-              <p className="text-slate-600">
+              <p className="text-slate-800">
                 Absolutely. You can upgrade your plan at any time. The price difference
                 will be prorated on your next billing cycle.
               </p>
@@ -384,7 +384,7 @@ function CoverWorkNarrativeReadOnly({ machine }: { machine: any }) {
             It was never engineered to crease, perforate, or cut single sheets to a high standard.
           </p>
 
-          <div className="text-slate-600 leading-relaxed space-y-4 mb-8">
+          <div className="text-slate-800 leading-relaxed space-y-4 mb-8">
             <p>OEM scoring wheels tear fibres. Standard perf wheels rip rather than perforate. Integrated slitting knives rough-trim a stack, not a single sheet.</p>
           </div>
 
@@ -397,17 +397,17 @@ function CoverWorkNarrativeReadOnly({ machine }: { machine: any }) {
           <div className="border border-slate-200 p-5">
             <p className="text-cyan-600 text-xs font-medium uppercase tracking-wide mb-2">Capability 01</p>
             <p className="text-slate-900 font-medium">Tri-Creaser</p>
-            <p className="text-slate-500 text-sm mt-1">Fibre-crack elimination</p>
+            <p className="text-slate-700 text-sm mt-1">Fibre-crack elimination</p>
           </div>
           <div className="border border-slate-200 p-5">
             <p className="text-cyan-600 text-xs font-medium uppercase tracking-wide mb-2">Capability 02</p>
             <p className="text-slate-900 font-medium">Micro-Perforator</p>
-            <p className="text-slate-500 text-sm mt-1">Precision perforation</p>
+            <p className="text-slate-700 text-sm mt-1">Precision perforation</p>
           </div>
           <div className="border border-slate-200 p-5">
             <p className="text-cyan-600 text-xs font-medium uppercase tracking-wide mb-2">Capability 03</p>
             <p className="text-slate-900 font-medium">Multi-Tool</p>
-            <p className="text-slate-500 text-sm mt-1">Inline trimming &amp; slitting</p>
+            <p className="text-slate-700 text-sm mt-1">Inline trimming &amp; slitting</p>
           </div>
         </div>
 
@@ -434,7 +434,7 @@ function PerfectBinderNarrativeReadOnly({ machine }: { machine: any }) {
             The cover-feeder's rotary metal scoring system.
           </p>
 
-          <div className="text-slate-600 leading-relaxed space-y-4 mb-8">
+          <div className="text-slate-800 leading-relaxed space-y-4 mb-8">
             <p>It wasn't engineered for modern coated stocks. It wasn't engineered for premium finishes. And it certainly wasn't engineered for digital, laminated or short-grain work.</p>
           </div>
 
@@ -445,7 +445,7 @@ function PerfectBinderNarrativeReadOnly({ machine }: { machine: any }) {
 
         <div className="bg-slate-50 border border-slate-200 p-6 mb-8">
           <h3 className="font-medium text-slate-900 mb-4">The Quad Creaser Solution</h3>
-          <p className="text-slate-600">
+          <p className="text-slate-800">
             The Technifold Quad Creaser replaces the metal scoring wheel with a true fibre-friendly creasing mechanism.
             Zero cracking. Zero tearing. Zero laminate lifting. At any production speed.
           </p>
@@ -474,7 +474,7 @@ function SpineCreaserNarrativeReadOnly({ machine }: { machine: any }) {
             The single cover crease.
           </p>
 
-          <div className="text-slate-600 leading-relaxed space-y-4 mb-8">
+          <div className="text-slate-800 leading-relaxed space-y-4 mb-8">
             <p>OEM scoring wheels were never engineered to crease premium cover stocks cleanly and consistently. They cut. They slice. They drag fibres apart.</p>
           </div>
 
@@ -485,7 +485,7 @@ function SpineCreaserNarrativeReadOnly({ machine }: { machine: any }) {
 
         <div className="bg-slate-50 border border-slate-200 p-6 mb-8">
           <h3 className="font-medium text-slate-900 mb-4">The Spine-Creaser Solution</h3>
-          <p className="text-slate-600">
+          <p className="text-slate-800">
             The Technifold Spine-Creaser replaces the metal scoring wheel with a precision-engineered rotary creasing mechanism
             that gently manipulates fibres instead of tearing them.
           </p>

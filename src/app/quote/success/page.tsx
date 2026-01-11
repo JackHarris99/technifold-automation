@@ -25,7 +25,7 @@ export default function QuoteSuccessPage() {
             Order Confirmed!
           </h1>
 
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl text-gray-800 mb-8">
             Thank you for your order. We've received your payment and will begin processing your order shortly.
           </p>
 

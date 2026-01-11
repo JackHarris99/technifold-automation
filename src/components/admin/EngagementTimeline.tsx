@@ -64,7 +64,7 @@ export function EngagementTimeline({ companyId, limit = 50 }: EngagementTimeline
     return (
       <div className="p-8 text-center">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
-        <p className="mt-2 text-gray-600">Loading engagement events...</p>
+        <p className="mt-2 text-gray-800">Loading engagement events...</p>
       </div>
     );
   }
@@ -105,10 +105,10 @@ export function EngagementTimeline({ companyId, limit = 50 }: EngagementTimeline
                   <p className="font-semibold text-gray-900">
                     {event.event_description}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-800">
                     {event.company_name}
                     {event.contact_name && (
-                      <span className="text-gray-600"> • {event.contact_name}</span>
+                      <span className="text-gray-800"> • {event.contact_name}</span>
                     )}
                   </p>
                 </div>

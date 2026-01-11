@@ -564,7 +564,7 @@ export function InteractiveQuotePortal({ quote, lineItems, company, contact, tok
               </div>
 
               {readOnly ? (
-                <div className="w-full py-4 bg-gray-100 text-gray-600 rounded-[14px] text-[16px] font-[700] text-center border-2 border-dashed border-gray-300">
+                <div className="w-full py-4 bg-gray-100 text-gray-800 rounded-[14px] text-[16px] font-[700] text-center border-2 border-dashed border-gray-300">
                   {previewMode === 'admin' ? 'Customers will see "Request Invoice" button here' : 'Quote Accepted - Invoice Sent'}
                 </div>
               ) : (

@@ -155,13 +155,13 @@ export default function ManageAddressModal({
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-600 hover:text-gray-600"
+            className="text-gray-800 hover:text-gray-800"
           >
             ✕
           </button>
         </div>
 
-        <div className="mb-4 text-sm text-gray-600">
+        <div className="mb-4 text-sm text-gray-800">
           Company: <strong>{companyName}</strong>
         </div>
 

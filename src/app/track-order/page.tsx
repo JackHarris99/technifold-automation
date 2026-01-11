@@ -56,7 +56,7 @@ export default function TrackOrderPage() {
       <div className="max-w-4xl mx-auto px-4">
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold text-gray-900 mb-3">Track Your Order</h1>
-          <p className="text-lg text-gray-600">Enter your order details to see the latest status</p>
+          <p className="text-lg text-gray-800">Enter your order details to see the latest status</p>
         </div>
 
         {/* Search Form */}
@@ -133,25 +133,25 @@ export default function TrackOrderPage() {
               {/* Progress Tracker */}
               <div className="relative pt-8 pb-4">
                 <div className="flex justify-between mb-2">
-                  <div className={`flex flex-col items-center ${order.status === 'paid' ? 'text-green-600' : order.status === 'cancelled' ? 'text-gray-600' : 'text-green-600'}`}>
+                  <div className={`flex flex-col items-center ${order.status === 'paid' ? 'text-green-600' : order.status === 'cancelled' ? 'text-gray-800' : 'text-green-600'}`}>
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${order.status === 'paid' ? 'bg-green-100' : 'bg-green-500 text-white'}`}>
                       ✓
                     </div>
                     <span className="text-xs font-semibold">Paid</span>
                   </div>
-                  <div className={`flex flex-col items-center ${['processing', 'shipped', 'completed'].includes(order.status) ? 'text-blue-600' : 'text-gray-600'}`}>
+                  <div className={`flex flex-col items-center ${['processing', 'shipped', 'completed'].includes(order.status) ? 'text-blue-600' : 'text-gray-800'}`}>
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${['processing', 'shipped', 'completed'].includes(order.status) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>
                       {['processing', 'shipped', 'completed'].includes(order.status) ? '✓' : '2'}
                     </div>
                     <span className="text-xs font-semibold">Processing</span>
                   </div>
-                  <div className={`flex flex-col items-center ${['shipped', 'completed'].includes(order.status) ? 'text-purple-600' : 'text-gray-600'}`}>
+                  <div className={`flex flex-col items-center ${['shipped', 'completed'].includes(order.status) ? 'text-purple-600' : 'text-gray-800'}`}>
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${['shipped', 'completed'].includes(order.status) ? 'bg-purple-500 text-white' : 'bg-gray-200'}`}>
                       {['shipped', 'completed'].includes(order.status) ? '✓' : '3'}
                     </div>
                     <span className="text-xs font-semibold">Shipped</span>
                   </div>
-                  <div className={`flex flex-col items-center ${order.status === 'completed' ? 'text-green-600' : 'text-gray-600'}`}>
+                  <div className={`flex flex-col items-center ${order.status === 'completed' ? 'text-green-600' : 'text-gray-800'}`}>
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${order.status === 'completed' ? 'bg-green-500 text-white' : 'bg-gray-200'}`}>
                       {order.status === 'completed' ? '✓' : '4'}
                     </div>
@@ -207,9 +207,9 @@ export default function TrackOrderPage() {
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600">Item</th>
-                      <th className="px-4 py-2 text-center text-xs font-semibold text-gray-600">Qty</th>
-                      <th className="px-4 py-2 text-right text-xs font-semibold text-gray-600">Price</th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-gray-800">Item</th>
+                      <th className="px-4 py-2 text-center text-xs font-semibold text-gray-800">Qty</th>
+                      <th className="px-4 py-2 text-right text-xs font-semibold text-gray-800">Price</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
@@ -217,7 +217,7 @@ export default function TrackOrderPage() {
                       <tr key={idx}>
                         <td className="px-4 py-3">
                           <div className="font-semibold">{item.product_code}</div>
-                          <div className="text-sm text-gray-600">{item.description}</div>
+                          <div className="text-sm text-gray-800">{item.description}</div>
                         </td>
                         <td className="px-4 py-3 text-center">{item.quantity}</td>
                         <td className="px-4 py-3 text-right font-semibold">{currency}{item.total_price.toFixed(2)}</td>

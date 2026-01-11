@@ -67,10 +67,10 @@ export function TrialRequestForm({ machine }: TrialRequestFormProps) {
           </svg>
         </div>
         <h3 className="text-xl font-bold text-slate-900 mb-2">Check Your Email</h3>
-        <p className="text-slate-600 mb-4">
+        <p className="text-slate-800 mb-4">
           We've sent your personalized trial offer to <strong>{formData.email}</strong>
         </p>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-slate-700">
           Can't find it? Check your spam folder or call <strong>+44 (0)1455 381 538</strong>
         </p>
       </div>
@@ -151,7 +151,7 @@ export function TrialRequestForm({ machine }: TrialRequestFormProps) {
         {loading ? 'Sending...' : 'Request 30-Day Trial'}
       </button>
 
-      <p className="text-xs text-slate-500 text-center">
+      <p className="text-xs text-slate-700 text-center">
         We'll email you a personalized offer link for your {machine.brand} {machine.model}.
         No payment required to request.
       </p>

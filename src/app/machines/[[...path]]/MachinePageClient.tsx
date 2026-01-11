@@ -119,7 +119,7 @@ export default function MachinePageClient({
             <div className="text-orange-400 text-sm">
               <Link href="/machines" className="hover:text-orange-300">All Machines</Link>
               {' / '}
-              <span className="text-gray-600">{machine.brand} {machine.model}</span>
+              <span className="text-gray-800">{machine.brand} {machine.model}</span>
             </div>
           </div>
         </section>
@@ -140,7 +140,7 @@ export default function MachinePageClient({
             <div className="text-orange-400 text-sm">
               <Link href="/machines" className="hover:text-orange-300">All Machines</Link>
               {' / '}
-              <span className="text-gray-600">{machine.brand} {machine.model}</span>
+              <span className="text-gray-800">{machine.brand} {machine.model}</span>
             </div>
           </div>
         </section>
@@ -161,7 +161,7 @@ export default function MachinePageClient({
             <div className="text-orange-400 text-sm">
               <Link href="/machines" className="hover:text-orange-300">All Machines</Link>
               {' / '}
-              <span className="text-gray-600">{machine.brand} {machine.model}</span>
+              <span className="text-gray-800">{machine.brand} {machine.model}</span>
             </div>
           </div>
         </section>
@@ -182,12 +182,12 @@ export default function MachinePageClient({
           <div className="text-orange-400 text-sm mb-4">
             <Link href="/machines" className="hover:text-orange-300">All Machines</Link>
             {' / '}
-            <span className="text-gray-600">{machine.brand} {machine.model}</span>
+            <span className="text-gray-800">{machine.brand} {machine.model}</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
             {renderedCopy.hero_headline}
           </h1>
-          <p className="text-xl text-gray-300 mb-8 max-w-3xl">
+          <p className="text-xl text-gray-600 mb-8 max-w-3xl">
             {renderedCopy.hero_subheading}
           </p>
           <div className="flex flex-wrap gap-4">
@@ -213,7 +213,7 @@ export default function MachinePageClient({
           <h2 className="text-3xl font-bold text-gray-900 mb-2 text-center">
             {renderedCopy.problem_section_title}
           </h2>
-          <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">
+          <p className="text-gray-800 text-center mb-12 max-w-2xl mx-auto">
             Common challenges when finishing on the {machine.brand} {machine.model}
           </p>
           <div className="grid md:grid-cols-3 gap-8">
@@ -221,7 +221,7 @@ export default function MachinePageClient({
               <div key={idx} className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                 <div className="text-3xl mb-4">{problem.icon}</div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{problem.title}</h3>
-                <p className="text-gray-600">{problem.description}</p>
+                <p className="text-gray-800">{problem.description}</p>
               </div>
             ))}
           </div>
@@ -234,7 +234,7 @@ export default function MachinePageClient({
           <h2 className="text-3xl font-bold text-gray-900 mb-2 text-center">
             {renderedCopy.solution_section_title}
           </h2>
-          <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">
+          <p className="text-gray-800 text-center mb-12 max-w-2xl mx-auto">
             {renderedCopy.solution_subheading}
           </p>
           <div className="grid md:grid-cols-3 gap-8">
@@ -246,7 +246,7 @@ export default function MachinePageClient({
                   </svg>
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
+                <p className="text-gray-800">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -262,7 +262,7 @@ export default function MachinePageClient({
                 <div className="text-3xl">{prop.icon}</div>
                 <div>
                   <h3 className="text-lg font-bold mb-1">{prop.title}</h3>
-                  <p className="text-gray-300">{prop.description}</p>
+                  <p className="text-gray-600">{prop.description}</p>
                 </div>
               </div>
             ))}
@@ -276,14 +276,14 @@ export default function MachinePageClient({
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
             {renderedCopy.pricing_title}
           </h2>
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-800 mb-8">
             {renderedCopy.pricing_subheading}
           </p>
 
           <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200 max-w-lg mx-auto">
             {/* Machine Context */}
             <div className="bg-slate-900 text-white -mx-8 -mt-8 px-8 py-4 rounded-t-lg mb-6">
-              <div className="text-sm text-gray-600">Free trial for your</div>
+              <div className="text-sm text-gray-800">Free trial for your</div>
               <div className="text-xl font-bold">{machine.brand} {machine.model}</div>
             </div>
 
@@ -296,7 +296,7 @@ export default function MachinePageClient({
                   </svg>
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Request Received!</h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-800 mb-4">
                   Check your email for your personalized trial link.
                 </p>
                 <div className="text-sm text-gray-700">
@@ -310,7 +310,7 @@ export default function MachinePageClient({
                   {basePricing.display}
                   <span className="text-lg text-gray-700 font-normal">/month</span>
                 </div>
-                <p className="text-gray-600 mb-6">
+                <p className="text-gray-800 mb-6">
                   Typical systems: {basePricing.typicalRange}/month
                 </p>
                 <ul className="text-left space-y-3 mb-8">
@@ -431,7 +431,7 @@ export default function MachinePageClient({
             <blockquote className="text-xl text-gray-700 italic mb-4">
               "The quality improvement was immediate. We went from rejecting 15% of our heavy cover jobs to zero rejects. Paid for itself in the first month."
             </blockquote>
-            <div className="text-gray-600">
+            <div className="text-gray-800">
               — Production Manager, Commercial Printer
             </div>
           </div>

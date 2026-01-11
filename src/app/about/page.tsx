@@ -9,7 +9,7 @@ export default function AboutPage() {
         <h1 className="text-4xl font-bold text-gray-900 mb-8">About Technifold</h1>
 
         <div className="prose prose-lg max-w-none">
-          <p className="text-xl text-gray-600 mb-6">
+          <p className="text-xl text-gray-800 mb-6">
             Leading manufacturer of professional print finishing solutions for the graphic arts industry.
           </p>
 

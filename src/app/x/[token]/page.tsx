@@ -35,7 +35,7 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Invalid or Expired Link</h1>
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-800 mb-8">
             This offer link is no longer valid. Please contact us for assistance.
           </p>
           <a
@@ -131,7 +131,7 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                 Technifold Products
               </h1>
-              <p className="text-xl text-gray-600">
+              <p className="text-xl text-gray-800">
                 Browse our full product catalog
               </p>
             </div>
@@ -209,7 +209,7 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
               <h1 className="text-4xl font-bold mb-6 leading-tight">
                 Transform Your Print Finishing
               </h1>
-              <p className="text-lg text-gray-300 mb-8 max-w-3xl">
+              <p className="text-lg text-gray-600 mb-8 max-w-3xl">
                 Eliminate fiber cracking, reduce waste, and increase productivity with Technifold's
                 precision finishing tools. Over 40,000 installations worldwide.
               </p>
@@ -229,22 +229,22 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
               <div className="grid md:grid-cols-2 gap-6">
                 <a href="/tools/tri-creaser" className="bg-slate-50 border-2 border-gray-200 p-6 hover:border-orange-500 transition-colors group">
                   <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600">Tri-Creaser</h3>
-                  <p className="text-gray-600 mb-4">Eliminate fiber cracking completely. 40,000+ installations worldwide.</p>
+                  <p className="text-gray-800 mb-4">Eliminate fiber cracking completely. 40,000+ installations worldwide.</p>
                   <span className="text-orange-600 font-semibold">Learn more →</span>
                 </a>
                 <a href="/tools/quad-creaser" className="bg-slate-50 border-2 border-gray-200 p-6 hover:border-orange-500 transition-colors group">
                   <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600">Quad-Creaser</h3>
-                  <p className="text-gray-600 mb-4">Perfect bound book finishing. Four creases inline. Zero flaking.</p>
+                  <p className="text-gray-800 mb-4">Perfect bound book finishing. Four creases inline. Zero flaking.</p>
                   <span className="text-orange-600 font-semibold">Learn more →</span>
                 </a>
                 <a href="/tools/spine-creaser" className="bg-slate-50 border-2 border-gray-200 p-6 hover:border-orange-500 transition-colors group">
                   <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600">Spine-Creaser</h3>
-                  <p className="text-gray-600 mb-4">Saddle stitcher transformation. Deep crease at 20,000 BPH.</p>
+                  <p className="text-gray-800 mb-4">Saddle stitcher transformation. Deep crease at 20,000 BPH.</p>
                   <span className="text-orange-600 font-semibold">Learn more →</span>
                 </a>
                 <a href="/tools/multi-tool" className="bg-slate-50 border-2 border-gray-200 p-6 hover:border-orange-500 transition-colors group">
                   <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600">Multi-Tool</h3>
-                  <p className="text-gray-600 mb-4">6-in-1 modular system. Crease, perf, cut, matrix removal inline.</p>
+                  <p className="text-gray-800 mb-4">6-in-1 modular system. Crease, perf, cut, matrix removal inline.</p>
                   <span className="text-orange-600 font-semibold">Learn more →</span>
                 </a>
               </div>

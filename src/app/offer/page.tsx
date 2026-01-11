@@ -104,14 +104,14 @@ function InvalidTokenPage({ message }: { message: string }) {
           </svg>
         </div>
         <h1 className="text-2xl font-bold text-slate-900 mb-4">Invalid Link</h1>
-        <p className="text-slate-600 mb-8">{message}</p>
+        <p className="text-slate-800 mb-8">{message}</p>
         <a
           href="/machines"
           className="inline-block bg-slate-900 text-white px-6 py-3 font-medium hover:bg-slate-800 transition-colors"
         >
           Find Your Machine
         </a>
-        <p className="text-sm text-slate-500 mt-6">
+        <p className="text-sm text-slate-700 mt-6">
           Need help? Call <strong>+44 (0)1455 381 538</strong>
         </p>
       </div>

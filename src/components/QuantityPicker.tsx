@@ -33,7 +33,7 @@ export function QuantityPicker({ value, onChange, min = 0, max = 999 }: Quantity
         type="button"
         onClick={handleDecrease}
         disabled={value <= min}
-        className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-gray-600 font-medium"
+        className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-gray-800 font-medium"
       >
         −
       </button>
@@ -51,7 +51,7 @@ export function QuantityPicker({ value, onChange, min = 0, max = 999 }: Quantity
         type="button"
         onClick={handleIncrease}
         disabled={value >= max}
-        className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-gray-600 font-medium"
+        className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-gray-800 font-medium"
       >
         +
       </button>

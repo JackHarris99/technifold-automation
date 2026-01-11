@@ -197,11 +197,11 @@ export default function ManageToolsModal({
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Manage Tools</h2>
-            <p className="text-sm text-gray-600">{companyName}</p>
+            <p className="text-sm text-gray-800">{companyName}</p>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-600 hover:text-gray-600 text-2xl font-bold"
+            className="text-gray-800 hover:text-gray-800 text-2xl font-bold"
           >
             ×
           </button>
@@ -211,7 +211,7 @@ export default function ManageToolsModal({
         <div className="flex-1 overflow-y-auto p-6">
           {loading ? (
             <div className="text-center py-12">
-              <div className="text-gray-600">Loading tools...</div>
+              <div className="text-gray-800">Loading tools...</div>
             </div>
           ) : (
             <>
@@ -249,7 +249,7 @@ export default function ManageToolsModal({
                               className="w-full text-left px-3 py-2 hover:bg-blue-50 border-b border-gray-100 last:border-b-0"
                             >
                               <div className="font-medium text-gray-900">{tool.description}</div>
-                              <div className="text-xs text-gray-600">{tool.product_code} • {tool.category}</div>
+                              <div className="text-xs text-gray-800">{tool.product_code} • {tool.category}</div>
                             </button>
                           ))
                         )}
@@ -278,7 +278,7 @@ export default function ManageToolsModal({
                   {saving ? 'Adding...' : 'Add Tool'}
                 </button>
                 {selectedToolCode && (
-                  <div className="mt-2 text-sm text-gray-600">
+                  <div className="mt-2 text-sm text-gray-800">
                     Selected: {toolSearch}
                   </div>
                 )}
@@ -290,7 +290,7 @@ export default function ManageToolsModal({
                   Current Tools ({currentTools.length})
                 </h3>
                 {currentTools.length === 0 ? (
-                  <div className="text-center py-12 text-gray-600">
+                  <div className="text-center py-12 text-gray-800">
                     No tools assigned yet. Add your first tool above.
                   </div>
                 ) : (
@@ -304,7 +304,7 @@ export default function ManageToolsModal({
                           <h4 className="font-semibold text-gray-900">
                             {tool.products?.description || tool.tool_code}
                           </h4>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-gray-800">
                             {tool.tool_code} • {tool.products?.category || 'Tool'}
                           </p>
                         </div>

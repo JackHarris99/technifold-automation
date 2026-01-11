@@ -74,7 +74,7 @@ export default function TrialCheckoutClient({
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Your Free Trial is Ready!
           </h1>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-800">
             30 days free for {machineName}
           </p>
         </div>
@@ -85,20 +85,20 @@ export default function TrialCheckoutClient({
 
           <div className="space-y-4 mb-8">
             <div className="flex justify-between py-3 border-b border-gray-100">
-              <span className="text-gray-600">Equipment</span>
+              <span className="text-gray-800">Equipment</span>
               <span className="font-semibold text-gray-900">{machineName}</span>
             </div>
             <div className="flex justify-between py-3 border-b border-gray-100">
-              <span className="text-gray-600">Trial Period</span>
+              <span className="text-gray-800">Trial Period</span>
               <span className="font-semibold text-green-600">30 Days FREE</span>
             </div>
             <div className="flex justify-between py-3 border-b border-gray-100">
-              <span className="text-gray-600">After Trial</span>
+              <span className="text-gray-800">After Trial</span>
               <span className="font-semibold text-gray-900">£{offerPrice}/month</span>
             </div>
             {companyName && (
               <div className="flex justify-between py-3 border-b border-gray-100">
-                <span className="text-gray-600">Company</span>
+                <span className="text-gray-800">Company</span>
                 <span className="font-semibold text-gray-900">{companyName}</span>
               </div>
             )}

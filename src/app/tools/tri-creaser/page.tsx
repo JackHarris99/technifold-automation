@@ -25,29 +25,29 @@ export default function TriCreaserPage() {
               </div>
 
               <h1 className="text-4xl font-bold mb-4 leading-tight">Tri-Creaser<br />Totally Eliminates Fiber Cracking</h1>
-              <p className="text-lg text-gray-300 mb-2 leading-relaxed">
+              <p className="text-lg text-gray-600 mb-2 leading-relaxed">
                 <strong>The revolutionary rotary creasing solution that completely eliminates fiber cracking on all popular types of folding machines.</strong>
               </p>
-              <p className="text-base text-gray-600 mb-6">
+              <p className="text-base text-gray-800 mb-6">
                 The resilient rubber compound penetrates the area prone to cracking with gentle rotary action—manipulating and stretching the fibres instead of damaging them like common steel scoring methods. Results equal to letterpress quality.
               </p>
 
               <div className="grid grid-cols-2 gap-3 mb-6">
                 <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
                   <div className="text-2xl font-bold">100%</div>
-                  <div className="text-xs text-gray-600">Cracking Eliminated</div>
+                  <div className="text-xs text-gray-800">Cracking Eliminated</div>
                 </div>
                 <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
                   <div className="text-2xl font-bold">Seconds</div>
-                  <div className="text-xs text-gray-600">Change Settings</div>
+                  <div className="text-xs text-gray-800">Change Settings</div>
                 </div>
                 <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
                   <div className="text-2xl font-bold">1-3 Jobs</div>
-                  <div className="text-xs text-gray-600">Payback Period</div>
+                  <div className="text-xs text-gray-800">Payback Period</div>
                 </div>
                 <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
                   <div className="text-2xl font-bold">£10k+</div>
-                  <div className="text-xs text-gray-600">Annual Savings</div>
+                  <div className="text-xs text-gray-800">Annual Savings</div>
                 </div>
               </div>
 
@@ -65,7 +65,7 @@ export default function TriCreaserPage() {
                 alt="Tri-Creaser Fast-Fit installed on folding machine"
                 className="w-full rounded-lg shadow-2xl border border-white/20"
               />
-              <p className="text-sm text-gray-600 text-center mt-3">
+              <p className="text-sm text-gray-800 text-center mt-3">
                 Tri-Creaser Fast-Fit creating letterpress-quality creases inline
               </p>
             </div>
@@ -130,7 +130,7 @@ export default function TriCreaserPage() {
               </ul>
               <div className="bg-gray-900 text-white p-4">
                 <p className="text-lg font-bold mb-1">£10,000 - £30,000</p>
-                <p className="text-xs text-gray-300">Annual waste reported by most printing companies</p>
+                <p className="text-xs text-gray-600">Annual waste reported by most printing companies</p>
               </div>
             </div>
           </div>
@@ -235,7 +235,7 @@ export default function TriCreaserPage() {
               Visual Proof
             </div>
             <h2 className="text-3xl font-bold text-gray-900">See the Difference: Metal Scoring vs. Tri-Creaser</h2>
-            <p className="text-gray-600 mt-2">Real results from actual production runs</p>
+            <p className="text-gray-800 mt-2">Real results from actual production runs</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 mb-8">
@@ -338,14 +338,14 @@ export default function TriCreaserPage() {
                 </div>
                 <div>
                   <div className="font-bold text-sm text-white">Sappi Paper Engineering Report</div>
-                  <div className="text-xs text-gray-300">Independent Laboratory Testing (2001)</div>
+                  <div className="text-xs text-gray-600">Independent Laboratory Testing (2001)</div>
                 </div>
               </div>
             </div>
 
             <div className="bg-white/10 border border-white/20 p-6">
               <h3 className="text-lg font-bold text-white mb-4">The Only Rotary Device That Totally Eliminates Fiber Cracking</h3>
-              <ul className="space-y-2 text-sm text-gray-300">
+              <ul className="space-y-2 text-sm text-gray-600">
                 <li className="flex items-start gap-2">
                   <span className="text-orange-400">✓</span>
                   <span><strong className="text-white">Tested against the top scoring systems worldwide</strong> and outperformed them all significantly in ease of setup, efficiency, versatility and finished quality</span>
@@ -369,19 +369,19 @@ export default function TriCreaserPage() {
           <div className="grid md:grid-cols-4 gap-4">
             <div className="bg-white/10 border border-white/20 p-4 text-center">
               <div className="text-3xl font-bold text-white mb-1">40,000+</div>
-              <div className="text-xs text-gray-300">Installations worldwide</div>
+              <div className="text-xs text-gray-600">Installations worldwide</div>
             </div>
             <div className="bg-white/10 border border-white/20 p-4 text-center">
               <div className="text-3xl font-bold text-white mb-1">3,000+</div>
-              <div className="text-xs text-gray-300">Units bought by Heidelberg</div>
+              <div className="text-xs text-gray-600">Units bought by Heidelberg</div>
             </div>
             <div className="bg-white/10 border border-white/20 p-4 text-center">
               <div className="text-3xl font-bold text-white mb-1">20:1</div>
-              <div className="text-xs text-gray-300">Outsells competitors</div>
+              <div className="text-xs text-gray-600">Outsells competitors</div>
             </div>
             <div className="bg-white/10 border border-white/20 p-4 text-center">
               <div className="text-3xl font-bold text-white mb-1">£30k</div>
-              <div className="text-xs text-gray-300">Annual savings (larger companies)</div>
+              <div className="text-xs text-gray-600">Annual savings (larger companies)</div>
             </div>
           </div>
         </div>
@@ -395,7 +395,7 @@ export default function TriCreaserPage() {
               Simple Color-Coded System
             </div>
             <h2 className="text-2xl font-bold text-gray-900">Fast-Fit Split Creasing Ribs</h2>
-            <p className="text-sm text-gray-600 mt-2">Change from one crease setting to another instantly—never remove the device from your machine again</p>
+            <p className="text-sm text-gray-800 mt-2">Change from one crease setting to another instantly—never remove the device from your machine again</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 mb-6">
@@ -406,7 +406,7 @@ export default function TriCreaserPage() {
                 </div>
                 <div>
                   <div className="font-bold text-gray-900">Orange</div>
-                  <div className="text-sm text-gray-600">85-200gsm</div>
+                  <div className="text-sm text-gray-800">85-200gsm</div>
                 </div>
               </div>
               <p className="text-sm text-gray-700">Light to medium stocks, standard digital output</p>
@@ -419,7 +419,7 @@ export default function TriCreaserPage() {
                 </div>
                 <div>
                   <div className="font-bold text-gray-900">Blue</div>
-                  <div className="text-sm text-gray-600">170-270gsm</div>
+                  <div className="text-sm text-gray-800">170-270gsm</div>
                 </div>
               </div>
               <p className="text-sm text-gray-700">Medium to heavy stocks, coated papers</p>
@@ -432,7 +432,7 @@ export default function TriCreaserPage() {
                 </div>
                 <div>
                   <div className="font-bold text-gray-900">Yellow</div>
-                  <div className="text-sm text-gray-600">250-350gsm</div>
+                  <div className="text-sm text-gray-800">250-350gsm</div>
                 </div>
               </div>
               <p className="text-sm text-gray-700">Heavy stocks, board, laminated materials</p>
@@ -483,7 +483,7 @@ export default function TriCreaserPage() {
               Digital Stock Upgrade
             </div>
             <h2 className="text-2xl font-bold text-gray-900">Tri-Creaser Advance</h2>
-            <p className="text-sm text-gray-600 mt-2">Two-way creasing that tackles inside-fold toner flaking on particularly difficult digital stocks</p>
+            <p className="text-sm text-gray-800 mt-2">Two-way creasing that tackles inside-fold toner flaking on particularly difficult digital stocks</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -558,12 +558,12 @@ export default function TriCreaserPage() {
                   </svg>
                 ))}
               </div>
-              <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+              <p className="text-sm text-gray-600 mb-4 leading-relaxed">
                 "We purchased the Tri-Creaser Easy Fit in August and it has only taken us <strong className="text-white">four weeks to recover our investment</strong>. Now that we know the system works so well we <strong className="text-white">estimate that it may save us £20,000 in the next 12 months.</strong>"
               </p>
               <div className="text-sm">
                 <div className="font-bold text-white">Andy Coles</div>
-                <div className="text-xs text-gray-600">Wyndeham Westway, Luton, UK</div>
+                <div className="text-xs text-gray-800">Wyndeham Westway, Luton, UK</div>
               </div>
             </div>
 
@@ -575,12 +575,12 @@ export default function TriCreaserPage() {
                   </svg>
                 ))}
               </div>
-              <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+              <p className="text-sm text-gray-600 mb-4 leading-relaxed">
                 "The savings we made by not having to send out for scoring <strong className="text-white">paid for our Tri-creaser on the first job!</strong>"
               </p>
               <div className="text-sm">
                 <div className="font-bold text-white">Bob Humphrys</div>
-                <div className="text-xs text-gray-600">Wessex Binding Services, Wimbourne</div>
+                <div className="text-xs text-gray-800">Wessex Binding Services, Wimbourne</div>
               </div>
             </div>
 
@@ -592,12 +592,12 @@ export default function TriCreaserPage() {
                   </svg>
                 ))}
               </div>
-              <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+              <p className="text-sm text-gray-600 mb-4 leading-relaxed">
                 "We had a difficult job with bleeds on both sides and the grain going the wrong way, the outside looked great but the inside was cracking. We just got a new Tri-Creaser Advance in and after a little trial and error, both sides looked great. <strong className="text-white">We only had 1, the next day I ordered 2 more.</strong> We delivered that job on time and it saved us from getting a letterpress score and missing a deadline."
               </p>
               <div className="text-sm">
                 <div className="font-bold text-white">Jim Navulis</div>
-                <div className="text-xs text-gray-600">Haapanen Brothers, Illinois, USA</div>
+                <div className="text-xs text-gray-800">Haapanen Brothers, Illinois, USA</div>
               </div>
             </div>
           </div>
@@ -611,12 +611,12 @@ export default function TriCreaserPage() {
                   </svg>
                 ))}
               </div>
-              <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+              <p className="text-sm text-gray-600 mb-4 leading-relaxed">
                 "We have used the Tech-ni-Fold Tri-Creaser in-line on our folders for a number of years, it is a very quick system to make ready and <strong className="text-white">the results are equal to a cylinder crease.</strong> Because we can crease in-line, we are able to <strong className="text-white">achieve speeds of up to 30k sheets per hour</strong> on our Heidelberg Stahl folders, eliminating all cracking across a multitude of stock types."
               </p>
               <div className="text-sm">
                 <div className="font-bold text-white">Jake Whitford</div>
-                <div className="text-xs text-gray-600">Pepper Communications Ltd</div>
+                <div className="text-xs text-gray-800">Pepper Communications Ltd</div>
               </div>
             </div>
 
@@ -628,12 +628,12 @@ export default function TriCreaserPage() {
                   </svg>
                 ))}
               </div>
-              <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+              <p className="text-sm text-gray-600 mb-4 leading-relaxed">
                 "We run a 300gsm silk job for a perfume brand. The job is laminated on the outside but not on the inside. <strong className="text-white">The Tri-Creaser Advance gives a beautiful square crease result on the inside of the fold</strong> by producing a deeper impression. The Tri-Creaser Advance is an improvement even on previous versions."
               </p>
               <div className="text-sm">
                 <div className="font-bold text-white">Tony Puxty</div>
-                <div className="text-xs text-gray-600">Fontain, London, UK</div>
+                <div className="text-xs text-gray-800">Fontain, London, UK</div>
               </div>
             </div>
           </div>

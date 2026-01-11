@@ -31,7 +31,7 @@ export default async function TrialCheckoutPage({ params }: TrialCheckoutProps) 
         <div className="text-center max-w-md p-8">
           <div className="text-6xl mb-6">⏰</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Link Expired</h1>
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-800 mb-8">
             This trial link is no longer valid. Please request a new trial.
           </p>
           <a

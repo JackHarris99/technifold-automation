@@ -10,7 +10,7 @@ export function HeroSection() {
             <span className="text-blue-600 block">Finishing Solutions</span>
           </h1>
           
-          <p className="mt-6 text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="mt-6 text-xl text-gray-800 max-w-3xl mx-auto leading-relaxed">
             Leading manufacturer of Tri-Creaser and Spine-Creaser systems. 
             Precision-engineered tools and consumables for the graphic arts industry.
           </p>
@@ -33,15 +33,15 @@ export function HeroSection() {
           <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
             <div className="bg-white rounded-lg p-6 shadow-md">
               <div className="text-3xl font-bold text-blue-600 mb-2">25+</div>
-              <div className="text-gray-600">Years of Innovation</div>
+              <div className="text-gray-800">Years of Innovation</div>
             </div>
             <div className="bg-white rounded-lg p-6 shadow-md">
               <div className="text-3xl font-bold text-blue-600 mb-2">2000+</div>
-              <div className="text-gray-600">Customers Worldwide</div>
+              <div className="text-gray-800">Customers Worldwide</div>
             </div>
             <div className="bg-white rounded-lg p-6 shadow-md">
               <div className="text-3xl font-bold text-blue-600 mb-2">100%</div>
-              <div className="text-gray-600">Customer Satisfaction</div>
+              <div className="text-gray-800">Customer Satisfaction</div>
             </div>
           </div>
         </div>

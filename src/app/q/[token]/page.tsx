@@ -28,7 +28,7 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center max-w-md">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Invalid or Expired Link</h1>
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-800 mb-8">
             This quote link is no longer valid. Please contact us for an updated quote.
           </p>
           <a
@@ -120,14 +120,14 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
               <span className="text-4xl">✅</span>
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Quote Already Accepted</h1>
-            <p className="text-gray-600 mb-2">
+            <p className="text-gray-800 mb-2">
               This quote was accepted on {new Date(quote.accepted_at).toLocaleDateString('en-GB', {
                 day: 'numeric',
                 month: 'long',
                 year: 'numeric',
               })}.
             </p>
-            <p className="text-gray-600 mb-8">
+            <p className="text-gray-800 mb-8">
               Your invoice has been sent. If you need assistance or have questions, please contact us.
             </p>
           </div>

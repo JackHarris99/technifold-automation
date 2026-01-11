@@ -12,7 +12,7 @@ export default function LogoBanner() {
     <section className="bg-white py-8 border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-6">
         <div className="mb-6">
-          <p className="text-center text-sm font-semibold text-gray-600 uppercase tracking-wide">
+          <p className="text-center text-sm font-semibold text-gray-800 uppercase tracking-wide">
             Compatible With Leading Machinery Brands
           </p>
         </div>

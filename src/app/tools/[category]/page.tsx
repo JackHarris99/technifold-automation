@@ -75,7 +75,7 @@ export default async function CategoryPage({ params }: PageProps) {
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
                 Available {displayName} Tools
               </h2>
-              <p className="text-xl text-gray-600">
+              <p className="text-xl text-gray-800">
                 {tools.length} professional tools in this category
               </p>
             </div>
@@ -106,7 +106,7 @@ export default async function CategoryPage({ params }: PageProps) {
                   </div>
 
                   {tool.description && (
-                    <p className="text-gray-600 mb-4">
+                    <p className="text-gray-800 mb-4">
                       {tool.description}
                     </p>
                   )}
@@ -114,7 +114,7 @@ export default async function CategoryPage({ params }: PageProps) {
                   {tool.specifications && (
                     <div className="mb-4">
                       <h4 className="font-medium text-gray-900 mb-2">Specifications</h4>
-                      <p className="text-sm text-gray-600">{tool.specifications}</p>
+                      <p className="text-sm text-gray-800">{tool.specifications}</p>
                     </div>
                   )}
 
@@ -167,7 +167,7 @@ export default async function CategoryPage({ params }: PageProps) {
             <h2 className="text-3xl font-bold text-white mb-4">
               Need Help Choosing the Right {displayName}?
             </h2>
-            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
               Our technical specialists can help you select the perfect {displayName.toLowerCase()} solution for your specific requirements
             </p>
             <Link

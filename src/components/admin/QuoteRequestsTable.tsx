@@ -89,7 +89,7 @@ export default function QuoteRequestsTable({ initialData }: QuoteRequestsTablePr
       {/* Filters */}
       <div className="p-4 border-b border-gray-200 flex gap-4">
         <div>
-          <label className="text-xs font-semibold text-gray-600 block mb-1">Status</label>
+          <label className="text-xs font-semibold text-gray-800 block mb-1">Status</label>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -107,7 +107,7 @@ export default function QuoteRequestsTable({ initialData }: QuoteRequestsTablePr
         </div>
 
         <div>
-          <label className="text-xs font-semibold text-gray-600 block mb-1">Assigned To</label>
+          <label className="text-xs font-semibold text-gray-800 block mb-1">Assigned To</label>
           <select
             value={assignedToFilter}
             onChange={(e) => setAssignedToFilter(e.target.value)}
@@ -121,7 +121,7 @@ export default function QuoteRequestsTable({ initialData }: QuoteRequestsTablePr
           </select>
         </div>
 
-        <div className="ml-auto text-sm text-gray-600 self-end pb-2">
+        <div className="ml-auto text-sm text-gray-800 self-end pb-2">
           Showing {filteredRequests.length} of {quoteRequests.length} requests
         </div>
       </div>
@@ -131,14 +131,14 @@ export default function QuoteRequestsTable({ initialData }: QuoteRequestsTablePr
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Company</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Contact</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Machine</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Source</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Assigned</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Created</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-800 uppercase">Company</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-800 uppercase">Contact</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-800 uppercase">Machine</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-800 uppercase">Status</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-800 uppercase">Source</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-800 uppercase">Assigned</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-800 uppercase">Created</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-800 uppercase">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
@@ -173,13 +173,13 @@ export default function QuoteRequestsTable({ initialData }: QuoteRequestsTablePr
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="text-xs text-gray-600">{formatStatus(request.source)}</div>
+                    <div className="text-xs text-gray-800">{formatStatus(request.source)}</div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="text-sm text-gray-700">{request.assigned_to || '—'}</div>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="text-xs text-gray-600">{formatDate(request.created_at)}</div>
+                    <div className="text-xs text-gray-800">{formatDate(request.created_at)}</div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">

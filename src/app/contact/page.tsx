@@ -12,7 +12,7 @@ export default function ContactPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h1 className="text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              <p className="text-xl text-gray-800 max-w-2xl mx-auto">
                 Get in touch with our technical team for expert consultation on your print finishing needs
               </p>
             </div>
@@ -31,7 +31,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
-                      <p className="text-gray-600">info@technifold.co.uk</p>
+                      <p className="text-gray-800">info@technifold.co.uk</p>
                     </div>
                   </div>
 
@@ -43,8 +43,8 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900 mb-1">Phone</h3>
-                      <p className="text-gray-600">+44 (0)1455 554491</p>
-                      <p className="text-gray-600 text-sm">Mon-Fri 9:00 AM - 5:00 PM GMT</p>
+                      <p className="text-gray-800">+44 (0)1455 554491</p>
+                      <p className="text-gray-800 text-sm">Mon-Fri 9:00 AM - 5:00 PM GMT</p>
                     </div>
                   </div>
 
@@ -57,7 +57,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900 mb-1">Address</h3>
-                      <p className="text-gray-600">
+                      <p className="text-gray-800">
                         Technifold Limited<br />
                         Unit 2D Tungsten Park<br />
                         Lutterworth<br />
@@ -70,7 +70,7 @@ export default function ContactPage() {
 
                 <div className="mt-12 p-6 bg-blue-50 rounded-lg">
                   <h3 className="font-semibold text-gray-900 mb-2">Technical Support</h3>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-gray-800 text-sm">
                     For existing customers needing technical support, consumables, or replacement parts, 
                     please contact our support team directly.
                   </p>

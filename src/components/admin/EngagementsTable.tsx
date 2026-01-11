@@ -174,8 +174,8 @@ export default function EngagementsTable({
       {/* Engagement List */}
       {filtered.length === 0 ? (
         <div className="bg-white border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
-          <div className="text-gray-600 text-5xl mb-4">📊</div>
-          <p className="text-gray-600 text-lg font-semibold">No engagements found</p>
+          <div className="text-gray-800 text-5xl mb-4">📊</div>
+          <p className="text-gray-800 text-lg font-semibold">No engagements found</p>
           <p className="text-gray-700 text-sm mt-2">Try adjusting your filters</p>
         </div>
       ) : (
@@ -210,7 +210,7 @@ export default function EngagementsTable({
                       {event.event_name.replace(/_/g, ' ')}
                     </div>
 
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-4 text-sm text-gray-800">
                       <span>📅 {new Date(event.occurred_at).toLocaleDateString('en-GB', {
                         day: 'numeric',
                         month: 'short',

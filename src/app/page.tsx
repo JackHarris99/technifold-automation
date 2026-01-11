@@ -79,7 +79,7 @@ export default async function HomePage() {
               <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight" style={{ fontFamily: "'Inter', 'system-ui', sans-serif" }}>
                 Professional Print Finishing Solutions
               </h1>
-              <p className="text-xl text-gray-300 leading-relaxed">
+              <p className="text-xl text-gray-600 leading-relaxed">
                 Eliminate fiber cracking, reduce waste, and handle jobs you couldn't touch before.
               </p>
             </div>
@@ -101,7 +101,7 @@ export default async function HomePage() {
                   <h2 className="text-3xl font-bold text-slate-900 mb-2" style={{ fontFamily: "'Inter', 'system-ui', sans-serif" }}>
                     Find Your Machine
                   </h2>
-                  <p className="text-slate-600">
+                  <p className="text-slate-800">
                     Get solutions engineered for your exact equipment
                   </p>
                 </div>
@@ -120,7 +120,7 @@ export default async function HomePage() {
             <div className="flex items-center justify-between mb-6 pb-3 border-b-2 border-gray-300">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">Product Catalog</h2>
-                <p className="text-sm text-gray-600 mt-1">Precision-engineered systems for professional print finishing</p>
+                <p className="text-sm text-gray-800 mt-1">Precision-engineered systems for professional print finishing</p>
               </div>
               <a href="/contact" className="bg-orange-500 text-white px-6 py-2 text-sm font-bold hover:bg-orange-600 transition-colors">
                 Request Quote
@@ -150,7 +150,7 @@ export default async function HomePage() {
                     <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">
                       {solution.name}
                     </h3>
-                    <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                    <p className="text-sm text-gray-800 leading-relaxed mb-4">
                       {solution.description}
                     </p>
 
@@ -169,7 +169,7 @@ export default async function HomePage() {
                     {/* Stats */}
                     <div className="border-t border-gray-200 pt-3">
                       {solution.stats.map((stat, idx) => (
-                        <div key={idx} className="flex items-center gap-2 text-xs text-gray-600 mb-1">
+                        <div key={idx} className="flex items-center gap-2 text-xs text-gray-800 mb-1">
                           <span className="text-green-600">✓</span>
                           <span>{stat}</span>
                         </div>
@@ -188,19 +188,19 @@ export default async function HomePage() {
             <div className="grid md:grid-cols-4 gap-6">
               <div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">Typical First-Year ROI</h3>
-                <p className="text-sm text-gray-600">Based on average print shop operations</p>
+                <p className="text-sm text-gray-800">Based on average print shop operations</p>
               </div>
               <div className="text-center border-l border-gray-200 pl-6">
                 <div className="text-3xl font-bold text-gray-900 mb-1">£10,000</div>
-                <div className="text-xs text-gray-600">Eliminated Waste</div>
+                <div className="text-xs text-gray-800">Eliminated Waste</div>
               </div>
               <div className="text-center border-l border-gray-200 pl-6">
                 <div className="text-3xl font-bold text-gray-900 mb-1">£12,000</div>
-                <div className="text-xs text-gray-600">Reduced Setup Time</div>
+                <div className="text-xs text-gray-800">Reduced Setup Time</div>
               </div>
               <div className="text-center border-l border-gray-200 pl-6">
                 <div className="text-3xl font-bold text-gray-900 mb-1">£18,000</div>
-                <div className="text-xs text-gray-600">New Job Capability</div>
+                <div className="text-xs text-gray-800">New Job Capability</div>
               </div>
             </div>
           </div>
@@ -217,21 +217,21 @@ export default async function HomePage() {
                 <h3 className="text-xl font-bold mb-3">
                   "Comparable to Letterpress Quality"
                 </h3>
-                <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+                <p className="text-sm text-gray-600 mb-4 leading-relaxed">
                   Sappi Paper Engineering conducted independent laboratory testing of Tri-Creaser technology against traditional scoring methods.
                 </p>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-start gap-2">
                     <span className="text-orange-500">✓</span>
-                    <span className="text-gray-300">Zero fiber cracking on coated stocks</span>
+                    <span className="text-gray-600">Zero fiber cracking on coated stocks</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-orange-500">✓</span>
-                    <span className="text-gray-300">3x deeper crease penetration without damage</span>
+                    <span className="text-gray-600">3x deeper crease penetration without damage</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-orange-500">✓</span>
-                    <span className="text-gray-300">Digital-friendly rubber eliminates toner flaking</span>
+                    <span className="text-gray-600">Digital-friendly rubber eliminates toner flaking</span>
                   </div>
                 </div>
               </div>
@@ -239,19 +239,19 @@ export default async function HomePage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white/10 border border-white/20 p-4 text-center">
                   <div className="text-3xl font-bold mb-1">30,000+</div>
-                  <div className="text-xs text-gray-600">Companies Worldwide</div>
+                  <div className="text-xs text-gray-800">Companies Worldwide</div>
                 </div>
                 <div className="bg-white/10 border border-white/20 p-4 text-center">
                   <div className="text-3xl font-bold mb-1">40,000+</div>
-                  <div className="text-xs text-gray-600">Installations</div>
+                  <div className="text-xs text-gray-800">Installations</div>
                 </div>
                 <div className="bg-white/10 border border-white/20 p-4 text-center">
                   <div className="text-3xl font-bold mb-1">25+</div>
-                  <div className="text-xs text-gray-600">Years Innovation</div>
+                  <div className="text-xs text-gray-800">Years Innovation</div>
                 </div>
                 <div className="bg-white/10 border border-white/20 p-4 text-center">
                   <div className="text-3xl font-bold mb-1">100%</div>
-                  <div className="text-xs text-gray-600">Quality Guarantee</div>
+                  <div className="text-xs text-gray-800">Quality Guarantee</div>
                 </div>
               </div>
             </div>

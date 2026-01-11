@@ -89,7 +89,7 @@ function TrialPageContent() {
               Request Received! 📧
             </h1>
 
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-xl text-gray-800 mb-8">
               We've sent you an email with your personalized trial link.
             </p>
 
@@ -100,28 +100,28 @@ function TrialPageContent() {
                   <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">1</div>
                   <div>
                     <div className="font-semibold">Check Your Email</div>
-                    <div className="text-sm text-gray-600">Look for an email from info@technifold.co.uk in the next few minutes</div>
+                    <div className="text-sm text-gray-800">Look for an email from info@technifold.co.uk in the next few minutes</div>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">2</div>
                   <div>
                     <div className="font-semibold">Click Your Trial Link</div>
-                    <div className="text-sm text-gray-600">The email contains a personalized link to start your trial</div>
+                    <div className="text-sm text-gray-800">The email contains a personalized link to start your trial</div>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">3</div>
                   <div>
                     <div className="font-semibold">Enter Payment Details</div>
-                    <div className="text-sm text-gray-600">Card required but not charged until after 30-day trial</div>
+                    <div className="text-sm text-gray-800">Card required but not charged until after 30-day trial</div>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">4</div>
                   <div>
                     <div className="font-semibold">We Ship Your Trial Kit</div>
-                    <div className="text-sm text-gray-600">Arrives in 2-3 days, test for 30 days free</div>
+                    <div className="text-sm text-gray-800">Arrives in 2-3 days, test for 30 days free</div>
                   </div>
                 </li>
               </ol>
@@ -146,7 +146,7 @@ function TrialPageContent() {
             Request Your Free Trial
           </h1>
           {machine && (
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-800">
               {machine.brand} {machine.model} • £{offerPrice}/month after trial
             </p>
           )}
@@ -163,28 +163,28 @@ function TrialPageContent() {
               <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">1</div>
               <div>
                 <div className="font-semibold">Fill In Your Details</div>
-                <div className="text-sm text-gray-600">Takes 1 minute</div>
+                <div className="text-sm text-gray-800">Takes 1 minute</div>
               </div>
             </li>
             <li className="flex items-start gap-3">
               <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">2</div>
               <div>
                 <div className="font-semibold">We Email You A Trial Link</div>
-                <div className="text-sm text-gray-600">Personalized link sent to your email</div>
+                <div className="text-sm text-gray-800">Personalized link sent to your email</div>
               </div>
             </li>
             <li className="flex items-start gap-3">
               <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">3</div>
               <div>
                 <div className="font-semibold">Click Link & Enter Card</div>
-                <div className="text-sm text-gray-600">Card required, charged after 30-day trial</div>
+                <div className="text-sm text-gray-800">Card required, charged after 30-day trial</div>
               </div>
             </li>
             <li className="flex items-start gap-3">
               <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">4</div>
               <div>
                 <div className="font-semibold">Trial Kit Ships In 2-3 Days</div>
-                <div className="text-sm text-gray-600">Test for 30 days, keep or cancel</div>
+                <div className="text-sm text-gray-800">Test for 30 days, keep or cancel</div>
               </div>
             </li>
           </ol>
@@ -265,8 +265,8 @@ function TrialPageContent() {
 
         {/* Trust Signals */}
         <div className="mt-12 text-center">
-          <p className="text-gray-600 mb-4">Trusted by 2,800+ printers worldwide</p>
-          <div className="flex justify-center items-center gap-8 text-gray-600">
+          <p className="text-gray-800 mb-4">Trusted by 2,800+ printers worldwide</p>
+          <div className="flex justify-center items-center gap-8 text-gray-800">
             <div>🏆 Award Winning</div>
             <div>•</div>
             <div>🌍 Global Shipping</div>

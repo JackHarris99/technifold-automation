@@ -13,7 +13,7 @@ export default function CheckoutCancelPage() {
         <div className="mb-6">
           <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
             <svg
-              className="w-10 h-10 text-gray-600"
+              className="w-10 h-10 text-gray-800"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -32,13 +32,13 @@ export default function CheckoutCancelPage() {
         <h1 className="text-2xl font-bold text-gray-900 mb-3">
           Checkout Cancelled
         </h1>
-        <p className="text-gray-600 mb-6">
+        <p className="text-gray-800 mb-6">
           Your checkout was cancelled. No charges were made to your account.
         </p>
 
         {/* Details */}
         <div className="bg-gray-50 rounded-lg p-4 mb-6">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-800">
             Your cart items are still saved. You can return to complete your order anytime.
           </p>
         </div>

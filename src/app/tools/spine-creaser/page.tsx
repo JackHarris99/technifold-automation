@@ -22,10 +22,10 @@ export default function SpineCreaserPage() {
               </div>
 
               <h1 className="text-4xl font-bold mb-4 leading-tight">Spine-Creaser<br />Discover the Secret to Perfect Creasing on Your Saddle Stitcher</h1>
-              <p className="text-lg text-gray-300 mb-2 leading-relaxed">
+              <p className="text-lg text-gray-600 mb-2 leading-relaxed">
                 <strong>Transform your saddle stitcher into a powerful cylinder creasing machine.</strong> In just 30 minutes, you'll be producing perfect letterpress-quality creases inline—no more cylinder press tie-up, no more outsourcing.
               </p>
-              <p className="text-base text-gray-600 mb-6">
+              <p className="text-base text-gray-800 mb-6">
                 Using the same technology as the patented Tri-Creaser, the Spine-Creaser produces results that equal or surpass those of any cylinder. Guaranteed.
               </p>
 
@@ -43,7 +43,7 @@ export default function SpineCreaserPage() {
                 alt="Spine-Creaser installed on saddle stitcher"
                 className="w-full rounded-lg shadow-2xl border border-white/20"
               />
-              <p className="text-sm text-gray-600 text-center mt-3">
+              <p className="text-sm text-gray-800 text-center mt-3">
                 Spine-Creaser delivering cylinder-quality creases inline
               </p>
             </div>
@@ -170,7 +170,7 @@ export default function SpineCreaserPage() {
 
             <div className="bg-slate-50 border-2 border-slate-300 p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">
-                <span className="text-slate-600">✓</span> Cylinder Quality Creases... or Better!
+                <span className="text-slate-800">✓</span> Cylinder Quality Creases... or Better!
               </h3>
               <p className="text-sm text-gray-700 leading-relaxed">
                 <strong>It's like substituting your cover feeder for a Heidelberg cylinder letterpress</strong>—the Spine-Creaser is that special!
@@ -315,7 +315,7 @@ export default function SpineCreaserPage() {
           <div className="grid md:grid-cols-2 gap-6">
             <div className="bg-white/10 border border-white/20 p-6">
               <h3 className="text-xl font-bold text-white mb-4">The True Cost</h3>
-              <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+              <p className="text-sm text-gray-600 mb-4 leading-relaxed">
                 After the initial investment, the Spine-Creaser costs a minimum of <strong className="text-white">only £15 per 600,000 copies</strong> vs. rising cylinder press costs.
               </p>
               <div className="bg-green-50 border border-green-200 p-4 text-gray-900">
@@ -330,10 +330,10 @@ export default function SpineCreaserPage() {
 
             <div className="bg-white/10 border border-white/20 p-6">
               <h3 className="text-xl font-bold text-white mb-4">Guaranteed Savings</h3>
-              <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+              <p className="text-sm text-gray-600 mb-4 leading-relaxed">
                 <strong className="text-white">"In just minutes, the Spine-Creaser will be producing the perfect crease and your company will begin saving thousands of pounds. Guaranteed."</strong>
               </p>
-              <p className="text-xs text-gray-600 italic">
+              <p className="text-xs text-gray-800 italic">
                 A small investment is guaranteed to begin saving you money from your very first job. And what price do you put on customer satisfaction?
               </p>
             </div>

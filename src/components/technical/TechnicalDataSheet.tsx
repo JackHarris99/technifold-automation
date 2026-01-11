@@ -31,7 +31,7 @@ export function TechnicalDataSheet({ tool, consumables }: TechnicalDataSheetProp
               <h1 className="text-3xl font-bold text-gray-900">
                 {tool.description || tool.product_code}
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-800 mt-1">
                 Technical Data Sheet • Product Code: {tool.product_code}
               </p>
             </div>
@@ -67,11 +67,11 @@ export function TechnicalDataSheet({ tool, consumables }: TechnicalDataSheetProp
                   />
                 ) : (
                   <div className="text-center">
-                    <svg className="w-24 h-24 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-24 h-24 text-gray-800 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
                     <p className="text-gray-700 text-sm">Product Image</p>
-                    <p className="text-xs text-gray-600">{tool.product_code}</p>
+                    <p className="text-xs text-gray-800">{tool.product_code}</p>
                   </div>
                 )}
               </div>
@@ -204,11 +204,11 @@ export function TechnicalDataSheet({ tool, consumables }: TechnicalDataSheetProp
               
               {consumables.length === 0 ? (
                 <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-                  <svg className="w-12 h-12 text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-12 h-12 text-gray-800 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
                   <p className="text-gray-700">Compatible consumables will be listed here</p>
-                  <p className="text-xs text-gray-600 mt-1">Consumable relationships being configured</p>
+                  <p className="text-xs text-gray-800 mt-1">Consumable relationships being configured</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -234,7 +234,7 @@ export function TechnicalDataSheet({ tool, consumables }: TechnicalDataSheetProp
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
-                                <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-8 h-8 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                 </svg>
                               </div>
@@ -257,7 +257,7 @@ export function TechnicalDataSheet({ tool, consumables }: TechnicalDataSheetProp
                             </p>
 
                             {consumable.category && (
-                              <p className="text-xs text-gray-600 mt-1">
+                              <p className="text-xs text-gray-800 mt-1">
                                 Category: {consumable.category}
                               </p>
                             )}
@@ -295,7 +295,7 @@ export function TechnicalDataSheet({ tool, consumables }: TechnicalDataSheetProp
         {/* Footer Info */}
         <div className="mt-12 bg-gray-900 rounded-lg p-8 text-white text-center">
           <h3 className="text-xl font-bold mb-2">Need This Product?</h3>
-          <p className="text-gray-300 mb-4">
+          <p className="text-gray-600 mb-4">
             Contact our sales team for pricing, availability, and technical consultation
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -309,7 +309,7 @@ export function TechnicalDataSheet({ tool, consumables }: TechnicalDataSheetProp
               Technical Support
             </button>
           </div>
-          <p className="text-xs text-gray-600 mt-4">
+          <p className="text-xs text-gray-800 mt-4">
             Technical data sheet generated from product database • {new Date().toLocaleDateString()}
           </p>
         </div>

@@ -93,7 +93,7 @@ export default function CompanyStatusControl({
 
   return (
     <div className="mt-4 flex items-center gap-3">
-      <div className="text-sm text-gray-600 font-medium">Status:</div>
+      <div className="text-sm text-gray-800 font-medium">Status:</div>
       <select
         value={status}
         onChange={(e) => handleStatusChange(e.target.value)}

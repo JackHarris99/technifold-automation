@@ -154,7 +154,7 @@ export default function ProductsManagementV2({ products: initialProducts }: Prod
               }`}
             >
               All Products
-              <span className="ml-2 px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">
+              <span className="ml-2 px-2 py-0.5 text-xs bg-gray-100 text-gray-800 rounded-full">
                 {products.length}
               </span>
             </button>
@@ -219,7 +219,7 @@ export default function ProductsManagementV2({ products: initialProducts }: Prod
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Product Catalog</h2>
-            <p className="text-sm text-gray-600 mt-1">Organized by type and category</p>
+            <p className="text-sm text-gray-800 mt-1">Organized by type and category</p>
           </div>
           <div className="flex gap-3">
             <button
@@ -287,7 +287,7 @@ export default function ProductsManagementV2({ products: initialProducts }: Prod
                 className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-center gap-4">
-                  <div className="text-gray-600">
+                  <div className="text-gray-800">
                     {isExpanded ? (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -305,7 +305,7 @@ export default function ProductsManagementV2({ products: initialProducts }: Prod
                       </span>
                       <h3 className="text-lg font-bold text-gray-900">{category}</h3>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-gray-800 mt-1">
                       {groupProducts.length} products • {productsWithImages} with images • {productsWithoutImages} missing images
                     </p>
                   </div>
@@ -369,10 +369,10 @@ export default function ProductsManagementV2({ products: initialProducts }: Prod
                                 className="h-16 w-16 bg-gray-100 border-2 border-dashed border-gray-300 rounded flex items-center justify-center hover:bg-gray-200 hover:border-gray-400 transition-colors group"
                               >
                                 <div className="text-center">
-                                  <svg className="w-6 h-6 mx-auto text-gray-600 group-hover:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <svg className="w-6 h-6 mx-auto text-gray-800 group-hover:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                   </svg>
-                                  <span className="text-xs text-gray-700 group-hover:text-gray-600 mt-1">Add</span>
+                                  <span className="text-xs text-gray-700 group-hover:text-gray-800 mt-1">Add</span>
                                 </div>
                               </button>
                             )}
@@ -421,13 +421,13 @@ export default function ProductsManagementV2({ products: initialProducts }: Prod
 
         {filteredGroups.length === 0 && (
           <div className="bg-white rounded-lg shadow p-12 text-center">
-            <div className="text-gray-600 mb-4">
+            <div className="text-gray-800 mb-4">
               <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
               </svg>
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No products found</h3>
-            <p className="text-gray-600">Try adjusting your search criteria</p>
+            <p className="text-gray-800">Try adjusting your search criteria</p>
           </div>
         )}
       </div>
@@ -508,7 +508,7 @@ function ImageUploadModal({ productCode, onClose, onSuccess }: ImageUploadModalP
       <div className="bg-white rounded-lg w-full max-w-lg">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-bold">Upload Image for {productCode}</h2>
-          <button onClick={onClose} className="text-gray-600 hover:text-gray-600 text-2xl">
+          <button onClick={onClose} className="text-gray-800 hover:text-gray-800 text-2xl">
             ✕
           </button>
         </div>
@@ -516,10 +516,10 @@ function ImageUploadModal({ productCode, onClose, onSuccess }: ImageUploadModalP
         <div className="p-6">
           <label className="block">
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-gray-400 cursor-pointer transition-colors">
-              <svg className="w-12 h-12 mx-auto text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-12 h-12 mx-auto text-gray-800 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
-              <p className="text-sm text-gray-600 mb-2">
+              <p className="text-sm text-gray-800 mb-2">
                 {uploading ? 'Uploading...' : 'Click to select image or drag & drop'}
               </p>
               <p className="text-xs text-gray-700">PNG, JPG, WEBP up to 10MB</p>
@@ -641,11 +641,11 @@ function BulkImageUploadModal({ categoryKey, onClose, onSuccess }: BulkImageUplo
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
             <h2 className="text-xl font-bold">Bulk Upload Image</h2>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-gray-800 mt-1">
               {type} • {category}
             </p>
           </div>
-          <button onClick={onClose} className="text-gray-600 hover:text-gray-600 text-2xl">
+          <button onClick={onClose} className="text-gray-800 hover:text-gray-800 text-2xl">
             ✕
           </button>
         </div>
@@ -664,10 +664,10 @@ function BulkImageUploadModal({ categoryKey, onClose, onSuccess }: BulkImageUplo
 
           <label className="block">
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-gray-400 cursor-pointer transition-colors">
-              <svg className="w-12 h-12 mx-auto text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-12 h-12 mx-auto text-gray-800 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
-              <p className="text-sm text-gray-600 mb-2">
+              <p className="text-sm text-gray-800 mb-2">
                 {uploading ? 'Uploading...' : 'Click to select image'}
               </p>
               <p className="text-xs text-gray-700">PNG, JPG, WEBP up to 10MB</p>

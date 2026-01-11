@@ -41,7 +41,7 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
             It was never engineered to crease, perforate, or cut single sheets to a high standard.
           </p>
 
-          <div className="text-slate-600 leading-relaxed space-y-4 mb-8">
+          <div className="text-slate-800 leading-relaxed space-y-4 mb-8">
             <p>OEM scoring wheels tear fibres. Standard perf wheels rip rather than perforate. Integrated slitting knives rough-trim a stack, not a single sheet.</p>
 
             <p>If you've ever fought with cracking along the fold, furry chewed edges, tough folds that refuse to lie flat, perfs that snap, tear or don't run straight, operators babysitting the machine all shift, or guillotine bottlenecks that delay dispatch — none of that is the fault of your {machine.display_name}.</p>
@@ -54,7 +54,7 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
 
         {/* Video Reference */}
         <aside className="mb-12 bg-slate-50 border border-slate-200 p-6">
-          <p className="text-sm text-slate-500 uppercase tracking-wide mb-3">Technical Demonstration</p>
+          <p className="text-sm text-slate-700 uppercase tracking-wide mb-3">Technical Demonstration</p>
           <div className="aspect-video">
             <iframe
               src="https://www.youtube.com/embed/QEZVzxka01U"
@@ -73,7 +73,7 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
             Three Precision-Engineered Capabilities for Your {machine.display_name}
           </h2>
 
-          <p className="text-slate-600 leading-relaxed mb-8">
+          <p className="text-slate-800 leading-relaxed mb-8">
             Technifold finishing tools are built around patented rubber-based technology and colour-coded tooling systems that deliver measurable, consistent results across a wide range of substrates and applications.
           </p>
 
@@ -81,17 +81,17 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
             <div className="border border-slate-200 p-5">
               <p className="text-cyan-600 text-xs font-medium uppercase tracking-wide mb-2">Capability 01</p>
               <p className="text-slate-900 font-medium">Tri-Creaser</p>
-              <p className="text-slate-500 text-sm mt-1">Fibre-crack elimination</p>
+              <p className="text-slate-700 text-sm mt-1">Fibre-crack elimination</p>
             </div>
             <div className="border border-slate-200 p-5">
               <p className="text-cyan-600 text-xs font-medium uppercase tracking-wide mb-2">Capability 02</p>
               <p className="text-slate-900 font-medium">Micro-Perforator</p>
-              <p className="text-slate-500 text-sm mt-1">Precision perforation</p>
+              <p className="text-slate-700 text-sm mt-1">Precision perforation</p>
             </div>
             <div className="border border-slate-200 p-5">
               <p className="text-cyan-600 text-xs font-medium uppercase tracking-wide mb-2">Capability 03</p>
               <p className="text-slate-900 font-medium">Multi-Tool</p>
-              <p className="text-slate-500 text-sm mt-1">Inline trimming &amp; slitting</p>
+              <p className="text-slate-700 text-sm mt-1">Inline trimming &amp; slitting</p>
             </div>
           </div>
         </section>
@@ -104,15 +104,15 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
 
           <div className="md:flex md:gap-8 mb-6">
             <div className="md:flex-1">
-              <p className="text-slate-600 leading-relaxed mb-4">
+              <p className="text-slate-800 leading-relaxed mb-4">
                 OEM scoring wheels crush and fracture the substrate. Every fold becomes a fault line waiting to crack — especially on coated, laminated, or digitally printed stock.
               </p>
 
-              <p className="text-slate-600 leading-relaxed mb-4">
+              <p className="text-slate-800 leading-relaxed mb-4">
                 The Tri-Creaser uses patented rubber-matrix technology to form a genuine channel crease without damaging fibres. The result is a fold that bends cleanly, lies flat, and never cracks — regardless of paper weight, coating, or grain direction.
               </p>
 
-              <p className="text-slate-600 leading-relaxed">
+              <p className="text-slate-800 leading-relaxed">
                 This applies to 170gsm gloss, 350gsm board, short-grain digital, laminated covers — and everything in between.
               </p>
             </div>
@@ -123,7 +123,7 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
                 alt="Tri-Creaser tooling in operation"
                 className="w-full border border-slate-200"
               />
-              <figcaption className="text-xs text-slate-400 mt-2">Fig. 1 — Tri-Creaser Fast-Fit module</figcaption>
+              <figcaption className="text-xs text-slate-700 mt-2">Fig. 1 — Tri-Creaser Fast-Fit module</figcaption>
             </figure>
           </div>
 
@@ -134,7 +134,7 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
                 alt="Fibre cracking with OEM scoring"
                 className="w-full border border-slate-300"
               />
-              <figcaption className="text-xs text-slate-400 mt-2">Before: OEM scoring damage</figcaption>
+              <figcaption className="text-xs text-slate-700 mt-2">Before: OEM scoring damage</figcaption>
             </figure>
             <figure className="md:w-48 flex-shrink-0">
               <img
@@ -142,7 +142,7 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
                 alt="Clean fold with Tri-Creaser"
                 className="w-full border border-slate-300"
               />
-              <figcaption className="text-xs text-slate-400 mt-2">After: Tri-Creaser result</figcaption>
+              <figcaption className="text-xs text-slate-700 mt-2">After: Tri-Creaser result</figcaption>
             </figure>
           </div>
         </section>
@@ -155,15 +155,15 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
 
           <div className="md:flex md:gap-8 mb-6">
             <div className="md:flex-1">
-              <p className="text-slate-600 leading-relaxed mb-4">
+              <p className="text-slate-800 leading-relaxed mb-4">
                 Standard perf wheels leave ragged edges. The cuts are uneven, the tear is unpredictable, and the result looks cheap. The Micro-Perforator solves this with a precision-engineered rotary blade system that delivers cleanly cut micro-perforations on every pass.
               </p>
 
-              <p className="text-slate-600 leading-relaxed mb-4">
+              <p className="text-slate-800 leading-relaxed mb-4">
                 Operators can adjust cut-to-tie ratio and perforation depth to match the stock. The result is a professional tear that separates exactly where intended — no ripping, no burrs, no fibre pull.
               </p>
 
-              <p className="text-slate-600 leading-relaxed">
+              <p className="text-slate-800 leading-relaxed">
                 Direct mail, response cards, tickets, coupons, vouchers — anything that needs to separate cleanly can now be finished inline, in one pass, at full machine speed.
               </p>
             </div>
@@ -174,7 +174,7 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
                 alt="Micro-Perforator tooling"
                 className="w-full border border-slate-200"
               />
-              <figcaption className="text-xs text-slate-400 mt-2">Fig. 2 — Micro-Perforator module</figcaption>
+              <figcaption className="text-xs text-slate-700 mt-2">Fig. 2 — Micro-Perforator module</figcaption>
             </figure>
           </div>
 
@@ -185,7 +185,7 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
                 alt="Poor perforation quality"
                 className="w-full border border-slate-300"
               />
-              <figcaption className="text-xs text-slate-400 mt-2">Before: Ragged perf edge</figcaption>
+              <figcaption className="text-xs text-slate-700 mt-2">Before: Ragged perf edge</figcaption>
             </figure>
             <figure className="md:w-48 flex-shrink-0">
               <img
@@ -193,7 +193,7 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
                 alt="Clean Micro-Perforator result"
                 className="w-full border border-slate-300"
               />
-              <figcaption className="text-xs text-slate-400 mt-2">After: Micro-Perforator result</figcaption>
+              <figcaption className="text-xs text-slate-700 mt-2">After: Micro-Perforator result</figcaption>
             </figure>
           </div>
         </section>
@@ -206,15 +206,15 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
 
           <div className="md:flex md:gap-8 mb-6">
             <div className="md:flex-1">
-              <p className="text-slate-600 leading-relaxed mb-4">
+              <p className="text-slate-800 leading-relaxed mb-4">
                 Guillotine trimming is slow, manual, and creates a bottleneck between folding and dispatch. Every stack that stops at the guillotine burns labour, floor space, and turnaround time.
               </p>
 
-              <p className="text-slate-600 leading-relaxed mb-4">
+              <p className="text-slate-800 leading-relaxed mb-4">
                 The Multi-Tool removes this entirely. Rotary slitting and trimming happens inline, on the folder, at full production speed. Sheets come off the machine finished — no secondary handling, no stack waiting, no guillotine queue.
               </p>
 
-              <p className="text-slate-600 leading-relaxed">
+              <p className="text-slate-800 leading-relaxed">
                 The result is faster job completion, lower labour cost per job, and a bindery floor that moves work instead of storing it.
               </p>
             </div>
@@ -225,7 +225,7 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
                 alt="Multi-Tool cutting system"
                 className="w-full border border-slate-200"
               />
-              <figcaption className="text-xs text-slate-400 mt-2">Fig. 3 — Multi-Tool cutting module</figcaption>
+              <figcaption className="text-xs text-slate-700 mt-2">Fig. 3 — Multi-Tool cutting module</figcaption>
             </figure>
           </div>
 
@@ -236,7 +236,7 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
                 alt="Inline trim result"
                 className="w-full border border-slate-300"
               />
-              <figcaption className="text-xs text-slate-400 mt-2">Inline trim quality</figcaption>
+              <figcaption className="text-xs text-slate-700 mt-2">Inline trim quality</figcaption>
             </figure>
           </div>
         </section>
@@ -247,11 +247,11 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
             Operational Impact
           </h2>
 
-          <p className="text-slate-600 leading-relaxed mb-6">
+          <p className="text-slate-800 leading-relaxed mb-6">
             Technifold tooling is not a marginal improvement. It fundamentally changes the economics of your finishing operation.
           </p>
 
-          <div className="grid md:grid-cols-2 gap-x-8 gap-y-4 text-slate-600 mb-8">
+          <div className="grid md:grid-cols-2 gap-x-8 gap-y-4 text-slate-800 mb-8">
             <div className="flex gap-3">
               <span className="text-cyan-600 flex-shrink-0">—</span>
               <span>Eliminate reprints caused by cracked folds</span>
@@ -278,7 +278,7 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
             </div>
           </div>
 
-          <p className="text-slate-600 leading-relaxed">
+          <p className="text-slate-800 leading-relaxed">
             Across more than 100,000 installations worldwide over 20+ years, customers consistently report savings of £1,000–£5,000 per month — with full payback in as few as five job runs.
           </p>
         </section>
@@ -291,19 +291,19 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div>
               <p className="text-2xl font-light">100K+</p>
-              <p className="text-slate-400 text-sm">Installations</p>
+              <p className="text-slate-700 text-sm">Installations</p>
             </div>
             <div>
               <p className="text-2xl font-light">20+</p>
-              <p className="text-slate-400 text-sm">Years in Field</p>
+              <p className="text-slate-700 text-sm">Years in Field</p>
             </div>
             <div>
               <p className="text-2xl font-light">£3K+</p>
-              <p className="text-slate-400 text-sm">Avg. Monthly Saving</p>
+              <p className="text-slate-700 text-sm">Avg. Monthly Saving</p>
             </div>
             <div>
               <p className="text-2xl font-light">30</p>
-              <p className="text-slate-400 text-sm">Day Trial Period</p>
+              <p className="text-slate-700 text-sm">Day Trial Period</p>
             </div>
           </div>
         </section>
@@ -314,7 +314,7 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
             Request Your 30-Day Trial
           </h2>
 
-          <p className="text-slate-600 leading-relaxed mb-6">
+          <p className="text-slate-800 leading-relaxed mb-6">
             Every Technifold tool is available for a 30-day evaluation on your {machine.display_name}. There is no obligation and no charge for the trial period. If the results don't meet expectations, return the tooling at no cost.
           </p>
 
@@ -323,7 +323,7 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
               <TrialRequestForm machine={machine} />
             </div>
             <div className="flex flex-col justify-center">
-              <p className="text-slate-600 mb-4">
+              <p className="text-slate-800 mb-4">
                 Prefer to speak with someone?
               </p>
               <a href="tel:+441455381538" className="inline-flex items-center gap-2 text-slate-900 font-medium hover:text-cyan-600 transition-colors">
@@ -332,7 +332,7 @@ export function CoverWorkNarrative({ machine }: CoverWorkNarrativeProps) {
                 </svg>
                 +44 (0)1455 381 538
               </a>
-              <p className="text-sm text-slate-500 mt-2">
+              <p className="text-sm text-slate-700 mt-2">
                 Technical enquiries welcome
               </p>
             </div>

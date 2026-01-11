@@ -304,7 +304,7 @@ export default function MachineFinder() {
             className="w-full px-4 py-3 text-base border border-gray-300 bg-white text-slate-900 placeholder-slate-500 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             style={{ fontFamily: "'Inter', 'system-ui', sans-serif" }}
           />
-          <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
@@ -319,14 +319,14 @@ export default function MachineFinder() {
                 className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-slate-100 last:border-0 transition-colors"
               >
                 <div className="font-semibold text-slate-900 text-sm">{result.display_name}</div>
-                <div className="text-xs text-slate-600 mt-0.5">{result.typeDisplay}</div>
+                <div className="text-xs text-slate-800 mt-0.5">{result.typeDisplay}</div>
               </button>
             ))}
           </div>
         )}
       </div>
 
-      <div className="text-sm text-slate-600 text-center font-medium">or select below (any order)</div>
+      <div className="text-sm text-slate-800 text-center font-medium">or select below (any order)</div>
 
       {/* Three Dropdowns - All Independently Selectable */}
       <div className="space-y-3">
@@ -415,7 +415,7 @@ export default function MachineFinder() {
 
       {/* Helper text */}
       {(selectedType || selectedBrand) && !selectedModel && (
-        <p className="text-sm text-slate-600 text-center bg-gray-50 border border-gray-200 p-3">
+        <p className="text-sm text-slate-800 text-center bg-gray-50 border border-gray-200 p-3">
           Don't know your exact model? We'll show you all compatible solutions.
         </p>
       )}

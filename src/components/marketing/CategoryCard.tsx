@@ -53,7 +53,7 @@ export function CategoryCard({ category, style }: CategoryCardProps) {
 
         {/* Show first 3 tool examples */}
         <div className="mb-4">
-          <p className="text-sm text-gray-600 mb-2">Featured Tools:</p>
+          <p className="text-sm text-gray-800 mb-2">Featured Tools:</p>
           <ul className="space-y-1">
             {category.tools.slice(0, 3).map((tool) => (
               <li key={tool.code} className="flex items-center text-sm text-gray-700">

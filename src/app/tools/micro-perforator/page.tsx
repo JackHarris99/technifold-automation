@@ -22,29 +22,29 @@ export default function MicroPerforatorPage() {
           </div>
 
           <h1 className="text-4xl font-bold mb-4 leading-tight">Micro-Perforator<br />Stop Outsourcing. Start Producing Flatbed-Quality Perfs Inline.</h1>
-          <p className="text-lg text-gray-300 mb-2 max-w-3xl leading-relaxed">
+          <p className="text-lg text-gray-600 mb-2 max-w-3xl leading-relaxed">
             <strong>Are you fed up with broken perf blades, outsourcing delays, and sheets that jam laser printers?</strong> The Micro-Perforator produces nearly invisible micro-perfs up to 72 teeth per inch—inline on your folder.
           </p>
-          <p className="text-base text-gray-600 mb-6 max-w-3xl">
+          <p className="text-base text-gray-800 mb-6 max-w-3xl">
             Kiss-cut technology. Break-resistant double-bevel blades. Cuts against soft nylon, not destructive steel. Sheets lie perfectly flat and run through any digital device without jamming.
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">72 TPI</div>
-              <div className="text-xs text-gray-600">Nearly Invisible</div>
+              <div className="text-xs text-gray-800">Nearly Invisible</div>
             </div>
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">2 Jobs</div>
-              <div className="text-xs text-gray-600">Recover Cost</div>
+              <div className="text-xs text-gray-800">Recover Cost</div>
             </div>
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">Zero</div>
-              <div className="text-xs text-gray-600">Broken Blades</div>
+              <div className="text-xs text-gray-800">Broken Blades</div>
             </div>
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">£1000s</div>
-              <div className="text-xs text-gray-600">Saved on Blankets</div>
+              <div className="text-xs text-gray-800">Saved on Blankets</div>
             </div>
           </div>
 
@@ -62,7 +62,7 @@ export default function MicroPerforatorPage() {
                 alt="Micro-Perforator installed on machine"
                 className="w-full rounded-lg shadow-2xl border border-white/20"
               />
-              <p className="text-sm text-gray-600 text-center mt-3">
+              <p className="text-sm text-gray-800 text-center mt-3">
                 Micro-Perforator creating precision perforations
               </p>
             </div>
@@ -136,7 +136,7 @@ export default function MicroPerforatorPage() {
               </ul>
               <div className="bg-slate-900 text-white p-4">
                 <p className="text-lg font-bold mb-1">It doesn't have to be this way.</p>
-                <p className="text-xs text-gray-300">What if there was a rotary solution that matched flatbed letterpress quality?</p>
+                <p className="text-xs text-gray-600">What if there was a rotary solution that matched flatbed letterpress quality?</p>
               </div>
             </div>
           </div>
@@ -347,7 +347,7 @@ export default function MicroPerforatorPage() {
             <div className="bg-white border-2 border-gray-300 p-6">
               <div className="text-center mb-4">
                 <div className="text-3xl font-bold text-gray-900">17 TPI</div>
-                <div className="text-sm text-gray-600">Heavy Stock</div>
+                <div className="text-sm text-gray-800">Heavy Stock</div>
               </div>
               <p className="text-sm text-gray-700 text-center">
                 Perfect for heavyweight materials where strength matters
@@ -357,7 +357,7 @@ export default function MicroPerforatorPage() {
             <div className="bg-white border-2 border-blue-400 p-6">
               <div className="text-center mb-4">
                 <div className="text-3xl font-bold text-gray-900">25 TPI</div>
-                <div className="text-sm text-gray-600">Medium Weight</div>
+                <div className="text-sm text-gray-800">Medium Weight</div>
               </div>
               <p className="text-sm text-gray-700 text-center">
                 The workhorse blade for most standard applications
@@ -367,7 +367,7 @@ export default function MicroPerforatorPage() {
             <div className="bg-white border-2 border-gray-300 p-6">
               <div className="text-center mb-4">
                 <div className="text-3xl font-bold text-gray-900">52 TPI</div>
-                <div className="text-sm text-gray-600">Lightweight</div>
+                <div className="text-sm text-gray-800">Lightweight</div>
               </div>
               <p className="text-sm text-gray-700 text-center">
                 Nearly invisible perforation for fine work
@@ -407,40 +407,40 @@ export default function MicroPerforatorPage() {
           <div className="grid md:grid-cols-4 gap-4">
             <div className="bg-white/10 border border-white/20 p-4">
               <div className="font-bold text-white mb-1">MBO</div>
-              <div className="text-sm text-gray-300">All major models</div>
+              <div className="text-sm text-gray-600">All major models</div>
             </div>
             <div className="bg-white/10 border border-white/20 p-4">
               <div className="font-bold text-white mb-1">Stahl/Heidelberg</div>
-              <div className="text-sm text-gray-300">Full range</div>
+              <div className="text-sm text-gray-600">Full range</div>
             </div>
             <div className="bg-white/10 border border-white/20 p-4">
               <div className="font-bold text-white mb-1">Horizon</div>
-              <div className="text-sm text-gray-300">Compatible models</div>
+              <div className="text-sm text-gray-600">Compatible models</div>
             </div>
             <div className="bg-white/10 border border-white/20 p-4">
               <div className="font-bold text-white mb-1">Baumfolder</div>
-              <div className="text-sm text-gray-300">Standard fitment</div>
+              <div className="text-sm text-gray-600">Standard fitment</div>
             </div>
             <div className="bg-white/10 border border-white/20 p-4">
               <div className="font-bold text-white mb-1">Rosback</div>
-              <div className="text-sm text-gray-300">Direct fit</div>
+              <div className="text-sm text-gray-600">Direct fit</div>
             </div>
             <div className="bg-white/10 border border-white/20 p-4">
               <div className="font-bold text-white mb-1">MB Bäuerle</div>
-              <div className="text-sm text-gray-300">Slitter shaft mount</div>
+              <div className="text-sm text-gray-600">Slitter shaft mount</div>
             </div>
             <div className="bg-white/10 border border-white/20 p-4">
               <div className="font-bold text-white mb-1">Morgana</div>
-              <div className="text-sm text-gray-300">Multiple models</div>
+              <div className="text-sm text-gray-600">Multiple models</div>
             </div>
             <div className="bg-white/10 border border-white/20 p-4">
               <div className="font-bold text-white mb-1">+ More</div>
-              <div className="text-sm text-gray-300">H&H, Petratto, GUK</div>
+              <div className="text-sm text-gray-600">H&H, Petratto, GUK</div>
             </div>
           </div>
 
           <div className="mt-6 bg-white/10 border border-white/20 p-5">
-            <p className="text-sm text-gray-300">
+            <p className="text-sm text-gray-600">
               <strong className="text-white">Also compatible with:</strong> CreaseStream and DCM creasing machines. Contact us to confirm fitment for your specific model.
             </p>
           </div>
@@ -470,7 +470,7 @@ export default function MicroPerforatorPage() {
             </blockquote>
             <div className="text-base">
               <div className="font-bold text-gray-900">Phil Fredericks</div>
-              <div className="text-sm text-gray-600">Wood Mitchell Printers, Stoke on Trent, UK</div>
+              <div className="text-sm text-gray-800">Wood Mitchell Printers, Stoke on Trent, UK</div>
             </div>
           </div>
         </div>

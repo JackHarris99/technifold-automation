@@ -176,7 +176,7 @@ export default function PortalAddressCollectionModal({
       <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-2xl font-semibold">Delivery Address Required</h2>
-          <p className="text-sm text-gray-600 mt-2">
+          <p className="text-sm text-gray-800 mt-2">
             Before you can see accurate pricing and place orders, we need your company's address for shipping and tax calculation.
           </p>
           <p className="text-sm text-gray-700 mt-1">{companyName}</p>
@@ -195,7 +195,7 @@ export default function PortalAddressCollectionModal({
               <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">1</span>
               Billing Address
             </h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-800">
               Your company's official registered address for invoicing.
             </p>
 

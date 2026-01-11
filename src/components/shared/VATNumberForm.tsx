@@ -83,7 +83,7 @@ export default function VATNumberForm({
             <strong>{companyName}</strong> is located in the EU ({country}).
             To apply the <strong>0% VAT reverse charge</strong>, we need their VAT number.
           </p>
-          <p className="text-xs text-gray-600 mb-4">
+          <p className="text-xs text-gray-800 mb-4">
             This will be saved permanently - you'll only need to enter it once.
           </p>
         </div>
@@ -135,7 +135,7 @@ export default function VATNumberForm({
       </form>
 
       <div className="mt-4 pt-4 border-t border-amber-200">
-        <p className="text-xs text-gray-600">
+        <p className="text-xs text-gray-800">
           <strong>Why do we need this?</strong>
           <br />
           EU B2B sales with a valid VAT number qualify for 0% VAT under the reverse charge mechanism.

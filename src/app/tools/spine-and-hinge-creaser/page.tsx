@@ -22,10 +22,10 @@ export default function SpineAndHingeCreaserPage() {
           </div>
 
           <h1 className="text-4xl font-bold mb-4 leading-tight">Spine & Hinge Creaser<br />Up to Four Deep Creases in Close Proximity</h1>
-          <p className="text-lg text-gray-300 mb-2 max-w-3xl leading-relaxed">
+          <p className="text-lg text-gray-600 mb-2 max-w-3xl leading-relaxed">
             <strong>Apply up to four deep creases—ideal for Perfect Bound book covers, folders, capacity wallets, or any product that requires multiple creasing.</strong> Deep penetrating crease application delivers flawless results.
           </p>
-          <p className="text-base text-gray-600 mb-6 max-w-3xl">
+          <p className="text-base text-gray-800 mb-6 max-w-3xl">
             Eliminating cracking is just the start. Works first time every time, avoiding unnecessary crease depth adjustment.
           </p>
 
@@ -43,7 +43,7 @@ export default function SpineAndHingeCreaserPage() {
                 alt="Spine & Hinge Creaser installed on machine"
                 className="w-full rounded-lg shadow-2xl border border-white/20"
               />
-              <p className="text-sm text-gray-600 text-center mt-3">
+              <p className="text-sm text-gray-800 text-center mt-3">
                 Spine & Hinge Creaser for lay-flat binding
               </p>
             </div>
@@ -158,28 +158,28 @@ export default function SpineAndHingeCreaserPage() {
           <div className="grid md:grid-cols-4 gap-4">
             <div className="bg-slate-50 border-2 border-gray-200 p-6">
               <h3 className="text-base font-bold text-gray-900 mb-3">Perfect Bound Book Covers</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <p className="text-sm text-gray-800 leading-relaxed">
                 Spine and hinge creases for professional lay-flat opening. Deep creases prevent cracking.
               </p>
             </div>
 
             <div className="bg-slate-50 border-2 border-gray-200 p-6">
               <h3 className="text-base font-bold text-gray-900 mb-3">Folders</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <p className="text-sm text-gray-800 leading-relaxed">
                 Multiple close-proximity creases for complex folder construction. Perfect registration.
               </p>
             </div>
 
             <div className="bg-slate-50 border-2 border-gray-200 p-6">
               <h3 className="text-base font-bold text-gray-900 mb-3">Capacity Wallets</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <p className="text-sm text-gray-800 leading-relaxed">
                 Up to four creases for expandable capacity wallets. Deep penetration for heavy stocks.
               </p>
             </div>
 
             <div className="bg-slate-50 border-2 border-gray-200 p-6">
               <h3 className="text-base font-bold text-gray-900 mb-3">Multiple Crease Products</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <p className="text-sm text-gray-800 leading-relaxed">
                 Any product requiring multiple close-proximity creases. Versatile and reliable.
               </p>
             </div>

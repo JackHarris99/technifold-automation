@@ -91,7 +91,7 @@ export default function AdminNav() {
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname === '/admin/sales' || pathname === '/admin'
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
             }`}
           >
             Sales Center
@@ -101,7 +101,7 @@ export default function AdminNav() {
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname === '/admin/sales/reorder-opportunities'
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
             }`}
           >
             Reorder Opportunities
@@ -111,7 +111,7 @@ export default function AdminNav() {
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname === '/admin/sales/trials-ending'
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
             }`}
           >
             Trials Ending
@@ -121,7 +121,7 @@ export default function AdminNav() {
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname === '/admin/sales/unpaid-invoices'
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
             }`}
           >
             Unpaid Invoices
@@ -138,7 +138,7 @@ export default function AdminNav() {
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname === '/admin/companies' || pathname?.startsWith('/admin/company/')
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
             }`}
           >
             All Companies
@@ -155,7 +155,7 @@ export default function AdminNav() {
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname === '/admin/quotes' || pathname?.startsWith('/admin/quotes/')
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
             }`}
           >
             All Quotes
@@ -165,7 +165,7 @@ export default function AdminNav() {
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname?.startsWith('/admin/quote-builder/tools')
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
             }`}
           >
             🔧 Tools Quote Builder
@@ -175,7 +175,7 @@ export default function AdminNav() {
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname?.startsWith('/admin/quote-builder/consumables')
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
             }`}
           >
             📦 Consumables Quote Builder
@@ -192,7 +192,7 @@ export default function AdminNav() {
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname === '/admin/invoices'
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
             }`}
           >
             Invoices
@@ -209,7 +209,7 @@ export default function AdminNav() {
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname === '/admin/subscriptions'
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
             }`}
           >
             All Subscriptions
@@ -219,7 +219,7 @@ export default function AdminNav() {
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname === '/admin/trials'
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
             }`}
           >
             Active Trials
@@ -236,7 +236,7 @@ export default function AdminNav() {
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname === '/admin/products'
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
             }`}
           >
             Product Catalog
@@ -246,7 +246,7 @@ export default function AdminNav() {
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname === '/admin/tool-consumables'
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
             }`}
           >
             Tool-Consumable Links
@@ -256,7 +256,7 @@ export default function AdminNav() {
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname === '/admin/sku-explorer'
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
             }`}
           >
             SKU Explorer
@@ -273,7 +273,7 @@ export default function AdminNav() {
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname === '/admin/send-reorder'
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
             }`}
           >
             Send Reorder Email
@@ -283,7 +283,7 @@ export default function AdminNav() {
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname === '/admin/test-reorder-link'
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
             }`}
           >
             Test Reorder Link
@@ -300,7 +300,7 @@ export default function AdminNav() {
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname === '/admin/shipping-manifests'
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
             }`}
           >
             Shipping Manifests
@@ -310,7 +310,7 @@ export default function AdminNav() {
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname === '/admin/engagements'
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
             }`}
           >
             Engagement Events
@@ -320,7 +320,7 @@ export default function AdminNav() {
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname === '/admin/brand-media'
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
             }`}
           >
             Brand Media
@@ -330,7 +330,7 @@ export default function AdminNav() {
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname === '/admin/users'
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
             }`}
           >
             Users
@@ -342,7 +342,7 @@ export default function AdminNav() {
       <div className="p-4 border-t border-gray-800 bg-gray-900">
         <button
           onClick={handleLogout}
-          className="w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white rounded transition-colors"
+          className="w-full px-4 py-2 text-sm text-gray-600 hover:bg-gray-800 hover:text-white rounded transition-colors"
         >
           Logout
         </button>

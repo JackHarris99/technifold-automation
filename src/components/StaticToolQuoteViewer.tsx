@@ -95,7 +95,7 @@ export default function StaticToolQuoteViewer({
           <div className="flex justify-between items-start mb-8">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Tool Quote</h1>
-              <p className="text-gray-600">{companyName}</p>
+              <p className="text-gray-800">{companyName}</p>
               {contactName && <p className="text-gray-700 text-sm">Attn: {contactName}</p>}
             </div>
             <div className="text-right">
@@ -128,7 +128,7 @@ export default function StaticToolQuoteViewer({
                       <div className="text-sm text-gray-700 mt-1">
                         {item.product_code} • Quantity: {item.quantity}
                       </div>
-                      <div className="text-sm text-gray-600 mt-1">
+                      <div className="text-sm text-gray-800 mt-1">
                         £{item.unit_price.toFixed(2)} per unit
                         {item.discount_percent > 0 && (
                           <span className="ml-2 text-green-600 font-semibold">
@@ -155,12 +155,12 @@ export default function StaticToolQuoteViewer({
             {/* Totals */}
             <div className="mt-8 pt-6 border-t-2 border-gray-200 space-y-3">
               <div className="flex justify-between text-lg">
-                <span className="text-gray-600">Subtotal</span>
+                <span className="text-gray-800">Subtotal</span>
                 <span className="font-semibold">£{subtotal.toFixed(2)}</span>
               </div>
               {totalDiscount > 0 && (
                 <div className="flex justify-between text-lg">
-                  <span className="text-gray-600">Total Discount</span>
+                  <span className="text-gray-800">Total Discount</span>
                   <span className="font-semibold text-green-600">-£{totalDiscount.toFixed(2)}</span>
                 </div>
               )}

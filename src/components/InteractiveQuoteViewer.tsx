@@ -187,7 +187,7 @@ export default function InteractiveQuoteViewer({
           <div className="flex justify-between items-start mb-8">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Quote</h1>
-              <p className="text-gray-600">{companyName}</p>
+              <p className="text-gray-800">{companyName}</p>
               {contactName && <p className="text-gray-700 text-sm">Attn: {contactName}</p>}
             </div>
             <div className="text-right">
@@ -213,7 +213,7 @@ export default function InteractiveQuoteViewer({
                 <div className="text-2xl">📈</div>
                 <div>
                   <div className="text-sm font-semibold text-gray-700">Next Tool Tier</div>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-gray-800">
                     Add {nextToolTier.min_quantity - toolQty} more tool{(nextToolTier.min_quantity - toolQty) > 1 ? 's' : ''} for {nextToolTier.discount_percent}% off
                   </div>
                   <div className="mt-1 h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -275,7 +275,7 @@ export default function InteractiveQuoteViewer({
                         )}
                       </div>
                       <div className="flex items-center gap-3">
-                        <label className="text-sm text-gray-600 font-medium">Quantity:</label>
+                        <label className="text-sm text-gray-800 font-medium">Quantity:</label>
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => updateQuantity(item.product_code, item.quantity - 1)}
@@ -315,12 +315,12 @@ export default function InteractiveQuoteViewer({
             {/* Totals */}
             <div className="mt-8 pt-6 border-t-2 border-gray-200 space-y-3">
               <div className="flex justify-between text-lg">
-                <span className="text-gray-600">Subtotal</span>
+                <span className="text-gray-800">Subtotal</span>
                 <span className="font-semibold">£{subtotal.toFixed(2)}</span>
               </div>
               {totalDiscount > 0 && (
                 <div className="flex justify-between text-lg">
-                  <span className="text-gray-600">Total Discount</span>
+                  <span className="text-gray-800">Total Discount</span>
                   <span className="font-semibold text-green-600">-£{totalDiscount.toFixed(2)}</span>
                 </div>
               )}

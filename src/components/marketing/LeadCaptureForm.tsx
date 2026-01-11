@@ -76,7 +76,7 @@ export default function LeadCaptureForm({
           </svg>
         </div>
         <h3 className="text-2xl font-bold text-gray-900 mb-2">Thanks! We'll be in touch soon.</h3>
-        <p className="text-gray-600">
+        <p className="text-gray-800">
           An engineer will reach out within 24 hours to discuss your {problemTitle?.toLowerCase() || 'issue'}.
         </p>
       </div>
@@ -87,7 +87,7 @@ export default function LeadCaptureForm({
     <div>
       <h3 className="text-2xl font-bold text-gray-900 mb-2">Get help with this problem</h3>
       {problemTitle && (
-        <p className="text-gray-600 mb-6">Issue: <span className="font-semibold">{problemTitle}</span></p>
+        <p className="text-gray-800 mb-6">Issue: <span className="font-semibold">{problemTitle}</span></p>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">

@@ -72,7 +72,7 @@ export default function OrderDetailModal({ orderId, onClose, onUpdate }: OrderDe
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg p-8">
-          <p className="text-gray-600">Loading order details...</p>
+          <p className="text-gray-800">Loading order details...</p>
         </div>
       </div>
     );
@@ -92,7 +92,7 @@ export default function OrderDetailModal({ orderId, onClose, onUpdate }: OrderDe
           <h2 className="text-2xl font-bold text-gray-900">Order Details</h2>
           <button
             onClick={onClose}
-            className="text-gray-600 hover:text-gray-600 text-2xl font-bold"
+            className="text-gray-800 hover:text-gray-800 text-2xl font-bold"
           >
             ×
           </button>
@@ -116,7 +116,7 @@ export default function OrderDetailModal({ orderId, onClose, onUpdate }: OrderDe
             <div>
               <h3 className="text-sm font-semibold text-gray-700 uppercase mb-2">Contact</h3>
               <p className="font-semibold">{order.contacts?.full_name}</p>
-              <p className="text-sm text-gray-600">{order.contacts?.email}</p>
+              <p className="text-sm text-gray-800">{order.contacts?.email}</p>
             </div>
           </div>
 
@@ -145,10 +145,10 @@ export default function OrderDetailModal({ orderId, onClose, onUpdate }: OrderDe
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600">Item</th>
-                    <th className="px-4 py-2 text-center text-xs font-semibold text-gray-600">Qty</th>
-                    <th className="px-4 py-2 text-right text-xs font-semibold text-gray-600">Unit Price</th>
-                    <th className="px-4 py-2 text-right text-xs font-semibold text-gray-600">Total</th>
+                    <th className="px-4 py-2 text-left text-xs font-semibold text-gray-800">Item</th>
+                    <th className="px-4 py-2 text-center text-xs font-semibold text-gray-800">Qty</th>
+                    <th className="px-4 py-2 text-right text-xs font-semibold text-gray-800">Unit Price</th>
+                    <th className="px-4 py-2 text-right text-xs font-semibold text-gray-800">Total</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -156,7 +156,7 @@ export default function OrderDetailModal({ orderId, onClose, onUpdate }: OrderDe
                     <tr key={idx}>
                       <td className="px-4 py-3">
                         <div className="font-semibold">{item.product_code}</div>
-                        <div className="text-sm text-gray-600">{item.description}</div>
+                        <div className="text-sm text-gray-800">{item.description}</div>
                       </td>
                       <td className="px-4 py-3 text-center">{item.quantity}</td>
                       <td className="px-4 py-3 text-right">{currency}{item.unit_price.toFixed(2)}</td>

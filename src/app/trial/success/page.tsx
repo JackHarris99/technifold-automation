@@ -40,7 +40,7 @@ function SuccessPageContent() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your trial details...</p>
+          <p className="text-gray-800">Loading your trial details...</p>
         </div>
       </div>
     );
@@ -59,7 +59,7 @@ function SuccessPageContent() {
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Trial Activated! 🎉
           </h1>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-800">
             Your 30-day free trial has been activated successfully.
           </p>
         </div>
@@ -77,7 +77,7 @@ function SuccessPageContent() {
               </div>
               <div>
                 <h3 className="font-bold text-gray-900 mb-2">Check Your Email</h3>
-                <p className="text-gray-600">
+                <p className="text-gray-800">
                   We've sent confirmation to <strong>{session?.customer_email || 'your email'}</strong> with your trial details and installation guide.
                 </p>
               </div>
@@ -91,10 +91,10 @@ function SuccessPageContent() {
               </div>
               <div>
                 <h3 className="font-bold text-gray-900 mb-2">We're Preparing Your Trial Kit</h3>
-                <p className="text-gray-600">
+                <p className="text-gray-800">
                   Our team is packing your trial system right now. You'll receive:
                 </p>
-                <ul className="mt-2 space-y-1 text-gray-600">
+                <ul className="mt-2 space-y-1 text-gray-800">
                   <li className="flex items-center gap-2">
                     <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -125,7 +125,7 @@ function SuccessPageContent() {
               </div>
               <div>
                 <h3 className="font-bold text-gray-900 mb-2">Delivery in 2-3 Days</h3>
-                <p className="text-gray-600">
+                <p className="text-gray-800">
                   Your trial kit will arrive within 2-3 business days. We'll send you tracking information once it ships.
                 </p>
               </div>
@@ -139,7 +139,7 @@ function SuccessPageContent() {
               </div>
               <div>
                 <h3 className="font-bold text-gray-900 mb-2">Install & Test (30 Days Free)</h3>
-                <p className="text-gray-600">
+                <p className="text-gray-800">
                   Install the system on your machine and run it in production for the full 30 days. No payment until the trial ends.
                 </p>
               </div>
@@ -153,7 +153,7 @@ function SuccessPageContent() {
               </div>
               <div>
                 <h3 className="font-bold text-gray-900 mb-2">Keep or Cancel</h3>
-                <p className="text-gray-600">
+                <p className="text-gray-800">
                   Love the results? Keep your subscription active. Not seeing the value? Cancel anytime before the trial ends with no charge.
                 </p>
               </div>
@@ -183,7 +183,7 @@ function SuccessPageContent() {
         {/* Support */}
         <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Need Help?</h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-800 mb-6">
             Our UK-based support team is here to help you get the most out of your trial.
           </p>
           <div className="grid md:grid-cols-2 gap-4">
@@ -193,7 +193,7 @@ function SuccessPageContent() {
               </svg>
               <div>
                 <div className="font-semibold text-gray-900">Call Us</div>
-                <div className="text-gray-600">01707 275 114</div>
+                <div className="text-gray-800">01707 275 114</div>
                 <div className="text-sm text-gray-700">Mon-Fri, 9am-5pm GMT</div>
               </div>
             </div>
@@ -203,7 +203,7 @@ function SuccessPageContent() {
               </svg>
               <div>
                 <div className="font-semibold text-gray-900">Email Us</div>
-                <div className="text-gray-600">sales@technifold.co.uk</div>
+                <div className="text-gray-800">sales@technifold.co.uk</div>
                 <div className="text-sm text-gray-700">Response within 24 hours</div>
               </div>
             </div>

@@ -22,10 +22,10 @@ export default function QuadCreaserPage() {
               </div>
 
               <h1 className="text-4xl font-bold mb-4 leading-tight">Quad-Creaser<br />Enhances the Look of Your Perfect Bound Books</h1>
-              <p className="text-lg text-gray-300 mb-2 leading-relaxed">
+              <p className="text-lg text-gray-600 mb-2 leading-relaxed">
                 <strong>Perfect Bound books are often judged by their cover.</strong> The Quad-Creaser replaces your OEM scoring mechanism to produce Letterpress quality creasing to the spine & hinge areas of your book covers.
               </p>
-              <p className="text-base text-gray-600 mb-6">
+              <p className="text-base text-gray-800 mb-6">
                 This patented application uses specially formulated rubber & nylon creasing ribs that gently stretch the fibres—producing three times deeper crease applications to prevent print, coating and laminate from flaking away.
               </p>
 
@@ -43,7 +43,7 @@ export default function QuadCreaserPage() {
                 alt="Quad-Creaser installed on perfect binder"
                 className="w-full rounded-lg shadow-2xl border border-white/20"
               />
-              <p className="text-sm text-gray-600 text-center mt-3">
+              <p className="text-sm text-gray-800 text-center mt-3">
                 Quad-Creaser delivering letterpress-quality spine and hinge creases
               </p>
             </div>
@@ -114,7 +114,7 @@ export default function QuadCreaserPage() {
               Visual Proof
             </div>
             <h2 className="text-3xl font-bold text-gray-900">See the Difference: OEM Scoring vs. Quad-Creaser</h2>
-            <p className="text-gray-600 mt-2">Real results on perfect bound book covers</p>
+            <p className="text-gray-800 mt-2">Real results on perfect bound book covers</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 mb-8">
@@ -302,22 +302,22 @@ export default function QuadCreaserPage() {
 
           <div className="grid md:grid-cols-2 gap-6">
             <div className="bg-white/10 border border-white/20 p-6">
-              <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+              <p className="text-sm text-gray-600 mb-4 leading-relaxed">
                 "We had to score thicker covers offline, and now we can do it inline. <strong className="text-white">It has increased productivity, but it is more about the quality of the finished product.</strong> I would definitely put your product forward to other print houses."
               </p>
               <div className="text-sm">
                 <div className="font-bold text-white">Jonathan Ellis</div>
-                <div className="text-xs text-gray-600">Printed Easy</div>
+                <div className="text-xs text-gray-800">Printed Easy</div>
               </div>
             </div>
 
             <div className="bg-white/10 border border-white/20 p-6">
-              <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+              <p className="text-sm text-gray-600 mb-4 leading-relaxed">
                 "We were utterly amazed when we tried the adjustable version of the Quad Creaser. <strong className="text-white">Not only does the system eliminate fibre-cracking, but it also minimises the reset force of the cover.</strong> The Quad Creaser has allowed Kosel to raise its own quality standards for bound products."
               </p>
               <div className="text-sm">
                 <div className="font-bold text-white">Eugen Mayer</div>
-                <div className="text-xs text-gray-600">Book-binding Department Manager, Kosel GmbH, Germany</div>
+                <div className="text-xs text-gray-800">Book-binding Department Manager, Kosel GmbH, Germany</div>
               </div>
             </div>
           </div>

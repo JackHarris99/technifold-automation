@@ -186,7 +186,7 @@ export default function AddressCollectionModal({
       <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-2xl font-semibold">Company Address Required</h2>
-          <p className="text-sm text-gray-600 mt-2">
+          <p className="text-sm text-gray-800 mt-2">
             Before creating your invoice, we need your company's billing address to calculate tax and shipping correctly.
           </p>
           <p className="text-sm text-gray-700 mt-1">{companyName}</p>
@@ -205,7 +205,7 @@ export default function AddressCollectionModal({
               <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">1</span>
               Billing Address (Company Registered Address)
             </h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-800">
               This is your company's official registered address, used for tax and invoicing purposes.
             </p>
 

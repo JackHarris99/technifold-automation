@@ -142,7 +142,7 @@ export default function QuotePreview({
         <div className="max-w-6xl mx-auto px-6 py-3">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Quote Preview Mode</div>
+              <div className="text-xs text-gray-800 uppercase tracking-wide mb-1">Quote Preview Mode</div>
               <div className="text-sm">
                 <strong>{company.company_name}</strong> • {contact.email}
               </div>
@@ -215,7 +215,7 @@ export default function QuotePreview({
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
             Your Solution Quote
           </h1>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-800">
             For {company.company_name}
           </p>
           <p className="text-sm text-gray-700 mt-1">
@@ -234,10 +234,10 @@ export default function QuotePreview({
                   <div className="grid grid-cols-4 gap-4 items-center">
                     <div className="col-span-1">
                       <p className="font-bold text-sm">{product.product_code}</p>
-                      <p className="text-xs text-gray-600">{product.description}</p>
+                      <p className="text-xs text-gray-800">{product.description}</p>
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-600 mb-1">Quantity</label>
+                      <label className="block text-xs font-semibold text-gray-800 mb-1">Quantity</label>
                       <input
                         type="number"
                         min="0"
@@ -248,7 +248,7 @@ export default function QuotePreview({
                       <p className="text-xs text-gray-700 mt-1">(Set to 0 to exclude)</p>
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-600 mb-1">Discount %</label>
+                      <label className="block text-xs font-semibold text-gray-800 mb-1">Discount %</label>
                       <input
                         type="number"
                         min="0"
@@ -259,9 +259,9 @@ export default function QuotePreview({
                       />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-gray-600 mb-1">Rental Price</p>
+                      <p className="text-xs font-semibold text-gray-800 mb-1">Rental Price</p>
                       <p className="text-sm font-bold">£{product.rental_price_monthly || 50}/mo</p>
-                      <p className="text-xs text-gray-600">Purchase: £{product.price || 1500}</p>
+                      <p className="text-xs text-gray-800">Purchase: £{product.price || 1500}</p>
                     </div>
                   </div>
                 </div>
@@ -281,7 +281,7 @@ export default function QuotePreview({
                   onChange={(e) => setGlobalDiscount(parseFloat(e.target.value) || 0)}
                   className="w-32 px-3 py-2 border border-gray-300 rounded-lg"
                 />
-                <span className="text-sm text-gray-600">%</span>
+                <span className="text-sm text-gray-800">%</span>
               </div>
             </div>
           </div>
@@ -290,7 +290,7 @@ export default function QuotePreview({
         {/* Itemized Quote Table - Customer Can Adjust Quantities */}
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Itemized Quote</h2>
-          <p className="text-sm text-gray-600 mb-6">Adjust quantities below to see live pricing updates</p>
+          <p className="text-sm text-gray-800 mb-6">Adjust quantities below to see live pricing updates</p>
 
           <div className="space-y-4">
             {lineItems.map((item) => (
@@ -318,7 +318,7 @@ export default function QuotePreview({
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <h3 className="font-bold text-gray-900 text-lg">{item.product.product_code}</h3>
-                        <p className="text-sm text-gray-600">{item.product.description}</p>
+                        <p className="text-sm text-gray-800">{item.product.description}</p>
                         {item.product.type && (
                           <span className="inline-block mt-1 px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-semibold">
                             {item.product.type}
@@ -398,7 +398,7 @@ export default function QuotePreview({
         {/* Pricing Summary - Both Options Visible */}
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Total Pricing</h2>
-          <p className="text-gray-600 mb-6">Both rental and purchase options shown below - choose your preferred option at checkout</p>
+          <p className="text-gray-800 mb-6">Both rental and purchase options shown below - choose your preferred option at checkout</p>
 
           <div className="grid md:grid-cols-2 gap-8 mb-8">
             {/* Rental Option */}
@@ -424,9 +424,9 @@ export default function QuotePreview({
               <h3 className="text-3xl font-bold text-gray-900 mb-2">Monthly Rental</h3>
               <div className="text-5xl font-bold text-blue-600 mb-6">
                 £{totals.rentalTotal.toFixed(2)}
-                <span className="text-2xl text-gray-600">/month</span>
+                <span className="text-2xl text-gray-800">/month</span>
               </div>
-              <p className="text-sm text-gray-600 mb-4">Total for all {itemsInQuote} item{itemsInQuote !== 1 ? 's' : ''}</p>
+              <p className="text-sm text-gray-800 mb-4">Total for all {itemsInQuote} item{itemsInQuote !== 1 ? 's' : ''}</p>
 
               <ul className="space-y-3">
                 <li className="flex items-start gap-2">
@@ -467,18 +467,18 @@ export default function QuotePreview({
             >
               <div className="flex items-center justify-end mb-4 h-10">
                 {purchaseType === 'purchase' && (
-                  <svg className="w-8 h-8 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-8 h-8 text-gray-800" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                 )}
               </div>
 
               <h3 className="text-3xl font-bold text-gray-900 mb-2">Purchase Outright</h3>
-              <div className="text-5xl font-bold text-gray-600 mb-6">
+              <div className="text-5xl font-bold text-gray-800 mb-6">
                 £{totals.purchaseTotal.toFixed(2)}
                 <span className="text-2xl text-gray-700"> once</span>
               </div>
-              <p className="text-sm text-gray-600 mb-4">Total for all {itemsInQuote} item{itemsInQuote !== 1 ? 's' : ''}</p>
+              <p className="text-sm text-gray-800 mb-4">Total for all {itemsInQuote} item{itemsInQuote !== 1 ? 's' : ''}</p>
 
               <ul className="space-y-3">
                 <li className="flex items-start gap-2">
@@ -500,7 +500,7 @@ export default function QuotePreview({
                   <span className="text-gray-700">Yours to keep forever</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <svg className="w-5 h-5 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-gray-800 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                   <span className="text-gray-700">Large upfront investment</span>
@@ -568,7 +568,7 @@ export default function QuotePreview({
               </a>
               {purchaseType === 'rental' && (
                 <> and understand that:
-                  <ul className="mt-3 ml-4 space-y-2 text-gray-600">
+                  <ul className="mt-3 ml-4 space-y-2 text-gray-800">
                     <li className="flex items-start gap-2">
                       <span className="text-blue-600 font-bold">•</span>
                       <span>The 30-day free trial begins upon delivery</span>
@@ -627,7 +627,7 @@ export default function QuotePreview({
 
         {/* Footer */}
         <div className="bg-gray-100 border-t border-gray-300 py-8 mt-12">
-          <div className="text-center text-sm text-gray-600">
+          <div className="text-center text-sm text-gray-800">
             <p className="mb-2">
               Questions about this quote? Contact us at{' '}
               <a href="mailto:info@technifold.co.uk" className="text-blue-600 hover:underline font-semibold">

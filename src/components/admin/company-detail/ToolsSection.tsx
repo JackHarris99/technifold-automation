@@ -43,7 +43,7 @@ export default function ToolsSection({ tools, companyId }: ToolsSectionProps) {
         </div>
 
         {tools.length === 0 ? (
-          <p className="text-gray-600 text-sm">No tools owned</p>
+          <p className="text-gray-800 text-sm">No tools owned</p>
         ) : (
           <div className="space-y-3">
             {tools.map((tool) => (
@@ -53,11 +53,11 @@ export default function ToolsSection({ tools, companyId }: ToolsSectionProps) {
                     <div className="font-semibold text-gray-900">
                       {tool.products?.description || tool.tool_code}
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">
+                    <div className="text-sm text-gray-800 mt-1">
                       Code: {tool.tool_code}
                       {tool.products?.category && ` • ${tool.products.category}`}
                     </div>
-                    <div className="text-sm text-gray-600 mt-2">
+                    <div className="text-sm text-gray-800 mt-2">
                       <span className="font-semibold">Quantity:</span> {tool.total_units} unit{tool.total_units !== 1 ? 's' : ''}
                     </div>
                     <div className="text-xs text-gray-700 mt-2">

@@ -24,29 +24,29 @@ export default function GripperBossPage() {
           <h1 className="text-4xl font-bold mb-4 leading-tight">
             Gripper Boss<br />Re-Grip Your Wheels in Seconds, Not Days
           </h1>
-          <p className="text-lg text-gray-300 mb-2 max-w-3xl leading-relaxed">
+          <p className="text-lg text-gray-600 mb-2 max-w-3xl leading-relaxed">
             <strong>Fed up with sending gripper wheels away for expensive re-gripping?</strong> Gripper Boss replaces your OEM wheels with a two-part system featuring replaceable gripper bands—just rip out worn bands and push in new ones.
           </p>
-          <p className="text-base text-gray-600 mb-6 max-w-3xl">
+          <p className="text-base text-gray-800 mb-6 max-w-3xl">
             No machine stripping. No specialist charges. No days or weeks of waiting. Change bands between jobs and get back to production immediately.
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">Seconds</div>
-              <div className="text-xs text-gray-600">Not Days to Re-Grip</div>
+              <div className="text-xs text-gray-800">Not Days to Re-Grip</div>
             </div>
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">Zero</div>
-              <div className="text-xs text-gray-600">Specialist Charges</div>
+              <div className="text-xs text-gray-800">Specialist Charges</div>
             </div>
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">90%</div>
-              <div className="text-xs text-gray-600">Cost Savings</div>
+              <div className="text-xs text-gray-800">Cost Savings</div>
             </div>
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">Better</div>
-              <div className="text-xs text-gray-600">Grip Than OEM</div>
+              <div className="text-xs text-gray-800">Grip Than OEM</div>
             </div>
           </div>
 
@@ -65,7 +65,7 @@ export default function GripperBossPage() {
                 alt="Gripper Boss installed on machine"
                 className="w-full rounded-lg shadow-2xl border border-white/20"
               />
-              <p className="text-sm text-gray-600 text-center mt-3">
+              <p className="text-sm text-gray-800 text-center mt-3">
                 Gripper Boss restoring gripper performance
               </p>
             </div>

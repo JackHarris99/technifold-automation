@@ -24,29 +24,29 @@ export default function SectionScorerPage() {
           <h1 className="text-4xl font-bold mb-4 leading-tight">
             Section-Scorer<br />3x Deeper Scores for Perfect Signature Work
           </h1>
-          <p className="text-lg text-gray-300 mb-2 max-w-3xl leading-relaxed">
+          <p className="text-lg text-gray-600 mb-2 max-w-3xl leading-relaxed">
             <strong>Producing 8, 16, 32, or 64-page signatures with crow's feet wrinkles and inconsistent folds?</strong> Section-Scorer replaces your OEM scoring tools with a system that delivers 3x deeper scores—ensuring sections fold tightly, register perfectly, and look professional.
           </p>
-          <p className="text-base text-gray-600 mb-6 max-w-3xl">
+          <p className="text-base text-gray-800 mb-6 max-w-3xl">
             OEM scoring tools haven't evolved since 1850. Section-Scorer modernizes your folder with 8 color-coded settings that eliminate operator guesswork and deliver consistent results on all signature work.
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">3x</div>
-              <div className="text-xs text-gray-600">Deeper Than OEM</div>
+              <div className="text-xs text-gray-800">Deeper Than OEM</div>
             </div>
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">8</div>
-              <div className="text-xs text-gray-600">Color-Coded Settings</div>
+              <div className="text-xs text-gray-800">Color-Coded Settings</div>
             </div>
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">Zero</div>
-              <div className="text-xs text-gray-600">Operator Guesswork</div>
+              <div className="text-xs text-gray-800">Operator Guesswork</div>
             </div>
             <div className="bg-white/10 border border-white/20 px-3 py-2 text-center">
               <div className="text-2xl font-bold">100%</div>
-              <div className="text-xs text-gray-600">Money-Back</div>
+              <div className="text-xs text-gray-800">Money-Back</div>
             </div>
           </div>
 
@@ -65,7 +65,7 @@ export default function SectionScorerPage() {
                 alt="Section-Scorer installed on machine"
                 className="w-full rounded-lg shadow-2xl border border-white/20"
               />
-              <p className="text-sm text-gray-600 text-center mt-3">
+              <p className="text-sm text-gray-800 text-center mt-3">
                 Section-Scorer delivering deep scoring impressions
               </p>
             </div>

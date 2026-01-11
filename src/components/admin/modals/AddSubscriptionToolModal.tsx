@@ -102,7 +102,7 @@ export default function AddSubscriptionToolModal({
           <h2 className="text-xl font-bold">Add Tool to Subscription</h2>
           <button
             onClick={onClose}
-            className="text-gray-600 hover:text-gray-600"
+            className="text-gray-800 hover:text-gray-800"
           >
             ✕
           </button>

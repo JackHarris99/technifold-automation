@@ -98,7 +98,7 @@ export default function CompanySearchBar() {
       'Steve': 'text-green-600',
       'jack_harris': 'text-purple-600',
     };
-    return colors[owner || ''] || 'text-gray-600';
+    return colors[owner || ''] || 'text-gray-800';
   };
 
   return (
@@ -115,7 +115,7 @@ export default function CompanySearchBar() {
           className="w-full px-4 py-2 pl-10 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 placeholder-gray-400"
         />
         <svg
-          className="absolute left-3 top-2.5 w-5 h-5 text-gray-600"
+          className="absolute left-3 top-2.5 w-5 h-5 text-gray-800"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -150,7 +150,7 @@ export default function CompanySearchBar() {
                 <span className="text-gray-700">{company.company_id}</span>
                 {company.account_owner && (
                   <>
-                    <span className="text-gray-600">•</span>
+                    <span className="text-gray-800">•</span>
                     <span className={`font-medium ${getOwnerColor(company.account_owner)}`}>
                       {company.account_owner}
                     </span>

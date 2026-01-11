@@ -24,7 +24,7 @@ export default async function InvoiceViewerPage({ params }: InvoiceViewerProps) 
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center max-w-md">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Invalid or Expired Link</h1>
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-800 mb-8">
             This invoice link is no longer valid.
           </p>
           <a
@@ -101,7 +101,7 @@ export default async function InvoiceViewerPage({ params }: InvoiceViewerProps) 
           <div className="flex justify-between items-start mb-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Invoices</h1>
-              <p className="text-gray-600">{company.company_name}</p>
+              <p className="text-gray-800">{company.company_name}</p>
               {contact && <p className="text-gray-700 text-sm">{contact.full_name}</p>}
             </div>
             <div className="text-right text-sm text-gray-700">
@@ -113,7 +113,7 @@ export default async function InvoiceViewerPage({ params }: InvoiceViewerProps) 
           {/* Company Address */}
           <div className="border-t border-gray-200 pt-4">
             <h3 className="text-sm font-semibold text-gray-700 mb-2">Bill To:</h3>
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-gray-800">
               <div>{company.company_name}</div>
               {company.address_line1 && <div>{company.address_line1}</div>}
               {company.address_line2 && <div>{company.address_line2}</div>}
@@ -164,18 +164,18 @@ export default async function InvoiceViewerPage({ params }: InvoiceViewerProps) 
 
                   {/* Breakdown */}
                   <div className="border-t border-gray-100 pt-3 mt-3 text-sm">
-                    <div className="flex justify-between text-gray-600 mb-1">
+                    <div className="flex justify-between text-gray-800 mb-1">
                       <span>Subtotal:</span>
                       <span>{invoice.currency} {(invoice.subtotal || 0).toFixed(2)}</span>
                     </div>
                     {invoice.shipping_amount > 0 && (
-                      <div className="flex justify-between text-gray-600 mb-1">
+                      <div className="flex justify-between text-gray-800 mb-1">
                         <span>Shipping:</span>
                         <span>{invoice.currency} {invoice.shipping_amount.toFixed(2)}</span>
                       </div>
                     )}
                     {invoice.tax_amount > 0 && (
-                      <div className="flex justify-between text-gray-600 mb-1">
+                      <div className="flex justify-between text-gray-800 mb-1">
                         <span>Tax:</span>
                         <span>{invoice.currency} {invoice.tax_amount.toFixed(2)}</span>
                       </div>

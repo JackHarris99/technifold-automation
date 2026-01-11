@@ -94,7 +94,7 @@ export default function LogCallPage({ params }: { params: Promise<{ token: strin
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="text-lg text-gray-600">Validating link...</div>
+          <div className="text-lg text-gray-800">Validating link...</div>
         </div>
       </div>
     );
@@ -106,7 +106,7 @@ export default function LogCallPage({ params }: { params: Promise<{ token: strin
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
           <div className="text-4xl mb-4">⚠️</div>
           <h1 className="text-xl font-bold text-gray-900 mb-2">Invalid Link</h1>
-          <p className="text-gray-600 mb-6">{error}</p>
+          <p className="text-gray-800 mb-6">{error}</p>
           <Link
             href="/admin/sales"
             className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -124,7 +124,7 @@ export default function LogCallPage({ params }: { params: Promise<{ token: strin
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
           <div className="text-4xl mb-4">✅</div>
           <h1 className="text-xl font-bold text-gray-900 mb-2">Call Logged</h1>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-800 mb-6">
             Your call with {context?.company_name} has been recorded.
           </p>
           <div className="space-y-2">
@@ -157,7 +157,7 @@ export default function LogCallPage({ params }: { params: Promise<{ token: strin
             <div className="text-2xl">📞</div>
             <h1 className="text-2xl font-bold text-gray-900">Log Call</h1>
           </div>
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-gray-800">
             {context?.user_name} • {context?.company_name}
           </div>
           {context?.contact_name && (
@@ -253,7 +253,7 @@ export default function LogCallPage({ params }: { params: Promise<{ token: strin
 
             {followUpNeeded && (
               <div className="mt-3">
-                <label className="block text-sm text-gray-600 mb-1">
+                <label className="block text-sm text-gray-800 mb-1">
                   Follow-up date
                 </label>
                 <input
