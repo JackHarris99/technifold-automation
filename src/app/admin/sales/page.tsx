@@ -295,6 +295,12 @@ export default async function SalesCenterPage() {
                 {currentUser.full_name} • {viewMode === 'my_customers' ? 'My Customers Only' : 'All Companies (Team View)'}
               </p>
             </div>
+            <Link
+              href="/admin/my-performance"
+              className="px-4 py-2 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 transition-colors"
+            >
+              💰 My Performance
+            </Link>
           </div>
         </div>
       </div>
