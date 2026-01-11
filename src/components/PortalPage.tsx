@@ -308,103 +308,92 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
       </div>
 
       <div className="max-w-[1600px] mx-auto px-6 py-12">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-[32px] font-[600] text-[#1e40af] mb-2 tracking-[-0.02em] leading-[1.2]">
-                {payload.company_name}
-              </h1>
-              <p className="text-[15px] text-[#64748b] font-[400] tracking-[-0.01em]">
-                Precision consumables ordering with intelligent tiered pricing
-              </p>
-            </div>
-            {contact && (
-              <div className="text-right">
-                <p className="text-[12px] text-[#94a3b8] font-[500] uppercase tracking-wider">Welcome back,</p>
-                <p className="text-[17px] font-[600] text-[#1e293b] tracking-[-0.01em] mt-1">{contact.full_name}</p>
-                <p className="text-[13px] text-[#64748b] mt-0.5">{contact.email}</p>
-              </div>
-            )}
-          </div>
-
-          {/* Address Sections - Horizontal Layout */}
-          <div className="grid grid-cols-3 gap-6 mb-12">
-            {/* Contact Info */}
-            <div>
-              <div className="text-[13px] font-[600] text-[#0a0a0a] mb-3 uppercase tracking-wider">Contact</div>
-              {contact ? (
-                <div className="p-5 bg-white rounded-[16px] border border-[#e8e8e8] shadow-sm">
-                  <div className="text-[14px] text-[#0a0a0a] font-[600]">{contact.full_name}</div>
-                  <div className="text-[13px] text-[#666] mt-1">{contact.email}</div>
-                </div>
-              ) : (
-                <div className="p-5 bg-white rounded-[16px] border border-[#e8e8e8] shadow-sm">
-                  <p className="text-[13px] text-[#999] italic">No contact assigned</p>
-                </div>
-              )}
-            </div>
-
-            {/* Billing Address */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="text-[13px] font-[600] text-[#0a0a0a] uppercase tracking-wider">Billing Address</div>
-                {billingAddress && (
-                  <button onClick={() => setShowAddressModal(true)} className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
-                )}
-              </div>
-              {loadingAddress ? (
-                <div className="p-5 bg-white rounded-[16px] border border-[#e8e8e8] shadow-sm">
-                  <p className="text-[13px] text-[#999] italic">Loading...</p>
-                </div>
-              ) : billingAddress && billingAddress.billing_address_line_1 ? (
-                <div className="p-5 bg-white rounded-[16px] border border-[#e8e8e8] shadow-sm">
-                  <div className="text-[13px] font-[500] text-[#0a0a0a]">{billingAddress.billing_address_line_1}</div>
-                  {billingAddress.billing_address_line_2 && <div className="text-[13px] text-[#666]">{billingAddress.billing_address_line_2}</div>}
-                  <div className="text-[13px] text-[#666]">{billingAddress.billing_city}{billingAddress.billing_state_province ? `, ${billingAddress.billing_state_province}` : ''}</div>
-                  <div className="text-[13px] text-[#666]">{billingAddress.billing_postal_code}</div>
-                  <div className="text-[13px] font-[500] text-[#0a0a0a] mt-1">{billingAddress.billing_country}</div>
-                </div>
-              ) : (
-                <div className="p-5 bg-white rounded-[16px] border border-[#e8e8e8] shadow-sm">
-                  <p className="text-[13px] text-red-600 italic">No billing address - <button onClick={() => setShowAddressModal(true)} className="underline font-[600]">Add now</button></p>
-                </div>
-              )}
-            </div>
-
-            {/* Delivery Address */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="text-[13px] font-[600] text-[#0a0a0a] uppercase tracking-wider">Delivery Address</div>
-                {shippingAddress && (
-                  <button onClick={() => setShowAddressModal(true)} className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
-                )}
-              </div>
-              {loadingAddress ? (
-                <div className="p-5 bg-white rounded-[16px] border border-[#e8e8e8] shadow-sm">
-                  <p className="text-[13px] text-[#999] italic">Loading...</p>
-                </div>
-              ) : shippingAddress ? (
-                <div className="p-5 bg-white rounded-[16px] border border-[#e8e8e8] shadow-sm">
-                  <div className="text-[13px] font-[500] text-[#0a0a0a]">{shippingAddress.address_line_1}</div>
-                  {shippingAddress.address_line_2 && <div className="text-[13px] text-[#666]">{shippingAddress.address_line_2}</div>}
-                  <div className="text-[13px] text-[#666]">{shippingAddress.city}{shippingAddress.state_province ? `, ${shippingAddress.state_province}` : ''}</div>
-                  <div className="text-[13px] text-[#666]">{shippingAddress.postal_code}</div>
-                  <div className="text-[13px] font-[500] text-[#0a0a0a] mt-1">{shippingAddress.country}</div>
-                </div>
-              ) : (
-                <div className="p-5 bg-white rounded-[16px] border border-[#e8e8e8] shadow-sm">
-                  <p className="text-[13px] text-[#999] italic">Address information will be confirmed during checkout</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Main Grid */}
+        {/* Main Grid - Starts from Top */}
         <div className="grid grid-cols-12 gap-8">
           {/* Main Content Area */}
           <div className="col-span-7 space-y-4">
+            {/* Customer Information Card */}
+            <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8] p-6">
+              <div className="mb-6">
+                <h1 className="text-[28px] font-[600] text-[#1e40af] mb-1 tracking-[-0.02em] leading-[1.2]">
+                  {payload.company_name}
+                </h1>
+                <p className="text-[13px] text-[#64748b] font-[400]">
+                  Precision consumables ordering with intelligent tiered pricing
+                </p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                {/* Contact Info */}
+                <div>
+                  <div className="text-[11px] font-[600] text-[#94a3b8] mb-2 uppercase tracking-wider">Contact</div>
+                  {contact ? (
+                    <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                      <div className="text-[13px] text-[#1e293b] font-[600]">{contact.full_name}</div>
+                      <div className="text-[12px] text-[#64748b] mt-0.5">{contact.email}</div>
+                    </div>
+                  ) : (
+                    <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                      <p className="text-[12px] text-[#94a3b8] italic">No contact assigned</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Billing Address */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-[11px] font-[600] text-[#94a3b8] uppercase tracking-wider">Billing Address</div>
+                    {billingAddress && (
+                      <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
+                    )}
+                  </div>
+                  {loadingAddress ? (
+                    <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                      <p className="text-[12px] text-[#94a3b8] italic">Loading...</p>
+                    </div>
+                  ) : billingAddress && billingAddress.billing_address_line_1 ? (
+                    <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                      <div className="text-[12px] font-[500] text-[#1e293b]">{billingAddress.billing_address_line_1}</div>
+                      {billingAddress.billing_address_line_2 && <div className="text-[11px] text-[#64748b]">{billingAddress.billing_address_line_2}</div>}
+                      <div className="text-[11px] text-[#64748b]">{billingAddress.billing_city}{billingAddress.billing_state_province ? `, ${billingAddress.billing_state_province}` : ''}</div>
+                      <div className="text-[11px] text-[#64748b]">{billingAddress.billing_postal_code}</div>
+                      <div className="text-[12px] font-[500] text-[#1e293b] mt-1">{billingAddress.billing_country}</div>
+                    </div>
+                  ) : (
+                    <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                      <p className="text-[11px] text-red-600 italic">No billing address - <button onClick={() => setShowAddressModal(true)} className="underline font-[600]">Add now</button></p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Delivery Address */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-[11px] font-[600] text-[#94a3b8] uppercase tracking-wider">Delivery Address</div>
+                    {shippingAddress && (
+                      <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
+                    )}
+                  </div>
+                  {loadingAddress ? (
+                    <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                      <p className="text-[12px] text-[#94a3b8] italic">Loading...</p>
+                    </div>
+                  ) : shippingAddress ? (
+                    <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                      <div className="text-[12px] font-[500] text-[#1e293b]">{shippingAddress.address_line_1}</div>
+                      {shippingAddress.address_line_2 && <div className="text-[11px] text-[#64748b]">{shippingAddress.address_line_2}</div>}
+                      <div className="text-[11px] text-[#64748b]">{shippingAddress.city}{shippingAddress.state_province ? `, ${shippingAddress.state_province}` : ''}</div>
+                      <div className="text-[11px] text-[#64748b]">{shippingAddress.postal_code}</div>
+                      <div className="text-[12px] font-[500] text-[#1e293b] mt-1">{shippingAddress.country}</div>
+                    </div>
+                  ) : (
+                    <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                      <p className="text-[11px] text-[#94a3b8] italic">Address confirmed at checkout</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
             {/* Previously Ordered Section */}
             {payload.reorder_items && payload.reorder_items.length > 0 && (
               <div className="bg-white rounded-[16px] shadow-sm border-2 border-blue-100 overflow-hidden">
