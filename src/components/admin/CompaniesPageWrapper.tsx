@@ -8,7 +8,7 @@ interface Company {
   company_id: string;
   company_name: string;
   account_owner?: string;
-  category?: string;
+  type?: string;
   country?: string;
   last_invoice_at?: string;
 }
@@ -67,7 +67,7 @@ export default function CompaniesPageWrapper({ companies, totalCompanies, viewMo
                   Account Owner
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Category
+                  Type
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Country
@@ -90,7 +90,7 @@ export default function CompaniesPageWrapper({ companies, totalCompanies, viewMo
                     <div className="text-sm text-gray-700">{company.account_owner || 'Unassigned'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-700">{company.category || '-'}</div>
+                    <div className="text-sm text-gray-700">{company.type || '-'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-700">{company.country || '-'}</div>

@@ -14,7 +14,7 @@ interface CompanyHeaderProps {
     company_id: string;
     company_name: string;
     country: string | null;
-    category: string | null;
+    type: string | null;
     portal_token: string | null;
     zoho_account_id: string | null;
     stripe_customer_id: string | null;
@@ -60,10 +60,10 @@ export default function CompanyHeader({ company }: CompanyHeaderProps) {
                     <span className="ml-1">{company.country}</span>
                   </div>
                 )}
-                {company.category && (
+                {company.type && (
                   <div className="mt-2">
                     <span className="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                      {company.category}
+                      {company.type}
                     </span>
                   </div>
                 )}

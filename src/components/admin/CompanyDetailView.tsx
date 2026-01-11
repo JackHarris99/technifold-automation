@@ -361,8 +361,8 @@ function OverviewTab({
               <dd className="text-sm font-medium text-gray-900">{company.account_owner || 'Unassigned'}</dd>
             </div>
             <div>
-              <dt className="text-sm text-gray-700">Category</dt>
-              <dd className="text-sm font-medium text-gray-900">{company.category || '-'}</dd>
+              <dt className="text-sm text-gray-700">Type</dt>
+              <dd className="text-sm font-medium text-gray-900">{company.type || '-'}</dd>
             </div>
             <div>
               <dt className="text-sm text-gray-700">Country</dt>

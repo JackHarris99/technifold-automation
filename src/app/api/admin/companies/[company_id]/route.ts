@@ -54,7 +54,7 @@ export async function PATCH(
       );
     }
 
-    const { company_name, account_owner, category } = body;
+    const { company_name, account_owner, type } = body;
 
     const supabase = getSupabaseClient();
     const updateData: any = {
@@ -63,7 +63,7 @@ export async function PATCH(
 
     if (company_name !== undefined) updateData.company_name = company_name;
     if (account_owner !== undefined) updateData.account_owner = account_owner;
-    if (category !== undefined) updateData.category = category;
+    if (type !== undefined) updateData.type = type;
 
     const { error } = await supabase
       .from('companies')
