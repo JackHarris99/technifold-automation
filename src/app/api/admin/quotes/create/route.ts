@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     const productCodes = items.map((item: QuoteItem) => item.product_code);
     const { data: catalogProducts, error: catalogError } = await supabase
       .from('catalog_products')
-      .select('product_code, stripe_price_id, product_name, unit_price')
+      .select('product_code, stripe_price_id, description, unit_price')
       .in('product_code', productCodes);
 
     if (catalogError) {
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
 
       return {
         product_code: item.product_code,
-        product_name: catalogProduct.product_name,
+        description: catalogProduct.description,
         quantity: item.quantity,
         unit_price: catalogProduct.unit_price,
         stripe_price_id: catalogProduct.stripe_price_id,
