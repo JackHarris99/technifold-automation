@@ -345,8 +345,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     // Don't fail the whole process - invoice header is already created
   } else {
     console.log('[stripe-webhook] Created', invoiceItems.length, 'invoice line items');
-    // Fact tables (company_tool, company_consumables) will auto-update via trigger
-    // when payment_status = 'paid' (which it already is since payment happened via checkout)
+    // Database triggers automatically handle sync:
+    // invoice (paid) → company_product_history → company_consumables + company_tools
+    // See: supabase/migrations/20260111_sync_invoice_to_history.sql
   }
 
   // Regenerate portal cache for this company
