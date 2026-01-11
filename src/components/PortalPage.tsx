@@ -523,9 +523,12 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
             ))}
           </div>
 
-          {/* Right Sidebar */}
-          <div className="col-span-4 space-y-6">
-            <div className="bg-white rounded-[20px] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8] sticky top-6 z-30">
+          {/* Right Sidebar - Single Sticky Container */}
+          <div className="col-span-4">
+            <div className="sticky top-6 space-y-6">
+
+            {/* Company Details Card */}
+            <div className="bg-white rounded-[20px] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
               <div className="flex items-center justify-between mb-6">
                 <div className="text-[12px] font-[700] text-[#666] uppercase tracking-[0.05em]">Company Details</div>
               </div>
@@ -575,7 +578,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
               </div>
             </div>
 
-            {/* Pricing Tiers - Sticky */}
+            {/* Pricing Tiers Card */}
             {pricingPreview && !loadingPreview && pricingPreview.line_items.length > 0 && standardTiers.length > 0 && (() => {
               const standardItems = pricingPreview.line_items.filter(item => item.discount_applied?.includes('total units'));
               const standardTotalQty = standardItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -598,7 +601,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
               const potentialSavings = nextTier ? (currentTier!.price - nextTier.price) * standardTotalQty : 0;
 
               return (
-                <div className="bg-gradient-to-br from-[#ecfdf5] to-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border-2 border-[#16a34a]/20 sticky top-[380px] z-20">
+                <div className="bg-gradient-to-br from-[#ecfdf5] to-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border-2 border-[#16a34a]/20">
                   <div className="mb-4">
                     <h3 className="text-[18px] font-[700] text-[#0a0a0a] tracking-tight">Volume Pricing</h3>
                     <p className="text-[13px] text-[#666] mt-1 font-[500]">Order more, save more!</p>
@@ -647,8 +650,9 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
               );
             })()}
 
+            {/* Order Summary Card */}
             {pricingPreview && pricingPreview.line_items.length > 0 && (
-              <div className="bg-[#0a0a0a] rounded-[20px] p-8 text-white sticky top-[660px] shadow-[0_16px_48px_rgba(0,0,0,0.24)] z-10">
+              <div className="bg-[#0a0a0a] rounded-[20px] p-8 text-white shadow-[0_16px_48px_rgba(0,0,0,0.24)]">
                 <div className="text-[12px] font-[700] text-[#999] uppercase tracking-[0.05em] mb-6">Order Summary</div>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center pb-4 border-b border-[#2a2a2a]">
@@ -689,10 +693,13 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
               </div>
             )}
 
+            {/* Need Help Card */}
             <div className="bg-white rounded-[20px] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
               <div className="text-[12px] font-[700] text-[#666] uppercase tracking-[0.05em] mb-4">Need Help?</div>
               <p className="text-[14px] text-[#666] mb-4">Our team is ready to assist with your order.</p>
               <a href="tel:+441455554491" className="text-[15px] text-[#16a34a] font-[600] hover:text-[#15803d]">+44 (0)1455 554491</a>
+            </div>
+
             </div>
           </div>
         </div>
