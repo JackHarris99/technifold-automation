@@ -130,7 +130,7 @@ export default function PerformanceDashboard() {
           {/* Tools */}
           <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
             <div>
-              <div className="text-sm font-medium text-gray-900">🔧 Tool Sales</div>
+              <div className="text-sm font-medium text-gray-900">🔧 Tool Sales (Your Customers)</div>
               <div className="text-xs text-gray-700 mt-1">
                 £{commissionData.commission_breakdown.tools.revenue.toLocaleString('en-GB', { minimumFractionDigits: 2 })} @ 10%
               </div>

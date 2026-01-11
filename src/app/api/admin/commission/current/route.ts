@@ -63,6 +63,11 @@ export async function GET(request: NextRequest) {
       const productType = item.products.type;
       const accountOwner = item.invoices.companies.account_owner;
 
+      // Only process items for customers assigned to this rep
+      if (accountOwner !== repId) {
+        return;
+      }
+
       // Track top products
       if (!topProductsMap.has(item.product_code)) {
         topProductsMap.set(item.product_code, {
@@ -79,8 +84,7 @@ export async function GET(request: NextRequest) {
       if (productType === 'tool') {
         toolRevenue += itemSubtotal;
         toolCommission += itemSubtotal * 0.10;
-      } else if (productType === 'consumable' && accountOwner === repId) {
-        // Only get commission on consumables for assigned customers
+      } else if (productType === 'consumable') {
         consumableRevenue += itemSubtotal;
         consumableCommission += itemSubtotal * 0.01;
       }
