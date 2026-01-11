@@ -2,10 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { CompanyPayload, CartItem, ReorderItem } from '@/types';
-import { ReorderTab } from './ReorderTab';
-import { ToolTab } from './ToolTab';
-import { CartBar } from './CartBar';
+import { CompanyPayload, ReorderItem } from '@/types';
 import { InvoiceRequestModal } from './InvoiceRequestModal';
 import PortalAddressCollectionModal from './portals/PortalAddressCollectionModal';
 
@@ -48,8 +45,8 @@ interface PortalPageProps {
     full_name: string;
     email: string;
   };
-  token: string; // HMAC token for API authentication
-  isTest?: boolean; // Test tokens bypass address collection
+  token: string;
+  isTest?: boolean;
 }
 
 interface PricingTier {
@@ -60,8 +57,9 @@ interface PricingTier {
 }
 
 export function PortalPage({ payload, contact, token, isTest }: PortalPageProps) {
-  const [activeTab, setActiveTab] = useState<string>('reorder');
-  const [cart, setCart] = useState<CartItem[]>([]);
+  // Track quantities for all items
+  const [itemQuantities, setItemQuantities] = useState<Map<string, number>>(new Map());
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['reorder']));
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [pricingPreview, setPricingPreview] = useState<PricingPreview | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
@@ -77,8 +75,6 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
       try {
         const response = await fetch('/api/admin/pricing-tiers');
         const data = await response.json();
-
-        // API already returns in correct format, just use it directly
         setStandardTiers(data.standard || []);
         setPremiumTiers(data.premium || []);
       } catch (err) {
@@ -98,7 +94,6 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
         if (data.success && data.address) {
           setShippingAddress(data.address);
         } else {
-          // No address exists - show modal to collect it (unless this is a test token)
           if (!isTest) {
             setShowAddressModal(true);
           }
@@ -113,15 +108,11 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
     fetchAddress();
   }, [token, isTest]);
 
-  // Handler for when address is successfully saved
   const handleAddressSaved = async () => {
     setShowAddressModal(false);
-
-    // Refetch the address
     try {
       const response = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
       const data = await response.json();
-
       if (data.success && data.address) {
         setShippingAddress(data.address);
       }
@@ -130,9 +121,13 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
     }
   };
 
-  // Fetch pricing preview when cart changes
+  // Fetch pricing preview when quantities change
   useEffect(() => {
-    if (cart.length === 0) {
+    const itemsWithQty = Array.from(itemQuantities.entries())
+      .filter(([_, qty]) => qty > 0)
+      .map(([product_code, quantity]) => ({ product_code, quantity }));
+
+    if (itemsWithQty.length === 0) {
       setPricingPreview(null);
       return;
     }
@@ -143,13 +138,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
         const response = await fetch('/api/portal/pricing-preview', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            token,
-            items: cart.map(item => ({
-              product_code: item.consumable_code,
-              quantity: item.quantity,
-            })),
-          }),
+          body: JSON.stringify({ token, items: itemsWithQty }),
         });
 
         const data = await response.json();
@@ -163,80 +152,77 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
       }
     };
 
-    // Debounce pricing fetch
     const timeoutId = setTimeout(fetchPricing, 300);
     return () => clearTimeout(timeoutId);
-  }, [cart, token]);
+  }, [itemQuantities, token]);
 
-  const addToCart = (item: ReorderItem, quantity: number) => {
-    if (quantity <= 0) return;
-
-    setCart(prevCart => {
-      const existingIndex = prevCart.findIndex(
-        cartItem => cartItem.consumable_code === item.consumable_code
-      );
-
-      if (existingIndex >= 0) {
-        const newCart = [...prevCart];
-        newCart[existingIndex].quantity = quantity;
-        return newCart;
+  const updateQuantity = (productCode: string, quantity: number) => {
+    setItemQuantities(prev => {
+      const newMap = new Map(prev);
+      if (quantity <= 0) {
+        newMap.delete(productCode);
       } else {
-        return [...prevCart, {
-          consumable_code: item.consumable_code,
-          description: item.description,
-          price: item.price,
-          quantity
-        }];
+        newMap.set(productCode, quantity);
       }
+      return newMap;
     });
   };
 
-  const removeFromCart = (consumableCode: string) => {
-    setCart(prevCart => prevCart.filter(item => item.consumable_code !== consumableCode));
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(sectionId)) {
+        newSet.delete(sectionId);
+      } else {
+        newSet.add(sectionId);
+      }
+      return newSet;
+    });
   };
 
-  const getTotalPrice = () => {
-    // Use tiered pricing if available, otherwise base pricing
-    if (pricingPreview && pricingPreview.line_items.length > 0) {
-      return pricingPreview.subtotal;
-    }
-    return cart.reduce((total, item) => {
-      return total + (item.price || 0) * item.quantity;
-    }, 0);
-  };
-
-  const getCartQuantity = () => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
+  const getTotalQuantity = () => {
+    return Array.from(itemQuantities.values()).reduce((sum, qty) => sum + qty, 0);
   };
 
   const handleRequestInvoice = () => {
-    if (cart.length === 0) return;
+    if (getTotalQuantity() === 0) return;
     setIsInvoiceModalOpen(true);
   };
 
   const handleInvoiceSuccess = (orderId: string) => {
     console.log('[PortalPage] Invoice created successfully:', orderId);
-    // Clear cart after successful invoice request
-    setCart([]);
+    setItemQuantities(new Map());
     setIsInvoiceModalOpen(false);
-    // Show success message - invoice sent to email
   };
 
-  const tabs = [
-    { id: 'reorder', label: 'Previously Ordered', code: '', icon: 'clock' },
-    ...(payload.by_tool_tabs || []).map(tab => ({
-      id: tab.tool_code,
-      label: tab.quantity && tab.quantity > 1
-        ? `${tab.tool_desc || tab.tool_code} (x${tab.quantity})`
-        : (tab.tool_desc || tab.tool_code),
-      code: tab.tool_code,
-      icon: 'tool'
-    }))
-  ];
+  // Build cart format for invoice modal
+  const cart = Array.from(itemQuantities.entries())
+    .filter(([_, qty]) => qty > 0)
+    .map(([product_code, quantity]) => {
+      // Find the item in payload
+      let item: ReorderItem | undefined;
+
+      // Check reorder items
+      item = payload.reorder_items.find(i => i.consumable_code === product_code);
+
+      // Check tool tabs
+      if (!item) {
+        for (const toolTab of payload.by_tool_tabs || []) {
+          item = toolTab.items.find(i => i.consumable_code === product_code);
+          if (item) break;
+        }
+      }
+
+      return {
+        consumable_code: product_code,
+        description: item?.description || product_code,
+        price: item?.price || 0,
+        quantity
+      };
+    });
 
   return (
     <>
-      {/* Premium Font */}
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
@@ -308,56 +294,167 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
               </div>
             )}
           </div>
-
-          {/* Category Tabs */}
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-6 py-3 rounded-[14px] font-[600] text-[15px] tracking-[-0.01em] whitespace-nowrap transition-all ${
-                  activeTab === tab.id
-                    ? 'bg-[#0a0a0a] text-white shadow-[0_4px_12px_rgba(0,0,0,0.15)]'
-                    : 'bg-white text-[#666] hover:bg-[#f5f5f5] border border-[#e8e8e8]'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Main Grid */}
         <div className="grid grid-cols-12 gap-8">
           {/* Main Content Area */}
           <div className="col-span-8 space-y-6">
-            {activeTab === 'reorder' ? (
-              <ReorderTab
-                items={payload.reorder_items}
-                cart={cart}
-                onAddToCart={addToCart}
-                onRemoveFromCart={removeFromCart}
-              />
-            ) : (
-              (() => {
-                const toolTab = payload.by_tool_tabs.find(tab => tab.tool_code === activeTab);
-                return toolTab ? (
-                  <ToolTab
-                    toolTab={toolTab}
-                    cart={cart}
-                    onAddToCart={addToCart}
-                    onRemoveFromCart={removeFromCart}
-                  />
-                ) : null;
-              })()
+            {/* Previously Ordered Section */}
+            {payload.reorder_items && payload.reorder_items.length > 0 && (
+              <div className="bg-white rounded-[20px] shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
+                <button
+                  onClick={() => toggleSection('reorder')}
+                  className="w-full px-8 py-6 flex items-center justify-between text-left hover:bg-[#fafafa] transition-colors rounded-t-[20px]"
+                >
+                  <div>
+                    <h2 className="text-[22px] font-[700] text-[#0a0a0a] tracking-tight">Previously Ordered</h2>
+                    <p className="text-[14px] text-[#666] mt-1">{payload.reorder_items.length} items</p>
+                  </div>
+                  <svg
+                    className={`w-6 h-6 text-[#666] transition-transform ${expandedSections.has('reorder') ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {expandedSections.has('reorder') && (
+                  <div className="px-8 pb-8 pt-4 space-y-4 border-t border-[#e8e8e8]">
+                    {payload.reorder_items.map((item) => {
+                      const currentQty = itemQuantities.get(item.consumable_code) || 0;
+
+                      return (
+                        <div key={item.consumable_code} className="flex items-center gap-4 p-4 border border-[#e8e8e8] rounded-[12px] hover:border-[#16a34a] transition-colors">
+                          <div className="relative w-20 h-20 bg-[#f9fafb] rounded-[8px] flex-shrink-0 overflow-hidden">
+                            <Image
+                              src={item.image_url || `/product_images/${item.consumable_code}.jpg`}
+                              alt={item.description}
+                              fill
+                              className="object-contain p-2"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.onerror = null;
+                                target.src = '/product-placeholder.svg';
+                              }}
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-[600] text-[15px] text-[#0a0a0a]">{item.description}</div>
+                            <div className="text-[13px] text-[#666] mt-1">
+                              {item.consumable_code}
+                              {item.last_purchased && (
+                                <span className="ml-2">• Last ordered: {new Date(item.last_purchased).toLocaleDateString()}</span>
+                              )}
+                            </div>
+                            <div className="text-[14px] font-[600] text-[#0a0a0a] mt-2">
+                              £{(item.price || 0).toFixed(2)} per unit
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <label className="text-[13px] text-[#666] font-[500]">Qty:</label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={currentQty}
+                              onChange={(e) => updateQuantity(item.consumable_code, parseInt(e.target.value) || 0)}
+                              className="w-20 px-3 py-2 border border-[#e8e8e8] rounded-[8px] text-center font-[600] focus:ring-2 focus:ring-[#16a34a] focus:border-[#16a34a] outline-none"
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             )}
+
+            {/* Tool Sections */}
+            {(payload.by_tool_tabs || []).map((toolTab) => (
+              <div key={toolTab.tool_code} className="bg-white rounded-[20px] shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
+                <button
+                  onClick={() => toggleSection(toolTab.tool_code)}
+                  className="w-full px-8 py-6 flex items-center justify-between text-left hover:bg-[#fafafa] transition-colors rounded-t-[20px]"
+                >
+                  <div>
+                    <h2 className="text-[22px] font-[700] text-[#0a0a0a] tracking-tight">
+                      {toolTab.tool_desc || toolTab.tool_code}
+                      {toolTab.quantity && toolTab.quantity > 1 && (
+                        <span className="text-[#666] font-[500]"> (x{toolTab.quantity})</span>
+                      )}
+                    </h2>
+                    <p className="text-[14px] text-[#666] mt-1">
+                      {toolTab.items.length} consumable{toolTab.items.length !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                  <svg
+                    className={`w-6 h-6 text-[#666] transition-transform ${expandedSections.has(toolTab.tool_code) ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {expandedSections.has(toolTab.tool_code) && (
+                  <div className="px-8 pb-8 pt-4 space-y-4 border-t border-[#e8e8e8]">
+                    {toolTab.items.map((item) => {
+                      const currentQty = itemQuantities.get(item.consumable_code) || 0;
+
+                      return (
+                        <div key={item.consumable_code} className="flex items-center gap-4 p-4 border border-[#e8e8e8] rounded-[12px] hover:border-[#16a34a] transition-colors">
+                          <div className="relative w-20 h-20 bg-[#f9fafb] rounded-[8px] flex-shrink-0 overflow-hidden">
+                            <Image
+                              src={(item as any).image_url || `/product_images/${item.consumable_code}.jpg`}
+                              alt={item.description}
+                              fill
+                              className="object-contain p-2"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.onerror = null;
+                                target.src = '/product-placeholder.svg';
+                              }}
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-[600] text-[15px] text-[#0a0a0a]">{item.description}</div>
+                            <div className="text-[13px] text-[#666] mt-1">
+                              {item.consumable_code}
+                              {item.category && <span className="ml-2">• {item.category}</span>}
+                              {item.last_purchased && (
+                                <span className="ml-2">• Last ordered: {new Date(item.last_purchased).toLocaleDateString()}</span>
+                              )}
+                            </div>
+                            <div className="text-[14px] font-[600] text-[#0a0a0a] mt-2">
+                              £{(item.price || 0).toFixed(2)} per unit
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <label className="text-[13px] text-[#666] font-[500]">Qty:</label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={currentQty}
+                              onChange={(e) => updateQuantity(item.consumable_code, parseInt(e.target.value) || 0)}
+                              className="w-20 px-3 py-2 border border-[#e8e8e8] rounded-[8px] text-center font-[600] focus:ring-2 focus:ring-[#16a34a] focus:border-[#16a34a] outline-none"
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            ))}
 
             {/* Tiered Pricing Guide */}
             {pricingPreview && !loadingPreview && pricingPreview.line_items.length > 0 && standardTiers.length > 0 && (() => {
               const standardItems = pricingPreview.line_items.filter(item => item.discount_applied?.includes('total units'));
               const standardTotalQty = standardItems.reduce((sum, item) => sum + item.quantity, 0);
 
-              // Transform database tiers to display format
               const tiersForDisplay = standardTiers.map((tier, idx) => ({
                 min: tier.min_quantity,
                 max: tier.max_quantity || Infinity,
@@ -374,58 +471,38 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
 
               return (
                 <div className="mt-10 space-y-6">
-                  {/* STANDARD TIER PRICING */}
                   {hasStandardItems && (() => {
                     const currentTier = tiersForDisplay.find(t => standardTotalQty >= t.min && standardTotalQty <= t.max);
                     const nextTier = tiersForDisplay.find(t => t.min > standardTotalQty);
-
-                    const progress = currentTier
-                      ? ((standardTotalQty - currentTier.min) / (currentTier.max - currentTier.min + 1)) * 100
-                      : 0;
-
+                    const progress = currentTier ? ((standardTotalQty - currentTier.min) / (currentTier.max - currentTier.min + 1)) * 100 : 0;
                     const unitsToNext = nextTier ? nextTier.min - standardTotalQty : 0;
-                    const potentialSavings = nextTier
-                      ? (currentTier!.price - nextTier.price) * standardTotalQty
-                      : 0;
+                    const potentialSavings = nextTier ? (currentTier!.price - nextTier.price) * standardTotalQty : 0;
 
                     return (
                       <div className="bg-gradient-to-br from-[#f9fafb] to-white rounded-[20px] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
                         <div className="flex items-center justify-between mb-5">
                           <div>
                             <h3 className="text-[22px] font-[700] text-[#0a0a0a] tracking-tight">Standard Tier Pricing</h3>
-                            <p className="text-[14px] text-[#666] mt-1 font-[400]">
-                              Combined total: {standardTotalQty} units
-                            </p>
+                            <p className="text-[14px] text-[#666] mt-1 font-[400]">Combined total: {standardTotalQty} units</p>
                           </div>
                           {pricingPreview.total_savings > 0 && (
                             <div className="text-right">
                               <div className="text-[14px] text-[#666] font-[500]">Total Savings</div>
-                              <div className="text-[28px] font-[800] text-[#16a34a]">
-                                £{pricingPreview.total_savings.toFixed(2)}
-                              </div>
+                              <div className="text-[28px] font-[800] text-[#16a34a]">£{pricingPreview.total_savings.toFixed(2)}</div>
                             </div>
                           )}
                         </div>
 
-                        {/* Tier Progress */}
                         <div className="mb-5">
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-[14px] font-[600] text-[#0a0a0a]">
-                              {currentTier?.label || 'Tier 1'} - £{currentTier?.price || 33}/unit
-                            </span>
-                            <span className="text-[14px] font-[500] text-[#666]">
-                              {Math.min(progress, 100).toFixed(0)}%
-                            </span>
+                            <span className="text-[14px] font-[600] text-[#0a0a0a]">{currentTier?.label || 'Tier 1'} - £{currentTier?.price || 33}/unit</span>
+                            <span className="text-[14px] font-[500] text-[#666]">{Math.min(progress, 100).toFixed(0)}%</span>
                           </div>
                           <div className="h-3 bg-[#f0f0f0] rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-gradient-to-r from-[#16a34a] to-[#22c55e] rounded-full transition-all duration-500"
-                              style={{ width: `${Math.min(progress, 100)}%` }}
-                            ></div>
+                            <div className="h-full bg-gradient-to-r from-[#16a34a] to-[#22c55e] rounded-full transition-all duration-500" style={{ width: `${Math.min(progress, 100)}%` }}></div>
                           </div>
                         </div>
 
-                        {/* Next Tier Unlock */}
                         {nextTier && (
                           <div className="bg-gradient-to-r from-[#ecfdf5] to-[#d1fae5] rounded-[12px] p-4 border border-[#a7f3d0]">
                             <div className="flex items-center gap-3">
@@ -435,35 +512,21 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                                 </svg>
                               </div>
                               <div className="flex-1">
-                                <div className="text-[14px] font-[700] text-[#0a0a0a]">
-                                  Add {unitsToNext} more {unitsToNext === 1 ? 'unit' : 'units'} to unlock {nextTier.label}
-                                </div>
-                                <div className="text-[13px] text-[#166534] mt-0.5 font-[500]">
-                                  Get £{nextTier.price}/unit pricing - Save an additional £{potentialSavings.toFixed(2)}!
-                                </div>
+                                <div className="text-[14px] font-[700] text-[#0a0a0a]">Add {unitsToNext} more {unitsToNext === 1 ? 'unit' : 'units'} to unlock {nextTier.label}</div>
+                                <div className="text-[13px] text-[#166534] mt-0.5 font-[500]">Get £{nextTier.price}/unit pricing - Save an additional £{potentialSavings.toFixed(2)}!</div>
                               </div>
                             </div>
                           </div>
                         )}
 
-                        {/* All Tiers Reference */}
                         <div className="mt-6 pt-6 border-t border-[#e8e8e8]">
                           <h4 className="text-[12px] font-[600] text-[#666] uppercase tracking-wider mb-3">All Pricing Tiers</h4>
                           <div className="grid grid-cols-4 gap-2">
                             {tiersForDisplay.map((tier, idx) => (
-                              <div
-                                key={idx}
-                                className={`text-center p-2 rounded-[8px] transition-all ${
-                                  currentTier?.label === tier.label
-                                    ? 'bg-[#16a34a] text-white'
-                                    : 'bg-[#f5f5f5] text-[#666]'
-                                }`}
-                              >
+                              <div key={idx} className={`text-center p-2 rounded-[8px] transition-all ${currentTier?.label === tier.label ? 'bg-[#16a34a] text-white' : 'bg-[#f5f5f5] text-[#666]'}`}>
                                 <div className="text-[11px] font-[600] opacity-80">{tier.label}</div>
                                 <div className="text-[16px] font-[800] mt-0.5">£{tier.price}</div>
-                                <div className="text-[10px] opacity-70 mt-0.5">
-                                  {tier.max === Infinity ? `${tier.min}+` : `${tier.min}-${tier.max}`} units
-                                </div>
+                                <div className="text-[10px] opacity-70 mt-0.5">{tier.max === Infinity ? `${tier.min}+` : `${tier.min}-${tier.max}`} units</div>
                               </div>
                             ))}
                           </div>
@@ -472,7 +535,6 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                     );
                   })()}
 
-                  {/* PREMIUM TIER PRICING */}
                   {hasPremiumItems && (
                     <div className="bg-gradient-to-br from-[#f9fafb] to-white rounded-[20px] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
                       <h3 className="text-[22px] font-[700] text-[#0a0a0a] tracking-tight mb-5">Premium Product Discounts</h3>
@@ -485,9 +547,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                             </div>
                             <div className="text-right">
                               {item.discount_applied && (
-                                <div className="inline-flex items-center px-3 py-1.5 bg-[#16a34a] text-white text-[12px] font-[600] rounded-[6px] mb-1">
-                                  {item.discount_applied}
-                                </div>
+                                <div className="inline-flex items-center px-3 py-1.5 bg-[#16a34a] text-white text-[12px] font-[600] rounded-[6px] mb-1">{item.discount_applied}</div>
                               )}
                               <div className="text-[14px] text-[#999] line-through">£{item.base_price.toFixed(2)}</div>
                               <div className="text-[18px] font-[700] text-[#0a0a0a]">£{item.unit_price.toFixed(2)}</div>
@@ -504,7 +564,6 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
 
           {/* Right Sidebar */}
           <div className="col-span-4 space-y-6">
-            {/* Company Info Card */}
             <div className="bg-white rounded-[20px] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8] sticky top-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="text-[12px] font-[700] text-[#666] uppercase tracking-[0.05em]">Company Details</div>
@@ -512,9 +571,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
               <div className="space-y-5">
                 <div>
                   <div className="text-[17px] font-[700] text-[#0a0a0a] mb-1 tracking-[-0.01em]">{payload.company_name}</div>
-                  <div className="text-[13px] text-[#999] font-mono">
-                    {payload.company_id}
-                  </div>
+                  <div className="text-[13px] text-[#999] font-mono">{payload.company_id}</div>
                 </div>
                 <div className="pt-5 border-t border-[#e8e8e8]">
                   <div className="text-[13px] font-[600] text-[#0a0a0a] mb-3">Contact</div>
@@ -529,12 +586,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-[13px] font-[600] text-[#0a0a0a]">Delivery Address</div>
                     {shippingAddress && (
-                      <button
-                        onClick={() => setShowAddressModal(true)}
-                        className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]"
-                      >
-                        Edit
-                      </button>
+                      <button onClick={() => setShowAddressModal(true)} className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
                     )}
                   </div>
                   {loadingAddress ? (
@@ -545,9 +597,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                     <div className="text-[13px] text-[#666] leading-relaxed">
                       <div className="p-4 bg-[#f9fafb] rounded-[12px] border border-[#e8e8e8]">
                         <div className="font-[500] text-[#0a0a0a]">{shippingAddress.address_line_1}</div>
-                        {shippingAddress.address_line_2 && (
-                          <div>{shippingAddress.address_line_2}</div>
-                        )}
+                        {shippingAddress.address_line_2 && <div>{shippingAddress.address_line_2}</div>}
                         <div>{shippingAddress.city}{shippingAddress.state_province ? `, ${shippingAddress.state_province}` : ''}</div>
                         <div>{shippingAddress.postal_code}</div>
                         <div className="font-[500] mt-1">{shippingAddress.country}</div>
@@ -556,9 +606,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                   ) : (
                     <div className="text-[13px] text-[#666] leading-relaxed">
                       <div className="p-4 bg-[#f9fafb] rounded-[12px] border border-[#e8e8e8]">
-                        <p className="text-[13px] text-[#999] italic">
-                          Address information will be confirmed during checkout
-                        </p>
+                        <p className="text-[13px] text-[#999] italic">Address information will be confirmed during checkout</p>
                       </div>
                     </div>
                   )}
@@ -566,7 +614,6 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
               </div>
             </div>
 
-            {/* Order Summary */}
             {pricingPreview && pricingPreview.line_items.length > 0 && (
               <div className="bg-[#0a0a0a] rounded-[20px] p-8 text-white sticky top-[200px] shadow-[0_16px_48px_rgba(0,0,0,0.24)]">
                 <div className="text-[12px] font-[700] text-[#999] uppercase tracking-[0.05em] mb-6">Order Summary</div>
@@ -578,9 +625,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                   {pricingPreview.shipping !== undefined && (
                     <div className="flex justify-between items-center">
                       <span className="text-[15px] text-[#999] font-[500]">Shipping</span>
-                      <span className="font-[600] text-[16px]">
-                        {pricingPreview.shipping === 0 ? 'FREE' : `£${pricingPreview.shipping.toFixed(2)}`}
-                      </span>
+                      <span className="font-[600] text-[16px]">{pricingPreview.shipping === 0 ? 'FREE' : `£${pricingPreview.shipping.toFixed(2)}`}</span>
                     </div>
                   )}
                   {pricingPreview.vat_amount !== undefined && (
@@ -597,35 +642,29 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                   )}
                   {pricingPreview.total_savings > 0 && (
                     <div className="mt-4 p-4 bg-[#16a34a]/10 rounded-[12px] border border-[#16a34a]/20">
-                      <div className="text-[13px] text-[#16a34a] font-[600]">
-                        You're saving £{pricingPreview.total_savings.toFixed(2)} with tiered pricing!
-                      </div>
+                      <div className="text-[13px] text-[#16a34a] font-[600]">You're saving £{pricingPreview.total_savings.toFixed(2)} with tiered pricing!</div>
                     </div>
                   )}
                 </div>
                 <button
                   onClick={handleRequestInvoice}
-                  disabled={getCartQuantity() === 0}
+                  disabled={getTotalQuantity() === 0}
                   className="w-full mt-6 py-4 bg-[#16a34a] text-white rounded-[14px] font-[700] text-[15px] tracking-[-0.01em] hover:bg-[#15803d] transition-all shadow-[0_4px_12px_rgba(22,163,74,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Request Invoice ({getCartQuantity()} items)
+                  Request Invoice ({getTotalQuantity()} items)
                 </button>
               </div>
             )}
 
-            {/* Help Card */}
             <div className="bg-white rounded-[20px] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
               <div className="text-[12px] font-[700] text-[#666] uppercase tracking-[0.05em] mb-4">Need Help?</div>
               <p className="text-[14px] text-[#666] mb-4">Our team is ready to assist with your order.</p>
-              <a href="tel:+441455554491" className="text-[15px] text-[#16a34a] font-[600] hover:text-[#15803d]">
-                +44 (0)1455 554491
-              </a>
+              <a href="tel:+441455554491" className="text-[15px] text-[#16a34a] font-[600] hover:text-[#15803d]">+44 (0)1455 554491</a>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Address Collection Modal (shown on first visit if no address) */}
       <PortalAddressCollectionModal
         isOpen={showAddressModal}
         onClose={() => setShowAddressModal(false)}
@@ -635,7 +674,6 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
         onSuccess={handleAddressSaved}
       />
 
-      {/* Invoice Request Modal */}
       <InvoiceRequestModal
         isOpen={isInvoiceModalOpen}
         onClose={() => setIsInvoiceModalOpen(false)}
