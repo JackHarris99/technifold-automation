@@ -8,11 +8,11 @@
 CREATE OR REPLACE FUNCTION sync_invoice_to_product_history()
 RETURNS TRIGGER AS $$
 DECLARE
-  v_company_id text;
-  v_invoice_date date;
-  v_payment_status text;
-  v_product_type text;
-  v_item record;
+  v_company_id TEXT;
+  v_invoice_date DATE;
+  v_payment_status TEXT;
+  v_product_type TEXT;
+  v_item RECORD;
 BEGIN
   -- Only process if invoice is paid
   IF (TG_OP = 'INSERT' AND NEW.payment_status = 'paid') OR

@@ -4,12 +4,12 @@
 -- This migration ensures all historical paid invoices are in product_history
 -- Run this AFTER the triggers are created
 
-DO $$
+DO $backfill$
 DECLARE
-  v_invoice record;
-  v_item record;
-  v_product_type text;
-  v_synced_count integer := 0;
+  v_invoice RECORD;
+  v_item RECORD;
+  v_product_type TEXT;
+  v_synced_count INTEGER := 0;
 BEGIN
   RAISE NOTICE 'Starting backfill of paid invoices to company_product_history...';
 
@@ -78,14 +78,14 @@ BEGIN
 
   -- The triggers on company_product_history will automatically sync to
   -- company_consumables and company_tools, so we don't need separate backfills
-END $$;
+END $backfill$;
 
 -- Verify the sync
-DO $$
+DO $verify$
 DECLARE
-  v_history_count integer;
-  v_consumables_count integer;
-  v_tools_count integer;
+  v_history_count INTEGER;
+  v_consumables_count INTEGER;
+  v_tools_count INTEGER;
 BEGIN
   SELECT COUNT(*) INTO v_history_count FROM company_product_history WHERE source IN ('invoice', 'invoice_backfill');
   SELECT COUNT(*) INTO v_consumables_count FROM company_consumables;
@@ -95,4 +95,4 @@ BEGIN
   RAISE NOTICE '  - company_product_history (from invoices): %', v_history_count;
   RAISE NOTICE '  - company_consumables: %', v_consumables_count;
   RAISE NOTICE '  - company_tools: %', v_tools_count;
-END $$;
+END $verify$;
