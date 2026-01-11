@@ -60,7 +60,7 @@ export default function ToolsSection({ tools, companyId }: ToolsSectionProps) {
                     <div className="text-sm text-gray-600 mt-2">
                       <span className="font-semibold">Quantity:</span> {tool.total_units} unit{tool.total_units !== 1 ? 's' : ''}
                     </div>
-                    <div className="text-xs text-gray-500 mt-2">
+                    <div className="text-xs text-gray-700 mt-2">
                       First seen: {new Date(tool.first_seen_at).toLocaleDateString('en-GB')}
                       {' '}• Last updated: {new Date(tool.last_seen_at).toLocaleDateString('en-GB')}
                     </div>

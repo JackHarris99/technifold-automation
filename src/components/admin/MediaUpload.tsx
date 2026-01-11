@@ -245,7 +245,7 @@ export default function MediaUpload({
 
         {/* File info */}
         {preview && (
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-700">
             {preview.startsWith('data:') ? 'Uploading...' : 'Uploaded successfully'}
           </div>
         )}

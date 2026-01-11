@@ -144,7 +144,7 @@ export default function QuoteRequestsTable({ initialData }: QuoteRequestsTablePr
           <tbody className="divide-y divide-gray-200">
             {filteredRequests.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
+                <td colSpan={8} className="px-4 py-8 text-center text-gray-700">
                   No quote requests found
                 </td>
               </tr>
@@ -158,11 +158,11 @@ export default function QuoteRequestsTable({ initialData }: QuoteRequestsTablePr
                     >
                       {request.companies.company_name}
                     </Link>
-                    <div className="text-xs text-gray-500">{request.company_id}</div>
+                    <div className="text-xs text-gray-700">{request.company_id}</div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="text-sm">{request.contacts.full_name || request.contacts.first_name || 'No name'}</div>
-                    <div className="text-xs text-gray-500">{request.contacts.email}</div>
+                    <div className="text-xs text-gray-700">{request.contacts.email}</div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="text-sm text-gray-700">{request.machine_slug || '—'}</div>

@@ -99,7 +99,7 @@ export default function AddCompanyModal({ isOpen, onClose, onSuccess }: AddCompa
             <button
               onClick={handleClose}
               disabled={isSubmitting}
-              className="text-white hover:text-gray-300"
+              className="text-white hover:text-gray-500"
             >
               ✕
             </button>

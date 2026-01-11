@@ -79,7 +79,7 @@ export function EngagementTimeline({ companyId, limit = 50 }: EngagementTimeline
 
   if (events.length === 0) {
     return (
-      <div className="p-8 text-center text-gray-500">
+      <div className="p-8 text-center text-gray-700">
         No engagement events found
       </div>
     );
@@ -108,11 +108,11 @@ export function EngagementTimeline({ companyId, limit = 50 }: EngagementTimeline
                   <p className="text-sm text-gray-600">
                     {event.company_name}
                     {event.contact_name && (
-                      <span className="text-gray-400"> • {event.contact_name}</span>
+                      <span className="text-gray-600"> • {event.contact_name}</span>
                     )}
                   </p>
                 </div>
-                <time className="text-sm text-gray-500 whitespace-nowrap">
+                <time className="text-sm text-gray-700 whitespace-nowrap">
                   {formatTimestamp(event.occurred_at)}
                 </time>
               </div>
@@ -140,7 +140,7 @@ export function EngagementTimeline({ companyId, limit = 50 }: EngagementTimeline
               </div>
 
               {event.url && (
-                <p className="mt-2 text-xs text-gray-500 truncate">
+                <p className="mt-2 text-xs text-gray-700 truncate">
                   {event.url}
                 </p>
               )}

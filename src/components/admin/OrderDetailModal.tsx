@@ -92,7 +92,7 @@ export default function OrderDetailModal({ orderId, onClose, onUpdate }: OrderDe
           <h2 className="text-2xl font-bold text-gray-900">Order Details</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
+            className="text-gray-600 hover:text-gray-600 text-2xl font-bold"
           >
             ×
           </button>
@@ -102,19 +102,19 @@ export default function OrderDetailModal({ orderId, onClose, onUpdate }: OrderDe
           {/* Order Info */}
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">Order ID</h3>
+              <h3 className="text-sm font-semibold text-gray-700 uppercase mb-2">Order ID</h3>
               <p className="font-mono text-sm">{order.order_id}</p>
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">Created</h3>
+              <h3 className="text-sm font-semibold text-gray-700 uppercase mb-2">Created</h3>
               <p>{new Date(order.created_at).toLocaleString()}</p>
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">Company</h3>
+              <h3 className="text-sm font-semibold text-gray-700 uppercase mb-2">Company</h3>
               <p className="font-semibold">{order.companies?.company_name}</p>
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">Contact</h3>
+              <h3 className="text-sm font-semibold text-gray-700 uppercase mb-2">Contact</h3>
               <p className="font-semibold">{order.contacts?.full_name}</p>
               <p className="text-sm text-gray-600">{order.contacts?.email}</p>
             </div>

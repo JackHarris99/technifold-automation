@@ -123,7 +123,7 @@ export default function SkuExplorer({ allSkus }: SkuExplorerProps) {
         {searchTerm && (
           <div className="border-2 border-gray-200 rounded-xl max-h-80 overflow-y-auto">
             {filteredSkus.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">No SKUs found</div>
+              <div className="p-8 text-center text-gray-700">No SKUs found</div>
             ) : (
               filteredSkus.map((sku) => (
                 <button
@@ -147,7 +147,7 @@ export default function SkuExplorer({ allSkus }: SkuExplorerProps) {
               ))
             )}
             {filteredSkus.length === 50 && (
-              <div className="p-4 text-center text-sm text-gray-500 bg-gray-50">
+              <div className="p-4 text-center text-sm text-gray-700 bg-gray-50">
                 Showing first 50 results - type more to narrow down
               </div>
             )}
@@ -158,7 +158,7 @@ export default function SkuExplorer({ allSkus }: SkuExplorerProps) {
       {/* Row 2: SKU Details */}
       {loading && (
         <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
-          <p className="text-gray-500">Loading SKU details...</p>
+          <p className="text-gray-700">Loading SKU details...</p>
         </div>
       )}
 
@@ -284,7 +284,7 @@ export default function SkuExplorer({ allSkus }: SkuExplorerProps) {
                 </h3>
 
                 {relatedItems.length === 0 ? (
-                  <p className="text-gray-500">No related items found</p>
+                  <p className="text-gray-700">No related items found</p>
                 ) : (
                   <div className="grid md:grid-cols-2 gap-4">
                     {relatedItems.map((item: any) => (
@@ -310,10 +310,10 @@ export default function SkuExplorer({ allSkus }: SkuExplorerProps) {
 
       {!selectedSku && !loading && (
         <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
-          <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-16 h-16 text-gray-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          <p className="text-gray-500 text-lg">Search for a SKU to view details</p>
+          <p className="text-gray-700 text-lg">Search for a SKU to view details</p>
         </div>
       )}
     </div>

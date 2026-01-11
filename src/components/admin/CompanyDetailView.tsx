@@ -70,12 +70,12 @@ export default function CompanyDetailView({
             <div>
               <Link
                 href="/admin/companies"
-                className="text-sm text-gray-500 hover:text-gray-700 mb-2 inline-block"
+                className="text-sm text-gray-700 hover:text-gray-700 mb-2 inline-block"
               >
                 ← Back to Companies
               </Link>
               <h1 className="text-3xl font-bold text-gray-900">{company.company_name}</h1>
-              <p className="text-gray-500 mt-1">{company.company_id}</p>
+              <p className="text-gray-700 mt-1">{company.company_id}</p>
               <CompanyStatusControl
                 companyId={company.company_id}
                 companyName={company.company_name}
@@ -115,7 +115,7 @@ export default function CompanyDetailView({
                 className={`pb-3 px-2 font-medium transition-colors ${
                   activeTab === tab.id
                     ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
+                    : 'text-gray-700 hover:text-gray-700'
                 }`}
               >
                 {tab.label}
@@ -295,23 +295,23 @@ function OverviewTab({
           <h2 className="text-lg font-semibold mb-4">Company Information</h2>
           <dl className="space-y-3">
             <div>
-              <dt className="text-sm text-gray-500">Account Owner</dt>
+              <dt className="text-sm text-gray-700">Account Owner</dt>
               <dd className="text-sm font-medium">{company.account_owner || 'Unassigned'}</dd>
             </div>
             <div>
-              <dt className="text-sm text-gray-500">Category</dt>
+              <dt className="text-sm text-gray-700">Category</dt>
               <dd className="text-sm font-medium">{company.category || '-'}</dd>
             </div>
             <div>
-              <dt className="text-sm text-gray-500">Country</dt>
+              <dt className="text-sm text-gray-700">Country</dt>
               <dd className="text-sm font-medium">{company.country || '-'}</dd>
             </div>
 
             {/* VAT Number - Editable */}
             <div className="border-t pt-3">
-              <dt className="text-sm text-gray-500 mb-1">VAT Number</dt>
+              <dt className="text-sm text-gray-700 mb-1">VAT Number</dt>
               <dd className="text-sm font-medium">
-                {company.vat_number || <span className="text-gray-400 italic">Not set - click to add</span>}
+                {company.vat_number || <span className="text-gray-600 italic">Not set - click to add</span>}
               </dd>
               <button
                 onClick={handleUpdateVAT}
@@ -323,7 +323,7 @@ function OverviewTab({
 
             {/* Billing Address - Editable */}
             <div className="border-t pt-3">
-              <dt className="text-sm text-gray-500 mb-1">Billing Address</dt>
+              <dt className="text-sm text-gray-700 mb-1">Billing Address</dt>
               <dd className="text-sm">
                 {hasBillingAddress ? (
                   <div className="text-gray-700">
@@ -334,7 +334,7 @@ function OverviewTab({
                     {company.billing_country && <div className="font-medium">{company.billing_country}</div>}
                   </div>
                 ) : (
-                  <span className="text-gray-400 italic">Not set - click to add</span>
+                  <span className="text-gray-600 italic">Not set - click to add</span>
                 )}
               </dd>
               <button
@@ -346,7 +346,7 @@ function OverviewTab({
             </div>
 
             <div className="border-t pt-3">
-              <dt className="text-sm text-gray-500">Website</dt>
+              <dt className="text-sm text-gray-700">Website</dt>
               <dd className="text-sm font-medium">
                 {company.website ? (
                   <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
@@ -356,7 +356,7 @@ function OverviewTab({
               </dd>
             </div>
             <div>
-              <dt className="text-sm text-gray-500">Stripe Customer ID</dt>
+              <dt className="text-sm text-gray-700">Stripe Customer ID</dt>
               <dd className="text-sm font-mono text-gray-600">{company.stripe_customer_id || 'Not set'}</dd>
             </div>
           </dl>
@@ -365,7 +365,7 @@ function OverviewTab({
         {/* Contacts */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Contacts ({contacts.length})</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Contacts ({contacts.length})</h2>
             <button
               onClick={onAddContact}
               className="text-sm text-blue-600 hover:text-blue-800 font-medium"
@@ -374,14 +374,14 @@ function OverviewTab({
             </button>
           </div>
           {contacts.length === 0 ? (
-            <p className="text-gray-500 text-sm">No contacts yet</p>
+            <p className="text-gray-700 text-sm">No contacts yet</p>
           ) : (
             <div className="space-y-3">
               {contacts.slice(0, 5).map((contact) => (
                 <div key={contact.contact_id} className="border-b border-gray-100 pb-3 last:border-0">
                   <div className="font-medium text-sm">{contact.full_name || `${contact.first_name} ${contact.last_name}`}</div>
-                  <div className="text-sm text-gray-500">{contact.email}</div>
-                  {contact.role && <div className="text-xs text-gray-400 mt-1">{contact.role}</div>}
+                  <div className="text-sm text-gray-700">{contact.email}</div>
+                  {contact.role && <div className="text-xs text-gray-600 mt-1">{contact.role}</div>}
                 </div>
               ))}
             </div>
@@ -392,7 +392,7 @@ function OverviewTab({
       {/* Shipping Addresses */}
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Shipping Addresses ({shippingAddresses.length})</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Shipping Addresses ({shippingAddresses.length})</h2>
           <button
             onClick={onAddAddress}
             className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
@@ -450,7 +450,7 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
       {/* Purchased Tools */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Purchased Tools ({tools.length})</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Purchased Tools ({tools.length})</h2>
           <button
             onClick={onAddTool}
             className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 font-medium"
@@ -460,7 +460,7 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
         </div>
         <div className="p-6">
           {tools.length === 0 ? (
-            <p className="text-gray-500 text-sm">No tools purchased yet</p>
+            <p className="text-gray-700 text-sm">No tools purchased yet</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {tools.map((item: any) => (
@@ -481,9 +481,9 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="font-medium">{item.products?.description || item.product_code}</div>
-                      <div className="text-xs text-gray-500 mt-1">SKU: {item.product_code}</div>
+                      <div className="text-xs text-gray-700 mt-1">SKU: {item.product_code}</div>
                       <div className="text-sm text-gray-600 mt-2">Qty: {item.total_quantity}</div>
-                      <div className="text-xs text-gray-400 mt-1">
+                      <div className="text-xs text-gray-600 mt-1">
                         Last: {item.last_purchased_at}
                       </div>
                       {item.source === 'manual' && (
@@ -503,11 +503,11 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
       {/* Purchased Consumables */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold">Purchased Consumables ({consumables.length})</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Purchased Consumables ({consumables.length})</h2>
         </div>
         <div className="p-6">
           {consumables.length === 0 ? (
-            <p className="text-gray-500 text-sm">No consumables purchased yet</p>
+            <p className="text-gray-700 text-sm">No consumables purchased yet</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {consumables.map((item: any) => (
@@ -528,11 +528,11 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-sm">{item.products?.description || item.product_code}</div>
-                      <div className="text-xs text-gray-500 mt-1">{item.product_code}</div>
+                      <div className="text-xs text-gray-700 mt-1">{item.product_code}</div>
                       <div className="text-xs text-gray-600 mt-2">
                         {item.total_purchases} orders • {item.total_quantity} total
                       </div>
-                      <div className="text-xs text-gray-400 mt-1">Last: {item.last_purchased_at}</div>
+                      <div className="text-xs text-gray-600 mt-1">Last: {item.last_purchased_at}</div>
                     </div>
                   </div>
                 </div>
@@ -546,7 +546,7 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
       {parts.length > 0 && (
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold">Other Parts ({parts.length})</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Other Parts ({parts.length})</h2>
           </div>
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -568,9 +568,9 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-sm">{item.products?.description || item.product_code}</div>
-                      <div className="text-xs text-gray-500 mt-1">{item.product_code}</div>
+                      <div className="text-xs text-gray-700 mt-1">{item.product_code}</div>
                       <div className="text-xs text-gray-600 mt-2">Qty: {item.total_quantity}</div>
-                      <div className="text-xs text-gray-400 mt-1">Last: {item.last_purchased_at}</div>
+                      <div className="text-xs text-gray-600 mt-1">Last: {item.last_purchased_at}</div>
                     </div>
                   </div>
                 </div>
@@ -595,15 +595,15 @@ function SubscriptionsTab({ subscriptionTools, subscriptions, companyId, onAddTo
           <h2 className="text-lg font-semibold mb-4">Active Subscription</h2>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <div className="text-sm text-gray-500">Status</div>
+              <div className="text-sm text-gray-700">Status</div>
               <div className="text-lg font-medium capitalize">{activeSub.status}</div>
             </div>
             <div>
-              <div className="text-sm text-gray-500">Monthly Price</div>
+              <div className="text-sm text-gray-700">Monthly Price</div>
               <div className="text-lg font-medium">£{activeSub.monthly_price}</div>
             </div>
             <div>
-              <div className="text-sm text-gray-500">Next Billing</div>
+              <div className="text-sm text-gray-700">Next Billing</div>
               <div className="text-sm">{activeSub.next_billing_date || 'N/A'}</div>
             </div>
           </div>
@@ -613,7 +613,7 @@ function SubscriptionsTab({ subscriptionTools, subscriptions, companyId, onAddTo
       {/* Tools on Subscription */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Tools on Subscription ({subscriptionTools.length})</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Tools on Subscription ({subscriptionTools.length})</h2>
           <button
             onClick={onAddTool}
             className="text-sm bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 font-medium"
@@ -623,15 +623,15 @@ function SubscriptionsTab({ subscriptionTools, subscriptions, companyId, onAddTo
         </div>
         <div className="p-6">
           {subscriptionTools.length === 0 ? (
-            <p className="text-gray-500 text-sm">No tools on subscription</p>
+            <p className="text-gray-700 text-sm">No tools on subscription</p>
           ) : (
             <div className="space-y-3">
               {subscriptionTools.map((item: any) => (
                 <div key={item.tool_code} className="flex items-center justify-between border border-gray-200 rounded-lg p-4">
                   <div>
                     <div className="font-medium">{item.products?.description || item.tool_code}</div>
-                    <div className="text-xs text-gray-500 mt-1">SKU: {item.tool_code}</div>
-                    <div className="text-xs text-gray-400 mt-1">
+                    <div className="text-xs text-gray-700 mt-1">SKU: {item.tool_code}</div>
+                    <div className="text-xs text-gray-600 mt-1">
                       Added: {item.added_at} {item.added_by && `by ${item.added_by}`}
                     </div>
                   </div>
@@ -658,15 +658,15 @@ function InvoicesTab({ invoices, companyId }: any) {
       <div className="bg-white rounded-lg shadow p-6">
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <div className="text-sm text-gray-500">Total Revenue (Since Launch)</div>
+            <div className="text-sm text-gray-700">Total Revenue (Since Launch)</div>
             <div className="text-2xl font-bold text-green-600">£{totalRevenue.toFixed(2)}</div>
           </div>
           <div>
-            <div className="text-sm text-gray-500">Total Invoices</div>
+            <div className="text-sm text-gray-700">Total Invoices</div>
             <div className="text-2xl font-bold">{invoices.length}</div>
           </div>
           <div>
-            <div className="text-sm text-gray-500">Paid</div>
+            <div className="text-sm text-gray-700">Paid</div>
             <div className="text-2xl font-bold">
               {invoices.filter((inv: any) => inv.payment_status === 'paid').length}
             </div>
@@ -677,20 +677,20 @@ function InvoicesTab({ invoices, companyId }: any) {
       {/* Invoices List */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold">Invoices</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Invoices</h2>
         </div>
         <div className="overflow-x-auto">
           {invoices.length === 0 ? (
-            <div className="p-6 text-gray-500 text-sm">No invoices yet</div>
+            <div className="p-6 text-gray-700 text-sm">No invoices yet</div>
           ) : (
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Invoice #</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Invoice #</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Amount</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -785,22 +785,22 @@ function QuotesTab({ quotes, companyId }: { quotes: any[]; companyId: string }) 
   return (
     <div className="bg-white rounded-lg shadow">
       <div className="px-6 py-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold">Quotes ({quotes.length})</h2>
+        <h2 className="text-lg font-semibold text-gray-900">Quotes ({quotes.length})</h2>
       </div>
       <div className="overflow-x-auto">
         {quotes.length === 0 ? (
-          <div className="p-6 text-gray-500 text-sm">No quotes yet</div>
+          <div className="p-6 text-gray-700 text-sm">No quotes yet</div>
         ) : (
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quote ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sent</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Quote ID</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Type</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Amount</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Created</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Sent</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -853,11 +853,11 @@ function EngagementTab({ engagement }: { engagement: any[] }) {
   return (
     <div className="bg-white rounded-lg shadow">
       <div className="px-6 py-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold">Engagement Timeline ({engagement.length})</h2>
+        <h2 className="text-lg font-semibold text-gray-900">Engagement Timeline ({engagement.length})</h2>
       </div>
       <div className="p-6">
         {engagement.length === 0 ? (
-          <p className="text-gray-500 text-sm">No engagement events yet</p>
+          <p className="text-gray-700 text-sm">No engagement events yet</p>
         ) : (
           <div className="space-y-4">
             {engagement.map((event: any) => (
@@ -869,11 +869,11 @@ function EngagementTab({ engagement }: { engagement: any[] }) {
                       <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">{event.source}</span>
                     )}
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-xs text-gray-700 mt-1">
                     {new Date(event.occurred_at).toLocaleString()}
                   </div>
                   {event.url && (
-                    <div className="text-xs text-gray-400 mt-1 truncate">{event.url}</div>
+                    <div className="text-xs text-gray-600 mt-1 truncate">{event.url}</div>
                   )}
                 </div>
               </div>

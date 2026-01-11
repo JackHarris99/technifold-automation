@@ -106,7 +106,7 @@ export default function AddToolModal({ isOpen, onClose, companyId }: AddToolModa
           <h2 className="text-xl font-bold">Add Tool to Purchase History</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-600 hover:text-gray-600"
           >
             ✕
           </button>
@@ -118,7 +118,7 @@ export default function AddToolModal({ isOpen, onClose, companyId }: AddToolModa
               Tool <span className="text-red-500">*</span>
             </label>
             {loadingProducts ? (
-              <div className="text-sm text-gray-500">Loading tools...</div>
+              <div className="text-sm text-gray-700">Loading tools...</div>
             ) : (
               <select
                 required

@@ -201,7 +201,7 @@ export default function ManageToolsModal({
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
+            className="text-gray-600 hover:text-gray-600 text-2xl font-bold"
           >
             ×
           </button>
@@ -234,9 +234,9 @@ export default function ManageToolsModal({
                     {toolSearch && (
                       <div className="mt-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg bg-white">
                         {searchLoading ? (
-                          <div className="p-3 text-center text-gray-500">Searching...</div>
+                          <div className="p-3 text-center text-gray-700">Searching...</div>
                         ) : availableTools.length === 0 ? (
-                          <div className="p-3 text-center text-gray-500">No tools found</div>
+                          <div className="p-3 text-center text-gray-700">No tools found</div>
                         ) : (
                           availableTools.map((tool) => (
                             <button

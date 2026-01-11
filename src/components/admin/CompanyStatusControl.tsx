@@ -107,7 +107,7 @@ export default function CompanyStatusControl({
         <option value="dead">{getStatusIcon('dead')} Dead</option>
       </select>
 
-      {isUpdating && <span className="text-sm text-gray-500">Updating...</span>}
+      {isUpdating && <span className="text-sm text-gray-700">Updating...</span>}
 
       {success && (
         <span className="text-sm text-green-600 font-medium animate-pulse">
@@ -122,7 +122,7 @@ export default function CompanyStatusControl({
       )}
 
       {!isOwner && (
-        <span className="text-xs text-gray-500 italic">
+        <span className="text-xs text-gray-700 italic">
           (Only {accountOwner} can change status)
         </span>
       )}

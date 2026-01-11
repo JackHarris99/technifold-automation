@@ -88,7 +88,7 @@ export default function EditBillingAddressModal({
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold">Edit Billing Address</h2>
-          <p className="text-sm text-gray-500 mt-1">{companyName}</p>
+          <p className="text-sm text-gray-700 mt-1">{companyName}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">

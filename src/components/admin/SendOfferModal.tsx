@@ -176,9 +176,9 @@ export default function SendOfferModal({
               Recipients
             </label>
             {loadingContacts ? (
-              <p className="text-sm text-gray-500">Loading contacts...</p>
+              <p className="text-sm text-gray-700">Loading contacts...</p>
             ) : contacts.length === 0 ? (
-              <p className="text-sm text-gray-500">No contacts found for this company</p>
+              <p className="text-sm text-gray-700">No contacts found for this company</p>
             ) : (
               <div className="border border-gray-300 rounded-md divide-y divide-gray-200 max-h-60 overflow-y-auto">
                 {contacts.map(contact => (
@@ -197,7 +197,7 @@ export default function SendOfferModal({
                       <div className="text-sm font-medium text-gray-900">
                         {contact.full_name || contact.email}
                       </div>
-                      <div className="text-sm text-gray-500">{contact.email}</div>
+                      <div className="text-sm text-gray-700">{contact.email}</div>
                     </div>
                     <span className={`text-xs px-2 py-1 rounded ${
                       contact.marketing_status === 'subscribed'
@@ -212,7 +212,7 @@ export default function SendOfferModal({
                 ))}
               </div>
             )}
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mt-2 text-sm text-gray-700">
               Selected: {selectedContacts.length} contact(s)
             </p>
           </div>

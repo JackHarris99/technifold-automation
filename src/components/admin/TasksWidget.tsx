@@ -122,7 +122,7 @@ export default function TasksWidget({ userId }: { userId: string }) {
   if (loading) {
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <div className="text-center text-gray-500">Loading tasks...</div>
+        <div className="text-center text-gray-700">Loading tasks...</div>
       </div>
     );
   }
@@ -184,7 +184,7 @@ export default function TasksWidget({ userId }: { userId: string }) {
                             {task.description}
                           </div>
                         )}
-                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                        <div className="flex items-center gap-4 text-xs text-gray-700">
                           {task.due_date && (
                             <div className="flex items-center gap-1">
                               <span>Due:</span>

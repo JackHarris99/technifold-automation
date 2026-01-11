@@ -142,7 +142,7 @@ export default function QuotePreview({
         <div className="max-w-6xl mx-auto px-6 py-3">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Quote Preview Mode</div>
+              <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Quote Preview Mode</div>
               <div className="text-sm">
                 <strong>{company.company_name}</strong> • {contact.email}
               </div>
@@ -198,13 +198,13 @@ export default function QuotePreview({
           <div className="flex items-center gap-8">
             {/* Brand Logos Placeholder */}
             <div className="h-12 w-32 bg-gray-100 rounded flex items-center justify-center">
-              <span className="text-xs text-gray-500 font-semibold">TECHNIFOLD</span>
+              <span className="text-xs text-gray-700 font-semibold">TECHNIFOLD</span>
             </div>
             <div className="h-10 w-28 bg-gray-100 rounded flex items-center justify-center">
-              <span className="text-xs text-gray-500 font-semibold">TECHNICREASE</span>
+              <span className="text-xs text-gray-700 font-semibold">TECHNICREASE</span>
             </div>
             <div className="h-10 w-28 bg-gray-100 rounded flex items-center justify-center">
-              <span className="text-xs text-gray-500 font-semibold">CREASESTREAM</span>
+              <span className="text-xs text-gray-700 font-semibold">CREASESTREAM</span>
             </div>
           </div>
         </div>
@@ -218,7 +218,7 @@ export default function QuotePreview({
           <p className="text-xl text-gray-600">
             For {company.company_name}
           </p>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-700 mt-1">
             Contact: {contact.full_name || contact.email}
           </p>
         </div>
@@ -245,7 +245,7 @@ export default function QuotePreview({
                         onChange={(e) => updateQuantity(product.product_code, parseInt(e.target.value))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                       />
-                      <p className="text-xs text-gray-500 mt-1">(Set to 0 to exclude)</p>
+                      <p className="text-xs text-gray-700 mt-1">(Set to 0 to exclude)</p>
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-gray-600 mb-1">Discount %</label>
@@ -366,7 +366,7 @@ export default function QuotePreview({
                     {/* Line Total */}
                     {item.product.quantity === 0 ? (
                       <div className="pt-3 border-t border-gray-200">
-                        <p className="text-sm text-gray-500 italic text-center py-2">
+                        <p className="text-sm text-gray-700 italic text-center py-2">
                           Not included in quote (quantity is 0)
                         </p>
                       </div>
@@ -476,7 +476,7 @@ export default function QuotePreview({
               <h3 className="text-3xl font-bold text-gray-900 mb-2">Purchase Outright</h3>
               <div className="text-5xl font-bold text-gray-600 mb-6">
                 £{totals.purchaseTotal.toFixed(2)}
-                <span className="text-2xl text-gray-500"> once</span>
+                <span className="text-2xl text-gray-700"> once</span>
               </div>
               <p className="text-sm text-gray-600 mb-4">Total for all {itemsInQuote} item{itemsInQuote !== 1 ? 's' : ''}</p>
 
@@ -500,10 +500,10 @@ export default function QuotePreview({
                   <span className="text-gray-700">Yours to keep forever</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <svg className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-gray-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
-                  <span className="text-gray-500">Large upfront investment</span>
+                  <span className="text-gray-700">Large upfront investment</span>
                 </li>
               </ul>
             </button>
@@ -620,7 +620,7 @@ export default function QuotePreview({
             )}
           </button>
 
-          <p className="text-center text-sm text-gray-500 mt-4">
+          <p className="text-center text-sm text-gray-700 mt-4">
             🔒 Secure payment powered by Stripe
           </p>
         </div>
@@ -634,7 +634,7 @@ export default function QuotePreview({
                 info@technifold.co.uk
               </a>
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-700">
               © {new Date().getFullYear()} Technifold. All rights reserved.
             </p>
           </div>

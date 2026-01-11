@@ -115,7 +115,7 @@ export default function CompanySearchBar() {
           className="w-full px-4 py-2 pl-10 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 placeholder-gray-400"
         />
         <svg
-          className="absolute left-3 top-2.5 w-5 h-5 text-gray-400"
+          className="absolute left-3 top-2.5 w-5 h-5 text-gray-600"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -147,10 +147,10 @@ export default function CompanySearchBar() {
             >
               <div className="font-semibold text-gray-900">{company.company_name}</div>
               <div className="flex items-center gap-2 mt-1 text-xs">
-                <span className="text-gray-500">{company.company_id}</span>
+                <span className="text-gray-700">{company.company_id}</span>
                 {company.account_owner && (
                   <>
-                    <span className="text-gray-400">•</span>
+                    <span className="text-gray-600">•</span>
                     <span className={`font-medium ${getOwnerColor(company.account_owner)}`}>
                       {company.account_owner}
                     </span>
@@ -164,7 +164,7 @@ export default function CompanySearchBar() {
 
       {/* No Results */}
       {showResults && searchTerm && !loading && results.length === 0 && (
-        <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-xl p-4 text-center text-gray-500">
+        <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-xl p-4 text-center text-gray-700">
           No companies found for "{searchTerm}"
         </div>
       )}

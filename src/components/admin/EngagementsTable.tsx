@@ -174,9 +174,9 @@ export default function EngagementsTable({
       {/* Engagement List */}
       {filtered.length === 0 ? (
         <div className="bg-white border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
-          <div className="text-gray-400 text-5xl mb-4">📊</div>
+          <div className="text-gray-600 text-5xl mb-4">📊</div>
           <p className="text-gray-600 text-lg font-semibold">No engagements found</p>
-          <p className="text-gray-500 text-sm mt-2">Try adjusting your filters</p>
+          <p className="text-gray-700 text-sm mt-2">Try adjusting your filters</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -244,7 +244,7 @@ export default function EngagementsTable({
                     </div>
 
                     {event.url && (
-                      <div className="mt-2 text-xs text-gray-500 font-mono truncate">
+                      <div className="mt-2 text-xs text-gray-700 font-mono truncate">
                         🔗 {event.url}
                       </div>
                     )}

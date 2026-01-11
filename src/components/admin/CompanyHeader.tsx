@@ -50,12 +50,12 @@ export default function CompanyHeader({ company }: CompanyHeaderProps) {
                 {company.company_name}
               </h1>
               <div className="mt-2 flex flex-col sm:flex-row sm:flex-wrap sm:space-x-4">
-                <div className="mt-2 flex items-center text-sm text-gray-500">
+                <div className="mt-2 flex items-center text-sm text-gray-700">
                   <span className="font-medium">ID:</span>
                   <span className="ml-1">{company.company_id}</span>
                 </div>
                 {company.country && (
-                  <div className="mt-2 flex items-center text-sm text-gray-500">
+                  <div className="mt-2 flex items-center text-sm text-gray-700">
                     <span className="font-medium">Country:</span>
                     <span className="ml-1">{company.country}</span>
                   </div>

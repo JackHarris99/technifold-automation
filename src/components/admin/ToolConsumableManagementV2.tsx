@@ -139,7 +139,7 @@ export default function ToolConsumableManagementV2({
               className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
                 activeView === 'by-tool'
                   ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  : 'border-transparent text-gray-700 hover:text-gray-700'
               }`}
             >
               By Tool
@@ -152,7 +152,7 @@ export default function ToolConsumableManagementV2({
               className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
                 activeView === 'by-consumable'
                   ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  : 'border-transparent text-gray-700 hover:text-gray-700'
               }`}
             >
               By Consumable
@@ -330,7 +330,7 @@ function ByConsumableView({ tools, consumables, relationships, searchTerm, onDel
                   </span>
                 </div>
                 <p className="text-sm text-gray-600 mt-1">{consumable.description}</p>
-                {consumable.price && <p className="text-xs text-gray-500 mt-1">£{consumable.price}</p>}
+                {consumable.price && <p className="text-xs text-gray-700 mt-1">£{consumable.price}</p>}
               </div>
             </div>
 
@@ -423,7 +423,7 @@ function AddConsumablesModal({ tools, consumables, relationships, onClose, onSuc
       <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-bold">Add Consumables to Tool</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl">✕</button>
+          <button onClick={onClose} className="text-gray-600 hover:text-gray-600 text-2xl">✕</button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -572,7 +572,7 @@ function BulkCopyModal({ tools, relationships, onClose, onSuccess }: any) {
       <div className="bg-white rounded-lg w-full max-w-2xl">
         <div className="border-b px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-bold">Bulk Copy Consumables</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl">✕</button>
+          <button onClick={onClose} className="text-gray-600 hover:text-gray-600 text-2xl">✕</button>
         </div>
 
         <div className="p-6 space-y-6">
