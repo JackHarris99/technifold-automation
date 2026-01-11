@@ -202,7 +202,13 @@ export function StaticQuotePortal({ quote, lineItems, company, contact, token, i
               return (
                 <div
                   key={item.consumable_code}
-                  className="bg-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] flex gap-6"
+                  className={`bg-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] flex gap-6 ${
+                    item.pricing_tier === 'standard'
+                      ? 'border-2 border-green-200 bg-green-50/30'
+                      : item.pricing_tier === 'premium'
+                      ? 'border-2 border-purple-200 bg-purple-50/30'
+                      : 'border border-[#e8e8e8]'
+                  }`}
                 >
                   {item.image_url && (
                     <div className="flex-shrink-0">

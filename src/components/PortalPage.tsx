@@ -360,7 +360,13 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                       const currentQty = itemQuantities.get(item.consumable_code) || 0;
 
                       return (
-                        <div key={item.consumable_code} className="flex items-center gap-4 p-4 border border-[#e8e8e8] rounded-[12px] hover:border-[#16a34a] transition-colors">
+                        <div key={item.consumable_code} className={`flex items-center gap-4 p-4 rounded-[12px] transition-colors ${
+                          item.pricing_tier === 'standard'
+                            ? 'border-2 border-green-200 hover:border-green-300 bg-green-50/30'
+                            : item.pricing_tier === 'premium'
+                            ? 'border-2 border-purple-200 hover:border-purple-300 bg-purple-50/30'
+                            : 'border border-[#e8e8e8] hover:border-[#16a34a]'
+                        }`}>
                           <div className="relative w-20 h-20 bg-[#f9fafb] rounded-[8px] flex-shrink-0 overflow-hidden">
                             <Image
                               src={item.image_url || `/product_images/${item.consumable_code}.jpg`}
@@ -479,7 +485,13 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                       const currentQty = itemQuantities.get(item.consumable_code) || 0;
 
                       return (
-                        <div key={item.consumable_code} className="flex items-center gap-4 p-4 border border-[#e8e8e8] rounded-[12px] hover:border-[#16a34a] transition-colors">
+                        <div key={item.consumable_code} className={`flex items-center gap-4 p-4 rounded-[12px] transition-colors ${
+                          item.pricing_tier === 'standard'
+                            ? 'border-2 border-green-200 hover:border-green-300 bg-green-50/30'
+                            : item.pricing_tier === 'premium'
+                            ? 'border-2 border-purple-200 hover:border-purple-300 bg-purple-50/30'
+                            : 'border border-[#e8e8e8] hover:border-[#16a34a]'
+                        }`}>
                           <div className="relative w-20 h-20 bg-[#f9fafb] rounded-[8px] flex-shrink-0 overflow-hidden">
                             <Image
                               src={(item as any).image_url || `/product_images/${item.consumable_code}.jpg`}
@@ -566,9 +578,9 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
             ))}
           </div>
 
-          {/* Right Sidebar - Single Sticky Container */}
+          {/* Right Sidebar - Single Sticky Container with Internal Scroll */}
           <div className="col-span-4">
-            <div className="sticky top-6 space-y-6">
+            <div className="sticky top-6 space-y-6 max-h-[calc(100vh-3rem)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
 
             {/* Company Details Card */}
             <div className="bg-white rounded-[20px] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
