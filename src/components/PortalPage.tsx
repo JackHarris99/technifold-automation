@@ -184,6 +184,13 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
     return Array.from(itemQuantities.values()).reduce((sum, qty) => sum + qty, 0);
   };
 
+  // Get current unit price for a product (with discounts applied)
+  const getCurrentUnitPrice = (productCode: string): number | null => {
+    if (!pricingPreview) return null;
+    const lineItem = pricingPreview.line_items.find(item => item.product_code === productCode);
+    return lineItem ? lineItem.unit_price : null;
+  };
+
   const handleRequestInvoice = () => {
     if (getTotalQuantity() === 0) return;
     setIsInvoiceModalOpen(true);
@@ -350,7 +357,19 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                               )}
                             </div>
                             <div className="text-[14px] font-[600] text-[#0a0a0a] mt-2">
-                              £{(item.price || 0).toFixed(2)} per unit
+                              {(() => {
+                                const currentPrice = getCurrentUnitPrice(item.consumable_code);
+                                const basePrice = item.price || 0;
+                                if (currentPrice !== null && currentPrice < basePrice) {
+                                  return (
+                                    <>
+                                      <span className="text-[#999] line-through mr-2">£{basePrice.toFixed(2)}</span>
+                                      <span className="text-[#16a34a]">£{currentPrice.toFixed(2)} per unit</span>
+                                    </>
+                                  );
+                                }
+                                return `£${basePrice.toFixed(2)} per unit`;
+                              })()}
                             </div>
                           </div>
                           <div className="flex items-center gap-3">
@@ -429,7 +448,19 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                               )}
                             </div>
                             <div className="text-[14px] font-[600] text-[#0a0a0a] mt-2">
-                              £{(item.price || 0).toFixed(2)} per unit
+                              {(() => {
+                                const currentPrice = getCurrentUnitPrice(item.consumable_code);
+                                const basePrice = item.price || 0;
+                                if (currentPrice !== null && currentPrice < basePrice) {
+                                  return (
+                                    <>
+                                      <span className="text-[#999] line-through mr-2">£{basePrice.toFixed(2)}</span>
+                                      <span className="text-[#16a34a]">£{currentPrice.toFixed(2)} per unit</span>
+                                    </>
+                                  );
+                                }
+                                return `£${basePrice.toFixed(2)} per unit`;
+                              })()}
                             </div>
                           </div>
                           <div className="flex items-center gap-3">
@@ -449,117 +480,6 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                 )}
               </div>
             ))}
-
-            {/* Tiered Pricing Guide */}
-            {pricingPreview && !loadingPreview && pricingPreview.line_items.length > 0 && standardTiers.length > 0 && (() => {
-              const standardItems = pricingPreview.line_items.filter(item => item.discount_applied?.includes('total units'));
-              const standardTotalQty = standardItems.reduce((sum, item) => sum + item.quantity, 0);
-
-              const tiersForDisplay = standardTiers.map((tier, idx) => ({
-                min: tier.min_quantity,
-                max: tier.max_quantity || Infinity,
-                price: tier.unit_price || 0,
-                label: `Tier ${idx + 1}`
-              }));
-
-              const premiumItems = pricingPreview.line_items.filter(item => item.discount_applied && !item.discount_applied.includes('total units'));
-
-              const hasStandardItems = standardItems.length > 0;
-              const hasPremiumItems = premiumItems.length > 0;
-
-              if (!hasStandardItems && !hasPremiumItems) return null;
-
-              return (
-                <div className="mt-10 space-y-6">
-                  {hasStandardItems && (() => {
-                    const currentTier = tiersForDisplay.find(t => standardTotalQty >= t.min && standardTotalQty <= t.max);
-                    const nextTier = tiersForDisplay.find(t => t.min > standardTotalQty);
-                    const progress = currentTier ? ((standardTotalQty - currentTier.min) / (currentTier.max - currentTier.min + 1)) * 100 : 0;
-                    const unitsToNext = nextTier ? nextTier.min - standardTotalQty : 0;
-                    const potentialSavings = nextTier ? (currentTier!.price - nextTier.price) * standardTotalQty : 0;
-
-                    return (
-                      <div className="bg-gradient-to-br from-[#f9fafb] to-white rounded-[20px] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
-                        <div className="flex items-center justify-between mb-5">
-                          <div>
-                            <h3 className="text-[22px] font-[700] text-[#0a0a0a] tracking-tight">Standard Tier Pricing</h3>
-                            <p className="text-[14px] text-[#666] mt-1 font-[400]">Combined total: {standardTotalQty} units</p>
-                          </div>
-                          {pricingPreview.total_savings > 0 && (
-                            <div className="text-right">
-                              <div className="text-[14px] text-[#666] font-[500]">Total Savings</div>
-                              <div className="text-[28px] font-[800] text-[#16a34a]">£{pricingPreview.total_savings.toFixed(2)}</div>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="mb-5">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-[14px] font-[600] text-[#0a0a0a]">{currentTier?.label || 'Tier 1'} - £{currentTier?.price || 33}/unit</span>
-                            <span className="text-[14px] font-[500] text-[#666]">{Math.min(progress, 100).toFixed(0)}%</span>
-                          </div>
-                          <div className="h-3 bg-[#f0f0f0] rounded-full overflow-hidden">
-                            <div className="h-full bg-gradient-to-r from-[#16a34a] to-[#22c55e] rounded-full transition-all duration-500" style={{ width: `${Math.min(progress, 100)}%` }}></div>
-                          </div>
-                        </div>
-
-                        {nextTier && (
-                          <div className="bg-gradient-to-r from-[#ecfdf5] to-[#d1fae5] rounded-[12px] p-4 border border-[#a7f3d0]">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-[#16a34a] rounded-full flex items-center justify-center flex-shrink-0">
-                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                </svg>
-                              </div>
-                              <div className="flex-1">
-                                <div className="text-[14px] font-[700] text-[#0a0a0a]">Add {unitsToNext} more {unitsToNext === 1 ? 'unit' : 'units'} to unlock {nextTier.label}</div>
-                                <div className="text-[13px] text-[#166534] mt-0.5 font-[500]">Get £{nextTier.price}/unit pricing - Save an additional £{potentialSavings.toFixed(2)}!</div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="mt-6 pt-6 border-t border-[#e8e8e8]">
-                          <h4 className="text-[12px] font-[600] text-[#666] uppercase tracking-wider mb-3">All Pricing Tiers</h4>
-                          <div className="grid grid-cols-4 gap-2">
-                            {tiersForDisplay.map((tier, idx) => (
-                              <div key={idx} className={`text-center p-2 rounded-[8px] transition-all ${currentTier?.label === tier.label ? 'bg-[#16a34a] text-white' : 'bg-[#f5f5f5] text-[#666]'}`}>
-                                <div className="text-[11px] font-[600] opacity-80">{tier.label}</div>
-                                <div className="text-[16px] font-[800] mt-0.5">£{tier.price}</div>
-                                <div className="text-[10px] opacity-70 mt-0.5">{tier.max === Infinity ? `${tier.min}+` : `${tier.min}-${tier.max}`} units</div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {hasPremiumItems && (
-                    <div className="bg-gradient-to-br from-[#f9fafb] to-white rounded-[20px] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
-                      <h3 className="text-[22px] font-[700] text-[#0a0a0a] tracking-tight mb-5">Premium Product Discounts</h3>
-                      <div className="space-y-3">
-                        {premiumItems.map((item) => (
-                          <div key={item.product_code} className="flex items-center justify-between p-4 bg-[#f5f5f5] rounded-[12px]">
-                            <div className="flex-1">
-                              <div className="font-[600] text-[14px] text-[#0a0a0a]">{item.description}</div>
-                              <div className="text-[12px] text-[#666] font-mono mt-1">{item.product_code}</div>
-                            </div>
-                            <div className="text-right">
-                              {item.discount_applied && (
-                                <div className="inline-flex items-center px-3 py-1.5 bg-[#16a34a] text-white text-[12px] font-[600] rounded-[6px] mb-1">{item.discount_applied}</div>
-                              )}
-                              <div className="text-[14px] text-[#999] line-through">£{item.base_price.toFixed(2)}</div>
-                              <div className="text-[18px] font-[700] text-[#0a0a0a]">£{item.unit_price.toFixed(2)}</div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
           </div>
 
           {/* Right Sidebar */}
@@ -614,8 +534,80 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
               </div>
             </div>
 
+            {/* Pricing Tiers - Sticky */}
+            {pricingPreview && !loadingPreview && pricingPreview.line_items.length > 0 && standardTiers.length > 0 && (() => {
+              const standardItems = pricingPreview.line_items.filter(item => item.discount_applied?.includes('total units'));
+              const standardTotalQty = standardItems.reduce((sum, item) => sum + item.quantity, 0);
+
+              const tiersForDisplay = standardTiers.map((tier, idx) => ({
+                min: tier.min_quantity,
+                max: tier.max_quantity || Infinity,
+                price: tier.unit_price || 0,
+                label: `Tier ${idx + 1}`
+              }));
+
+              const hasStandardItems = standardItems.length > 0;
+
+              if (!hasStandardItems) return null;
+
+              const currentTier = tiersForDisplay.find(t => standardTotalQty >= t.min && standardTotalQty <= t.max);
+              const nextTier = tiersForDisplay.find(t => t.min > standardTotalQty);
+              const progress = currentTier ? ((standardTotalQty - currentTier.min) / (currentTier.max - currentTier.min + 1)) * 100 : 0;
+              const unitsToNext = nextTier ? nextTier.min - standardTotalQty : 0;
+              const potentialSavings = nextTier ? (currentTier!.price - nextTier.price) * standardTotalQty : 0;
+
+              return (
+                <div className="bg-gradient-to-br from-[#ecfdf5] to-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border-2 border-[#16a34a]/20 sticky top-[380px]">
+                  <div className="mb-4">
+                    <h3 className="text-[18px] font-[700] text-[#0a0a0a] tracking-tight">Volume Pricing</h3>
+                    <p className="text-[13px] text-[#666] mt-1 font-[500]">Order more, save more!</p>
+                  </div>
+
+                  <div className="mb-4 p-4 bg-white rounded-[12px] border border-[#e8e8e8]">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[13px] font-[600] text-[#0a0a0a]">Current: {currentTier?.label || 'Tier 1'}</span>
+                      <span className="text-[16px] font-[800] text-[#16a34a]">£{currentTier?.price || 33}/unit</span>
+                    </div>
+                    <div className="text-[12px] text-[#666] mb-2">{standardTotalQty} total units</div>
+                    <div className="h-2 bg-[#f0f0f0] rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-[#16a34a] to-[#22c55e] rounded-full transition-all duration-500" style={{ width: `${Math.min(progress, 100)}%` }}></div>
+                    </div>
+                  </div>
+
+                  {nextTier && (
+                    <div className="bg-gradient-to-r from-[#16a34a] to-[#15803d] rounded-[12px] p-4 mb-4 text-white shadow-lg">
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-[13px] font-[700]">Add {unitsToNext} more to unlock {nextTier.label}!</div>
+                          <div className="text-[12px] opacity-90 mt-1">Save £{potentialSavings.toFixed(2)} at £{nextTier.price}/unit</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div>
+                    <h4 className="text-[11px] font-[600] text-[#666] uppercase tracking-wider mb-2">All Tiers</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {tiersForDisplay.map((tier, idx) => (
+                        <div key={idx} className={`text-center p-2 rounded-[8px] transition-all ${currentTier?.label === tier.label ? 'bg-[#16a34a] text-white shadow-md' : 'bg-[#f5f5f5] text-[#666]'}`}>
+                          <div className="text-[10px] font-[600] opacity-80">{tier.label}</div>
+                          <div className="text-[14px] font-[800] mt-0.5">£{tier.price}</div>
+                          <div className="text-[9px] opacity-70 mt-0.5">{tier.max === Infinity ? `${tier.min}+` : `${tier.min}-${tier.max}`}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
             {pricingPreview && pricingPreview.line_items.length > 0 && (
-              <div className="bg-[#0a0a0a] rounded-[20px] p-8 text-white sticky top-[200px] shadow-[0_16px_48px_rgba(0,0,0,0.24)]">
+              <div className="bg-[#0a0a0a] rounded-[20px] p-8 text-white sticky top-[660px] shadow-[0_16px_48px_rgba(0,0,0,0.24)]">
                 <div className="text-[12px] font-[700] text-[#999] uppercase tracking-[0.05em] mb-6">Order Summary</div>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center pb-4 border-b border-[#2a2a2a]">
