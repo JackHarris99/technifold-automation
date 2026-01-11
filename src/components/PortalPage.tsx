@@ -52,6 +52,13 @@ interface PortalPageProps {
   isTest?: boolean; // Test tokens bypass address collection
 }
 
+interface PricingTier {
+  min_quantity: number;
+  max_quantity?: number;
+  unit_price?: number;
+  discount_percent?: number;
+}
+
 export function PortalPage({ payload, contact, token, isTest }: PortalPageProps) {
   const [activeTab, setActiveTab] = useState<string>('reorder');
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -61,6 +68,25 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress | null>(null);
   const [loadingAddress, setLoadingAddress] = useState(true);
   const [showAddressModal, setShowAddressModal] = useState(false);
+  const [standardTiers, setStandardTiers] = useState<PricingTier[]>([]);
+  const [premiumTiers, setPremiumTiers] = useState<PricingTier[]>([]);
+
+  // Load pricing tiers on mount
+  useEffect(() => {
+    async function loadTiers() {
+      try {
+        const response = await fetch('/api/admin/pricing-tiers');
+        const data = await response.json();
+
+        // API already returns in correct format, just use it directly
+        setStandardTiers(data.standard || []);
+        setPremiumTiers(data.premium || []);
+      } catch (err) {
+        console.error('[PortalPage] Failed to load pricing tiers:', err);
+      }
+    }
+    loadTiers();
+  }, []);
 
   // Fetch shipping address on mount
   useEffect(() => {
@@ -327,20 +353,17 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
             )}
 
             {/* Tiered Pricing Guide */}
-            {pricingPreview && !loadingPreview && pricingPreview.line_items.length > 0 && (() => {
+            {pricingPreview && !loadingPreview && pricingPreview.line_items.length > 0 && standardTiers.length > 0 && (() => {
               const standardItems = pricingPreview.line_items.filter(item => item.discount_applied?.includes('total units'));
               const standardTotalQty = standardItems.reduce((sum, item) => sum + item.quantity, 0);
 
-              const standardTiers = [
-                { min: 1, max: 3, price: 33, label: 'Tier 1' },
-                { min: 4, max: 7, price: 29, label: 'Tier 2' },
-                { min: 8, max: 9, price: 27, label: 'Tier 3' },
-                { min: 10, max: 19, price: 25, label: 'Tier 4' },
-                { min: 20, max: 24, price: 23, label: 'Tier 5' },
-                { min: 25, max: 29, price: 22, label: 'Tier 6' },
-                { min: 30, max: 34, price: 21, label: 'Tier 7' },
-                { min: 35, max: Infinity, price: 20, label: 'Tier 8' },
-              ];
+              // Transform database tiers to display format
+              const tiersForDisplay = standardTiers.map((tier, idx) => ({
+                min: tier.min_quantity,
+                max: tier.max_quantity || Infinity,
+                price: tier.unit_price || 0,
+                label: `Tier ${idx + 1}`
+              }));
 
               const premiumItems = pricingPreview.line_items.filter(item => item.discount_applied && !item.discount_applied.includes('total units'));
 
@@ -353,8 +376,8 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                 <div className="mt-10 space-y-6">
                   {/* STANDARD TIER PRICING */}
                   {hasStandardItems && (() => {
-                    const currentTier = standardTiers.find(t => standardTotalQty >= t.min && standardTotalQty <= t.max);
-                    const nextTier = standardTiers.find(t => t.min > standardTotalQty);
+                    const currentTier = tiersForDisplay.find(t => standardTotalQty >= t.min && standardTotalQty <= t.max);
+                    const nextTier = tiersForDisplay.find(t => t.min > standardTotalQty);
 
                     const progress = currentTier
                       ? ((standardTotalQty - currentTier.min) / (currentTier.max - currentTier.min + 1)) * 100
@@ -427,7 +450,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                         <div className="mt-6 pt-6 border-t border-[#e8e8e8]">
                           <h4 className="text-[12px] font-[600] text-[#666] uppercase tracking-wider mb-3">All Pricing Tiers</h4>
                           <div className="grid grid-cols-4 gap-2">
-                            {standardTiers.map((tier, idx) => (
+                            {tiersForDisplay.map((tier, idx) => (
                               <div
                                 key={idx}
                                 className={`text-center p-2 rounded-[8px] transition-all ${

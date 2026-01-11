@@ -46,18 +46,21 @@ export async function GET() {
   const standard = (standardData || []).map(tier => ({
     tier_name: `${tier.min_qty}-${tier.max_qty === 999 ? tier.min_qty + '+' : tier.max_qty} units`,
     min_quantity: tier.min_qty,
+    max_quantity: tier.max_qty,
     unit_price: tier.unit_price,
   }));
 
   const premium = (premiumData || []).map(tier => ({
     tier_name: `${tier.min_qty}-${tier.max_qty === 999 ? tier.min_qty + '+' : tier.max_qty} units`,
     min_quantity: tier.min_qty,
+    max_quantity: tier.max_qty,
     discount_percent: tier.discount_pct,
   }));
 
   const tool = (toolData || []).map(tier => ({
     tier_name: `${tier.min_qty}${tier.max_qty === 999 ? '+' : `-${tier.max_qty}`} tool${tier.min_qty > 1 ? 's' : ''}`,
     min_quantity: tier.min_qty,
+    max_quantity: tier.max_qty,
     discount_percent: tier.discount_pct,
   }));
 
