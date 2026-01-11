@@ -309,7 +309,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
 
       <div className="max-w-[1600px] mx-auto px-6 py-12">
         {/* Header */}
-        <div className="mb-16">
+        <div className="mb-8">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-[56px] font-[800] text-[#0a0a0a] mb-3 tracking-[-0.04em] leading-[1.1]">
@@ -326,6 +326,78 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                 <p className="text-[14px] text-[#666] mt-1">{contact.email}</p>
               </div>
             )}
+          </div>
+
+          {/* Address Sections - Horizontal Layout */}
+          <div className="grid grid-cols-3 gap-6 mb-12">
+            {/* Contact Info */}
+            <div>
+              <div className="text-[13px] font-[600] text-[#0a0a0a] mb-3 uppercase tracking-wider">Contact</div>
+              {contact ? (
+                <div className="p-5 bg-white rounded-[16px] border border-[#e8e8e8] shadow-sm">
+                  <div className="text-[14px] text-[#0a0a0a] font-[600]">{contact.full_name}</div>
+                  <div className="text-[13px] text-[#666] mt-1">{contact.email}</div>
+                </div>
+              ) : (
+                <div className="p-5 bg-white rounded-[16px] border border-[#e8e8e8] shadow-sm">
+                  <p className="text-[13px] text-[#999] italic">No contact assigned</p>
+                </div>
+              )}
+            </div>
+
+            {/* Billing Address */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-[13px] font-[600] text-[#0a0a0a] uppercase tracking-wider">Billing Address</div>
+                {billingAddress && (
+                  <button onClick={() => setShowAddressModal(true)} className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
+                )}
+              </div>
+              {loadingAddress ? (
+                <div className="p-5 bg-white rounded-[16px] border border-[#e8e8e8] shadow-sm">
+                  <p className="text-[13px] text-[#999] italic">Loading...</p>
+                </div>
+              ) : billingAddress && billingAddress.billing_address_line_1 ? (
+                <div className="p-5 bg-white rounded-[16px] border border-[#e8e8e8] shadow-sm">
+                  <div className="text-[13px] font-[500] text-[#0a0a0a]">{billingAddress.billing_address_line_1}</div>
+                  {billingAddress.billing_address_line_2 && <div className="text-[13px] text-[#666]">{billingAddress.billing_address_line_2}</div>}
+                  <div className="text-[13px] text-[#666]">{billingAddress.billing_city}{billingAddress.billing_state_province ? `, ${billingAddress.billing_state_province}` : ''}</div>
+                  <div className="text-[13px] text-[#666]">{billingAddress.billing_postal_code}</div>
+                  <div className="text-[13px] font-[500] text-[#0a0a0a] mt-1">{billingAddress.billing_country}</div>
+                </div>
+              ) : (
+                <div className="p-5 bg-white rounded-[16px] border border-[#e8e8e8] shadow-sm">
+                  <p className="text-[13px] text-red-600 italic">No billing address - <button onClick={() => setShowAddressModal(true)} className="underline font-[600]">Add now</button></p>
+                </div>
+              )}
+            </div>
+
+            {/* Delivery Address */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-[13px] font-[600] text-[#0a0a0a] uppercase tracking-wider">Delivery Address</div>
+                {shippingAddress && (
+                  <button onClick={() => setShowAddressModal(true)} className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
+                )}
+              </div>
+              {loadingAddress ? (
+                <div className="p-5 bg-white rounded-[16px] border border-[#e8e8e8] shadow-sm">
+                  <p className="text-[13px] text-[#999] italic">Loading...</p>
+                </div>
+              ) : shippingAddress ? (
+                <div className="p-5 bg-white rounded-[16px] border border-[#e8e8e8] shadow-sm">
+                  <div className="text-[13px] font-[500] text-[#0a0a0a]">{shippingAddress.address_line_1}</div>
+                  {shippingAddress.address_line_2 && <div className="text-[13px] text-[#666]">{shippingAddress.address_line_2}</div>}
+                  <div className="text-[13px] text-[#666]">{shippingAddress.city}{shippingAddress.state_province ? `, ${shippingAddress.state_province}` : ''}</div>
+                  <div className="text-[13px] text-[#666]">{shippingAddress.postal_code}</div>
+                  <div className="text-[13px] font-[500] text-[#0a0a0a] mt-1">{shippingAddress.country}</div>
+                </div>
+              ) : (
+                <div className="p-5 bg-white rounded-[16px] border border-[#e8e8e8] shadow-sm">
+                  <p className="text-[13px] text-[#999] italic">Address information will be confirmed during checkout</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -582,89 +654,8 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
           <div className="col-span-4">
             <div className="sticky top-6 space-y-6 max-h-[calc(100vh-3rem)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
 
-            {/* Company Details Card */}
-            <div className="bg-white rounded-[20px] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
-              <div className="flex items-center justify-between mb-6">
-                <div className="text-[12px] font-[700] text-[#666] uppercase tracking-[0.05em]">Company Details</div>
-              </div>
-              <div className="space-y-5">
-                <div>
-                  <div className="text-[17px] font-[700] text-[#0a0a0a] mb-1 tracking-[-0.01em]">{payload.company_name}</div>
-                  <div className="text-[13px] text-[#999] font-mono">{payload.company_id}</div>
-                </div>
-                <div className="pt-5 border-t border-[#e8e8e8]">
-                  <div className="text-[13px] font-[600] text-[#0a0a0a] mb-3">Contact</div>
-                  {contact && (
-                    <div className="space-y-1">
-                      <div className="text-[14px] text-[#0a0a0a] font-[500]">{contact.full_name}</div>
-                      <div className="text-[13px] text-[#666]">{contact.email}</div>
-                    </div>
-                  )}
-                </div>
-                <div className="pt-5 border-t border-[#e8e8e8]">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="text-[13px] font-[600] text-[#0a0a0a]">Billing Address</div>
-                    {billingAddress && (
-                      <button onClick={() => setShowAddressModal(true)} className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
-                    )}
-                  </div>
-                  {loadingAddress ? (
-                    <div className="p-4 bg-[#f9fafb] rounded-[12px] border border-[#e8e8e8]">
-                      <p className="text-[13px] text-[#999] italic">Loading...</p>
-                    </div>
-                  ) : billingAddress && billingAddress.billing_address_line_1 ? (
-                    <div className="text-[13px] text-[#666] leading-relaxed">
-                      <div className="p-4 bg-[#f9fafb] rounded-[12px] border border-[#e8e8e8]">
-                        <div className="font-[500] text-[#0a0a0a]">{billingAddress.billing_address_line_1}</div>
-                        {billingAddress.billing_address_line_2 && <div>{billingAddress.billing_address_line_2}</div>}
-                        <div>{billingAddress.billing_city}{billingAddress.billing_state_province ? `, ${billingAddress.billing_state_province}` : ''}</div>
-                        <div>{billingAddress.billing_postal_code}</div>
-                        <div className="font-[500] mt-1">{billingAddress.billing_country}</div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-[13px] text-[#666] leading-relaxed">
-                      <div className="p-4 bg-[#f9fafb] rounded-[12px] border border-[#e8e8e8]">
-                        <p className="text-[13px] text-red-600 italic">No billing address - <button onClick={() => setShowAddressModal(true)} className="underline font-[600]">Add now</button></p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="pt-5 border-t border-[#e8e8e8]">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="text-[13px] font-[600] text-[#0a0a0a]">Delivery Address</div>
-                    {shippingAddress && (
-                      <button onClick={() => setShowAddressModal(true)} className="text-[12px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
-                    )}
-                  </div>
-                  {loadingAddress ? (
-                    <div className="p-4 bg-[#f9fafb] rounded-[12px] border border-[#e8e8e8]">
-                      <p className="text-[13px] text-[#999] italic">Loading...</p>
-                    </div>
-                  ) : shippingAddress ? (
-                    <div className="text-[13px] text-[#666] leading-relaxed">
-                      <div className="p-4 bg-[#f9fafb] rounded-[12px] border border-[#e8e8e8]">
-                        <div className="font-[500] text-[#0a0a0a]">{shippingAddress.address_line_1}</div>
-                        {shippingAddress.address_line_2 && <div>{shippingAddress.address_line_2}</div>}
-                        <div>{shippingAddress.city}{shippingAddress.state_province ? `, ${shippingAddress.state_province}` : ''}</div>
-                        <div>{shippingAddress.postal_code}</div>
-                        <div className="font-[500] mt-1">{shippingAddress.country}</div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-[13px] text-[#666] leading-relaxed">
-                      <div className="p-4 bg-[#f9fafb] rounded-[12px] border border-[#e8e8e8]">
-                        <p className="text-[13px] text-[#999] italic">Address information will be confirmed during checkout</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Pricing Tiers Card */}
+            {/* Standard Pricing Guide */}
             {pricingPreview && !loadingPreview && pricingPreview.line_items.length > 0 && standardTiers.length > 0 && (() => {
-              // Show card for ANY standard items in cart (even if qty=1, no discount yet)
               const allStandardItems = Array.from(itemQuantities.entries())
                 .filter(([code, qty]) => {
                   const item = [...payload.reorder_items, ...(payload.by_tool_tabs?.flatMap(t => t.items) || [])]
@@ -672,11 +663,9 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                   return item?.pricing_tier === 'standard' && qty > 0;
                 });
 
-              const hasStandardItems = allStandardItems.length > 0;
-              if (!hasStandardItems) return null;
+              if (allStandardItems.length === 0) return null;
 
               const standardTotalQty = allStandardItems.reduce((sum, [_, qty]) => sum + qty, 0);
-
               const tiersForDisplay = standardTiers.map((tier, idx) => ({
                 min: tier.min_quantity,
                 max: tier.max_quantity || Infinity,
@@ -685,53 +674,29 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
               }));
 
               const currentTier = tiersForDisplay.find(t => standardTotalQty >= t.min && standardTotalQty <= t.max);
-              const nextTier = tiersForDisplay.find(t => t.min > standardTotalQty);
-              const progress = currentTier ? ((standardTotalQty - currentTier.min) / (currentTier.max - currentTier.min + 1)) * 100 : 0;
-              const unitsToNext = nextTier ? nextTier.min - standardTotalQty : 0;
-              const potentialSavings = nextTier ? (currentTier!.price - nextTier.price) * standardTotalQty : 0;
 
               return (
-                <div className="bg-gradient-to-br from-[#ecfdf5] to-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border-2 border-[#16a34a]/20">
-                  <div className="mb-4">
-                    <h3 className="text-[18px] font-[700] text-[#0a0a0a] tracking-tight">Volume Pricing</h3>
-                    <p className="text-[13px] text-[#666] mt-1 font-[500]">Order more, save more!</p>
+                <div className="bg-gradient-to-br from-[#ecfdf5] to-white rounded-[16px] p-5 shadow-sm border-2 border-[#16a34a]/20">
+                  <div className="mb-3">
+                    <h3 className="text-[15px] font-[700] text-[#0a0a0a] tracking-tight">Standard Volume Pricing</h3>
+                    <p className="text-[12px] text-[#666] mt-1">All standard items combine for tier pricing</p>
                   </div>
 
-                  <div className="mb-4 p-4 bg-white rounded-[12px] border border-[#e8e8e8]">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[13px] font-[600] text-[#0a0a0a]">Current: {currentTier?.label || 'Tier 1'}</span>
-                      <span className="text-[16px] font-[800] text-[#16a34a]">£{currentTier?.price || 33}/unit</span>
-                    </div>
-                    <div className="text-[12px] text-[#666] mb-2">{standardTotalQty} total units</div>
-                    <div className="h-2 bg-[#f0f0f0] rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-[#16a34a] to-[#22c55e] rounded-full transition-all duration-500" style={{ width: `${Math.min(progress, 100)}%` }}></div>
+                  <div className="p-3 bg-white rounded-[10px] border border-[#e8e8e8] mb-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[12px] font-[600] text-[#0a0a0a]">{standardTotalQty} total units</span>
+                      <span className="text-[15px] font-[800] text-[#16a34a]">£{currentTier?.price || 33}/unit</span>
                     </div>
                   </div>
-
-                  {nextTier && (
-                    <div className="bg-gradient-to-r from-[#16a34a] to-[#15803d] rounded-[12px] p-4 mb-4 text-white shadow-lg">
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                          </svg>
-                        </div>
-                        <div className="flex-1">
-                          <div className="text-[13px] font-[700]">Add {unitsToNext} more to unlock {nextTier.label}!</div>
-                          <div className="text-[12px] opacity-90 mt-1">Save £{potentialSavings.toFixed(2)} at £{nextTier.price}/unit</div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
 
                   <div>
-                    <h4 className="text-[11px] font-[600] text-[#666] uppercase tracking-wider mb-2">All Tiers</h4>
-                    <div className="grid grid-cols-2 gap-2">
+                    <h4 className="text-[10px] font-[600] text-[#666] uppercase tracking-wider mb-2">Tier Guide</h4>
+                    <div className="grid grid-cols-2 gap-1.5">
                       {tiersForDisplay.map((tier, idx) => (
-                        <div key={idx} className={`text-center p-2 rounded-[8px] transition-all ${currentTier?.label === tier.label ? 'bg-[#16a34a] text-white shadow-md' : 'bg-[#f5f5f5] text-[#666]'}`}>
-                          <div className="text-[10px] font-[600] opacity-80">{tier.label}</div>
-                          <div className="text-[14px] font-[800] mt-0.5">£{tier.price}</div>
-                          <div className="text-[9px] opacity-70 mt-0.5">{tier.max === Infinity ? `${tier.min}+` : `${tier.min}-${tier.max}`}</div>
+                        <div key={idx} className={`text-center p-1.5 rounded-[6px] transition-all ${currentTier?.label === tier.label ? 'bg-[#16a34a] text-white' : 'bg-[#f5f5f5] text-[#666]'}`}>
+                          <div className="text-[9px] font-[600] opacity-80">{tier.label}</div>
+                          <div className="text-[12px] font-[800] mt-0.5">£{tier.price}</div>
+                          <div className="text-[8px] opacity-70 mt-0.5">{tier.max === Infinity ? `${tier.min}+` : `${tier.min}-${tier.max}`}</div>
                         </div>
                       ))}
                     </div>
@@ -740,77 +705,217 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
               );
             })()}
 
-            {/* Premium Pricing Card */}
+            {/* Standard Selected Products */}
+            {pricingPreview && !loadingPreview && pricingPreview.line_items.length > 0 && (() => {
+              const standardProducts = pricingPreview.line_items.filter(item => {
+                const fullItem = [...payload.reorder_items, ...(payload.by_tool_tabs?.flatMap(t => t.items) || [])]
+                  .find(i => i.consumable_code === item.product_code);
+                return fullItem?.pricing_tier === 'standard';
+              });
+
+              if (standardProducts.length === 0) return null;
+
+              return (
+                <div className="bg-white rounded-[16px] p-5 shadow-sm border-2 border-green-200">
+                  <div className="mb-4">
+                    <h3 className="text-[15px] font-[700] text-[#0a0a0a] tracking-tight">Standard Products</h3>
+                    <p className="text-[11px] text-[#666] mt-1">{standardProducts.length} item{standardProducts.length !== 1 ? 's' : ''} selected</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    {standardProducts.map((item) => {
+                      const currentQty = itemQuantities.get(item.product_code) || 0;
+                      const lineTotal = item.unit_price * currentQty;
+
+                      return (
+                        <div key={item.product_code} className="p-3 bg-green-50/50 rounded-[10px] border border-green-200">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="text-[11px] font-mono text-[#666] mb-0.5">{item.product_code}</div>
+                              <div className="text-[13px] font-[600] text-[#0a0a0a] leading-tight">{item.description}</div>
+                            </div>
+                            <button
+                              onClick={() => updateQuantity(item.product_code, 0)}
+                              className="ml-2 text-red-600 hover:text-red-700 flex-shrink-0"
+                              title="Remove"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+
+                          <div className="flex items-center gap-3 mt-2">
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => updateQuantity(item.product_code, Math.max(0, currentQty - 1))}
+                                className="w-6 h-6 rounded-[6px] bg-white border border-[#e8e8e8] flex items-center justify-center hover:bg-gray-50"
+                              >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                                </svg>
+                              </button>
+                              <input
+                                type="number"
+                                min="0"
+                                value={currentQty}
+                                onChange={(e) => updateQuantity(item.product_code, parseInt(e.target.value) || 0)}
+                                className="w-16 px-2 py-1 border border-[#e8e8e8] rounded-[6px] text-center text-[13px] font-[600]"
+                              />
+                              <button
+                                onClick={() => updateQuantity(item.product_code, currentQty + 1)}
+                                className="w-6 h-6 rounded-[6px] bg-white border border-[#e8e8e8] flex items-center justify-center hover:bg-gray-50"
+                              >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                              </button>
+                            </div>
+                            <div className="flex-1 text-right">
+                              <div className="text-[11px] text-[#666]">
+                                {item.unit_price !== item.base_price && (
+                                  <span className="line-through mr-1">£{item.base_price.toFixed(2)}</span>
+                                )}
+                                <span className="font-[600] text-[#16a34a]">£{item.unit_price.toFixed(2)}</span>
+                                <span className="text-[#999]"> /unit</span>
+                              </div>
+                              <div className="text-[14px] font-[700] text-[#0a0a0a] mt-0.5">£{lineTotal.toFixed(2)}</div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Premium Pricing Guide */}
             {pricingPreview && !loadingPreview && pricingPreview.line_items.length > 0 && premiumTiers.length > 0 && (() => {
-              // Show card for ANY premium items in cart (even if qty=1, no discount yet)
               const allPremiumItems = Array.from(itemQuantities.entries())
                 .filter(([code, qty]) => {
                   const item = [...payload.reorder_items, ...(payload.by_tool_tabs?.flatMap(t => t.items) || [])]
                     .find(i => i.consumable_code === code);
                   return item?.pricing_tier === 'premium' && qty > 0;
-                })
-                .map(([code, qty]) => {
-                  const item = [...payload.reorder_items, ...(payload.by_tool_tabs?.flatMap(t => t.items) || [])]
-                    .find(i => i.consumable_code === code);
-                  const previewItem = pricingPreview.line_items.find(li => li.product_code === code);
-                  return {
-                    product_code: code,
-                    description: item?.description || code,
-                    quantity: qty,
-                    base_price: previewItem?.base_price || item?.price || 0,
-                    unit_price: previewItem?.unit_price || item?.price || 0,
-                    discount_applied: previewItem?.discount_applied || null
-                  };
                 });
 
               if (allPremiumItems.length === 0) return null;
 
               return (
-                <div className="bg-gradient-to-br from-[#faf5ff] to-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] border-2 border-[#a855f7]/20">
-                  <div className="mb-4">
-                    <h3 className="text-[18px] font-[700] text-[#0a0a0a] tracking-tight">Premium Pricing</h3>
-                    <p className="text-[13px] text-[#666] mt-1 font-[500]">Per-item quantity discounts</p>
-                  </div>
-
-                  <div className="space-y-2 mb-4">
-                    {allPremiumItems.map((item) => (
-                      <div key={item.product_code} className="p-3 bg-white rounded-[10px] border border-[#e8e8e8]">
-                        <div className="text-[12px] font-[600] text-[#0a0a0a] mb-1">{item.description}</div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-[11px] text-[#666]">{item.quantity} units</span>
-                          <div className="flex items-center gap-2">
-                            {item.unit_price < item.base_price && (
-                              <span className="text-[13px] text-[#999] line-through">£{item.base_price.toFixed(2)}</span>
-                            )}
-                            <span className={`text-[15px] font-[700] ${item.unit_price < item.base_price ? 'text-[#a855f7]' : 'text-[#0a0a0a]'}`}>
-                              £{item.unit_price.toFixed(2)}
-                            </span>
-                          </div>
-                        </div>
-                        {item.discount_applied && (
-                          <div className="mt-1 text-[11px] font-[600] text-[#a855f7]">{item.discount_applied}</div>
-                        )}
-                      </div>
-                    ))}
+                <div className="bg-gradient-to-br from-[#faf5ff] to-white rounded-[16px] p-5 shadow-sm border-2 border-[#a855f7]/20">
+                  <div className="mb-3">
+                    <h3 className="text-[15px] font-[700] text-[#0a0a0a] tracking-tight">Premium Pricing</h3>
+                    <p className="text-[12px] text-[#666] mt-1">Each item priced by its own quantity</p>
                   </div>
 
                   <div>
-                    <h4 className="text-[11px] font-[600] text-[#666] uppercase tracking-wider mb-2">Premium Tiers</h4>
+                    <h4 className="text-[10px] font-[600] text-[#666] uppercase tracking-wider mb-2">Tier Guide</h4>
                     <div className="space-y-1.5">
                       {premiumTiers.map((tier, idx) => {
                         const discount = tier.discount_percent || 0;
                         return (
-                          <div key={idx} className="flex items-center justify-between p-2 bg-[#faf5ff] rounded-[8px]">
+                          <div key={idx} className="flex items-center justify-between p-2 bg-white rounded-[8px] border border-[#e8e8e8]">
                             <span className="text-[11px] text-[#666]">
                               {tier.max_quantity === 999 ? `${tier.min_quantity}+` : `${tier.min_quantity}-${tier.max_quantity}`} units
                             </span>
                             <span className="text-[12px] font-[700] text-[#a855f7]">
-                              {discount === 0 ? 'Standard price' : `${discount}% off`}
+                              {discount === 0 ? 'Base price' : `${discount}% off`}
                             </span>
                           </div>
                         );
                       })}
                     </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Premium Selected Products */}
+            {pricingPreview && !loadingPreview && pricingPreview.line_items.length > 0 && (() => {
+              const premiumProducts = pricingPreview.line_items.filter(item => {
+                const fullItem = [...payload.reorder_items, ...(payload.by_tool_tabs?.flatMap(t => t.items) || [])]
+                  .find(i => i.consumable_code === item.product_code);
+                return fullItem?.pricing_tier === 'premium';
+              });
+
+              if (premiumProducts.length === 0) return null;
+
+              return (
+                <div className="bg-white rounded-[16px] p-5 shadow-sm border-2 border-purple-200">
+                  <div className="mb-4">
+                    <h3 className="text-[15px] font-[700] text-[#0a0a0a] tracking-tight">Premium Products</h3>
+                    <p className="text-[11px] text-[#666] mt-1">{premiumProducts.length} item{premiumProducts.length !== 1 ? 's' : ''} selected</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    {premiumProducts.map((item) => {
+                      const currentQty = itemQuantities.get(item.product_code) || 0;
+                      const lineTotal = item.unit_price * currentQty;
+
+                      return (
+                        <div key={item.product_code} className="p-3 bg-purple-50/50 rounded-[10px] border border-purple-200">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="text-[11px] font-mono text-[#666] mb-0.5">{item.product_code}</div>
+                              <div className="text-[13px] font-[600] text-[#0a0a0a] leading-tight">{item.description}</div>
+                            </div>
+                            <button
+                              onClick={() => updateQuantity(item.product_code, 0)}
+                              className="ml-2 text-red-600 hover:text-red-700 flex-shrink-0"
+                              title="Remove"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+
+                          <div className="flex items-center gap-3 mt-2">
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => updateQuantity(item.product_code, Math.max(0, currentQty - 1))}
+                                className="w-6 h-6 rounded-[6px] bg-white border border-[#e8e8e8] flex items-center justify-center hover:bg-gray-50"
+                              >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                                </svg>
+                              </button>
+                              <input
+                                type="number"
+                                min="0"
+                                value={currentQty}
+                                onChange={(e) => updateQuantity(item.product_code, parseInt(e.target.value) || 0)}
+                                className="w-16 px-2 py-1 border border-[#e8e8e8] rounded-[6px] text-center text-[13px] font-[600]"
+                              />
+                              <button
+                                onClick={() => updateQuantity(item.product_code, currentQty + 1)}
+                                className="w-6 h-6 rounded-[6px] bg-white border border-[#e8e8e8] flex items-center justify-center hover:bg-gray-50"
+                              >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                              </button>
+                            </div>
+                            <div className="flex-1 text-right">
+                              <div className="text-[11px] text-[#666]">
+                                {item.unit_price !== item.base_price && (
+                                  <span className="line-through mr-1">£{item.base_price.toFixed(2)}</span>
+                                )}
+                                <span className="font-[600] text-[#a855f7]">£{item.unit_price.toFixed(2)}</span>
+                                <span className="text-[#999]"> /unit</span>
+                              </div>
+                              <div className="text-[14px] font-[700] text-[#0a0a0a] mt-0.5">£{lineTotal.toFixed(2)}</div>
+                            </div>
+                          </div>
+
+                          {item.discount_applied && (
+                            <div className="mt-2 text-[10px] font-[600] text-[#a855f7] bg-purple-100 px-2 py-1 rounded-[6px] inline-block">
+                              {item.discount_applied}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               );
