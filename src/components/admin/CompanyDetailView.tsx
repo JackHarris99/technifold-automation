@@ -292,25 +292,25 @@ function OverviewTab({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Company Info */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-4">Company Information</h2>
+          <h2 className="text-lg font-semibold mb-4 text-gray-900">Company Information</h2>
           <dl className="space-y-3">
             <div>
               <dt className="text-sm text-gray-700">Account Owner</dt>
-              <dd className="text-sm font-medium">{company.account_owner || 'Unassigned'}</dd>
+              <dd className="text-sm font-medium text-gray-900">{company.account_owner || 'Unassigned'}</dd>
             </div>
             <div>
               <dt className="text-sm text-gray-700">Category</dt>
-              <dd className="text-sm font-medium">{company.category || '-'}</dd>
+              <dd className="text-sm font-medium text-gray-900">{company.category || '-'}</dd>
             </div>
             <div>
               <dt className="text-sm text-gray-700">Country</dt>
-              <dd className="text-sm font-medium">{company.country || '-'}</dd>
+              <dd className="text-sm font-medium text-gray-900">{company.country || '-'}</dd>
             </div>
 
             {/* VAT Number - Editable */}
             <div className="border-t pt-3">
               <dt className="text-sm text-gray-700 mb-1">VAT Number</dt>
-              <dd className="text-sm font-medium">
+              <dd className="text-sm font-medium text-gray-900">
                 {company.vat_number || <span className="text-gray-800 italic">Not set - click to add</span>}
               </dd>
               <button
@@ -331,7 +331,7 @@ function OverviewTab({
                     {company.billing_address_line_2 && <div>{company.billing_address_line_2}</div>}
                     {company.billing_city && <div>{company.billing_city}{company.billing_state_province ? `, ${company.billing_state_province}` : ''}</div>}
                     {company.billing_postal_code && <div>{company.billing_postal_code}</div>}
-                    {company.billing_country && <div className="font-medium">{company.billing_country}</div>}
+                    {company.billing_country && <div className="font-medium text-gray-900">{company.billing_country}</div>}
                   </div>
                 ) : (
                   <span className="text-gray-800 italic">Not set - click to add</span>
@@ -347,7 +347,7 @@ function OverviewTab({
 
             <div className="border-t pt-3">
               <dt className="text-sm text-gray-700">Website</dt>
-              <dd className="text-sm font-medium">
+              <dd className="text-sm font-medium text-gray-900">
                 {company.website ? (
                   <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                     {company.website}
@@ -379,7 +379,7 @@ function OverviewTab({
             <div className="space-y-3">
               {contacts.slice(0, 5).map((contact) => (
                 <div key={contact.contact_id} className="border-b border-gray-100 pb-3 last:border-0">
-                  <div className="font-medium text-sm">{contact.full_name || `${contact.first_name} ${contact.last_name}`}</div>
+                  <div className="font-medium text-sm text-gray-900">{contact.full_name || `${contact.first_name} ${contact.last_name}`}</div>
                   <div className="text-sm text-gray-700">{contact.email}</div>
                   {contact.role && <div className="text-xs text-gray-800 mt-1">{contact.role}</div>}
                 </div>
@@ -426,7 +426,7 @@ function OverviewTab({
                   {address.address_line_2 && <div>{address.address_line_2}</div>}
                   <div>{address.city}{address.state_province && `, ${address.state_province}`}</div>
                   <div>{address.postal_code}</div>
-                  <div className="font-medium">{address.country}</div>
+                  <div className="font-medium text-gray-900">{address.country}</div>
                 </div>
                 <button
                   onClick={() => onEditAddress(address)}
@@ -480,7 +480,7 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium">{item.products?.description || item.product_code}</div>
+                      <div className="font-medium text-gray-900">{item.products?.description || item.product_code}</div>
                       <div className="text-xs text-gray-700 mt-1">SKU: {item.product_code}</div>
                       <div className="text-sm text-gray-800 mt-2">Qty: {item.total_quantity}</div>
                       <div className="text-xs text-gray-800 mt-1">
@@ -527,7 +527,7 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm">{item.products?.description || item.product_code}</div>
+                      <div className="font-medium text-sm text-gray-900">{item.products?.description || item.product_code}</div>
                       <div className="text-xs text-gray-700 mt-1">{item.product_code}</div>
                       <div className="text-xs text-gray-800 mt-2">
                         {item.total_purchases} orders • {item.total_quantity} total
@@ -567,7 +567,7 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm">{item.products?.description || item.product_code}</div>
+                      <div className="font-medium text-sm text-gray-900">{item.products?.description || item.product_code}</div>
                       <div className="text-xs text-gray-700 mt-1">{item.product_code}</div>
                       <div className="text-xs text-gray-800 mt-2">Qty: {item.total_quantity}</div>
                       <div className="text-xs text-gray-800 mt-1">Last: {item.last_purchased_at}</div>
@@ -592,15 +592,15 @@ function SubscriptionsTab({ subscriptionTools, subscriptions, companyId, onAddTo
       {/* Active Subscription Info */}
       {activeSub && (
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-4">Active Subscription</h2>
+          <h2 className="text-lg font-semibold mb-4 text-gray-900">Active Subscription</h2>
           <div className="grid grid-cols-3 gap-4">
             <div>
               <div className="text-sm text-gray-700">Status</div>
-              <div className="text-lg font-medium capitalize">{activeSub.status}</div>
+              <div className="text-lg font-medium text-gray-900 text-gray-900 capitalize">{activeSub.status}</div>
             </div>
             <div>
               <div className="text-sm text-gray-700">Monthly Price</div>
-              <div className="text-lg font-medium">£{activeSub.monthly_price}</div>
+              <div className="text-lg font-medium text-gray-900 text-gray-900">£{activeSub.monthly_price}</div>
             </div>
             <div>
               <div className="text-sm text-gray-700">Next Billing</div>
@@ -629,7 +629,7 @@ function SubscriptionsTab({ subscriptionTools, subscriptions, companyId, onAddTo
               {subscriptionTools.map((item: any) => (
                 <div key={item.tool_code} className="flex items-center justify-between border border-gray-200 rounded-lg p-4">
                   <div>
-                    <div className="font-medium">{item.products?.description || item.tool_code}</div>
+                    <div className="font-medium text-gray-900">{item.products?.description || item.tool_code}</div>
                     <div className="text-xs text-gray-700 mt-1">SKU: {item.tool_code}</div>
                     <div className="text-xs text-gray-800 mt-1">
                       Added: {item.added_at} {item.added_by && `by ${item.added_by}`}
@@ -663,11 +663,11 @@ function InvoicesTab({ invoices, companyId }: any) {
           </div>
           <div>
             <div className="text-sm text-gray-700">Total Invoices</div>
-            <div className="text-2xl font-bold">{invoices.length}</div>
+            <div className="text-2xl font-bold text-gray-900">{invoices.length}</div>
           </div>
           <div>
             <div className="text-sm text-gray-700">Paid</div>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-gray-900">
               {invoices.filter((inv: any) => inv.payment_status === 'paid').length}
             </div>
           </div>
@@ -700,7 +700,7 @@ function InvoicesTab({ invoices, companyId }: any) {
                       {invoice.invoice_number || invoice.stripe_invoice_id}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{invoice.invoice_date}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       £{invoice.total_amount}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -818,7 +818,7 @@ function QuotesTab({ quotes, companyId }: { quotes: any[]; companyId: string }) 
                       {quote.quote_type}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     £{quote.total_amount?.toLocaleString() || '0'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
@@ -864,7 +864,7 @@ function EngagementTab({ engagement }: { engagement: any[] }) {
               <div key={event.event_id} className="flex gap-4 border-l-2 border-gray-200 pl-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm">{event.event_name || event.event_type}</span>
+                    <span className="font-medium text-sm text-gray-900">{event.event_name || event.event_type}</span>
                     {event.source && (
                       <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">{event.source}</span>
                     )}
