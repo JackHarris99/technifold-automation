@@ -334,9 +334,12 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
               const standardTiers = [
                 { min: 1, max: 3, price: 33, label: 'Tier 1' },
                 { min: 4, max: 7, price: 29, label: 'Tier 2' },
-                { min: 8, max: 11, price: 25, label: 'Tier 3' },
-                { min: 12, max: 19, price: 21, label: 'Tier 4' },
-                { min: 20, max: Infinity, price: 17, label: 'Tier 5' },
+                { min: 8, max: 9, price: 27, label: 'Tier 3' },
+                { min: 10, max: 19, price: 25, label: 'Tier 4' },
+                { min: 20, max: 24, price: 23, label: 'Tier 5' },
+                { min: 25, max: 29, price: 22, label: 'Tier 6' },
+                { min: 30, max: 34, price: 21, label: 'Tier 7' },
+                { min: 35, max: Infinity, price: 20, label: 'Tier 8' },
               ];
 
               const premiumItems = pricingPreview.line_items.filter(item => item.discount_applied && !item.discount_applied.includes('total units'));
@@ -423,8 +426,8 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                         {/* All Tiers Reference */}
                         <div className="mt-6 pt-6 border-t border-[#e8e8e8]">
                           <h4 className="text-[12px] font-[600] text-[#666] uppercase tracking-wider mb-3">All Pricing Tiers</h4>
-                          <div className="grid grid-cols-5 gap-2">
-                            {standardTiers.filter(t => t.max !== Infinity).map((tier, idx) => (
+                          <div className="grid grid-cols-4 gap-2">
+                            {standardTiers.map((tier, idx) => (
                               <div
                                 key={idx}
                                 className={`text-center p-2 rounded-[8px] transition-all ${
@@ -435,16 +438,11 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                               >
                                 <div className="text-[11px] font-[600] opacity-80">{tier.label}</div>
                                 <div className="text-[16px] font-[800] mt-0.5">£{tier.price}</div>
-                                <div className="text-[10px] opacity-70 mt-0.5">{tier.min}-{tier.max} units</div>
+                                <div className="text-[10px] opacity-70 mt-0.5">
+                                  {tier.max === Infinity ? `${tier.min}+` : `${tier.min}-${tier.max}`} units
+                                </div>
                               </div>
                             ))}
-                            <div className={`text-center p-2 rounded-[8px] transition-all ${
-                              currentTier?.label === 'Tier 5' ? 'bg-[#16a34a] text-white' : 'bg-[#f5f5f5] text-[#666]'
-                            }`}>
-                              <div className="text-[11px] font-[600] opacity-80">Tier 5</div>
-                              <div className="text-[16px] font-[800] mt-0.5">£17</div>
-                              <div className="text-[10px] opacity-70 mt-0.5">20+ units</div>
-                            </div>
                           </div>
                         </div>
                       </div>

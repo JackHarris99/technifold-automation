@@ -1,5 +1,5 @@
 /**
- * POST /api/admin/tools/sync
+ * GET/POST /api/admin/tools/sync
  * One-time sync: Copy all tools from company_product_history to company_tools
  * This fixes any tools that were manually added and are missing from company_tools
  */
@@ -7,7 +7,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
-export async function POST() {
+async function syncTools() {
   try {
     const supabase = getSupabaseClient();
 
@@ -71,4 +71,12 @@ export async function POST() {
       { status: 500 }
     );
   }
+}
+
+export async function GET() {
+  return syncTools();
+}
+
+export async function POST() {
+  return syncTools();
 }
