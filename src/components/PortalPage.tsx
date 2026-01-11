@@ -680,12 +680,12 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
 
                   <div>
                     <h4 className="text-[10px] font-[600] text-[#666] uppercase tracking-wider mb-2">Tier Guide</h4>
-                    <div className="grid grid-cols-2 gap-1.5">
+                    <div className="grid grid-cols-4 gap-1">
                       {tiersForDisplay.map((tier, idx) => (
-                        <div key={idx} className={`text-center p-1.5 rounded-[6px] transition-all ${currentTier?.label === tier.label && standardTotalQty > 0 ? 'bg-[#16a34a] text-white' : 'bg-[#f5f5f5] text-[#666]'}`}>
-                          <div className="text-[9px] font-[600] opacity-80">{tier.label}</div>
-                          <div className="text-[12px] font-[800] mt-0.5">£{tier.price}</div>
-                          <div className="text-[8px] opacity-70 mt-0.5">{tier.max === Infinity ? `${tier.min}+` : `${tier.min}-${tier.max}`}</div>
+                        <div key={idx} className={`text-center p-1 rounded-[4px] transition-all ${currentTier?.label === tier.label && standardTotalQty > 0 ? 'bg-[#16a34a] text-white' : 'bg-[#f5f5f5] text-[#666]'}`}>
+                          <div className="text-[8px] font-[600] opacity-80">{tier.label}</div>
+                          <div className="text-[11px] font-[800] mt-0.5">£{tier.price}</div>
+                          <div className="text-[7px] opacity-70 mt-0.5">{tier.max === Infinity ? `${tier.min}+` : `${tier.min}-${tier.max}`}</div>
                         </div>
                       ))}
                     </div>
