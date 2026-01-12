@@ -190,9 +190,11 @@ export default function EditBillingAddressModal({
                 <option value="IT">Italy</option>
                 <option value="NL">Netherlands</option>
                 <option value="BE">Belgium</option>
+                <option value="PL">Poland</option>
                 <option value="SK">Slovakia</option>
                 <option value="US">United States</option>
                 <option value="CA">Canada</option>
+                <option value="AU">Australia</option>
               </select>
             </div>
           </div>

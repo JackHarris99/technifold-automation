@@ -260,6 +260,7 @@ export default function ManageAddressModal({
                 <option value="IS">Iceland</option>
                 <option value="US">United States</option>
                 <option value="CA">Canada</option>
+                <option value="AU">Australia</option>
                 <option value="DE">Germany</option>
                 <option value="FR">France</option>
                 <option value="ES">Spain</option>
