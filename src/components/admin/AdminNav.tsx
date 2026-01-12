@@ -251,16 +251,6 @@ export default function AdminNav() {
           >
             Tool-Consumable Links
           </Link>
-          <Link
-            href="/admin/sku-explorer"
-            className={`block px-4 py-2 text-sm transition-colors ${
-              pathname === '/admin/sku-explorer'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
-            }`}
-          >
-            SKU Explorer
-          </Link>
         </div>
 
         {/* Tools */}

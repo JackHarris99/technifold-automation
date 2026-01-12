@@ -406,10 +406,8 @@ export default function ProductsManagementV2({ products: initialProducts }: Prod
                           </td>
                           <td className="px-6 py-4">
                             <a
-                              href={`/admin/sku-explorer?search=${encodeURIComponent(product.product_code)}`}
+                              href={`/admin/products/${product.product_code.replace(/\//g, '--')}`}
                               className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                              target="_blank"
-                              rel="noopener noreferrer"
                             >
                               Edit Details
                             </a>
