@@ -32,7 +32,12 @@ export default async function ProductDetailPage({
   }
 
   // Fetch related data based on product type
-  let relatedData: any = {};
+  const relatedData: {
+    linkedConsumables?: any[];
+    linkedTools?: any[];
+    availableConsumables?: any[];
+    availableTools?: any[];
+  } = {};
 
   if (product.type === 'tool') {
     // Get consumables linked to this tool
