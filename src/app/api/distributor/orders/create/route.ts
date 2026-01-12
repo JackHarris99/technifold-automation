@@ -1,6 +1,6 @@
 /**
  * POST /api/distributor/orders/create
- * Create an order on behalf of a customer
+ * Create an order for the distributor themselves
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -15,31 +15,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { customer_id, items } = await request.json();
+    const { items } = await request.json();
 
-    if (!customer_id || !items || !Array.isArray(items) || items.length === 0) {
+    if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        { error: 'Customer ID and items are required' },
+        { error: 'Items are required' },
         { status: 400 }
       );
     }
 
     const supabase = getSupabaseClient();
-
-    // Verify customer belongs to this distributor
-    const { data: customer } = await supabase
-      .from('companies')
-      .select('company_id, company_name')
-      .eq('company_id', customer_id)
-      .eq('account_owner', distributor.account_owner)
-      .single();
-
-    if (!customer) {
-      return NextResponse.json(
-        { error: 'Customer not found or access denied' },
-        { status: 403 }
-      );
-    }
 
     // Calculate totals
     const subtotal = items.reduce(
@@ -47,16 +32,16 @@ export async function POST(request: NextRequest) {
       0
     );
 
-    // Create invoice
+    // Create invoice for the distributor company
     const { data: invoice, error: invoiceError } = await supabase
       .from('invoices')
       .insert({
-        company_id: customer_id,
+        company_id: distributor.company_id,
         invoice_date: new Date().toISOString().split('T')[0],
         subtotal: subtotal,
         total_amount: subtotal, // Add VAT/shipping logic if needed
         status: 'pending',
-        created_by: distributor.company_name,
+        created_by: 'Distributor Portal',
       })
       .select()
       .single();

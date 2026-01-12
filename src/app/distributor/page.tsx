@@ -1,6 +1,6 @@
 /**
  * Distributor Dashboard
- * Shows customer list and order management
+ * Place orders and view invoice history
  */
 
 import { getCurrentDistributor } from '@/lib/distributorAuth';
@@ -17,17 +17,24 @@ export default async function DistributorDashboardPage() {
 
   const supabase = getSupabaseClient();
 
-  // Fetch distributor's customers
-  const { data: customers, error } = await supabase
-    .from('companies')
-    .select('company_id, company_name, type, created_at, last_invoice_at')
-    .eq('account_owner', distributor.account_owner)
-    .neq('type', 'distributor') // Don't show other distributors
-    .order('company_name', { ascending: true });
+  // Fetch distributor's own invoices
+  const { data: invoices, error } = await supabase
+    .from('invoices')
+    .select('invoice_id, invoice_number, invoice_date, total_amount, status')
+    .eq('company_id', distributor.company_id)
+    .order('invoice_date', { ascending: false })
+    .limit(50);
 
   if (error) {
-    console.error('[Distributor Dashboard] Error fetching customers:', error);
+    console.error('[Distributor Dashboard] Error fetching invoices:', error);
   }
+
+  // Fetch all consumable products
+  const { data: products } = await supabase
+    .from('consumables')
+    .select('consumable_code, name, unit_price, pricing_tier, category, min_order_qty')
+    .eq('active', true)
+    .order('name', { ascending: true });
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
@@ -59,7 +66,8 @@ export default async function DistributorDashboardPage() {
       <div className="max-w-[1600px] mx-auto px-8 py-8">
         <DistributorDashboard
           distributor={distributor}
-          customers={customers || []}
+          invoices={invoices || []}
+          products={products || []}
         />
       </div>
     </div>
