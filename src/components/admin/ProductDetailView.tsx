@@ -235,19 +235,53 @@ export default function ProductDetailView({ product: initialProduct, relatedData
                         className="w-full px-4 py-3 bg-[#f8fafc] border border-[#e2e8f0] rounded-[10px] text-[14px] text-[#0a0a0a] font-[500] focus:outline-none focus:ring-2 focus:ring-[#1e40af]"
                       >
                         <option value="">-- Select Category --</option>
-                        <option value="Tri-Creaser">Tri-Creaser</option>
-                        <option value="Quad-Creaser">Quad-Creaser</option>
-                        <option value="Spine-Creaser">Spine-Creaser</option>
-                        <option value="Section-Scorer">Section-Scorer</option>
-                        <option value="Micro-Perforator">Micro-Perforator</option>
-                        <option value="Multi-Tool">Multi-Tool</option>
-                        <option value="CP-Applicator">CP-Applicator</option>
-                        <option value="Gripper-Boss">Gripper-Boss</option>
-                        <option value="Spine-and-Hinge-Creaser">Spine-and-Hinge-Creaser</option>
-                        <option value="Matrix">Matrix</option>
-                        <option value="Perforating Strip">Perforating Strip</option>
-                        <option value="Accessories">Accessories</option>
-                        <option value="Other">Other</option>
+                        {currentValue('type') === 'tool' && (
+                          <>
+                            <option value="Fast-Fit Tri-Creaser">Fast-Fit Tri-Creaser</option>
+                            <option value="Easy-Fit Tri-Creaser">Easy-Fit Tri-Creaser</option>
+                            <option value="Deluxe Tri-Creaser">Deluxe Tri-Creaser</option>
+                            <option value="Multi-Tool">Multi-Tool</option>
+                            <option value="Quad-Creaser">Quad-Creaser</option>
+                            <option value="Spine-Creaser">Spine-Creaser</option>
+                            <option value="Spine and Hinge Creaser">Spine and Hinge Creaser</option>
+                            <option value="Micro-Perforator">Micro-Perforator</option>
+                            <option value="Gripper Boss">Gripper Boss</option>
+                            <option value="CP Applicator">CP Applicator</option>
+                            <option value="Section-Scorer">Section-Scorer</option>
+                            <option value="Web-Tool">Web-Tool</option>
+                            <option value="Perforation Head">Perforation Head</option>
+                            <option value="Fast-Fit">Fast-Fit</option>
+                            <option value="Exit Fold">Exit Fold</option>
+                          </>
+                        )}
+                        {currentValue('type') === 'consumable' && (
+                          <>
+                            <option value="Rubber Creasing Band">Rubber Creasing Band</option>
+                            <option value="Plastic Creasing Band">Plastic Creasing Band</option>
+                            <option value="Micro-Perforation Blade">Micro-Perforation Blade</option>
+                            <option value="Nylon Sleeve">Nylon Sleeve</option>
+                            <option value="Female Receiver Ring">Female Receiver Ring</option>
+                            <option value="Waste-Stripper">Waste-Stripper</option>
+                            <option value="Cutting Knife">Cutting Knife</option>
+                            <option value="Spacer">Spacer</option>
+                            <option value="Gripper Band">Gripper Band</option>
+                            <option value="Cutting Boss">Cutting Boss</option>
+                            <option value="Section Scoring Band">Section Scoring Band</option>
+                            <option value="Blade Seal">Blade Seal</option>
+                            <option value="Machine Belt">Machine Belt</option>
+                            <option value="Belt">Belt</option>
+                          </>
+                        )}
+                        {currentValue('type') === 'part' && (
+                          <>
+                            <option value="Machine">Machine</option>
+                          </>
+                        )}
+                        {currentValue('type') === 'other' && (
+                          <>
+                            <option value="Other">Other</option>
+                          </>
+                        )}
                       </select>
                     ) : (
                       <div className="text-[14px] text-[#0a0a0a] font-[500]">{product.category || '-'}</div>
