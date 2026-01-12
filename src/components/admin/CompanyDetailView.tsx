@@ -67,20 +67,23 @@ export default function CompanyDetailView({
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#f8fafc]">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="px-8 py-6">
+      <div className="bg-white border-b border-[#e8e8e8] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+        <div className="px-8 py-8">
           <div className="flex items-center justify-between">
             <div>
               <Link
                 href="/admin/companies"
-                className="text-sm text-gray-700 hover:text-gray-700 mb-2 inline-block"
+                className="text-[13px] text-[#475569] hover:text-[#1e40af] font-[500] transition-colors flex items-center gap-2 mb-3"
               >
-                ← Back to Companies
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                All Companies
               </Link>
-              <h1 className="text-3xl font-bold text-gray-900">{company.company_name}</h1>
-              <p className="text-gray-700 mt-1">{company.company_id}</p>
+              <h1 className="text-[32px] font-[700] text-[#0a0a0a] tracking-[-0.02em]">{company.company_name}</h1>
+              <p className="text-[13px] text-[#64748b] font-[500] mt-2">{company.company_id}</p>
               <CompanyStatusControl
                 companyId={company.company_id}
                 companyName={company.company_name}
@@ -92,19 +95,19 @@ export default function CompanyDetailView({
             <div className="flex gap-3 flex-wrap">
               <Link
                 href={`/admin/send-reorder?company_id=${company.company_id}`}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium inline-block"
+                className="px-4 py-2.5 bg-[#1e40af] text-white rounded-lg text-[14px] font-[600] hover:bg-[#1e3a8a] transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.05)] inline-block"
               >
                 Send Reorder Email
               </Link>
               <Link
                 href={`/admin/quote-builder/tools?company_id=${company.company_id}`}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium inline-block"
+                className="px-4 py-2.5 bg-[#4f46e5] text-white rounded-lg text-[14px] font-[600] hover:bg-[#4338ca] transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.05)] inline-block"
               >
                 🔧 Create Tools Quote
               </Link>
               <Link
                 href={`/admin/quote-builder/consumables?company_id=${company.company_id}`}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium inline-block"
+                className="px-4 py-2.5 bg-[#9333ea] text-white rounded-lg text-[14px] font-[600] hover:bg-[#7e22ce] transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.05)] inline-block"
               >
                 📦 Create Consumables Quote
               </Link>
@@ -112,20 +115,20 @@ export default function CompanyDetailView({
           </div>
 
           {/* Tabs */}
-          <div className="mt-6 flex gap-4 border-b border-gray-200">
+          <div className="mt-8 flex gap-6 border-b border-[#e8e8e8]">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`pb-3 px-2 font-medium transition-colors ${
+                className={`pb-3 px-1 text-[14px] font-[600] transition-colors ${
                   activeTab === tab.id
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-700 hover:text-gray-700'
+                    ? 'text-[#1e40af] border-b-2 border-[#1e40af]'
+                    : 'text-[#64748b] hover:text-[#0a0a0a]'
                 }`}
               >
                 {tab.label}
                 {tab.count !== null && (
-                  <span className="ml-2 text-xs bg-gray-100 px-2 py-1 rounded-full">
+                  <span className="ml-2 text-[11px] bg-[#f1f5f9] text-[#64748b] px-2 py-0.5 rounded-full font-[600]">
                     {tab.count}
                   </span>
                 )}
@@ -136,7 +139,7 @@ export default function CompanyDetailView({
       </div>
 
       {/* Content */}
-      <div className="px-8 py-6">
+      <div className="max-w-6xl mx-auto px-8 py-8">
         {activeTab === 'overview' && (
           <OverviewTab
             company={company}
@@ -310,70 +313,70 @@ function OverviewTab({
   return (
     <div className="space-y-6">
       {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold mb-4 text-gray-900">Quick Actions</h2>
+      <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] border border-[#e8e8e8] p-6">
+        <h2 className="text-[18px] font-[600] mb-5 text-[#0a0a0a]">Quick Actions</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           <button
             onClick={() => onLogActivity('call')}
-            className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+            className="flex flex-col items-center gap-2 p-4 border-2 border-[#e8e8e8] rounded-lg hover:border-[#1e40af] hover:bg-[#eff6ff] transition-colors"
           >
             <span className="text-3xl">📞</span>
-            <span className="text-sm font-medium text-gray-900">Log Call</span>
+            <span className="text-[13px] font-[600] text-[#0a0a0a]">Log Call</span>
           </button>
           <button
             onClick={() => onLogActivity('visit')}
-            className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+            className="flex flex-col items-center gap-2 p-4 border-2 border-[#e8e8e8] rounded-lg hover:border-[#1e40af] hover:bg-[#eff6ff] transition-colors"
           >
             <span className="text-3xl">🚗</span>
-            <span className="text-sm font-medium text-gray-900">Log Visit</span>
+            <span className="text-[13px] font-[600] text-[#0a0a0a]">Log Visit</span>
           </button>
           <button
             onClick={() => onLogActivity('email')}
-            className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+            className="flex flex-col items-center gap-2 p-4 border-2 border-[#e8e8e8] rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
           >
             <span className="text-3xl">✉️</span>
-            <span className="text-sm font-medium text-gray-900">Log Email</span>
+            <span className="text-[13px] font-[600] text-[#0a0a0a]">Log Email</span>
           </button>
           <button
             onClick={() => onLogActivity('followup')}
-            className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+            className="flex flex-col items-center gap-2 p-4 border-2 border-[#e8e8e8] rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
           >
             <span className="text-3xl">🔄</span>
-            <span className="text-sm font-medium text-gray-900">Log Follow-up</span>
+            <span className="text-[13px] font-[600] text-[#0a0a0a]">Log Follow-up</span>
           </button>
           <button
             onClick={() => onLogActivity('meeting')}
-            className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+            className="flex flex-col items-center gap-2 p-4 border-2 border-[#e8e8e8] rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
           >
             <span className="text-3xl">🤝</span>
-            <span className="text-sm font-medium text-gray-900">Log Meeting</span>
+            <span className="text-[13px] font-[600] text-[#0a0a0a]">Log Meeting</span>
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Company Info */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-4 text-gray-900">Company Information</h2>
+        <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] border border-[#e8e8e8] p-6">
+          <h2 className="text-[18px] font-[600] mb-4 text-[#0a0a0a]">Company Information</h2>
           <dl className="space-y-3">
             <div>
-              <dt className="text-sm text-gray-700">Account Owner</dt>
-              <dd className="text-sm font-medium text-gray-900">{company.account_owner || 'Unassigned'}</dd>
+              <dt className="text-sm text-[#475569]">Account Owner</dt>
+              <dd className="text-[13px] font-[600] text-[#0a0a0a]">{company.account_owner || 'Unassigned'}</dd>
             </div>
             <div>
-              <dt className="text-sm text-gray-700">Type</dt>
-              <dd className="text-sm font-medium text-gray-900">{company.type || '-'}</dd>
+              <dt className="text-sm text-[#475569]">Type</dt>
+              <dd className="text-[13px] font-[600] text-[#0a0a0a]">{company.type || '-'}</dd>
             </div>
             <div>
-              <dt className="text-sm text-gray-700">Country</dt>
-              <dd className="text-sm font-medium text-gray-900">{company.country || '-'}</dd>
+              <dt className="text-sm text-[#475569]">Country</dt>
+              <dd className="text-[13px] font-[600] text-[#0a0a0a]">{company.country || '-'}</dd>
             </div>
 
             {/* VAT Number - Editable */}
             <div className="border-t pt-3">
-              <dt className="text-sm text-gray-700 mb-1">VAT Number</dt>
-              <dd className="text-sm font-medium text-gray-900">
-                {company.vat_number || <span className="text-gray-800 italic">Not set - click to add</span>}
+              <dt className="text-sm text-[#475569] mb-1">VAT Number</dt>
+              <dd className="text-[13px] font-[600] text-[#0a0a0a]">
+                {company.vat_number || <span className="text-[#64748b] italic">Not set - click to add</span>}
               </dd>
               <button
                 onClick={handleUpdateVAT}
@@ -385,18 +388,18 @@ function OverviewTab({
 
             {/* Billing Address - Editable */}
             <div className="border-t pt-3">
-              <dt className="text-sm text-gray-700 mb-1">Billing Address</dt>
+              <dt className="text-sm text-[#475569] mb-1">Billing Address</dt>
               <dd className="text-sm">
                 {hasBillingAddress ? (
-                  <div className="text-gray-700">
+                  <div className="text-[#475569]">
                     {company.billing_address_line_1 && <div>{company.billing_address_line_1}</div>}
                     {company.billing_address_line_2 && <div>{company.billing_address_line_2}</div>}
                     {company.billing_city && <div>{company.billing_city}{company.billing_state_province ? `, ${company.billing_state_province}` : ''}</div>}
                     {company.billing_postal_code && <div>{company.billing_postal_code}</div>}
-                    {company.billing_country && <div className="font-medium text-gray-900">{company.billing_country}</div>}
+                    {company.billing_country && <div className="font-medium text-[#0a0a0a]">{company.billing_country}</div>}
                   </div>
                 ) : (
-                  <span className="text-gray-800 italic">Not set - click to add</span>
+                  <span className="text-[#64748b] italic">Not set - click to add</span>
                 )}
               </dd>
               <button
@@ -408,8 +411,8 @@ function OverviewTab({
             </div>
 
             <div className="border-t pt-3">
-              <dt className="text-sm text-gray-700">Website</dt>
-              <dd className="text-sm font-medium text-gray-900">
+              <dt className="text-sm text-[#475569]">Website</dt>
+              <dd className="text-[13px] font-[600] text-[#0a0a0a]">
                 {company.website ? (
                   <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                     {company.website}
@@ -418,16 +421,16 @@ function OverviewTab({
               </dd>
             </div>
             <div>
-              <dt className="text-sm text-gray-700">Stripe Customer ID</dt>
-              <dd className="text-sm font-mono text-gray-800">{company.stripe_customer_id || 'Not set'}</dd>
+              <dt className="text-sm text-[#475569]">Stripe Customer ID</dt>
+              <dd className="text-sm font-mono text-[#64748b]">{company.stripe_customer_id || 'Not set'}</dd>
             </div>
           </dl>
         </div>
 
         {/* Contacts */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] border border-[#e8e8e8] p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Contacts ({contacts.length})</h2>
+            <h2 className="text-[18px] font-[600] text-[#0a0a0a]">Contacts ({contacts.length})</h2>
             <button
               onClick={onAddContact}
               className="text-sm text-blue-600 hover:text-blue-800 font-medium"
@@ -436,14 +439,14 @@ function OverviewTab({
             </button>
           </div>
           {contacts.length === 0 ? (
-            <p className="text-gray-700 text-sm">No contacts yet</p>
+            <p className="text-[#475569] text-sm">No contacts yet</p>
           ) : (
             <div className="space-y-3">
               {contacts.slice(0, 5).map((contact) => (
                 <div key={contact.contact_id} className="border-b border-gray-100 pb-3 last:border-0">
-                  <div className="font-medium text-sm text-gray-900">{contact.full_name || `${contact.first_name} ${contact.last_name}`}</div>
-                  <div className="text-sm text-gray-700">{contact.email}</div>
-                  {contact.role && <div className="text-xs text-gray-800 mt-1">{contact.role}</div>}
+                  <div className="font-medium text-sm text-[#0a0a0a]">{contact.full_name || `${contact.first_name} ${contact.last_name}`}</div>
+                  <div className="text-sm text-[#475569]">{contact.email}</div>
+                  {contact.role && <div className="text-xs text-[#64748b] mt-1">{contact.role}</div>}
                 </div>
               ))}
             </div>
@@ -452,9 +455,9 @@ function OverviewTab({
       </div>
 
       {/* Shipping Addresses */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] border border-[#e8e8e8] p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Shipping Addresses ({shippingAddresses.length})</h2>
+          <h2 className="text-[18px] font-[600] text-[#0a0a0a]">Shipping Addresses ({shippingAddresses.length})</h2>
           <button
             onClick={onAddAddress}
             className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
@@ -473,7 +476,7 @@ function OverviewTab({
             {shippingAddresses.map((address) => (
               <div
                 key={address.address_id}
-                className={`border rounded-lg p-4 relative ${address.is_default ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
+                className={`border rounded-lg p-4 relative ${address.is_default ? 'border-blue-500 bg-blue-50' : 'border-[#e8e8e8]'}`}
               >
                 {address.is_default && (
                   <div className="inline-block px-2 py-0.5 bg-blue-600 text-white text-xs font-medium rounded mb-2">
@@ -481,14 +484,14 @@ function OverviewTab({
                   </div>
                 )}
                 {address.label && (
-                  <div className="font-medium text-sm text-gray-900 mb-2">{address.label}</div>
+                  <div className="font-medium text-sm text-[#0a0a0a] mb-2">{address.label}</div>
                 )}
-                <div className="text-sm text-gray-800 space-y-1 mb-3">
+                <div className="text-sm text-[#64748b] space-y-1 mb-3">
                   <div>{address.address_line_1}</div>
                   {address.address_line_2 && <div>{address.address_line_2}</div>}
                   <div>{address.city}{address.state_province && `, ${address.state_province}`}</div>
                   <div>{address.postal_code}</div>
-                  <div className="font-medium text-gray-900">{address.country}</div>
+                  <div className="font-medium text-[#0a0a0a]">{address.country}</div>
                 </div>
                 <button
                   onClick={() => onEditAddress(address)}
@@ -510,9 +513,9 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
   return (
     <div className="space-y-6">
       {/* Purchased Tools */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Purchased Tools ({tools.length})</h2>
+      <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
+        <div className="px-6 py-4 border-b border-[#e8e8e8] flex items-center justify-between">
+          <h2 className="text-[18px] font-[600] text-[#0a0a0a]">Purchased Tools ({tools.length})</h2>
           <button
             onClick={onAddTool}
             className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 font-medium"
@@ -522,13 +525,13 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
         </div>
         <div className="p-6">
           {tools.length === 0 ? (
-            <p className="text-gray-700 text-sm">No tools purchased yet</p>
+            <p className="text-[#475569] text-sm">No tools purchased yet</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {tools.map((item: any) => (
-                <div key={item.product_code} className="border border-gray-200 rounded-lg p-4">
+                <div key={item.product_code} className="border border-[#e8e8e8] rounded-lg p-4">
                   <div className="flex items-start gap-3">
-                    <div className="relative w-16 h-16 bg-gray-50 rounded-lg flex-shrink-0 overflow-hidden border border-gray-200">
+                    <div className="relative w-16 h-16 bg-[#f8fafc] rounded-lg flex-shrink-0 overflow-hidden border border-[#e8e8e8]">
                       <Image
                         src={item.products?.image_url || `/product_images/${item.product_code}.jpg`}
                         alt={item.products?.description || item.product_code}
@@ -542,10 +545,10 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-gray-900">{item.products?.description || item.product_code}</div>
-                      <div className="text-xs text-gray-700 mt-1">SKU: {item.product_code}</div>
-                      <div className="text-sm text-gray-800 mt-2">Qty: {item.total_quantity}</div>
-                      <div className="text-xs text-gray-800 mt-1">
+                      <div className="font-medium text-[#0a0a0a]">{item.products?.description || item.product_code}</div>
+                      <div className="text-xs text-[#475569] mt-1">SKU: {item.product_code}</div>
+                      <div className="text-sm text-[#64748b] mt-2">Qty: {item.total_quantity}</div>
+                      <div className="text-xs text-[#64748b] mt-1">
                         Last: {item.last_purchased_at}
                       </div>
                       {item.source === 'manual' && (
@@ -563,19 +566,19 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
       </div>
 
       {/* Purchased Consumables */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Purchased Consumables ({consumables.length})</h2>
+      <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
+        <div className="px-6 py-4 border-b border-[#e8e8e8]">
+          <h2 className="text-[18px] font-[600] text-[#0a0a0a]">Purchased Consumables ({consumables.length})</h2>
         </div>
         <div className="p-6">
           {consumables.length === 0 ? (
-            <p className="text-gray-700 text-sm">No consumables purchased yet</p>
+            <p className="text-[#475569] text-sm">No consumables purchased yet</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {consumables.map((item: any) => (
-                <div key={item.product_code} className="border border-gray-200 rounded-lg p-4">
+                <div key={item.product_code} className="border border-[#e8e8e8] rounded-lg p-4">
                   <div className="flex items-start gap-3">
-                    <div className="relative w-16 h-16 bg-gray-50 rounded-lg flex-shrink-0 overflow-hidden border border-gray-200">
+                    <div className="relative w-16 h-16 bg-[#f8fafc] rounded-lg flex-shrink-0 overflow-hidden border border-[#e8e8e8]">
                       <Image
                         src={item.products?.image_url || `/product_images/${item.product_code}.jpg`}
                         alt={item.products?.description || item.product_code}
@@ -589,12 +592,12 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm text-gray-900">{item.products?.description || item.product_code}</div>
-                      <div className="text-xs text-gray-700 mt-1">{item.product_code}</div>
-                      <div className="text-xs text-gray-800 mt-2">
+                      <div className="font-medium text-sm text-[#0a0a0a]">{item.products?.description || item.product_code}</div>
+                      <div className="text-xs text-[#475569] mt-1">{item.product_code}</div>
+                      <div className="text-xs text-[#64748b] mt-2">
                         {item.total_purchases} orders • {item.total_quantity} total
                       </div>
-                      <div className="text-xs text-gray-800 mt-1">Last: {item.last_purchased_at}</div>
+                      <div className="text-xs text-[#64748b] mt-1">Last: {item.last_purchased_at}</div>
                     </div>
                   </div>
                 </div>
@@ -606,16 +609,16 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
 
       {/* Other Parts */}
       {parts.length > 0 && (
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Other Parts ({parts.length})</h2>
+        <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
+          <div className="px-6 py-4 border-b border-[#e8e8e8]">
+            <h2 className="text-[18px] font-[600] text-[#0a0a0a]">Other Parts ({parts.length})</h2>
           </div>
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {parts.map((item: any) => (
-                <div key={item.product_code} className="border border-gray-200 rounded-lg p-4">
+                <div key={item.product_code} className="border border-[#e8e8e8] rounded-lg p-4">
                   <div className="flex items-start gap-3">
-                    <div className="relative w-16 h-16 bg-gray-50 rounded-lg flex-shrink-0 overflow-hidden border border-gray-200">
+                    <div className="relative w-16 h-16 bg-[#f8fafc] rounded-lg flex-shrink-0 overflow-hidden border border-[#e8e8e8]">
                       <Image
                         src={item.products?.image_url || `/product_images/${item.product_code}.jpg`}
                         alt={item.products?.description || item.product_code}
@@ -629,10 +632,10 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm text-gray-900">{item.products?.description || item.product_code}</div>
-                      <div className="text-xs text-gray-700 mt-1">{item.product_code}</div>
-                      <div className="text-xs text-gray-800 mt-2">Qty: {item.total_quantity}</div>
-                      <div className="text-xs text-gray-800 mt-1">Last: {item.last_purchased_at}</div>
+                      <div className="font-medium text-sm text-[#0a0a0a]">{item.products?.description || item.product_code}</div>
+                      <div className="text-xs text-[#475569] mt-1">{item.product_code}</div>
+                      <div className="text-xs text-[#64748b] mt-2">Qty: {item.total_quantity}</div>
+                      <div className="text-xs text-[#64748b] mt-1">Last: {item.last_purchased_at}</div>
                     </div>
                   </div>
                 </div>
@@ -653,19 +656,19 @@ function SubscriptionsTab({ subscriptionTools, subscriptions, companyId, onAddTo
     <div className="space-y-6">
       {/* Active Subscription Info */}
       {activeSub && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-4 text-gray-900">Active Subscription</h2>
+        <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] border border-[#e8e8e8] p-6">
+          <h2 className="text-[18px] font-[600] mb-4 text-[#0a0a0a]">Active Subscription</h2>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <div className="text-sm text-gray-700">Status</div>
-              <div className="text-lg font-medium text-gray-900 text-gray-900 capitalize">{activeSub.status}</div>
+              <div className="text-sm text-[#475569]">Status</div>
+              <div className="text-lg font-medium text-[#0a0a0a] text-[#0a0a0a] capitalize">{activeSub.status}</div>
             </div>
             <div>
-              <div className="text-sm text-gray-700">Monthly Price</div>
-              <div className="text-lg font-medium text-gray-900 text-gray-900">£{activeSub.monthly_price}</div>
+              <div className="text-sm text-[#475569]">Monthly Price</div>
+              <div className="text-lg font-medium text-[#0a0a0a] text-[#0a0a0a]">£{activeSub.monthly_price}</div>
             </div>
             <div>
-              <div className="text-sm text-gray-700">Next Billing</div>
+              <div className="text-sm text-[#475569]">Next Billing</div>
               <div className="text-sm">{activeSub.next_billing_date || 'N/A'}</div>
             </div>
           </div>
@@ -673,9 +676,9 @@ function SubscriptionsTab({ subscriptionTools, subscriptions, companyId, onAddTo
       )}
 
       {/* Tools on Subscription */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Tools on Subscription ({subscriptionTools.length})</h2>
+      <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
+        <div className="px-6 py-4 border-b border-[#e8e8e8] flex items-center justify-between">
+          <h2 className="text-[18px] font-[600] text-[#0a0a0a]">Tools on Subscription ({subscriptionTools.length})</h2>
           <button
             onClick={onAddTool}
             className="text-sm bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 font-medium"
@@ -685,15 +688,15 @@ function SubscriptionsTab({ subscriptionTools, subscriptions, companyId, onAddTo
         </div>
         <div className="p-6">
           {subscriptionTools.length === 0 ? (
-            <p className="text-gray-700 text-sm">No tools on subscription</p>
+            <p className="text-[#475569] text-sm">No tools on subscription</p>
           ) : (
             <div className="space-y-3">
               {subscriptionTools.map((item: any) => (
-                <div key={item.tool_code} className="flex items-center justify-between border border-gray-200 rounded-lg p-4">
+                <div key={item.tool_code} className="flex items-center justify-between border border-[#e8e8e8] rounded-lg p-4">
                   <div>
-                    <div className="font-medium text-gray-900">{item.products?.description || item.tool_code}</div>
-                    <div className="text-xs text-gray-700 mt-1">SKU: {item.tool_code}</div>
-                    <div className="text-xs text-gray-800 mt-1">
+                    <div className="font-medium text-[#0a0a0a]">{item.products?.description || item.tool_code}</div>
+                    <div className="text-xs text-[#475569] mt-1">SKU: {item.tool_code}</div>
+                    <div className="text-xs text-[#64748b] mt-1">
                       Added: {item.added_at} {item.added_by && `by ${item.added_by}`}
                     </div>
                   </div>
@@ -717,19 +720,19 @@ function InvoicesTab({ invoices, companyId }: any) {
   return (
     <div className="space-y-6">
       {/* Revenue Summary */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] border border-[#e8e8e8] p-6">
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <div className="text-sm text-gray-700">Total Revenue (Since Launch)</div>
+            <div className="text-sm text-[#475569]">Total Revenue (Since Launch)</div>
             <div className="text-2xl font-bold text-green-600">£{totalRevenue.toFixed(2)}</div>
           </div>
           <div>
-            <div className="text-sm text-gray-700">Total Invoices</div>
-            <div className="text-2xl font-bold text-gray-900">{invoices.length}</div>
+            <div className="text-sm text-[#475569]">Total Invoices</div>
+            <div className="text-2xl font-bold text-[#0a0a0a]">{invoices.length}</div>
           </div>
           <div>
-            <div className="text-sm text-gray-700">Paid</div>
-            <div className="text-2xl font-bold text-gray-900">
+            <div className="text-sm text-[#475569]">Paid</div>
+            <div className="text-2xl font-bold text-[#0a0a0a]">
               {invoices.filter((inv: any) => inv.payment_status === 'paid').length}
             </div>
           </div>
@@ -737,22 +740,22 @@ function InvoicesTab({ invoices, companyId }: any) {
       </div>
 
       {/* Invoices List */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Invoices</h2>
+      <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
+        <div className="px-6 py-4 border-b border-[#e8e8e8]">
+          <h2 className="text-[18px] font-[600] text-[#0a0a0a]">Invoices</h2>
         </div>
         <div className="overflow-x-auto">
           {invoices.length === 0 ? (
-            <div className="p-6 text-gray-700 text-sm">No invoices yet</div>
+            <div className="p-6 text-[#475569] text-sm">No invoices yet</div>
           ) : (
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-[#f8fafc]">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Invoice #</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Invoice #</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Amount</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -762,7 +765,7 @@ function InvoicesTab({ invoices, companyId }: any) {
                       {invoice.invoice_number || invoice.stripe_invoice_id}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{invoice.invoice_date}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-[13px] font-[600] text-[#0a0a0a]">
                       £{invoice.total_amount}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -807,7 +810,7 @@ function QuotesTab({ quotes, companyId }: { quotes: any[]; companyId: string }) 
     const isExpired = expiresAt && expiresAt < now;
 
     if (isExpired) {
-      return <span className="px-2 py-1 text-xs font-semibold rounded bg-gray-200 text-gray-700">Expired</span>;
+      return <span className="px-2 py-1 text-xs font-semibold rounded bg-gray-200 text-[#475569]">Expired</span>;
     }
 
     if (quote.accepted_at) {
@@ -836,7 +839,7 @@ function QuotesTab({ quotes, companyId }: { quotes: any[]; companyId: string }) 
       }
     }
 
-    return <span className="px-2 py-1 text-xs font-semibold rounded bg-gray-200 text-gray-700">Draft</span>;
+    return <span className="px-2 py-1 text-xs font-semibold rounded bg-gray-200 text-[#475569]">Draft</span>;
   }
 
   function formatDate(dateString: string | null) {
@@ -845,30 +848,30 @@ function QuotesTab({ quotes, companyId }: { quotes: any[]; companyId: string }) 
   }
 
   return (
-    <div className="bg-white rounded-lg shadow">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Quotes ({quotes.length})</h2>
+    <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
+      <div className="px-6 py-4 border-b border-[#e8e8e8]">
+        <h2 className="text-[18px] font-[600] text-[#0a0a0a]">Quotes ({quotes.length})</h2>
       </div>
       <div className="overflow-x-auto">
         {quotes.length === 0 ? (
-          <div className="p-6 text-gray-700 text-sm">No quotes yet</div>
+          <div className="p-6 text-[#475569] text-sm">No quotes yet</div>
         ) : (
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-[#f8fafc]">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Quote ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Amount</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Created</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Sent</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Quote ID</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Type</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Amount</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Created</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Sent</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {quotes.map((quote: any) => (
-                <tr key={quote.quote_id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-800">
+                <tr key={quote.quote_id} className="hover:bg-[#f8fafc]">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-[#64748b]">
                     {quote.quote_id.substring(0, 8)}...
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -880,13 +883,13 @@ function QuotesTab({ quotes, companyId }: { quotes: any[]; companyId: string }) 
                       {quote.quote_type}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-[13px] font-[600] text-[#0a0a0a]">
                     £{quote.total_amount?.toLocaleString() || '0'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[#64748b]">
                     {formatDate(quote.created_at)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[#64748b]">
                     {formatDate(quote.sent_at)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -913,29 +916,29 @@ function QuotesTab({ quotes, companyId }: { quotes: any[]; companyId: string }) 
 // Engagement Tab
 function EngagementTab({ engagement }: { engagement: any[] }) {
   return (
-    <div className="bg-white rounded-lg shadow">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Engagement Timeline ({engagement.length})</h2>
+    <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
+      <div className="px-6 py-4 border-b border-[#e8e8e8]">
+        <h2 className="text-[18px] font-[600] text-[#0a0a0a]">Engagement Timeline ({engagement.length})</h2>
       </div>
       <div className="p-6">
         {engagement.length === 0 ? (
-          <p className="text-gray-700 text-sm">No engagement events yet</p>
+          <p className="text-[#475569] text-sm">No engagement events yet</p>
         ) : (
           <div className="space-y-4">
             {engagement.map((event: any) => (
-              <div key={event.event_id} className="flex gap-4 border-l-2 border-gray-200 pl-4">
+              <div key={event.event_id} className="flex gap-4 border-l-2 border-[#e8e8e8] pl-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm text-gray-900">{event.event_name || event.event_type}</span>
+                    <span className="font-medium text-sm text-[#0a0a0a]">{event.event_name || event.event_type}</span>
                     {event.source && (
-                      <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">{event.source}</span>
+                      <span className="text-xs bg-[#f1f5f9] px-2 py-0.5 rounded">{event.source}</span>
                     )}
                   </div>
-                  <div className="text-xs text-gray-700 mt-1">
+                  <div className="text-xs text-[#475569] mt-1">
                     {new Date(event.occurred_at).toLocaleString()}
                   </div>
                   {event.url && (
-                    <div className="text-xs text-gray-800 mt-1 truncate">{event.url}</div>
+                    <div className="text-xs text-[#64748b] mt-1 truncate">{event.url}</div>
                   )}
                 </div>
               </div>
