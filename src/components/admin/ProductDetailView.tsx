@@ -71,8 +71,8 @@ export default function ProductDetailView({ product: initialProduct, relatedData
 
       if (!response.ok) throw new Error('Failed to save');
 
-      const { data } = await response.json();
-      setProduct(data);
+      const { product: updatedProduct } = await response.json();
+      setProduct(updatedProduct);
       setEditedFields({});
       setEditing(false);
       router.refresh();

@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       .select(`
         *,
         companies:company_id (company_name, country, account_owner),
-        orders:order_id (order_id, invoice_number, total_amount)
+        invoices:invoice_id (invoice_id, invoice_number, total_amount)
       `)
       .order('created_at', { ascending: false });
 
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       company_id,
-      order_id,
+      invoice_id,
       subscription_id,
       destination_country,
       shipment_type,
@@ -98,31 +98,18 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
-    // If order_id provided, fetch quantities from invoice_items
+    // If invoice_id provided, fetch quantities from invoice_items
     let quantitiesMap: Record<string, number> = {};
-    if (order_id) {
-      // Try invoice_items first (new system)
+    if (invoice_id) {
       const { data: invoiceItems } = await supabase
         .from('invoice_items')
         .select('product_code, quantity')
-        .eq('invoice_id', order_id);
+        .eq('invoice_id', invoice_id);
 
       if (invoiceItems && invoiceItems.length > 0) {
         invoiceItems.forEach(item => {
           quantitiesMap[item.product_code] = item.quantity;
         });
-      } else {
-        // Fallback to order_items (legacy system)
-        const { data: orderItems } = await supabase
-          .from('order_items')
-          .select('product_code, quantity')
-          .eq('order_id', order_id);
-
-        if (orderItems) {
-          orderItems.forEach(item => {
-            quantitiesMap[item.product_code] = item.quantity;
-          });
-        }
       }
     }
 
@@ -159,7 +146,7 @@ export async function POST(request: NextRequest) {
       .from('shipping_manifests')
       .insert({
         company_id,
-        order_id: order_id || null,
+        invoice_id: invoice_id || null,
         subscription_id: subscription_id || null,
         destination_country,
         shipment_type,

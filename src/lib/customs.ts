@@ -36,7 +36,7 @@ export async function generateCustomsDeclaration(params: {
   shipment_type: 'rental' | 'sale' | 'consumables' | 'return';
   product_codes: string[];
   subscription_id?: string;
-  order_id?: string;
+  invoice_id?: string;
 }): Promise<CustomsDeclaration> {
   const supabase = getSupabaseClient();
 
@@ -75,7 +75,7 @@ export async function generateCustomsDeclaration(params: {
     .insert({
       company_id: params.company_id,
       subscription_id: params.subscription_id,
-      order_id: params.order_id,
+      invoice_id: params.invoice_id,
       destination_country: params.destination_country,
       shipment_type: params.shipment_type,
       customs_invoice_number,

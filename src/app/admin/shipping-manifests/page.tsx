@@ -26,7 +26,7 @@ interface ShippingManifest {
   companies?: {
     company_name: string;
   };
-  orders?: {
+  invoices?: {
     invoice_number: string;
   };
 }

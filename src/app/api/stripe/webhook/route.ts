@@ -903,27 +903,8 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   if (order) {
     console.log('[stripe-webhook] Order marked as paid:', order.order_id);
 
-    // Check if this is an international shipment - if so, generate commercial invoice
-    const { data: company } = await supabase
-      .from('companies')
-      .select('country')
-      .eq('company_id', order.company_id)
-      .single();
-
-    if (company && company.country && company.country.toUpperCase() !== 'GB' && company.country.toUpperCase() !== 'UK') {
-      console.log('[stripe-webhook] International order detected - generating commercial invoice');
-
-      // Generate commercial invoice for customs clearance
-      const { generateCommercialInvoice } = await import('@/lib/commercial-invoice');
-      const invoiceResult = await generateCommercialInvoice({ order_id: order.order_id });
-
-      if (invoiceResult.success) {
-        console.log('[stripe-webhook] Commercial invoice generated:', invoiceResult.pdf_url);
-      } else {
-        console.error('[stripe-webhook] Failed to generate commercial invoice:', invoiceResult.error);
-        // Don't fail the whole webhook - just log the error
-      }
-    }
+    // Note: Shipping manifests and commercial invoices are now created manually
+    // via the admin UI when preparing international shipments
 
     // Track payment event
     const { error: paidEventErr } = await supabase.from('engagement_events').insert({
