@@ -34,6 +34,7 @@ export default async function DistributorDashboardPage() {
     .from('products')
     .select('product_code, description, price, pricing_tier, category, type, currency')
     .eq('active', true)
+    .not('price', 'is', null)
     .order('description', { ascending: true });
 
   return (
