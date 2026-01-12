@@ -314,42 +314,53 @@ function OverviewTab({
     <div className="space-y-6">
       {/* Quick Actions */}
       <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] border border-[#e8e8e8] p-6">
-        <h2 className="text-[18px] font-[600] mb-5 text-[#0a0a0a]">Quick Actions</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <h2 className="text-[18px] font-[600] mb-5 text-[#0a0a0a]">Log Activity</h2>
+        <div className="flex gap-3 flex-wrap">
           <button
             onClick={() => onLogActivity('call')}
-            className="flex flex-col items-center gap-2 p-4 border-2 border-[#e8e8e8] rounded-lg hover:border-[#1e40af] hover:bg-[#eff6ff] transition-colors"
+            className="px-4 py-2.5 bg-white border border-[#e8e8e8] text-[#0a0a0a] rounded-lg text-[13px] font-[500] hover:border-[#1e40af] hover:bg-[#eff6ff] transition-all shadow-sm inline-flex items-center gap-2"
           >
-            <span className="text-3xl">📞</span>
-            <span className="text-[13px] font-[600] text-[#0a0a0a]">Log Call</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+            </svg>
+            Call
           </button>
           <button
             onClick={() => onLogActivity('visit')}
-            className="flex flex-col items-center gap-2 p-4 border-2 border-[#e8e8e8] rounded-lg hover:border-[#1e40af] hover:bg-[#eff6ff] transition-colors"
+            className="px-4 py-2.5 bg-white border border-[#e8e8e8] text-[#0a0a0a] rounded-lg text-[13px] font-[500] hover:border-[#1e40af] hover:bg-[#eff6ff] transition-all shadow-sm inline-flex items-center gap-2"
           >
-            <span className="text-3xl">🚗</span>
-            <span className="text-[13px] font-[600] text-[#0a0a0a]">Log Visit</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Visit
           </button>
           <button
             onClick={() => onLogActivity('email')}
-            className="flex flex-col items-center gap-2 p-4 border-2 border-[#e8e8e8] rounded-lg hover:border-[#1e40af] hover:bg-[#eff6ff] transition-colors"
+            className="px-4 py-2.5 bg-white border border-[#e8e8e8] text-[#0a0a0a] rounded-lg text-[13px] font-[500] hover:border-[#1e40af] hover:bg-[#eff6ff] transition-all shadow-sm inline-flex items-center gap-2"
           >
-            <span className="text-3xl">✉️</span>
-            <span className="text-[13px] font-[600] text-[#0a0a0a]">Log Email</span>
-          </button>
-          <button
-            onClick={() => onLogActivity('followup')}
-            className="flex flex-col items-center gap-2 p-4 border-2 border-[#e8e8e8] rounded-lg hover:border-[#1e40af] hover:bg-[#eff6ff] transition-colors"
-          >
-            <span className="text-3xl">🔄</span>
-            <span className="text-[13px] font-[600] text-[#0a0a0a]">Log Follow-up</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Email
           </button>
           <button
             onClick={() => onLogActivity('meeting')}
-            className="flex flex-col items-center gap-2 p-4 border-2 border-[#e8e8e8] rounded-lg hover:border-[#1e40af] hover:bg-[#eff6ff] transition-colors"
+            className="px-4 py-2.5 bg-white border border-[#e8e8e8] text-[#0a0a0a] rounded-lg text-[13px] font-[500] hover:border-[#1e40af] hover:bg-[#eff6ff] transition-all shadow-sm inline-flex items-center gap-2"
           >
-            <span className="text-3xl">🤝</span>
-            <span className="text-[13px] font-[600] text-[#0a0a0a]">Log Meeting</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Meeting
+          </button>
+          <button
+            onClick={() => onLogActivity('followup')}
+            className="px-4 py-2.5 bg-white border border-[#e8e8e8] text-[#0a0a0a] rounded-lg text-[13px] font-[500] hover:border-[#1e40af] hover:bg-[#eff6ff] transition-all shadow-sm inline-flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Follow-up
           </button>
         </div>
       </div>

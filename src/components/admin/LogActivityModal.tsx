@@ -33,13 +33,6 @@ const ACTIVITY_LABELS = {
   meeting: 'Meeting',
 };
 
-const ACTIVITY_ICONS = {
-  call: '📞',
-  visit: '🚗',
-  email: '✉️',
-  followup: '🔄',
-  meeting: '🤝',
-};
 
 const CALL_OUTCOMES = [
   { value: 'success', label: 'Successful conversation' },
@@ -96,7 +89,6 @@ export function LogActivityModal({
   if (!isOpen) return null;
 
   const activityLabel = ACTIVITY_LABELS[activityType];
-  const activityIcon = ACTIVITY_ICONS[activityType];
 
   // Get appropriate outcomes based on activity type
   let outcomeOptions: Array<{ value: string; label: string }> = [];
@@ -160,41 +152,43 @@ export function LogActivityModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+      <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full border border-[#e8e8e8]">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="px-6 py-5 border-b border-[#e8e8e8]">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">
-              {activityIcon} Log {activityLabel}
-            </h2>
+            <div>
+              <h2 className="text-[20px] font-[600] text-[#0a0a0a]">
+                Log {activityLabel}
+              </h2>
+              <p className="text-[13px] text-[#64748b] mt-1 font-[500]">{companyName}</p>
+            </div>
             <button
               onClick={handleClose}
               disabled={loading}
-              className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+              className="text-[#64748b] hover:text-[#0a0a0a] disabled:opacity-50 transition-colors"
             >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
-          <p className="text-sm text-gray-700 mt-1">{companyName}</p>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
+        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
           {/* Contact Selection */}
           {contacts.length > 0 && (
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-1">
+              <label className="block text-[13px] font-[600] text-[#0a0a0a] mb-2">
                 Contact (Optional)
               </label>
               <select
                 value={contactId}
                 onChange={(e) => setContactId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                className="w-full px-3 py-2.5 border border-[#e8e8e8] rounded-lg focus:ring-2 focus:ring-[#1e40af] focus:border-[#1e40af] text-[#0a0a0a] text-[13px] transition-all"
               >
-                <option value="">-- General (no specific contact) --</option>
+                <option value="">General (no specific contact)</option>
                 {contacts.map((contact) => (
                   <option key={contact.contact_id} value={contact.contact_id}>
                     {contact.full_name} {contact.email ? `(${contact.email})` : ''}
@@ -207,22 +201,22 @@ export function LogActivityModal({
           {/* Outcome */}
           {outcomeOptions.length > 0 && (
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Outcome
+              <label className="block text-[13px] font-[600] text-[#0a0a0a] mb-3">
+                Outcome <span className="text-red-500">*</span>
               </label>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {outcomeOptions.map((option) => (
-                  <label key={option.value} className="flex items-center">
+                  <label key={option.value} className="flex items-center cursor-pointer group">
                     <input
                       type="radio"
                       name="outcome"
                       value={option.value}
                       checked={outcome === option.value}
                       onChange={(e) => setOutcome(e.target.value)}
-                      className="mr-2 text-blue-600"
+                      className="w-4 h-4 text-[#1e40af] border-[#e8e8e8] focus:ring-2 focus:ring-[#1e40af]"
                       required
                     />
-                    <span className="text-sm text-gray-900">{option.label}</span>
+                    <span className="ml-3 text-[13px] text-[#475569] font-[500] group-hover:text-[#0a0a0a] transition-colors">{option.label}</span>
                   </label>
                 ))}
               </div>
@@ -231,7 +225,7 @@ export function LogActivityModal({
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-1">
+            <label className="block text-[13px] font-[600] text-[#0a0a0a] mb-2">
               Notes
             </label>
             <textarea
@@ -239,31 +233,31 @@ export function LogActivityModal({
               onChange={(e) => setNotes(e.target.value)}
               rows={4}
               placeholder="Add any additional details..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-400"
+              className="w-full px-3 py-2.5 border border-[#e8e8e8] rounded-lg focus:ring-2 focus:ring-[#1e40af] focus:border-[#1e40af] text-[#0a0a0a] text-[13px] placeholder-[#94a3b8] transition-all"
             />
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-800">{error}</p>
+            <div className="p-4 bg-[#fef2f2] border border-[#fecaca] rounded-lg">
+              <p className="text-[13px] text-[#991b1b] font-[500]">{error}</p>
             </div>
           )}
 
           {/* Actions */}
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-3 pt-3 border-t border-[#e8e8e8]">
             <button
               type="button"
               onClick={handleClose}
               disabled={loading}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 font-medium"
+              className="flex-1 px-4 py-2.5 border border-[#e8e8e8] text-[#64748b] rounded-lg hover:bg-[#f8fafc] hover:text-[#0a0a0a] disabled:opacity-50 font-[500] text-[13px] transition-all"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium"
+              className="flex-1 px-4 py-2.5 bg-[#1e40af] text-white rounded-lg hover:bg-[#1e3a8a] disabled:opacity-50 font-[600] text-[13px] transition-all shadow-sm"
             >
               {loading ? 'Logging...' : 'Log Activity'}
             </button>
