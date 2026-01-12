@@ -9,12 +9,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface Product {
-  consumable_code: string;
-  name: string;
-  unit_price: number;
+  product_code: string;
+  description: string;
+  price: number;
   pricing_tier: string | null;
   category: string | null;
-  min_order_qty: number | null;
+  type: string;
+  currency: string;
 }
 
 interface Invoice {
@@ -45,8 +46,8 @@ export default function DistributorDashboard({
   const [submitting, setSubmitting] = useState(false);
 
   const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.consumable_code.toLowerCase().includes(searchTerm.toLowerCase())
+    product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.product_code.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const updateQuantity = (productCode: string, quantity: number) => {
@@ -61,13 +62,13 @@ export default function DistributorDashboard({
 
   const cartItems = Array.from(cart.entries())
     .map(([code, qty]) => {
-      const product = products.find((p) => p.consumable_code === code);
+      const product = products.find((p) => p.product_code === code);
       return product ? { product, quantity: qty } : null;
     })
     .filter((item): item is { product: Product; quantity: number } => item !== null);
 
   const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.product.unit_price * item.quantity,
+    (sum, item) => sum + item.product.price * item.quantity,
     0
   );
 
@@ -82,9 +83,9 @@ export default function DistributorDashboard({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: cartItems.map((item) => ({
-            product_code: item.product.consumable_code,
+            product_code: item.product.product_code,
             quantity: item.quantity,
-            unit_price: item.product.unit_price,
+            unit_price: item.product.price,
           })),
         }),
       });
@@ -130,17 +131,17 @@ export default function DistributorDashboard({
 
           <div className="px-8 pb-8 pt-4 space-y-4 max-h-[600px] overflow-y-auto">
             {filteredProducts.map((product) => {
-              const currentQty = cart.get(product.consumable_code) || 0;
+              const currentQty = cart.get(product.product_code) || 0;
 
               return (
                 <div
-                  key={product.consumable_code}
+                  key={product.product_code}
                   className="p-4 bg-[#f8fafc] rounded-[12px] border border-[#e2e8f0]"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="text-[14px] font-[600] text-[#0a0a0a]">{product.name}</div>
-                      <div className="text-[12px] text-[#1e293b] mt-1 font-mono">{product.consumable_code}</div>
+                      <div className="text-[14px] font-[600] text-[#0a0a0a]">{product.description}</div>
+                      <div className="text-[12px] text-[#1e293b] mt-1 font-mono">{product.product_code}</div>
                       {product.category && (
                         <div className="text-[11px] text-[#475569] font-[500] mt-1">
                           {product.category}
@@ -148,7 +149,7 @@ export default function DistributorDashboard({
                       )}
                       <div className="mt-2">
                         <div className="text-[18px] font-[700] text-[#0a0a0a]">
-                          £{product.unit_price.toFixed(2)}
+                          £{product.price.toFixed(2)}
                         </div>
                       </div>
                     </div>
@@ -160,7 +161,7 @@ export default function DistributorDashboard({
                           min="0"
                           value={currentQty}
                           onChange={(e) =>
-                            updateQuantity(product.consumable_code, parseInt(e.target.value) || 0)
+                            updateQuantity(product.product_code, parseInt(e.target.value) || 0)
                           }
                           className="w-20 px-3 py-2 border border-[#e8e8e8] rounded-[8px] text-center font-[600] focus:ring-2 focus:ring-[#16a34a] focus:border-[#16a34a] outline-none"
                         />
@@ -195,20 +196,20 @@ export default function DistributorDashboard({
                 <div className="space-y-3 mb-6">
                   {cartItems.map((item) => (
                     <div
-                      key={item.product.consumable_code}
+                      key={item.product.product_code}
                       className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1 min-w-0">
                           <div className="text-[12px] font-[600] text-[#0a0a0a] leading-tight">
-                            {item.product.name}
+                            {item.product.description}
                           </div>
                           <div className="text-[11px] text-[#475569] font-mono mt-0.5">
-                            {item.product.consumable_code}
+                            {item.product.product_code}
                           </div>
                         </div>
                         <button
-                          onClick={() => updateQuantity(item.product.consumable_code, 0)}
+                          onClick={() => updateQuantity(item.product.product_code, 0)}
                           className="ml-2 text-red-600 hover:text-red-700 flex-shrink-0"
                           title="Remove"
                         >
@@ -225,10 +226,10 @@ export default function DistributorDashboard({
 
                       <div className="flex items-center justify-between">
                         <div className="text-[11px] text-[#475569] font-[500]">
-                          {item.quantity} × £{item.product.unit_price.toFixed(2)}
+                          {item.quantity} × £{item.product.price.toFixed(2)}
                         </div>
                         <div className="text-[14px] font-[700] text-[#0a0a0a]">
-                          £{(item.quantity * item.product.unit_price).toFixed(2)}
+                          £{(item.quantity * item.product.price).toFixed(2)}
                         </div>
                       </div>
                     </div>

@@ -29,12 +29,12 @@ export default async function DistributorDashboardPage() {
     console.error('[Distributor Dashboard] Error fetching invoices:', error);
   }
 
-  // Fetch all consumable products
+  // Fetch all products with static pricing
   const { data: products } = await supabase
-    .from('consumables')
-    .select('consumable_code, name, unit_price, pricing_tier, category, min_order_qty')
+    .from('products')
+    .select('product_code, description, price, pricing_tier, category, type, currency')
     .eq('active', true)
-    .order('name', { ascending: true });
+    .order('description', { ascending: true });
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
