@@ -332,21 +332,21 @@ function OverviewTab({
           </button>
           <button
             onClick={() => onLogActivity('email')}
-            className="flex flex-col items-center gap-2 p-4 border-2 border-[#e8e8e8] rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+            className="flex flex-col items-center gap-2 p-4 border-2 border-[#e8e8e8] rounded-lg hover:border-[#1e40af] hover:bg-[#eff6ff] transition-colors"
           >
             <span className="text-3xl">✉️</span>
             <span className="text-[13px] font-[600] text-[#0a0a0a]">Log Email</span>
           </button>
           <button
             onClick={() => onLogActivity('followup')}
-            className="flex flex-col items-center gap-2 p-4 border-2 border-[#e8e8e8] rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+            className="flex flex-col items-center gap-2 p-4 border-2 border-[#e8e8e8] rounded-lg hover:border-[#1e40af] hover:bg-[#eff6ff] transition-colors"
           >
             <span className="text-3xl">🔄</span>
             <span className="text-[13px] font-[600] text-[#0a0a0a]">Log Follow-up</span>
           </button>
           <button
             onClick={() => onLogActivity('meeting')}
-            className="flex flex-col items-center gap-2 p-4 border-2 border-[#e8e8e8] rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+            className="flex flex-col items-center gap-2 p-4 border-2 border-[#e8e8e8] rounded-lg hover:border-[#1e40af] hover:bg-[#eff6ff] transition-colors"
           >
             <span className="text-3xl">🤝</span>
             <span className="text-[13px] font-[600] text-[#0a0a0a]">Log Meeting</span>
@@ -380,7 +380,7 @@ function OverviewTab({
               </dd>
               <button
                 onClick={handleUpdateVAT}
-                className="text-xs text-blue-600 hover:text-blue-800 font-medium mt-1"
+                className="text-[12px] text-[#1e40af] hover:text-[#1e3a8a] transition-colors font-medium mt-1"
               >
                 Edit VAT
               </button>
@@ -404,7 +404,7 @@ function OverviewTab({
               </dd>
               <button
                 onClick={onEditBillingAddress}
-                className="text-xs text-blue-600 hover:text-blue-800 font-medium mt-1"
+                className="text-[12px] text-[#1e40af] hover:text-[#1e3a8a] transition-colors font-medium mt-1"
               >
                 Edit Billing Address
               </button>
@@ -433,7 +433,7 @@ function OverviewTab({
             <h2 className="text-[18px] font-[600] text-[#0a0a0a]">Contacts ({contacts.length})</h2>
             <button
               onClick={onAddContact}
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              className="text-[13px] text-[#1e40af] hover:text-[#1e3a8a] transition-colors font-medium"
             >
               + Add Contact
             </button>
@@ -443,7 +443,7 @@ function OverviewTab({
           ) : (
             <div className="space-y-3">
               {contacts.slice(0, 5).map((contact) => (
-                <div key={contact.contact_id} className="border-b border-gray-100 pb-3 last:border-0">
+                <div key={contact.contact_id} className="border-b border-[#f1f5f9] pb-3 last:border-0">
                   <div className="font-medium text-sm text-[#0a0a0a]">{contact.full_name || `${contact.first_name} ${contact.last_name}`}</div>
                   <div className="text-sm text-[#475569]">{contact.email}</div>
                   {contact.role && <div className="text-xs text-[#64748b] mt-1">{contact.role}</div>}
@@ -495,7 +495,7 @@ function OverviewTab({
                 </div>
                 <button
                   onClick={() => onEditAddress(address)}
-                  className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                  className="text-[12px] text-[#1e40af] hover:text-[#1e3a8a] transition-colors font-medium"
                 >
                   Edit
                 </button>
@@ -518,7 +518,7 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
           <h2 className="text-[18px] font-[600] text-[#0a0a0a]">Purchased Tools ({tools.length})</h2>
           <button
             onClick={onAddTool}
-            className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 font-medium"
+            className="text-[13px] bg-[#1e40af] text-white px-4 py-2 rounded-lg hover:bg-[#1e3a8a] transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.05)] font-medium"
           >
             + Add Tool
           </button>
@@ -724,15 +724,15 @@ function InvoicesTab({ invoices, companyId }: any) {
         <div className="grid grid-cols-3 gap-4">
           <div>
             <div className="text-sm text-[#475569]">Total Revenue (Since Launch)</div>
-            <div className="text-2xl font-bold text-green-600">£{totalRevenue.toFixed(2)}</div>
+            <div className="text-[28px] font-[700] text-[#16a34a]">£{totalRevenue.toFixed(2)}</div>
           </div>
           <div>
             <div className="text-sm text-[#475569]">Total Invoices</div>
-            <div className="text-2xl font-bold text-[#0a0a0a]">{invoices.length}</div>
+            <div className="text-[28px] font-[700] text-[#0a0a0a]">{invoices.length}</div>
           </div>
           <div>
             <div className="text-sm text-[#475569]">Paid</div>
-            <div className="text-2xl font-bold text-[#0a0a0a]">
+            <div className="text-[28px] font-[700] text-[#0a0a0a]">
               {invoices.filter((inv: any) => inv.payment_status === 'paid').length}
             </div>
           </div>
@@ -748,44 +748,44 @@ function InvoicesTab({ invoices, companyId }: any) {
           {invoices.length === 0 ? (
             <div className="p-6 text-[#475569] text-sm">No invoices yet</div>
           ) : (
-            <table className="min-w-full divide-y divide-gray-200">
+            <table className="min-w-full divide-y divide-[#f1f5f9]">
               <thead className="bg-[#f8fafc]">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Invoice #</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Actions</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-[600] text-[#64748b] uppercase tracking-wider">Invoice #</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-[600] text-[#64748b] uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-[600] text-[#64748b] uppercase tracking-wider">Amount</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-[600] text-[#64748b] uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-[600] text-[#64748b] uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white divide-y divide-[#f1f5f9]">
                 {invoices.map((invoice: any) => (
-                  <tr key={invoice.invoice_id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">
+                  <tr key={invoice.invoice_id} className="transition-colors hover:bg-[#f8fafc]">
+                    <td className="px-6 py-4 whitespace-nowrap text-[13px] font-mono text-[#475569] font-[500]">
                       {invoice.invoice_number || invoice.stripe_invoice_id}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{invoice.invoice_date}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-[13px] font-[600] text-[#0a0a0a]">
+                    <td className="px-6 py-4 whitespace-nowrap text-[13px] text-[#64748b] font-[500]">{invoice.invoice_date}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-[14px] font-[600] text-[#0a0a0a]">
                       £{invoice.total_amount}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                        className={`px-3 py-1 text-[11px] font-[600] rounded-full ${
                           invoice.payment_status === 'paid'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-yellow-100 text-yellow-800'
+                            ? 'bg-[#dcfce7] text-[#166534]'
+                            : 'bg-[#fef9c3] text-[#854d0e]'
                         }`}
                       >
                         {invoice.payment_status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <td className="px-6 py-4 whitespace-nowrap text-[13px]">
                       {invoice.invoice_url && (
                         <a
                           href={invoice.invoice_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
+                          className="text-[#1e40af] hover:text-[#1e3a8a] transition-colors font-[500]"
                         >
                           View
                         </a>
@@ -810,32 +810,32 @@ function QuotesTab({ quotes, companyId }: { quotes: any[]; companyId: string }) 
     const isExpired = expiresAt && expiresAt < now;
 
     if (isExpired) {
-      return <span className="px-2 py-1 text-xs font-semibold rounded bg-gray-200 text-[#475569]">Expired</span>;
+      return <span className="px-3 py-1 text-[11px] font-[600] rounded-full bg-[#f1f5f9] text-[#64748b]">Expired</span>;
     }
 
     if (quote.accepted_at) {
-      return <span className="px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-700">Accepted</span>;
+      return <span className="px-3 py-1 text-[11px] font-[600] rounded-full bg-[#dcfce7] text-[#166534]">Accepted</span>;
     }
 
     if (quote.viewed_at) {
       const daysSinceViewed = Math.floor((now.getTime() - new Date(quote.viewed_at).getTime()) / (1000 * 60 * 60 * 24));
       if (daysSinceViewed === 0) {
-        return <span className="px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-700">Active</span>;
+        return <span className="px-3 py-1 text-[11px] font-[600] rounded-full bg-[#dcfce7] text-[#166534]">Active</span>;
       } else if (daysSinceViewed <= 3) {
-        return <span className="px-2 py-1 text-xs font-semibold rounded bg-blue-100 text-blue-700">Viewed</span>;
+        return <span className="px-3 py-1 text-[11px] font-[600] rounded-full bg-[#dbeafe] text-[#1e40af]">Viewed</span>;
       } else {
-        return <span className="px-2 py-1 text-xs font-semibold rounded bg-orange-100 text-orange-700">Follow-up</span>;
+        return <span className="px-3 py-1 text-[11px] font-[600] rounded-full bg-[#fed7aa] text-[#92400e]">Follow-up</span>;
       }
     }
 
     if (quote.sent_at) {
       const daysSinceSent = Math.floor((now.getTime() - new Date(quote.sent_at).getTime()) / (1000 * 60 * 60 * 24));
       if (daysSinceSent >= 7) {
-        return <span className="px-2 py-1 text-xs font-semibold rounded bg-red-100 text-red-700">Stale</span>;
+        return <span className="px-3 py-1 text-[11px] font-[600] rounded-full bg-[#fee2e2] text-[#991b1b]">Stale</span>;
       } else if (daysSinceSent >= 3) {
-        return <span className="px-2 py-1 text-xs font-semibold rounded bg-yellow-100 text-yellow-700">Not Viewed</span>;
+        return <span className="px-3 py-1 text-[11px] font-[600] rounded-full bg-[#fef9c3] text-[#854d0e]">Not Viewed</span>;
       } else {
-        return <span className="px-2 py-1 text-xs font-semibold rounded bg-yellow-100 text-yellow-700">Sent</span>;
+        return <span className="px-3 py-1 text-[11px] font-[600] rounded-full bg-[#fef9c3] text-[#854d0e]">Sent</span>;
       }
     }
 
@@ -856,49 +856,49 @@ function QuotesTab({ quotes, companyId }: { quotes: any[]; companyId: string }) 
         {quotes.length === 0 ? (
           <div className="p-6 text-[#475569] text-sm">No quotes yet</div>
         ) : (
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-[#f1f5f9]">
             <thead className="bg-[#f8fafc]">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Quote ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Amount</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Created</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Sent</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-[#475569] uppercase">Actions</th>
+                <th className="px-6 py-3 text-left text-[11px] font-[600] text-[#64748b] uppercase tracking-wider">Quote ID</th>
+                <th className="px-6 py-3 text-left text-[11px] font-[600] text-[#64748b] uppercase tracking-wider">Type</th>
+                <th className="px-6 py-3 text-left text-[11px] font-[600] text-[#64748b] uppercase tracking-wider">Amount</th>
+                <th className="px-6 py-3 text-left text-[11px] font-[600] text-[#64748b] uppercase tracking-wider">Created</th>
+                <th className="px-6 py-3 text-left text-[11px] font-[600] text-[#64748b] uppercase tracking-wider">Sent</th>
+                <th className="px-6 py-3 text-left text-[11px] font-[600] text-[#64748b] uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-[11px] font-[600] text-[#64748b] uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-[#f1f5f9]">
               {quotes.map((quote: any) => (
-                <tr key={quote.quote_id} className="hover:bg-[#f8fafc]">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-[#64748b]">
+                <tr key={quote.quote_id} className="transition-colors hover:bg-[#f8fafc]">
+                  <td className="px-6 py-4 whitespace-nowrap text-[13px] font-mono text-[#475569] font-[500]">
                     {quote.quote_id.substring(0, 8)}...
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-3 py-1 rounded-full text-[11px] font-[600] ${
                       quote.quote_type === 'interactive'
-                        ? 'bg-purple-100 text-purple-700'
-                        : 'bg-blue-100 text-blue-700'
+                        ? 'bg-[#f3e8ff] text-[#7e22ce]'
+                        : 'bg-[#dbeafe] text-[#1e40af]'
                     }`}>
                       {quote.quote_type}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-[13px] font-[600] text-[#0a0a0a]">
+                  <td className="px-6 py-4 whitespace-nowrap text-[14px] font-[600] text-[#0a0a0a]">
                     £{quote.total_amount?.toLocaleString() || '0'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[#64748b]">
+                  <td className="px-6 py-4 whitespace-nowrap text-[13px] text-[#64748b] font-[500]">
                     {formatDate(quote.created_at)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[#64748b]">
+                  <td className="px-6 py-4 whitespace-nowrap text-[13px] text-[#64748b] font-[500]">
                     {formatDate(quote.sent_at)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {getStatusBadge(quote)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-6 py-4 whitespace-nowrap text-[13px]">
                     <Link
                       href={`/admin/quotes/${quote.quote_id}`}
-                      className="text-blue-600 hover:text-blue-800 font-medium"
+                      className="text-[#1e40af] hover:text-[#1e3a8a] transition-colors font-[500]"
                     >
                       View
                     </Link>
