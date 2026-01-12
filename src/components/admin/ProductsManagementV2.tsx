@@ -405,9 +405,14 @@ export default function ProductsManagementV2({ products: initialProducts }: Prod
                             )}
                           </td>
                           <td className="px-6 py-4">
-                            <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                            <a
+                              href={`/admin/sku-explorer?search=${encodeURIComponent(product.product_code)}`}
+                              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
                               Edit Details
-                            </button>
+                            </a>
                           </td>
                         </tr>
                       ))}
