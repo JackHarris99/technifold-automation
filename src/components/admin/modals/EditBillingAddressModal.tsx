@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import CountrySelect from '@/components/shared/CountrySelect';
 
 interface EditBillingAddressModalProps {
   isOpen: boolean;
@@ -175,27 +176,12 @@ export default function EditBillingAddressModal({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Country <span className="text-red-500">*</span>
               </label>
-              <select
+              <CountrySelect
                 value={formData.billing_country}
-                onChange={(e) => handleChange('billing_country', e.target.value)}
+                onChange={(value) => handleChange('billing_country', value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
-              >
-                <option value="GB">United Kingdom</option>
-                <option value="IE">Ireland</option>
-                <option value="IS">Iceland</option>
-                <option value="FR">France</option>
-                <option value="DE">Germany</option>
-                <option value="ES">Spain</option>
-                <option value="IT">Italy</option>
-                <option value="NL">Netherlands</option>
-                <option value="BE">Belgium</option>
-                <option value="PL">Poland</option>
-                <option value="SK">Slovakia</option>
-                <option value="US">United States</option>
-                <option value="CA">Canada</option>
-                <option value="AU">Australia</option>
-              </select>
+              />
             </div>
           </div>
 
