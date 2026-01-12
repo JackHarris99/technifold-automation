@@ -16,9 +16,9 @@ export async function PATCH(
 ) {
   try {
     const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session');
+    const userCookie = cookieStore.get('current_user');
 
-    if (!sessionCookie) {
+    if (!userCookie) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -81,9 +81,9 @@ export async function DELETE(
 ) {
   try {
     const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session');
+    const userCookie = cookieStore.get('current_user');
 
-    if (!sessionCookie) {
+    if (!userCookie) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

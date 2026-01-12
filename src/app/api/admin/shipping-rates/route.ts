@@ -13,9 +13,9 @@ import { cookies } from 'next/headers';
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session');
+    const userCookie = cookieStore.get('current_user');
 
-    if (!sessionCookie) {
+    if (!userCookie) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -43,9 +43,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session');
+    const userCookie = cookieStore.get('current_user');
 
-    if (!sessionCookie) {
+    if (!userCookie) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
