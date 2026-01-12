@@ -296,6 +296,16 @@ export default function AdminNav() {
             Shipping Manifests
           </Link>
           <Link
+            href="/admin/shipping-rates"
+            className={`block px-4 py-2 text-sm transition-colors ${
+              pathname === '/admin/shipping-rates'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-600 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            Shipping Rates
+          </Link>
+          <Link
             href="/admin/engagements"
             className={`block px-4 py-2 text-sm transition-colors ${
               pathname === '/admin/engagements'
