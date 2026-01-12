@@ -926,31 +926,173 @@ function QuotesTab({ quotes, companyId }: { quotes: any[]; companyId: string }) 
 
 // Engagement Tab
 function EngagementTab({ engagement }: { engagement: any[] }) {
+  // Get icon for activity type
+  const getActivityIcon = (eventName: string) => {
+    if (eventName.includes('call')) {
+      return (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+        </svg>
+      );
+    } else if (eventName.includes('visit')) {
+      return (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      );
+    } else if (eventName.includes('email')) {
+      return (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      );
+    } else if (eventName.includes('meeting')) {
+      return (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      );
+    } else if (eventName.includes('followup')) {
+      return (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      );
+    } else if (eventName.includes('quote')) {
+      return (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      );
+    }
+
+    // Default icon
+    return (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    );
+  };
+
+  // Format activity title
+  const getActivityTitle = (eventName: string) => {
+    return eventName
+      .replace('manual_contact_', '')
+      .replace(/_/g, ' ')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  // Format date nicely
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+
+    return date.toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+    }) + ' at ' + date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] border border-[#e8e8e8]">
       <div className="px-6 py-4 border-b border-[#e8e8e8]">
-        <h2 className="text-[18px] font-[600] text-[#0a0a0a]">Engagement Timeline ({engagement.length})</h2>
+        <h2 className="text-[18px] font-[600] text-[#0a0a0a]">Activity Timeline</h2>
+        <p className="text-[13px] text-[#64748b] mt-1">{engagement.length} event{engagement.length !== 1 ? 's' : ''}</p>
       </div>
       <div className="p-6">
         {engagement.length === 0 ? (
-          <p className="text-[#475569] text-sm">No engagement events yet</p>
+          <div className="text-center py-12">
+            <svg className="w-12 h-12 mx-auto text-[#cbd5e1] mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-[#64748b] text-[14px] font-[500]">No activity yet</p>
+            <p className="text-[#94a3b8] text-[13px] mt-1">Log calls, visits, and emails to track engagement</p>
+          </div>
         ) : (
-          <div className="space-y-4">
-            {engagement.map((event: any) => (
-              <div key={event.event_id} className="flex gap-4 border-l-2 border-[#e8e8e8] pl-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm text-[#0a0a0a]">{event.event_name || event.event_type}</span>
-                    {event.source && (
-                      <span className="text-xs bg-[#f1f5f9] px-2 py-0.5 rounded">{event.source}</span>
+          <div className="space-y-6">
+            {engagement.map((event: any, index: number) => (
+              <div key={event.event_id} className="relative">
+                {/* Timeline line */}
+                {index !== engagement.length - 1 && (
+                  <div className="absolute left-[11px] top-[40px] bottom-[-24px] w-[2px] bg-[#f1f5f9]"></div>
+                )}
+
+                <div className="flex gap-4">
+                  {/* Icon */}
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#eff6ff] text-[#1e40af] flex items-center justify-center relative z-10">
+                    {getActivityIcon(event.event_name)}
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="text-[14px] font-[600] text-[#0a0a0a]">
+                            {getActivityTitle(event.event_name)}
+                          </h3>
+                          {event.source && (
+                            <span className="text-[11px] bg-[#f1f5f9] text-[#64748b] px-2 py-0.5 rounded-full font-[500]">
+                              {event.source}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[12px] text-[#64748b] mt-1 font-[500]">
+                          {formatDate(event.occurred_at)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Metadata */}
+                    {event.meta && (
+                      <div className="mt-3 space-y-2">
+                        {/* Logged by */}
+                        {event.meta.logged_by_name && (
+                          <div className="text-[13px]">
+                            <span className="text-[#64748b]">By:</span>{' '}
+                            <span className="text-[#0a0a0a] font-[500]">{event.meta.logged_by_name}</span>
+                          </div>
+                        )}
+
+                        {/* Outcome */}
+                        {event.meta.outcome && (
+                          <div className="text-[13px]">
+                            <span className="text-[#64748b]">Outcome:</span>{' '}
+                            <span className="text-[#0a0a0a] font-[500]">
+                              {event.meta.outcome.replace(/_/g, ' ').split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Notes */}
+                        {event.meta.notes && (
+                          <div className="mt-2 p-3 bg-[#f8fafc] border border-[#e8e8e8] rounded-lg">
+                            <p className="text-[13px] text-[#475569] leading-relaxed">{event.meta.notes}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* URL for non-manual events */}
+                    {event.url && !event.event_name.includes('manual') && (
+                      <div className="mt-2 text-[12px] text-[#64748b] truncate font-mono">
+                        {event.url}
+                      </div>
                     )}
                   </div>
-                  <div className="text-xs text-[#475569] mt-1">
-                    {new Date(event.occurred_at).toLocaleString()}
-                  </div>
-                  {event.url && (
-                    <div className="text-xs text-[#64748b] mt-1 truncate">{event.url}</div>
-                  )}
                 </div>
               </div>
             ))}
