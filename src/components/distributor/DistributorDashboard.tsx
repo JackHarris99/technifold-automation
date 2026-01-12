@@ -8,6 +8,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import PortalAddressCollectionModal from '../portals/PortalAddressCollectionModal';
 
 interface Product {
   product_code: string;
@@ -50,19 +51,29 @@ export default function DistributorDashboard({
   const [shippingAddresses, setShippingAddresses] = useState<any[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [loadingAddresses, setLoadingAddresses] = useState(true);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [billingAddress, setBillingAddress] = useState<any>(null);
 
-  // Fetch shipping addresses on mount
+  // Fetch shipping addresses and billing on mount
   useEffect(() => {
     const fetchAddresses = async () => {
       try {
-        const response = await fetch(`/api/distributor/shipping-addresses`);
-        const data = await response.json();
-        if (data.success && data.addresses) {
-          setShippingAddresses(data.addresses);
-          const defaultAddress = data.addresses.find((addr: any) => addr.is_default);
+        // Fetch shipping addresses
+        const shippingResponse = await fetch(`/api/distributor/shipping-addresses`);
+        const shippingData = await shippingResponse.json();
+        if (shippingData.success && shippingData.addresses) {
+          setShippingAddresses(shippingData.addresses);
+          const defaultAddress = shippingData.addresses.find((addr: any) => addr.is_default);
           if (defaultAddress) {
             setSelectedAddressId(defaultAddress.address_id);
           }
+        }
+
+        // Fetch billing address from company
+        const billingResponse = await fetch(`/api/distributor/company-details`);
+        const billingData = await billingResponse.json();
+        if (billingData.success && billingData.company) {
+          setBillingAddress(billingData.company);
         }
       } catch (error) {
         console.error('Failed to fetch addresses:', error);
@@ -140,6 +151,31 @@ export default function DistributorDashboard({
     (sum, item) => sum + item.product.price * item.quantity,
     0
   );
+
+  const handleAddressSaved = async () => {
+    setShowAddressModal(false);
+    try {
+      // Refetch shipping addresses
+      const shippingResponse = await fetch(`/api/distributor/shipping-addresses`);
+      const shippingData = await shippingResponse.json();
+      if (shippingData.success && shippingData.addresses) {
+        setShippingAddresses(shippingData.addresses);
+        const defaultAddress = shippingData.addresses.find((addr: any) => addr.is_default);
+        if (defaultAddress) {
+          setSelectedAddressId(defaultAddress.address_id);
+        }
+      }
+
+      // Refetch billing address
+      const billingResponse = await fetch(`/api/distributor/company-details`);
+      const billingData = await billingResponse.json();
+      if (billingData.success && billingData.company) {
+        setBillingAddress(billingData.company);
+      }
+    } catch (error) {
+      console.error('Failed to refetch addresses:', error);
+    }
+  };
 
   const handleSubmitOrder = async () => {
     if (cartItems.length === 0) return;
@@ -223,62 +259,101 @@ export default function DistributorDashboard({
       <div className="col-span-7 space-y-4">
         {/* Address Collection */}
         <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8] p-6">
-          <div className="mb-4">
+          <div className="mb-6">
             <h2 className="text-[20px] font-[600] text-[#1e40af] mb-1 tracking-[-0.01em]">
-              Delivery Information
+              {distributor.company_name}
             </h2>
             <p className="text-[13px] text-[#334155] font-[400]">
-              Manage your shipping addresses
+              Company and delivery information
             </p>
           </div>
 
-          {loadingAddresses ? (
-            <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
-              <p className="text-[12px] text-[#475569] italic">Loading addresses...</p>
-            </div>
-          ) : shippingAddresses.length > 0 ? (
-            <div className="space-y-2">
-              {shippingAddresses.map((addr) => (
-                <div
-                  key={addr.address_id}
-                  onClick={() => setSelectedAddressId(addr.address_id)}
-                  className={`p-3 rounded-[10px] border cursor-pointer transition-all ${
-                    selectedAddressId === addr.address_id
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-[#e2e8f0] bg-[#f8fafc] hover:border-blue-300'
-                  }`}
-                >
-                  <div className="flex items-start gap-2">
-                    <input
-                      type="radio"
-                      checked={selectedAddressId === addr.address_id}
-                      onChange={() => setSelectedAddressId(addr.address_id)}
-                      className="mt-0.5 text-blue-600"
-                    />
-                    <div className="flex-1">
-                      {addr.label && (
-                        <div className="text-[12px] font-[600] text-[#1e293b] mb-0.5">
-                          {addr.label}
-                          {addr.is_default && <span className="ml-1 text-[10px] text-blue-600">(Default)</span>}
-                        </div>
-                      )}
-                      <div className="text-[11px] text-[#334155]">
-                        {addr.address_line_1}{addr.address_line_2 && `, ${addr.address_line_2}`}
-                      </div>
-                      <div className="text-[11px] text-[#334155]">
-                        {addr.city}{addr.state_province ? `, ${addr.state_province}` : ''} {addr.postal_code}
-                      </div>
-                      <div className="text-[11px] font-[500] text-[#1e293b]">{addr.country}</div>
-                    </div>
-                  </div>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Billing Address */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider">Billing Address</div>
+                {billingAddress && (
+                  <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
+                )}
+              </div>
+              {loadingAddresses ? (
+                <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                  <p className="text-[12px] text-[#475569] italic">Loading...</p>
                 </div>
-              ))}
+              ) : billingAddress && billingAddress.billing_address_line_1 ? (
+                <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                  <div className="text-[12px] font-[500] text-[#1e293b]">{billingAddress.billing_address_line_1}</div>
+                  {billingAddress.billing_address_line_2 && <div className="text-[11px] text-[#334155]">{billingAddress.billing_address_line_2}</div>}
+                  <div className="text-[11px] text-[#334155]">{billingAddress.billing_city}{billingAddress.billing_state_province ? `, ${billingAddress.billing_state_province}` : ''}</div>
+                  <div className="text-[11px] text-[#334155]">{billingAddress.billing_postal_code}</div>
+                  <div className="text-[12px] font-[500] text-[#1e293b] mt-1">{billingAddress.billing_country}</div>
+                </div>
+              ) : (
+                <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                  <p className="text-[11px] text-red-600 italic">No billing address - <button onClick={() => setShowAddressModal(true)} className="underline font-[600]">Add now</button></p>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
-              <p className="text-[12px] text-[#475569] italic">No addresses added yet</p>
+
+            {/* Delivery Addresses */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider">Delivery Addresses</div>
+                <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">
+                  {shippingAddresses.length > 0 ? 'Add New' : 'Add'}
+                </button>
+              </div>
+              {loadingAddresses ? (
+                <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                  <p className="text-[12px] text-[#475569] italic">Loading...</p>
+                </div>
+              ) : shippingAddresses.length > 0 ? (
+                <div className="space-y-2 max-h-[120px] overflow-y-auto pr-1">
+                  {shippingAddresses.map((addr) => (
+                    <div
+                      key={addr.address_id}
+                      onClick={() => setSelectedAddressId(addr.address_id)}
+                      className={`p-2 rounded-[8px] border cursor-pointer transition-all ${
+                        selectedAddressId === addr.address_id
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-[#e2e8f0] bg-[#f8fafc] hover:border-blue-300'
+                      }`}
+                    >
+                      <div className="flex items-start gap-2">
+                        <input
+                          type="radio"
+                          checked={selectedAddressId === addr.address_id}
+                          onChange={() => setSelectedAddressId(addr.address_id)}
+                          className="mt-0.5 text-blue-600"
+                        />
+                        <div className="flex-1 min-w-0">
+                          {addr.label && (
+                            <div className="text-[11px] font-[600] text-[#1e293b] mb-0.5">
+                              {addr.label}
+                              {addr.is_default && <span className="ml-1 text-[9px] text-blue-600">(Default)</span>}
+                            </div>
+                          )}
+                          <div className="text-[10px] text-[#334155]">
+                            {addr.address_line_1}
+                            {addr.address_line_2 && `, ${addr.address_line_2}`}
+                          </div>
+                          <div className="text-[10px] text-[#334155]">
+                            {addr.city}{addr.state_province ? `, ${addr.state_province}` : ''} {addr.postal_code}
+                          </div>
+                          <div className="text-[10px] font-[500] text-[#1e293b]">{addr.country}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                  <p className="text-[11px] text-[#475569] italic">Address confirmed at checkout</p>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
         {/* Search */}
@@ -545,6 +620,16 @@ export default function DistributorDashboard({
           </div>
         </div>
       </div>
+
+      {/* Address Modal */}
+      <PortalAddressCollectionModal
+        isOpen={showAddressModal}
+        onClose={() => setShowAddressModal(false)}
+        companyId={distributor.company_id}
+        companyName={distributor.company_name}
+        token=""
+        onSuccess={handleAddressSaved}
+      />
     </div>
   );
 }
