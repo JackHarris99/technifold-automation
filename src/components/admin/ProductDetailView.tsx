@@ -206,34 +206,68 @@ export default function ProductDetailView({ product: initialProduct, relatedData
                 <h2 className="text-[20px] font-[600] text-[#1e40af] tracking-[-0.01em]">Basic Information</h2>
               </div>
               <div className="p-6 space-y-4">
+                {/* Type and Category Row */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider mb-2 block">Description</label>
+                    <label className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider mb-2 block">Product Type</label>
                     {editing ? (
-                      <input
-                        type="text"
-                        value={currentValue('description') || ''}
-                        onChange={(e) => handleFieldChange('description', e.target.value)}
+                      <select
+                        value={currentValue('type') || 'part'}
+                        onChange={(e) => handleFieldChange('type', e.target.value)}
                         className="w-full px-4 py-3 bg-[#f8fafc] border border-[#e2e8f0] rounded-[10px] text-[14px] text-[#0a0a0a] font-[500] focus:outline-none focus:ring-2 focus:ring-[#1e40af]"
-                      />
+                      >
+                        <option value="tool">Tool</option>
+                        <option value="consumable">Consumable</option>
+                        <option value="part">Part</option>
+                        <option value="other">Other</option>
+                      </select>
                     ) : (
-                      <div className="text-[14px] text-[#0a0a0a] font-[500]">{product.description || '-'}</div>
+                      <div className="text-[14px] text-[#0a0a0a] font-[500] capitalize">{product.type || '-'}</div>
                     )}
                   </div>
 
                   <div>
                     <label className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider mb-2 block">Category</label>
                     {editing ? (
-                      <input
-                        type="text"
+                      <select
                         value={currentValue('category') || ''}
                         onChange={(e) => handleFieldChange('category', e.target.value)}
                         className="w-full px-4 py-3 bg-[#f8fafc] border border-[#e2e8f0] rounded-[10px] text-[14px] text-[#0a0a0a] font-[500] focus:outline-none focus:ring-2 focus:ring-[#1e40af]"
-                      />
+                      >
+                        <option value="">-- Select Category --</option>
+                        <option value="Tri-Creaser">Tri-Creaser</option>
+                        <option value="Quad-Creaser">Quad-Creaser</option>
+                        <option value="Spine-Creaser">Spine-Creaser</option>
+                        <option value="Section-Scorer">Section-Scorer</option>
+                        <option value="Micro-Perforator">Micro-Perforator</option>
+                        <option value="Multi-Tool">Multi-Tool</option>
+                        <option value="CP-Applicator">CP-Applicator</option>
+                        <option value="Gripper-Boss">Gripper-Boss</option>
+                        <option value="Spine-and-Hinge-Creaser">Spine-and-Hinge-Creaser</option>
+                        <option value="Matrix">Matrix</option>
+                        <option value="Perforating Strip">Perforating Strip</option>
+                        <option value="Accessories">Accessories</option>
+                        <option value="Other">Other</option>
+                      </select>
                     ) : (
                       <div className="text-[14px] text-[#0a0a0a] font-[500]">{product.category || '-'}</div>
                     )}
                   </div>
+                </div>
+
+                {/* Description Row */}
+                <div>
+                  <label className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider mb-2 block">Description</label>
+                  {editing ? (
+                    <input
+                      type="text"
+                      value={currentValue('description') || ''}
+                      onChange={(e) => handleFieldChange('description', e.target.value)}
+                      className="w-full px-4 py-3 bg-[#f8fafc] border border-[#e2e8f0] rounded-[10px] text-[14px] text-[#0a0a0a] font-[500] focus:outline-none focus:ring-2 focus:ring-[#1e40af]"
+                    />
+                  ) : (
+                    <div className="text-[14px] text-[#0a0a0a] font-[500]">{product.description || '-'}</div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
