@@ -29,13 +29,33 @@ export default async function DistributorDashboardPage() {
     console.error('[Distributor Dashboard] Error fetching invoices:', error);
   }
 
-  // Fetch all products with static pricing
-  const { data: products } = await supabase
-    .from('products')
-    .select('product_code, description, price, pricing_tier, category, type, currency')
-    .eq('active', true)
-    .not('price', 'is', null)
-    .order('description', { ascending: true });
+  // Fetch ALL products with static pricing (no limit)
+  let allProducts: any[] = [];
+  let offset = 0;
+  const batchSize = 1000;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data: batch } = await supabase
+      .from('products')
+      .select('product_code, description, price, category, type, currency, image_url')
+      .eq('active', true)
+      .not('price', 'is', null)
+      .order('type', { ascending: true })
+      .order('category', { ascending: true })
+      .order('description', { ascending: true })
+      .range(offset, offset + batchSize - 1);
+
+    if (!batch || batch.length === 0) {
+      hasMore = false;
+    } else {
+      allProducts = [...allProducts, ...batch];
+      if (batch.length < batchSize) {
+        hasMore = false;
+      }
+      offset += batchSize;
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
@@ -68,7 +88,7 @@ export default async function DistributorDashboardPage() {
         <DistributorDashboard
           distributor={distributor}
           invoices={invoices || []}
-          products={products || []}
+          products={allProducts}
         />
       </div>
     </div>
