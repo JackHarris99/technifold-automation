@@ -95,21 +95,21 @@ export default function CompanyDetailView({
             <div className="flex gap-3 flex-wrap">
               <Link
                 href={`/admin/send-reorder?company_id=${company.company_id}`}
-                className="px-4 py-2.5 bg-[#1e40af] text-white rounded-lg text-[14px] font-[600] hover:bg-[#1e3a8a] transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.05)] inline-block"
+                className="px-5 py-2.5 bg-white border-2 border-[#e8e8e8] text-[#0a0a0a] rounded-lg text-[13px] font-[600] hover:border-[#1e40af] hover:bg-[#eff6ff] transition-all shadow-sm inline-block"
               >
                 Send Reorder Email
               </Link>
               <Link
                 href={`/admin/quote-builder/tools?company_id=${company.company_id}`}
-                className="px-4 py-2.5 bg-[#4f46e5] text-white rounded-lg text-[14px] font-[600] hover:bg-[#4338ca] transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.05)] inline-block"
+                className="px-5 py-2.5 bg-white border-2 border-[#e8e8e8] text-[#0a0a0a] rounded-lg text-[13px] font-[600] hover:border-[#4f46e5] hover:bg-[#eef2ff] transition-all shadow-sm inline-block"
               >
-                🔧 Create Tools Quote
+                Create Tools Quote
               </Link>
               <Link
                 href={`/admin/quote-builder/consumables?company_id=${company.company_id}`}
-                className="px-4 py-2.5 bg-[#9333ea] text-white rounded-lg text-[14px] font-[600] hover:bg-[#7e22ce] transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.05)] inline-block"
+                className="px-5 py-2.5 bg-white border-2 border-[#e8e8e8] text-[#0a0a0a] rounded-lg text-[13px] font-[600] hover:border-[#9333ea] hover:bg-[#faf5ff] transition-all shadow-sm inline-block"
               >
-                📦 Create Consumables Quote
+                Create Consumables Quote
               </Link>
             </div>
           </div>
@@ -139,7 +139,7 @@ export default function CompanyDetailView({
       </div>
 
       {/* Content */}
-      <div className="max-w-6xl mx-auto px-8 py-8">
+      <div className="px-8 py-8">
         {activeTab === 'overview' && (
           <OverviewTab
             company={company}
