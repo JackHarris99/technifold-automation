@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const resetUrl = `${baseUrl}/admin/reset-password/${resetToken}`;
+    const resetUrl = `${baseUrl}/reset-password/${resetToken}`;
 
     const emailHtml = `
       <!DOCTYPE html>
