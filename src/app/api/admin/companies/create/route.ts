@@ -40,20 +40,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1. Fetch all active sales reps
+    // 1. Fetch all ACTIVE sales reps only
     const { data: salesReps, error: repsError } = await supabase
       .from('users')
-      .select('sales_rep_id, full_name')
+      .select('sales_rep_id, full_name, is_active')
       .eq('role', 'sales_rep')
+      .eq('is_active', true)  // ONLY active sales reps
       .order('sales_rep_id');
 
     if (repsError || !salesReps || salesReps.length === 0) {
       console.error('[companies/create] Error fetching sales reps:', repsError);
       return NextResponse.json(
-        { error: 'No sales reps available for assignment' },
+        { error: 'No active sales reps available for assignment' },
         { status: 500 }
       );
     }
+
+    console.log('[companies/create] Active sales reps found:', salesReps.map(r => `${r.full_name} (${r.sales_rep_id})`));
 
     // 2. Count TOTAL companies per rep (regardless of status - ensures fairness)
     const { data: allCompanies, error: companiesError } = await supabase
@@ -91,8 +94,14 @@ export async function POST(request: NextRequest) {
     const randomIndex = Math.floor(Math.random() * repsWithFewest.length);
     const assignedRep = repsWithFewest[randomIndex];
 
-    console.log('[companies/create] Assignment counts:', repCounts);
-    console.log('[companies/create] Assigned to:', assignedRep);
+    // Detailed logging for debugging
+    console.log('[companies/create] ===== ASSIGNMENT CALCULATION =====');
+    console.log('[companies/create] Current company counts per rep:', repCounts);
+    console.log('[companies/create] Minimum count:', minCount);
+    console.log('[companies/create] Reps with fewest companies:', repsWithFewest);
+    console.log('[companies/create] Randomly selected:', assignedRep);
+    const assignedRepName = salesReps.find(r => r.sales_rep_id === assignedRep)?.full_name;
+    console.log('[companies/create] Assigned to:', `${assignedRepName} (${assignedRep})`);
 
     // 6. Generate unique company_id (MAN prefix for manually created)
     const companyId = `MAN${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
