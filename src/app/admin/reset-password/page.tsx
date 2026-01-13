@@ -128,8 +128,8 @@ export default function ResetPasswordPage() {
           <div className="mt-6 pt-6 border-t border-gray-200">
             <p className="text-sm text-gray-600">
               After resetting, you can log in at{' '}
-              <a href="/admin/login" className="text-blue-600 hover:text-blue-800 font-medium">
-                /admin/login
+              <a href="/login" className="text-blue-600 hover:text-blue-800 font-medium">
+                /login
               </a>
             </p>
           </div>

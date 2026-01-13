@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Password updated successfully. You can now log in at /admin/login'
+      message: 'Password updated successfully. You can now log in at /login'
     });
 
   } catch (err) {

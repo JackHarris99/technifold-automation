@@ -48,7 +48,7 @@ export default function ResetPasswordWithTokenPage({ params }: { params: Promise
       if (response.ok) {
         setMessage({ type: 'success', text: 'Password reset successfully! Redirecting to login...' });
         setTimeout(() => {
-          router.push('/admin/login');
+          router.push('/login');
         }, 2000);
       } else {
         setMessage({ type: 'error', text: data.error || 'Failed to reset password' });
