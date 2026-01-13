@@ -7,6 +7,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getSupabaseClient } from '@/lib/supabase';
 import bcrypt from 'bcryptjs';
+import Link from 'next/link';
 
 export default function AdminLoginPage() {
   async function handleLogin(formData: FormData) {
@@ -120,6 +121,14 @@ export default function AdminLoginPage() {
             >
               Sign in
             </button>
+          </div>
+          <div className="text-center">
+            <Link
+              href="/admin/forgot-password"
+              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Forgot your password?
+            </Link>
           </div>
         </form>
       </div>
