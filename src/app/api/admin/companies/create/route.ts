@@ -59,18 +59,37 @@ export async function POST(request: NextRequest) {
     console.log('[companies/create] Active sales reps found:', salesReps.map(r => `${r.full_name} (${r.sales_rep_id})`));
 
     // 2. Count TOTAL companies per rep (regardless of status - ensures fairness)
-    const { data: allCompanies, error: companiesError } = await supabase
-      .from('companies')
-      .select('account_owner')
-      .not('account_owner', 'is', null);
+    // IMPORTANT: Use batching to get ALL companies (Supabase default limit is 1000)
+    let allCompanies: { account_owner: string | null }[] = [];
+    let start = 0;
+    const batchSize = 1000;
+    let hasMore = true;
 
-    if (companiesError) {
-      console.error('[companies/create] Error counting companies:', companiesError);
-      return NextResponse.json(
-        { error: 'Failed to calculate assignment' },
-        { status: 500 }
-      );
+    while (hasMore) {
+      const { data: batch, error: batchError } = await supabase
+        .from('companies')
+        .select('account_owner')
+        .not('account_owner', 'is', null)
+        .range(start, start + batchSize - 1);
+
+      if (batchError) {
+        console.error('[companies/create] Error counting companies:', batchError);
+        return NextResponse.json(
+          { error: 'Failed to calculate assignment' },
+          { status: 500 }
+        );
+      }
+
+      if (batch && batch.length > 0) {
+        allCompanies = allCompanies.concat(batch);
+        start += batchSize;
+        hasMore = batch.length === batchSize;
+      } else {
+        hasMore = false;
+      }
     }
+
+    console.log('[companies/create] Total companies counted:', allCompanies.length);
 
     // 3. Count companies per rep
     const repCounts: { [key: string]: number } = {};
