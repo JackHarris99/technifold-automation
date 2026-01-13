@@ -6,18 +6,16 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
-import { cookies } from 'next/headers';
+import { getCurrentUser } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const userCookie = cookieStore.get('current_user');
-
-    if (!userCookie) {
+    // SECURITY: Require authentication
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const session = JSON.parse(userCookie.value);
     const supabase = getSupabaseClient();
 
     const body = await request.json();

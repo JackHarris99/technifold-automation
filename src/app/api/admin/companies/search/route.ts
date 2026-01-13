@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
-import { getUserRepFilter } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 
 export const maxDuration = 10;
 
@@ -13,6 +13,12 @@ export async function GET(request: NextRequest) {
   console.log('[companies/search] Endpoint called');
 
   try {
+    // SECURITY: Require authentication
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const q = searchParams.get('q');
     console.log('[companies/search] Query:', q);
