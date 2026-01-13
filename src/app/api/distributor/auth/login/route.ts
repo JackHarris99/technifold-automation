@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cookies } from 'next/headers';
 import { SignJWT } from 'jose';
+import bcrypt from 'bcryptjs';
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'your-secret-key-change-this'
@@ -41,8 +42,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify password (plain text comparison for now - should be hashed in production)
-    if (company.distributor_password !== password) {
+    // Verify password (supports both hashed and plaintext during migration)
+    let passwordValid = false;
+
+    // Check if password is already hashed (bcrypt hashes start with $2a$ or $2b$)
+    if (company.distributor_password && company.distributor_password.startsWith('$2')) {
+      // Verify hashed password
+      passwordValid = await bcrypt.compare(password, company.distributor_password);
+    } else {
+      // Legacy plaintext comparison - should be migrated to hashed
+      passwordValid = company.distributor_password === password;
+
+      // Auto-upgrade to hashed password on successful login
+      if (passwordValid) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await supabase
+          .from('companies')
+          .update({ distributor_password: hashedPassword })
+          .eq('company_id', company.company_id);
+
+        console.log(`[Distributor Login] Auto-upgraded password hash for ${company.company_name}`);
+      }
+    }
+
+    if (!passwordValid) {
       return NextResponse.json(
         { error: 'Invalid email or password' },
         { status: 401 }

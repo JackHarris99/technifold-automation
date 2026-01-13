@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import bcrypt from 'bcryptjs';
 
 export async function GET(
   request: NextRequest,
@@ -54,7 +55,7 @@ export async function PATCH(
       );
     }
 
-    const { company_name, account_owner, type } = body;
+    const { company_name, account_owner, type, distributor_email, distributor_password } = body;
 
     const supabase = getSupabaseClient();
     const updateData: any = {
@@ -64,6 +65,12 @@ export async function PATCH(
     if (company_name !== undefined) updateData.company_name = company_name;
     if (account_owner !== undefined) updateData.account_owner = account_owner;
     if (type !== undefined) updateData.type = type;
+    if (distributor_email !== undefined) updateData.distributor_email = distributor_email;
+
+    // Hash distributor password if provided
+    if (distributor_password !== undefined && distributor_password !== '') {
+      updateData.distributor_password = await bcrypt.hash(distributor_password, 10);
+    }
 
     const { error } = await supabase
       .from('companies')
