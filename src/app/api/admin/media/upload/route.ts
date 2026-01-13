@@ -15,13 +15,13 @@ export const runtime = 'nodejs';
 // SECURITY: Prevents SQL injection by validating user input
 const ALLOWED_MEDIA_TARGETS = {
   'products': ['product_image_url', 'image_url'],
-  'brand_media': ['logo_url', 'banner_url', 'before_image_url', 'after_image_url', 'product_image_url'],
+  'brand_media': ['logo_url', 'hero_url', 'banner_url', 'before_image_url', 'after_image_url', 'product_image_url'],
   'companies': ['logo_url'],
   'case_studies': ['before_image_url', 'after_image_url', 'product_image_url'],
 } as const;
 
 // Allowed ID column names (for WHERE clause)
-const ALLOWED_ID_COLUMNS = ['id', 'product_id', 'brand_slug', 'company_id', 'case_study_id'] as const;
+const ALLOWED_ID_COLUMNS = ['id', 'product_id', 'product_code', 'brand_slug', 'company_id', 'case_study_id'] as const;
 
 interface UploadRequest {
   mediaType: MediaType;
