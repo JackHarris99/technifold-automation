@@ -2,13 +2,21 @@
  * GET /api/admin/companies/all
  * Fetch all companies with tool/subscription counts (for directors)
  * Optimized with bulk queries
+ * SECURITY: Requires authentication
  */
 
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { getCurrentUser } from '@/lib/auth';
 
 export async function GET() {
   try {
+    // SECURITY: Require authentication
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const supabase = getSupabaseClient();
 
     // 1. Fetch ALL companies in batches (Supabase has 1000 row limit per query)
