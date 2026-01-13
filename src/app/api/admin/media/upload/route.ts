@@ -1,13 +1,27 @@
 /**
  * Media Upload API Route
  * Handles file uploads to Supabase Storage and database updates
+ * SECURITY: Validates table/column combinations against whitelist
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { getStoragePath, MediaType, getFileExtension } from '@/lib/media';
+import { getCurrentUser } from '@/lib/auth';
 
 export const runtime = 'nodejs';
+
+// Whitelist of allowed table/column combinations
+// SECURITY: Prevents SQL injection by validating user input
+const ALLOWED_MEDIA_TARGETS = {
+  'products': ['product_image_url', 'image_url'],
+  'brand_media': ['logo_url', 'banner_url', 'before_image_url', 'after_image_url', 'product_image_url'],
+  'companies': ['logo_url'],
+  'case_studies': ['before_image_url', 'after_image_url', 'product_image_url'],
+} as const;
+
+// Allowed ID column names (for WHERE clause)
+const ALLOWED_ID_COLUMNS = ['id', 'product_id', 'brand_slug', 'company_id', 'case_study_id'] as const;
 
 interface UploadRequest {
   mediaType: MediaType;
@@ -20,6 +34,12 @@ interface UploadRequest {
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Require authentication
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const mediaType = formData.get('mediaType') as MediaType;
@@ -37,6 +57,34 @@ export async function POST(request: NextRequest) {
 
     if (!mediaType || !identifier || !table || !column || !recordId) {
       return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
+    }
+
+    // SECURITY: Validate table/column combination against whitelist
+    const allowedColumns = ALLOWED_MEDIA_TARGETS[table as keyof typeof ALLOWED_MEDIA_TARGETS];
+    if (!allowedColumns) {
+      console.error('[UPLOAD] Invalid table:', table);
+      return NextResponse.json({ error: 'Invalid table name' }, { status: 400 });
+    }
+
+    if (!allowedColumns.includes(column as any)) {
+      console.error('[UPLOAD] Invalid column for table:', { table, column });
+      return NextResponse.json({ error: 'Invalid column name for this table' }, { status: 400 });
+    }
+
+    // SECURITY: Validate idColumn against whitelist
+    if (!ALLOWED_ID_COLUMNS.includes(idColumn as any)) {
+      console.error('[UPLOAD] Invalid idColumn:', idColumn);
+      return NextResponse.json({ error: 'Invalid ID column name' }, { status: 400 });
+    }
+
+    // SECURITY: Validate recordId format (should be UUID or slug)
+    // UUID format: 8-4-4-4-12 hex characters, or slug format for brand_slug
+    const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(recordId);
+    const isValidSlug = /^[a-z0-9-]+$/.test(recordId); // For brand_slug
+
+    if (!isValidUUID && !isValidSlug) {
+      console.error('[UPLOAD] Invalid recordId format:', recordId);
+      return NextResponse.json({ error: 'Invalid record ID format' }, { status: 400 });
     }
 
     // Validate file size (max 10MB)
@@ -168,6 +216,12 @@ export async function POST(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
+    // SECURITY: Require authentication
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const storagePath = searchParams.get('path');
     const table = searchParams.get('table');
@@ -177,6 +231,33 @@ export async function DELETE(request: NextRequest) {
 
     if (!storagePath || !table || !column || !recordId) {
       return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
+    }
+
+    // SECURITY: Validate table/column combination against whitelist
+    const allowedColumns = ALLOWED_MEDIA_TARGETS[table as keyof typeof ALLOWED_MEDIA_TARGETS];
+    if (!allowedColumns) {
+      console.error('[DELETE] Invalid table:', table);
+      return NextResponse.json({ error: 'Invalid table name' }, { status: 400 });
+    }
+
+    if (!allowedColumns.includes(column as any)) {
+      console.error('[DELETE] Invalid column for table:', { table, column });
+      return NextResponse.json({ error: 'Invalid column name for this table' }, { status: 400 });
+    }
+
+    // SECURITY: Validate idColumn against whitelist
+    if (!ALLOWED_ID_COLUMNS.includes(idColumn as any)) {
+      console.error('[DELETE] Invalid idColumn:', idColumn);
+      return NextResponse.json({ error: 'Invalid ID column name' }, { status: 400 });
+    }
+
+    // SECURITY: Validate recordId format
+    const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(recordId);
+    const isValidSlug = /^[a-z0-9-]+$/.test(recordId);
+
+    if (!isValidUUID && !isValidSlug) {
+      console.error('[DELETE] Invalid recordId format:', recordId);
+      return NextResponse.json({ error: 'Invalid record ID format' }, { status: 400 });
     }
 
     const supabase = getSupabaseClient();
