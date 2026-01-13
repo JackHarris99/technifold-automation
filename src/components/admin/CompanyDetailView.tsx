@@ -57,6 +57,34 @@ export default function CompanyDetailView({
   const [showActivityModal, setShowActivityModal] = useState(false);
   const [activityType, setActivityType] = useState<'call' | 'visit' | 'email' | 'followup' | 'meeting'>('call');
 
+  // Delete state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const isDirector = currentUser.role === 'director';
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/admin/companies/${company.company_id}/delete`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Redirect to companies list
+        window.location.href = '/admin/companies';
+      } else {
+        const data = await response.json();
+        alert('Failed to delete company: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err) {
+      alert('Network error: Failed to delete company');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
   const tabs = [
     { id: 'overview', label: 'Overview', count: null },
     { id: 'products', label: 'Products', count: purchasedTools.length + purchasedConsumables.length + purchasedParts.length },
@@ -111,6 +139,14 @@ export default function CompanyDetailView({
               >
                 Create Consumables Quote
               </Link>
+              {isDirector && (
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="px-5 py-2.5 bg-white border-2 border-[#e8e8e8] text-[#dc2626] rounded-lg text-[13px] font-[600] hover:border-[#dc2626] hover:bg-[#fef2f2] transition-all shadow-sm"
+                >
+                  Delete Company
+                </button>
+              )}
             </div>
           </div>
 
@@ -244,6 +280,37 @@ export default function CompanyDetailView({
         context="general"
         onSuccess={() => window.location.reload()}
       />
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg max-w-md w-full p-6 mx-4">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Delete Company?</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Are you sure you want to permanently delete <strong>{company.company_name}</strong>?
+            </p>
+            <p className="text-sm text-red-600 font-semibold mb-6">
+              ⚠️ This action cannot be undone. All related data (contacts, quotes, invoices, etc.) will be deleted.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Forever'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
