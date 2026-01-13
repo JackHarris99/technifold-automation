@@ -3,77 +3,44 @@
  * Validates credentials against users table
  */
 
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import { getSupabaseClient } from '@/lib/supabase';
-import bcrypt from 'bcryptjs';
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function AdminLoginPage() {
-  async function handleLogin(formData: FormData) {
-    'use server';
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
-    if (!email || !password) {
-      redirect('/login?error=missing');
+    try {
+      const response = await fetch('/api/admin/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        router.push('/admin');
+      } else {
+        setError(data.error || 'Invalid email or password');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
     }
-
-    const supabase = getSupabaseClient();
-
-    // Find user by email
-    const { data: user, error } = await supabase
-      .from('users')
-      .select('user_id, email, password_hash, full_name, role, sales_rep_id, is_active')
-      .eq('email', email.toLowerCase())
-      .eq('is_active', true)
-      .single();
-
-    if (error || !user) {
-      redirect('/login?error=invalid');
-    }
-
-    // Verify password
-    const passwordMatch = await bcrypt.compare(password, user.password_hash);
-
-    if (!passwordMatch) {
-      redirect('/login?error=invalid');
-    }
-
-    // Update last login time
-    await supabase
-      .from('users')
-      .update({ last_login_at: new Date().toISOString() })
-      .eq('user_id', user.user_id);
-
-    // Set session cookies
-    const cookieStore = await cookies();
-
-    const userData = {
-      user_id: user.user_id,
-      email: user.email,
-      full_name: user.full_name,
-      role: user.role,
-      sales_rep_id: user.sales_rep_id,
-    };
-
-    cookieStore.set('current_user', JSON.stringify(userData), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 30  // 30 days
-    });
-
-    cookieStore.set('admin_authorized', 'true', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 30
-    });
-
-    redirect('/admin');
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -83,7 +50,14 @@ export default function AdminLoginPage() {
             Admin Login
           </h2>
         </div>
-        <form className="mt-8 space-y-6" action={handleLogin}>
+
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-800 text-sm text-center">{error}</p>
+          </div>
+        )}
+
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="sr-only">
@@ -95,6 +69,8 @@ export default function AdminLoginPage() {
                 type="email"
                 autoComplete="email"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Email address"
               />
@@ -109,6 +85,8 @@ export default function AdminLoginPage() {
                 type="password"
                 autoComplete="current-password"
                 required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
               />
@@ -117,16 +95,17 @@ export default function AdminLoginPage() {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              Sign in
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
         </form>
-        <div className="text-center mt-4">
+        <div className="text-center">
           <Link
             href="/admin/forgot-password"
-            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium hover:underline"
           >
             Forgot your password?
           </Link>
