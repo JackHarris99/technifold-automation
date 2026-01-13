@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { getCurrentUser } from '@/lib/auth';
 import { generateReorderUrl, generateUnsubscribeUrl } from '@/lib/tokens';
 import { getResendClient } from '@/lib/resend-client';
 
@@ -99,6 +100,12 @@ function buildReorderEmailHtml(
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Require authentication
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
     const { company_id, contact_ids, offer_key, campaign_key } = body;
 

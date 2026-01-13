@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { getCurrentUser } from '@/lib/auth';
 import { sendShippingNotification } from '@/lib/resend-client';
 
 export async function GET(
@@ -15,6 +16,12 @@ export async function GET(
   { params }: { params: Promise<{ orderId: string }> }
 ) {
   try {
+    // SECURITY: Require authentication
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { orderId } = await params;
     const supabase = getSupabaseClient();
 

@@ -4,19 +4,23 @@
  *
  * POST /api/admin/companies/[companyId]/contacts
  * Add new contact to company
- *
- * Note: This endpoint is used by the system-check page which is already
- * protected by the admin layout. No additional auth needed here.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { getCurrentUser } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ company_id: string }> }
 ) {
   try {
+    // SECURITY: Require authentication
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { company_id: companyId } = await params;
     const supabase = getSupabaseClient();
 

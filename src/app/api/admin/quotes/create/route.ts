@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { getCurrentUser } from '@/lib/auth';
 import { verifyAdminAuth } from '@/lib/admin-auth';
 
 interface QuoteItem {
@@ -17,6 +18,12 @@ export async function POST(request: NextRequest) {
   const authError = verifyAdminAuth(request);
   if (authError) return authError;
   try {
+    // SECURITY: Require authentication
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
     const { company_id, items, discount_request, notes } = body;
 

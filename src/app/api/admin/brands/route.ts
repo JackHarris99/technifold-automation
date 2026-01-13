@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { getCurrentUser } from '@/lib/auth';
 
 // Helper function to create slug from brand name
 function createSlug(brand: string): string {
@@ -16,6 +17,12 @@ function createSlug(brand: string): string {
 
 export async function GET(request: NextRequest) {
   try {
+    // SECURITY: Require authentication
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const supabase = getSupabaseClient();
 
     // Get all unique brands from machines table

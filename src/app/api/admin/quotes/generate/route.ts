@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateToken } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
+import { getCurrentUser } from '@/lib/auth';
 
 interface QuoteLineItem {
   product_code: string;
@@ -20,6 +21,12 @@ interface QuoteLineItem {
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Require authentication
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
     const { company_id, contact_id, line_items, pricing_mode, quote_type, is_test, created_by } = body;
 

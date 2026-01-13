@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminAuth } from '@/lib/admin-auth';
 import { getSupabaseClient } from '@/lib/supabase';
+import { getCurrentUser } from '@/lib/auth';
 import { calculateCartPricing, CartItem } from '@/lib/pricing-v2';
 
 interface InvoiceItem {
@@ -20,6 +21,12 @@ export async function POST(request: NextRequest) {
   if (authError) return authError;
 
   try {
+    // SECURITY: Require authentication
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
     const { company_id, items } = body as { company_id: string; items: InvoiceItem[] };
 

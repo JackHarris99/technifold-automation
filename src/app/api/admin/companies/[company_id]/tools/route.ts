@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { getCurrentUser } from '@/lib/auth';
 
 /**
  * GET - Fetch all tools for a company
@@ -14,6 +15,12 @@ export async function GET(
   { params }: { params: Promise<{ companyId: string }> }
 ) {
   try {
+    // SECURITY: Require authentication
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { companyId } = await params;
     const supabase = getSupabaseClient();
 

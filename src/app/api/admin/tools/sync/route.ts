@@ -6,6 +6,7 @@
 
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { getCurrentUser } from '@/lib/auth';
 
 async function syncTools() {
   try {

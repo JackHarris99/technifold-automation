@@ -8,6 +8,12 @@ import { generateReorderUrl } from '@/lib/tokens';
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Require authentication
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { company_id, contact_id } = await request.json();
 
     if (!company_id || !contact_id) {

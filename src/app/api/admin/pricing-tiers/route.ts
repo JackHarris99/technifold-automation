@@ -5,6 +5,7 @@
 
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { getCurrentUser } from '@/lib/auth';
 
 export async function GET() {
   const supabase = getSupabaseClient();

@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { getCurrentUser } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
 export async function GET(
@@ -12,6 +13,12 @@ export async function GET(
   { params }: { params: Promise<{ quote_id: string }> }
 ) {
   try {
+    // SECURITY: Require authentication
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { quote_id } = await params;
 
     const cookieStore = await cookies();
