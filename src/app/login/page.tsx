@@ -122,15 +122,15 @@ export default function AdminLoginPage() {
               Sign in
             </button>
           </div>
-          <div className="text-center">
-            <Link
-              href="/admin/forgot-password"
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-            >
-              Forgot your password?
-            </Link>
-          </div>
         </form>
+        <div className="text-center mt-4">
+          <Link
+            href="/admin/forgot-password"
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+          >
+            Forgot your password?
+          </Link>
+        </div>
       </div>
     </div>
   );
