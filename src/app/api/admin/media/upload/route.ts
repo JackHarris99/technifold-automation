@@ -77,12 +77,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid ID column name' }, { status: 400 });
     }
 
-    // SECURITY: Validate recordId format (should be UUID or slug)
-    // UUID format: 8-4-4-4-12 hex characters, or slug format for brand_slug
+    // SECURITY: Validate recordId format to prevent SQL injection
+    // Allow: UUIDs, product codes (uppercase), slugs
+    // Block: SQL injection characters like quotes, semicolons, etc.
     const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(recordId);
-    const isValidSlug = /^[a-z0-9-]+$/.test(recordId); // For brand_slug
+    const isValidCode = /^[A-Za-z0-9_-]+$/.test(recordId); // Product codes, slugs, etc.
 
-    if (!isValidUUID && !isValidSlug) {
+    if (!isValidUUID && !isValidCode) {
       console.error('[UPLOAD] Invalid recordId format:', recordId);
       return NextResponse.json({ error: 'Invalid record ID format' }, { status: 400 });
     }
@@ -251,11 +252,11 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid ID column name' }, { status: 400 });
     }
 
-    // SECURITY: Validate recordId format
+    // SECURITY: Validate recordId format to prevent SQL injection
     const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(recordId);
-    const isValidSlug = /^[a-z0-9-]+$/.test(recordId);
+    const isValidCode = /^[A-Za-z0-9_-]+$/.test(recordId); // Product codes, slugs, etc.
 
-    if (!isValidUUID && !isValidSlug) {
+    if (!isValidUUID && !isValidCode) {
       console.error('[DELETE] Invalid recordId format:', recordId);
       return NextResponse.json({ error: 'Invalid record ID format' }, { status: 400 });
     }
