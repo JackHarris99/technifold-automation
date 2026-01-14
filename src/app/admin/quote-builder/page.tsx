@@ -86,10 +86,23 @@ export default function QuoteBuilderPage() {
   const [generating, setGenerating] = useState(false);
   const [freeShipping, setFreeShipping] = useState(false);
 
-  // Load companies on mount
+  // Edit Mode
+  const [editMode, setEditMode] = useState(false);
+  const [editingQuoteId, setEditingQuoteId] = useState<string | null>(null);
+
+  // Load companies on mount and check for edit mode
   useEffect(() => {
     loadCompanies();
     loadPricingTiers();
+
+    // Check if we're in edit mode
+    const urlParams = new URLSearchParams(window.location.search);
+    const editQuoteId = urlParams.get('edit');
+    if (editQuoteId) {
+      setEditMode(true);
+      setEditingQuoteId(editQuoteId);
+      loadQuoteForEditing(editQuoteId);
+    }
   }, []);
 
   // Filter companies based on search
@@ -146,6 +159,65 @@ export default function QuoteBuilderPage() {
       setToolTiers(data.tool || []);
     } catch (err) {
       console.error('Failed to load pricing tiers:', err);
+    }
+  }
+
+  async function loadQuoteForEditing(quoteId: string) {
+    try {
+      const response = await fetch(`/api/admin/quotes/${quoteId}`);
+      const data = await response.json();
+
+      if (data.success && data.quote) {
+        const quote = data.quote;
+
+        // Set company
+        const company = {
+          company_id: quote.company_id,
+          company_name: quote.company_name,
+        };
+        setSelectedCompany(company);
+
+        // Set contact
+        if (quote.contact_id) {
+          const contact = {
+            contact_id: quote.contact_id,
+            full_name: quote.contact_name,
+            email: quote.contact_email || '',
+          };
+          setSelectedContact(contact);
+        }
+
+        // Set line items
+        const items = quote.line_items.map((item: any) => ({
+          product_code: item.product_code,
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          discount_percent: item.discount_percent || 0,
+          product_type: item.product_type,
+          category: item.category,
+          image_url: item.image_url,
+        }));
+        setLineItems(items);
+
+        // Set pricing mode
+        if (quote.pricing_mode) {
+          setPricingMode(quote.pricing_mode);
+        }
+
+        // Set free shipping
+        if (quote.free_shipping) {
+          setFreeShipping(true);
+        }
+
+        // Load contacts for the company
+        await loadContacts(quote.company_id);
+      } else {
+        alert('Failed to load quote for editing');
+      }
+    } catch (err) {
+      console.error('Failed to load quote:', err);
+      alert('Failed to load quote for editing');
     }
   }
 
@@ -264,26 +336,48 @@ export default function QuoteBuilderPage() {
 
     setGenerating(true);
     try {
-      const response = await fetch('/api/admin/quotes/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          company_id: selectedCompany.company_id,
-          contact_id: selectedContact.contact_id,
-          line_items: lineItems,
-          pricing_mode: pricingMode,
-          free_shipping: freeShipping,
-        }),
-      });
+      if (editMode && editingQuoteId) {
+        // Update existing quote
+        const response = await fetch(`/api/admin/quotes/${editingQuoteId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            line_items: lineItems,
+            pricing_mode: pricingMode,
+            free_shipping: freeShipping,
+          }),
+        });
 
-      const data = await response.json();
-      if (data.url) {
-        setQuoteUrl(data.url);
+        const data = await response.json();
+        if (data.success) {
+          alert('Quote updated successfully!');
+          window.location.href = '/admin/quotes';
+        } else {
+          alert('Failed to update quote: ' + (data.error || 'Unknown error'));
+        }
       } else {
-        alert('Failed to generate quote: ' + (data.error || 'Unknown error'));
+        // Create new quote
+        const response = await fetch('/api/admin/quotes/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            company_id: selectedCompany.company_id,
+            contact_id: selectedContact.contact_id,
+            line_items: lineItems,
+            pricing_mode: pricingMode,
+            free_shipping: freeShipping,
+          }),
+        });
+
+        const data = await response.json();
+        if (data.url) {
+          setQuoteUrl(data.url);
+        } else {
+          alert('Failed to generate quote: ' + (data.error || 'Unknown error'));
+        }
       }
     } catch (err) {
-      alert('Error generating quote');
+      alert(editMode ? 'Error updating quote' : 'Error generating quote');
       console.error(err);
     } finally {
       setGenerating(false);
@@ -306,10 +400,10 @@ export default function QuoteBuilderPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-[32px] font-[800] text-[#0a0a0a] tracking-[-0.04em] mb-2">
-            Quote Builder
+            {editMode ? 'Edit Quote' : 'Quote Builder'}
           </h1>
           <p className="text-[15px] text-[#666] font-[400] tracking-[-0.01em]">
-            Create professional quotes for tool and consumable sales
+            {editMode ? 'Update quote details, line items, and pricing' : 'Create professional quotes for tool and consumable sales'}
           </p>
         </div>
 
@@ -533,7 +627,7 @@ export default function QuoteBuilderPage() {
                   disabled={!selectedCompany || !selectedContact || lineItems.length === 0 || generating}
                   className="w-full mt-6 py-3 bg-white text-[#0a0a0a] rounded-[14px] text-[15px] font-[700] tracking-[-0.01em] hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {generating ? 'Generating...' : 'Generate Quote'}
+                  {generating ? (editMode ? 'Updating...' : 'Generating...') : (editMode ? 'Update Quote' : 'Generate Quote')}
                 </button>
               </div>
             )}

@@ -158,7 +158,7 @@ export async function GET(
 
 /**
  * PATCH /api/admin/quotes/[quote_id]
- * Update quote details (including free_shipping flag)
+ * Update quote details including line items, prices, and free_shipping flag
  */
 export async function PATCH(
   request: NextRequest,
@@ -173,6 +173,7 @@ export async function PATCH(
 
     const { quote_id } = await params;
     const body = await request.json();
+    const { line_items, free_shipping, ...otherFields } = body;
 
     const supabase = getSupabaseClient();
 
@@ -200,21 +201,91 @@ export async function PATCH(
       );
     }
 
-    // Update quote (allow updating free_shipping and other fields)
-    const { error: updateError } = await supabase
-      .from('quotes')
-      .update({
-        ...body,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('quote_id', quote_id);
-
-    if (updateError) {
-      console.error('[quotes/[quote_id]] Update error:', updateError);
-      return NextResponse.json(
-        { error: 'Failed to update quote' },
-        { status: 500 }
+    // If line_items provided, update them and recalculate totals
+    if (line_items && Array.isArray(line_items) && line_items.length > 0) {
+      // Calculate new totals
+      const subtotal = line_items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
+      const discountAmount = line_items.reduce((sum, item) =>
+        sum + ((item.unit_price * item.quantity * (item.discount_percent || 0)) / 100), 0
       );
+      const total = subtotal - discountAmount;
+
+      // Delete existing line items
+      await supabase
+        .from('quote_items')
+        .delete()
+        .eq('quote_id', quote_id);
+
+      // Insert new line items
+      const quoteItems = line_items.map((item, index) => ({
+        quote_id: quote_id,
+        product_code: item.product_code,
+        line_number: index + 1,
+        description: item.description,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        discount_percent: item.discount_percent || 0,
+        line_total: (item.unit_price * item.quantity) - ((item.unit_price * item.quantity * (item.discount_percent || 0)) / 100),
+        product_type: item.product_type,
+        category: item.category,
+        image_url: item.image_url,
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('quote_items')
+        .insert(quoteItems);
+
+      if (itemsError) {
+        console.error('[quotes/[quote_id]] Line items update error:', itemsError);
+        return NextResponse.json(
+          { error: 'Failed to update quote line items' },
+          { status: 500 }
+        );
+      }
+
+      // Update quote with new totals
+      const { error: updateError } = await supabase
+        .from('quotes')
+        .update({
+          subtotal,
+          discount_amount: discountAmount,
+          total_amount: total,
+          free_shipping: free_shipping !== undefined ? free_shipping : undefined,
+          ...otherFields,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('quote_id', quote_id);
+
+      if (updateError) {
+        console.error('[quotes/[quote_id]] Update error:', updateError);
+        return NextResponse.json(
+          { error: 'Failed to update quote' },
+          { status: 500 }
+        );
+      }
+    } else {
+      // Just update quote fields (no line items changes)
+      const updateData: any = {
+        ...otherFields,
+        updated_at: new Date().toISOString(),
+      };
+
+      if (free_shipping !== undefined) {
+        updateData.free_shipping = free_shipping;
+      }
+
+      const { error: updateError } = await supabase
+        .from('quotes')
+        .update(updateData)
+        .eq('quote_id', quote_id);
+
+      if (updateError) {
+        console.error('[quotes/[quote_id]] Update error:', updateError);
+        return NextResponse.json(
+          { error: 'Failed to update quote' },
+          { status: 500 }
+        );
+      }
     }
 
     return NextResponse.json({
