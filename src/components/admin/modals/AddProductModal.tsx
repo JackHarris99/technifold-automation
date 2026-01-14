@@ -6,6 +6,7 @@
 'use client';
 
 import { useState } from 'react';
+import ProductAttributeBuilder from '../ProductAttributeBuilder';
 
 interface AddProductModalProps {
   isOpen: boolean;
@@ -16,7 +17,7 @@ interface AddProductModalProps {
 export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProductModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'basic' | 'pricing' | 'shipping' | 'advanced'>('basic');
+  const [activeTab, setActiveTab] = useState<'basic' | 'pricing' | 'shipping' | 'attributes' | 'advanced'>('basic');
 
   // Form state
   const [formData, setFormData] = useState({
@@ -45,6 +46,8 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
     video_url: '',
   });
 
+  const [attributes, setAttributes] = useState<Record<string, string | number>>({});
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -62,6 +65,7 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
         height_cm: formData.height_cm ? parseFloat(formData.height_cm) : null,
         depth_cm: formData.depth_cm ? parseFloat(formData.depth_cm) : null,
         customs_value_gbp: formData.customs_value_gbp ? parseFloat(formData.customs_value_gbp) : null,
+        extra: attributes, // Include attributes in JSONB field
       };
 
       const response = await fetch('/api/admin/products/create', {
@@ -101,6 +105,7 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
           image_alt: '',
           video_url: '',
         });
+        setAttributes({});
       } else {
         setError(data.error || 'Failed to create product');
       }
@@ -156,6 +161,22 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
                 }`}
               >
                 Shipping & Customs
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('attributes')}
+                className={`px-4 py-3 font-semibold text-sm border-b-2 transition-colors ${
+                  activeTab === 'attributes'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Attributes
+                {Object.keys(attributes).length > 0 && (
+                  <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-600 rounded-full text-xs">
+                    {Object.keys(attributes).length}
+                  </span>
+                )}
               </button>
               <button
                 type="button"
@@ -473,6 +494,15 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
                   <p className="text-xs text-gray-500 mt-1">Declared value for customs</p>
                 </div>
               </div>
+            )}
+
+            {/* Attributes Tab */}
+            {activeTab === 'attributes' && (
+              <ProductAttributeBuilder
+                value={attributes}
+                onChange={setAttributes}
+                showCustom={true}
+              />
             )}
 
             {/* Advanced Tab */}

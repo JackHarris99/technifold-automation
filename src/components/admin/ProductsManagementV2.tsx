@@ -399,6 +399,23 @@ export default function ProductsManagementV2({ products: initialProducts }: Prod
                           </td>
                           <td className="px-6 py-4">
                             <div className="text-sm text-gray-700">{product.description || '-'}</div>
+                            {product.extra && Object.keys(product.extra).length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-2">
+                                {Object.entries(product.extra).slice(0, 3).map(([key, value]) => (
+                                  <span
+                                    key={key}
+                                    className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800"
+                                  >
+                                    {key.replace(/_/g, ' ')}: {value}
+                                  </span>
+                                ))}
+                                {Object.keys(product.extra).length > 3 && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                    +{Object.keys(product.extra).length - 3} more
+                                  </span>
+                                )}
+                              </div>
+                            )}
                           </td>
                           <td className="px-6 py-4">
                             <div className="text-sm text-gray-900">
