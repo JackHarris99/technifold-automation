@@ -386,6 +386,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     contact_id: contactId,
     source: 'stripe',
     source_event_id: session.id,
+    event_type: 'purchase',
     event_name: 'checkout_completed',
     offer_key: offerKey,
     value: total,
@@ -632,6 +633,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
     contact_id: contactId,
     source: 'stripe',
     source_event_id: paymentIntent.id,
+    event_type: 'purchase',
     event_name: 'embedded_checkout_completed',
     value: totalAmount,
     currency,
@@ -693,6 +695,7 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
       contact_id: contactId,
       source: 'stripe',
       source_event_id: paymentIntent.id,
+      event_type: 'payment_issue',
       event_name: 'payment_failed',
       value: (paymentIntent.amount || 0) / 100,
       currency: paymentIntent.currency?.toUpperCase() || 'GBP',
@@ -912,6 +915,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
       contact_id: order.contact_id,
       source: 'stripe',
       source_event_id: invoice.id,
+      event_type: 'purchase',
       event_name: 'invoice_paid',
       value: order.total_amount,
       currency: order.currency,
@@ -932,6 +936,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
         contact_id: contactId,
         source: 'stripe',
         source_event_id: invoice.id,
+        event_type: 'purchase',
         event_name: 'invoice_paid',
         value: (invoice.amount_paid || 0) / 100,
         currency: invoice.currency?.toUpperCase() || 'GBP',
@@ -983,6 +988,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
       contact_id: contactId,
       source: 'stripe',
       source_event_id: invoice.id,
+      event_type: 'payment_issue',
       event_name: 'invoice_payment_failed',
       value: (invoice.amount_due || 0) / 100,
       currency: invoice.currency?.toUpperCase() || 'GBP',
@@ -1080,6 +1086,7 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
     contact_id: invoice.contact_id,
     source: 'stripe',
     source_event_id: charge.id,
+    event_type: 'refund',
     event_name: 'charge_refunded',
     value: refundAmount,
     currency: invoice.currency,
@@ -1214,6 +1221,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
     contact_id: contactId,
     source: 'stripe',
     source_event_id: subscription.id,
+    event_type: 'rental_event',
     event_name: 'rental_started',
     value: monthlyPrice,
     currency: (firstItem.price.currency || 'gbp').toUpperCase(),
@@ -1487,6 +1495,7 @@ async function handleSubscriptionTableUpdate(
     const { error: statusEngagementErr } = await supabase.from('engagement_events').insert({
       company_id: existingSub.company_id,
       contact_id: existingSub.contact_id,
+      event_type: 'subscription_event',
       event_name: 'subscription_status_changed',
       source: 'stripe',
       meta: {
@@ -1550,6 +1559,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     const { error: cancelEngagementErr } = await supabase.from('engagement_events').insert({
       company_id: sub.company_id,
       contact_id: sub.contact_id,
+      event_type: 'subscription_event',
       event_name: 'subscription_cancelled',
       source: 'stripe',
       meta: {
@@ -1595,6 +1605,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     contact_id: rental.contact_id,
     source: 'stripe',
     source_event_id: subscription.id,
+    event_type: 'rental_event',
     event_name: 'rental_cancelled',
     meta: {
       rental_id: rental.rental_id,
@@ -1728,6 +1739,7 @@ async function handleTrialSubscriptionCreated(
   const { error: trialEngagementErr } = await supabase.from('engagement_events').insert({
     company_id: companyId,
     contact_id: contactId,
+    event_type: 'subscription_event',
     event_name: 'subscription_created',
     source: 'stripe',
     meta: {
