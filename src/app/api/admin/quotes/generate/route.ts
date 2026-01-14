@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { company_id, contact_id, line_items, pricing_mode, quote_type, is_test, created_by } = body;
+    const { company_id, contact_id, line_items, pricing_mode, quote_type, is_test, created_by, free_shipping } = body;
 
     if (!company_id || !contact_id || !line_items || !Array.isArray(line_items) || line_items.length === 0) {
       return NextResponse.json(
@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
         discount_amount: discountAmount,
         total_amount: total,
         is_test: is_test || false,
+        free_shipping: free_shipping || false,
         expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
         created_by: created_by || 'system',
       })

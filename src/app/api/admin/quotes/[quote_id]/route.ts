@@ -155,3 +155,158 @@ export async function GET(
     );
   }
 }
+
+/**
+ * PATCH /api/admin/quotes/[quote_id]
+ * Update quote details (including free_shipping flag)
+ */
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ quote_id: string }> }
+) {
+  try {
+    // SECURITY: Require authentication
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { quote_id } = await params;
+    const body = await request.json();
+
+    const supabase = getSupabaseClient();
+
+    // Fetch existing quote to verify it exists
+    const { data: existingQuote } = await supabase
+      .from('quotes')
+      .select('quote_id, company_id')
+      .eq('quote_id', quote_id)
+      .single();
+
+    if (!existingQuote) {
+      return NextResponse.json(
+        { error: 'Quote not found' },
+        { status: 404 }
+      );
+    }
+
+    // Check territory permission
+    const { canActOnCompany } = await import('@/lib/auth');
+    const permission = await canActOnCompany(existingQuote.company_id);
+    if (!permission.allowed) {
+      return NextResponse.json(
+        { error: permission.error },
+        { status: 403 }
+      );
+    }
+
+    // Update quote (allow updating free_shipping and other fields)
+    const { error: updateError } = await supabase
+      .from('quotes')
+      .update({
+        ...body,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('quote_id', quote_id);
+
+    if (updateError) {
+      console.error('[quotes/[quote_id]] Update error:', updateError);
+      return NextResponse.json(
+        { error: 'Failed to update quote' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Quote updated successfully',
+    });
+  } catch (error) {
+    console.error('[quotes/[quote_id]] PATCH error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * DELETE /api/admin/quotes/[quote_id]
+ * Delete a quote and its related records
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ quote_id: string }> }
+) {
+  try {
+    // SECURITY: Require authentication
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { quote_id } = await params;
+
+    const supabase = getSupabaseClient();
+
+    // Fetch existing quote
+    const { data: existingQuote } = await supabase
+      .from('quotes')
+      .select('quote_id, company_id, company:companies(company_name)')
+      .eq('quote_id', quote_id)
+      .single();
+
+    if (!existingQuote) {
+      return NextResponse.json(
+        { error: 'Quote not found' },
+        { status: 404 }
+      );
+    }
+
+    // Check territory permission
+    const { canActOnCompany } = await import('@/lib/auth');
+    const permission = await canActOnCompany(existingQuote.company_id);
+    if (!permission.allowed) {
+      return NextResponse.json(
+        { error: permission.error },
+        { status: 403 }
+      );
+    }
+
+    // Delete quote (CASCADE will delete quote_items and quote_notes)
+    const { error: deleteError } = await supabase
+      .from('quotes')
+      .delete()
+      .eq('quote_id', quote_id);
+
+    if (deleteError) {
+      console.error('[quotes/[quote_id]] Delete error:', deleteError);
+      return NextResponse.json(
+        { error: 'Failed to delete quote' },
+        { status: 500 }
+      );
+    }
+
+    // Log activity
+    await supabase.from('activity_log').insert({
+      user_id: user.user_id,
+      user_email: user.email,
+      user_name: user.full_name,
+      action_type: 'quote_deleted',
+      entity_type: 'quote',
+      entity_id: quote_id,
+      description: `Deleted quote ${quote_id} for ${(existingQuote.company as any)?.company_name || existingQuote.company_id}`,
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Quote deleted successfully',
+    });
+  } catch (error) {
+    console.error('[quotes/[quote_id]] DELETE error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     // Fetch quote details to verify it's a static quote
     const { data: quote } = await supabase
       .from('quotes')
-      .select('quote_type')
+      .select('quote_type, free_shipping')
       .eq('quote_id', quote_id)
       .single();
 
@@ -123,19 +123,25 @@ export async function POST(request: NextRequest) {
 
     const country = (defaultAddress?.country || company?.country || 'GB').toUpperCase();
 
-    // Calculate shipping first
-    const { data: shippingRate } = await supabase
-      .from('shipping_rates')
-      .select('rate_gbp, free_shipping_threshold')
-      .eq('country_code', country)
-      .eq('active', true)
-      .single();
-
+    // Calculate shipping first (check free_shipping override)
     let shipping_amount = 0;
-    const freeShippingThreshold = shippingRate?.free_shipping_threshold || 500;
 
-    if (subtotal < freeShippingThreshold) {
-      shipping_amount = shippingRate?.rate_gbp || 15; // Default £15 if no rate found
+    if (quote.free_shipping) {
+      // Sales rep has enabled free shipping for this quote
+      shipping_amount = 0;
+    } else {
+      const { data: shippingRate } = await supabase
+        .from('shipping_rates')
+        .select('rate_gbp, free_shipping_threshold')
+        .eq('country_code', country)
+        .eq('active', true)
+        .single();
+
+      const freeShippingThreshold = shippingRate?.free_shipping_threshold || 500;
+
+      if (subtotal < freeShippingThreshold) {
+        shipping_amount = shippingRate?.rate_gbp || 15; // Default £15 if no rate found
+      }
     }
 
     // Calculate VAT on subtotal + shipping (20% for UK, 0% for exports/reverse charge)
