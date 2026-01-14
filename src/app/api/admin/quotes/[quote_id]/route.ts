@@ -124,14 +124,22 @@ export async function GET(
 
     const enrichedEngagementEvents = (engagementEvents || []).map(event => {
       const eventContact = engagementContacts.find(c => c.contact_id === event.contact_id);
+      const isInternalView = event.meta?.internal_view === true;
+      const internalUser = event.meta?.internal_user || null;
+
       return {
         ...event,
         contact_name: eventContact?.full_name || 'Unknown',
         contact_email: eventContact?.email || null,
+        internal_view: isInternalView,
+        internal_user: internalUser,
       };
     });
 
-    // Build enriched quote response
+    // Filter to only show customer views (exclude internal views)
+    const customerEngagementEvents = enrichedEngagementEvents.filter(e => !e.internal_view);
+
+    // Build enriched quote response (only show customer engagement, not internal views)
     const enrichedQuote = {
       ...quote,
       company_name: company?.company_name || 'Unknown Company',
@@ -140,7 +148,8 @@ export async function GET(
       created_by_name: creator?.full_name || quote.created_by,
       line_items: lineItems || [],
       notes: notes || [],
-      engagement_events: enrichedEngagementEvents,
+      engagement_events: customerEngagementEvents,
+      internal_views_count: enrichedEngagementEvents.length - customerEngagementEvents.length,
     };
 
     return NextResponse.json({

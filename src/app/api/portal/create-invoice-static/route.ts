@@ -338,7 +338,7 @@ export async function POST(request: NextRequest) {
       await getStripeClient().invoiceItems.create({
         customer: stripeCustomerId,
         invoice: invoice.id,
-        description: item.description,
+        description: `${item.product_code} - ${item.description}`,
         quantity: item.quantity,
         unit_amount: Math.round(item.unit_price * 100), // Convert to pence
         currency: currency.toLowerCase(),

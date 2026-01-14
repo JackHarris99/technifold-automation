@@ -5,6 +5,7 @@
  */
 
 import { notFound } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 import { StaticQuotePortal } from '@/components/quotes/StaticQuotePortal';
@@ -166,8 +167,27 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
     }
   }
 
-  // 7. Track quote view engagement event
+  // 7. Track quote view engagement event (skip internal admin views)
   if (contact) {
+    // Check if current user is an authenticated admin
+    const cookieStore = await cookies();
+    const userCookie = cookieStore.get('current_user');
+    let isInternalView = false;
+    let internalUser = null;
+
+    if (userCookie) {
+      try {
+        const session = JSON.parse(userCookie.value);
+        if (session.user_id && session.email) {
+          isInternalView = true;
+          internalUser = session.email;
+        }
+      } catch (e) {
+        // Invalid cookie, treat as customer view
+      }
+    }
+
+    // Log engagement event with internal_view flag
     supabase
       .from('engagement_events')
       .insert({
@@ -183,10 +203,18 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
           company_name: company.company_name,
           item_count: lineItems.length,
           quote_type: quote.quote_type,
-          total_amount: quote.total_amount
+          total_amount: quote.total_amount,
+          internal_view: isInternalView,
+          internal_user: internalUser
         }
       })
-      .then(() => console.log(`[Quote] Tracked view by ${contact.full_name}`))
+      .then(() => {
+        if (isInternalView) {
+          console.log(`[Quote] Internal view by ${internalUser} (not counted as customer engagement)`);
+        } else {
+          console.log(`[Quote] Customer view tracked: ${contact.full_name}`);
+        }
+      })
       .catch(err => console.error('[Quote] Tracking failed:', err));
   }
 
