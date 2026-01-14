@@ -27,12 +27,15 @@ interface Quote {
   expires_at: string | null;
   last_activity: string | null;
   account_owner: string | null;
+  free_shipping?: boolean;
 }
 
 export default function QuotesPage() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
+  const [editFreeShipping, setEditFreeShipping] = useState(false);
 
   useEffect(() => {
     fetchQuotes();
@@ -67,6 +70,62 @@ export default function QuotesPage() {
       setQuotes([]);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function deleteQuote(quoteId: string, companyName: string) {
+    if (!confirm(`Are you sure you want to delete this quote for ${companyName}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/quotes/${quoteId}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Quote deleted successfully');
+        fetchQuotes(); // Refresh the list
+      } else {
+        alert('Failed to delete quote: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Failed to delete quote:', error);
+      alert('Failed to delete quote');
+    }
+  }
+
+  function openEditModal(quote: Quote) {
+    setEditingQuote(quote);
+    setEditFreeShipping(quote.free_shipping || false);
+  }
+
+  async function saveQuoteEdit() {
+    if (!editingQuote) return;
+
+    try {
+      const response = await fetch(`/api/admin/quotes/${editingQuote.quote_id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          free_shipping: editFreeShipping,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Quote updated successfully');
+        setEditingQuote(null);
+        fetchQuotes(); // Refresh the list
+      } else {
+        alert('Failed to update quote: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Failed to update quote:', error);
+      alert('Failed to update quote');
     }
   }
 
@@ -250,12 +309,26 @@ export default function QuotesPage() {
                     {getStatusBadge(quote)}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/admin/quotes/${quote.quote_id}`}
-                      className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                      View →
-                    </Link>
+                    <div className="flex items-center justify-end gap-2">
+                      <Link
+                        href={`/admin/quotes/${quote.quote_id}`}
+                        className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        View
+                      </Link>
+                      <button
+                        onClick={() => openEditModal(quote)}
+                        className="text-sm text-gray-600 hover:text-gray-800 font-medium"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deleteQuote(quote.quote_id, quote.company_name)}
+                        className="text-sm text-red-600 hover:text-red-800 font-medium"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -268,6 +341,56 @@ export default function QuotesPage() {
       {!loading && quotes.length > 0 && (
         <div className="mt-4 text-sm text-gray-800 text-center">
           Showing {quotes.length} quotes • Total pipeline value: £{stats.totalValue.toLocaleString()}
+        </div>
+      )}
+
+      {/* Edit Quote Modal */}
+      {editingQuote && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Edit Quote</h2>
+
+            <div className="mb-4">
+              <p className="text-sm text-gray-700 mb-2">
+                <strong>Company:</strong> {editingQuote.company_name}
+              </p>
+              <p className="text-sm text-gray-700 mb-4">
+                <strong>Quote ID:</strong> {editingQuote.quote_id}
+              </p>
+            </div>
+
+            <div className="mb-6">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={editFreeShipping}
+                  onChange={(e) => setEditFreeShipping(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-900 font-medium">
+                  Free shipping for this quote
+                </span>
+              </label>
+              <p className="text-xs text-gray-600 mt-2 ml-7">
+                Override country shipping rules and set shipping to £0
+              </p>
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setEditingQuote(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveQuoteEdit}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

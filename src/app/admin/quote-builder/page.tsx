@@ -84,6 +84,7 @@ export default function QuoteBuilderPage() {
   // Quote Generation
   const [quoteUrl, setQuoteUrl] = useState('');
   const [generating, setGenerating] = useState(false);
+  const [freeShipping, setFreeShipping] = useState(false);
 
   // Load companies on mount
   useEffect(() => {
@@ -271,6 +272,7 @@ export default function QuoteBuilderPage() {
           contact_id: selectedContact.contact_id,
           line_items: lineItems,
           pricing_mode: pricingMode,
+          free_shipping: freeShipping,
         }),
       });
 
@@ -508,6 +510,23 @@ export default function QuoteBuilderPage() {
                     </div>
                   </div>
                 )}
+
+                <div className="mt-4 pt-4 border-t border-white/20">
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={freeShipping}
+                      onChange={(e) => setFreeShipping(e.target.checked)}
+                      className="w-4 h-4 rounded border-white/30 bg-white/10 text-blue-400 focus:ring-2 focus:ring-white/50"
+                    />
+                    <span className="text-[14px] text-white/90 font-[500] group-hover:text-white transition-colors">
+                      Free shipping for this quote
+                    </span>
+                  </label>
+                  <p className="text-[12px] text-white/60 mt-2 ml-7">
+                    Override country shipping rules and set shipping to £0
+                  </p>
+                </div>
 
                 <button
                   onClick={generateQuote}
