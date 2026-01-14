@@ -7,6 +7,8 @@
  * - OTHER: Fixed price from products table
  */
 
+export const maxDuration = 60; // Allow up to 60 seconds for Stripe API calls
+
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
