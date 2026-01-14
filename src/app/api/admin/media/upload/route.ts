@@ -78,10 +78,10 @@ export async function POST(request: NextRequest) {
     }
 
     // SECURITY: Validate recordId format to prevent SQL injection
-    // Allow: UUIDs, product codes (uppercase), slugs
+    // Allow: UUIDs, product codes (uppercase, with slashes), slugs
     // Block: SQL injection characters like quotes, semicolons, etc.
     const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(recordId);
-    const isValidCode = /^[A-Za-z0-9_-]+$/.test(recordId); // Product codes, slugs, etc.
+    const isValidCode = /^[A-Za-z0-9_\-\/]+$/.test(recordId); // Product codes (with /), slugs, etc.
 
     if (!isValidUUID && !isValidCode) {
       console.error('[UPLOAD] Invalid recordId format:', recordId);
@@ -254,7 +254,7 @@ export async function DELETE(request: NextRequest) {
 
     // SECURITY: Validate recordId format to prevent SQL injection
     const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(recordId);
-    const isValidCode = /^[A-Za-z0-9_-]+$/.test(recordId); // Product codes, slugs, etc.
+    const isValidCode = /^[A-Za-z0-9_\-\/]+$/.test(recordId); // Product codes (with /), slugs, etc.
 
     if (!isValidUUID && !isValidCode) {
       console.error('[DELETE] Invalid recordId format:', recordId);
