@@ -5,6 +5,7 @@
  */
 
 import { notFound } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 import { PortalPage } from '@/components/PortalPage';
@@ -254,8 +255,26 @@ export default async function ReorderPortalPage({ params }: ReorderPortalProps) 
       }
     });
 
-  // 5. Track reorder portal view
+  // 5. Track reorder portal view (skip internal admin views)
   if (contact) {
+    // Check if current user is an authenticated admin
+    const cookieStore = await cookies();
+    const userCookie = cookieStore.get('current_user');
+    let isInternalView = false;
+    let internalUser = null;
+
+    if (userCookie) {
+      try {
+        const session = JSON.parse(userCookie.value);
+        if (session.user_id && session.email) {
+          isInternalView = true;
+          internalUser = session.email;
+        }
+      } catch (e) {
+        // Invalid cookie, treat as customer view
+      }
+    }
+
     supabase
       .from('engagement_events')
       .insert({
@@ -270,10 +289,18 @@ export default async function ReorderPortalPage({ params }: ReorderPortalProps) 
           company_name: company.company_name,
           reorder_items_count: portalPayload.reorder_items?.length || 0,
           tool_tabs_count: portalPayload.by_tool_tabs?.length || 0,
-          token_type: 'reorder'
+          token_type: 'reorder',
+          internal_view: isInternalView,
+          internal_user: internalUser
         }
       })
-      .then(() => console.log(`[Reorder] Tracked view by ${contact.full_name}`))
+      .then(() => {
+        if (isInternalView) {
+          console.log(`[Reorder] Internal view by ${internalUser} (not counted as customer engagement)`);
+        } else {
+          console.log(`[Reorder] Customer view tracked: ${contact.full_name}`);
+        }
+      })
       .catch(err => console.error('[Reorder] Tracking failed:', err));
   }
 
