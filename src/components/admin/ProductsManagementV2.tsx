@@ -497,12 +497,11 @@ export default function ProductsManagementV2({ products: initialProducts }: Prod
       )}
 
       {/* Add Product Modal */}
-      {showAddProductModal && (
-        <AddProductModal
-          onClose={() => setShowAddProductModal(false)}
-          onSuccess={handleProductCreated}
-        />
-      )}
+      <AddProductModal
+        isOpen={showAddProductModal}
+        onClose={() => setShowAddProductModal(false)}
+        onSuccess={handleProductCreated}
+      />
     </div>
   );
 }
