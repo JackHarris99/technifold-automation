@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import ImageUpload from './ImageUpload';
+import AddProductModal from './modals/AddProductModal';
 
 interface Product {
   product_code: string;
@@ -40,6 +41,7 @@ export default function ProductsManagementV2({ products: initialProducts }: Prod
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [showImageUpload, setShowImageUpload] = useState<string | null>(null);
   const [showBulkImageUpload, setShowBulkImageUpload] = useState<string | null>(null);
+  const [showAddProductModal, setShowAddProductModal] = useState(false);
 
   // Group products by type + category
   const groupedProducts = useMemo(() => {
@@ -123,6 +125,12 @@ export default function ProductsManagementV2({ products: initialProducts }: Prod
   const handleBulkImageUploaded = async (imageUrl: string, categoryKey: string) => {
     // Bulk upload completed - refresh the page to show updated images
     setShowBulkImageUpload(null);
+    window.location.reload();
+  };
+
+  const handleProductCreated = () => {
+    // Refresh the page to show the new product
+    setShowAddProductModal(false);
     window.location.reload();
   };
 
@@ -222,6 +230,15 @@ export default function ProductsManagementV2({ products: initialProducts }: Prod
             <p className="text-sm text-gray-800 mt-1">Organized by type and category</p>
           </div>
           <div className="flex gap-3">
+            <button
+              onClick={() => setShowAddProductModal(true)}
+              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add Product
+            </button>
             <button
               onClick={expandAll}
               className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -450,6 +467,14 @@ export default function ProductsManagementV2({ products: initialProducts }: Prod
           categoryKey={showBulkImageUpload}
           onClose={() => setShowBulkImageUpload(null)}
           onSuccess={handleBulkImageUploaded}
+        />
+      )}
+
+      {/* Add Product Modal */}
+      {showAddProductModal && (
+        <AddProductModal
+          onClose={() => setShowAddProductModal(false)}
+          onSuccess={handleProductCreated}
         />
       )}
     </div>
