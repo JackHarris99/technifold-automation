@@ -93,6 +93,7 @@ export default function ConsumablesQuoteBuilderPage() {
   const [quoteId, setQuoteId] = useState('');
   const [sendingEmail, setSendingEmail] = useState(false);
   const [quoteType, setQuoteType] = useState<'interactive' | 'static'>('interactive');
+  const [freeShipping, setFreeShipping] = useState(false);
 
   useEffect(() => {
     loadCompanies();
@@ -357,6 +358,7 @@ export default function ConsumablesQuoteBuilderPage() {
           line_items: lineItems,
           quote_type: quoteType, // 'static' or 'interactive'
           is_test: isTestToken, // Test tokens bypass address collection
+          free_shipping: freeShipping,
         }),
       });
 
@@ -614,6 +616,19 @@ export default function ConsumablesQuoteBuilderPage() {
                   />
                   <label htmlFor="test-token" className="text-sm text-white/70">
                     Test link (internal preview only)
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-2 mb-4 pb-4 border-b border-white/20">
+                  <input
+                    type="checkbox"
+                    id="free-shipping"
+                    checked={freeShipping}
+                    onChange={(e) => setFreeShipping(e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-300"
+                  />
+                  <label htmlFor="free-shipping" className="text-sm text-white/70">
+                    Free shipping for this quote
                   </label>
                 </div>
 
