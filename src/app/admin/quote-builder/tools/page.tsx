@@ -90,6 +90,7 @@ export default function ToolsQuoteBuilderPage() {
   const [sendingEmail, setSendingEmail] = useState(false);
   const [isTestToken, setIsTestToken] = useState(false);
   const [quoteType, setQuoteType] = useState<'interactive' | 'static'>('static');
+  const [freeShipping, setFreeShipping] = useState(false);
 
   useEffect(() => {
     loadCompanies();
@@ -306,6 +307,7 @@ export default function ToolsQuoteBuilderPage() {
           })),
           quote_type: quoteType, // Use selected quote type
           is_test: isTestToken,
+          free_shipping: freeShipping,
         }),
       });
 
@@ -598,6 +600,19 @@ export default function ToolsQuoteBuilderPage() {
                   />
                   <label htmlFor="test-token" className="text-sm text-white/70">
                     Test link (internal preview only)
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-2 mb-4 pb-4 border-b border-white/20">
+                  <input
+                    type="checkbox"
+                    id="free-shipping"
+                    checked={freeShipping}
+                    onChange={(e) => setFreeShipping(e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-300"
+                  />
+                  <label htmlFor="free-shipping" className="text-sm text-white/70">
+                    Free shipping for this quote
                   </label>
                 </div>
 
