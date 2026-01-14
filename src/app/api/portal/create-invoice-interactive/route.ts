@@ -103,15 +103,19 @@ export async function POST(request: NextRequest) {
     const company_id = payload.company_id;
 
     // IDEMPOTENCY CHECK: If this is a quote request, check if invoice already exists
+    // Also fetch free_shipping flag for later use
+    let quoteFreeShipping = false;
     if (payload.quote_id && payload.object_type === 'quote') {
       console.log(`[create-invoice-interactive] Checking idempotency for quote ${payload.quote_id}`);
 
       const supabase = getSupabaseClient();
       const { data: existingQuote } = await supabase
         .from('quotes')
-        .select('quote_id, invoice_id, accepted_at, status')
+        .select('quote_id, invoice_id, accepted_at, status, free_shipping')
         .eq('quote_id', payload.quote_id)
         .single();
+
+      quoteFreeShipping = existingQuote?.free_shipping || false;
 
       if (existingQuote?.invoice_id) {
         // Invoice already exists - return it instead of creating duplicate
@@ -340,12 +344,18 @@ export async function POST(request: NextRequest) {
     // Calculate subtotal using RECALCULATED prices
     const subtotal = calculatedItems.reduce((sum, item) => sum + item.line_total, 0);
 
-    // Calculate shipping cost
-    const { data: shippingData } = await supabase.rpc('calculate_shipping_cost', {
-      p_country_code: destinationCountry,
-      p_order_subtotal: subtotal,
-    });
-    const shippingCost = shippingData || 0;
+    // Calculate shipping cost - check free_shipping override from quote
+    let shippingCost = 0;
+    if (quoteFreeShipping) {
+      console.log(`[create-invoice-interactive] Free shipping enabled for quote ${payload.quote_id} - setting shipping to £0`);
+      shippingCost = 0;
+    } else {
+      const { data: shippingData } = await supabase.rpc('calculate_shipping_cost', {
+        p_country_code: destinationCountry,
+        p_order_subtotal: subtotal,
+      });
+      shippingCost = shippingData || 0;
+    }
 
     // Calculate VAT on subtotal + shipping
     const taxableAmount = subtotal + shippingCost;
