@@ -635,6 +635,108 @@ export default function QuoteBuilderPage() {
 
           {/* Right Main Area - Product Selection & Line Items */}
           <div className="col-span-8 space-y-6">
+            {/* EDIT MODE: Show current quote summary */}
+            {editMode && (
+              <div className="bg-yellow-50 border-2 border-yellow-500 rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)]">
+                <h2 className="text-[18px] font-[800] text-yellow-900 tracking-[-0.02em] mb-4">
+                  ⚠️ Editing Live Quote
+                </h2>
+                <div className="grid grid-cols-2 gap-4 text-[14px]">
+                  <div>
+                    <span className="text-yellow-700 font-[500]">Company:</span>
+                    <span className="ml-2 font-[700] text-yellow-900">{selectedCompany?.company_name}</span>
+                  </div>
+                  <div>
+                    <span className="text-yellow-700 font-[500]">Contact:</span>
+                    <span className="ml-2 font-[700] text-yellow-900">{selectedContact?.email}</span>
+                  </div>
+                  <div>
+                    <span className="text-yellow-700 font-[500]">Pricing Mode:</span>
+                    <span className="ml-2 font-[700] text-yellow-900 uppercase">{pricingMode}</span>
+                  </div>
+                  <div>
+                    <span className="text-yellow-700 font-[500]">Free Shipping:</span>
+                    <span className="ml-2 font-[700] text-yellow-900">{freeShipping ? 'YES ✓' : 'No'}</span>
+                  </div>
+                </div>
+                <div className="mt-4 p-3 bg-yellow-100 rounded-[10px] text-[13px] text-yellow-800">
+                  <strong>Changes are live:</strong> When you click "Update Quote", the customer's tokenized link will immediately show the updated items and prices.
+                </div>
+              </div>
+            )}
+
+            {/* EDIT MODE: Show current quote items FIRST */}
+            {editMode && lineItems.length > 0 && (
+              <div className="bg-blue-50 border-2 border-blue-500 rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)]">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-[20px] font-[800] text-blue-900 tracking-[-0.02em]">
+                    ✏️ Current Quote Items - {lineItems.length} item{lineItems.length !== 1 ? 's' : ''}
+                  </h2>
+                  <div className="text-[14px] text-blue-700 font-[600]">
+                    Editing Quote: {editingQuoteId?.slice(0, 8)}...
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {lineItems.map((item) => (
+                    <div
+                      key={item.product_code}
+                      className="flex items-center gap-4 p-4 bg-white border-2 border-blue-200 rounded-[14px]"
+                    >
+                      {item.image_url && (
+                        <img
+                          src={item.image_url}
+                          alt={item.description}
+                          className="w-16 h-16 object-cover rounded-[8px]"
+                        />
+                      )}
+                      <div className="flex-1">
+                        <div className="text-[15px] font-[600] text-[#0a0a0a] mb-1">{item.description}</div>
+                        <div className="text-[13px] text-[#666] mb-2">
+                          {item.product_code} • {item.product_type} • £{item.unit_price.toFixed(2)}/unit
+                        </div>
+                        <div className="flex gap-3">
+                          <div>
+                            <label className="text-[12px] text-[#666] font-[500] block mb-1">Quantity</label>
+                            <input
+                              type="number"
+                              min="1"
+                              value={item.quantity}
+                              onChange={(e) => updateQuantity(item.product_code, parseInt(e.target.value) || 1)}
+                              className="w-24 px-3 py-1.5 border border-[#e8e8e8] rounded-[8px] text-[14px] text-[#0a0a0a] font-[500] focus:outline-none focus:ring-2 focus:ring-[#0a0a0a]"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[12px] text-[#666] font-[500] block mb-1">Discount %</label>
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              step="0.1"
+                              value={item.discount_percent}
+                              onChange={(e) => updateDiscount(item.product_code, parseFloat(e.target.value) || 0)}
+                              className="w-24 px-3 py-1.5 border border-[#e8e8e8] rounded-[8px] text-[14px] text-[#0a0a0a] font-[500] focus:outline-none focus:ring-2 focus:ring-[#0a0a0a]"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[18px] font-[700] text-[#0a0a0a] mb-2">
+                          £{((item.unit_price * item.quantity) * (1 - item.discount_percent / 100)).toFixed(2)}
+                        </div>
+                        <button
+                          onClick={() => removeLineItem(item.product_code)}
+                          className="px-4 py-2 bg-red-500 text-white rounded-[8px] text-[13px] font-[600] hover:bg-red-600 transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Step 3: Add Products */}
             <div className="bg-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)]">
               <div className="flex items-center gap-3 mb-4">
@@ -642,7 +744,7 @@ export default function QuoteBuilderPage() {
                   <span className="text-[14px] font-[700] text-white">3</span>
                 </div>
                 <h2 className="text-[18px] font-[700] text-[#0a0a0a] tracking-[-0.02em]">
-                  Add Products
+                  {editMode ? 'Add More Products' : 'Add Products'}
                 </h2>
               </div>
 
