@@ -105,11 +105,12 @@ export default function AddressCollectionModal({
         }
       }
 
-      // 1. Update company billing address and VAT number
-      const billingResponse = await fetch(`/api/admin/companies/${companyId}/update-billing`, {
+      // 1. Update company billing address and VAT number using portal endpoint
+      const billingResponse = await fetch(`/api/portal/update-billing`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          token,
           billing_address_line_1: formData.billing_address_line_1,
           billing_address_line_2: formData.billing_address_line_2,
           billing_city: formData.billing_city,
@@ -127,10 +128,11 @@ export default function AddressCollectionModal({
 
       // 2. Create shipping address (if different from billing)
       if (!formData.use_billing_for_shipping) {
-        const shippingResponse = await fetch(`/api/admin/shipping-addresses`, {
+        const shippingResponse = await fetch(`/api/portal/create-shipping-address`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            token,
             company_id: companyId,
             address_line_1: formData.shipping_address_line_1,
             address_line_2: formData.shipping_address_line_2,
@@ -148,10 +150,11 @@ export default function AddressCollectionModal({
         }
       } else {
         // Use billing address as shipping address
-        const shippingResponse = await fetch(`/api/admin/shipping-addresses`, {
+        const shippingResponse = await fetch(`/api/portal/create-shipping-address`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            token,
             company_id: companyId,
             address_line_1: formData.billing_address_line_1,
             address_line_2: formData.billing_address_line_2,
