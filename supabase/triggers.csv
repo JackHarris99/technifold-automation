@@ -8,7 +8,6 @@ trg_engagement_events_fill_company,engagement_events,BEFORE,UPDATE,EXECUTE FUNCT
 trigger_invoices_updated_at,invoices,BEFORE,UPDATE,EXECUTE FUNCTION set_updated_at()
 trigger_sync_invoice_to_history,invoices,AFTER,INSERT,EXECUTE FUNCTION sync_invoice_to_product_history()
 trigger_sync_invoice_to_history,invoices,AFTER,UPDATE,EXECUTE FUNCTION sync_invoice_to_product_history()
-trigger_update_facts_on_invoice_paid,invoices,AFTER,UPDATE,EXECUTE FUNCTION update_facts_on_invoice_paid()
 update_notification_preferences_updated_at,notification_preferences,BEFORE,UPDATE,EXECUTE FUNCTION update_updated_at_column()
 trg_orders_updated,orders,BEFORE,UPDATE,EXECUTE FUNCTION set_updated_at()
 update_quote_notes_updated_at,quote_notes,BEFORE,UPDATE,EXECUTE FUNCTION update_updated_at_column()

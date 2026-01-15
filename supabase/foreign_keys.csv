@@ -38,7 +38,7 @@ rental_agreements,contact_id,contacts,contact_id
 rental_agreements,product_code,products,product_code
 shipping_addresses,company_id,companies,company_id
 shipping_manifests,company_id,companies,company_id
-shipping_manifests,order_id,orders,order_id
+shipping_manifests,invoice_id,invoices,invoice_id
 subscription_events,subscription_id,subscriptions,subscription_id
 subscription_tools,subscription_id,subscriptions,subscription_id
 subscription_tools,tool_code,products,product_code

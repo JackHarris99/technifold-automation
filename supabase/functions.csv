@@ -1,0 +1,52 @@
+schema_name,function_name,arguments,return_type,volatility,security_type,language
+public,calculate_shipping_cost,"p_country_code text, p_order_subtotal numeric",numeric,STABLE,SECURITY INVOKER,plpgsql
+public,current_user_company_id,,text,STABLE,SECURITY DEFINER,sql
+public,current_user_role,,text,STABLE,SECURITY DEFINER,sql
+public,current_user_sales_rep_id,,text,STABLE,SECURITY DEFINER,sql
+public,generate_rental_serial_number,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
+public,gin_extract_query_trgm,"text, internal, smallint, internal, internal, internal, internal",internal,IMMUTABLE,SECURITY INVOKER,c
+public,gin_extract_value_trgm,"text, internal",internal,IMMUTABLE,SECURITY INVOKER,c
+public,gin_trgm_consistent,"internal, smallint, text, integer, internal, internal, internal, internal",boolean,IMMUTABLE,SECURITY INVOKER,c
+public,gin_trgm_triconsistent,"internal, smallint, text, integer, internal, internal, internal","""char""",IMMUTABLE,SECURITY INVOKER,c
+public,gtrgm_compress,internal,internal,IMMUTABLE,SECURITY INVOKER,c
+public,gtrgm_consistent,"internal, text, smallint, oid, internal",boolean,IMMUTABLE,SECURITY INVOKER,c
+public,gtrgm_decompress,internal,internal,IMMUTABLE,SECURITY INVOKER,c
+public,gtrgm_distance,"internal, text, smallint, oid, internal",double precision,IMMUTABLE,SECURITY INVOKER,c
+public,gtrgm_in,cstring,gtrgm,IMMUTABLE,SECURITY INVOKER,c
+public,gtrgm_options,internal,void,IMMUTABLE,SECURITY INVOKER,c
+public,gtrgm_out,gtrgm,cstring,IMMUTABLE,SECURITY INVOKER,c
+public,gtrgm_penalty,"internal, internal, internal",internal,IMMUTABLE,SECURITY INVOKER,c
+public,gtrgm_picksplit,"internal, internal",internal,IMMUTABLE,SECURITY INVOKER,c
+public,gtrgm_same,"gtrgm, gtrgm, internal",internal,IMMUTABLE,SECURITY INVOKER,c
+public,gtrgm_union,"internal, internal",gtrgm,IMMUTABLE,SECURITY INVOKER,c
+public,regenerate_company_payload,p_company_id text,void,VOLATILE,SECURITY INVOKER,plpgsql
+public,set_engagement_company_from_contact,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
+public,set_limit,real,real,VOLATILE,SECURITY INVOKER,c
+public,set_rental_serial_number,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
+public,set_updated_at,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
+public,show_limit,,real,STABLE,SECURITY INVOKER,c
+public,show_trgm,text,text[],IMMUTABLE,SECURITY INVOKER,c
+public,similarity,"text, text",real,IMMUTABLE,SECURITY INVOKER,c
+public,similarity_dist,"text, text",real,IMMUTABLE,SECURITY INVOKER,c
+public,similarity_op,"text, text",boolean,STABLE,SECURITY INVOKER,c
+public,strict_word_similarity,"text, text",real,IMMUTABLE,SECURITY INVOKER,c
+public,strict_word_similarity_commutator_op,"text, text",boolean,STABLE,SECURITY INVOKER,c
+public,strict_word_similarity_dist_commutator_op,"text, text",real,IMMUTABLE,SECURITY INVOKER,c
+public,strict_word_similarity_dist_op,"text, text",real,IMMUTABLE,SECURITY INVOKER,c
+public,strict_word_similarity_op,"text, text",boolean,STABLE,SECURITY INVOKER,c
+public,sync_invoice_to_product_history,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
+public,sync_product_history_to_consumables,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
+public,sync_product_history_to_tools,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
+public,update_company_machine_updated_at,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
+public,update_quote_requests_updated_at,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
+public,update_quotes_updated_at,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
+public,update_updated_at_column,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
+public,update_users_updated_at,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
+public,upsert_company_consumable,"p_company_id text, p_consumable_code text, p_order_date date, p_quantity integer, p_amount numeric, p_invoice_id text",void,VOLATILE,SECURITY INVOKER,plpgsql
+public,upsert_company_product_history,"p_company_id text, p_product_code text, p_product_type text, p_purchase_date date, p_quantity integer",void,VOLATILE,SECURITY INVOKER,plpgsql
+public,upsert_company_tool,"p_company_id text, p_tool_code text, p_purchase_date date, p_quantity integer, p_amount numeric, p_invoice_id text",void,VOLATILE,SECURITY INVOKER,plpgsql
+public,word_similarity,"text, text",real,IMMUTABLE,SECURITY INVOKER,c
+public,word_similarity_commutator_op,"text, text",boolean,STABLE,SECURITY INVOKER,c
+public,word_similarity_dist_commutator_op,"text, text",real,IMMUTABLE,SECURITY INVOKER,c
+public,word_similarity_dist_op,"text, text",real,IMMUTABLE,SECURITY INVOKER,c
+public,word_similarity_op,"text, text",boolean,STABLE,SECURITY INVOKER,c

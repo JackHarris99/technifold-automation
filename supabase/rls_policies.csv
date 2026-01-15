@@ -1,0 +1,40 @@
+schema_name,table_name,policy_name,is_permissive,applies_to_roles,command_type,using_expression,with_check_expression
+public,activity_log,activity_log_insert_all,PERMISSIVE,{public},INSERT,null,TRUE
+public,activity_log,activity_log_select_directors,PERMISSIVE,{public},SELECT,(current_user_role() = 'director'::text),null
+public,companies,companies_delete_directors,PERMISSIVE,{public},DELETE,(current_user_role() = 'director'::text),null
+public,companies,companies_insert_all_staff,PERMISSIVE,{public},INSERT,null,"(current_user_role() = ANY (ARRAY['director'::text, 'sales_rep'::text]))"
+public,companies,companies_select_all_staff,PERMISSIVE,{public},SELECT,"(current_user_role() = ANY (ARRAY['director'::text, 'sales_rep'::text]))",null
+public,companies,companies_select_distributors,PERMISSIVE,{public},SELECT,(company_id = current_user_company_id()),null
+public,companies,companies_update_all_staff,PERMISSIVE,{public},UPDATE,"(current_user_role() = ANY (ARRAY['director'::text, 'sales_rep'::text]))",null
+public,contacts,contacts_modify_all_staff,PERMISSIVE,{public},ALL,"(current_user_role() = ANY (ARRAY['director'::text, 'sales_rep'::text]))",null
+public,contacts,contacts_select_all_staff,PERMISSIVE,{public},SELECT,"(current_user_role() = ANY (ARRAY['director'::text, 'sales_rep'::text]))",null
+public,contacts,contacts_select_distributors,PERMISSIVE,{public},SELECT,(company_id = current_user_company_id()),null
+public,engagement_events,engagement_events_delete_directors,PERMISSIVE,{public},DELETE,(current_user_role() = 'director'::text),null
+public,engagement_events,engagement_events_insert_all,PERMISSIVE,{public},INSERT,null,TRUE
+public,engagement_events,engagement_events_select_all_staff,PERMISSIVE,{public},SELECT,"(current_user_role() = ANY (ARRAY['director'::text, 'sales_rep'::text]))",null
+public,invoices,invoices_modify_directors,PERMISSIVE,{public},ALL,(current_user_role() = 'director'::text),null
+public,invoices,invoices_select_all_staff,PERMISSIVE,{public},SELECT,"(current_user_role() = ANY (ARRAY['director'::text, 'sales_rep'::text]))",null
+public,invoices,invoices_select_distributors,PERMISSIVE,{public},SELECT,(company_id = current_user_company_id()),null
+public,quotes,quotes_modify_all_staff,PERMISSIVE,{public},ALL,"(current_user_role() = ANY (ARRAY['director'::text, 'sales_rep'::text]))",null
+public,quotes,quotes_select_all_staff,PERMISSIVE,{public},SELECT,"(current_user_role() = ANY (ARRAY['director'::text, 'sales_rep'::text]))",null
+public,quotes,quotes_select_distributors,PERMISSIVE,{public},SELECT,(company_id = current_user_company_id()),null
+public,shipping_addresses,shipping_addresses_insert_distributors,PERMISSIVE,{public},INSERT,null,(company_id = current_user_company_id())
+public,shipping_addresses,shipping_addresses_modify_all_staff,PERMISSIVE,{public},ALL,"(current_user_role() = ANY (ARRAY['director'::text, 'sales_rep'::text]))",null
+public,shipping_addresses,shipping_addresses_modify_staff,PERMISSIVE,{public},ALL,"(current_user_role() = ANY (ARRAY['director'::text, 'sales_rep'::text]))",null
+public,shipping_addresses,shipping_addresses_select_all_staff,PERMISSIVE,{public},SELECT,"(current_user_role() = ANY (ARRAY['director'::text, 'sales_rep'::text]))",null
+public,shipping_addresses,shipping_addresses_select_distributors,PERMISSIVE,{public},SELECT,(company_id = current_user_company_id()),null
+public,shipping_addresses,shipping_addresses_update_distributors,PERMISSIVE,{public},UPDATE,(company_id = current_user_company_id()),null
+public,shipping_manifests,shipping_manifests_modify_directors,PERMISSIVE,{public},ALL,(current_user_role() = 'director'::text),null
+public,shipping_manifests,shipping_manifests_select_all_staff,PERMISSIVE,{public},SELECT,"(current_user_role() = ANY (ARRAY['director'::text, 'sales_rep'::text]))",null
+public,site_branding,Authenticated update access for site branding,PERMISSIVE,{authenticated},UPDATE,TRUE,TRUE
+public,site_branding,Public read access for site branding,PERMISSIVE,{public},SELECT,TRUE,null
+public,subscription_events,subscription_events_delete_directors,PERMISSIVE,{public},DELETE,(current_user_role() = 'director'::text),null
+public,subscription_events,subscription_events_select_all_staff,PERMISSIVE,{public},SELECT,"(current_user_role() = ANY (ARRAY['director'::text, 'sales_rep'::text]))",null
+public,subscriptions,Admin full access to subscriptions,PERMISSIVE,{authenticated},ALL,TRUE,TRUE
+public,subscriptions,subscriptions_modify_all_staff,PERMISSIVE,{public},ALL,"(current_user_role() = ANY (ARRAY['director'::text, 'sales_rep'::text]))",null
+public,subscriptions,subscriptions_select_all_staff,PERMISSIVE,{public},SELECT,"(current_user_role() = ANY (ARRAY['director'::text, 'sales_rep'::text]))",null
+public,subscriptions,subscriptions_select_distributors,PERMISSIVE,{public},SELECT,(company_id = current_user_company_id()),null
+public,users,users_insert_directors,PERMISSIVE,{public},INSERT,null,(current_user_role() = 'director'::text)
+public,users,users_select_directors,PERMISSIVE,{public},SELECT,(current_user_role() = 'director'::text),null
+public,users,users_select_own,PERMISSIVE,{public},SELECT,((auth.uid())::text = (user_id)::text),null
+public,users,users_update_directors,PERMISSIVE,{public},UPDATE,(current_user_role() = 'director'::text),null

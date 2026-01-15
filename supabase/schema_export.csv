@@ -45,6 +45,8 @@ companies,billing_state_province,text,YES,null
 companies,billing_postal_code,text,YES,null
 companies,billing_country,text,YES,null
 companies,status,text,YES,'active'::text
+companies,distributor_email,text,YES,null
+companies,distributor_password,text,YES,null
 company_consumables,company_id,text,NO,null
 company_consumables,consumable_code,text,NO,null
 company_consumables,first_ordered_at,date,NO,null
@@ -359,6 +361,7 @@ quotes,updated_at,timestamp with time zone,NO,now()
 quotes,won_at,timestamp with time zone,YES,null
 quotes,lost_at,timestamp with time zone,YES,null
 quotes,lost_reason,text,YES,null
+quotes,free_shipping,boolean,YES,FALSE
 rental_agreements,rental_id,uuid,NO,gen_random_uuid()
 rental_agreements,serial_number,text,NO,null
 rental_agreements,company_id,text,NO,null
@@ -396,7 +399,6 @@ shipping_addresses,updated_at,timestamp with time zone,NO,now()
 shipping_manifests,manifest_id,uuid,NO,gen_random_uuid()
 shipping_manifests,company_id,text,NO,null
 shipping_manifests,subscription_id,character varying,YES,null
-shipping_manifests,order_id,uuid,YES,null
 shipping_manifests,destination_country,character varying,NO,null
 shipping_manifests,shipment_type,character varying,NO,null
 shipping_manifests,courier,character varying,YES,null
@@ -410,6 +412,7 @@ shipping_manifests,items,jsonb,NO,null
 shipping_manifests,created_at,timestamp without time zone,YES,CURRENT_TIMESTAMP
 shipping_manifests,updated_at,timestamp without time zone,YES,CURRENT_TIMESTAMP
 shipping_manifests,notes,text,YES,null
+shipping_manifests,invoice_id,uuid,YES,null
 shipping_rates,rate_id,uuid,NO,gen_random_uuid()
 shipping_rates,country_code,text,NO,null
 shipping_rates,rate_gbp,numeric,NO,null
@@ -420,6 +423,8 @@ shipping_rates,active,boolean,NO,TRUE
 shipping_rates,notes,text,YES,null
 shipping_rates,created_at,timestamp with time zone,NO,now()
 shipping_rates,updated_at,timestamp with time zone,NO,now()
+shipping_rates,country_name,text,YES,null
+shipping_rates,display_order,integer,YES,999
 site_branding,brand_key,text,NO,null
 site_branding,brand_name,text,NO,null
 site_branding,logo_url,text,YES,null
@@ -514,6 +519,8 @@ users,is_active,boolean,NO,TRUE
 users,last_login_at,timestamp with time zone,YES,null
 users,created_at,timestamp with time zone,NO,now()
 users,updated_at,timestamp with time zone,NO,now()
+users,reset_token,text,YES,null
+users,reset_token_expires,timestamp with time zone,YES,null
 v_active_subscription_tools,subscription_id,uuid,YES,null
 v_active_subscription_tools,tool_code,text,YES,null
 v_active_subscription_tools,added_at,timestamp with time zone,YES,null
