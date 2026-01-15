@@ -12,6 +12,13 @@ interface Invoice {
   invoice_date: string;
   invoice_url: string | null;
   company_name?: string;
+  stripe_invoice_id?: string | null;
+}
+
+interface StripeStatusInfo {
+  stripe_status: string | null;
+  in_sync: boolean;
+  loading: boolean;
 }
 
 interface InvoiceListClientProps {
@@ -24,6 +31,66 @@ export default function InvoiceListClient({ initialInvoices, viewMode }: Invoice
   const [voidingInvoiceId, setVoidingInvoiceId] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [stripeStatuses, setStripeStatuses] = useState<Map<string, StripeStatusInfo>>(new Map());
+
+  const handleSyncStatus = async (invoice: Invoice) => {
+    if (!invoice.stripe_invoice_id) {
+      alert('This invoice has no Stripe invoice ID');
+      return;
+    }
+
+    // Set loading state
+    setStripeStatuses(prev => new Map(prev).set(invoice.invoice_id, {
+      stripe_status: null,
+      in_sync: false,
+      loading: true,
+    }));
+
+    try {
+      const response = await fetch(`/api/admin/invoices/${invoice.invoice_id}/sync-status`, {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(`Failed to sync status: ${data.error}`);
+        setStripeStatuses(prev => {
+          const newMap = new Map(prev);
+          newMap.delete(invoice.invoice_id);
+          return newMap;
+        });
+        return;
+      }
+
+      // Update Stripe status state
+      setStripeStatuses(prev => new Map(prev).set(invoice.invoice_id, {
+        stripe_status: data.stripe_status,
+        in_sync: data.in_sync,
+        loading: false,
+      }));
+
+      // If status was updated, refresh the invoice in the list
+      if (data.updated) {
+        setInvoices(prev =>
+          prev.map(inv =>
+            inv.invoice_id === invoice.invoice_id
+              ? { ...inv, payment_status: data.local_status_after }
+              : inv
+          )
+        );
+        alert(`Invoice status synced: ${data.local_status_before} → ${data.local_status_after}`);
+      }
+    } catch (error) {
+      console.error('Error syncing status:', error);
+      alert('An error occurred while syncing status');
+      setStripeStatuses(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(invoice.invoice_id);
+        return newMap;
+      });
+    }
+  };
 
   const handleVoidClick = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
@@ -80,71 +147,108 @@ export default function InvoiceListClient({ initialInvoices, viewMode }: Invoice
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Company</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Date</th>
                 <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Amount</th>
-                <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
+                <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Local Status</th>
+                <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Stripe Status</th>
                 <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {invoices.map((invoice) => (
-                <tr key={invoice.invoice_id} className="hover:bg-gray-50">
-                  <td className="py-3 px-4">
-                    <span className="font-mono text-sm text-gray-900">
-                      {invoice.invoice_number || invoice.invoice_id.slice(0, 8)}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <Link
-                      href={`/admin/company/${invoice.company_id}`}
-                      className="text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                      {invoice.company_name}
-                    </Link>
-                  </td>
-                  <td className="py-3 px-4 text-sm text-gray-800">
-                    {new Date(invoice.invoice_date).toLocaleDateString('en-GB', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
-                  </td>
-                  <td className="py-3 px-4 text-right font-semibold text-gray-900">
-                    £{invoice.total_amount.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${invoice.payment_status === 'paid'
-                        ? 'bg-green-100 text-green-700'
-                        : invoice.payment_status === 'void'
-                          ? 'bg-gray-100 text-gray-700'
-                          : 'bg-orange-100 text-orange-700'
-                      }`}>
-                      {invoice.payment_status === 'paid' ? 'Paid' : invoice.payment_status === 'void' ? 'Void' : 'Unpaid'}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <div className="flex items-center justify-end gap-3">
-                      {invoice.invoice_url && (
-                        <a
-                          href={invoice.invoice_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                        >
-                          View
-                        </a>
-                      )}
-                      {invoice.payment_status !== 'void' && invoice.payment_status !== 'paid' && (
+              {invoices.map((invoice) => {
+                const stripeStatus = stripeStatuses.get(invoice.invoice_id);
+                return (
+                  <tr key={invoice.invoice_id} className="hover:bg-gray-50">
+                    <td className="py-3 px-4">
+                      <span className="font-mono text-sm text-gray-900">
+                        {invoice.invoice_number || invoice.invoice_id.slice(0, 8)}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <Link
+                        href={`/admin/company/${invoice.company_id}`}
+                        className="text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        {invoice.company_name}
+                      </Link>
+                    </td>
+                    <td className="py-3 px-4 text-sm text-gray-800">
+                      {new Date(invoice.invoice_date).toLocaleDateString('en-GB', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </td>
+                    <td className="py-3 px-4 text-right font-semibold text-gray-900">
+                      £{invoice.total_amount.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${invoice.payment_status === 'paid'
+                          ? 'bg-green-100 text-green-700'
+                          : invoice.payment_status === 'void'
+                            ? 'bg-gray-100 text-gray-700'
+                            : 'bg-orange-100 text-orange-700'
+                        }`}>
+                        {invoice.payment_status === 'paid' ? 'Paid' : invoice.payment_status === 'void' ? 'Void' : 'Unpaid'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      {stripeStatus?.loading ? (
+                        <span className="text-xs text-gray-500">Checking...</span>
+                      ) : stripeStatus?.stripe_status ? (
+                        <div className="flex flex-col items-center gap-1">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                            stripeStatus.stripe_status === 'paid'
+                              ? 'bg-green-100 text-green-700'
+                              : stripeStatus.stripe_status === 'void'
+                              ? 'bg-gray-100 text-gray-700'
+                              : stripeStatus.stripe_status === 'open'
+                              ? 'bg-orange-100 text-orange-700'
+                              : 'bg-blue-100 text-blue-700'
+                          }`}>
+                            {stripeStatus.stripe_status}
+                          </span>
+                          {!stripeStatus.in_sync && (
+                            <span className="text-xs text-red-600 font-semibold">Out of sync!</span>
+                          )}
+                        </div>
+                      ) : (
                         <button
-                          onClick={() => handleVoidClick(invoice)}
-                          disabled={voidingInvoiceId === invoice.invoice_id}
-                          className="text-sm text-red-600 hover:text-red-800 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                          onClick={() => handleSyncStatus(invoice)}
+                          className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                         >
-                          {voidingInvoiceId === invoice.invoice_id ? 'Voiding...' : 'Void'}
+                          Check Status
                         </button>
                       )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <div className="flex items-center justify-end gap-3">
+                        {invoice.invoice_url && (
+                          <a
+                            href={invoice.invoice_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                          >
+                            View
+                          </a>
+                        )}
+                        {stripeStatus?.stripe_status && stripeStatus.stripe_status !== 'open' ? (
+                          <span className="text-xs text-gray-500">
+                            Cannot void ({stripeStatus.stripe_status})
+                          </span>
+                        ) : invoice.payment_status !== 'void' && invoice.payment_status !== 'paid' && (
+                          <button
+                            onClick={() => handleVoidClick(invoice)}
+                            disabled={voidingInvoiceId === invoice.invoice_id}
+                            className="text-sm text-red-600 hover:text-red-800 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {voidingInvoiceId === invoice.invoice_id ? 'Voiding...' : 'Void'}
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

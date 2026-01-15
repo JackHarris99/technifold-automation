@@ -18,6 +18,7 @@ interface Invoice {
   payment_status: 'paid' | 'unpaid' | 'void';
   invoice_date: string;
   invoice_url: string | null;
+  stripe_invoice_id?: string | null;
   company_name?: string;
 }
 
@@ -55,7 +56,8 @@ export default async function InvoicesPage() {
       total_amount,
       payment_status,
       invoice_date,
-      invoice_url
+      invoice_url,
+      stripe_invoice_id
     `)
     .order('invoice_date', { ascending: false })
     .limit(100);
