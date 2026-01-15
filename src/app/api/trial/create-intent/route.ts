@@ -292,6 +292,7 @@ export async function POST(request: NextRequest) {
     const { error: engagementError } = await supabase.from('engagement_events').insert({
       company_id,
       contact_id,
+      event_type: 'trial_signup',
       event_name: 'trial_intent_created',
       source: 'website',
       meta: {
