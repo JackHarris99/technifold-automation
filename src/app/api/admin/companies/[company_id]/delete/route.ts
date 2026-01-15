@@ -47,6 +47,31 @@ export async function DELETE(
       );
     }
 
+    // Check if company has invoices (cannot delete if invoices exist)
+    const { data: invoices, error: invoiceCheckError } = await supabase
+      .from('invoices')
+      .select('invoice_id')
+      .eq('company_id', company_id)
+      .limit(1);
+
+    if (invoiceCheckError) {
+      console.error('[delete-company] Error checking invoices:', invoiceCheckError);
+      return NextResponse.json(
+        { error: 'Failed to check company records' },
+        { status: 500 }
+      );
+    }
+
+    if (invoices && invoices.length > 0) {
+      return NextResponse.json(
+        {
+          error: 'Cannot delete company with invoices. Company has financial records that must be preserved for accounting purposes.',
+          details: 'Archive the company instead of deleting, or contact support to remove invoices first.'
+        },
+        { status: 400 }
+      );
+    }
+
     // Delete company (CASCADE will delete related records based on foreign keys)
     const { error: deleteError } = await supabase
       .from('companies')
