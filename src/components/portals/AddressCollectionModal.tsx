@@ -9,6 +9,7 @@ interface AddressCollectionModalProps {
   onClose: () => void;
   companyId: string;
   companyName: string;
+  token: string;
   onSuccess: () => void;
 }
 
@@ -37,6 +38,7 @@ export default function AddressCollectionModal({
   onClose,
   companyId,
   companyName,
+  token,
   onSuccess,
 }: AddressCollectionModalProps) {
   const [formData, setFormData] = useState<AddressFormData>({
