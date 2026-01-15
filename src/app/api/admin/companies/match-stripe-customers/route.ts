@@ -43,11 +43,10 @@ export async function GET(request: NextRequest) {
         company_id,
         company_name,
         stripe_customer_id,
-        contacts!inner (
+        contacts (
           contact_id,
           email,
-          full_name,
-          is_primary
+          full_name
         )
       `)
       .order('company_name');
@@ -129,9 +128,9 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      // Get primary contact or first contact
-      const contacts = Array.isArray(company.contacts) ? company.contacts : [company.contacts];
-      const primaryContact = contacts.find((c: any) => c.is_primary) || contacts[0];
+      // Get first contact
+      const contacts = Array.isArray(company.contacts) ? company.contacts : (company.contacts ? [company.contacts] : []);
+      const primaryContact = contacts[0];
 
       let matched = false;
 
