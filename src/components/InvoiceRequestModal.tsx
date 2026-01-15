@@ -230,6 +230,7 @@ export function InvoiceRequestModal({
         onClose={handleAddressCancel}
         companyId={companyId}
         companyName={companyName}
+        token={token}
         onSuccess={handleAddressSaved}
       />
     );
