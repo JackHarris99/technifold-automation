@@ -45,7 +45,7 @@ export async function POST(
         payment_status,
         total_amount,
         company_id,
-        companies!inner (
+        companies (
           company_name
         )
       `)
@@ -53,12 +53,16 @@ export async function POST(
       .single();
 
     if (fetchError || !invoice) {
-      console.error('[void-invoice] Invoice not found:', invoice_id, fetchError);
+      console.error('[void-invoice] Invoice fetch error:', fetchError);
+      console.error('[void-invoice] Invoice ID:', invoice_id);
       return NextResponse.json(
-        { error: 'Invoice not found' },
+        { error: 'Invoice not found', details: fetchError?.message },
         { status: 404 }
       );
     }
+
+    // Extract company name safely
+    const companyName = (invoice.companies as any)?.company_name || 'Unknown Company';
 
     // Check if already voided
     if (invoice.payment_status === 'void') {
@@ -84,16 +88,56 @@ export async function POST(
       );
     }
 
+    // Fetch current status from Stripe to verify it's voidable
+    console.log(`[void-invoice] Fetching invoice status from Stripe: ${invoice.stripe_invoice_id}`);
+    let stripeInvoice;
+    try {
+      stripeInvoice = await stripe.invoices.retrieve(invoice.stripe_invoice_id);
+      console.log(`[void-invoice] Stripe invoice status: ${stripeInvoice.status}`);
+    } catch (stripeError: any) {
+      console.error('[void-invoice] Failed to retrieve invoice from Stripe:', stripeError);
+      return NextResponse.json(
+        {
+          error: 'Failed to retrieve invoice from Stripe',
+          details: stripeError.message,
+        },
+        { status: 500 }
+      );
+    }
+
+    // Check if invoice is in a voidable state (only "open" invoices can be voided)
+    if (stripeInvoice.status !== 'open') {
+      console.error(`[void-invoice] Invoice status is "${stripeInvoice.status}", not "open". Cannot void.`);
+      return NextResponse.json(
+        {
+          error: `Cannot void invoice with status "${stripeInvoice.status}". Only "open" invoices can be voided.`,
+          details: stripeInvoice.status === 'paid'
+            ? 'This invoice has been paid. Issue a refund instead.'
+            : stripeInvoice.status === 'void'
+            ? 'This invoice is already voided.'
+            : stripeInvoice.status === 'draft'
+            ? 'This invoice is still a draft. Delete or finalize it first.'
+            : `Invoice status: ${stripeInvoice.status}`,
+        },
+        { status: 400 }
+      );
+    }
+
     // Void the invoice in Stripe
+    console.log(`[void-invoice] Calling Stripe API to void invoice: ${invoice.stripe_invoice_id}`);
     try {
       await stripe.invoices.voidInvoice(invoice.stripe_invoice_id);
-      console.log(`[void-invoice] Stripe invoice voided: ${invoice.stripe_invoice_id}`);
+      console.log(`[void-invoice] Stripe invoice voided successfully: ${invoice.stripe_invoice_id}`);
     } catch (stripeError: any) {
       console.error('[void-invoice] Stripe API error:', stripeError);
+      console.error('[void-invoice] Stripe error type:', stripeError.type);
+      console.error('[void-invoice] Stripe error code:', stripeError.code);
+      console.error('[void-invoice] Stripe error message:', stripeError.message);
       return NextResponse.json(
         {
           error: 'Failed to void invoice in Stripe',
-          details: stripeError.message
+          details: stripeError.message,
+          stripe_error_type: stripeError.type,
         },
         { status: 500 }
       );
@@ -133,20 +177,25 @@ export async function POST(
 
     // Log the action
     if (currentUser) {
-      await supabase.from('activity_log').insert({
+      const logResult = await supabase.from('activity_log').insert({
         user_id: currentUser.user_id,
         user_email: currentUser.email,
         user_name: currentUser.full_name,
         action_type: 'invoice_voided',
         entity_type: 'invoice',
         entity_id: invoice_id,
-        description: `Voided invoice ${invoice.invoice_number || invoice_id.slice(0, 8)} for ${invoice.companies.company_name} (£${invoice.total_amount})`,
+        description: `Voided invoice ${invoice.invoice_number || invoice_id.slice(0, 8)} for ${companyName} (£${invoice.total_amount})`,
         metadata: {
           stripe_invoice_id: invoice.stripe_invoice_id,
           company_id: invoice.company_id,
           amount: invoice.total_amount,
         },
       });
+
+      if (logResult.error) {
+        console.error('[void-invoice] Failed to log activity:', logResult.error);
+        // Non-critical, continue
+      }
     }
 
     console.log(`[void-invoice] Invoice ${invoice_id} voided by ${currentUser?.full_name}`);
