@@ -28,13 +28,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify HMAC token
+    console.log('[portal/create-shipping-address] Verifying token, length:', token?.length);
     const payload = verifyToken(token);
     if (!payload) {
+      console.error('[portal/create-shipping-address] TOKEN VERIFICATION FAILED - Check logs above for [tokens] warnings');
       return NextResponse.json(
         { error: 'Invalid or expired token' },
         { status: 401 }
       );
     }
+    console.log('[portal/create-shipping-address] Token verified successfully for company:', payload.company_id);
 
     const supabase = getSupabaseClient();
     const company_id = payload.company_id;

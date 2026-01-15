@@ -29,13 +29,16 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Verify HMAC token
+    console.log('[portal/update-billing] Verifying token, length:', token?.length, 'first 20 chars:', token?.substring(0, 20));
     const payload = verifyToken(token);
     if (!payload) {
+      console.error('[portal/update-billing] TOKEN VERIFICATION FAILED - Check logs above for [tokens] warnings');
       return NextResponse.json(
         { error: 'Invalid or expired token' },
         { status: 401 }
       );
     }
+    console.log('[portal/update-billing] Token verified successfully for company:', payload.company_id);
 
     const supabase = getSupabaseClient();
     const company_id = payload.company_id;
