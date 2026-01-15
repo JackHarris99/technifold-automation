@@ -149,6 +149,16 @@ export default async function InvoicesPage() {
           </div>
         )}
 
+        {/* Info Banner */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <p className="text-sm text-blue-800">
+            <strong>Before importing invoices from Stripe:</strong> Link your companies to Stripe customers first.{' '}
+            <Link href="/admin/companies/link-stripe" className="underline font-medium hover:text-blue-900">
+              Link Companies to Stripe →
+            </Link>
+          </p>
+        </div>
+
         {/* Invoice Table with Void Functionality */}
         <InvoiceListClient initialInvoices={enrichedInvoices} viewMode={viewMode} />
 

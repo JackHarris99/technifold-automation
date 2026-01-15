@@ -34,6 +34,7 @@ export default function InvoiceListClient({ initialInvoices, viewMode }: Invoice
   const [stripeStatuses, setStripeStatuses] = useState<Map<string, StripeStatusInfo>>(new Map());
   const [showVoidInvoices, setShowVoidInvoices] = useState(false);
   const [bulkSyncing, setBulkSyncing] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   const handleBulkSync = async () => {
     if (!confirm('Sync all invoice statuses from Stripe? This may take a moment.')) {
@@ -62,6 +63,36 @@ export default function InvoiceListClient({ initialInvoices, viewMode }: Invoice
       console.error('Error bulk syncing:', error);
       alert('An error occurred while syncing invoices');
       setBulkSyncing(false);
+    }
+  };
+
+  const handleImport = async () => {
+    if (!confirm('Import invoices from Stripe that don\'t exist in the system? This may take several minutes.')) {
+      return;
+    }
+
+    setImporting(true);
+
+    try {
+      const response = await fetch('/api/admin/invoices/import-from-stripe', {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(`Failed to import: ${data.error}`);
+        setImporting(false);
+        return;
+      }
+
+      // Reload the page to show imported invoices
+      alert(`Processed ${data.total} invoices. ${data.imported} imported, ${data.skipped} skipped, ${data.errors} errors.`);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error importing invoices:', error);
+      alert('An error occurred while importing invoices');
+      setImporting(false);
     }
   };
 
@@ -187,13 +218,22 @@ export default function InvoiceListClient({ initialInvoices, viewMode }: Invoice
             Show void invoices ({invoices.filter(inv => inv.payment_status === 'void').length})
           </label>
         </div>
-        <button
-          onClick={handleBulkSync}
-          disabled={bulkSyncing}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {bulkSyncing ? 'Syncing...' : 'Sync All from Stripe'}
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleImport}
+            disabled={importing || bulkSyncing}
+            className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {importing ? 'Importing...' : 'Import from Stripe'}
+          </button>
+          <button
+            onClick={handleBulkSync}
+            disabled={bulkSyncing || importing}
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {bulkSyncing ? 'Syncing...' : 'Sync All from Stripe'}
+          </button>
+        </div>
       </div>
 
       {/* Invoice Table */}
