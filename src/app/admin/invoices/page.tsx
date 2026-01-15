@@ -87,9 +87,10 @@ export default async function InvoicesPage() {
     company_name: companyMap.get(inv.company_id) || 'Unknown Company',
   }));
 
-  // Group by status for summary
+  // Group by status for summary (exclude void invoices from calculations)
   const unpaidInvoices = enrichedInvoices.filter(inv => inv.payment_status === 'unpaid');
   const paidInvoices = enrichedInvoices.filter(inv => inv.payment_status === 'paid');
+  const voidInvoices = enrichedInvoices.filter(inv => inv.payment_status === 'void');
   const unpaidTotal = unpaidInvoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0);
   const paidTotal = paidInvoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0);
 
@@ -111,7 +112,7 @@ export default async function InvoicesPage() {
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white border border-gray-200 border-l-4 border-l-orange-500 rounded-lg p-5">
             <div className="text-sm text-gray-800 mb-1">Unpaid</div>
             <div className="text-2xl font-bold text-gray-900">
@@ -125,6 +126,13 @@ export default async function InvoicesPage() {
               £{paidTotal.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
             </div>
             <div className="text-sm text-gray-700">{paidInvoices.length} invoice{paidInvoices.length !== 1 ? 's' : ''}</div>
+          </div>
+          <div className="bg-white border border-gray-200 border-l-4 border-l-gray-400 rounded-lg p-5">
+            <div className="text-sm text-gray-800 mb-1">Void (excluded)</div>
+            <div className="text-2xl font-bold text-gray-500">
+              {voidInvoices.length}
+            </div>
+            <div className="text-sm text-gray-700">invoice{voidInvoices.length !== 1 ? 's' : ''}</div>
           </div>
           <div className="bg-white border border-gray-200 border-l-4 border-l-blue-500 rounded-lg p-5">
             <div className="text-sm text-gray-800 mb-1">Total Shown</div>

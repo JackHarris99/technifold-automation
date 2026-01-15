@@ -32,6 +32,38 @@ export default function InvoiceListClient({ initialInvoices, viewMode }: Invoice
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [stripeStatuses, setStripeStatuses] = useState<Map<string, StripeStatusInfo>>(new Map());
+  const [showVoidInvoices, setShowVoidInvoices] = useState(false);
+  const [bulkSyncing, setBulkSyncing] = useState(false);
+
+  const handleBulkSync = async () => {
+    if (!confirm('Sync all invoice statuses from Stripe? This may take a moment.')) {
+      return;
+    }
+
+    setBulkSyncing(true);
+
+    try {
+      const response = await fetch('/api/admin/invoices/bulk-sync', {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(`Failed to bulk sync: ${data.error}`);
+        setBulkSyncing(false);
+        return;
+      }
+
+      // Reload the page to show updated invoices
+      alert(`Synced ${data.total} invoices. ${data.updated} updated, ${data.errors} errors.`);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error bulk syncing:', error);
+      alert('An error occurred while syncing invoices');
+      setBulkSyncing(false);
+    }
+  };
 
   const handleSyncStatus = async (invoice: Invoice) => {
     if (!invoice.stripe_invoice_id) {
@@ -135,8 +167,35 @@ export default function InvoiceListClient({ initialInvoices, viewMode }: Invoice
     }
   };
 
+  // Filter invoices based on showVoidInvoices toggle
+  const filteredInvoices = showVoidInvoices
+    ? invoices
+    : invoices.filter(inv => inv.payment_status !== 'void');
+
   return (
     <>
+      {/* Controls */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={showVoidInvoices}
+              onChange={(e) => setShowVoidInvoices(e.target.checked)}
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            Show void invoices ({invoices.filter(inv => inv.payment_status === 'void').length})
+          </label>
+        </div>
+        <button
+          onClick={handleBulkSync}
+          disabled={bulkSyncing}
+          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {bulkSyncing ? 'Syncing...' : 'Sync All from Stripe'}
+        </button>
+      </div>
+
       {/* Invoice Table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
@@ -153,7 +212,7 @@ export default function InvoiceListClient({ initialInvoices, viewMode }: Invoice
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {invoices.map((invoice) => {
+              {filteredInvoices.map((invoice) => {
                 const stripeStatus = stripeStatuses.get(invoice.invoice_id);
                 return (
                   <tr key={invoice.invoice_id} className="hover:bg-gray-50">
