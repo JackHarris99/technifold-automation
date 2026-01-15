@@ -83,7 +83,9 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'invoice.paid':
+        console.log('[stripe-webhook] INVOICE.PAID event received, calling handler...');
         await handleInvoicePaid(event.data.object as Stripe.Invoice);
+        console.log('[stripe-webhook] INVOICE.PAID handler completed');
         break;
 
       case 'invoice.payment_failed':
@@ -803,13 +805,16 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   const supabase = getSupabaseClient();
 
   console.log('[stripe-webhook] Processing invoice.paid:', invoice.id);
+  console.log('[stripe-webhook] Invoice metadata:', JSON.stringify(invoice.metadata));
 
   const metadata = invoice.metadata || {};
   const companyId = metadata.company_id;
   const contactId = metadata.contact_id || null;
 
+  console.log('[stripe-webhook] Attempting to update invoices table for stripe_invoice_id:', invoice.id);
+
   // Update NEW invoices table (triggers automatic fact table updates)
-  const { data: newInvoice } = await supabase
+  const { data: newInvoice, error: updateError } = await supabase
     .from('invoices')
     .update({
       status: 'paid',
@@ -820,7 +825,13 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
     .select('invoice_id, company_id, contact_id, total_amount, currency')
     .single();
 
+  if (updateError) {
+    console.error('[stripe-webhook] CRITICAL: Failed to update invoice in database:', updateError);
+    console.error('[stripe-webhook] Searched for stripe_invoice_id:', invoice.id);
+  }
+
   if (newInvoice) {
+    console.log('[stripe-webhook] SUCCESS: Invoice marked as PAID in database:', newInvoice.invoice_id);
     console.log('[stripe-webhook] New invoice table updated (fact tables auto-updated via trigger):', newInvoice.invoice_id);
 
     // AUTO-WON: Mark related quote as won when invoice is paid
@@ -951,6 +962,8 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
       }
     }
   }
+
+  console.log('[stripe-webhook] handleInvoicePaid completed successfully for:', invoice.id);
 }
 
 /**
