@@ -8,6 +8,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import InvoiceListClient from '@/components/admin/InvoiceListClient';
 
 interface Invoice {
   invoice_id: string;
@@ -138,82 +139,8 @@ export default async function InvoicesPage() {
           </div>
         )}
 
-        {/* Invoice Table */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Invoice</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Company</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Date</th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Amount</th>
-                  <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {enrichedInvoices.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="py-12 text-center text-gray-700">
-                      No invoices found
-                    </td>
-                  </tr>
-                )}
-                {enrichedInvoices.map((invoice) => (
-                  <tr key={invoice.invoice_id} className="hover:bg-gray-50">
-                    <td className="py-3 px-4">
-                      <span className="font-mono text-sm text-gray-900">
-                        {invoice.invoice_number || invoice.invoice_id.slice(0, 8)}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <Link
-                        href={`/admin/company/${invoice.company_id}`}
-                        className="text-blue-600 hover:text-blue-800 font-medium"
-                      >
-                        {invoice.company_name}
-                      </Link>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-gray-800">
-                      {new Date(invoice.invoice_date).toLocaleDateString('en-GB', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                      })}
-                    </td>
-                    <td className="py-3 px-4 text-right font-semibold text-gray-900">
-                      £{invoice.total_amount.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                        invoice.payment_status === 'paid'
-                          ? 'bg-green-100 text-green-700'
-                          : invoice.payment_status === 'void'
-                          ? 'bg-gray-100 text-gray-700'
-                          : 'bg-orange-100 text-orange-700'
-                      }`}>
-                        {invoice.payment_status === 'paid' ? 'Paid' : invoice.payment_status === 'void' ? 'Void' : 'Unpaid'}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      {invoice.invoice_url && (
-                        <a
-                          href={invoice.invoice_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                        >
-                          View →
-                        </a>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        {/* Invoice Table with Void Functionality */}
+        <InvoiceListClient initialInvoices={enrichedInvoices} viewMode={viewMode} />
 
         {/* Back Link */}
         <div className="mt-8">

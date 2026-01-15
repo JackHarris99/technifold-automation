@@ -1021,8 +1021,48 @@ async function handleInvoiceVoided(invoice: Stripe.Invoice) {
 
   console.log('[stripe-webhook] Processing invoice.voided:', invoice.id);
 
-  // Update order status to cancelled
-  const { error } = await supabase
+  const metadata = invoice.metadata || {};
+
+  // Update NEW invoices table (primary source of truth)
+  const { data: invoiceRecord, error: invoiceUpdateError } = await supabase
+    .from('invoices')
+    .update({
+      payment_status: 'void',
+      status: 'void',
+      voided_at: new Date().toISOString(),
+    })
+    .eq('stripe_invoice_id', invoice.id)
+    .select('invoice_id, company_id, total_amount')
+    .single();
+
+  if (invoiceUpdateError) {
+    console.error('[stripe-webhook] Failed to update invoices table:', invoiceUpdateError);
+  } else if (invoiceRecord) {
+    console.log('[stripe-webhook] Invoice record voided:', invoiceRecord.invoice_id);
+
+    // Track voided event
+    const { error: voidedEventErr } = await supabase.from('engagement_events').insert({
+      company_id: invoiceRecord.company_id,
+      contact_id: metadata.contact_id || null,
+      source: 'stripe',
+      source_event_id: invoice.id,
+      event_type: 'invoice_event',
+      event_name: 'invoice_voided',
+      value: invoiceRecord.total_amount,
+      currency: invoice.currency?.toUpperCase() || 'GBP',
+      meta: {
+        invoice_id: invoiceRecord.invoice_id,
+        stripe_invoice_id: invoice.id,
+        invoice_number: invoice.number,
+      },
+    });
+    if (voidedEventErr && !voidedEventErr.message?.includes('duplicate') && voidedEventErr.code !== '23505') {
+      console.error('[stripe-webhook] Failed to track invoice_voided event:', voidedEventErr);
+    }
+  }
+
+  // Update OLD orders table (legacy - for backward compatibility)
+  const { error: orderUpdateError } = await supabase
     .from('orders')
     .update({
       invoice_status: 'void',
@@ -1031,8 +1071,10 @@ async function handleInvoiceVoided(invoice: Stripe.Invoice) {
     })
     .eq('stripe_invoice_id', invoice.id);
 
-  if (error) {
-    console.error('[stripe-webhook] Failed to update order on invoice.voided:', error);
+  if (orderUpdateError) {
+    console.error('[stripe-webhook] Failed to update orders table:', orderUpdateError);
+  } else {
+    console.log('[stripe-webhook] Order record updated to voided');
   }
 }
 

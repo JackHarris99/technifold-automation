@@ -48,29 +48,71 @@ interface TeamActivitiesData {
   }>;
 }
 
+interface InvoiceItem {
+  product_code: string;
+  description: string;
+  quantity: number;
+  unit_price: number;
+  line_total: number;
+  product_type: string | null;
+  commission: number;
+}
+
+interface InvoiceDetail {
+  invoice_id: string;
+  invoice_number: string | null;
+  invoice_date: string;
+  company_id: string;
+  company_name: string;
+  invoice_url: string | null;
+  subtotal: number;
+  tools_revenue: number;
+  tools_commission: number;
+  consumables_revenue: number;
+  consumables_commission: number;
+  total_commission: number;
+  items: InvoiceItem[];
+}
+
+interface InvoicesData {
+  month: string;
+  invoices: InvoiceDetail[];
+  summary: {
+    total_invoices: number;
+    total_commission: number;
+    total_tools_commission: number;
+    total_consumables_commission: number;
+  };
+}
+
 export default function PerformanceDashboard() {
   const [commissionData, setCommissionData] = useState<CommissionData | null>(null);
   const [teamData, setTeamData] = useState<TeamActivitiesData | null>(null);
+  const [invoicesData, setInvoicesData] = useState<InvoicesData | null>(null);
+  const [expandedInvoices, setExpandedInvoices] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [commissionRes, teamRes] = await Promise.all([
+        const [commissionRes, teamRes, invoicesRes] = await Promise.all([
           fetch('/api/admin/commission/current'),
           fetch('/api/admin/commission/team-activities'),
+          fetch('/api/admin/commission/invoices'),
         ]);
 
-        if (!commissionRes.ok || !teamRes.ok) {
+        if (!commissionRes.ok || !teamRes.ok || !invoicesRes.ok) {
           throw new Error('Failed to fetch performance data');
         }
 
         const commission = await commissionRes.json();
         const team = await teamRes.json();
+        const invoices = await invoicesRes.json();
 
         setCommissionData(commission);
         setTeamData(team);
+        setInvoicesData(invoices);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -292,6 +334,192 @@ export default function PerformanceDashboard() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Commission Breakdown by Invoice */}
+        {invoicesData && invoicesData.invoices.length > 0 && (
+          <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8] p-6">
+            <div className="mb-6">
+              <h2 className="text-[20px] font-[600] text-[#0a0a0a] mb-1 tracking-[-0.01em]">
+                Commission Breakdown
+              </h2>
+              <p className="text-[13px] text-[#334155] font-[400]">
+                Detailed invoice-by-invoice commission this month
+              </p>
+            </div>
+
+            {/* Invoice Table */}
+            <div className="overflow-x-auto -mx-6 px-6">
+              <table className="w-full">
+                <thead className="bg-[#f8fafc] border-b border-[#e2e8f0]">
+                  <tr>
+                    <th className="text-left py-3 px-4 text-[11px] font-[600] text-[#475569] uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="text-left py-3 px-4 text-[11px] font-[600] text-[#475569] uppercase tracking-wider">
+                      Company
+                    </th>
+                    <th className="text-left py-3 px-4 text-[11px] font-[600] text-[#475569] uppercase tracking-wider">
+                      Invoice
+                    </th>
+                    <th className="text-right py-3 px-4 text-[11px] font-[600] text-[#475569] uppercase tracking-wider">
+                      Invoice Total
+                    </th>
+                    <th className="text-right py-3 px-4 text-[11px] font-[600] text-[#475569] uppercase tracking-wider">
+                      Tools
+                    </th>
+                    <th className="text-right py-3 px-4 text-[11px] font-[600] text-[#475569] uppercase tracking-wider">
+                      Consumables
+                    </th>
+                    <th className="text-right py-3 px-4 text-[11px] font-[600] text-[#475569] uppercase tracking-wider">
+                      Commission
+                    </th>
+                    <th className="text-center py-3 px-4 text-[11px] font-[600] text-[#475569] uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#e2e8f0]">
+                  {invoicesData.invoices.map((invoice) => {
+                    const isExpanded = expandedInvoices.has(invoice.invoice_id);
+
+                    return (
+                      <>
+                        <tr
+                          key={invoice.invoice_id}
+                          className="hover:bg-[#f8fafc] cursor-pointer"
+                          onClick={() => {
+                            setExpandedInvoices((prev) => {
+                              const newSet = new Set(prev);
+                              if (isExpanded) {
+                                newSet.delete(invoice.invoice_id);
+                              } else {
+                                newSet.add(invoice.invoice_id);
+                              }
+                              return newSet;
+                            });
+                          }}
+                        >
+                          <td className="py-3 px-4 text-[13px] text-[#334155]">
+                            {new Date(invoice.invoice_date).toLocaleDateString('en-GB', {
+                              day: 'numeric',
+                              month: 'short',
+                            })}
+                          </td>
+                          <td className="py-3 px-4 text-[13px] font-[500] text-[#0a0a0a]">
+                            {invoice.company_name}
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="font-mono text-[12px] text-[#475569]">
+                              {invoice.invoice_number || invoice.invoice_id.slice(0, 8)}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-right font-[600] text-[#0a0a0a]">
+                            £{invoice.subtotal.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
+                          </td>
+                          <td className="py-3 px-4 text-right text-[13px] text-[#1e40af]">
+                            £{invoice.tools_commission.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
+                          </td>
+                          <td className="py-3 px-4 text-right text-[13px] text-[#15803d]">
+                            £{invoice.consumables_commission.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
+                          </td>
+                          <td className="py-3 px-4 text-right font-[700] text-[15px] text-[#0a0a0a]">
+                            £{invoice.total_commission.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            {invoice.invoice_url && (
+                              <a
+                                href={invoice.invoice_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[13px] text-[#1e40af] hover:text-[#1e3a8a] font-[500]"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                View →
+                              </a>
+                            )}
+                          </td>
+                        </tr>
+
+                        {/* Expandable detail rows */}
+                        {isExpanded && (
+                          <tr>
+                            <td colSpan={8} className="bg-[#f8fafc] p-6">
+                              <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider mb-3">
+                                Line Items
+                              </div>
+                              <table className="w-full">
+                                <thead className="border-b border-[#e2e8f0]">
+                                  <tr>
+                                    <th className="text-left py-2 px-3 text-[10px] font-[600] text-[#475569] uppercase">
+                                      Product
+                                    </th>
+                                    <th className="text-left py-2 px-3 text-[10px] font-[600] text-[#475569] uppercase">
+                                      Description
+                                    </th>
+                                    <th className="text-center py-2 px-3 text-[10px] font-[600] text-[#475569] uppercase">
+                                      Qty
+                                    </th>
+                                    <th className="text-right py-2 px-3 text-[10px] font-[600] text-[#475569] uppercase">
+                                      Unit Price
+                                    </th>
+                                    <th className="text-right py-2 px-3 text-[10px] font-[600] text-[#475569] uppercase">
+                                      Total
+                                    </th>
+                                    <th className="text-center py-2 px-3 text-[10px] font-[600] text-[#475569] uppercase">
+                                      Type
+                                    </th>
+                                    <th className="text-right py-2 px-3 text-[10px] font-[600] text-[#475569] uppercase">
+                                      Commission
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {invoice.items.map((item, idx) => (
+                                    <tr key={idx} className="border-b border-[#e2e8f0] last:border-0">
+                                      <td className="py-2 px-3 font-mono text-[11px] text-[#334155]">
+                                        {item.product_code}
+                                      </td>
+                                      <td className="py-2 px-3 text-[11px] text-[#334155]">
+                                        {item.description}
+                                      </td>
+                                      <td className="py-2 px-3 text-center text-[11px] text-[#334155]">
+                                        {item.quantity}
+                                      </td>
+                                      <td className="py-2 px-3 text-right text-[11px] text-[#334155]">
+                                        £{item.unit_price.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
+                                      </td>
+                                      <td className="py-2 px-3 text-right font-[600] text-[11px] text-[#0a0a0a]">
+                                        £{item.line_total.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
+                                      </td>
+                                      <td className="py-2 px-3 text-center">
+                                        <span
+                                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-[600] ${
+                                            item.product_type === 'tool'
+                                              ? 'bg-[#eff6ff] text-[#1e40af]'
+                                              : 'bg-[#f0fdf4] text-[#15803d]'
+                                          }`}
+                                        >
+                                          {item.product_type === 'tool' ? 'Tool (10%)' : 'Consumable (1%)'}
+                                        </span>
+                                      </td>
+                                      <td className="py-2 px-3 text-right font-[700] text-[11px] text-[#0a0a0a]">
+                                        £{item.commission.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                        )}
+                      </>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
