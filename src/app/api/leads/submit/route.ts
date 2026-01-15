@@ -125,7 +125,6 @@ export async function POST(request: NextRequest) {
         source: 'vercel',
         event_type: 'inbound_lead',
         event_name: 'inbound_lead',
-        session_id: crypto.randomUUID(),
         url: '/api/leads/submit',
         meta: {
           lead_data: {
