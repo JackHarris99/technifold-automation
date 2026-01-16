@@ -5,7 +5,7 @@ ADD COLUMN IF NOT EXISTS show_in_distributor_portal BOOLEAN DEFAULT true;
 -- Create company_product_catalog table (custom catalogs per company)
 CREATE TABLE IF NOT EXISTS company_product_catalog (
   catalog_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  company_id UUID NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE,
+  company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE,
   product_code TEXT NOT NULL REFERENCES products(product_code) ON DELETE CASCADE,
   visible BOOLEAN DEFAULT true,
   display_order INTEGER,
@@ -35,7 +35,7 @@ ALTER TABLE company_product_catalog ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Companies can view their own catalog"
 ON company_product_catalog FOR SELECT
 USING (
-  company_id = (current_setting('request.jwt.claims', true)::json->>'company_id')::uuid
+  company_id = current_setting('request.jwt.claims', true)::json->>'company_id'
   OR visible = true
 );
 
