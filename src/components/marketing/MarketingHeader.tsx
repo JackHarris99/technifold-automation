@@ -66,6 +66,13 @@ export async function MarketingHeader() {
             >
               Admin
             </Link>
+            <Link
+              href="/distributor/login"
+              className="bg-white/10 hover:bg-white/20 text-white font-semibold tracking-wide transition-all text-[15px] uppercase px-4 py-2 rounded-lg border border-white/30"
+              style={{ fontFamily: "'Inter', 'system-ui', sans-serif", letterSpacing: '0.5px' }}
+            >
+              Distributor Login
+            </Link>
           </div>
         </div>
       </nav>
