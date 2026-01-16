@@ -1,6 +1,6 @@
--- Add distributor_tier column to companies table
+-- Add pricing_tier column to companies table
 ALTER TABLE companies
-ADD COLUMN IF NOT EXISTS distributor_tier TEXT DEFAULT 'standard';
+ADD COLUMN IF NOT EXISTS pricing_tier TEXT DEFAULT 'standard';
 
 -- Create distributor_pricing table
 CREATE TABLE IF NOT EXISTS distributor_pricing (
@@ -21,7 +21,7 @@ ON distributor_pricing(product_code, tier) WHERE active = true;
 
 -- Add comment
 COMMENT ON TABLE distributor_pricing IS 'Tiered pricing for distributor products. Falls back to products.price if no tier pricing exists.';
-COMMENT ON COLUMN companies.distributor_tier IS 'Distributor pricing tier: standard, gold, silver, bronze, tier_1, tier_2, etc.';
+COMMENT ON COLUMN companies.pricing_tier IS 'Pricing tier for this company: standard, gold, silver, bronze, tier_1, tier_2, etc.';
 
 -- Enable RLS
 ALTER TABLE distributor_pricing ENABLE ROW LEVEL SECURITY;

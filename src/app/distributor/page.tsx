@@ -32,11 +32,11 @@ export default async function DistributorDashboardPage() {
   // Get distributor's pricing tier
   const { data: company } = await supabase
     .from('companies')
-    .select('distributor_tier')
+    .select('pricing_tier')
     .eq('company_id', distributor.company_id)
     .single();
 
-  const distributorTier = company?.distributor_tier || 'standard';
+  const distributorTier = company?.pricing_tier || 'standard';
 
   // Fetch ALL products (no limit)
   let allProducts: any[] = [];
