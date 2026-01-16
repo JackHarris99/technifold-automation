@@ -36,28 +36,46 @@ export async function GET(request: NextRequest) {
 
     console.log('[match-stripe-customers] Fetching companies from database');
 
-    // Get all companies with their contact info
-    const { data: companies, error: companiesError } = await supabase
-      .from('companies')
-      .select(`
-        company_id,
-        company_name,
-        stripe_customer_id,
-        contacts (
-          contact_id,
-          email,
-          full_name
-        )
-      `)
-      .order('company_name');
+    // Get ALL companies with their contact info (paginate to bypass 1000 row limit)
+    const allCompanies: any[] = [];
+    let page = 0;
+    const pageSize = 1000;
+    let hasMore = true;
 
-    if (companiesError) {
-      console.error('[match-stripe-customers] Error fetching companies:', companiesError);
-      return NextResponse.json(
-        { error: 'Failed to fetch companies' },
-        { status: 500 }
-      );
+    while (hasMore) {
+      const { data: companiesPage, error: companiesError } = await supabase
+        .from('companies')
+        .select(`
+          company_id,
+          company_name,
+          stripe_customer_id,
+          contacts (
+            contact_id,
+            email,
+            full_name
+          )
+        `)
+        .order('company_name')
+        .range(page * pageSize, (page + 1) * pageSize - 1);
+
+      if (companiesError) {
+        console.error('[match-stripe-customers] Error fetching companies:', companiesError);
+        return NextResponse.json(
+          { error: 'Failed to fetch companies' },
+          { status: 500 }
+        );
+      }
+
+      if (companiesPage && companiesPage.length > 0) {
+        allCompanies.push(...companiesPage);
+        hasMore = companiesPage.length === pageSize;
+        page++;
+      } else {
+        hasMore = false;
+      }
     }
+
+    const companies = allCompanies;
 
     console.log(`[match-stripe-customers] Found ${companies?.length || 0} companies`);
 
