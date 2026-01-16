@@ -178,7 +178,32 @@ export default function DistributorDashboard({
   };
 
   const handleSubmitOrder = async () => {
-    if (cartItems.length === 0) return;
+    if (cartItems.length === 0) {
+      alert('Your cart is empty. Please add items before placing an order.');
+      return;
+    }
+
+    if (!selectedAddressId) {
+      alert('Please select a shipping address before placing your order.');
+      return;
+    }
+
+    // CRITICAL: Verify billing address exists before submitting
+    if (!billingAddress || !billingAddress.billing_address_line_1) {
+      alert('Your company must have a billing address before placing orders. Please contact support.');
+      return;
+    }
+
+    // CRITICAL: Verify selected shipping address is complete
+    const selectedAddress = shippingAddresses.find(addr => addr.address_id === selectedAddressId);
+    if (!selectedAddress || !selectedAddress.address_line_1 || !selectedAddress.city || !selectedAddress.postal_code || !selectedAddress.country) {
+      alert('The selected shipping address is incomplete. Please update it with all required fields.');
+      return;
+    }
+
+    if (!confirm(`Place order for ${cartItems.length} item(s) to ${selectedAddress.city}, ${selectedAddress.country}?`)) {
+      return;
+    }
 
     setSubmitting(true);
 
@@ -189,21 +214,26 @@ export default function DistributorDashboard({
         body: JSON.stringify({
           items: cartItems.map((item) => ({
             product_code: item.product.product_code,
+            description: item.product.description,
             quantity: item.quantity,
             unit_price: item.product.price,
           })),
+          shipping_address_id: selectedAddressId,
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to create order');
+        throw new Error(data.details || data.error || 'Failed to create order');
       }
 
+      alert('Order placed successfully! Invoice has been sent via email.');
       router.refresh();
       setCart(new Map());
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting order:', error);
-      alert('Failed to submit order. Please try again.');
+      alert(`Failed to submit order: ${error.message}`);
     } finally {
       setSubmitting(false);
     }
