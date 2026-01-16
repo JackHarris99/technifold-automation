@@ -35,12 +35,14 @@ interface DistributorDashboardProps {
   };
   invoices: Invoice[];
   products: Product[];
+  tier: string;
 }
 
 export default function DistributorDashboard({
   distributor,
   invoices,
   products,
+  tier,
 }: DistributorDashboardProps) {
   const router = useRouter();
   const [cart, setCart] = useState<Map<string, number>>(new Map());
