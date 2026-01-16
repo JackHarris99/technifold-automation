@@ -30,16 +30,7 @@ export default async function DistributorPricingPage() {
   const { data: distributorPricing } = await supabase
     .from('distributor_pricing')
     .select('*')
-    .order('tier')
     .order('product_code');
-
-  // Get unique tiers
-  const tiers = [...new Set((distributorPricing || []).map(dp => dp.tier))];
-
-  // Add 'standard' if not present
-  if (!tiers.includes('standard')) {
-    tiers.unshift('standard');
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -62,17 +53,16 @@ export default async function DistributorPricingPage() {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <h3 className="text-sm font-semibold text-blue-900 mb-2">How Distributor Pricing Works</h3>
           <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-            <li>Each distributor company has a <strong>pricing tier</strong> (standard, gold, silver, etc.)</li>
-            <li>Set custom prices per tier below. If no tier price exists, the standard product price is used.</li>
-            <li>You can create new tiers by adding pricing for that tier name.</li>
-            <li>To assign a distributor to a tier, update their company record.</li>
+            <li>Each distributor company has a <strong>pricing tier</strong> (standard or gold)</li>
+            <li>Set custom prices per tier below. If no tier price exists, the base product price is used.</li>
+            <li>Standard tier = regular distributors, Gold tier = premium distributors with better pricing</li>
+            <li>To assign a distributor to a tier, update their company's pricing_tier field.</li>
           </ul>
         </div>
 
         <DistributorPricingClient
           products={products || []}
           distributorPricing={distributorPricing || []}
-          tiers={tiers}
         />
 
         {/* Back Link */}

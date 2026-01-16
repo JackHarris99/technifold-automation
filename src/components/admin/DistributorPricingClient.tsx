@@ -14,8 +14,8 @@ interface Product {
 interface DistributorPricing {
   pricing_id: string;
   product_code: string;
-  tier: string;
-  price: number;
+  standard_price: number | null;
+  gold_price: number | null;
   currency: string;
   active: boolean;
 }
@@ -23,45 +23,35 @@ interface DistributorPricing {
 interface DistributorPricingClientProps {
   products: Product[];
   distributorPricing: DistributorPricing[];
-  tiers: string[];
 }
 
 export default function DistributorPricingClient({
   products,
   distributorPricing,
-  tiers: initialTiers,
 }: DistributorPricingClientProps) {
-  const [selectedTier, setSelectedTier] = useState(initialTiers[0] || 'standard');
-  const [newTierName, setNewTierName] = useState('');
-  const [pricingMap, setPricingMap] = useState<Map<string, DistributorPricing>>(
-    new Map(distributorPricing.map(dp => [`${dp.tier}-${dp.product_code}`, dp]))
-  );
-  const [editingPrices, setEditingPrices] = useState<Map<string, number>>(new Map());
+  // Create map of existing pricing
+  const pricingMap = new Map(distributorPricing.map(dp => [dp.product_code, dp]));
+
+  const [editingPrices, setEditingPrices] = useState<Map<string, { standard?: number; gold?: number }>>(new Map());
   const [saving, setSaving] = useState(false);
-  const [tiers, setTiers] = useState(initialTiers);
 
-  const handleAddTier = () => {
-    const tierName = newTierName.trim().toLowerCase();
-    if (!tierName) {
-      alert('Please enter a tier name');
-      return;
-    }
-    if (tiers.includes(tierName)) {
-      alert('This tier already exists');
-      return;
-    }
-    setTiers([...tiers, tierName]);
-    setSelectedTier(tierName);
-    setNewTierName('');
-  };
+  const handlePriceChange = (productCode: string, tier: 'standard' | 'gold', priceStr: string) => {
+    const priceValue = priceStr === '' ? null : parseFloat(priceStr);
 
-  const handlePriceChange = (productCode: string, price: string) => {
-    const priceValue = parseFloat(price);
-    if (isNaN(priceValue)) {
+    const current = editingPrices.get(productCode) || {};
+
+    if (priceValue === null || isNaN(priceValue)) {
+      delete current[tier];
+    } else {
+      current[tier] = priceValue;
+    }
+
+    if (Object.keys(current).length === 0) {
       editingPrices.delete(productCode);
     } else {
-      editingPrices.set(productCode, priceValue);
+      editingPrices.set(productCode, current);
     }
+
     setEditingPrices(new Map(editingPrices));
   };
 
@@ -74,10 +64,10 @@ export default function DistributorPricingClient({
     setSaving(true);
 
     try {
-      const updates = Array.from(editingPrices.entries()).map(([productCode, price]) => ({
+      const updates = Array.from(editingPrices.entries()).map(([productCode, prices]) => ({
         product_code: productCode,
-        tier: selectedTier,
-        price,
+        standard_price: prices.standard ?? null,
+        gold_price: prices.gold ?? null,
         currency: 'GBP',
         active: true,
       }));
@@ -94,7 +84,7 @@ export default function DistributorPricingClient({
         throw new Error(data.error || 'Failed to save pricing');
       }
 
-      alert(`Successfully saved ${data.updated} price${data.updated !== 1 ? 's' : ''}`);
+      alert(`Successfully saved ${data.updated} product${data.updated !== 1 ? 's' : ''}`);
 
       // Refresh page to get updated data
       window.location.reload();
@@ -106,58 +96,28 @@ export default function DistributorPricingClient({
     }
   };
 
-  const getPrice = (productCode: string): number | null => {
-    const key = `${selectedTier}-${productCode}`;
-    return pricingMap.get(key)?.price || null;
+  const getDisplayPrice = (productCode: string, tier: 'standard' | 'gold'): string => {
+    const editing = editingPrices.get(productCode)?.[tier];
+    if (editing !== undefined) {
+      return editing.toString();
+    }
+
+    const existing = pricingMap.get(productCode);
+    if (!existing) return '';
+
+    const price = tier === 'standard' ? existing.standard_price : existing.gold_price;
+    return price !== null ? price.toString() : '';
   };
 
   const activeProducts = products.filter(p => p.active);
 
   return (
     <>
-      {/* Tier Selection */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Select Pricing Tier</h3>
-
-        <div className="flex items-center gap-4 mb-4">
-          {tiers.map(tier => (
-            <button
-              key={tier}
-              onClick={() => setSelectedTier(tier)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                selectedTier === tier
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {tier}
-            </button>
-          ))}
-        </div>
-
-        {/* Add New Tier */}
-        <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
-          <input
-            type="text"
-            value={newTierName}
-            onChange={(e) => setNewTierName(e.target.value)}
-            placeholder="New tier name (e.g., platinum)"
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-          <button
-            onClick={handleAddTier}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
-          >
-            Add Tier
-          </button>
-        </div>
-      </div>
-
       {/* Pricing Table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6">
         <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900">
-            {selectedTier} Tier Pricing ({activeProducts.length} products)
+            Distributor Pricing ({activeProducts.length} products)
           </h3>
           <button
             onClick={handleSavePrices}
@@ -175,15 +135,19 @@ export default function DistributorPricingClient({
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Product Code</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Description</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Type</th>
-                <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Standard Price</th>
-                <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">{selectedTier} Price</th>
+                <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Base Price</th>
+                <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700 bg-blue-50">
+                  Standard Price
+                </th>
+                <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700 bg-yellow-50">
+                  Gold Price
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {activeProducts.map((product) => {
-                const tierPrice = getPrice(product.product_code);
-                const editingPrice = editingPrices.get(product.product_code);
-                const displayPrice = editingPrice !== undefined ? editingPrice : (tierPrice || '');
+                const standardPrice = getDisplayPrice(product.product_code, 'standard');
+                const goldPrice = getDisplayPrice(product.product_code, 'gold');
 
                 return (
                   <tr key={product.product_code} className="hover:bg-gray-50">
@@ -201,17 +165,31 @@ export default function DistributorPricingClient({
                     <td className="py-3 px-4 text-right text-sm text-gray-600">
                       £{product.price.toFixed(2)}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-4 bg-blue-50">
                       <div className="flex items-center justify-end gap-2">
                         <span className="text-sm text-gray-500">£</span>
                         <input
                           type="number"
                           step="0.01"
                           min="0"
-                          value={displayPrice}
-                          onChange={(e) => handlePriceChange(product.product_code, e.target.value)}
-                          placeholder="Use standard"
-                          className="w-32 px-3 py-1.5 border border-gray-300 rounded text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          value={standardPrice}
+                          onChange={(e) => handlePriceChange(product.product_code, 'standard', e.target.value)}
+                          placeholder="Use base"
+                          className="w-28 px-3 py-1.5 border border-gray-300 rounded text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 bg-yellow-50">
+                      <div className="flex items-center justify-end gap-2">
+                        <span className="text-sm text-gray-500">£</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={goldPrice}
+                          onChange={(e) => handlePriceChange(product.product_code, 'gold', e.target.value)}
+                          placeholder="Use base"
+                          className="w-28 px-3 py-1.5 border border-gray-300 rounded text-right focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                         />
                       </div>
                     </td>
@@ -227,10 +205,10 @@ export default function DistributorPricingClient({
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
         <h4 className="text-sm font-semibold text-gray-900 mb-2">Tips</h4>
         <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
-          <li>Leave a price blank to use the standard product price for that tier</li>
-          <li>Changes are saved individually - you can update multiple prices before saving</li>
-          <li>To remove a tier price, clear the field and save</li>
-          <li>Prices are in GBP (£)</li>
+          <li>Leave a price blank to use the base product price for that tier</li>
+          <li>Standard tier = regular distributors, Gold tier = premium distributors</li>
+          <li>Changes are saved when you click the Save button</li>
+          <li>All prices are in GBP (£)</li>
         </ul>
       </div>
     </>

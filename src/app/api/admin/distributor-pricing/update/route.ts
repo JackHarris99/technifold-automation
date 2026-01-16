@@ -1,6 +1,6 @@
 /**
  * POST /api/admin/distributor-pricing/update
- * Update distributor pricing (upsert)
+ * Update distributor pricing (column-based structure)
  * Directors only
  */
 
@@ -10,8 +10,8 @@ import { isDirector } from '@/lib/auth';
 
 interface PricingUpdate {
   product_code: string;
-  tier: string;
-  price: number;
+  standard_price?: number | null;
+  gold_price?: number | null;
   currency: string;
   active: boolean;
 }
@@ -44,35 +44,18 @@ export async function POST(request: NextRequest) {
 
     for (const item of pricing) {
       try {
-        // If price is 0 or null, delete the tier pricing (fall back to standard)
-        if (!item.price || item.price <= 0) {
-          const { error: deleteError } = await supabase
-            .from('distributor_pricing')
-            .delete()
-            .eq('product_code', item.product_code)
-            .eq('tier', item.tier);
-
-          if (deleteError) {
-            console.error('[distributor-pricing-update] Delete error:', deleteError);
-            errors++;
-          } else {
-            updated++;
-          }
-          continue;
-        }
-
-        // Upsert (insert or update)
+        // Upsert (insert or update) - single row per product with tier columns
         const { error: upsertError } = await supabase
           .from('distributor_pricing')
           .upsert({
             product_code: item.product_code,
-            tier: item.tier,
-            price: item.price,
+            standard_price: item.standard_price ?? null,
+            gold_price: item.gold_price ?? null,
             currency: item.currency || 'GBP',
             active: item.active !== false,
             updated_at: new Date().toISOString(),
           }, {
-            onConflict: 'product_code,tier',
+            onConflict: 'product_code',
           });
 
         if (upsertError) {
@@ -91,7 +74,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Updated ${updated} pricing records`,
+      message: `Updated ${updated} product${updated !== 1 ? 's' : ''}`,
       updated,
       errors,
     });
