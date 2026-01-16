@@ -38,22 +38,44 @@ export default async function DistributorDashboardPage() {
 
   const distributorTier = company?.pricing_tier || 'standard';
 
-  // Fetch ALL products (no limit)
+  // Check if company has custom product catalog
+  const { data: customCatalog } = await supabase
+    .from('company_product_catalog')
+    .select('product_code')
+    .eq('company_id', distributor.company_id)
+    .eq('visible', true);
+
+  const hasCustomCatalog = customCatalog && customCatalog.length > 0;
+
+  // Fetch products based on catalog type
   let allProducts: any[] = [];
   let offset = 0;
   const batchSize = 1000;
   let hasMore = true;
 
   while (hasMore) {
-    const { data: batch } = await supabase
+    let query = supabase
       .from('products')
       .select('product_code, description, price, category, type, currency, image_url')
       .eq('active', true)
-      .not('price', 'is', null)
+      .not('price', 'is', null);
+
+    // If company has custom catalog, filter to only those products
+    if (hasCustomCatalog) {
+      const customProductCodes = customCatalog.map(c => c.product_code);
+      query = query.in('product_code', customProductCodes);
+    } else {
+      // Otherwise, show products marked for distributor portal
+      query = query.eq('show_in_distributor_portal', true);
+    }
+
+    query = query
       .order('type', { ascending: true })
       .order('category', { ascending: true })
       .order('description', { ascending: true })
       .range(offset, offset + batchSize - 1);
+
+    const { data: batch } = await query;
 
     if (!batch || batch.length === 0) {
       hasMore = false;
