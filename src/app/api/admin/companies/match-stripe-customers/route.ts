@@ -82,23 +82,23 @@ export async function GET(request: NextRequest) {
     // Fetch all Stripe customers
     console.log('[match-stripe-customers] Fetching customers from Stripe');
     const stripeCustomers: any[] = [];
-    let hasMore = true;
+    let hasMoreStripeCustomers = true;
     let startingAfter: string | undefined = undefined;
 
-    while (hasMore) {
+    while (hasMoreStripeCustomers) {
       const customers = await stripe.customers.list({
         limit: 100,
         starting_after: startingAfter,
       });
 
       stripeCustomers.push(...customers.data);
-      hasMore = customers.has_more;
-      if (hasMore && customers.data.length > 0) {
+      hasMoreStripeCustomers = customers.has_more;
+      if (hasMoreStripeCustomers && customers.data.length > 0) {
         startingAfter = customers.data[customers.data.length - 1].id;
       }
 
       // Rate limit protection
-      if (hasMore) {
+      if (hasMoreStripeCustomers) {
         await new Promise(resolve => setTimeout(resolve, 100));
       }
     }
