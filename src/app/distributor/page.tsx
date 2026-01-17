@@ -106,6 +106,11 @@ export default async function DistributorDashboardPage() {
     (distributorPricing || []).map(dp => [dp.product_code, dp])
   );
 
+  // Test specific products
+  console.log('[Distributor Portal] Test CP-AP-BF/22-FP pricing:', pricingMap.get('CP-AP-BF/22-FP'));
+  console.log('[Distributor Portal] Test EF-PC/30-Y pricing:', pricingMap.get('EF-PC/30-Y'));
+  console.log('[Distributor Portal] Test PD-NY/SL-25 pricing:', pricingMap.get('PD-NY/SL-25'));
+
   // Apply distributor pricing (use standard_price for all distributors)
   let debugCount = 0;
   const productsWithPricing = allProducts.map(product => {
@@ -114,12 +119,13 @@ export default async function DistributorDashboardPage() {
     // Use distributor standard_price if available, otherwise fallback to product's base price
     const distributorPrice = pricingData?.standard_price ?? null;
 
-    // Debug: Log first 3 products
-    if (debugCount < 3) {
+    // Debug: Log specific problem products
+    if (product.product_code === 'CP-AP-BF/22-FP' || product.product_code === 'EF-PC/30-Y' || debugCount < 3) {
       console.log('[Distributor Portal] Product:', product.product_code,
         'Base:', product.price,
         'Distributor:', distributorPrice,
-        'Final:', distributorPrice ?? product.price);
+        'Final:', distributorPrice ?? product.price,
+        'Has pricing data:', !!pricingData);
       debugCount++;
     }
 
@@ -130,6 +136,8 @@ export default async function DistributorDashboardPage() {
       has_distributor_pricing: !!distributorPrice,
     };
   });
+
+  console.log('[Distributor Portal] Final product count:', productsWithPricing.length);
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
