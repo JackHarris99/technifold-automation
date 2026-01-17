@@ -89,35 +89,32 @@ export default async function DistributorDashboardPage() {
   }
 
   // Fetch all distributor pricing
-  const { data: distributorPricing } = await supabase
+  const { data: distributorPricing, error: pricingError } = await supabase
     .from('distributor_pricing')
-    .select('product_code, standard_price, gold_price, currency')
+    .select('product_code, standard_price, currency')
     .eq('active', true);
+
+  if (pricingError) {
+    console.error('[Distributor Portal] Error fetching distributor pricing:', pricingError);
+  }
 
   // Create pricing map for quick lookup
   const pricingMap = new Map(
     (distributorPricing || []).map(dp => [dp.product_code, dp])
   );
 
-  // Apply distributor pricing based on tier (fallback to standard price if no tier pricing)
+  // Apply distributor pricing (use standard_price for all distributors)
   const productsWithPricing = allProducts.map(product => {
     const pricingData = pricingMap.get(product.product_code);
 
-    // Select price based on company's tier
-    let tierPrice: number | null = null;
-    if (pricingData) {
-      if (distributorTier === 'gold' && pricingData.gold_price) {
-        tierPrice = pricingData.gold_price;
-      } else if (pricingData.standard_price) {
-        tierPrice = pricingData.standard_price;
-      }
-    }
+    // Use distributor standard_price if available, otherwise fallback to product's base price
+    const distributorPrice = pricingData?.standard_price ?? null;
 
     return {
       ...product,
-      price: tierPrice ?? product.price,
+      price: distributorPrice ?? product.price,
       currency: pricingData?.currency ?? product.currency,
-      has_tier_pricing: !!tierPrice,
+      has_distributor_pricing: !!distributorPrice,
     };
   });
 

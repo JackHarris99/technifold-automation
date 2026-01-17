@@ -15,7 +15,6 @@ interface DistributorPricing {
   pricing_id: string;
   product_code: string;
   standard_price: number | null;
-  gold_price: number | null;
   currency: string;
   active: boolean;
 }
@@ -32,24 +31,16 @@ export default function DistributorPricingClient({
   // Create map of existing pricing
   const pricingMap = new Map(distributorPricing.map(dp => [dp.product_code, dp]));
 
-  const [editingPrices, setEditingPrices] = useState<Map<string, { standard?: number; gold?: number }>>(new Map());
+  const [editingPrices, setEditingPrices] = useState<Map<string, number | null>>(new Map());
   const [saving, setSaving] = useState(false);
 
-  const handlePriceChange = (productCode: string, tier: 'standard' | 'gold', priceStr: string) => {
+  const handlePriceChange = (productCode: string, priceStr: string) => {
     const priceValue = priceStr === '' ? null : parseFloat(priceStr);
 
-    const current = editingPrices.get(productCode) || {};
-
     if (priceValue === null || isNaN(priceValue)) {
-      delete current[tier];
-    } else {
-      current[tier] = priceValue;
-    }
-
-    if (Object.keys(current).length === 0) {
       editingPrices.delete(productCode);
     } else {
-      editingPrices.set(productCode, current);
+      editingPrices.set(productCode, priceValue);
     }
 
     setEditingPrices(new Map(editingPrices));
@@ -64,10 +55,9 @@ export default function DistributorPricingClient({
     setSaving(true);
 
     try {
-      const updates = Array.from(editingPrices.entries()).map(([productCode, prices]) => ({
+      const updates = Array.from(editingPrices.entries()).map(([productCode, price]) => ({
         product_code: productCode,
-        standard_price: prices.standard ?? null,
-        gold_price: prices.gold ?? null,
+        standard_price: price,
         currency: 'GBP',
         active: true,
       }));
@@ -96,16 +86,16 @@ export default function DistributorPricingClient({
     }
   };
 
-  const getDisplayPrice = (productCode: string, tier: 'standard' | 'gold'): string => {
-    const editing = editingPrices.get(productCode)?.[tier];
-    if (editing !== undefined) {
+  const getDisplayPrice = (productCode: string): string => {
+    const editing = editingPrices.get(productCode);
+    if (editing !== undefined && editing !== null) {
       return editing.toString();
     }
 
     const existing = pricingMap.get(productCode);
     if (!existing) return '';
 
-    const price = tier === 'standard' ? existing.standard_price : existing.gold_price;
+    const price = existing.standard_price;
     return price !== null ? price.toString() : '';
   };
 
@@ -137,17 +127,13 @@ export default function DistributorPricingClient({
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Type</th>
                 <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Base Price</th>
                 <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700 bg-blue-50">
-                  Standard Price
-                </th>
-                <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700 bg-yellow-50">
-                  Gold Price
+                  Distributor Price
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {activeProducts.map((product) => {
-                const standardPrice = getDisplayPrice(product.product_code, 'standard');
-                const goldPrice = getDisplayPrice(product.product_code, 'gold');
+                const distributorPrice = getDisplayPrice(product.product_code);
 
                 return (
                   <tr key={product.product_code} className="hover:bg-gray-50">
@@ -172,24 +158,10 @@ export default function DistributorPricingClient({
                           type="number"
                           step="0.01"
                           min="0"
-                          value={standardPrice}
-                          onChange={(e) => handlePriceChange(product.product_code, 'standard', e.target.value)}
+                          value={distributorPrice}
+                          onChange={(e) => handlePriceChange(product.product_code, e.target.value)}
                           placeholder="Use base"
                           className="w-28 px-3 py-1.5 border border-gray-300 rounded text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 bg-yellow-50">
-                      <div className="flex items-center justify-end gap-2">
-                        <span className="text-sm text-gray-500">£</span>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={goldPrice}
-                          onChange={(e) => handlePriceChange(product.product_code, 'gold', e.target.value)}
-                          placeholder="Use base"
-                          className="w-28 px-3 py-1.5 border border-gray-300 rounded text-right focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                         />
                       </div>
                     </td>
@@ -205,8 +177,8 @@ export default function DistributorPricingClient({
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
         <h4 className="text-sm font-semibold text-gray-900 mb-2">Tips</h4>
         <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
-          <li>Leave a price blank to use the base product price for that tier</li>
-          <li>Standard tier = regular distributors, Gold tier = premium distributors</li>
+          <li>Leave a price blank to use the base product price</li>
+          <li>These prices apply to all distributors in the portal</li>
           <li>Changes are saved when you click the Save button</li>
           <li>All prices are in GBP (£)</li>
         </ul>

@@ -4,6 +4,8 @@ company_consumables,company_id,companies,company_id
 company_consumables,consumable_code,products,product_code
 company_machine,company_id,companies,company_id
 company_machine,machine_id,machines,machine_id
+company_product_catalog,company_id,companies,company_id
+company_product_catalog,product_code,products,product_code
 company_product_history,company_id,companies,company_id
 company_product_history,product_code,products,product_code
 company_tools,company_id,companies,company_id
@@ -13,6 +15,7 @@ contact_interactions,contact_id,contacts,contact_id
 contacts,company_id,companies,company_id
 customer_pricing_overrides,company_id,companies,company_id
 customer_pricing_overrides,product_code,products,product_code
+distributor_pricing,product_code,products,product_code
 engagement_events,company_id,companies,company_id
 engagement_events,contact_id,contacts,contact_id
 invoice_items,invoice_id,invoices,invoice_id

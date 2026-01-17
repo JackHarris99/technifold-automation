@@ -44,7 +44,7 @@ export default async function InvoiceViewerPage({ params }: InvoiceViewerProps) 
   // 2. Fetch company
   const { data: company } = await supabase
     .from('companies')
-    .select('company_id, company_name, address_line1, address_line2, city, county, postcode, country')
+    .select('company_id, company_name, billing_address_line_1, billing_address_line_2, billing_city, billing_state_province, billing_postal_code, billing_country')
     .eq('company_id', company_id)
     .single();
 
@@ -115,12 +115,12 @@ export default async function InvoiceViewerPage({ params }: InvoiceViewerProps) 
             <h3 className="text-sm font-semibold text-gray-700 mb-2">Bill To:</h3>
             <div className="text-sm text-gray-800">
               <div>{company.company_name}</div>
-              {company.address_line1 && <div>{company.address_line1}</div>}
-              {company.address_line2 && <div>{company.address_line2}</div>}
-              {company.city && <div>{company.city}</div>}
-              {company.county && <div>{company.county}</div>}
-              {company.postcode && <div>{company.postcode}</div>}
-              {company.country && <div>{company.country}</div>}
+              {company.billing_address_line_1 && <div>{company.billing_address_line_1}</div>}
+              {company.billing_address_line_2 && <div>{company.billing_address_line_2}</div>}
+              {company.billing_city && <div>{company.billing_city}</div>}
+              {company.billing_state_province && <div>{company.billing_state_province}</div>}
+              {company.billing_postal_code && <div>{company.billing_postal_code}</div>}
+              {company.billing_country && <div>{company.billing_country}</div>}
             </div>
           </div>
         </div>

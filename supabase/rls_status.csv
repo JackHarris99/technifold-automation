@@ -4,11 +4,13 @@ public,brand_media,DISABLED,NOT_FORCED
 public,companies,DISABLED,NOT_FORCED
 public,company_consumables,DISABLED,NOT_FORCED
 public,company_machine,DISABLED,NOT_FORCED
+public,company_product_catalog,ENABLED,NOT_FORCED
 public,company_product_history,DISABLED,NOT_FORCED
 public,company_tools,DISABLED,NOT_FORCED
 public,contact_interactions,DISABLED,NOT_FORCED
 public,contacts,ENABLED,NOT_FORCED
 public,customer_pricing_overrides,DISABLED,NOT_FORCED
+public,distributor_pricing,ENABLED,NOT_FORCED
 public,engagement_events,ENABLED,NOT_FORCED
 public,invoice_items,DISABLED,NOT_FORCED
 public,invoices,ENABLED,NOT_FORCED

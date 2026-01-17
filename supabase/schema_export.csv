@@ -47,6 +47,7 @@ companies,billing_country,text,YES,null
 companies,status,text,YES,'active'::text
 companies,distributor_email,text,YES,null
 companies,distributor_password,text,YES,null
+companies,pricing_tier,text,YES,'standard'::text
 company_consumables,company_id,text,NO,null
 company_consumables,consumable_code,text,NO,null
 company_consumables,first_ordered_at,date,NO,null
@@ -73,6 +74,13 @@ company_machine,created_at,timestamp with time zone,YES,now()
 company_machine,company_id,text,NO,null
 company_machine,confidence,smallint,YES,1
 company_machine,evidence,jsonb,YES,'{}'::jsonb
+company_product_catalog,catalog_id,uuid,NO,gen_random_uuid()
+company_product_catalog,company_id,text,NO,null
+company_product_catalog,product_code,text,NO,null
+company_product_catalog,visible,boolean,YES,TRUE
+company_product_catalog,display_order,integer,YES,null
+company_product_catalog,created_at,timestamp with time zone,YES,now()
+company_product_catalog,updated_at,timestamp with time zone,YES,now()
 company_product_history,company_id,text,NO,null
 company_product_history,product_code,text,NO,null
 company_product_history,product_type,text,NO,null
@@ -130,6 +138,13 @@ customer_pricing_overrides,active,boolean,YES,TRUE
 customer_pricing_overrides,notes,text,YES,null
 customer_pricing_overrides,created_at,timestamp with time zone,YES,now()
 customer_pricing_overrides,created_by,text,YES,null
+distributor_pricing,pricing_id,uuid,NO,gen_random_uuid()
+distributor_pricing,product_code,text,NO,null
+distributor_pricing,standard_price,numeric,YES,null
+distributor_pricing,currency,text,YES,'GBP'::text
+distributor_pricing,active,boolean,YES,TRUE
+distributor_pricing,created_at,timestamp with time zone,YES,now()
+distributor_pricing,updated_at,timestamp with time zone,YES,now()
 engagement_events,event_id,uuid,NO,gen_random_uuid()
 engagement_events,company_id,text,YES,null
 engagement_events,contact_id,uuid,YES,null
@@ -303,6 +318,7 @@ products,height_cm,numeric,YES,null
 products,depth_cm,numeric,YES,null
 products,cost_price,numeric,YES,null
 products,pricing_tier,text,YES,'standard'::text
+products,show_in_distributor_portal,boolean,YES,TRUE
 quote_items,quote_id,uuid,NO,null
 quote_items,product_code,text,NO,null
 quote_items,line_number,integer,NO,null

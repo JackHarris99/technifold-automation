@@ -78,9 +78,11 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
       event_name: 'offer_view',
       offer_key: offer_key || null,
       campaign_key: campaign_key || null,
-      session_id: sessionId,
       url,
-      meta: Object.keys(utm).length > 0 ? { utm } : {},
+      meta: {
+        session_id: sessionId,
+        ...(Object.keys(utm).length > 0 ? { utm } : {}),
+      },
     });
   } catch (err) {
     console.error('[token-page] Failed to track engagement event:', err);

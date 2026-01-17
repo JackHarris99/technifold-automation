@@ -11,7 +11,6 @@ import { isDirector } from '@/lib/auth';
 interface PricingUpdate {
   product_code: string;
   standard_price?: number | null;
-  gold_price?: number | null;
   currency: string;
   active: boolean;
 }
@@ -44,13 +43,12 @@ export async function POST(request: NextRequest) {
 
     for (const item of pricing) {
       try {
-        // Upsert (insert or update) - single row per product with tier columns
+        // Upsert (insert or update) - single row per product
         const { error: upsertError } = await supabase
           .from('distributor_pricing')
           .upsert({
             product_code: item.product_code,
             standard_price: item.standard_price ?? null,
-            gold_price: item.gold_price ?? null,
             currency: item.currency || 'GBP',
             active: item.active !== false,
             updated_at: new Date().toISOString(),

@@ -5,6 +5,7 @@ companies,company_id
 company_consumables,company_id
 company_consumables,consumable_code
 company_machine,id
+company_product_catalog,catalog_id
 company_product_history,company_id
 company_product_history,product_code
 company_tools,company_id
@@ -12,6 +13,7 @@ company_tools,tool_code
 contact_interactions,id
 contacts,contact_id
 customer_pricing_overrides,override_id
+distributor_pricing,pricing_id
 engagement_events,event_id
 invoice_items,invoice_id
 invoice_items,product_code

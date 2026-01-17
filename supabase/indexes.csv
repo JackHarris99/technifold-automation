@@ -28,6 +28,10 @@ public,company_metrics_view,idx_company_metrics_account_owner,CREATE INDEX idx_c
 public,company_metrics_view,idx_company_metrics_company_name,CREATE INDEX idx_company_metrics_company_name ON public.company_metrics_view USING btree (company_name)
 public,company_metrics_view,idx_company_metrics_lifetime_value,CREATE INDEX idx_company_metrics_lifetime_value ON public.company_metrics_view USING btree (lifetime_value DESC)
 public,company_metrics_view,idx_company_metrics_order_count,CREATE INDEX idx_company_metrics_order_count ON public.company_metrics_view USING btree (order_count DESC)
+public,company_product_catalog,company_product_catalog_company_id_product_code_key,"CREATE UNIQUE INDEX company_product_catalog_company_id_product_code_key ON public.company_product_catalog USING btree (company_id, product_code)"
+public,company_product_catalog,company_product_catalog_pkey,CREATE UNIQUE INDEX company_product_catalog_pkey ON public.company_product_catalog USING btree (catalog_id)
+public,company_product_catalog,idx_company_product_catalog_company,CREATE INDEX idx_company_product_catalog_company ON public.company_product_catalog USING btree (company_id) WHERE (visible = true)
+public,company_product_catalog,idx_company_product_catalog_product,CREATE INDEX idx_company_product_catalog_product ON public.company_product_catalog USING btree (product_code)
 public,company_product_history,company_product_history_pkey,"CREATE UNIQUE INDEX company_product_history_pkey ON public.company_product_history USING btree (company_id, product_code)"
 public,company_product_history,idx_company_product_history_company,CREATE INDEX idx_company_product_history_company ON public.company_product_history USING btree (company_id)
 public,company_product_history,idx_company_product_history_last_purchase,CREATE INDEX idx_company_product_history_last_purchase ON public.company_product_history USING btree (last_purchased_at)
@@ -50,6 +54,9 @@ public,customer_pricing_overrides,customer_pricing_overrides_pkey,CREATE UNIQUE 
 public,customer_pricing_overrides,idx_customer_overrides_company,CREATE INDEX idx_customer_overrides_company ON public.customer_pricing_overrides USING btree (company_id) WHERE (active = true)
 public,customer_pricing_overrides,idx_customer_overrides_product,CREATE INDEX idx_customer_overrides_product ON public.customer_pricing_overrides USING btree (product_code) WHERE (active = true)
 public,customer_pricing_overrides,idx_customer_overrides_validity,"CREATE INDEX idx_customer_overrides_validity ON public.customer_pricing_overrides USING btree (valid_from, valid_until) WHERE (active = true)"
+public,distributor_pricing,distributor_pricing_pkey,CREATE UNIQUE INDEX distributor_pricing_pkey ON public.distributor_pricing USING btree (pricing_id)
+public,distributor_pricing,distributor_pricing_product_code_key,CREATE UNIQUE INDEX distributor_pricing_product_code_key ON public.distributor_pricing USING btree (product_code)
+public,distributor_pricing,idx_distributor_pricing_active,CREATE INDEX idx_distributor_pricing_active ON public.distributor_pricing USING btree (product_code) WHERE (active = true)
 public,engagement_events,engagement_events_pkey,CREATE UNIQUE INDEX engagement_events_pkey ON public.engagement_events USING btree (event_id)
 public,engagement_events,idx_engagement_events_company_time,"CREATE INDEX idx_engagement_events_company_time ON public.engagement_events USING btree (company_id, occurred_at)"
 public,engagement_events,idx_engagement_events_contact_time,"CREATE INDEX idx_engagement_events_contact_time ON public.engagement_events USING btree (contact_id, occurred_at)"
@@ -92,6 +99,7 @@ public,outbox,idx_outbox_pick,"CREATE INDEX idx_outbox_pick ON public.outbox USI
 public,outbox,outbox_pkey,CREATE UNIQUE INDEX outbox_pkey ON public.outbox USING btree (job_id)
 public,premium_pricing_ladder,premium_pricing_ladder_pkey,CREATE UNIQUE INDEX premium_pricing_ladder_pkey ON public.premium_pricing_ladder USING btree (tier_id)
 public,premium_pricing_ladder,unique_qty_range_premium,"CREATE UNIQUE INDEX unique_qty_range_premium ON public.premium_pricing_ladder USING btree (min_qty, max_qty)"
+public,products,idx_products_distributor_portal,CREATE INDEX idx_products_distributor_portal ON public.products USING btree (product_code) WHERE ((show_in_distributor_portal = true) AND (active = true))
 public,products,idx_products_hs_code,CREATE INDEX idx_products_hs_code ON public.products USING btree (hs_code)
 public,products,idx_products_origin,CREATE INDEX idx_products_origin ON public.products USING btree (country_of_origin)
 public,products,products_pkey,CREATE UNIQUE INDEX products_pkey ON public.products USING btree (product_code)
