@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
 
       try {
         await resend.emails.send({
-          from: 'Technifold <noreply@technifold.com>',
+          from: 'Technifold Distributor Team <distributors@technifold.com>',
           to: user.email,
           subject: 'Welcome to Technifold Online Ordering Portal',
           html: `
