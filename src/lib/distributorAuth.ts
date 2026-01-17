@@ -10,10 +10,13 @@ const JWT_SECRET = new TextEncoder().encode(
 );
 
 interface DistributorPayload {
+  user_id: string;
   company_id: string;
   company_name: string;
-  type: string;
-  account_owner: string;
+  email: string;
+  full_name: string;
+  role: string; // 'admin', 'user', 'viewer'
+  type: string; // 'distributor'
 }
 
 export async function getCurrentDistributor(): Promise<DistributorPayload | null> {

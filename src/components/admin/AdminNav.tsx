@@ -143,6 +143,16 @@ export default function AdminNav() {
           >
             All Companies
           </Link>
+          <Link
+            href="/admin/distributors"
+            className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+              pathname === '/admin/distributors'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            Distributor Users
+          </Link>
         </div>
 
         {/* Quotes */}

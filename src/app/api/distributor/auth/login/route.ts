@@ -26,44 +26,38 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
-    // Look up distributor company by email
-    // Distributors should have type='distributor'
-    const { data: company, error: companyError } = await supabase
-      .from('companies')
-      .select('company_id, company_name, type, account_owner, distributor_email, distributor_password')
-      .eq('distributor_email', email)
-      .eq('type', 'distributor')
+    // Look up distributor user by email
+    const { data: user, error: userError } = await supabase
+      .from('distributor_users')
+      .select('*, companies(company_name)')
+      .eq('email', email)
       .single();
 
-    if (companyError || !company) {
+    if (userError || !user) {
       return NextResponse.json(
         { error: 'Invalid email or password' },
         { status: 401 }
       );
     }
 
-    // Verify password (supports both hashed and plaintext during migration)
-    let passwordValid = false;
-
-    // Check if password is already hashed (bcrypt hashes start with $2a$ or $2b$)
-    if (company.distributor_password && company.distributor_password.startsWith('$2')) {
-      // Verify hashed password
-      passwordValid = await bcrypt.compare(password, company.distributor_password);
-    } else {
-      // Legacy plaintext comparison - should be migrated to hashed
-      passwordValid = company.distributor_password === password;
-
-      // Auto-upgrade to hashed password on successful login
-      if (passwordValid) {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        await supabase
-          .from('companies')
-          .update({ distributor_password: hashedPassword })
-          .eq('company_id', company.company_id);
-
-        console.log(`[Distributor Login] Auto-upgraded password hash for ${company.company_name}`);
-      }
+    // Check if user is active
+    if (!user.active) {
+      return NextResponse.json(
+        { error: 'Your account has been deactivated. Please contact support.' },
+        { status: 401 }
+      );
     }
+
+    // Check if user has set password
+    if (!user.password_hash) {
+      return NextResponse.json(
+        { error: 'Please set your password using the invitation link sent to your email.' },
+        { status: 401 }
+      );
+    }
+
+    // Verify password
+    const passwordValid = await bcrypt.compare(password, user.password_hash);
 
     if (!passwordValid) {
       return NextResponse.json(
@@ -72,12 +66,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Update last login timestamp
+    await supabase
+      .from('distributor_users')
+      .update({ last_login_at: new Date().toISOString() })
+      .eq('user_id', user.user_id);
+
     // Create JWT token
     const token = await new SignJWT({
-      company_id: company.company_id,
-      company_name: company.company_name,
+      user_id: user.user_id,
+      company_id: user.company_id,
+      company_name: user.companies?.company_name || 'Unknown Company',
+      email: user.email,
+      full_name: user.full_name,
+      role: user.role,
       type: 'distributor',
-      account_owner: company.account_owner,
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setExpirationTime('7d')
@@ -96,9 +99,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      distributor: {
-        company_id: company.company_id,
-        company_name: company.company_name,
+      user: {
+        user_id: user.user_id,
+        company_id: user.company_id,
+        company_name: user.companies?.company_name || 'Unknown Company',
+        email: user.email,
+        full_name: user.full_name,
+        role: user.role,
       },
     });
   } catch (error) {

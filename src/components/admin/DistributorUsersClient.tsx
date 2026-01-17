@@ -1,0 +1,335 @@
+'use client';
+
+import { useState } from 'react';
+
+interface Company {
+  company_id: string;
+  company_name: string;
+  type: string;
+}
+
+interface DistributorUser {
+  user_id: string;
+  company_id: string;
+  email: string;
+  full_name: string;
+  role: string;
+  active: boolean;
+  password_hash: string | null;
+  invitation_token: string | null;
+  invitation_expires_at: string | null;
+  last_login_at: string | null;
+  created_at: string;
+}
+
+interface DistributorUsersClientProps {
+  companies: Company[];
+  users: DistributorUser[];
+}
+
+export default function DistributorUsersClient({ companies, users }: DistributorUsersClientProps) {
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newUser, setNewUser] = useState({ full_name: '', email: '', role: 'user' });
+  const [submitting, setSubmitting] = useState(false);
+
+  const selectedCompany = companies.find(c => c.company_id === selectedCompanyId);
+  const companyUsers = users.filter(u => u.company_id === selectedCompanyId);
+
+  const handleAddUser = async () => {
+    if (!selectedCompanyId || !newUser.full_name || !newUser.email) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const response = await fetch('/api/admin/distributor-users/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company_id: selectedCompanyId,
+          full_name: newUser.full_name,
+          email: newUser.email,
+          role: newUser.role,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create user');
+      }
+
+      alert(`User created! Invitation email sent to ${newUser.email}`);
+      setShowAddModal(false);
+      setNewUser({ full_name: '', email: '', role: 'user' });
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Error creating user:', error);
+      alert(`Failed to create user: ${error.message}`);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleResendInvitation = async (userId: string, email: string) => {
+    if (!confirm(`Resend invitation email to ${email}?`)) return;
+
+    try {
+      const response = await fetch('/api/admin/distributor-users/resend-invitation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to resend invitation');
+      }
+
+      alert(`Invitation email sent to ${email}`);
+    } catch (error: any) {
+      alert(`Failed to resend invitation: ${error.message}`);
+    }
+  };
+
+  const handleToggleActive = async (userId: string, currentActive: boolean) => {
+    const action = currentActive ? 'deactivate' : 'activate';
+    if (!confirm(`Are you sure you want to ${action} this user?`)) return;
+
+    try {
+      const response = await fetch('/api/admin/distributor-users/toggle-active', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, active: !currentActive }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update user');
+      }
+
+      alert(`User ${action}d successfully`);
+      window.location.reload();
+    } catch (error: any) {
+      alert(`Failed to ${action} user: ${error.message}`);
+    }
+  };
+
+  return (
+    <>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Companies List */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="px-5 py-4 border-b border-gray-200 bg-gray-50">
+            <h3 className="font-bold text-gray-900">Distributor Companies ({companies.length})</h3>
+          </div>
+          <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
+            {companies.map((company) => {
+              const companyUserCount = users.filter(u => u.company_id === company.company_id).length;
+              const isSelected = selectedCompanyId === company.company_id;
+
+              return (
+                <button
+                  key={company.company_id}
+                  onClick={() => setSelectedCompanyId(company.company_id)}
+                  className={`w-full text-left px-5 py-3 hover:bg-gray-50 transition-colors ${
+                    isSelected ? 'bg-blue-50 border-l-4 border-blue-600' : ''
+                  }`}
+                >
+                  <div className="font-semibold text-gray-900">{company.company_name}</div>
+                  <div className="text-sm text-gray-700 mt-1">
+                    {companyUserCount} user{companyUserCount !== 1 ? 's' : ''}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Users List */}
+        <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="px-5 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+            <h3 className="font-bold text-gray-900">
+              {selectedCompany ? `${selectedCompany.company_name} - Users` : 'Select a Company'}
+            </h3>
+            {selectedCompany && (
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
+              >
+                + Add User
+              </button>
+            )}
+          </div>
+
+          {!selectedCompany && (
+            <div className="p-12 text-center text-gray-700">
+              <p>Select a distributor company to view and manage users</p>
+            </div>
+          )}
+
+          {selectedCompany && companyUsers.length === 0 && (
+            <div className="p-12 text-center">
+              <p className="text-gray-700 mb-4">No users yet for this company</p>
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
+              >
+                Add First User
+              </button>
+            </div>
+          )}
+
+          {selectedCompany && companyUsers.length > 0 && (
+            <div className="divide-y divide-gray-100">
+              {companyUsers.map((user) => {
+                const hasPassword = !!user.password_hash;
+                const invitationExpired = user.invitation_expires_at
+                  ? new Date(user.invitation_expires_at) < new Date()
+                  : false;
+
+                return (
+                  <div key={user.user_id} className="p-5 hover:bg-gray-50">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <h4 className="font-semibold text-gray-900">{user.full_name}</h4>
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                            user.role === 'admin' ? 'bg-purple-100 text-purple-700' :
+                            user.role === 'user' ? 'bg-blue-100 text-blue-700' :
+                            'bg-gray-100 text-gray-700'
+                          }`}>
+                            {user.role}
+                          </span>
+                          {!user.active && (
+                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
+                              Inactive
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-700 mt-1">{user.email}</p>
+                        <div className="flex items-center gap-4 mt-2 text-xs text-gray-600">
+                          <span>
+                            {hasPassword ? '✅ Password set' : '⏳ Pending invitation'}
+                          </span>
+                          {user.last_login_at && (
+                            <span>
+                              Last login: {new Date(user.last_login_at).toLocaleDateString()}
+                            </span>
+                          )}
+                          <span>
+                            Added: {new Date(user.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 ml-4">
+                        {!hasPassword && (
+                          <button
+                            onClick={() => handleResendInvitation(user.user_id, user.email)}
+                            className="px-3 py-1.5 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 font-medium"
+                          >
+                            Resend Invitation
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleToggleActive(user.user_id, user.active)}
+                          className={`px-3 py-1.5 text-sm rounded font-medium ${
+                            user.active
+                              ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                              : 'bg-green-100 text-green-700 hover:bg-green-200'
+                          }`}
+                        >
+                          {user.active ? 'Deactivate' : 'Activate'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Add User Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">
+              Add User to {selectedCompany?.company_name}
+            </h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  value={newUser.full_name}
+                  onChange={(e) => setNewUser({ ...newUser, full_name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="John Smith"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={newUser.email}
+                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="john@company.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Role
+                </label>
+                <select
+                  value={newUser.role}
+                  onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="admin">Admin (can manage users + order)</option>
+                  <option value="user">User (can order)</option>
+                  <option value="viewer">Viewer (read only)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowAddModal(false);
+                  setNewUser({ full_name: '', email: '', role: 'user' });
+                }}
+                disabled={submitting}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddUser}
+                disabled={submitting}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50"
+              >
+                {submitting ? 'Creating...' : 'Create & Send Invitation'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

@@ -151,14 +151,24 @@ export default async function DistributorDashboardPage() {
                 Distributor Portal
               </p>
             </div>
-            <form action="/api/distributor/auth/logout" method="POST">
-              <button
-                type="submit"
-                className="px-4 py-2 text-[13px] font-[600] text-[#475569] hover:text-[#1e40af] transition-colors"
-              >
-                Sign Out
-              </button>
-            </form>
+            <div className="flex items-center gap-4">
+              {distributor.role === 'admin' && (
+                <a
+                  href="/distributor/users"
+                  className="px-4 py-2 text-[13px] font-[600] text-[#475569] hover:text-[#1e40af] transition-colors"
+                >
+                  Manage Team
+                </a>
+              )}
+              <form action="/api/distributor/auth/logout" method="POST">
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-[13px] font-[600] text-[#475569] hover:text-[#1e40af] transition-colors"
+                >
+                  Sign Out
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </div>
