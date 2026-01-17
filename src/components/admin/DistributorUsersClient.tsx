@@ -25,7 +25,7 @@ interface DistributorUser {
 interface Contact {
   contact_id: string;
   company_id: string;
-  name: string;
+  full_name: string;
   email: string;
   role: string | null;
 }
@@ -137,7 +137,7 @@ export default function DistributorUsersClient({ companies, users, contacts }: D
   };
 
   const handleCreateFromContact = async (contact: Contact, role: string) => {
-    if (!confirm(`Create portal user for ${contact.name} (${contact.email}) with role: ${role}?`)) return;
+    if (!confirm(`Create portal user for ${contact.full_name} (${contact.email}) with role: ${role}?`)) return;
 
     setSubmitting(true);
 
@@ -147,7 +147,7 @@ export default function DistributorUsersClient({ companies, users, contacts }: D
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           company_id: contact.company_id,
-          full_name: contact.name,
+          full_name: contact.full_name,
           email: contact.email,
           role: role,
         }),
@@ -419,7 +419,7 @@ export default function DistributorUsersClient({ companies, users, contacts }: D
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900">{contact.name}</h4>
+                          <h4 className="font-semibold text-gray-900">{contact.full_name}</h4>
                           <p className="text-sm text-gray-700 mt-1">{contact.email}</p>
                           {contact.role && (
                             <p className="text-xs text-gray-600 mt-1">
