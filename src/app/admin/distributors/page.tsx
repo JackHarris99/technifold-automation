@@ -31,6 +31,13 @@ export default async function DistributorsPage() {
     .select('*')
     .order('company_id, created_at');
 
+  // Fetch all contacts for distributor companies
+  const { data: contacts } = await supabase
+    .from('contacts')
+    .select('contact_id, company_id, name, email, role')
+    .in('company_id', (companies || []).map(c => c.company_id))
+    .order('company_id, name');
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -63,6 +70,7 @@ export default async function DistributorsPage() {
         <DistributorUsersClient
           companies={companies || []}
           users={users || []}
+          contacts={contacts || []}
         />
 
         {/* Back Link */}

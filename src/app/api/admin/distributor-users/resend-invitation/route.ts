@@ -64,16 +64,47 @@ export async function POST(request: NextRequest) {
         await resend.emails.send({
           from: 'Technifold <noreply@technifold.com>',
           to: user.email,
-          subject: 'Invitation to Technifold Distributor Portal',
+          subject: 'Welcome to Technifold Online Ordering Portal',
           html: `
-            <h2>Welcome to Technifold Distributor Portal</h2>
-            <p>Hi ${user.full_name},</p>
-            <p>You've been invited to access the distributor portal for <strong>${user.companies?.company_name}</strong>.</p>
-            <p>Click the link below to set your password and get started:</p>
-            <p><a href="${invitationUrl}" style="display: inline-block; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">Accept Invitation</a></p>
-            <p>Or copy this link: ${invitationUrl}</p>
-            <p>This invitation expires in 7 days.</p>
-            <p>Best regards,<br>Technifold Team</p>
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h1 style="color: #1e40af; border-bottom: 3px solid #1e40af; padding-bottom: 10px;">Welcome to Technifold</h1>
+
+              <p style="font-size: 16px;">Hi ${user.full_name},</p>
+
+              <p style="font-size: 16px;">Great news! We've upgraded our ordering system and you now have access to the <strong>Technifold Online Ordering Portal</strong>.</p>
+
+              <div style="background-color: #f0f7ff; border-left: 4px solid #2563eb; padding: 15px; margin: 20px 0;">
+                <h3 style="margin-top: 0; color: #1e40af;">What This Means for You:</h3>
+                <ul style="margin-bottom: 0;">
+                  <li><strong>24/7 Ordering</strong> - Place orders anytime, anywhere</li>
+                  <li><strong>Instant Pricing</strong> - See your distributor pricing in real-time</li>
+                  <li><strong>Order History</strong> - View all your past invoices and orders</li>
+                  <li><strong>Faster Processing</strong> - Orders go directly into our system</li>
+                </ul>
+              </div>
+
+              <p style="font-size: 16px;"><strong>This is now the primary way to place orders with Technifold.</strong></p>
+
+              <h3 style="color: #1e40af;">Get Started in 2 Easy Steps:</h3>
+              <ol style="font-size: 16px;">
+                <li>Click the button below to set your password</li>
+                <li>Start browsing and ordering!</li>
+              </ol>
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${invitationUrl}" style="display: inline-block; padding: 15px 30px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Set Up My Account</a>
+              </div>
+
+              <p style="font-size: 14px; color: #666;">Or copy this link: <a href="${invitationUrl}" style="color: #2563eb;">${invitationUrl}</a></p>
+
+              <p style="font-size: 14px; color: #666; font-style: italic;">This invitation link expires in 7 days.</p>
+
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+
+              <p style="font-size: 14px;">Need help? Reply to this email or contact us at support@technifold.com</p>
+
+              <p style="font-size: 14px;">Best regards,<br><strong>The Technifold Team</strong></p>
+            </div>
           `,
         });
 

@@ -22,19 +22,35 @@ interface DistributorUser {
   created_at: string;
 }
 
+interface Contact {
+  contact_id: string;
+  company_id: string;
+  name: string;
+  email: string;
+  role: string | null;
+}
+
 interface DistributorUsersClientProps {
   companies: Company[];
   users: DistributorUser[];
+  contacts: Contact[];
 }
 
-export default function DistributorUsersClient({ companies, users }: DistributorUsersClientProps) {
+export default function DistributorUsersClient({ companies, users, contacts }: DistributorUsersClientProps) {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showContactsModal, setShowContactsModal] = useState(false);
   const [newUser, setNewUser] = useState({ full_name: '', email: '', role: 'user' });
   const [submitting, setSubmitting] = useState(false);
 
   const selectedCompany = companies.find(c => c.company_id === selectedCompanyId);
   const companyUsers = users.filter(u => u.company_id === selectedCompanyId);
+  const companyContacts = contacts.filter(c => c.company_id === selectedCompanyId);
+
+  // Find contacts that don't have portal users yet
+  const availableContacts = companyContacts.filter(contact =>
+    !companyUsers.some(user => user.email.toLowerCase() === contact.email.toLowerCase())
+  );
 
   const handleAddUser = async () => {
     if (!selectedCompanyId || !newUser.full_name || !newUser.email) {
@@ -120,6 +136,40 @@ export default function DistributorUsersClient({ companies, users }: Distributor
     }
   };
 
+  const handleCreateFromContact = async (contact: Contact, role: string) => {
+    if (!confirm(`Create portal user for ${contact.name} (${contact.email}) with role: ${role}?`)) return;
+
+    setSubmitting(true);
+
+    try {
+      const response = await fetch('/api/admin/distributor-users/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company_id: contact.company_id,
+          full_name: contact.name,
+          email: contact.email,
+          role: role,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create user');
+      }
+
+      alert(`Portal user created! Welcome email sent to ${contact.email}`);
+      setShowContactsModal(false);
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Error creating user:', error);
+      alert(`Failed to create user: ${error.message}`);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -158,12 +208,20 @@ export default function DistributorUsersClient({ companies, users }: Distributor
               {selectedCompany ? `${selectedCompany.company_name} - Users` : 'Select a Company'}
             </h3>
             {selectedCompany && (
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
-              >
-                + Add User
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowContactsModal(true)}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium text-sm"
+                >
+                  + From Contacts {availableContacts.length > 0 && `(${availableContacts.length})`}
+                </button>
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
+                >
+                  + Manual Entry
+                </button>
+              </div>
             )}
           </div>
 
@@ -325,6 +383,87 @@ export default function DistributorUsersClient({ companies, users }: Distributor
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50"
               >
                 {submitting ? 'Creating...' : 'Create & Send Invitation'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create from Contacts Modal */}
+      {showContactsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+              <h3 className="text-xl font-bold text-gray-900">
+                Create Portal Users from Contacts
+              </h3>
+              <p className="text-sm text-gray-700 mt-1">
+                {selectedCompany?.company_name}
+              </p>
+            </div>
+
+            <div className="overflow-y-auto max-h-[calc(80vh-180px)] p-6">
+              {availableContacts.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-gray-700 mb-2">No available contacts</p>
+                  <p className="text-sm text-gray-600">
+                    All contacts for this company already have portal users.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {availableContacts.map((contact) => (
+                    <div
+                      key={contact.contact_id}
+                      className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900">{contact.name}</h4>
+                          <p className="text-sm text-gray-700 mt-1">{contact.email}</p>
+                          {contact.role && (
+                            <p className="text-xs text-gray-600 mt-1">
+                              Contact Role: {contact.role}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-2 ml-4">
+                          <button
+                            onClick={() => handleCreateFromContact(contact, 'admin')}
+                            disabled={submitting}
+                            className="px-3 py-1.5 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 font-medium disabled:opacity-50 whitespace-nowrap"
+                          >
+                            Create as Admin
+                          </button>
+                          <button
+                            onClick={() => handleCreateFromContact(contact, 'user')}
+                            disabled={submitting}
+                            className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 font-medium disabled:opacity-50 whitespace-nowrap"
+                          >
+                            Create as User
+                          </button>
+                          <button
+                            onClick={() => handleCreateFromContact(contact, 'viewer')}
+                            disabled={submitting}
+                            className="px-3 py-1.5 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 font-medium disabled:opacity-50 whitespace-nowrap"
+                          >
+                            Create as Viewer
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+              <button
+                onClick={() => setShowContactsModal(false)}
+                disabled={submitting}
+                className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium disabled:opacity-50"
+              >
+                Close
               </button>
             </div>
           </div>
