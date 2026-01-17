@@ -88,22 +88,41 @@ export default async function DistributorDashboardPage() {
     }
   }
 
-  // Fetch all distributor pricing
-  const { data: distributorPricing, error: pricingError } = await supabase
-    .from('distributor_pricing')
-    .select('product_code, standard_price, currency')
-    .eq('active', true);
+  // Fetch ALL distributor pricing (with pagination to avoid 1000 row limit)
+  let allPricing: any[] = [];
+  let pricingOffset = 0;
+  const pricingBatchSize = 1000;
+  let hasMorePricing = true;
 
-  if (pricingError) {
-    console.error('[Distributor Portal] Error fetching distributor pricing:', pricingError);
+  while (hasMorePricing) {
+    const { data: pricingBatch, error: pricingError } = await supabase
+      .from('distributor_pricing')
+      .select('product_code, standard_price, currency')
+      .eq('active', true)
+      .range(pricingOffset, pricingOffset + pricingBatchSize - 1);
+
+    if (pricingError) {
+      console.error('[Distributor Portal] Error fetching distributor pricing:', pricingError);
+      break;
+    }
+
+    if (!pricingBatch || pricingBatch.length === 0) {
+      hasMorePricing = false;
+    } else {
+      allPricing = [...allPricing, ...pricingBatch];
+      if (pricingBatch.length < pricingBatchSize) {
+        hasMorePricing = false;
+      }
+      pricingOffset += pricingBatchSize;
+    }
   }
 
-  console.log('[Distributor Portal] Fetched pricing entries:', distributorPricing?.length || 0);
+  console.log('[Distributor Portal] Fetched pricing entries:', allPricing.length);
   console.log('[Distributor Portal] Total products to price:', allProducts.length);
 
   // Create pricing map for quick lookup
   const pricingMap = new Map(
-    (distributorPricing || []).map(dp => [dp.product_code, dp])
+    allPricing.map(dp => [dp.product_code, dp])
   );
 
   // Test specific products
