@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
 
     // 3. Link machine to company (if not already linked)
     const { data: existingLink } = await supabase
-      .from('company_machines')
+      .from('company_machine')
       .select('id')
       .eq('company_id', company_id)
       .eq('machine_id', machine_id)
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
 
     if (!existingLink) {
       const { error: linkError } = await supabase
-        .from('company_machines')
+        .from('company_machine')
         .insert({
           company_id,
           machine_id,
