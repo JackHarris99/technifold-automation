@@ -67,10 +67,33 @@ export async function POST(request: NextRequest) {
     }
 
     // Update last login timestamp
+    const loginTime = new Date().toISOString();
     await supabase
       .from('distributor_users')
-      .update({ last_login_at: new Date().toISOString() })
+      .update({ last_login_at: loginTime })
       .eq('user_id', user.user_id);
+
+    // Log distributor login event
+    try {
+      await supabase
+        .from('engagement_events')
+        .insert({
+          company_id: user.company_id,
+          occurred_at: loginTime,
+          event_type: 'distributor_activity',
+          event_name: 'distributor_portal_login',
+          source: 'distributor_portal',
+          meta: {
+            user_id: user.user_id,
+            user_name: user.full_name,
+            user_email: user.email,
+            user_role: user.role,
+          },
+        });
+    } catch (eventError) {
+      console.error('[Distributor Login] Failed to log event:', eventError);
+      // Don't fail login if event logging fails
+    }
 
     // Create JWT token
     const token = await new SignJWT({

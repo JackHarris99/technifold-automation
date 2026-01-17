@@ -34,6 +34,7 @@ export default async function CompaniesPage() {
       .from('companies')
       .select('company_id, company_name, account_owner, category, country, last_invoice_at')
       .neq('status', 'dead')  // Exclude dead customers
+      .neq('type', 'distributor')  // Exclude distributors (they have their own page)
       .order('company_name')
       .range(start, start + batchSize - 1);
 

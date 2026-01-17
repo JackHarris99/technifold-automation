@@ -485,6 +485,16 @@ export default async function SalesCenterPage() {
               </div>
               <div className="p-4 space-y-3">
                 <Link
+                  href="/admin/distributor-sales"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 border-2 border-purple-200 hover:bg-purple-100 transition-colors"
+                >
+                  <span className="text-2xl">📦</span>
+                  <div>
+                    <h4 className="font-semibold text-purple-900">Distributor Sales</h4>
+                    <p className="text-sm text-purple-700">View wholesale orders (separate from retail)</p>
+                  </div>
+                </Link>
+                <Link
                   href="/admin/sales/companies"
                   className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
                 >

@@ -139,6 +139,31 @@ export default async function DistributorDashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
+      {/* Admin Preview Mode Banner */}
+      {(distributor as any).preview_mode && (
+        <div className="bg-red-600 text-white py-3 px-8">
+          <div className="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">👁</span>
+              <div>
+                <div className="font-bold text-sm">ADMIN PREVIEW MODE</div>
+                <div className="text-xs opacity-90">
+                  Viewing as: {distributor.full_name} ({distributor.company_name})
+                </div>
+              </div>
+            </div>
+            <form action="/api/admin/distributor-users/exit-preview" method="POST">
+              <button
+                type="submit"
+                className="px-4 py-2 bg-white text-red-600 rounded-lg font-bold text-sm hover:bg-red-50 transition-colors"
+              >
+                Exit Preview
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white border-b border-[#e8e8e8] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         <div className="max-w-[1600px] mx-auto px-8 py-8">

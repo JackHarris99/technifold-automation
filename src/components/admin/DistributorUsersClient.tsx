@@ -40,7 +40,15 @@ export default function DistributorUsersClient({ companies, users, contacts }: D
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showContactsModal, setShowContactsModal] = useState(false);
+  const [showAddDistributorModal, setShowAddDistributorModal] = useState(false);
   const [newUser, setNewUser] = useState({ full_name: '', email: '', role: 'user' });
+  const [newDistributor, setNewDistributor] = useState({
+    company_name: '',
+    country: '',
+    account_owner: '',
+    contact_name: '',
+    contact_email: '',
+  });
   const [submitting, setSubmitting] = useState(false);
 
   const selectedCompany = companies.find(c => c.company_id === selectedCompanyId);
@@ -136,6 +144,29 @@ export default function DistributorUsersClient({ companies, users, contacts }: D
     }
   };
 
+  const handleLoginAs = async (userId: string, userName: string) => {
+    if (!confirm(`Preview portal as ${userName}?`)) return;
+
+    try {
+      const response = await fetch('/api/admin/distributor-users/login-as', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create preview session');
+      }
+
+      // Redirect to distributor portal
+      window.location.href = data.redirect;
+    } catch (error: any) {
+      alert(`Failed to login as user: ${error.message}`);
+    }
+  };
+
   const handleCreateFromContact = async (contact: Contact, role: string) => {
     if (!confirm(`Create portal user for ${contact.full_name} (${contact.email}) with role: ${role}?`)) return;
 
@@ -170,13 +201,59 @@ export default function DistributorUsersClient({ companies, users, contacts }: D
     }
   };
 
+  const handleAddDistributor = async () => {
+    if (!newDistributor.company_name) {
+      alert('Company name is required');
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const response = await fetch('/api/admin/distributors/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newDistributor),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create distributor');
+      }
+
+      alert(`Distributor "${newDistributor.company_name}" created successfully!`);
+      setShowAddDistributorModal(false);
+      setNewDistributor({
+        company_name: '',
+        country: '',
+        account_owner: '',
+        contact_name: '',
+        contact_email: '',
+      });
+
+      // Redirect to the new distributor's detail page
+      window.location.href = `/admin/distributor-company/${data.company_id}`;
+    } catch (error: any) {
+      console.error('Error creating distributor:', error);
+      alert(`Failed to create distributor: ${error.message}`);
+      setSubmitting(false);
+    }
+  };
+
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Companies List */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="px-5 py-4 border-b border-gray-200 bg-gray-50">
+          <div className="px-5 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
             <h3 className="font-bold text-gray-900">Distributor Companies ({companies.length})</h3>
+            <button
+              onClick={() => setShowAddDistributorModal(true)}
+              className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium text-sm"
+            >
+              + Add Distributor
+            </button>
           </div>
           <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
             {companies.map((company) => {
@@ -184,18 +261,26 @@ export default function DistributorUsersClient({ companies, users, contacts }: D
               const isSelected = selectedCompanyId === company.company_id;
 
               return (
-                <button
-                  key={company.company_id}
-                  onClick={() => setSelectedCompanyId(company.company_id)}
-                  className={`w-full text-left px-5 py-3 hover:bg-gray-50 transition-colors ${
-                    isSelected ? 'bg-blue-50 border-l-4 border-blue-600' : ''
-                  }`}
-                >
-                  <div className="font-semibold text-gray-900">{company.company_name}</div>
-                  <div className="text-sm text-gray-700 mt-1">
-                    {companyUserCount} user{companyUserCount !== 1 ? 's' : ''}
-                  </div>
-                </button>
+                <div key={company.company_id} className="relative">
+                  <button
+                    onClick={() => setSelectedCompanyId(company.company_id)}
+                    className={`w-full text-left px-5 py-3 hover:bg-gray-50 transition-colors ${
+                      isSelected ? 'bg-blue-50 border-l-4 border-blue-600' : ''
+                    }`}
+                  >
+                    <div className="font-semibold text-gray-900">{company.company_name}</div>
+                    <div className="text-sm text-gray-700 mt-1">
+                      {companyUserCount} user{companyUserCount !== 1 ? 's' : ''}
+                    </div>
+                  </button>
+                  <a
+                    href={`/admin/distributor-company/${company.company_id}`}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded"
+                    title="View details"
+                  >
+                    →
+                  </a>
+                </div>
               );
             })}
           </div>
@@ -287,6 +372,14 @@ export default function DistributorUsersClient({ companies, users, contacts }: D
                       </div>
 
                       <div className="flex items-center gap-2 ml-4">
+                        {hasPassword && user.active && (
+                          <button
+                            onClick={() => handleLoginAs(user.user_id, user.full_name)}
+                            className="px-3 py-1.5 text-sm bg-purple-100 text-purple-700 rounded hover:bg-purple-200 font-medium"
+                          >
+                            👁 Login As
+                          </button>
+                        )}
                         {!hasPassword && (
                           <button
                             onClick={() => handleResendInvitation(user.user_id, user.email)}
@@ -464,6 +557,121 @@ export default function DistributorUsersClient({ companies, users, contacts }: D
                 className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium disabled:opacity-50"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Distributor Modal */}
+      {showAddDistributorModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-1">
+              Add New Distributor
+            </h3>
+            <p className="text-sm text-gray-700 mb-6">
+              Create a new distributor company in the system
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Company Name <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={newDistributor.company_name}
+                  onChange={(e) => setNewDistributor({ ...newDistributor, company_name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  placeholder="Acme Distribution Ltd"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Country
+                </label>
+                <input
+                  type="text"
+                  value={newDistributor.country}
+                  onChange={(e) => setNewDistributor({ ...newDistributor, country: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  placeholder="United Kingdom"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Account Owner (Sales Rep)
+                </label>
+                <input
+                  type="text"
+                  value={newDistributor.account_owner}
+                  onChange={(e) => setNewDistributor({ ...newDistributor, account_owner: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  placeholder="GH"
+                />
+              </div>
+
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                <h4 className="font-semibold text-gray-900 mb-3 text-sm">
+                  Primary Contact (Optional)
+                </h4>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Contact Name
+                    </label>
+                    <input
+                      type="text"
+                      value={newDistributor.contact_name}
+                      onChange={(e) => setNewDistributor({ ...newDistributor, contact_name: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      placeholder="John Smith"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Contact Email
+                    </label>
+                    <input
+                      type="email"
+                      value={newDistributor.contact_email}
+                      onChange={(e) => setNewDistributor({ ...newDistributor, contact_email: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      placeholder="john@acmedist.com"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowAddDistributorModal(false);
+                  setNewDistributor({
+                    company_name: '',
+                    country: '',
+                    account_owner: '',
+                    contact_name: '',
+                    contact_email: '',
+                  });
+                }}
+                disabled={submitting}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddDistributor}
+                disabled={submitting || !newDistributor.company_name}
+                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium disabled:opacity-50"
+              >
+                {submitting ? 'Creating...' : 'Create Distributor'}
               </button>
             </div>
           </div>

@@ -363,6 +363,35 @@ export async function POST(request: NextRequest) {
       console.error('[distributor-create-order] Failed to create invoice items:', itemsError);
     }
 
+    // Log distributor order event to engagement_events
+    try {
+      await supabase
+        .from('engagement_events')
+        .insert({
+          company_id: distributor.company_id,
+          occurred_at: new Date().toISOString(),
+          event_type: 'distributor_order',
+          event_name: 'distributor_order_placed',
+          source: 'distributor_portal',
+          value: subtotal, // Use subtotal (excludes VAT/shipping) for consistency
+          currency: 'gbp',
+          meta: {
+            invoice_id: dbInvoice.invoice_id,
+            stripe_invoice_id: finalizedInvoice.id,
+            total_amount: total,
+            items_count: items.length,
+            placed_by: distributor.full_name,
+            placed_by_email: distributor.email,
+            shipping_country: destinationCountry,
+          },
+        });
+
+      console.log('[distributor-create-order] Event logged for company:', distributor.company_id);
+    } catch (eventError) {
+      console.error('[distributor-create-order] Failed to log event:', eventError);
+      // Don't fail the request if event logging fails
+    }
+
     return NextResponse.json({
       success: true,
       invoice_id: finalizedInvoice.id,
