@@ -98,17 +98,30 @@ export default async function DistributorDashboardPage() {
     console.error('[Distributor Portal] Error fetching distributor pricing:', pricingError);
   }
 
+  console.log('[Distributor Portal] Fetched pricing entries:', distributorPricing?.length || 0);
+  console.log('[Distributor Portal] Total products to price:', allProducts.length);
+
   // Create pricing map for quick lookup
   const pricingMap = new Map(
     (distributorPricing || []).map(dp => [dp.product_code, dp])
   );
 
   // Apply distributor pricing (use standard_price for all distributors)
+  let debugCount = 0;
   const productsWithPricing = allProducts.map(product => {
     const pricingData = pricingMap.get(product.product_code);
 
     // Use distributor standard_price if available, otherwise fallback to product's base price
     const distributorPrice = pricingData?.standard_price ?? null;
+
+    // Debug: Log first 3 products
+    if (debugCount < 3) {
+      console.log('[Distributor Portal] Product:', product.product_code,
+        'Base:', product.price,
+        'Distributor:', distributorPrice,
+        'Final:', distributorPrice ?? product.price);
+      debugCount++;
+    }
 
     return {
       ...product,
