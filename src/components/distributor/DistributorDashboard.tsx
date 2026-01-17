@@ -247,7 +247,7 @@ export default function DistributorDashboard({
     return (
       <div
         key={product.product_code}
-        className="flex items-center gap-4 p-4 rounded-[12px] border border-[#e8e8e8] hover:border-[#1e40af] transition-all bg-white"
+        className="flex items-center gap-4 p-4 rounded-[12px] border-2 border-blue-200 hover:border-blue-400 transition-all bg-white"
       >
         <div className="relative w-20 h-20 bg-[#f9fafb] rounded-[8px] flex-shrink-0 overflow-hidden">
           <Image
@@ -271,15 +271,26 @@ export default function DistributorDashboard({
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <label className="text-[13px] text-[#1e293b] font-[500]">Qty:</label>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => updateQuantity(product.product_code, Math.max(0, currentQty - 1))}
+            className="w-8 h-8 flex items-center justify-center rounded-[8px] bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#475569] font-bold transition-colors"
+          >
+            −
+          </button>
           <input
             type="number"
             min="0"
             value={currentQty}
             onChange={(e) => updateQuantity(product.product_code, parseInt(e.target.value) || 0)}
-            className="w-20 px-3 py-2 border border-[#e8e8e8] rounded-[8px] text-center font-[600] focus:ring-2 focus:ring-[#16a34a] focus:border-[#16a34a] outline-none"
+            className="w-16 px-2 py-2 border border-[#e8e8e8] rounded-[8px] text-center font-[600] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
+          <button
+            onClick={() => updateQuantity(product.product_code, currentQty + 1)}
+            className="w-8 h-8 flex items-center justify-center rounded-[8px] bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#475569] font-bold transition-colors"
+          >
+            +
+          </button>
         </div>
       </div>
     );
@@ -289,6 +300,32 @@ export default function DistributorDashboard({
     <div className="grid grid-cols-12 gap-6">
       {/* Left Column - Product Catalog */}
       <div className="col-span-7 space-y-4">
+        {/* Compatible Machines Section */}
+        <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8] p-6">
+          <h3 className="text-[15px] font-[600] text-[#1e40af] mb-4 tracking-[-0.01em]">
+            Compatible Machine Brands
+          </h3>
+          <div className="flex flex-wrap gap-4">
+            {[
+              'heidelberg', 'mbo', 'horizon', 'duplo', 'morgana', 'kolbus',
+              'muller-martini', 'baumfolder', 'guk', 'hohner'
+            ].map((brand) => (
+              <div key={brand} className="relative h-12 w-24 grayscale hover:grayscale-0 transition-all opacity-60 hover:opacity-100">
+                <Image
+                  src={`/images/logos/${brand}.png`}
+                  alt={brand}
+                  fill
+                  className="object-contain"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Address Collection */}
         <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8] p-6">
           <div className="mb-6">
@@ -515,83 +552,81 @@ export default function DistributorDashboard({
       {/* Right Column - Cart & Invoices */}
       <div className="col-span-5 space-y-6">
         {/* Cart Summary */}
-        <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8]">
-          <div className="px-6 py-4 bg-gradient-to-r from-green-50/50 to-transparent border-b border-[#e8e8e8]">
-            <h2 className="text-[17px] font-[600] text-[#0a0a0a] tracking-[-0.01em]">Order Summary</h2>
-            <p className="text-[12px] text-[#334155] mt-0.5 font-[500]">
+        <div className="bg-[#0a0a0a] rounded-[20px] p-8 text-white shadow-[0_16px_48px_rgba(0,0,0,0.24)]">
+          <div className="mb-6">
+            <h2 className="text-[20px] font-[700] tracking-[-0.01em]">Order Summary</h2>
+            <p className="text-[13px] text-gray-400 mt-1 font-[500]">
               {cartItems.length} item{cartItems.length !== 1 ? 's' : ''}
             </p>
           </div>
 
-          <div className="p-6">
-            {cartItems.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-[13px] text-[#475569] font-[400]">No items in cart</p>
-              </div>
-            ) : (
-              <>
-                <div className="space-y-3 mb-6">
-                  {cartItems.map((item) => (
-                    <div
-                      key={item.product.product_code}
-                      className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]"
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1 min-w-0">
-                          <div className="text-[12px] font-[600] text-[#0a0a0a] leading-tight">
-                            {item.product.description}
-                          </div>
-                          <div className="text-[11px] text-[#475569] font-mono mt-0.5">
-                            {item.product.product_code}
-                          </div>
+          {cartItems.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-[13px] text-gray-400 font-[400]">No items in cart</p>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-3 mb-6">
+                {cartItems.map((item) => (
+                  <div
+                    key={item.product.product_code}
+                    className="p-3 bg-white/5 rounded-[10px] border border-white/10"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[12px] font-[600] text-white leading-tight">
+                          {item.product.description}
                         </div>
-                        <button
-                          onClick={() => updateQuantity(item.product.product_code, 0)}
-                          className="ml-2 text-red-600 hover:text-red-700 flex-shrink-0"
-                          title="Remove"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="text-[11px] text-[#475569] font-[500]">
-                          {item.quantity} × £{item.product.price.toFixed(2)}
-                        </div>
-                        <div className="text-[14px] font-[700] text-[#0a0a0a]">
-                          £{(item.quantity * item.product.price).toFixed(2)}
+                        <div className="text-[11px] text-gray-400 font-mono mt-0.5">
+                          {item.product.product_code}
                         </div>
                       </div>
+                      <button
+                        onClick={() => updateQuantity(item.product.product_code, 0)}
+                        className="ml-2 text-red-400 hover:text-red-300 flex-shrink-0"
+                        title="Remove"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
                     </div>
-                  ))}
-                </div>
 
-                <div className="border-t-2 border-[#e8e8e8] pt-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="text-[15px] font-[700] text-[#0a0a0a]">Subtotal</div>
-                    <div className="text-[24px] font-[800] text-[#15803d] tracking-[-0.02em]">
-                      £{subtotal.toFixed(2)}
+                    <div className="flex items-center justify-between">
+                      <div className="text-[11px] text-gray-400 font-[500]">
+                        {item.quantity} × £{item.product.price.toFixed(2)}
+                      </div>
+                      <div className="text-[14px] font-[700] text-white">
+                        £{(item.quantity * item.product.price).toFixed(2)}
+                      </div>
                     </div>
                   </div>
+                ))}
+              </div>
 
-                  <button
-                    onClick={handleSubmitOrder}
-                    disabled={submitting || cartItems.length === 0}
-                    className="w-full py-4 bg-gradient-to-r from-[#15803d] to-[#16a34a] text-white rounded-[10px] font-[600] text-[14px] tracking-[-0.01em] hover:from-[#14532d] hover:to-[#15803d] transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {submitting ? 'Submitting Order...' : 'Place Order'}
-                  </button>
+              <div className="border-t-2 border-white/10 pt-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="text-[15px] font-[700] text-white">Subtotal</div>
+                  <div className="text-[28px] font-[800] text-[#16a34a] tracking-[-0.02em]">
+                    £{subtotal.toFixed(2)}
+                  </div>
                 </div>
-              </>
-            )}
-          </div>
+
+                <button
+                  onClick={handleSubmitOrder}
+                  disabled={submitting || cartItems.length === 0}
+                  className="w-full py-4 bg-[#16a34a] text-white rounded-[10px] font-[700] text-[15px] tracking-[-0.01em] hover:bg-[#15803d] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {submitting ? 'Submitting Order...' : 'Place Order'}
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Recent Invoices */}
