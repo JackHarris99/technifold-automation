@@ -63,6 +63,7 @@ interface PricingTier {
 export default function ConsumablesQuoteBuilderPage() {
   const searchParams = useSearchParams();
   const companyIdParam = searchParams.get('company_id');
+  const editQuoteId = searchParams.get('edit');
 
   const [companies, setCompanies] = useState<Company[]>([]);
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
@@ -77,6 +78,10 @@ export default function ConsumablesQuoteBuilderPage() {
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [searching, setSearching] = useState(false);
   const [showProductDropdown, setShowProductDropdown] = useState(false);
+
+  // Edit mode state
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [loadingQuote, setLoadingQuote] = useState(false);
 
   const [allConsumables, setAllConsumables] = useState<Product[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
@@ -100,6 +105,13 @@ export default function ConsumablesQuoteBuilderPage() {
     loadPricingTiers();
     loadAllConsumables();
   }, []);
+
+  // Load quote for editing if edit parameter exists
+  useEffect(() => {
+    if (editQuoteId && companies.length > 0) {
+      loadQuoteForEditing(editQuoteId);
+    }
+  }, [editQuoteId, companies]);
 
   // Pre-select company if company_id is in URL
   useEffect(() => {
@@ -201,6 +213,72 @@ export default function ConsumablesQuoteBuilderPage() {
       console.error('Failed to load consumables:', err);
     } finally {
       setLoadingProducts(false);
+    }
+  }
+
+  async function loadQuoteForEditing(quoteIdToLoad: string) {
+    setLoadingQuote(true);
+    setIsEditMode(true);
+    try {
+      const response = await fetch(`/api/admin/quotes/${quoteIdToLoad}`);
+      const data = await response.json();
+
+      if (data.success && data.quote) {
+        const quote = data.quote;
+
+        // Set quote ID and URL
+        setQuoteId(quote.quote_id);
+        if (quote.quote_token) {
+          setQuoteUrl(`${window.location.origin}/q/${quote.quote_token}`);
+        }
+
+        // Load and set company
+        const company = companies.find(c => c.company_id === quote.company_id);
+        if (company) {
+          setSelectedCompany(company);
+        } else {
+          const compResp = await fetch(`/api/admin/companies/${quote.company_id}`);
+          const compData = await compResp.json();
+          if (compData.success) {
+            setSelectedCompany(compData.company);
+          }
+        }
+
+        // Load and set contact
+        if (quote.contact_id) {
+          const contactsResp = await fetch(`/api/admin/companies/${quote.company_id}/contacts`);
+          const contactsData = await contactsResp.json();
+          const contact = contactsData.contacts?.find((c: Contact) => c.contact_id === quote.contact_id);
+          if (contact) {
+            setSelectedContact(contact);
+          }
+        }
+
+        // Set line items with discount_percent
+        if (quote.line_items && quote.line_items.length > 0) {
+          const items: QuoteLineItem[] = quote.line_items.map((item: any) => ({
+            product_code: item.product_code,
+            description: item.description,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            discount_percent: item.discount_percent || 0,
+            product_type: 'consumable',
+            category: item.category,
+            image_url: item.image_url,
+            pricing_tier: item.pricing_tier,
+          }));
+          setLineItems(items);
+        }
+
+        // Set quote settings
+        setQuoteType(quote.quote_type || 'interactive');
+        setFreeShipping(quote.free_shipping || false);
+      }
+    } catch (err) {
+      console.error('Error loading quote:', err);
+      alert('Failed to load quote for editing');
+    } finally {
+      setLoadingQuote(false);
     }
   }
 
@@ -349,30 +427,51 @@ export default function ConsumablesQuoteBuilderPage() {
 
     setGenerating(true);
     try {
-      const response = await fetch('/api/admin/quotes/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          company_id: selectedCompany.company_id,
-          contact_id: selectedContact.contact_id,
-          line_items: lineItems,
-          quote_type: quoteType, // 'static' or 'interactive'
-          is_test: isTestToken, // Test tokens bypass address collection
-          free_shipping: freeShipping,
-        }),
-      });
+      if (isEditMode && quoteId) {
+        // UPDATE existing quote
+        const response = await fetch(`/api/admin/quotes/${quoteId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            line_items: lineItems,
+            free_shipping: freeShipping,
+          }),
+        });
 
-      const data = await response.json();
-      if (data.url) {
-        setQuoteUrl(data.url);
-        if (data.quote_id) {
-          setQuoteId(data.quote_id);
+        const data = await response.json();
+        if (data.success) {
+          alert('✓ Quote updated successfully!');
+          window.location.href = `/admin/quotes/${quoteId}`;
+        } else {
+          alert('Failed to update quote: ' + (data.error || 'Unknown error'));
         }
       } else {
-        alert('Failed to generate quote: ' + (data.error || 'Unknown error'));
+        // CREATE new quote
+        const response = await fetch('/api/admin/quotes/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            company_id: selectedCompany.company_id,
+            contact_id: selectedContact.contact_id,
+            line_items: lineItems,
+            quote_type: quoteType, // 'static' or 'interactive'
+            is_test: isTestToken, // Test tokens bypass address collection
+            free_shipping: freeShipping,
+          }),
+        });
+
+        const data = await response.json();
+        if (data.url) {
+          setQuoteUrl(data.url);
+          if (data.quote_id) {
+            setQuoteId(data.quote_id);
+          }
+        } else {
+          alert('Failed to generate quote: ' + (data.error || 'Unknown error'));
+        }
       }
     } catch (err) {
-      alert('Error generating quote');
+      alert(isEditMode ? 'Error updating quote' : 'Error generating quote');
       console.error(err);
     } finally {
       setGenerating(false);
@@ -421,10 +520,13 @@ export default function ConsumablesQuoteBuilderPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-[32px] font-[800] text-[#0a0a0a] tracking-[-0.04em] mb-2">
-            Consumables Quote Builder
+            {isEditMode ? 'Edit Consumables Quote' : 'Consumables Quote Builder'}
           </h1>
           <p className="text-[15px] text-[#666] font-[400] tracking-[-0.01em]">
-            Create quotes with static (locked) or interactive (tiered) pricing modes
+            {isEditMode
+              ? `Editing Quote ${quoteId?.slice(0, 8)}... • Update line items and pricing`
+              : 'Create quotes with static (locked) or interactive (tiered) pricing modes'
+            }
           </p>
         </div>
 
@@ -638,7 +740,10 @@ export default function ConsumablesQuoteBuilderPage() {
                     disabled={!selectedCompany || !selectedContact || lineItems.length === 0 || generating}
                     className="w-full py-3 bg-white text-[#0a0a0a] rounded-[14px] text-[15px] font-[700] tracking-[-0.01em] hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {generating ? 'Generating...' : '🔗 Generate Test Link'}
+                    {generating
+                      ? (isEditMode ? 'Updating...' : 'Generating...')
+                      : (isEditMode ? '✓ Update Quote' : '🔗 Generate Test Link')
+                    }
                   </button>
 
                   {quoteUrl && !isTestToken && (

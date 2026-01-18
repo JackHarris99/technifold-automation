@@ -33,15 +33,14 @@ export type CartItem = {
 export type Company = {
   company_id: string;
   company_name: string;
-  portal_token: string;
   created_at?: string;
   updated_at?: string;
+  category?: string;
 };
 
 export type CompanyStats = {
   company_id: string;
   company_name: string;
-  portal_token: string;
   total_orders: number;
   total_spent: number;
   last_order_date: string | null;
@@ -63,7 +62,6 @@ export type EmailCampaign = {
 export type CustomerProfile = {
   company_id: string;
   company_name: string;
-  portal_token: string;
   contact_name?: string;
   contact_email?: string;
   contact_phone?: string;

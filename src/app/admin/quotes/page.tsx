@@ -95,6 +95,40 @@ export default function QuotesPage() {
     }
   }
 
+  async function handleEditQuote(quoteId: string) {
+    try {
+      // Fetch quote details to determine which builder to use
+      const response = await fetch(`/api/admin/quotes/${quoteId}`);
+      const data = await response.json();
+
+      if (data.success && data.quote && data.quote.line_items?.length > 0) {
+        const lineItems = data.quote.line_items;
+
+        // Check product types in line items
+        const hasTools = lineItems.some((item: any) => item.product_type === 'tool');
+        const hasConsumables = lineItems.some((item: any) => item.product_type === 'consumable');
+
+        // Route to appropriate builder
+        if (hasTools && !hasConsumables) {
+          // Tools only
+          window.location.href = `/admin/quote-builder/tools?edit=${quoteId}`;
+        } else if (hasConsumables && !hasTools) {
+          // Consumables only
+          window.location.href = `/admin/quote-builder/consumables?edit=${quoteId}`;
+        } else {
+          // Mixed or unknown - default to tools builder
+          alert('This quote contains mixed product types. Defaulting to tools builder.');
+          window.location.href = `/admin/quote-builder/tools?edit=${quoteId}`;
+        }
+      } else {
+        alert('Failed to load quote details');
+      }
+    } catch (error) {
+      console.error('Failed to determine quote type:', error);
+      alert('Error loading quote for editing');
+    }
+  }
+
   function getStatusBadge(quote: Quote) {
     const now = new Date();
     const expiresAt = quote.expires_at ? new Date(quote.expires_at) : null;
@@ -282,12 +316,12 @@ export default function QuotesPage() {
                       >
                         View
                       </Link>
-                      <Link
-                        href={`/admin/quote-builder?edit=${quote.quote_id}`}
-                        className="text-sm text-gray-600 hover:text-gray-800 font-medium"
+                      <button
+                        onClick={() => handleEditQuote(quote.quote_id)}
+                        className="text-sm text-gray-700 hover:text-gray-900 font-medium"
                       >
                         Edit
-                      </Link>
+                      </button>
                       <button
                         onClick={() => deleteQuote(quote.quote_id, quote.company_name)}
                         className="text-sm text-red-600 hover:text-red-800 font-medium"

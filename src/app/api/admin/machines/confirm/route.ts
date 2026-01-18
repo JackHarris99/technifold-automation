@@ -31,12 +31,11 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('company_machine')
       .update({
-        confirmed: true,
+        verified: true,
         source: 'sales_confirmed',
-        confidence_score: 5,
-        updated_at: new Date().toISOString()
+        confidence: 5
       })
-      .eq('company_machine_id', company_machine_id)
+      .eq('id', company_machine_id)
       .select('company_id, machine_id')
       .single();
 

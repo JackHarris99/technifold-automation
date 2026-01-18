@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
       // Check if record already exists
       const { data: existingMachine } = await supabase
         .from('company_machine')
-        .select('company_machine_id')
+        .select('id')
         .eq('company_id', companyId)
         .eq('machine_id', machine_id)
         .single();
@@ -106,8 +106,8 @@ export async function POST(request: NextRequest) {
             company_id: companyId,
             machine_id,
             source: 'self_report',
-            confirmed: false,
-            confidence_score: 5,
+            verified: false,
+            confidence: 5,
             notes: `Self-reported via lead capture form - ${urgency}`
           });
 

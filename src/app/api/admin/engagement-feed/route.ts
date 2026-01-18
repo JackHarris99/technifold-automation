@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const supabase = getSupabaseClient();
 
     let query = supabase
-      .from('v_engagement_feed')
+      .from('engagement_events')
       .select('*')
       .order('occurred_at', { ascending: false })
       .limit(Math.min(limit, 200)); // Cap at 200

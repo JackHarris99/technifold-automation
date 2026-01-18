@@ -57,6 +57,12 @@ public,customer_pricing_overrides,idx_customer_overrides_validity,"CREATE INDEX 
 public,distributor_pricing,distributor_pricing_pkey,CREATE UNIQUE INDEX distributor_pricing_pkey ON public.distributor_pricing USING btree (pricing_id)
 public,distributor_pricing,distributor_pricing_product_code_key,CREATE UNIQUE INDEX distributor_pricing_product_code_key ON public.distributor_pricing USING btree (product_code)
 public,distributor_pricing,idx_distributor_pricing_active,CREATE INDEX idx_distributor_pricing_active ON public.distributor_pricing USING btree (product_code) WHERE (active = true)
+public,distributor_users,distributor_users_email_key,CREATE UNIQUE INDEX distributor_users_email_key ON public.distributor_users USING btree (email)
+public,distributor_users,distributor_users_invitation_token_key,CREATE UNIQUE INDEX distributor_users_invitation_token_key ON public.distributor_users USING btree (invitation_token)
+public,distributor_users,distributor_users_pkey,CREATE UNIQUE INDEX distributor_users_pkey ON public.distributor_users USING btree (user_id)
+public,distributor_users,idx_distributor_users_company_id,CREATE INDEX idx_distributor_users_company_id ON public.distributor_users USING btree (company_id)
+public,distributor_users,idx_distributor_users_email,CREATE INDEX idx_distributor_users_email ON public.distributor_users USING btree (email)
+public,distributor_users,idx_distributor_users_invitation_token,CREATE INDEX idx_distributor_users_invitation_token ON public.distributor_users USING btree (invitation_token) WHERE (invitation_token IS NOT NULL)
 public,engagement_events,engagement_events_pkey,CREATE UNIQUE INDEX engagement_events_pkey ON public.engagement_events USING btree (event_id)
 public,engagement_events,idx_engagement_events_company_time,"CREATE INDEX idx_engagement_events_company_time ON public.engagement_events USING btree (company_id, occurred_at)"
 public,engagement_events,idx_engagement_events_contact_time,"CREATE INDEX idx_engagement_events_contact_time ON public.engagement_events USING btree (contact_id, occurred_at)"

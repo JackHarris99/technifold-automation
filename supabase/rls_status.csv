@@ -11,6 +11,7 @@ public,contact_interactions,DISABLED,NOT_FORCED
 public,contacts,ENABLED,NOT_FORCED
 public,customer_pricing_overrides,DISABLED,NOT_FORCED
 public,distributor_pricing,ENABLED,NOT_FORCED
+public,distributor_users,DISABLED,NOT_FORCED
 public,engagement_events,ENABLED,NOT_FORCED
 public,invoice_items,DISABLED,NOT_FORCED
 public,invoices,ENABLED,NOT_FORCED

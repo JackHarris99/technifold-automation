@@ -45,22 +45,21 @@ export async function POST(request: NextRequest) {
     // Check if this company-machine pair already exists
     const { data: existing } = await supabase
       .from('company_machine')
-      .select('company_machine_id, confidence_score')
+      .select('id, confidence, verified')
       .eq('company_id', company_id)
       .eq('machine_id', machine.machine_id)
       .single();
 
     if (existing) {
-      // Update existing record if it's unconfirmed and has lower confidence
-      if (!existing.confirmed && (existing.confidence_score || 0) < 5) {
+      // Update existing record if it's unverified and has lower confidence
+      if (!existing.verified && (existing.confidence || 0) < 5) {
         const { error: updateError } = await supabase
           .from('company_machine')
           .update({
             source: source || 'self_report',
-            confidence_score: 5,
-            updated_at: new Date().toISOString()
+            confidence: 5
           })
-          .eq('company_machine_id', existing.company_machine_id);
+          .eq('id', existing.id);
 
         if (updateError) {
           console.error('[machines/capture] Update error:', updateError);
@@ -78,8 +77,8 @@ export async function POST(request: NextRequest) {
           company_id,
           machine_id: machine.machine_id,
           source: source || 'self_report',
-          confirmed: false,
-          confidence_score: 5,
+          verified: false,
+          confidence: 5,
           notes: `Self-reported via ${offer_key ? 'offer: ' + offer_key : 'machine finder'}`
         });
 

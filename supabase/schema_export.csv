@@ -145,6 +145,18 @@ distributor_pricing,currency,text,YES,'GBP'::text
 distributor_pricing,active,boolean,YES,TRUE
 distributor_pricing,created_at,timestamp with time zone,YES,now()
 distributor_pricing,updated_at,timestamp with time zone,YES,now()
+distributor_users,user_id,uuid,NO,gen_random_uuid()
+distributor_users,company_id,text,NO,null
+distributor_users,email,text,NO,null
+distributor_users,password_hash,text,YES,null
+distributor_users,full_name,text,NO,null
+distributor_users,role,text,NO,'user'::text
+distributor_users,active,boolean,NO,TRUE
+distributor_users,invitation_token,text,YES,null
+distributor_users,invitation_expires_at,timestamp with time zone,YES,null
+distributor_users,last_login_at,timestamp with time zone,YES,null
+distributor_users,created_at,timestamp with time zone,NO,now()
+distributor_users,updated_at,timestamp with time zone,NO,now()
 engagement_events,event_id,uuid,NO,gen_random_uuid()
 engagement_events,company_id,text,YES,null
 engagement_events,contact_id,uuid,YES,null

@@ -1,39 +1,248 @@
 table_name,constraint_name,constraint_type,check_clause,columns
-companies,companies_category_check,CHECK,"CHECK (category = ANY (ARRAY['customer'::text, 'prospect'::text, 'supplier'::text, 'press'::text, 'partner'::text, 'internal'::text, 'distributor'::text, 'dealer'::text]))",null
-companies,companies_status_check,CHECK,"CHECK (status = ANY (ARRAY['active'::text, 'inactive'::text, 'dead'::text]))",null
-companies,companies_type_check,CHECK,"CHECK (type = ANY (ARRAY['customer'::text, 'prospect'::text, 'distributor'::text]))",null
+activity_log,2200_99996_12_not_null,CHECK,null,null
+activity_log,2200_99996_1_not_null,CHECK,null,null
+activity_log,2200_99996_3_not_null,CHECK,null,null
+activity_log,2200_99996_4_not_null,CHECK,null,null
+activity_log,2200_99996_5_not_null,CHECK,null,null
+brand_media,2200_83062_1_not_null,CHECK,null,null
+brand_media,2200_83062_2_not_null,CHECK,null,null
+companies,2200_17316_1_not_null,CHECK,null,null
+companies,2200_17316_2_not_null,CHECK,null,null
+companies,companies_category_check,CHECK,"CHECK ((category = ANY (ARRAY['customer'::text, 'prospect'::text, 'supplier'::text, 'press'::text, 'partner'::text, 'internal'::text, 'distributor'::text, 'dealer'::text])))",null
+companies,companies_category_check,CHECK,"CHECK ((category = ANY (ARRAY['customer'::text, 'prospect'::text, 'supplier'::text, 'press'::text, 'partner'::text, 'internal'::text])))",null
+companies,companies_status_check,CHECK,"CHECK ((status = ANY (ARRAY['active'::text, 'inactive'::text, 'dead'::text])))",null
+companies,companies_type_check,CHECK,"CHECK ((type = ANY (ARRAY['customer'::text, 'prospect'::text, 'distributor'::text])))",null
+companies,companies_type_check,CHECK,"CHECK ((type = ANY (ARRAY['customer'::text, 'prospect'::text, 'distributor'::text])))",null
+company_consumables,2200_136726_1_not_null,CHECK,null,null
+company_consumables,2200_136726_2_not_null,CHECK,null,null
+company_consumables,2200_136726_3_not_null,CHECK,null,null
+company_consumables,2200_136726_4_not_null,CHECK,null,null
+company_consumables,2200_136726_5_not_null,CHECK,null,null
+company_consumables,2200_136726_6_not_null,CHECK,null,null
+company_machine,2200_89982_10_not_null,CHECK,null,null
+company_machine,2200_89982_1_not_null,CHECK,null,null
+company_machine,2200_89982_3_not_null,CHECK,null,null
 company_machine,company_machine_company_machine_unique,UNIQUE,null,"company_id, machine_id"
+company_product_catalog,2200_176174_1_not_null,CHECK,null,null
+company_product_catalog,2200_176174_2_not_null,CHECK,null,null
+company_product_catalog,2200_176174_3_not_null,CHECK,null,null
 company_product_catalog,company_product_catalog_company_id_product_code_key,UNIQUE,null,"company_id, product_code"
-contact_interactions,contact_interactions_interaction_type_check,CHECK,"CHECK (interaction_type = ANY (ARRAY['portal_view'::text, 'portal_cart_add'::text, 'portal_purchase'::text, 'email_sent'::text, 'email_opened'::text, 'email_clicked'::text, 'marketing_page_view'::text, 'form_submit'::text, 'machine_selected'::text, 'quote_requested'::text, 'quote_sent'::text, 'quote_accepted'::text, 'phone_call'::text, 'trade_show_meeting'::text, 'demo_requested'::text]))",null
-contacts,contacts_marketing_status_check,CHECK,"CHECK (marketing_status = ANY (ARRAY['subscribed'::text, 'unsubscribed'::text, 'pending'::text]))",null
-contacts,contacts_status_check,CHECK,"CHECK (status = ANY (ARRAY['active'::text, 'former'::text, 'unknown'::text]))",null
-contacts,email_or_phone_chk,CHECK,CHECK (email IS NOT NULL OR phone IS NOT NULL),null
+company_product_history,2200_140066_10_not_null,CHECK,null,null
+company_product_history,2200_140066_11_not_null,CHECK,null,null
+company_product_history,2200_140066_1_not_null,CHECK,null,null
+company_product_history,2200_140066_2_not_null,CHECK,null,null
+company_product_history,2200_140066_3_not_null,CHECK,null,null
+company_product_history,2200_140066_4_not_null,CHECK,null,null
+company_product_history,2200_140066_5_not_null,CHECK,null,null
+company_product_history,2200_140066_6_not_null,CHECK,null,null
+company_product_history,2200_140066_7_not_null,CHECK,null,null
+company_tools,2200_18116_1_not_null,CHECK,null,null
+company_tools,2200_18116_2_not_null,CHECK,null,null
+company_tools,2200_18116_3_not_null,CHECK,null,null
+company_tools,2200_18116_4_not_null,CHECK,null,null
+company_tools,2200_18116_5_not_null,CHECK,null,null
+contact_interactions,2200_92024_10_not_null,CHECK,null,null
+contact_interactions,2200_92024_1_not_null,CHECK,null,null
+contact_interactions,2200_92024_2_not_null,CHECK,null,null
+contact_interactions,2200_92024_4_not_null,CHECK,null,null
+contact_interactions,contact_interactions_interaction_type_check,CHECK,"CHECK ((interaction_type = ANY (ARRAY['portal_view'::text, 'portal_cart_add'::text, 'portal_purchase'::text, 'email_sent'::text, 'email_opened'::text, 'email_clicked'::text, 'marketing_page_view'::text, 'form_submit'::text, 'machine_selected'::text, 'quote_requested'::text, 'quote_sent'::text, 'quote_accepted'::text, 'phone_call'::text, 'trade_show_meeting'::text, 'demo_requested'::text])))",null
+contacts,2200_17328_1_not_null,CHECK,null,null
+contacts,2200_17328_2_not_null,CHECK,null,null
+contacts,contacts_marketing_status_check,CHECK,"CHECK ((marketing_status = ANY (ARRAY['subscribed'::text, 'unsubscribed'::text, 'pending'::text])))",null
+contacts,contacts_marketing_status_check,CHECK,"CHECK ((marketing_status = ANY (ARRAY['subscribed'::text, 'unsubscribed'::text, 'pending'::text])))",null
+contacts,contacts_status_check,CHECK,"CHECK ((status = ANY (ARRAY['active'::text, 'former'::text, 'unknown'::text])))",null
+contacts,contacts_status_check,CHECK,"CHECK ((status = ANY (ARRAY['active'::text, 'former'::text, 'unknown'::text])))",null
+contacts,email_or_phone_chk,CHECK,CHECK (((email IS NOT NULL) OR (phone IS NOT NULL))),null
+contacts,email_or_phone_chk,CHECK,CHECK (((email IS NOT NULL) OR (phone IS NOT NULL))),null
 contacts,uq_contacts_company_email_exact,UNIQUE,null,"company_id, email"
-customer_pricing_overrides,must_specify_product_or_category,CHECK,CHECK (product_code IS NOT NULL OR category IS NOT NULL),null
+customer_pricing_overrides,2200_144506_1_not_null,CHECK,null,null
+customer_pricing_overrides,2200_144506_2_not_null,CHECK,null,null
+customer_pricing_overrides,must_specify_product_or_category,CHECK,CHECK (((product_code IS NOT NULL) OR (category IS NOT NULL))),null
+distributor_pricing,2200_176211_1_not_null,CHECK,null,null
+distributor_pricing,2200_176211_2_not_null,CHECK,null,null
 distributor_pricing,distributor_pricing_product_code_key,UNIQUE,null,product_code
+distributor_users,2200_177353_11_not_null,CHECK,null,null
+distributor_users,2200_177353_12_not_null,CHECK,null,null
+distributor_users,2200_177353_1_not_null,CHECK,null,null
+distributor_users,2200_177353_2_not_null,CHECK,null,null
+distributor_users,2200_177353_3_not_null,CHECK,null,null
+distributor_users,2200_177353_5_not_null,CHECK,null,null
+distributor_users,2200_177353_6_not_null,CHECK,null,null
+distributor_users,2200_177353_7_not_null,CHECK,null,null
+distributor_users,distributor_users_email_key,UNIQUE,null,email
+distributor_users,distributor_users_invitation_token_key,UNIQUE,null,invitation_token
+engagement_events,2200_45216_1_not_null,CHECK,null,null
+engagement_events,2200_45216_4_not_null,CHECK,null,null
+engagement_events,2200_45216_5_not_null,CHECK,null,null
+engagement_events,2200_45216_8_not_null,CHECK,null,null
+invoice_items,2200_136834_1_not_null,CHECK,null,null
+invoice_items,2200_136834_2_not_null,CHECK,null,null
+invoice_items,2200_136834_3_not_null,CHECK,null,null
+invoice_items,2200_136834_4_not_null,CHECK,null,null
+invoice_items,2200_136834_5_not_null,CHECK,null,null
+invoice_items,2200_136834_6_not_null,CHECK,null,null
+invoice_items,2200_136834_7_not_null,CHECK,null,null
+invoices,2200_136795_10_not_null,CHECK,null,null
+invoices,2200_136795_13_not_null,CHECK,null,null
+invoices,2200_136795_14_not_null,CHECK,null,null
+invoices,2200_136795_15_not_null,CHECK,null,null
+invoices,2200_136795_16_not_null,CHECK,null,null
+invoices,2200_136795_1_not_null,CHECK,null,null
+invoices,2200_136795_2_not_null,CHECK,null,null
+invoices,2200_136795_30_not_null,CHECK,null,null
+invoices,2200_136795_31_not_null,CHECK,null,null
+invoices,2200_136795_9_not_null,CHECK,null,null
 invoices,invoices_invoice_number_key,UNIQUE,null,invoice_number
 invoices,invoices_stripe_invoice_id_key,UNIQUE,null,stripe_invoice_id
+machines,2200_74258_1_not_null,CHECK,null,null
+machines,2200_74258_2_not_null,CHECK,null,null
+machines,2200_74258_5_not_null,CHECK,null,null
 machines,machines_slug_key,UNIQUE,null,slug
-order_items,order_items_qty_check,CHECK,CHECK (qty <> 0),null
-orders,orders_fulfillment_status_check,CHECK,"CHECK (fulfillment_status = ANY (ARRAY['new'::text, 'hold_unpaid'::text, 'ready_to_pick'::text, 'shipped'::text, 'cancelled'::text]))",null
-orders,orders_invoice_status_check,CHECK,"CHECK (invoice_status = ANY (ARRAY['draft'::text, 'open'::text, 'sent'::text, 'paid'::text, 'void'::text, 'uncollectible'::text]))",null
-orders,orders_order_type_check,CHECK,"CHECK (order_type = ANY (ARRAY['consumables_reorder'::text, 'tool_purchase'::text, 'tool_rental_setup'::text, 'tool_rental_payment'::text]))",null
-orders,orders_payment_channel_check,CHECK,"CHECK (payment_channel = ANY (ARRAY['stripe'::text, 'invoice'::text]))",null
-orders,orders_payment_status_check,CHECK,"CHECK (payment_status = ANY (ARRAY['unpaid'::text, 'paid'::text, 'failed'::text, 'refunded'::text]))",null
-outbox,outbox_status_check,CHECK,"CHECK (status = ANY (ARRAY['pending'::text, 'processing'::text, 'completed'::text, 'failed'::text]))",null
-premium_pricing_ladder,valid_qty_range_premium,CHECK,CHECK (min_qty <= max_qty),null
+notification_preferences,2200_166979_1_not_null,CHECK,null,null
+order_items,2200_41580_1_not_null,CHECK,null,null
+order_items,2200_41580_2_not_null,CHECK,null,null
+order_items,2200_41580_4_not_null,CHECK,null,null
+order_items,2200_41580_5_not_null,CHECK,null,null
+order_items,2200_41580_6_not_null,CHECK,null,null
+order_items,order_items_qty_check,CHECK,CHECK ((qty <> 0)),null
+orders,2200_41560_10_not_null,CHECK,null,null
+orders,2200_41560_1_not_null,CHECK,null,null
+orders,2200_41560_23_not_null,CHECK,null,null
+orders,2200_41560_24_not_null,CHECK,null,null
+orders,2200_41560_2_not_null,CHECK,null,null
+orders,2200_41560_3_not_null,CHECK,null,null
+orders,2200_41560_4_not_null,CHECK,null,null
+orders,2200_41560_5_not_null,CHECK,null,null
+orders,2200_41560_6_not_null,CHECK,null,null
+orders,2200_41560_7_not_null,CHECK,null,null
+orders,2200_41560_8_not_null,CHECK,null,null
+orders,2200_41560_9_not_null,CHECK,null,null
+orders,orders_fulfillment_status_check,CHECK,"CHECK ((fulfillment_status = ANY (ARRAY['new'::text, 'hold_unpaid'::text, 'ready_to_pick'::text, 'shipped'::text, 'cancelled'::text])))",null
+orders,orders_invoice_status_check,CHECK,"CHECK ((invoice_status = ANY (ARRAY['draft'::text, 'open'::text, 'sent'::text, 'paid'::text, 'void'::text, 'uncollectible'::text])))",null
+orders,orders_order_type_check,CHECK,"CHECK ((order_type = ANY (ARRAY['consumables_reorder'::text, 'tool_purchase'::text, 'tool_rental_setup'::text, 'tool_rental_payment'::text])))",null
+orders,orders_payment_channel_check,CHECK,"CHECK ((payment_channel = ANY (ARRAY['stripe'::text, 'invoice'::text])))",null
+orders,orders_payment_status_check,CHECK,"CHECK ((payment_status = ANY (ARRAY['unpaid'::text, 'paid'::text, 'failed'::text, 'refunded'::text])))",null
+outbox,2200_71576_11_not_null,CHECK,null,null
+outbox,2200_71576_12_not_null,CHECK,null,null
+outbox,2200_71576_1_not_null,CHECK,null,null
+outbox,2200_71576_2_not_null,CHECK,null,null
+outbox,2200_71576_3_not_null,CHECK,null,null
+outbox,2200_71576_4_not_null,CHECK,null,null
+outbox,2200_71576_5_not_null,CHECK,null,null
+outbox,2200_71576_6_not_null,CHECK,null,null
+outbox,outbox_status_check,CHECK,"CHECK ((status = ANY (ARRAY['pending'::text, 'processing'::text, 'completed'::text, 'failed'::text])))",null
+premium_pricing_ladder,2200_144453_1_not_null,CHECK,null,null
+premium_pricing_ladder,2200_144453_2_not_null,CHECK,null,null
+premium_pricing_ladder,2200_144453_3_not_null,CHECK,null,null
+premium_pricing_ladder,2200_144453_4_not_null,CHECK,null,null
 premium_pricing_ladder,unique_qty_range_premium,UNIQUE,null,"min_qty, max_qty"
-products,products_type_check,CHECK,"CHECK (type = ANY (ARRAY['tool'::text, 'consumable'::text, 'machine'::text, 'part'::text]))",null
-quote_requests,quote_requests_source_check,CHECK,"CHECK (source::text = ANY (ARRAY['manual'::character varying, 'automated'::character varying, 'website_form'::character varying, 'phone_call'::character varying, 'marketing_link'::character varying]::text[]))",null
-quote_requests,quote_requests_status_check,CHECK,"CHECK (status::text = ANY (ARRAY['requested'::character varying, 'quote_sent'::character varying, 'won'::character varying, 'lost'::character varying, 'too_soon'::character varying, 'not_ready'::character varying, 'too_expensive'::character varying]::text[]))",null
-rental_agreements,rental_agreements_status_check,CHECK,"CHECK (status = ANY (ARRAY['trial'::text, 'active'::text, 'past_due'::text, 'cancelled'::text, 'completed'::text, 'defaulted'::text]))",null
+premium_pricing_ladder,valid_qty_range_premium,CHECK,CHECK ((min_qty <= max_qty)),null
+products,2200_17702_1_not_null,CHECK,null,null
+products,products_type_check,CHECK,"CHECK ((type = ANY (ARRAY['tool'::text, 'consumable'::text, 'machine'::text, 'part'::text])))",null
+products,products_type_check,CHECK,"CHECK ((type = ANY (ARRAY['tool'::text, 'consumable'::text, 'machine'::text, 'part'::text])))",null
+quote_items,2200_164663_1_not_null,CHECK,null,null
+quote_items,2200_164663_2_not_null,CHECK,null,null
+quote_items,2200_164663_3_not_null,CHECK,null,null
+quote_items,2200_164663_4_not_null,CHECK,null,null
+quote_items,2200_164663_5_not_null,CHECK,null,null
+quote_items,2200_164663_6_not_null,CHECK,null,null
+quote_items,2200_164663_8_not_null,CHECK,null,null
+quote_notes,2200_166932_1_not_null,CHECK,null,null
+quote_notes,2200_166932_2_not_null,CHECK,null,null
+quote_notes,2200_166932_3_not_null,CHECK,null,null
+quote_notes,2200_166932_4_not_null,CHECK,null,null
+quote_notes,2200_166932_5_not_null,CHECK,null,null
+quote_requests,2200_99759_1_not_null,CHECK,null,null
+quote_requests,2200_99759_2_not_null,CHECK,null,null
+quote_requests,2200_99759_3_not_null,CHECK,null,null
+quote_requests,2200_99759_6_not_null,CHECK,null,null
+quote_requests,2200_99759_7_not_null,CHECK,null,null
+quote_requests,quote_requests_source_check,CHECK,"CHECK (((source)::text = ANY ((ARRAY['manual'::character varying, 'automated'::character varying, 'website_form'::character varying, 'phone_call'::character varying, 'marketing_link'::character varying])::text[])))",null
+quote_requests,quote_requests_status_check,CHECK,"CHECK (((status)::text = ANY ((ARRAY['requested'::character varying, 'quote_sent'::character varying, 'won'::character varying, 'lost'::character varying, 'too_soon'::character varying, 'not_ready'::character varying, 'too_expensive'::character varying])::text[])))",null
+quotes,2200_164634_10_not_null,CHECK,null,null
+quotes,2200_164634_19_not_null,CHECK,null,null
+quotes,2200_164634_1_not_null,CHECK,null,null
+quotes,2200_164634_20_not_null,CHECK,null,null
+quotes,2200_164634_2_not_null,CHECK,null,null
+quotes,2200_164634_3_not_null,CHECK,null,null
+quotes,2200_164634_4_not_null,CHECK,null,null
+quotes,2200_164634_6_not_null,CHECK,null,null
+quotes,2200_164634_7_not_null,CHECK,null,null
+quotes,2200_164634_8_not_null,CHECK,null,null
+rental_agreements,2200_97206_10_not_null,CHECK,null,null
+rental_agreements,2200_97206_12_not_null,CHECK,null,null
+rental_agreements,2200_97206_13_not_null,CHECK,null,null
+rental_agreements,2200_97206_16_not_null,CHECK,null,null
+rental_agreements,2200_97206_1_not_null,CHECK,null,null
+rental_agreements,2200_97206_21_not_null,CHECK,null,null
+rental_agreements,2200_97206_22_not_null,CHECK,null,null
+rental_agreements,2200_97206_2_not_null,CHECK,null,null
+rental_agreements,2200_97206_3_not_null,CHECK,null,null
+rental_agreements,2200_97206_5_not_null,CHECK,null,null
+rental_agreements,2200_97206_8_not_null,CHECK,null,null
+rental_agreements,2200_97206_9_not_null,CHECK,null,null
 rental_agreements,rental_agreements_serial_number_key,UNIQUE,null,serial_number
+rental_agreements,rental_agreements_status_check,CHECK,"CHECK ((status = ANY (ARRAY['trial'::text, 'active'::text, 'past_due'::text, 'cancelled'::text, 'completed'::text, 'defaulted'::text])))",null
 rental_agreements,rental_agreements_stripe_subscription_id_key,UNIQUE,null,stripe_subscription_id
-shipping_rates,shipping_rates_rate_gbp_check,CHECK,CHECK (rate_gbp >= 0::numeric),null
+shipping_addresses,2200_97127_11_not_null,CHECK,null,null
+shipping_addresses,2200_97127_12_not_null,CHECK,null,null
+shipping_addresses,2200_97127_1_not_null,CHECK,null,null
+shipping_addresses,2200_97127_2_not_null,CHECK,null,null
+shipping_addresses,2200_97127_3_not_null,CHECK,null,null
+shipping_addresses,2200_97127_5_not_null,CHECK,null,null
+shipping_addresses,2200_97127_7_not_null,CHECK,null,null
+shipping_addresses,2200_97127_8_not_null,CHECK,null,null
+shipping_manifests,2200_121087_14_not_null,CHECK,null,null
+shipping_manifests,2200_121087_1_not_null,CHECK,null,null
+shipping_manifests,2200_121087_2_not_null,CHECK,null,null
+shipping_manifests,2200_121087_5_not_null,CHECK,null,null
+shipping_manifests,2200_121087_6_not_null,CHECK,null,null
+shipping_rates,2200_141466_10_not_null,CHECK,null,null
+shipping_rates,2200_141466_1_not_null,CHECK,null,null
+shipping_rates,2200_141466_2_not_null,CHECK,null,null
+shipping_rates,2200_141466_3_not_null,CHECK,null,null
+shipping_rates,2200_141466_7_not_null,CHECK,null,null
+shipping_rates,2200_141466_9_not_null,CHECK,null,null
 shipping_rates,shipping_rates_country_code_key,UNIQUE,null,country_code
-standard_pricing_ladder,valid_qty_range,CHECK,CHECK (min_qty <= max_qty),null
+shipping_rates,shipping_rates_rate_gbp_check,CHECK,CHECK ((rate_gbp >= (0)::numeric)),null
+site_branding,2200_95663_1_not_null,CHECK,null,null
+site_branding,2200_95663_2_not_null,CHECK,null,null
+standard_pricing_ladder,2200_144399_1_not_null,CHECK,null,null
+standard_pricing_ladder,2200_144399_2_not_null,CHECK,null,null
+standard_pricing_ladder,2200_144399_3_not_null,CHECK,null,null
+standard_pricing_ladder,2200_144399_4_not_null,CHECK,null,null
 standard_pricing_ladder,unique_qty_range,UNIQUE,null,"min_qty, max_qty"
+standard_pricing_ladder,valid_qty_range,CHECK,CHECK ((min_qty <= max_qty)),null
+subscription_events,2200_121185_1_not_null,CHECK,null,null
+subscription_events,2200_121185_2_not_null,CHECK,null,null
+subscription_events,2200_121185_3_not_null,CHECK,null,null
+subscription_tools,2200_136705_1_not_null,CHECK,null,null
+subscription_tools,2200_136705_2_not_null,CHECK,null,null
+subscription_tools,2200_136705_3_not_null,CHECK,null,null
+subscriptions,2200_121153_1_not_null,CHECK,null,null
+subscriptions,2200_121153_4_not_null,CHECK,null,null
+subscriptions,2200_121153_6_not_null,CHECK,null,null
 subscriptions,subscriptions_stripe_subscription_id_key,UNIQUE,null,stripe_subscription_id
+tasks,2200_166949_1_not_null,CHECK,null,null
+tasks,2200_166949_2_not_null,CHECK,null,null
+tasks,2200_166949_3_not_null,CHECK,null,null
+tasks,2200_166949_6_not_null,CHECK,null,null
+tool_consumable_map,2200_18183_1_not_null,CHECK,null,null
+tool_consumable_map,2200_18183_2_not_null,CHECK,null,null
+tool_pricing_ladder,2200_164613_1_not_null,CHECK,null,null
+tool_pricing_ladder,2200_164613_2_not_null,CHECK,null,null
+tool_pricing_ladder,2200_164613_3_not_null,CHECK,null,null
+tool_pricing_ladder,2200_164613_4_not_null,CHECK,null,null
+trial_intents,2200_125185_1_not_null,CHECK,null,null
+trial_intents,2200_125185_2_not_null,CHECK,null,null
 trial_intents,trial_intents_token_key,UNIQUE,null,token
-users,users_role_check,CHECK,"CHECK (role = ANY (ARRAY['director'::text, 'sales_rep'::text]))",null
+users,2200_99956_10_not_null,CHECK,null,null
+users,2200_99956_1_not_null,CHECK,null,null
+users,2200_99956_2_not_null,CHECK,null,null
+users,2200_99956_3_not_null,CHECK,null,null
+users,2200_99956_4_not_null,CHECK,null,null
+users,2200_99956_5_not_null,CHECK,null,null
+users,2200_99956_7_not_null,CHECK,null,null
+users,2200_99956_9_not_null,CHECK,null,null
 users,users_email_key,UNIQUE,null,email
+users,users_role_check,CHECK,"CHECK ((role = ANY (ARRAY['director'::text, 'sales_rep'::text])))",null

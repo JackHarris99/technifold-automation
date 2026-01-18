@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 import { Company } from '@/types';
-import { generatePortalUrl } from '@/lib/supabase';
-import { CopyButton } from '../shared/CopyButton';
 
 interface CompanyListProps {
   companies: Company[];
@@ -11,27 +9,11 @@ interface CompanyListProps {
 
 export function CompanyList({ companies }: CompanyListProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [copiedAll, setCopiedAll] = useState(false);
 
   const filteredCompanies = companies.filter(company =>
     company.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     company.company_id.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const handleCopyAllLinks = async () => {
-    const allLinks = companies.map(company => {
-      const portalUrl = generatePortalUrl(company.portal_token);
-      return `${company.company_name}: ${portalUrl}`;
-    }).join('\n');
-
-    try {
-      await navigator.clipboard.writeText(allLinks);
-      setCopiedAll(true);
-      setTimeout(() => setCopiedAll(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy links:', err);
-    }
-  };
 
   return (
     <div>
@@ -52,22 +34,6 @@ export function CompanyList({ companies }: CompanyListProps) {
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
             />
           </div>
-          
-          <div className="flex space-x-3">
-            <button
-              onClick={handleCopyAllLinks}
-              className={`inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-                copiedAll 
-                  ? 'bg-green-50 text-green-700 border-green-300' 
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-              {copiedAll ? 'Copied!' : 'Copy All Links'}
-            </button>
-          </div>
         </div>
         
         <div className="mt-2 text-sm text-gray-700">
@@ -84,10 +50,7 @@ export function CompanyList({ companies }: CompanyListProps) {
                 Company
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                Portal Link
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                Status
+                Category
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
                 Actions
@@ -96,8 +59,6 @@ export function CompanyList({ companies }: CompanyListProps) {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredCompanies.map((company) => {
-              const portalUrl = generatePortalUrl(company.portal_token);
-              
               return (
                 <tr key={company.company_id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -110,13 +71,10 @@ export function CompanyList({ companies }: CompanyListProps) {
                       </div>
                     </div>
                   </td>
-                  
+
                   <td className="px-6 py-4">
-                    <div className="flex items-center space-x-2">
-                      <code className="text-xs bg-gray-100 px-2 py-1 rounded font-mono max-w-xs truncate">
-                        {portalUrl}
-                      </code>
-                      <CopyButton text={portalUrl} />
+                    <div className="text-sm text-gray-700">
+                      {company.category || 'Uncategorized'}
                     </div>
                   </td>
                   
