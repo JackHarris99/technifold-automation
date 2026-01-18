@@ -51,6 +51,10 @@ export default function QuotesPage() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [showLostModal, setShowLostModal] = useState(false);
+  const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
+  const [lostReason, setLostReason] = useState('');
+  const [markingLost, setMarkingLost] = useState(false);
 
   useEffect(() => {
     fetchQuotes();
@@ -112,6 +116,44 @@ export default function QuotesPage() {
     }
   }
 
+  function openLostModal(quote: Quote) {
+    setSelectedQuote(quote);
+    setLostReason('');
+    setShowLostModal(true);
+  }
+
+  async function markQuoteAsLost() {
+    if (!selectedQuote || !lostReason.trim()) {
+      alert('Please select a reason');
+      return;
+    }
+
+    setMarkingLost(true);
+    try {
+      const response = await fetch(`/api/admin/quotes/${selectedQuote.quote_id}/mark-lost`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lost_reason: lostReason }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setShowLostModal(false);
+        setSelectedQuote(null);
+        setLostReason('');
+        fetchQuotes(); // Refresh list
+      } else {
+        alert('Failed to mark as lost: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Failed to mark as lost:', error);
+      alert('Error marking quote as lost');
+    } finally {
+      setMarkingLost(false);
+    }
+  }
+
   async function handleEditQuote(quoteId: string) {
     try {
       // Fetch quote details to determine which builder to use
@@ -162,10 +204,15 @@ export default function QuotesPage() {
     }
   }
 
-  function getQuoteStatus(quote: Quote): { label: string; description: string; type: 'draft' | 'sent' | 'viewed' | 'accepted' | 'paid' | 'expired' } {
+  function getQuoteStatus(quote: Quote): { label: string; description: string; type: 'draft' | 'sent' | 'viewed' | 'accepted' | 'paid' | 'expired' | 'lost' } {
     const now = new Date();
 
-    // Check if expired first
+    // Check if marked as lost
+    if (quote.lost_at) {
+      return { label: 'Lost', description: quote.lost_reason || 'Marked as lost', type: 'lost' };
+    }
+
+    // Check if expired
     if (quote.expires_at && new Date(quote.expires_at) < now) {
       return { label: 'Expired', description: formatDate(quote.expires_at), type: 'expired' };
     }
@@ -267,16 +314,19 @@ export default function QuotesPage() {
 
   const stats = {
     total: quotes.length,
-    draft: quotes.filter(q => !q.sent_at).length,
-    active: quotes.filter(q => q.sent_at && !q.accepted_at && !q.invoice?.paid_at).length,
-    invoiced: quotes.filter(q => q.accepted_at && !q.invoice?.paid_at).length,
+    draft: quotes.filter(q => !q.sent_at && !q.lost_at).length,
+    active: quotes.filter(q => q.sent_at && !q.accepted_at && !q.invoice?.paid_at && !q.lost_at).length,
+    invoiced: quotes.filter(q => q.accepted_at && !q.invoice?.paid_at && !q.lost_at).length,
     paid: quotes.filter(q => q.invoice?.paid_at).length,
+    lost: quotes.filter(q => q.lost_at).length,
     needAction: quotes.filter(q => {
+      if (q.lost_at) return false; // Don't count lost quotes
       const action = getNextAction(q);
       return action.priority === 'high' || action.priority === 'medium';
     }).length,
     totalValue: quotes.reduce((sum, q) => sum + (q.total_amount || 0), 0),
     paidValue: quotes.filter(q => q.invoice?.paid_at).reduce((sum, q) => sum + (q.total_amount || 0), 0),
+    lostValue: quotes.filter(q => q.lost_at).reduce((sum, q) => sum + (q.total_amount || 0), 0),
   };
 
   return (
@@ -290,7 +340,7 @@ export default function QuotesPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-7 gap-4 mb-6">
         <div className="bg-white rounded-lg p-4 border-2 border-gray-200">
           <div className="text-xs font-medium text-gray-500 uppercase mb-1">Total Quotes</div>
           <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
@@ -312,14 +362,19 @@ export default function QuotesPage() {
           <div className="text-xs text-purple-600 mt-1">Payment pending</div>
         </div>
         <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-          <div className="text-xs font-medium text-green-700 uppercase mb-1">Paid</div>
+          <div className="text-xs font-medium text-green-700 uppercase mb-1">Won (Paid)</div>
           <div className="text-2xl font-bold text-green-900">{stats.paid}</div>
           <div className="text-xs text-green-600 mt-1">£{stats.paidValue.toLocaleString()}</div>
         </div>
         <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
-          <div className="text-xs font-medium text-orange-700 uppercase mb-1">Need Action</div>
-          <div className="text-2xl font-bold text-orange-900">{stats.needAction}</div>
-          <div className="text-xs text-orange-600 mt-1">Require follow-up</div>
+          <div className="text-xs font-medium text-orange-700 uppercase mb-1">Lost</div>
+          <div className="text-2xl font-bold text-orange-900">{stats.lost}</div>
+          <div className="text-xs text-orange-600 mt-1">£{stats.lostValue.toLocaleString()}</div>
+        </div>
+        <div className="bg-red-50 rounded-lg p-4 border border-red-200">
+          <div className="text-xs font-medium text-red-700 uppercase mb-1">Need Action</div>
+          <div className="text-2xl font-bold text-red-900">{stats.needAction}</div>
+          <div className="text-xs text-red-600 mt-1">Require follow-up</div>
         </div>
       </div>
 
@@ -403,6 +458,7 @@ export default function QuotesPage() {
                         status.type === 'viewed' ? 'bg-purple-100 text-purple-800' :
                         status.type === 'sent' ? 'bg-yellow-100 text-yellow-800' :
                         status.type === 'expired' ? 'bg-red-100 text-red-800' :
+                        status.type === 'lost' ? 'bg-orange-100 text-orange-800' :
                         'bg-gray-100 text-gray-800'
                       }`}>
                         {status.label}
@@ -493,6 +549,14 @@ export default function QuotesPage() {
                           📄 Invoice PDF
                         </a>
                       )}
+                      {!quote.lost_at && !quote.invoice?.paid_at && (
+                        <button
+                          onClick={() => openLostModal(quote)}
+                          className="px-3 py-1.5 text-sm font-medium text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-md transition-colors"
+                        >
+                          Mark Lost
+                        </button>
+                      )}
                       <button
                         onClick={() => deleteQuote(quote.quote_id, quote.company_name)}
                         className="px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
@@ -512,6 +576,66 @@ export default function QuotesPage() {
       {!loading && quotes.length > 0 && (
         <div className="mt-4 text-sm text-gray-800 text-center">
           Showing {quotes.length} quotes • Total pipeline value: £{stats.totalValue.toLocaleString()}
+        </div>
+      )}
+
+      {/* Mark as Lost Modal */}
+      {showLostModal && selectedQuote && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Mark Quote as Lost</h3>
+
+            <p className="text-sm text-gray-700 mb-4">
+              Quote for <span className="font-semibold">{selectedQuote.company_name}</span> • £{selectedQuote.total_amount.toLocaleString()}
+            </p>
+
+            <p className="text-sm text-gray-600 mb-4">
+              Select the reason why this quote was lost. This helps improve our sales process and is tracked in the company timeline.
+            </p>
+
+            <div className="mb-4">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Lost Reason <span className="text-red-600">*</span>
+              </label>
+              <select
+                value={lostReason}
+                onChange={(e) => setLostReason(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              >
+                <option value="">Select a reason...</option>
+                <option value="Price too high">Price too high</option>
+                <option value="Went with competitor">Went with competitor</option>
+                <option value="Budget constraints">Budget constraints</option>
+                <option value="Timing not right">Timing not right</option>
+                <option value="No longer interested">No longer interested</option>
+                <option value="Requirements changed">Requirements changed</option>
+                <option value="No response from customer">No response from customer</option>
+                <option value="Product not suitable">Product not suitable</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowLostModal(false);
+                  setSelectedQuote(null);
+                  setLostReason('');
+                }}
+                disabled={markingLost}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={markQuoteAsLost}
+                disabled={!lostReason.trim() || markingLost}
+                className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-semibold hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {markingLost ? 'Saving...' : 'Mark as Lost'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
