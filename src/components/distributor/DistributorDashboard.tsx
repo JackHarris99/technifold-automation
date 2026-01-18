@@ -56,6 +56,9 @@ export default function DistributorDashboard({
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [billingAddress, setBillingAddress] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'tools' | 'consumables'>('tools');
+  const [pricingPreview, setPricingPreview] = useState<any>(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // Fetch shipping addresses and billing on mount
   useEffect(() => {
@@ -86,6 +89,44 @@ export default function DistributorDashboard({
     };
     fetchAddresses();
   }, []);
+
+  // Fetch pricing preview whenever cart or selected address changes
+  useEffect(() => {
+    const fetchPricingPreview = async () => {
+      if (cart.size === 0) {
+        setPricingPreview(null);
+        return;
+      }
+
+      setLoadingPreview(true);
+      try {
+        const items = Array.from(cart.entries()).map(([product_code, quantity]) => ({
+          product_code,
+          quantity,
+        }));
+
+        const response = await fetch('/api/distributor/pricing-preview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            items,
+            shipping_address_id: selectedAddressId,
+          }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          setPricingPreview(data.preview);
+        }
+      } catch (error) {
+        console.error('Failed to fetch pricing preview:', error);
+      } finally {
+        setLoadingPreview(false);
+      }
+    };
+
+    fetchPricingPreview();
+  }, [cart, selectedAddressId]);
 
   // Group products by type and category
   const groupedProducts = useMemo(() => {
@@ -180,7 +221,7 @@ export default function DistributorDashboard({
     }
   };
 
-  const handleSubmitOrder = async () => {
+  const handleSubmitOrder = () => {
     if (cartItems.length === 0) {
       alert('Your cart is empty. Please add items before placing an order.');
       return;
@@ -204,10 +245,12 @@ export default function DistributorDashboard({
       return;
     }
 
-    if (!confirm(`Place order for ${cartItems.length} item(s) to ${selectedAddress.city}, ${selectedAddress.country}?`)) {
-      return;
-    }
+    // Show confirmation modal
+    setShowConfirmModal(true);
+  };
 
+  const handleConfirmOrder = async () => {
+    setShowConfirmModal(false);
     setSubmitting(true);
 
     try {
@@ -234,6 +277,7 @@ export default function DistributorDashboard({
       alert('Order placed successfully! Invoice has been sent via email.');
       router.refresh();
       setCart(new Map());
+      setPricingPreview(null);
     } catch (error: any) {
       console.error('Error submitting order:', error);
       alert(`Failed to submit order: ${error.message}`);
@@ -648,16 +692,55 @@ export default function DistributorDashboard({
               </div>
 
               <div className="border-t-2 border-white/10 pt-4">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-[15px] font-[700] text-white">Subtotal</div>
-                  <div className="text-[28px] font-[800] text-[#16a34a] tracking-[-0.02em]">
-                    £{subtotal.toFixed(2)}
+                {loadingPreview ? (
+                  <div className="text-center py-4 text-gray-400 text-sm">Calculating...</div>
+                ) : pricingPreview ? (
+                  <div className="space-y-3 mb-4">
+                    {/* Subtotal */}
+                    <div className="flex justify-between items-center">
+                      <span className="text-[15px] text-[#999] font-[500]">Subtotal</span>
+                      <span className="font-[700] text-[17px] tracking-[-0.01em]">£{pricingPreview.subtotal.toFixed(2)}</span>
+                    </div>
+
+                    {/* Shipping */}
+                    {pricingPreview.shipping !== undefined && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-[15px] text-[#999] font-[500]">Shipping</span>
+                        <span className="font-[600] text-[16px]">{pricingPreview.shipping === 0 ? 'FREE' : `£${pricingPreview.shipping.toFixed(2)}`}</span>
+                      </div>
+                    )}
+
+                    {/* VAT */}
+                    {pricingPreview.vat_amount !== undefined && (
+                      <div className="flex justify-between items-center pb-3 border-b border-[#2a2a2a]">
+                        <span className="text-[15px] text-[#999] font-[500]">
+                          VAT {pricingPreview.vat_rate > 0 && `(${(pricingPreview.vat_rate * 100).toFixed(0)}%)`}
+                          {pricingPreview.vat_exempt_reason && ` - ${pricingPreview.vat_exempt_reason}`}
+                        </span>
+                        <span className="font-[600] text-[16px]">£{pricingPreview.vat_amount.toFixed(2)}</span>
+                      </div>
+                    )}
+
+                    {/* Final Total */}
+                    <div className="flex justify-between items-center pt-2">
+                      <span className="text-[17px] font-[700] text-white">Total</span>
+                      <span className="text-[28px] font-[800] text-[#16a34a] tracking-[-0.02em]">
+                        £{pricingPreview.total.toFixed(2)}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-[15px] font-[700] text-white">Subtotal</div>
+                    <div className="text-[28px] font-[800] text-[#16a34a] tracking-[-0.02em]">
+                      £{subtotal.toFixed(2)}
+                    </div>
+                  </div>
+                )}
 
                 <button
                   onClick={handleSubmitOrder}
-                  disabled={submitting || cartItems.length === 0}
+                  disabled={submitting || cartItems.length === 0 || !selectedAddressId}
                   className="w-full py-4 bg-[#16a34a] text-white rounded-[10px] font-[700] text-[15px] tracking-[-0.01em] hover:bg-[#15803d] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? 'Submitting Order...' : 'Place Order'}
@@ -734,6 +817,64 @@ export default function DistributorDashboard({
         companyName={distributor.company_name}
         onSuccess={handleAddressSaved}
       />
+
+      {/* Order Confirmation Modal */}
+      {showConfirmModal && pricingPreview && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-2xl font-semibold">Confirm Order</h2>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <p className="text-gray-700">
+                You're about to place an order for <strong>{cartItems.length} item(s)</strong>.
+              </p>
+
+              {/* Order Summary */}
+              <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Subtotal</span>
+                  <span className="font-medium">£{pricingPreview.subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Shipping</span>
+                  <span className="font-medium">{pricingPreview.shipping === 0 ? 'FREE' : `£${pricingPreview.shipping.toFixed(2)}`}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">VAT</span>
+                  <span className="font-medium">£{pricingPreview.vat_amount.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-300">
+                  <span>Total</span>
+                  <span className="text-green-600">£{pricingPreview.total.toFixed(2)}</span>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-600">
+                A Stripe invoice will be created and sent to your email. Payment terms: Net 30 days.
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-3 p-6 border-t">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
+                disabled={submitting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmOrder}
+                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium disabled:opacity-50"
+                disabled={submitting}
+              >
+                {submitting ? 'Processing...' : 'Confirm Order'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

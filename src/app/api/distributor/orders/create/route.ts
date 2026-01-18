@@ -200,6 +200,7 @@ export async function POST(request: NextRequest) {
     if (!stripeCustomerId) {
       // Create new Stripe customer
       const customer = await getStripeClient().customers.create({
+        email: distributor.email,
         name: company.company_name,
         address: billingAddress,
         shipping: shippingDetails,
@@ -217,6 +218,7 @@ export async function POST(request: NextRequest) {
     } else {
       // Update existing customer's addresses
       await getStripeClient().customers.update(stripeCustomerId, {
+        email: distributor.email,
         name: company.company_name,
         address: billingAddress,
         shipping: shippingDetails,
