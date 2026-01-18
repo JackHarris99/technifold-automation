@@ -9,6 +9,16 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getViewMode, addViewModeToUrl } from '@/lib/viewMode';
 
+interface Invoice {
+  invoice_id: string;
+  invoice_number: string;
+  total_amount: number;
+  payment_status: string;
+  paid_at: string | null;
+  due_date: string | null;
+  status: string;
+}
+
 interface Quote {
   quote_id: string;
   company_id: string;
@@ -28,6 +38,8 @@ interface Quote {
   last_activity: string | null;
   account_owner: string | null;
   free_shipping?: boolean;
+  invoice: Invoice | null;
+  invoice_id: string | null;
 }
 
 export default function QuotesPage() {
@@ -145,42 +157,89 @@ export default function QuotesPage() {
     }
   }
 
-  function getStatusBadge(quote: Quote) {
+  function getQuoteStatus(quote: Quote): { label: string; description: string; type: 'draft' | 'sent' | 'viewed' | 'accepted' | 'paid' | 'expired' } {
     const now = new Date();
-    const expiresAt = quote.expires_at ? new Date(quote.expires_at) : null;
-    const isExpired = expiresAt && expiresAt < now;
 
-    if (isExpired) {
-      return <span className="px-2 py-1 text-xs font-semibold rounded bg-gray-200 text-gray-700">🔴 Expired</span>;
+    // Check if expired first
+    if (quote.expires_at && new Date(quote.expires_at) < now) {
+      return { label: 'Expired', description: formatDate(quote.expires_at), type: 'expired' };
     }
 
+    // Check if invoice is paid
+    if (quote.invoice?.paid_at) {
+      return { label: 'Paid', description: formatDate(quote.invoice.paid_at), type: 'paid' };
+    }
+
+    // Check if invoice generated (accepted)
     if (quote.accepted_at) {
-      return <span className="px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-700">✅ Accepted</span>;
+      return { label: 'Invoice Generated', description: formatDate(quote.accepted_at), type: 'accepted' };
     }
 
+    // Check if viewed
     if (quote.viewed_at) {
-      const daysSinceViewed = Math.floor((now.getTime() - new Date(quote.viewed_at).getTime()) / (1000 * 60 * 60 * 24));
-      if (daysSinceViewed === 0) {
-        return <span className="px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-700">🟢 Active</span>;
-      } else if (daysSinceViewed <= 3) {
-        return <span className="px-2 py-1 text-xs font-semibold rounded bg-blue-100 text-blue-700">🟢 Viewed</span>;
-      } else {
-        return <span className="px-2 py-1 text-xs font-semibold rounded bg-orange-100 text-orange-700">🟠 Follow-up</span>;
-      }
+      return { label: 'Viewed', description: getTimeAgo(quote.viewed_at), type: 'viewed' };
     }
 
+    // Check if sent
     if (quote.sent_at) {
-      const daysSinceSent = Math.floor((now.getTime() - new Date(quote.sent_at).getTime()) / (1000 * 60 * 60 * 24));
-      if (daysSinceSent >= 7) {
-        return <span className="px-2 py-1 text-xs font-semibold rounded bg-red-100 text-red-700">🔴 Stale</span>;
-      } else if (daysSinceSent >= 3) {
-        return <span className="px-2 py-1 text-xs font-semibold rounded bg-yellow-100 text-yellow-700">🟡 Not Viewed</span>;
-      } else {
-        return <span className="px-2 py-1 text-xs font-semibold rounded bg-yellow-100 text-yellow-700">🟡 Sent</span>;
-      }
+      return { label: 'Sent', description: getTimeAgo(quote.sent_at), type: 'sent' };
     }
 
-    return <span className="px-2 py-1 text-xs font-semibold rounded bg-gray-200 text-gray-700">📝 Draft</span>;
+    // Draft
+    return { label: 'Draft', description: 'Not sent yet', type: 'draft' };
+  }
+
+  function getNextAction(quote: Quote): { action: string; priority: 'low' | 'medium' | 'high' | 'none' } {
+    const now = new Date();
+
+    // If paid, no action needed
+    if (quote.invoice?.paid_at) {
+      return { action: 'Quote completed - invoice paid', priority: 'none' };
+    }
+
+    // If invoice exists but not paid, check if overdue
+    if (quote.invoice && !quote.invoice.paid_at) {
+      if (quote.invoice.due_date && new Date(quote.invoice.due_date) < now) {
+        const daysOverdue = Math.floor((now.getTime() - new Date(quote.invoice.due_date).getTime()) / 86400000);
+        return { action: `Invoice overdue by ${daysOverdue} day${daysOverdue > 1 ? 's' : ''} - chase payment`, priority: 'high' };
+      }
+      return { action: 'Awaiting invoice payment', priority: 'medium' };
+    }
+
+    // If expired
+    if (quote.expires_at && new Date(quote.expires_at) < now) {
+      return { action: 'Quote expired - create new quote if customer interested', priority: 'low' };
+    }
+
+    // If viewed but no action
+    if (quote.viewed_at) {
+      const daysSinceViewed = Math.floor((now.getTime() - new Date(quote.viewed_at).getTime()) / 86400000);
+      if (daysSinceViewed >= 5) {
+        return { action: `Follow up - customer viewed ${daysSinceViewed} days ago`, priority: 'high' };
+      } else if (daysSinceViewed >= 3) {
+        return { action: `Consider follow up - viewed ${daysSinceViewed} days ago`, priority: 'medium' };
+      }
+      return { action: 'Wait for customer response', priority: 'low' };
+    }
+
+    // If sent but not viewed
+    if (quote.sent_at) {
+      const daysSinceSent = Math.floor((now.getTime() - new Date(quote.sent_at).getTime()) / 86400000);
+      if (daysSinceSent >= 7) {
+        return { action: `Not opened in ${daysSinceSent} days - send reminder`, priority: 'high' };
+      } else if (daysSinceSent >= 3) {
+        return { action: `Not opened yet (${daysSinceSent} days) - consider reminder`, priority: 'medium' };
+      }
+      return { action: 'Wait for customer to open quote', priority: 'low' };
+    }
+
+    // Draft
+    return { action: 'Draft - complete and send to customer', priority: 'medium' };
+  }
+
+  function formatDate(dateString: string) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
   function getTimeAgo(dateString: string | null) {
@@ -203,17 +262,16 @@ export default function QuotesPage() {
 
   const stats = {
     total: quotes.length,
-    sent: quotes.filter(q => q.sent_at && !q.viewed_at).length,
-    viewed: quotes.filter(q => q.viewed_at && !q.accepted_at).length,
-    accepted: quotes.filter(q => q.accepted_at).length,
-    needFollowUp: quotes.filter(q => {
-      if (!q.sent_at || q.accepted_at) return false;
-      const daysSinceSent = Math.floor((new Date().getTime() - new Date(q.sent_at).getTime()) / 86400000);
-      if (!q.viewed_at) return daysSinceSent >= 3;
-      const daysSinceViewed = Math.floor((new Date().getTime() - new Date(q.viewed_at).getTime()) / 86400000);
-      return daysSinceViewed >= 5;
+    draft: quotes.filter(q => !q.sent_at).length,
+    active: quotes.filter(q => q.sent_at && !q.accepted_at && !q.invoice?.paid_at).length,
+    invoiced: quotes.filter(q => q.accepted_at && !q.invoice?.paid_at).length,
+    paid: quotes.filter(q => q.invoice?.paid_at).length,
+    needAction: quotes.filter(q => {
+      const action = getNextAction(q);
+      return action.priority === 'high' || action.priority === 'medium';
     }).length,
     totalValue: quotes.reduce((sum, q) => sum + (q.total_amount || 0), 0),
+    paidValue: quotes.filter(q => q.invoice?.paid_at).reduce((sum, q) => sum + (q.total_amount || 0), 0),
   };
 
   return (
@@ -227,26 +285,36 @@ export default function QuotesPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-        <div className="bg-white rounded-lg p-4 border border-gray-200">
-          <div className="text-sm text-gray-800">Total Quotes</div>
-          <div className="text-2xl font-bold text-gray-900 mt-1">{stats.total}</div>
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
+        <div className="bg-white rounded-lg p-4 border-2 border-gray-200">
+          <div className="text-xs font-medium text-gray-500 uppercase mb-1">Total Quotes</div>
+          <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
+          <div className="text-xs text-gray-600 mt-1">£{stats.totalValue.toLocaleString()}</div>
         </div>
-        <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-          <div className="text-sm text-yellow-700">Sent</div>
-          <div className="text-2xl font-bold text-yellow-900 mt-1">{stats.sent}</div>
-        </div>
-        <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-          <div className="text-sm text-green-700">Viewed</div>
-          <div className="text-2xl font-bold text-green-900 mt-1">{stats.viewed}</div>
+        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <div className="text-xs font-medium text-gray-500 uppercase mb-1">Drafts</div>
+          <div className="text-2xl font-bold text-gray-700">{stats.draft}</div>
+          <div className="text-xs text-gray-500 mt-1">Not sent yet</div>
         </div>
         <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-          <div className="text-sm text-blue-700">Accepted</div>
-          <div className="text-2xl font-bold text-blue-900 mt-1">{stats.accepted}</div>
+          <div className="text-xs font-medium text-blue-700 uppercase mb-1">Active</div>
+          <div className="text-2xl font-bold text-blue-900">{stats.active}</div>
+          <div className="text-xs text-blue-600 mt-1">Awaiting response</div>
+        </div>
+        <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+          <div className="text-xs font-medium text-purple-700 uppercase mb-1">Invoiced</div>
+          <div className="text-2xl font-bold text-purple-900">{stats.invoiced}</div>
+          <div className="text-xs text-purple-600 mt-1">Payment pending</div>
+        </div>
+        <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+          <div className="text-xs font-medium text-green-700 uppercase mb-1">Paid</div>
+          <div className="text-2xl font-bold text-green-900">{stats.paid}</div>
+          <div className="text-xs text-green-600 mt-1">£{stats.paidValue.toLocaleString()}</div>
         </div>
         <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
-          <div className="text-sm text-orange-700">Need Follow-up</div>
-          <div className="text-2xl font-bold text-orange-900 mt-1">{stats.needFollowUp}</div>
+          <div className="text-xs font-medium text-orange-700 uppercase mb-1">Need Action</div>
+          <div className="text-2xl font-bold text-orange-900">{stats.needAction}</div>
+          <div className="text-xs text-orange-600 mt-1">Require follow-up</div>
         </div>
       </div>
 
@@ -269,87 +337,155 @@ export default function QuotesPage() {
         </div>
       </div>
 
-      {/* Quotes Table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      {/* Quotes List */}
+      <div className="space-y-3">
         {loading ? (
-          <div className="p-8 text-center text-gray-700">Loading quotes...</div>
+          <div className="bg-white rounded-lg border border-gray-200 p-8 text-center text-gray-700">
+            Loading quotes...
+          </div>
         ) : quotes.length === 0 ? (
-          <div className="p-8 text-center text-gray-700">No quotes found</div>
+          <div className="bg-white rounded-lg border border-gray-200 p-8 text-center text-gray-700">
+            No quotes found
+          </div>
         ) : (
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Owner</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Company</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Contact</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase">Amount</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Sent</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Last Viewed</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Status</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {quotes.map((quote) => (
-                <tr key={quote.quote_id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 text-sm">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      quote.account_owner === 'current_user'
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'bg-gray-100 text-gray-700'
-                    }`}>
-                      {quote.account_owner === 'current_user' ? 'Me' : quote.created_by_name || 'Unknown'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/admin/company/${quote.company_id}`}
-                      className="text-sm font-medium text-blue-600 hover:text-blue-800"
-                    >
-                      {quote.company_name}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">
-                    {quote.contact_name || '-'}
-                  </td>
-                  <td className="px-4 py-3 text-sm font-semibold text-gray-900 text-right">
-                    £{quote.total_amount?.toLocaleString() || '0'}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-800">
-                    {getTimeAgo(quote.sent_at)}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-800">
-                    {getTimeAgo(quote.viewed_at)}
-                  </td>
-                  <td className="px-4 py-3">
-                    {getStatusBadge(quote)}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
+          quotes.map((quote) => {
+            const status = getQuoteStatus(quote);
+            const nextAction = getNextAction(quote);
+
+            return (
+              <div key={quote.quote_id} className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                <div className="p-5">
+                  {/* Header Row */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-1">
+                        <Link
+                          href={`/admin/company/${quote.company_id}`}
+                          className="text-lg font-semibold text-gray-900 hover:text-blue-600"
+                        >
+                          {quote.company_name}
+                        </Link>
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                          quote.account_owner === 'current_user'
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'bg-gray-100 text-gray-700'
+                        }`}>
+                          {quote.account_owner === 'current_user' ? 'My Customer' : quote.created_by_name}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {quote.contact_name || 'No contact'} • Quote #{quote.quote_id.slice(0, 8)}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-gray-900">
+                        £{quote.total_amount?.toLocaleString() || '0'}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {quote.quote_type === 'interactive' ? 'Interactive' : 'Static'} Quote
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Status Grid */}
+                  <div className="grid grid-cols-3 gap-4 mb-4 pb-4 border-b border-gray-200">
+                    {/* Quote Status */}
+                    <div>
+                      <div className="text-xs font-medium text-gray-500 uppercase mb-1">Quote Status</div>
+                      <div className={`inline-flex items-center px-2.5 py-1 rounded-md text-sm font-semibold ${
+                        status.type === 'paid' ? 'bg-green-100 text-green-800' :
+                        status.type === 'accepted' ? 'bg-blue-100 text-blue-800' :
+                        status.type === 'viewed' ? 'bg-purple-100 text-purple-800' :
+                        status.type === 'sent' ? 'bg-yellow-100 text-yellow-800' :
+                        status.type === 'expired' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {status.label}
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">{status.description}</div>
+                    </div>
+
+                    {/* Invoice Status */}
+                    <div>
+                      <div className="text-xs font-medium text-gray-500 uppercase mb-1">Invoice Status</div>
+                      {quote.invoice ? (
+                        <>
+                          <div className={`inline-flex items-center px-2.5 py-1 rounded-md text-sm font-semibold ${
+                            quote.invoice.paid_at ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
+                          }`}>
+                            {quote.invoice.paid_at ? 'Paid ✓' : 'Awaiting Payment'}
+                          </div>
+                          <div className="text-xs text-gray-600 mt-1">
+                            {quote.invoice.invoice_number} • £{quote.invoice.total_amount?.toLocaleString()}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-sm text-gray-500">No invoice yet</div>
+                          <div className="text-xs text-gray-400 mt-1">Pending customer action</div>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Timeline */}
+                    <div>
+                      <div className="text-xs font-medium text-gray-500 uppercase mb-1">Timeline</div>
+                      <div className="text-xs text-gray-700 space-y-0.5">
+                        {quote.sent_at && <div>• Sent {getTimeAgo(quote.sent_at)}</div>}
+                        {quote.viewed_at && <div>• Viewed {getTimeAgo(quote.viewed_at)}</div>}
+                        {quote.accepted_at && <div>• Invoice created {getTimeAgo(quote.accepted_at)}</div>}
+                        {quote.invoice?.paid_at && <div>• Paid {getTimeAgo(quote.invoice.paid_at)}</div>}
+                        {!quote.sent_at && <div className="text-gray-400">Not sent yet</div>}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Next Action Row */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${
+                        nextAction.priority === 'high' ? 'bg-red-500' :
+                        nextAction.priority === 'medium' ? 'bg-orange-500' :
+                        nextAction.priority === 'low' ? 'bg-blue-500' :
+                        'bg-green-500'
+                      }`}></div>
+                      <span className="text-sm font-medium text-gray-700">
+                        {nextAction.action}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
                       <Link
                         href={`/admin/quotes/${quote.quote_id}`}
-                        className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                        className="px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
                       >
-                        View
+                        View Details
                       </Link>
                       <button
                         onClick={() => handleEditQuote(quote.quote_id)}
-                        className="text-sm text-gray-700 hover:text-gray-900 font-medium"
+                        className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
                       >
-                        Edit
+                        Edit Quote
                       </button>
+                      {quote.invoice && (
+                        <Link
+                          href={`/admin/invoices/${quote.invoice.invoice_id}`}
+                          className="px-3 py-1.5 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-md transition-colors"
+                        >
+                          View Invoice
+                        </Link>
+                      )}
                       <button
                         onClick={() => deleteQuote(quote.quote_id, quote.company_name)}
-                        className="text-sm text-red-600 hover:text-red-800 font-medium"
+                        className="px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
                       >
                         Delete
                       </button>
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                </div>
+              </div>
+            );
+          })
         )}
       </div>
 

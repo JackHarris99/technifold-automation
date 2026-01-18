@@ -176,11 +176,28 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Fetch invoices for quotes that have invoice_id
+    const invoiceIds = [...new Set(ownerFilteredQuotes.map(q => q.invoice_id).filter(Boolean))];
+    let invoices: any[] = [];
+    if (invoiceIds.length > 0) {
+      const { data: invoicesData, error: invoicesError } = await supabase
+        .from('invoices')
+        .select('invoice_id, invoice_number, total_amount, payment_status, paid_at, due_date, status')
+        .in('invoice_id', invoiceIds);
+
+      if (invoicesError) {
+        console.error('[quotes/list] Error fetching invoices:', invoicesError);
+      } else {
+        invoices = invoicesData || [];
+      }
+    }
+
     // Merge data
     const enrichedQuotes = ownerFilteredQuotes.map(quote => {
       const company = companies?.find(c => c.company_id === quote.company_id);
       const creator = users?.find(u => u.user_id === quote.created_by);
       const contact = contacts?.find(c => c.contact_id === quote.contact_id);
+      const invoice = invoices?.find(i => i.invoice_id === quote.invoice_id);
       const uniqueContactCount = quoteContactCounts[quote.quote_id]?.size || 0;
 
       // Determine contact display
@@ -201,6 +218,7 @@ export async function GET(request: NextRequest) {
         created_by_name: creator?.full_name || quote.created_by,
         contact_name: contactName,
         contact_email: contactEmail,
+        invoice: invoice || null,
       };
     });
 
