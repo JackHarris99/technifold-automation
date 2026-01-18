@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { getCurrentUser } from '@/lib/auth';
 import { cookies } from 'next/headers';
+import { generateToken } from '@/lib/tokens';
 
 export async function GET(request: NextRequest) {
   try {
@@ -211,6 +212,18 @@ export async function GET(request: NextRequest) {
         contactEmail = contact.email;
       }
 
+      // Generate preview token for this quote
+      const previewToken = generateToken({
+        quote_id: quote.quote_id,
+        company_id: quote.company_id,
+        contact_id: quote.contact_id,
+        object_type: 'quote',
+        is_test: false,
+      }, 720); // 30 days
+
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.technifold.com';
+      const preview_url = `${baseUrl}/q/${previewToken}`;
+
       return {
         ...quote,
         company_name: company?.company_name || 'Unknown Company',
@@ -219,6 +232,7 @@ export async function GET(request: NextRequest) {
         contact_name: contactName,
         contact_email: contactEmail,
         invoice: invoice || null,
+        preview_url,
       };
     });
 

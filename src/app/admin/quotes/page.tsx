@@ -40,6 +40,10 @@ interface Quote {
   free_shipping?: boolean;
   invoice: Invoice | null;
   invoice_id: string | null;
+  preview_url: string;
+  won_at: string | null;
+  lost_at: string | null;
+  lost_reason: string | null;
 }
 
 export default function QuotesPage() {
@@ -454,25 +458,29 @@ export default function QuotesPage() {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Link
-                        href={`/admin/quotes/${quote.quote_id}`}
+                      <a
+                        href={quote.preview_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
                       >
-                        View Details
-                      </Link>
+                        👁️ Preview
+                      </a>
                       <button
                         onClick={() => handleEditQuote(quote.quote_id)}
                         className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
                       >
-                        Edit Quote
+                        Edit
                       </button>
                       {quote.invoice && (
-                        <Link
+                        <a
                           href={`/admin/invoices/${quote.invoice.invoice_id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="px-3 py-1.5 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-md transition-colors"
                         >
-                          View Invoice
-                        </Link>
+                          Invoice
+                        </a>
                       )}
                       <button
                         onClick={() => deleteQuote(quote.quote_id, quote.company_name)}

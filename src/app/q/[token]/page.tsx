@@ -135,8 +135,28 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
     );
   }
 
-  // 7. Update quote viewed_at timestamp on first view
-  if (!quote.viewed_at) {
+  // 7. Check if current user is an authenticated admin (do this BEFORE updating viewed_at)
+  const cookieStore = await cookies();
+  const userCookie = cookieStore.get('current_user');
+  let isInternalView = false;
+  let internalUser = null;
+
+  if (userCookie) {
+    try {
+      const session = JSON.parse(userCookie.value);
+      if (session.user_id && session.email) {
+        isInternalView = true;
+        internalUser = session.email;
+        console.log('[Quote] Internal view detected:', session.email);
+      }
+    } catch (e) {
+      // Invalid cookie, treat as customer view
+    }
+  }
+
+  // 8. Update quote viewed_at timestamp on first view (ONLY for customer views, NOT internal)
+  if (!quote.viewed_at && !isInternalView) {
+    console.log('[Quote] Updating viewed_at for customer view');
     await supabase
       .from('quotes')
       .update({ status: 'viewed', viewed_at: new Date().toISOString() })
@@ -165,27 +185,12 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
         }).catch(err => console.error('[Quote] Notification failed:', err));
       }
     }
+  } else if (isInternalView) {
+    console.log('[Quote] Skipping viewed_at update for internal view');
   }
 
-  // 7. Track quote view engagement event (skip internal admin views)
+  // 9. Track quote view engagement event
   if (contact) {
-    // Check if current user is an authenticated admin
-    const cookieStore = await cookies();
-    const userCookie = cookieStore.get('current_user');
-    let isInternalView = false;
-    let internalUser = null;
-
-    if (userCookie) {
-      try {
-        const session = JSON.parse(userCookie.value);
-        if (session.user_id && session.email) {
-          isInternalView = true;
-          internalUser = session.email;
-        }
-      } catch (e) {
-        // Invalid cookie, treat as customer view
-      }
-    }
 
     // Log engagement event with internal_view flag
     supabase
