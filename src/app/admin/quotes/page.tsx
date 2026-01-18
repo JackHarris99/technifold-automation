@@ -99,33 +99,49 @@ export default function QuotesPage() {
     try {
       // Fetch quote details to determine which builder to use
       const response = await fetch(`/api/admin/quotes/${quoteId}`);
+
+      if (!response.ok) {
+        console.error('API error:', response.status, response.statusText);
+        alert(`Failed to load quote: ${response.status} ${response.statusText}`);
+        return;
+      }
+
       const data = await response.json();
+      console.log('Quote data:', data);
 
-      if (data.success && data.quote && data.quote.line_items?.length > 0) {
-        const lineItems = data.quote.line_items;
+      if (!data.success || !data.quote) {
+        alert('Failed to load quote details: ' + (data.error || 'Unknown error'));
+        return;
+      }
 
-        // Check product types in line items
-        const hasTools = lineItems.some((item: any) => item.product_type === 'tool');
-        const hasConsumables = lineItems.some((item: any) => item.product_type === 'consumable');
+      const lineItems = data.quote.line_items || [];
 
-        // Route to appropriate builder
-        if (hasTools && !hasConsumables) {
-          // Tools only
-          window.location.href = `/admin/quote-builder/tools?edit=${quoteId}`;
-        } else if (hasConsumables && !hasTools) {
-          // Consumables only
-          window.location.href = `/admin/quote-builder/consumables?edit=${quoteId}`;
-        } else {
-          // Mixed or unknown - default to tools builder
-          alert('This quote contains mixed product types. Defaulting to tools builder.');
-          window.location.href = `/admin/quote-builder/tools?edit=${quoteId}`;
-        }
+      if (lineItems.length === 0) {
+        // No line items - default to tools builder (can add items there)
+        alert('This quote has no items yet. Opening tools builder.');
+        window.location.href = `/admin/quote-builder/tools?edit=${quoteId}`;
+        return;
+      }
+
+      // Check product types in line items
+      const hasTools = lineItems.some((item: any) => item.product_type === 'tool');
+      const hasConsumables = lineItems.some((item: any) => item.product_type === 'consumable');
+
+      // Route to appropriate builder
+      if (hasTools && !hasConsumables) {
+        // Tools only
+        window.location.href = `/admin/quote-builder/tools?edit=${quoteId}`;
+      } else if (hasConsumables && !hasTools) {
+        // Consumables only
+        window.location.href = `/admin/quote-builder/consumables?edit=${quoteId}`;
       } else {
-        alert('Failed to load quote details');
+        // Mixed or unknown - default to tools builder
+        alert('This quote contains mixed product types. Defaulting to tools builder.');
+        window.location.href = `/admin/quote-builder/tools?edit=${quoteId}`;
       }
     } catch (error) {
       console.error('Failed to determine quote type:', error);
-      alert('Error loading quote for editing');
+      alert('Error loading quote for editing: ' + error);
     }
   }
 

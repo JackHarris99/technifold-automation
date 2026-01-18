@@ -71,19 +71,23 @@ export async function GET(
       contact = contactData;
     }
 
-    // Fetch creator details
-    const { data: creator } = await supabase
-      .from('users')
-      .select('full_name')
-      .eq('user_id', quote.created_by)
-      .single();
+    // Fetch creator details (only if created_by is a valid UUID)
+    let creator = null;
+    if (quote.created_by && quote.created_by !== 'system') {
+      const { data: creatorData } = await supabase
+        .from('users')
+        .select('full_name')
+        .eq('user_id', quote.created_by)
+        .single();
+      creator = creatorData;
+    }
 
     // Fetch line items
     const { data: lineItems, error: itemsError } = await supabase
       .from('quote_items')
       .select('*')
       .eq('quote_id', quote_id)
-      .order('created_at', { ascending: true });
+      .order('line_number', { ascending: true });
 
     if (itemsError) {
       console.error('[quotes/[quote_id]] Error fetching line items:', itemsError);
@@ -103,9 +107,9 @@ export async function GET(
     // Fetch engagement events for this quote
     const { data: engagementEvents, error: engagementError } = await supabase
       .from('engagement_events')
-      .select('event_id, contact_id, event_type, event_name, created_at, meta')
+      .select('event_id, contact_id, event_type, event_name, occurred_at, meta')
       .contains('meta', { quote_id: quote_id })
-      .order('created_at', { ascending: false });
+      .order('occurred_at', { ascending: false });
 
     if (engagementError) {
       console.error('[quotes/[quote_id]] Error fetching engagement events:', engagementError);

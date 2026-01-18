@@ -160,15 +160,20 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Get user names for created_by
-    const userIds = [...new Set(ownerFilteredQuotes.map(q => q.created_by))];
-    const { data: users, error: usersError } = await supabase
-      .from('users')
-      .select('user_id, full_name')
-      .in('user_id', userIds);
+    // Get user names for created_by (filter out non-UUID values like "system")
+    const userIds = [...new Set(ownerFilteredQuotes.map(q => q.created_by).filter(id => id && id !== 'system'))];
+    let users: any[] = [];
+    if (userIds.length > 0) {
+      const { data: usersData, error: usersError } = await supabase
+        .from('users')
+        .select('user_id, full_name')
+        .in('user_id', userIds);
 
-    if (usersError) {
-      console.error('[quotes/list] Error fetching users:', usersError);
+      if (usersError) {
+        console.error('[quotes/list] Error fetching users:', usersError);
+      } else {
+        users = usersData || [];
+      }
     }
 
     // Merge data
