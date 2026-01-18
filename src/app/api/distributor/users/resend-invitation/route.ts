@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
 
     // Send invitation email
     if (resend) {
-      const invitationUrl = `${process.env.NEXT_PUBLIC_URL || 'https://technifold-automation.vercel.app'}/distributor/accept-invitation?token=${invitation_token}`;
+      const invitationUrl = `${process.env.NEXT_PUBLIC_URL || 'https://technifold.com'}/distributor/accept-invitation?token=${invitation_token}`;
 
       try {
         await resend.emails.send({

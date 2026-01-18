@@ -9,7 +9,7 @@ interface PortalAddressCollectionModalProps {
   onClose: () => void;
   companyId: string;
   companyName: string;
-  token: string;
+  token?: string; // Optional - if not provided, uses JWT auth (for distributors)
   onSuccess: () => void;
 }
 
@@ -106,20 +106,39 @@ export default function PortalAddressCollectionModal({
         }
       }
 
-      // 1. Update company billing address and VAT number using portal endpoint
-      const billingResponse = await fetch(`/api/portal/update-billing`, {
+      // Determine which endpoints to use based on token presence
+      const useDistributorEndpoints = !token;
+
+      // 1. Update company billing address and VAT number
+      const billingEndpoint = useDistributorEndpoints
+        ? `/api/distributor/company-details`
+        : `/api/portal/update-billing`;
+
+      const billingPayload = useDistributorEndpoints
+        ? {
+            billing_address_line_1: formData.billing_address_line_1,
+            billing_address_line_2: formData.billing_address_line_2,
+            billing_city: formData.billing_city,
+            billing_state_province: formData.billing_state_province,
+            billing_postal_code: formData.billing_postal_code,
+            billing_country: formData.billing_country,
+            vat_number: formData.vat_number || null,
+          }
+        : {
+            token,
+            billing_address_line_1: formData.billing_address_line_1,
+            billing_address_line_2: formData.billing_address_line_2,
+            billing_city: formData.billing_city,
+            billing_state_province: formData.billing_state_province,
+            billing_postal_code: formData.billing_postal_code,
+            billing_country: formData.billing_country,
+            vat_number: formData.vat_number || null,
+          };
+
+      const billingResponse = await fetch(billingEndpoint, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token,
-          billing_address_line_1: formData.billing_address_line_1,
-          billing_address_line_2: formData.billing_address_line_2,
-          billing_city: formData.billing_city,
-          billing_state_province: formData.billing_state_province,
-          billing_postal_code: formData.billing_postal_code,
-          billing_country: formData.billing_country,
-          vat_number: formData.vat_number || null,
-        }),
+        body: JSON.stringify(billingPayload),
       });
 
       if (!billingResponse.ok) {
@@ -127,7 +146,11 @@ export default function PortalAddressCollectionModal({
         throw new Error(data.error || 'Failed to save billing address');
       }
 
-      // 2. Create shipping address using portal endpoint
+      // 2. Create shipping address
+      const shippingEndpoint = useDistributorEndpoints
+        ? `/api/distributor/shipping-addresses`
+        : `/api/portal/create-shipping-address`;
+
       const shippingData = formData.use_billing_for_shipping
         ? {
             address_line_1: formData.billing_address_line_1,
@@ -146,13 +169,14 @@ export default function PortalAddressCollectionModal({
             country: formData.shipping_country,
           };
 
-      const shippingResponse = await fetch(`/api/portal/create-shipping-address`, {
+      const shippingPayload = useDistributorEndpoints
+        ? { ...shippingData, is_default: true }
+        : { token, ...shippingData };
+
+      const shippingResponse = await fetch(shippingEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token,
-          ...shippingData,
-        }),
+        body: JSON.stringify(shippingPayload),
       });
 
       if (!shippingResponse.ok) {

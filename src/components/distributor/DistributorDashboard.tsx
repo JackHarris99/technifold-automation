@@ -55,6 +55,7 @@ export default function DistributorDashboard({
   const [loadingAddresses, setLoadingAddresses] = useState(true);
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [billingAddress, setBillingAddress] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<'tools' | 'consumables'>('tools');
 
   // Fetch shipping addresses and billing on mount
   useEffect(() => {
@@ -300,29 +301,36 @@ export default function DistributorDashboard({
     <div className="grid grid-cols-12 gap-6">
       {/* Left Column - Product Catalog */}
       <div className="col-span-7 space-y-4">
-        {/* Compatible Machines Section */}
+        {/* Company Branding */}
         <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8] p-6">
-          <h3 className="text-[15px] font-[600] text-[#1e40af] mb-4 tracking-[-0.01em]">
-            Compatible Machine Brands
-          </h3>
-          <div className="flex flex-wrap gap-4">
-            {[
-              'heidelberg', 'mbo', 'horizon', 'duplo', 'morgana', 'kolbus',
-              'muller-martini', 'baumfolder', 'guk', 'hohner'
-            ].map((brand) => (
-              <div key={brand} className="relative h-12 w-24 grayscale hover:grayscale-0 transition-all opacity-60 hover:opacity-100">
-                <Image
-                  src={`/images/logos/${brand}.png`}
-                  alt={brand}
-                  fill
-                  className="object-contain"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                  }}
-                />
-              </div>
-            ))}
+          <div className="flex items-center justify-center gap-8">
+            <div className="relative h-10 w-32">
+              <Image
+                src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/technifold.png"
+                alt="Technifold"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
+            <div className="relative h-10 w-32">
+              <Image
+                src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/technicrease.png"
+                alt="Technicrease"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
+            <div className="relative h-10 w-32">
+              <Image
+                src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/creasestream.png"
+                alt="Creasestream"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
           </div>
         </div>
 
@@ -474,79 +482,109 @@ export default function DistributorDashboard({
           )}
         </div>
 
-        {/* Tools Sections */}
-        {Object.keys(groupedProducts.tools).length > 0 && (
-          <div className="bg-white rounded-[16px] shadow-sm border-2 border-blue-100 overflow-hidden">
-            <div className="px-6 py-4 bg-gradient-to-r from-blue-50/50 to-transparent border-b border-[#e8e8e8]">
-              <h2 className="text-[20px] font-[600] text-[#1e40af] tracking-[-0.01em]">Tools</h2>
-              <p className="text-[12px] text-[#334155] mt-0.5 font-[500]">
-                {Object.values(groupedProducts.tools).flat().length} products
-              </p>
-            </div>
-            <div className="p-6 space-y-6">
-              {Object.entries(groupedProducts.tools).map(([category, categoryProducts]) => (
-                <div key={category}>
-                  <button
-                    onClick={() => toggleSection(`tool-${category}`)}
-                    className="w-full flex items-center justify-between mb-3 text-left"
-                  >
-                    <h3 className="text-[16px] font-[600] text-[#0a0a0a]">{category}</h3>
-                    <svg
-                      className={`w-5 h-5 text-[#3b82f6] transition-transform ${expandedSections.has(`tool-${category}`) ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  {expandedSections.has(`tool-${category}`) && (
-                    <div className="space-y-3">
-                      {categoryProducts.map(renderProductCard)}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+        {/* Product Tabs */}
+        <div className="bg-white rounded-[16px] shadow-sm border-2 border-blue-100 overflow-hidden">
+          {/* Tab Headers */}
+          <div className="flex border-b border-[#e8e8e8]">
+            <button
+              onClick={() => setActiveTab('tools')}
+              className={`flex-1 px-6 py-4 text-[16px] font-[600] tracking-[-0.01em] transition-colors ${
+                activeTab === 'tools'
+                  ? 'text-[#1e40af] bg-gradient-to-r from-blue-50/50 to-transparent border-b-2 border-[#1e40af]'
+                  : 'text-[#64748b] hover:text-[#1e40af] hover:bg-blue-50/30'
+              }`}
+            >
+              Tools
+              <span className="ml-2 text-[12px] text-[#64748b]">
+                ({Object.values(groupedProducts.tools).flat().length})
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveTab('consumables')}
+              className={`flex-1 px-6 py-4 text-[16px] font-[600] tracking-[-0.01em] transition-colors ${
+                activeTab === 'consumables'
+                  ? 'text-[#1e40af] bg-gradient-to-r from-blue-50/50 to-transparent border-b-2 border-[#1e40af]'
+                  : 'text-[#64748b] hover:text-[#1e40af] hover:bg-blue-50/30'
+              }`}
+            >
+              Consumables
+              <span className="ml-2 text-[12px] text-[#64748b]">
+                ({Object.values(groupedProducts.consumables).flat().length})
+              </span>
+            </button>
           </div>
-        )}
 
-        {/* Consumables Sections */}
-        {Object.keys(groupedProducts.consumables).length > 0 && (
-          <div className="bg-white rounded-[16px] shadow-sm border-2 border-blue-100 overflow-hidden">
-            <div className="px-6 py-4 bg-gradient-to-r from-blue-50/50 to-transparent border-b border-[#e8e8e8]">
-              <h2 className="text-[20px] font-[600] text-[#1e40af] tracking-[-0.01em]">Consumables</h2>
-              <p className="text-[12px] text-[#334155] mt-0.5 font-[500]">
-                {Object.values(groupedProducts.consumables).flat().length} products
-              </p>
-            </div>
-            <div className="p-6 space-y-6">
-              {Object.entries(groupedProducts.consumables).map(([category, categoryProducts]) => (
-                <div key={category}>
-                  <button
-                    onClick={() => toggleSection(`consumable-${category}`)}
-                    className="w-full flex items-center justify-between mb-3 text-left"
-                  >
-                    <h3 className="text-[16px] font-[600] text-[#0a0a0a]">{category}</h3>
-                    <svg
-                      className={`w-5 h-5 text-[#3b82f6] transition-transform ${expandedSections.has(`consumable-${category}`) ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+          {/* Tab Content */}
+          <div className="p-6">
+            {activeTab === 'tools' && Object.keys(groupedProducts.tools).length > 0 && (
+              <div className="space-y-6">
+                {Object.entries(groupedProducts.tools).map(([category, categoryProducts]) => (
+                  <div key={category}>
+                    <button
+                      onClick={() => toggleSection(`tool-${category}`)}
+                      className="w-full flex items-center justify-between mb-3 text-left"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  {expandedSections.has(`consumable-${category}`) && (
-                    <div className="space-y-3">
-                      {categoryProducts.map(renderProductCard)}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+                      <h3 className="text-[16px] font-[600] text-[#0a0a0a]">{category}</h3>
+                      <svg
+                        className={`w-5 h-5 text-[#3b82f6] transition-transform ${expandedSections.has(`tool-${category}`) ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {expandedSections.has(`tool-${category}`) && (
+                      <div className="space-y-3">
+                        {categoryProducts.map(renderProductCard)}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeTab === 'tools' && Object.keys(groupedProducts.tools).length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-[14px] text-[#64748b]">No tools available</p>
+              </div>
+            )}
+
+            {activeTab === 'consumables' && Object.keys(groupedProducts.consumables).length > 0 && (
+              <div className="space-y-6">
+                {Object.entries(groupedProducts.consumables).map(([category, categoryProducts]) => (
+                  <div key={category}>
+                    <button
+                      onClick={() => toggleSection(`consumable-${category}`)}
+                      className="w-full flex items-center justify-between mb-3 text-left"
+                    >
+                      <h3 className="text-[16px] font-[600] text-[#0a0a0a]">{category}</h3>
+                      <svg
+                        className={`w-5 h-5 text-[#3b82f6] transition-transform ${expandedSections.has(`consumable-${category}`) ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {expandedSections.has(`consumable-${category}`) && (
+                      <div className="space-y-3">
+                        {categoryProducts.map(renderProductCard)}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeTab === 'consumables' && Object.keys(groupedProducts.consumables).length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-[14px] text-[#64748b]">No consumables available</p>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Right Column - Cart & Invoices */}
@@ -694,7 +732,6 @@ export default function DistributorDashboard({
         onClose={() => setShowAddressModal(false)}
         companyId={distributor.company_id}
         companyName={distributor.company_name}
-        token=""
         onSuccess={handleAddressSaved}
       />
     </div>
