@@ -17,6 +17,7 @@ interface Invoice {
   paid_at: string | null;
   due_date: string | null;
   status: string;
+  invoice_pdf_url: string | null;
 }
 
 interface Quote {
@@ -422,11 +423,21 @@ export default function QuotesPage() {
                           <div className="text-xs text-gray-600 mt-1">
                             {quote.invoice.invoice_number} • £{quote.invoice.total_amount?.toLocaleString()}
                           </div>
+                          {quote.quote_type === 'interactive' && quote.invoice.total_amount !== quote.total_amount && (
+                            <div className="text-xs text-amber-600 mt-1 italic">
+                              ⚠️ Invoice total may differ - customer adjusted interactive quote
+                            </div>
+                          )}
                         </>
                       ) : (
                         <>
                           <div className="text-sm text-gray-500">No invoice yet</div>
-                          <div className="text-xs text-gray-400 mt-1">Pending customer action</div>
+                          <div className="text-xs text-gray-400 mt-1">
+                            {quote.quote_type === 'interactive'
+                              ? 'Customer can adjust quantities before generating'
+                              : 'Pending customer action'
+                            }
+                          </div>
                         </>
                       )}
                     </div>
@@ -472,14 +483,14 @@ export default function QuotesPage() {
                       >
                         Edit
                       </button>
-                      {quote.invoice && (
+                      {quote.invoice?.invoice_pdf_url && (
                         <a
-                          href={`/admin/invoices/${quote.invoice.invoice_id}`}
+                          href={quote.invoice.invoice_pdf_url}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="px-3 py-1.5 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-md transition-colors"
                         >
-                          Invoice
+                          📄 Invoice PDF
                         </a>
                       )}
                       <button

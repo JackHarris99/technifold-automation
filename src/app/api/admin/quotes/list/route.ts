@@ -183,7 +183,7 @@ export async function GET(request: NextRequest) {
     if (invoiceIds.length > 0) {
       const { data: invoicesData, error: invoicesError } = await supabase
         .from('invoices')
-        .select('invoice_id, invoice_number, total_amount, payment_status, paid_at, due_date, status')
+        .select('invoice_id, invoice_number, total_amount, payment_status, paid_at, due_date, status, invoice_pdf_url')
         .in('invoice_id', invoiceIds);
 
       if (invoicesError) {

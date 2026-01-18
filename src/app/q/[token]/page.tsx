@@ -231,6 +231,8 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
     contact,
     token,
     isTest: is_test || false,
+    readOnly: isInternalView, // Read-only mode for admin previews
+    previewMode: isInternalView ? ('admin' as const) : undefined,
   };
 
   // Load StaticQuotePortal for static quotes, InteractiveQuotePortal for interactive
