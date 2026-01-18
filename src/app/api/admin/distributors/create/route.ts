@@ -1,17 +1,22 @@
 /**
  * POST /api/admin/distributors/create
  * Create a new distributor company
+ * SECURITY: Directors only
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
-import { getCurrentUser } from '@/lib/auth';
+import { isDirector } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
-    if (!currentUser) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // SECURITY: Directors only
+    const director = await isDirector();
+    if (!director) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Directors only' },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();

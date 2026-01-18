@@ -2,10 +2,11 @@
  * Distributor Sales Dashboard
  * COMPLETELY SEPARATE from customer sales - tracks distributor wholesale orders only
  * CRITICAL: Only shows invoices from companies with type='distributor'
+ * SECURITY: Directors only
  */
 
 import { getSupabaseClient } from '@/lib/supabase';
-import { getCurrentUser } from '@/lib/auth';
+import { isDirector } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
@@ -37,10 +38,11 @@ interface TopDistributor {
 }
 
 export default async function DistributorSalesPage() {
-  const currentUser = await getCurrentUser();
+  // SECURITY: Directors only
+  const director = await isDirector();
 
-  if (!currentUser) {
-    redirect('/login');
+  if (!director) {
+    redirect('/admin');
   }
 
   const supabase = getSupabaseClient();

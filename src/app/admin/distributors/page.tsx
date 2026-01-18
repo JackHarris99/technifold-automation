@@ -1,19 +1,21 @@
 /**
  * Distributor User Management
  * Admin page to manage distributor users across all companies
+ * SECURITY: Directors only
  */
 
 import { getSupabaseClient } from '@/lib/supabase';
-import { getCurrentUser } from '@/lib/auth';
+import { isDirector } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import DistributorUsersClient from '@/components/admin/DistributorUsersClient';
 
 export default async function DistributorsPage() {
-  const currentUser = await getCurrentUser();
+  // SECURITY: Directors only
+  const director = await isDirector();
 
-  if (!currentUser) {
-    redirect('/login');
+  if (!director) {
+    redirect('/admin');
   }
 
   const supabase = getSupabaseClient();
