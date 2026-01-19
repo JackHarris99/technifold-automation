@@ -23,7 +23,8 @@ export default async function BulkPricingTierPage() {
     .from('products')
     .select('product_code, description, type, category, pricing_tier, price, active')
     .eq('type', 'consumable')
-    .order('product_code');
+    .order('product_code')
+    .limit(10000);
 
   return (
     <div className="min-h-screen bg-gray-50">
