@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import AddCompanyModal from './modals/AddCompanyModal';
+import { getViewModeLabel, type ViewMode } from '@/lib/viewMode';
 
 interface Company {
   company_id: string;
@@ -16,7 +17,7 @@ interface Company {
 interface CompaniesPageWrapperProps {
   companies: Company[];
   totalCompanies: number;
-  viewMode: 'all' | 'my_customers';
+  viewMode: ViewMode;
 }
 
 export default function CompaniesPageWrapper({ companies, totalCompanies, viewMode }: CompaniesPageWrapperProps) {
@@ -33,7 +34,7 @@ export default function CompaniesPageWrapper({ companies, totalCompanies, viewMo
         <div>
           <h1 className="text-3xl font-bold text-gray-900">All Companies</h1>
           <p className="text-gray-800 mt-2">
-            {totalCompanies} companies • {viewMode === 'my_customers' ? 'My Customers Only' : 'All Companies (Team View)'}
+            {totalCompanies} companies • {getViewModeLabel(viewMode)}
           </p>
         </div>
         <button

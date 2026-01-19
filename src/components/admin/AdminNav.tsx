@@ -10,9 +10,13 @@ import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import CompanySearchBar from './CompanySearchBar';
-import { getViewMode, setViewMode, type ViewMode } from '@/lib/viewMode';
+import { getViewMode, setViewMode, getViewModeLabel, type ViewMode } from '@/lib/viewMode';
 
-export default function AdminNav() {
+interface AdminNavProps {
+  isDirector?: boolean;
+}
+
+export default function AdminNav({ isDirector = false }: AdminNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [viewMode, setViewModeState] = useState<ViewMode>('all');
@@ -68,9 +72,16 @@ export default function AdminNav() {
         >
           <option value="all">🌍 All Companies (Team)</option>
           <option value="my_customers">👤 My Customers Only</option>
+          {isDirector && (
+            <>
+              <option value="view_as_lee">🟡 Lee's Customers</option>
+              <option value="view_as_steve">🟠 Steve's Customers</option>
+              <option value="view_as_callum">🔴 Callum's Customers</option>
+            </>
+          )}
         </select>
         <p className="text-xs text-gray-400 mt-2">
-          {viewMode === 'all' ? 'Viewing all team data' : 'Viewing your customers only'}
+          {getViewModeLabel(viewMode)}
         </p>
       </div>
 
@@ -125,6 +136,16 @@ export default function AdminNav() {
             }`}
           >
             Unpaid Invoices
+          </Link>
+          <Link
+            href="/admin/sales/distributors"
+            className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+              pathname === '/admin/sales/distributors'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            📦 Distributor Center
           </Link>
         </div>
 

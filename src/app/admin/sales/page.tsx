@@ -8,6 +8,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { getSalesRepFromViewMode, type ViewMode } from '@/lib/viewMode';
 
 interface ReorderOpportunity {
   company_id: string;
@@ -59,7 +60,17 @@ export default async function SalesCenterPage() {
   // Get view mode from cookies
   const cookieStore = await cookies();
   const viewModeCookie = cookieStore.get('view_mode');
-  const viewMode = viewModeCookie?.value === 'my_customers' ? 'my_customers' : 'all';
+  const viewModeValue = viewModeCookie?.value || 'all';
+
+  // Parse view mode
+  let viewMode: ViewMode = 'all';
+  if (viewModeValue === 'my_customers') viewMode = 'my_customers';
+  else if (viewModeValue === 'view_as_lee') viewMode = 'view_as_lee';
+  else if (viewModeValue === 'view_as_steve') viewMode = 'view_as_steve';
+  else if (viewModeValue === 'view_as_callum') viewMode = 'view_as_callum';
+
+  // Determine which sales rep to filter by
+  const filterBySalesRep = getSalesRepFromViewMode(viewMode, currentUser.sales_rep_id);
 
   const supabase = getSupabaseClient();
 
@@ -77,8 +88,8 @@ export default async function SalesCenterPage() {
       .range(start, start + batchSize - 1);
 
     // Apply view mode filter
-    if (viewMode === 'my_customers') {
-      query = query.eq('account_owner', currentUser.sales_rep_id);
+    if (filterBySalesRep) {
+      query = query.eq('account_owner', filterBySalesRep);
     }
 
     const { data: batch, error } = await query;
@@ -172,8 +183,8 @@ export default async function SalesCenterPage() {
       .order('occurred_at', { ascending: false })
       .limit(1000);
 
-    // Apply company filter ONLY when in "my_customers" mode
-    if (viewMode === 'my_customers') {
+    // Apply company filter when filtering by specific sales rep
+    if (filterBySalesRep) {
       paidInvoicesQuery = paidInvoicesQuery.in('company_id', companyIds);
       unpaidInvoicesQuery = unpaidInvoicesQuery.in('company_id', companyIds);
       trialsQuery = trialsQuery.in('company_id', companyIds);
@@ -296,7 +307,13 @@ export default async function SalesCenterPage() {
                 Sales Control Center
               </h1>
               <p className="text-sm text-gray-800 mt-1">
-                {currentUser.full_name} • {viewMode === 'my_customers' ? 'My Customers Only' : 'All Companies (Team View)'}
+                {currentUser.full_name} • {
+                  viewMode === 'my_customers' ? 'My Customers Only' :
+                  viewMode === 'view_as_lee' ? "Viewing as Lee" :
+                  viewMode === 'view_as_steve' ? "Viewing as Steve" :
+                  viewMode === 'view_as_callum' ? "Viewing as Callum" :
+                  'All Companies (Team View)'
+                }
               </p>
             </div>
             <Link
@@ -485,13 +502,13 @@ export default async function SalesCenterPage() {
               </div>
               <div className="p-4 space-y-3">
                 <Link
-                  href="/admin/distributor-sales"
+                  href="/admin/sales/distributors"
                   className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 border-2 border-purple-200 hover:bg-purple-100 transition-colors"
                 >
                   <span className="text-2xl">📦</span>
                   <div>
-                    <h4 className="font-semibold text-purple-900">Distributor Sales</h4>
-                    <p className="text-sm text-purple-700">View wholesale orders (separate from retail)</p>
+                    <h4 className="font-semibold text-purple-900">Distributor Control Center</h4>
+                    <p className="text-sm text-purple-700">Manage distributors, orders, and wholesale relationships</p>
                   </div>
                 </Link>
                 <Link

@@ -8,6 +8,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import CompaniesPageWrapper from '@/components/admin/CompaniesPageWrapper';
+import { getSalesRepFromViewMode, type ViewMode } from '@/lib/viewMode';
 
 export default async function CompaniesPage() {
   const user = await getCurrentUser();
@@ -19,7 +20,17 @@ export default async function CompaniesPage() {
   // Get view mode from cookies
   const cookieStore = await cookies();
   const viewModeCookie = cookieStore.get('view_mode');
-  const viewMode = viewModeCookie?.value === 'my_customers' ? 'my_customers' : 'all';
+  const viewModeValue = viewModeCookie?.value || 'all';
+
+  // Parse view mode
+  let viewMode: ViewMode = 'all';
+  if (viewModeValue === 'my_customers') viewMode = 'my_customers';
+  else if (viewModeValue === 'view_as_lee') viewMode = 'view_as_lee';
+  else if (viewModeValue === 'view_as_steve') viewMode = 'view_as_steve';
+  else if (viewModeValue === 'view_as_callum') viewMode = 'view_as_callum';
+
+  // Determine which sales rep to filter by
+  const filterBySalesRep = getSalesRepFromViewMode(viewMode, user.sales_rep_id);
 
   const supabase = getSupabaseClient();
 
@@ -38,9 +49,9 @@ export default async function CompaniesPage() {
       .order('company_name')
       .range(start, start + batchSize - 1);
 
-    // Apply "My Customers" filter
-    if (viewMode === 'my_customers') {
-      query = query.eq('account_owner', user.sales_rep_id);
+    // Apply sales rep filter
+    if (filterBySalesRep) {
+      query = query.eq('account_owner', filterBySalesRep);
     }
 
     const { data: batch, error } = await query;

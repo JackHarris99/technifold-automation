@@ -6,6 +6,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import AdminNav from '@/components/admin/AdminNav';
+import { getCurrentUser } from '@/lib/auth';
 import { Inter } from 'next/font/google';
 
 const inter = Inter({
@@ -27,9 +28,13 @@ export default async function AdminLayout({
     redirect('/login');
   }
 
+  // Get current user for role-based features
+  const user = await getCurrentUser();
+  const isDirector = user?.role === 'Director';
+
   return (
     <div className={inter.className}>
-      <AdminNav />
+      <AdminNav isDirector={isDirector} />
       <main className="ml-64 min-h-screen bg-gray-50">
         {children}
       </main>
