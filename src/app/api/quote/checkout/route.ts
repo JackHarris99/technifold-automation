@@ -25,6 +25,7 @@ interface CheckoutRequest {
     country: string;
   };
   agreed_to_terms: boolean;
+  po_number?: string;
 }
 
 export async function POST(request: NextRequest) {
@@ -168,6 +169,7 @@ export async function POST(request: NextRequest) {
             contact_id: body.contact_id,
             purchase_type: 'rental',
             shipping_address_id: savedAddress.address_id,
+            po_number: body.po_number || '',
           },
         },
         success_url: `${baseUrl}/quote/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -177,6 +179,7 @@ export async function POST(request: NextRequest) {
           contact_id: body.contact_id,
           purchase_type: 'rental',
           shipping_address_id: savedAddress.address_id,
+          po_number: body.po_number || '',
         },
       });
     } else {
@@ -211,6 +214,7 @@ export async function POST(request: NextRequest) {
           contact_id: body.contact_id,
           purchase_type: 'purchase',
           shipping_address_id: savedAddress.address_id,
+          po_number: body.po_number || '',
         },
       });
     }

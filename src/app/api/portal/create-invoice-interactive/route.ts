@@ -91,7 +91,7 @@ function calculateVAT(subtotal: number, country: string, vatNumber: string | nul
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { token, contact_id, items, currency = 'gbp', offer_key, campaign_key } = body;
+    const { token, contact_id, items, currency = 'gbp', offer_key, campaign_key, po_number } = body;
 
     // Verify HMAC token
     const payload = verifyToken(token);
@@ -442,12 +442,14 @@ export async function POST(request: NextRequest) {
       auto_advance: false,
       collection_method: 'send_invoice',
       days_until_due: 30,
+      description: po_number ? `PO: ${po_number}` : undefined,
       // Note: customer_shipping was removed from Stripe API - shipping address is on customer record
       metadata: {
         company_id,
         contact_id,
         offer_key: offer_key || 'portal_quote_interactive',
         campaign_key: campaign_key || `quote_${new Date().toISOString().split('T')[0]}`,
+        po_number: po_number || '',
         // Store shipping address in metadata for reference
         shipping_address_line_1: shippingAddress?.address_line_1 || '',
         shipping_city: shippingAddress?.city || '',
@@ -529,6 +531,7 @@ export async function POST(request: NextRequest) {
         invoice_pdf_url: finalizedInvoice.invoice_pdf || undefined,
         sent_at: new Date().toISOString(),
         notes: invoiceNotes,
+        po_number: po_number || null,
       })
       .select('invoice_id')
       .single();
