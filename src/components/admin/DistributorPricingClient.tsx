@@ -5,7 +5,7 @@ import { useState } from 'react';
 interface Product {
   product_code: string;
   description: string;
-  price: number;
+  price: number | null;
   type: string;
   category: string | null;
   active: boolean;
@@ -149,7 +149,7 @@ export default function DistributorPricingClient({
                       </span>
                     </td>
                     <td className="py-3 px-4 text-right text-sm text-gray-600">
-                      £{product.price.toFixed(2)}
+                      {product.price != null ? `£${product.price.toFixed(2)}` : '-'}
                     </td>
                     <td className="py-3 px-4 bg-blue-50">
                       <div className="flex items-center justify-end gap-2">
