@@ -1,29 +1,15 @@
 /**
  * POST /api/distributor/orders/create
- * Create Stripe invoice for distributor order
- * Same flow as quote builder - creates real Stripe invoice immediately
+ * Create distributor order for admin review (NO Stripe invoice yet)
+ * Invoice will be created after admin reviews stock availability
  */
-
-export const maxDuration = 60; // Allow up to 60 seconds for Stripe API calls
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { getCurrentDistributor } from '@/lib/distributorAuth';
-import Stripe from 'stripe';
+import { Resend } from 'resend';
 
-let stripeClient: Stripe | null = null;
-
-function getStripeClient(): Stripe {
-  if (!stripeClient) {
-    if (!process.env.STRIPE_SECRET_KEY) {
-      throw new Error('STRIPE_SECRET_KEY environment variable is required');
-    }
-    stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2024-12-18.acacia',
-    });
-  }
-  return stripeClient;
-}
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 function calculateVAT(subtotal: number, country: string, vatNumber: string | null): {
   vat_amount: number;
@@ -94,13 +80,12 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
-    // Get company details (MUST have billing address before creating invoice)
+    // Get company details
     const { data: company, error: companyError } = await supabase
       .from('companies')
       .select(`
         company_id,
         company_name,
-        stripe_customer_id,
         vat_number,
         billing_address_line_1,
         billing_address_line_2,
@@ -116,18 +101,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Company not found' }, { status: 404 });
     }
 
-    // CRITICAL: Verify billing address exists
+    // Verify billing address exists
     if (!company.billing_address_line_1 || !company.billing_city || !company.billing_postal_code) {
       return NextResponse.json(
-        {
-          error: 'Billing address required',
-          details: 'Your company must have a complete billing address before placing orders. Please contact support.'
-        },
+        { error: 'Billing address required' },
         { status: 400 }
       );
     }
 
-    // Get shipping address (MUST exist - no creation during order)
+    // Get shipping address
     const { data: shippingAddress, error: shippingError } = await supabase
       .from('shipping_addresses')
       .select('*')
@@ -137,15 +119,15 @@ export async function POST(request: NextRequest) {
 
     if (shippingError || !shippingAddress) {
       return NextResponse.json(
-        { error: 'Shipping address not found. Please add a shipping address first.' },
+        { error: 'Shipping address not found' },
         { status: 404 }
       );
     }
 
-    // CRITICAL: Verify shipping address is complete
+    // Verify shipping address is complete
     if (!shippingAddress.address_line_1 || !shippingAddress.city || !shippingAddress.postal_code || !shippingAddress.country) {
       return NextResponse.json(
-        { error: 'Incomplete shipping address. Please update the address with all required fields.' },
+        { error: 'Incomplete shipping address' },
         { status: 400 }
       );
     }
@@ -156,16 +138,16 @@ export async function POST(request: NextRequest) {
       0
     );
 
-    // Calculate shipping cost
+    // Calculate shipping cost (predicted - admin can override)
     const destinationCountry = shippingAddress.country || 'GB';
     const { data: shippingCostData } = await supabase.rpc('calculate_shipping_cost', {
       p_country_code: destinationCountry,
       p_order_subtotal: subtotal,
     });
-    const shippingCost = shippingCostData || 0;
+    const predictedShipping = shippingCostData || 0;
 
-    // Calculate VAT on subtotal + shipping
-    const taxableAmount = subtotal + shippingCost;
+    // Calculate VAT
+    const taxableAmount = subtotal + predictedShipping;
     const { vat_amount, vat_rate, vat_exempt_reason } = calculateVAT(
       taxableAmount,
       destinationCountry,
@@ -173,238 +155,224 @@ export async function POST(request: NextRequest) {
     );
     const total = taxableAmount + vat_amount;
 
-    // Create or retrieve Stripe Customer
-    let stripeCustomerId = company.stripe_customer_id;
-
-    const billingAddress = {
-      line1: company.billing_address_line_1,
-      line2: company.billing_address_line_2 || undefined,
-      city: company.billing_city || undefined,
-      state: company.billing_state_province || undefined,
-      postal_code: company.billing_postal_code || undefined,
-      country: company.billing_country || undefined,
-    };
-
-    const shippingDetails = {
-      name: company.company_name,
-      address: {
-        line1: shippingAddress.address_line_1,
-        line2: shippingAddress.address_line_2 || undefined,
-        city: shippingAddress.city || undefined,
-        state: shippingAddress.state_province || undefined,
-        postal_code: shippingAddress.postal_code || undefined,
-        country: shippingAddress.country || undefined,
-      }
-    };
-
-    if (!stripeCustomerId) {
-      // Create new Stripe customer
-      const customer = await getStripeClient().customers.create({
-        email: distributor.email,
-        name: company.company_name,
-        address: billingAddress,
-        shipping: shippingDetails,
-        metadata: {
-          company_id: distributor.company_id,
-        }
-      });
-      stripeCustomerId = customer.id;
-
-      // Save stripe_customer_id to company
-      await supabase
-        .from('companies')
-        .update({ stripe_customer_id: stripeCustomerId })
-        .eq('company_id', distributor.company_id);
-    } else {
-      // Update existing customer's addresses
-      await getStripeClient().customers.update(stripeCustomerId, {
-        email: distributor.email,
-        name: company.company_name,
-        address: billingAddress,
-        shipping: shippingDetails,
-      });
-    }
-
-    // Add VAT number to Stripe if provided
-    if (company.vat_number && company.vat_number.trim().length > 0) {
-      try {
-        const existingTaxIds = await getStripeClient().customers.listTaxIds(stripeCustomerId, { limit: 10 });
-        const hasVatNumber = existingTaxIds.data.some(taxId =>
-          taxId.value === company.vat_number && taxId.verification?.status !== 'unverified'
-        );
-
-        if (!hasVatNumber) {
-          await getStripeClient().customers.createTaxId(stripeCustomerId, {
-            type: 'eu_vat',
-            value: company.vat_number,
-          });
-        }
-      } catch (taxError) {
-        console.error('[distributor-create-order] VAT number error:', taxError);
-      }
-    }
-
-    // Create Stripe Invoice
-    const stripeInvoice = await getStripeClient().invoices.create({
-      customer: stripeCustomerId,
-      currency: 'gbp',
-      auto_advance: false,
-      collection_method: 'send_invoice',
-      days_until_due: 30,
-      metadata: {
-        company_id: distributor.company_id,
-        order_source: 'distributor_portal',
-        shipping_address_id: shipping_address_id,
-      },
-    });
-
-    // Add line items with product codes in metadata
-    for (const item of items) {
-      await getStripeClient().invoiceItems.create({
-        customer: stripeCustomerId,
-        invoice: stripeInvoice.id,
-        description: `${item.product_code} - ${item.description || 'Product'}`,
-        quantity: item.quantity,
-        unit_amount: Math.round(item.unit_price * 100), // Convert to pence
-        currency: 'gbp',
-        metadata: {
-          product_code: item.product_code, // CRITICAL: Product code included
-        },
-      });
-    }
-
-    // Add shipping if applicable
-    if (shippingCost > 0) {
-      await getStripeClient().invoiceItems.create({
-        customer: stripeCustomerId,
-        invoice: stripeInvoice.id,
-        description: 'Shipping & Handling',
-        quantity: 1,
-        unit_amount: Math.round(shippingCost * 100),
-        currency: 'gbp',
-      });
-    }
-
-    // Add VAT if applicable
-    if (vat_amount > 0) {
-      await getStripeClient().invoiceItems.create({
-        customer: stripeCustomerId,
-        invoice: stripeInvoice.id,
-        description: vat_exempt_reason
-          ? `VAT (${(vat_rate * 100).toFixed(0)}% - ${vat_exempt_reason})`
-          : `VAT (${(vat_rate * 100).toFixed(0)}%)`,
-        quantity: 1,
-        unit_amount: Math.round(vat_amount * 100),
-        currency: 'gbp',
-      });
-    }
-
-    // Finalize and send invoice
-    const finalizedInvoice = await getStripeClient().invoices.finalizeInvoice(stripeInvoice.id);
-    await getStripeClient().invoices.sendInvoice(finalizedInvoice.id);
-
-    console.log('[distributor-create-order] Stripe invoice created and sent:', finalizedInvoice.id);
-
-    // Store invoice in database
-    const invoiceNotes = [
-      vat_exempt_reason ? `VAT: ${vat_exempt_reason}` : null,
-      'Source: Distributor Portal',
-    ].filter(Boolean).join(', ') || null;
-
-    const { data: dbInvoice, error: invoiceError } = await supabase
-      .from('invoices')
+    // Create distributor order (NO Stripe invoice yet)
+    const { data: order, error: orderError } = await supabase
+      .from('distributor_orders')
       .insert({
         company_id: distributor.company_id,
-        stripe_invoice_id: finalizedInvoice.id,
-        stripe_customer_id: stripeCustomerId,
-        invoice_type: 'sale',
-        status: 'open',
-        payment_status: 'unpaid',
-        currency: 'gbp',
+        user_id: distributor.user_id,
+        user_email: distributor.email,
+        user_name: distributor.full_name,
+        status: 'pending_review',
         subtotal,
-        shipping_amount: shippingCost,
-        tax_amount: vat_amount,
+        predicted_shipping: predictedShipping,
+        vat_amount,
         total_amount: total,
+        currency: 'gbp',
+        // Original billing address
+        billing_address_line_1: company.billing_address_line_1,
+        billing_address_line_2: company.billing_address_line_2,
+        billing_city: company.billing_city,
+        billing_state_province: company.billing_state_province,
+        billing_postal_code: company.billing_postal_code,
+        billing_country: company.billing_country,
+        vat_number: company.vat_number,
+        // Original shipping address
         shipping_address_id: shipping_address_id,
-        shipping_country: destinationCountry,
-        invoice_url: finalizedInvoice.hosted_invoice_url || undefined,
-        invoice_pdf_url: finalizedInvoice.invoice_pdf || undefined,
-        sent_at: new Date().toISOString(),
-        notes: invoiceNotes,
+        shipping_address_line_1: shippingAddress.address_line_1,
+        shipping_address_line_2: shippingAddress.address_line_2,
+        shipping_city: shippingAddress.city,
+        shipping_state_province: shippingAddress.state_province,
+        shipping_postal_code: shippingAddress.postal_code,
+        shipping_country: shippingAddress.country,
       })
-      .select('invoice_id')
+      .select('order_id')
       .single();
 
-    if (invoiceError || !dbInvoice) {
-      console.error('[distributor-create-order] Failed to create invoice record:', invoiceError);
-      // Stripe invoice was still sent - return success with warning
-      return NextResponse.json({
-        success: true,
-        invoice_id: finalizedInvoice.id,
-        invoice_url: finalizedInvoice.hosted_invoice_url,
-        warning: 'Stripe invoice created successfully but database record failed to save',
-      });
+    if (orderError || !order) {
+      console.error('[Create Distributor Order] Order insert error:', orderError);
+      return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
     }
 
-    // Store invoice items
-    const invoiceItems = items.map((item: any, index: number) => ({
-      invoice_id: dbInvoice.invoice_id,
+    // Create order items
+    const orderItems = items.map((item: any, index: number) => ({
+      order_id: order.order_id,
       product_code: item.product_code,
-      line_number: index + 1,
       description: item.description || item.product_code,
       quantity: item.quantity,
       unit_price: item.unit_price,
       line_total: item.unit_price * item.quantity,
+      status: 'pending_review',
     }));
 
     const { error: itemsError } = await supabase
-      .from('invoice_items')
-      .insert(invoiceItems);
+      .from('distributor_order_items')
+      .insert(orderItems);
 
     if (itemsError) {
-      console.error('[distributor-create-order] Failed to create invoice items:', itemsError);
+      console.error('[Create Distributor Order] Items insert error:', itemsError);
+      // Rollback order
+      await supabase.from('distributor_orders').delete().eq('order_id', order.order_id);
+      return NextResponse.json({ error: 'Failed to create order items' }, { status: 500 });
     }
 
-    // Log distributor order event to engagement_events
+    // Log engagement event
     try {
       await supabase
         .from('engagement_events')
         .insert({
           company_id: distributor.company_id,
           occurred_at: new Date().toISOString(),
-          event_type: 'distributor_order',
-          event_name: 'distributor_order_placed',
+          event_type: 'distributor_order_submitted',
+          event_name: 'Distributor order submitted for review',
           source: 'distributor_portal',
-          value: subtotal, // Use subtotal (excludes VAT/shipping) for consistency
+          value: subtotal,
           currency: 'gbp',
           meta: {
-            invoice_id: dbInvoice.invoice_id,
-            stripe_invoice_id: finalizedInvoice.id,
+            order_id: order.order_id,
             total_amount: total,
             items_count: items.length,
-            placed_by: distributor.full_name,
-            placed_by_email: distributor.email,
+            submitted_by: distributor.full_name,
+            submitted_by_email: distributor.email,
             shipping_country: destinationCountry,
           },
         });
-
-      console.log('[distributor-create-order] Event logged for company:', distributor.company_id);
     } catch (eventError) {
-      console.error('[distributor-create-order] Failed to log event:', eventError);
-      // Don't fail the request if event logging fails
+      console.error('[Create Distributor Order] Failed to log event:', eventError);
+    }
+
+    // Send confirmation email
+    if (resend) {
+      try {
+        const itemsList = items.map((item: any) =>
+          `<tr>
+            <td style="padding: 12px; border-bottom: 1px solid #e8e8e8;">
+              <div style="font-weight: 600; color: #0a0a0a; font-size: 14px;">${item.description}</div>
+              <div style="color: #64748b; font-size: 12px; font-family: 'Courier New', monospace; margin-top: 4px;">${item.product_code}</div>
+            </td>
+            <td style="padding: 12px; border-bottom: 1px solid #e8e8e8; text-align: center; color: #475569;">${item.quantity}</td>
+            <td style="padding: 12px; border-bottom: 1px solid #e8e8e8; text-align: right; font-weight: 600; color: #0a0a0a;">£${(item.unit_price * item.quantity).toFixed(2)}</td>
+          </tr>`
+        ).join('');
+
+        await resend.emails.send({
+          from: 'Technifold Orders <orders@technifold.com>',
+          to: distributor.email,
+          subject: `Order ${order.order_id} - Under Review`,
+          html: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
+            <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc;">
+              <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+
+                <!-- Header with Logos -->
+                <div style="background-color: #ffffff; padding: 32px 32px 24px; border-bottom: 1px solid #e8e8e8;">
+                  <div style="display: flex; align-items: center; justify-content: center; gap: 32px; margin-bottom: 24px;">
+                    <img src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/technifold.png" alt="Technifold" style="height: 40px; width: auto;">
+                    <img src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/technicrease.png" alt="TechniCrease" style="height: 40px; width: auto;">
+                    <img src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/creasestream.png" alt="CreaseStream" style="height: 40px; width: auto;">
+                  </div>
+                  <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: #1e40af; text-align: center;">Order Received</h1>
+                  <p style="margin: 8px 0 0; font-size: 14px; color: #64748b; text-align: center;">Order ${order.order_id}</p>
+                </div>
+
+                <!-- Main Content -->
+                <div style="padding: 32px;">
+                  <p style="margin: 0 0 24px; font-size: 16px; color: #0a0a0a; line-height: 1.6;">
+                    Hi ${distributor.full_name},
+                  </p>
+
+                  <p style="margin: 0 0 24px; font-size: 16px; color: #0a0a0a; line-height: 1.6;">
+                    Thank you for your order! We've received your request and our team is now reviewing stock availability.
+                  </p>
+
+                  <!-- Info Box -->
+                  <div style="background-color: #dbeafe; border-left: 4px solid #1e40af; padding: 16px; margin: 24px 0; border-radius: 4px;">
+                    <p style="margin: 0; font-size: 14px; color: #1e3a8a; line-height: 1.6;">
+                      <strong>What happens next:</strong><br>
+                      We're checking stock availability for all items. Once confirmed, we'll create your invoice and send it via email. Your order will be shipped once payment is received.
+                    </p>
+                  </div>
+
+                  <!-- Order Summary -->
+                  <h2 style="margin: 32px 0 16px; font-size: 18px; font-weight: 600; color: #0a0a0a;">Order Summary</h2>
+
+                  <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+                    <thead>
+                      <tr style="background-color: #f8fafc;">
+                        <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Product</th>
+                        <th style="padding: 12px; text-align: center; font-size: 12px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Qty</th>
+                        <th style="padding: 12px; text-align: right; font-size: 12px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${itemsList}
+                    </tbody>
+                  </table>
+
+                  <!-- Totals -->
+                  <table style="width: 100%; margin-left: auto; max-width: 300px; margin-bottom: 24px;">
+                    <tr>
+                      <td style="padding: 8px 0; font-size: 14px; color: #64748b;">Subtotal:</td>
+                      <td style="padding: 8px 0; font-size: 14px; color: #0a0a0a; text-align: right; font-weight: 600;">£${subtotal.toFixed(2)}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; font-size: 14px; color: #64748b;">Predicted Shipping:</td>
+                      <td style="padding: 8px 0; font-size: 14px; color: #0a0a0a; text-align: right; font-weight: 600;">${predictedShipping === 0 ? 'FREE' : `£${predictedShipping.toFixed(2)}`}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; font-size: 14px; color: #64748b;">VAT:</td>
+                      <td style="padding: 8px 0; font-size: 14px; color: #0a0a0a; text-align: right; font-weight: 600;">£${vat_amount.toFixed(2)}</td>
+                    </tr>
+                    <tr style="border-top: 2px solid #e8e8e8;">
+                      <td style="padding: 12px 0 0; font-size: 16px; color: #0a0a0a; font-weight: 700;">Estimated Total:</td>
+                      <td style="padding: 12px 0 0; font-size: 18px; color: #16a34a; text-align: right; font-weight: 800;">£${total.toFixed(2)}</td>
+                    </tr>
+                  </table>
+
+                  <p style="margin: 24px 0 0; font-size: 13px; color: #64748b; font-style: italic;">
+                    Final amounts may vary based on stock availability and confirmed shipping costs.
+                  </p>
+                </div>
+
+                <!-- Footer -->
+                <div style="background-color: #f8fafc; padding: 24px 32px; border-top: 1px solid #e8e8e8;">
+                  <p style="margin: 0 0 8px; font-size: 14px; color: #0a0a0a;">
+                    Questions? Contact us:
+                  </p>
+                  <p style="margin: 0; font-size: 14px; color: #1e40af;">
+                    Email: <a href="mailto:orders@technifold.com" style="color: #1e40af; text-decoration: none;">orders@technifold.com</a><br>
+                    Phone: +44 (0) 1622 235 123
+                  </p>
+                  <p style="margin: 16px 0 0; font-size: 12px; color: #64748b;">
+                    © ${new Date().getFullYear()} Technifold International Ltd. All rights reserved.
+                  </p>
+                </div>
+              </div>
+            </body>
+            </html>
+          `,
+        });
+
+        console.log(`[Create Distributor Order] Confirmation email sent to ${distributor.email}`);
+      } catch (emailError) {
+        console.error('[Create Distributor Order] Email error:', emailError);
+        // Don't fail the request if email fails
+      }
     }
 
     return NextResponse.json({
       success: true,
-      invoice_id: finalizedInvoice.id,
-      db_invoice_id: dbInvoice.invoice_id,
-      invoice_url: finalizedInvoice.hosted_invoice_url,
-      invoice_pdf_url: finalizedInvoice.invoice_pdf,
-      total_amount: total,
+      order_id: order.order_id,
+      message: 'Order submitted for review',
     });
 
   } catch (error: any) {
-    console.error('[distributor-create-order] Error:', error);
+    console.error('[Create Distributor Order] Error:', error);
     return NextResponse.json(
       {
         error: 'Failed to create order',

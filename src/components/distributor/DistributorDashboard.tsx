@@ -28,12 +28,31 @@ interface Invoice {
   status: string | null;
 }
 
+interface Order {
+  order_id: string;
+  status: string;
+  total_amount: number;
+  created_at: string;
+  reviewed_at: string | null;
+}
+
+interface BackOrderItem {
+  item_id: string;
+  product_code: string;
+  description: string;
+  quantity: number;
+  predicted_delivery_date: string | null;
+  back_order_notes: string | null;
+}
+
 interface DistributorDashboardProps {
   distributor: {
     company_id: string;
     company_name: string;
   };
   invoices: Invoice[];
+  orders: Order[];
+  backOrderItems: BackOrderItem[];
   products: Product[];
   tier: string;
 }
@@ -41,6 +60,8 @@ interface DistributorDashboardProps {
 export default function DistributorDashboard({
   distributor,
   invoices,
+  orders,
+  backOrderItems,
   products,
   tier,
 }: DistributorDashboardProps) {
@@ -59,6 +80,7 @@ export default function DistributorDashboard({
   const [pricingPreview, setPricingPreview] = useState<any>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [orderResult, setOrderResult] = useState<{ order_id: string } | null>(null);
 
   // Fetch shipping addresses and billing on mount
   useEffect(() => {
@@ -274,14 +296,14 @@ export default function DistributorDashboard({
         throw new Error(data.details || data.error || 'Failed to create order');
       }
 
-      alert('Order placed successfully! Invoice has been sent via email.');
-      router.refresh();
+      // Show success modal
+      setOrderResult({ order_id: data.order_id });
       setCart(new Map());
       setPricingPreview(null);
+      setSubmitting(false);
     } catch (error: any) {
       console.error('Error submitting order:', error);
       alert(`Failed to submit order: ${error.message}`);
-    } finally {
       setSubmitting(false);
     }
   };
@@ -767,22 +789,124 @@ export default function DistributorDashboard({
           </div>
         )}
 
-        {/* Recent Invoices */}
+        {/* Back-Order Items */}
+        {backOrderItems.length > 0 && (
+          <div className="bg-white rounded-[16px] shadow-sm border-2 border-amber-200">
+            <div className="px-6 py-4 bg-gradient-to-r from-amber-50 to-transparent border-b border-amber-200">
+              <h2 className="text-[17px] font-[600] text-[#0a0a0a] tracking-[-0.01em]">📦 Back-Ordered Items</h2>
+              <p className="text-[12px] text-[#334155] mt-0.5 font-[500]">
+                {backOrderItems.length} item{backOrderItems.length !== 1 ? 's' : ''} awaiting stock
+              </p>
+            </div>
+
+            <div className="p-6 space-y-3">
+              {backOrderItems.map((item) => (
+                <div
+                  key={item.item_id}
+                  className="p-3 bg-amber-50/50 rounded-[10px] border border-amber-200"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="text-[13px] font-[600] text-[#0a0a0a]">
+                        {item.description}
+                      </div>
+                      <div className="text-[11px] text-[#666] font-mono mt-0.5">{item.product_code}</div>
+                      <div className="text-[11px] text-[#475569] mt-1">
+                        Quantity: <span className="font-semibold">{item.quantity}</span>
+                      </div>
+                      {item.predicted_delivery_date && (
+                        <div className="text-[11px] text-amber-700 font-semibold mt-1">
+                          Expected: {new Date(item.predicted_delivery_date).toLocaleDateString('en-GB', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric'
+                          })}
+                        </div>
+                      )}
+                      {item.back_order_notes && (
+                        <div className="text-[10px] text-[#666] mt-1 italic">
+                          {item.back_order_notes}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Order & Invoice History */}
         <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8]">
           <div className="px-6 py-4 bg-gradient-to-r from-purple-50/50 to-transparent border-b border-[#e8e8e8]">
-            <h2 className="text-[17px] font-[600] text-[#0a0a0a] tracking-[-0.01em]">Recent Orders</h2>
+            <h2 className="text-[17px] font-[600] text-[#0a0a0a] tracking-[-0.01em]">Order History</h2>
             <p className="text-[12px] text-[#334155] mt-0.5 font-[500]">
-              {invoices.length} invoice{invoices.length !== 1 ? 's' : ''}
+              {orders.length + invoices.length} total
             </p>
           </div>
 
           <div className="p-6 max-h-[400px] overflow-y-auto">
-            {invoices.length === 0 ? (
+            {orders.length === 0 && invoices.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-[13px] text-[#475569] font-[400]">No orders yet</p>
               </div>
             ) : (
               <div className="space-y-2">
+                {/* Show orders first (most recent) */}
+                {orders.slice(0, 10).map((order) => (
+                  <div
+                    key={order.order_id}
+                    className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <div className="text-[13px] font-[600] text-[#0a0a0a] font-mono">
+                            {order.order_id}
+                          </div>
+                          <div className={`px-2 py-0.5 rounded-[6px] text-[9px] font-[700] uppercase tracking-wide ${
+                            order.status === 'pending_review'
+                              ? 'bg-blue-100 text-blue-800'
+                              : order.status === 'partially_fulfilled'
+                              ? 'bg-amber-100 text-amber-800'
+                              : order.status === 'fully_fulfilled'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {order.status === 'pending_review'
+                              ? 'Under Review'
+                              : order.status === 'partially_fulfilled'
+                              ? 'Partially Fulfilled'
+                              : order.status === 'fully_fulfilled'
+                              ? 'Fulfilled'
+                              : order.status}
+                          </div>
+                        </div>
+                        <div className="text-[11px] text-[#475569] font-[500] mt-0.5">
+                          Submitted: {new Date(order.created_at).toLocaleDateString('en-GB', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric'
+                          })}
+                          {order.reviewed_at && (
+                            <span className="ml-2">
+                              • Reviewed: {new Date(order.reviewed_at).toLocaleDateString('en-GB', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric'
+                              })}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-[15px] font-[700] text-[#0a0a0a] tracking-[-0.01em]">
+                        £{order.total_amount.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Then show invoices */}
                 {invoices.slice(0, 10).map((invoice) => (
                   <div
                     key={invoice.invoice_id}
@@ -807,7 +931,7 @@ export default function DistributorDashboard({
                           )}
                         </div>
                         <div className="text-[11px] text-[#475569] font-[500] mt-0.5">
-                          {new Date(invoice.invoice_date).toLocaleDateString('en-GB', {
+                          Invoice Date: {new Date(invoice.invoice_date).toLocaleDateString('en-GB', {
                             day: 'numeric',
                             month: 'short',
                             year: 'numeric'
@@ -959,6 +1083,70 @@ export default function DistributorDashboard({
                   )}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Order Success Modal */}
+      {orderResult && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            {/* Header */}
+            <div className="px-6 py-5 border-b border-[#e8e8e8]">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-[#0a0a0a]">
+                    Order Submitted!
+                  </h3>
+                  <p className="text-sm text-[#666] mt-0.5">
+                    Order ID: <span className="font-mono font-semibold text-[#1e40af]">{orderResult.order_id}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6">
+              {/* Info Box */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  <div className="flex-1 text-sm text-blue-800">
+                    <strong className="font-semibold">What happens next?</strong>
+                    <ul className="mt-2 space-y-1.5 list-disc list-inside">
+                      <li>We'll review stock availability for your order</li>
+                      <li>You'll receive a Stripe invoice via email (Net 30 terms)</li>
+                      <li>Any back-ordered items will be noted with predicted delivery dates</li>
+                      <li>Your order ships once payment is received</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Confirmation Message */}
+              <div className="text-center mb-6">
+                <p className="text-sm text-[#666]">
+                  A confirmation email has been sent with your order details.
+                </p>
+              </div>
+
+              {/* Close Button */}
+              <button
+                onClick={() => {
+                  setOrderResult(null);
+                  router.refresh();
+                }}
+                className="w-full bg-[#16a34a] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#15803d] transition-all shadow-lg"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>

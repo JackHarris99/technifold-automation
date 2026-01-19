@@ -29,6 +29,40 @@ export default async function DistributorDashboardPage() {
     console.error('[Distributor Dashboard] Error fetching invoices:', error);
   }
 
+  // Fetch distributor orders (pending, partially fulfilled, etc.)
+  const { data: orders, error: ordersError } = await supabase
+    .from('distributor_orders')
+    .select('order_id, status, total_amount, created_at, reviewed_at')
+    .eq('company_id', distributor.company_id)
+    .order('created_at', { ascending: false })
+    .limit(50);
+
+  if (ordersError) {
+    console.error('[Distributor Dashboard] Error fetching orders:', ordersError);
+  }
+
+  // Fetch back-order items for this distributor
+  const { data: backOrderItems, error: backOrderError } = await supabase
+    .from('distributor_order_items')
+    .select(`
+      item_id,
+      product_code,
+      description,
+      quantity,
+      predicted_delivery_date,
+      back_order_notes,
+      distributor_orders!inner (
+        order_id,
+        company_id
+      )
+    `)
+    .eq('status', 'back_order')
+    .eq('distributor_orders.company_id', distributor.company_id);
+
+  if (backOrderError) {
+    console.error('[Distributor Dashboard] Error fetching back-order items:', backOrderError);
+  }
+
   // Get distributor's pricing tier
   const { data: company } = await supabase
     .from('companies')
@@ -185,6 +219,8 @@ export default async function DistributorDashboardPage() {
         <DistributorDashboard
           distributor={distributor}
           invoices={invoices || []}
+          orders={orders || []}
+          backOrderItems={backOrderItems || []}
           products={productsWithPricing}
           tier={distributorTier}
         />
