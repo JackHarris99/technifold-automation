@@ -30,6 +30,26 @@ export default async function ToolConsumablesAdminPage() {
     .not('rental_price_monthly', 'is', null)
     .order('product_code');
 
+  console.log('[tool-consumables/page] Fetched', tools?.length || 0, 'tools from DB');
+  if (tools && tools.length > 0) {
+    console.log('[tool-consumables/page] Sample tool product_codes:', tools.slice(0, 3).map(t => t.product_code));
+  }
+
+  // Check if the tool codes match between tables
+  if (relationships && tools && relationships.length > 0 && tools.length > 0) {
+    const relToolCodes = new Set(relationships.map(r => r.tool_code));
+    const productCodes = new Set(tools.map(t => t.product_code));
+    const relOnly = [...relToolCodes].filter(code => !productCodes.has(code)).slice(0, 5);
+    const productsOnly = [...productCodes].filter(code => !relToolCodes.has(code)).slice(0, 5);
+
+    if (relOnly.length > 0) {
+      console.log('[tool-consumables/page] ⚠️ Tool codes in relationships but NOT in products:', relOnly);
+    }
+    if (productsOnly.length > 0) {
+      console.log('[tool-consumables/page] ℹ️ Tool codes in products but NOT in relationships:', productsOnly);
+    }
+  }
+
   // Fetch all consumables in batches (Supabase 1000 row limit)
   let allConsumables: any[] = [];
   let start = 0;
