@@ -43,20 +43,26 @@ export default function ToolConsumableManagementV2({
     setRelationships(initialRelationships);
   }, [initialRelationships]);
 
-  // Auto-refresh when user switches back to this tab (from detail page)
+  // Refetch relationships when user returns to tab (proper client-side refetch)
   useEffect(() => {
     let wasHidden = false;
 
-    const handleVisibilityChange = () => {
+    const handleVisibilityChange = async () => {
       if (document.hidden) {
-        // Tab is now hidden - user switched away
         wasHidden = true;
       } else if (wasHidden) {
-        // Tab is now visible again - user came back
-        // Wait a moment to avoid reload loop, then reload
-        setTimeout(() => {
-          window.location.reload();
-        }, 100);
+        wasHidden = false;
+        // Refetch data from API
+        try {
+          const response = await fetch('/api/admin/tool-consumables/relationships');
+          if (response.ok) {
+            const data = await response.json();
+            setRelationships(data.relationships || []);
+            setLastRefresh(new Date());
+          }
+        } catch (error) {
+          console.error('Failed to refetch relationships:', error);
+        }
       }
     };
 
@@ -125,9 +131,17 @@ export default function ToolConsumableManagementV2({
               Last updated: {lastRefresh.toLocaleTimeString('en-GB')}
             </span>
             <button
-              onClick={() => {
-                router.refresh();
-                setLastRefresh(new Date());
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/admin/tool-consumables/relationships');
+                  if (response.ok) {
+                    const data = await response.json();
+                    setRelationships(data.relationships || []);
+                    setLastRefresh(new Date());
+                  }
+                } catch (error) {
+                  console.error('Failed to refresh relationships:', error);
+                }
               }}
               className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors"
             >

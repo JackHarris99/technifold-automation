@@ -65,7 +65,8 @@ export default function QuotesPage() {
     try {
       const viewMode = getViewMode();
       const params = new URLSearchParams();
-      if (viewMode === 'my_customers') params.set('viewMode', 'my_customers');
+      // Send view mode to API (supports all Director view modes)
+      if (viewMode !== 'all') params.set('viewMode', viewMode);
       if (statusFilter !== 'all') params.set('status', statusFilter);
 
       const response = await fetch(`/api/admin/quotes/list?${params}`);

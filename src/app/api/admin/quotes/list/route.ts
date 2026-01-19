@@ -8,6 +8,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { getCurrentUser } from '@/lib/auth';
 import { cookies } from 'next/headers';
 import { generateToken } from '@/lib/tokens';
+import { getSalesRepFromViewMode, ViewMode } from '@/lib/viewMode';
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,8 +37,12 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const viewMode = searchParams.get('viewMode'); // 'my_customers' or null (all)
+    const viewModeParam = searchParams.get('viewMode'); // 'my_customers', 'view_as_lee', etc., or null (all)
     const statusFilter = searchParams.get('status'); // 'sent', 'viewed', 'accepted', 'expired', 'need_followup'
+
+    // Determine which sales rep to filter by (supports all Director view modes)
+    const viewMode = (viewModeParam as ViewMode) || 'all';
+    const filterBySalesRep = getSalesRepFromViewMode(viewMode, session.sales_rep_id);
 
     const supabase = getSupabaseClient();
 
@@ -103,12 +108,12 @@ export async function GET(request: NextRequest) {
 
     console.log('[quotes/list] Fetched companies count:', companies?.length || 0);
 
-    // Filter by company account_owner if in "my_customers" mode
+    // Filter by company account_owner based on view mode
     let ownerFilteredQuotes = quotes;
-    if (viewMode === 'my_customers') {
+    if (filterBySalesRep) {
       ownerFilteredQuotes = quotes.filter((quote: any) => {
         const company = companies?.find(c => c.company_id === quote.company_id);
-        return company?.account_owner === session.sales_rep_id;
+        return company?.account_owner === filterBySalesRep;
       });
       console.log('[quotes/list] After owner filter:', ownerFilteredQuotes.length);
     }
