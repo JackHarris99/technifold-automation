@@ -101,6 +101,24 @@ export default function DistributorPricingClient({
 
   const activeProducts = products.filter(p => p.active);
 
+  // Group products by type and category
+  const groupedProducts = activeProducts.reduce((acc, product) => {
+    const type = product.type || 'other';
+    const category = product.category || 'uncategorized';
+    const key = `${type}|||${category}`;
+
+    if (!acc[key]) {
+      acc[key] = { type, category, products: [] };
+    }
+    acc[key].products.push(product);
+    return acc;
+  }, {} as Record<string, { type: string; category: string; products: Product[] }>);
+
+  const sortedGroups = Object.values(groupedProducts).sort((a, b) => {
+    if (a.type !== b.type) return a.type.localeCompare(b.type);
+    return a.category.localeCompare(b.category);
+  });
+
   return (
     <>
       {/* Pricing Table */}
@@ -132,42 +150,51 @@ export default function DistributorPricingClient({
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {activeProducts.map((product) => {
-                const distributorPrice = getDisplayPrice(product.product_code);
-
-                return (
-                  <tr key={product.product_code} className="hover:bg-gray-50">
-                    <td className="py-3 px-4 font-mono text-sm text-gray-900">{product.product_code}</td>
-                    <td className="py-3 px-4 text-sm text-gray-800">{product.description}</td>
-                    <td className="py-3 px-4">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                        product.type === 'tool'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-green-100 text-green-700'
-                      }`}>
-                        {product.type}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right text-sm text-gray-600">
-                      {product.price != null ? `£${product.price.toFixed(2)}` : '-'}
-                    </td>
-                    <td className="py-3 px-4 bg-blue-50">
-                      <div className="flex items-center justify-end gap-2">
-                        <span className="text-sm text-gray-500">£</span>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={distributorPrice}
-                          onChange={(e) => handlePriceChange(product.product_code, e.target.value)}
-                          placeholder="Use base"
-                          className="w-28 px-3 py-1.5 border border-gray-300 rounded text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
+              {sortedGroups.map((group) => (
+                <>
+                  <tr key={`${group.type}-${group.category}`} className="bg-gray-100">
+                    <td colSpan={5} className="py-2 px-4 font-semibold text-sm text-gray-700">
+                      {group.type.toUpperCase()} - {group.category}
                     </td>
                   </tr>
-                );
-              })}
+                  {group.products.map((product) => {
+                    const distributorPrice = getDisplayPrice(product.product_code);
+
+                    return (
+                      <tr key={product.product_code} className="hover:bg-gray-50">
+                        <td className="py-3 px-4 font-mono text-sm text-gray-900">{product.product_code}</td>
+                        <td className="py-3 px-4 text-sm text-gray-800">{product.description}</td>
+                        <td className="py-3 px-4">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                            product.type === 'tool'
+                              ? 'bg-blue-100 text-blue-700'
+                              : 'bg-green-100 text-green-700'
+                          }`}>
+                            {product.type}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-right text-sm text-gray-600">
+                          {product.price != null ? `£${product.price.toFixed(2)}` : '-'}
+                        </td>
+                        <td className="py-3 px-4 bg-blue-50">
+                          <div className="flex items-center justify-end gap-2">
+                            <span className="text-sm text-gray-500">£</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={distributorPrice}
+                              onChange={(e) => handlePriceChange(product.product_code, e.target.value)}
+                              placeholder="Use base"
+                              className="w-28 px-3 py-1.5 border border-gray-300 rounded text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </>
+              ))}
             </tbody>
           </table>
         </div>

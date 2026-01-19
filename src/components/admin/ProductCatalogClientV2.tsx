@@ -123,6 +123,32 @@ export default function ProductCatalogClientV2({
   const productsInCatalog = filteredProducts.filter(p => companyCatalogProducts.has(p.product_code));
   const productsNotInCatalog = filteredProducts.filter(p => !companyCatalogProducts.has(p.product_code));
 
+  // Group products by type and category
+  const groupProducts = (productList: Product[]) => {
+    const grouped = new Map<string, Map<string, Product[]>>();
+
+    productList.forEach(product => {
+      const type = product.type || 'other';
+      const category = product.category || 'uncategorized';
+
+      if (!grouped.has(type)) {
+        grouped.set(type, new Map());
+      }
+
+      const typeGroup = grouped.get(type)!;
+      if (!typeGroup.has(category)) {
+        typeGroup.set(category, []);
+      }
+
+      typeGroup.get(category)!.push(product);
+    });
+
+    return grouped;
+  };
+
+  const groupedInCatalog = groupProducts(productsInCatalog);
+  const groupedNotInCatalog = groupProducts(productsNotInCatalog);
+
   const handleAddProduct = async (productCode: string) => {
     if (!selectedCompanyId) return;
 
@@ -352,8 +378,21 @@ export default function ProductCatalogClientV2({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {productsInCatalog.map(product => (
-                      <ProductRow key={product.product_code} product={product} inCatalog={true} />
+                    {Array.from(groupedInCatalog.entries()).map(([type, categories]) => (
+                      <>
+                        {Array.from(categories.entries()).map(([category, products]) => (
+                          <>
+                            <tr key={`${type}-${category}`} className="bg-gray-100">
+                              <td colSpan={7} className="py-2 px-4 font-semibold text-sm text-gray-700">
+                                {type.toUpperCase()} - {category}
+                              </td>
+                            </tr>
+                            {products.map(product => (
+                              <ProductRow key={product.product_code} product={product} inCatalog={true} />
+                            ))}
+                          </>
+                        ))}
+                      </>
                     ))}
                   </tbody>
                 </table>
@@ -384,8 +423,21 @@ export default function ProductCatalogClientV2({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {productsNotInCatalog.map(product => (
-                      <ProductRow key={product.product_code} product={product} inCatalog={false} />
+                    {Array.from(groupedNotInCatalog.entries()).map(([type, categories]) => (
+                      <>
+                        {Array.from(categories.entries()).map(([category, products]) => (
+                          <>
+                            <tr key={`${type}-${category}`} className="bg-gray-100 sticky top-[48px]">
+                              <td colSpan={7} className="py-2 px-4 font-semibold text-sm text-gray-700">
+                                {type.toUpperCase()} - {category}
+                              </td>
+                            </tr>
+                            {products.map(product => (
+                              <ProductRow key={product.product_code} product={product} inCatalog={false} />
+                            ))}
+                          </>
+                        ))}
+                      </>
                     ))}
                   </tbody>
                 </table>

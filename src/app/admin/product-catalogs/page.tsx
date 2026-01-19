@@ -18,11 +18,11 @@ export default async function ProductCatalogsPage() {
 
   const supabase = getSupabaseClient();
 
-  // Fetch all companies (distributors and OEMs)
+  // Fetch all distributors only (not regular customers)
   const { data: companies } = await supabase
     .from('companies')
     .select('company_id, company_name, type')
-    .in('type', ['distributor', 'customer'])
+    .eq('type', 'distributor')
     .order('company_name');
 
   // Fetch all products with base prices
