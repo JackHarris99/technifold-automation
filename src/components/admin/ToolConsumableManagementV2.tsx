@@ -43,17 +43,26 @@ export default function ToolConsumableManagementV2({
     setRelationships(initialRelationships);
   }, [initialRelationships]);
 
-  // Auto-refresh when page regains focus (user returns from detail page)
+  // Auto-refresh when user switches back to this tab (from detail page)
   useEffect(() => {
-    const handleFocus = () => {
-      // Refresh the page data when user returns from another tab
-      router.refresh();
-      setLastRefresh(new Date());
+    let wasHidden = false;
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Tab is now hidden - user switched away
+        wasHidden = true;
+      } else if (wasHidden) {
+        // Tab is now visible again - user came back
+        // Wait a moment to avoid reload loop, then reload
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      }
     };
 
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
-  }, [router]);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
 
   // Coverage stats
   const toolCoverage = useMemo(() => {
