@@ -166,33 +166,15 @@ export default async function DistributorDashboardPage() {
 
       {/* Header */}
       <div className="bg-white border-b border-[#e8e8e8] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-        <div className="max-w-[1600px] mx-auto px-8 py-8">
+        <div className="max-w-[1600px] mx-auto px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-[32px] font-[700] text-[#0a0a0a] tracking-[-0.02em]">
-                {distributor.company_name}
-              </h1>
-              <p className="text-[15px] text-[#475569] font-[500] mt-2">
+              <h1 className="text-[24px] font-[700] text-[#1e40af] tracking-[-0.02em]">
                 Distributor Portal
+              </h1>
+              <p className="text-[13px] text-[#64748b] font-[500] mt-1">
+                {distributor.full_name} • {distributor.email}
               </p>
-            </div>
-            <div className="flex items-center gap-4">
-              {distributor.role === 'admin' && (
-                <a
-                  href="/distributor/users"
-                  className="px-4 py-2 text-[13px] font-[600] text-[#475569] hover:text-[#1e40af] transition-colors"
-                >
-                  Manage Team
-                </a>
-              )}
-              <form action="/api/distributor/auth/logout" method="POST">
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-[13px] font-[600] text-[#475569] hover:text-[#1e40af] transition-colors"
-                >
-                  Sign Out
-                </button>
-              </form>
             </div>
           </div>
         </div>

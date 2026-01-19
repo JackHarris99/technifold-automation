@@ -378,105 +378,6 @@ export default function DistributorDashboard({
           </div>
         </div>
 
-        {/* Address Collection */}
-        <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8] p-6">
-          <div className="mb-6">
-            <h2 className="text-[20px] font-[600] text-[#1e40af] mb-1 tracking-[-0.01em]">
-              {distributor.company_name}
-            </h2>
-            <p className="text-[13px] text-[#334155] font-[400]">
-              Company and delivery information
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            {/* Billing Address */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider">Billing Address</div>
-                {billingAddress && (
-                  <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
-                )}
-              </div>
-              {loadingAddresses ? (
-                <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
-                  <p className="text-[12px] text-[#475569] italic">Loading...</p>
-                </div>
-              ) : billingAddress && billingAddress.billing_address_line_1 ? (
-                <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
-                  <div className="text-[12px] font-[500] text-[#1e293b]">{billingAddress.billing_address_line_1}</div>
-                  {billingAddress.billing_address_line_2 && <div className="text-[11px] text-[#334155]">{billingAddress.billing_address_line_2}</div>}
-                  <div className="text-[11px] text-[#334155]">{billingAddress.billing_city}{billingAddress.billing_state_province ? `, ${billingAddress.billing_state_province}` : ''}</div>
-                  <div className="text-[11px] text-[#334155]">{billingAddress.billing_postal_code}</div>
-                  <div className="text-[12px] font-[500] text-[#1e293b] mt-1">{billingAddress.billing_country}</div>
-                </div>
-              ) : (
-                <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
-                  <p className="text-[11px] text-red-600 italic">No billing address - <button onClick={() => setShowAddressModal(true)} className="underline font-[600]">Add now</button></p>
-                </div>
-              )}
-            </div>
-
-            {/* Delivery Addresses */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider">Delivery Addresses</div>
-                <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">
-                  {shippingAddresses.length > 0 ? 'Add New' : 'Add'}
-                </button>
-              </div>
-              {loadingAddresses ? (
-                <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
-                  <p className="text-[12px] text-[#475569] italic">Loading...</p>
-                </div>
-              ) : shippingAddresses.length > 0 ? (
-                <div className="space-y-2 max-h-[120px] overflow-y-auto pr-1">
-                  {shippingAddresses.map((addr) => (
-                    <div
-                      key={addr.address_id}
-                      onClick={() => setSelectedAddressId(addr.address_id)}
-                      className={`p-2 rounded-[8px] border cursor-pointer transition-all ${
-                        selectedAddressId === addr.address_id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-[#e2e8f0] bg-[#f8fafc] hover:border-blue-300'
-                      }`}
-                    >
-                      <div className="flex items-start gap-2">
-                        <input
-                          type="radio"
-                          checked={selectedAddressId === addr.address_id}
-                          onChange={() => setSelectedAddressId(addr.address_id)}
-                          className="mt-0.5 text-blue-600"
-                        />
-                        <div className="flex-1 min-w-0">
-                          {addr.label && (
-                            <div className="text-[11px] font-[600] text-[#1e293b] mb-0.5">
-                              {addr.label}
-                              {addr.is_default && <span className="ml-1 text-[9px] text-blue-600">(Default)</span>}
-                            </div>
-                          )}
-                          <div className="text-[10px] text-[#334155]">
-                            {addr.address_line_1}
-                            {addr.address_line_2 && `, ${addr.address_line_2}`}
-                          </div>
-                          <div className="text-[10px] text-[#334155]">
-                            {addr.city}{addr.state_province ? `, ${addr.state_province}` : ''} {addr.postal_code}
-                          </div>
-                          <div className="text-[10px] font-[500] text-[#1e293b]">{addr.country}</div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
-                  <p className="text-[11px] text-[#475569] italic">Address confirmed at checkout</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
         {/* Search */}
         <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8] p-6 relative">
           <input
@@ -631,124 +532,240 @@ export default function DistributorDashboard({
         </div>
       </div>
 
-      {/* Right Column - Cart & Invoices */}
+      {/* Right Column - Quote Builder & Summary */}
       <div className="col-span-5 space-y-6">
-        {/* Cart Summary */}
-        <div className="bg-[#0a0a0a] rounded-[20px] p-8 text-white shadow-[0_16px_48px_rgba(0,0,0,0.24)]">
-          <div className="mb-6">
-            <h2 className="text-[20px] font-[700] tracking-[-0.01em]">Order Summary</h2>
-            <p className="text-[13px] text-gray-400 mt-1 font-[500]">
-              {cartItems.length} item{cartItems.length !== 1 ? 's' : ''}
-            </p>
-          </div>
+        {/* Company Info Card */}
+        <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8] p-6">
+          <h2 className="text-[20px] font-[600] text-[#1e40af] mb-1 tracking-[-0.01em]">
+            {distributor.company_name}
+          </h2>
+          <p className="text-[13px] text-[#334155] font-[400] mb-4">
+            Company and delivery information
+          </p>
 
-          {cartItems.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-[13px] text-gray-400 font-[400]">No items in cart</p>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Billing Address */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider">Billing Address</div>
+                {billingAddress && (
+                  <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
+                )}
+              </div>
+              {loadingAddresses ? (
+                <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                  <p className="text-[12px] text-[#475569] italic">Loading...</p>
+                </div>
+              ) : billingAddress && billingAddress.billing_address_line_1 ? (
+                <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                  <div className="text-[12px] font-[500] text-[#1e293b]">{billingAddress.billing_address_line_1}</div>
+                  {billingAddress.billing_address_line_2 && <div className="text-[11px] text-[#334155]">{billingAddress.billing_address_line_2}</div>}
+                  <div className="text-[11px] text-[#334155]">{billingAddress.billing_city}{billingAddress.billing_state_province ? `, ${billingAddress.billing_state_province}` : ''}</div>
+                  <div className="text-[11px] text-[#334155]">{billingAddress.billing_postal_code}</div>
+                  <div className="text-[12px] font-[500] text-[#1e293b] mt-1">{billingAddress.billing_country}</div>
+                </div>
+              ) : (
+                <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                  <p className="text-[11px] text-red-600 italic">No billing address - <button onClick={() => setShowAddressModal(true)} className="underline font-[600]">Add now</button></p>
+                </div>
+              )}
             </div>
-          ) : (
-            <>
-              <div className="space-y-3 mb-6">
-                {cartItems.map((item) => (
-                  <div
-                    key={item.product.product_code}
-                    className="p-3 bg-white/5 rounded-[10px] border border-white/10"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[12px] font-[600] text-white leading-tight">
-                          {item.product.description}
-                        </div>
-                        <div className="text-[11px] text-gray-400 font-mono mt-0.5">
-                          {item.product.product_code}
+
+            {/* Delivery Addresses */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider">Delivery Addresses</div>
+                <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">
+                  {shippingAddresses.length > 0 ? 'Add New' : 'Add'}
+                </button>
+              </div>
+              {loadingAddresses ? (
+                <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                  <p className="text-[12px] text-[#475569] italic">Loading...</p>
+                </div>
+              ) : shippingAddresses.length > 0 ? (
+                <div className="space-y-2 max-h-[120px] overflow-y-auto pr-1">
+                  {shippingAddresses.map((addr) => (
+                    <div
+                      key={addr.address_id}
+                      onClick={() => setSelectedAddressId(addr.address_id)}
+                      className={`p-2 rounded-[8px] border cursor-pointer transition-all ${
+                        selectedAddressId === addr.address_id
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-[#e2e8f0] bg-[#f8fafc] hover:border-blue-300'
+                      }`}
+                    >
+                      <div className="flex items-start gap-2">
+                        <input
+                          type="radio"
+                          checked={selectedAddressId === addr.address_id}
+                          onChange={() => setSelectedAddressId(addr.address_id)}
+                          className="mt-0.5 text-blue-600"
+                        />
+                        <div className="flex-1 min-w-0">
+                          {addr.label && (
+                            <div className="text-[11px] font-[600] text-[#1e293b] mb-0.5">
+                              {addr.label}
+                              {addr.is_default && <span className="ml-1 text-[9px] text-blue-600">(Default)</span>}
+                            </div>
+                          )}
+                          <div className="text-[10px] text-[#334155]">
+                            {addr.address_line_1}
+                            {addr.address_line_2 && `, ${addr.address_line_2}`}
+                          </div>
+                          <div className="text-[10px] text-[#334155]">
+                            {addr.city}{addr.state_province ? `, ${addr.state_province}` : ''} {addr.postal_code}
+                          </div>
+                          <div className="text-[10px] font-[500] text-[#1e293b]">{addr.country}</div>
                         </div>
                       </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                  <p className="text-[11px] text-[#475569] italic">Address confirmed at checkout</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-3 mt-6 pt-4 border-t border-[#e8e8e8]">
+            {distributor.role === 'admin' && (
+              <a
+                href="/distributor/users"
+                className="px-4 py-2 text-[13px] font-[600] text-[#475569] hover:text-[#1e40af] transition-colors border border-[#e8e8e8] rounded-lg hover:border-[#1e40af]"
+              >
+                Manage Team
+              </a>
+            )}
+            <form action="/api/distributor/auth/logout" method="POST">
+              <button
+                type="submit"
+                className="px-4 py-2 text-[13px] font-[600] text-[#475569] hover:text-[#1e40af] transition-colors border border-[#e8e8e8] rounded-lg hover:border-[#1e40af]"
+              >
+                Sign Out
+              </button>
+            </form>
+          </div>
+        </div>
+
+        {/* Selected Products Section */}
+        {cartItems.length > 0 && (
+          <div className="bg-white rounded-[16px] p-5 shadow-sm border-2 border-blue-200">
+            <div className="mb-4">
+              <h3 className="text-[15px] font-[700] text-[#0a0a0a] tracking-tight">Selected Products</h3>
+              <p className="text-[11px] text-[#334155] mt-1">{cartItems.length} item{cartItems.length !== 1 ? 's' : ''} selected</p>
+            </div>
+
+            <div className="space-y-3">
+              {cartItems.map((item) => (
+                <div key={item.product.product_code} className="p-3 bg-blue-50/50 rounded-[10px] border border-blue-200">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[11px] font-mono text-[#1e293b] mb-0.5">{item.product.product_code}</div>
+                      <div className="text-[13px] font-[600] text-[#0a0a0a] leading-tight">{item.product.description}</div>
+                    </div>
+                    <button
+                      onClick={() => updateQuantity(item.product.product_code, 0)}
+                      className="ml-2 text-red-600 hover:text-red-700 flex-shrink-0"
+                      title="Remove"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-3 mt-2">
+                    <div className="flex items-center gap-2">
                       <button
-                        onClick={() => updateQuantity(item.product.product_code, 0)}
-                        className="ml-2 text-red-400 hover:text-red-300 flex-shrink-0"
-                        title="Remove"
+                        onClick={() => updateQuantity(item.product.product_code, Math.max(0, item.quantity - 1))}
+                        className="w-6 h-6 rounded-[6px] bg-white border border-[#e8e8e8] flex items-center justify-center hover:bg-gray-50"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                        </svg>
+                      </button>
+                      <input
+                        type="number"
+                        min="0"
+                        value={item.quantity}
+                        onChange={(e) => updateQuantity(item.product.product_code, parseInt(e.target.value) || 0)}
+                        className="w-16 px-2 py-1 border border-[#e8e8e8] rounded-[6px] text-center text-[13px] font-[600]"
+                      />
+                      <button
+                        onClick={() => updateQuantity(item.product.product_code, item.quantity + 1)}
+                        className="w-6 h-6 rounded-[6px] bg-white border border-[#e8e8e8] flex items-center justify-center hover:bg-gray-50"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
                       </button>
                     </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="text-[11px] text-gray-400 font-[500]">
-                        {item.quantity} × £{item.product.price.toFixed(2)}
+                    <div className="flex-1 text-right">
+                      <div className="text-[11px] text-[#334155]">
+                        <span className="font-[600] text-[#16a34a]">£{item.product.price.toFixed(2)}</span>
+                        <span className="text-[#475569]"> /unit</span>
                       </div>
-                      <div className="text-[14px] font-[700] text-white">
-                        £{(item.quantity * item.product.price).toFixed(2)}
-                      </div>
+                      <div className="text-[14px] font-[700] text-[#0a0a0a] mt-0.5">£{(item.quantity * item.product.price).toFixed(2)}</div>
                     </div>
                   </div>
-                ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Order Summary Card (Black) */}
+        {pricingPreview && cartItems.length > 0 && (
+          <div className="bg-[#0a0a0a] rounded-[20px] p-8 text-white shadow-[0_16px_48px_rgba(0,0,0,0.24)]">
+            <div className="text-[12px] font-[700] text-[#999] uppercase tracking-[0.05em] mb-6">Order Summary</div>
+            <div className="space-y-4">
+              {/* Subtotal */}
+              <div className="flex justify-between items-center">
+                <span className="text-[15px] text-[#999] font-[500]">Subtotal</span>
+                <span className="font-[700] text-[17px] tracking-[-0.01em]">£{pricingPreview.subtotal.toFixed(2)}</span>
               </div>
 
-              <div className="border-t-2 border-white/10 pt-4">
-                {loadingPreview ? (
-                  <div className="text-center py-4 text-gray-400 text-sm">Calculating...</div>
-                ) : pricingPreview ? (
-                  <div className="space-y-3 mb-4">
-                    {/* Subtotal */}
-                    <div className="flex justify-between items-center">
-                      <span className="text-[15px] text-[#999] font-[500]">Subtotal</span>
-                      <span className="font-[700] text-[17px] tracking-[-0.01em]">£{pricingPreview.subtotal.toFixed(2)}</span>
-                    </div>
+              {/* Shipping */}
+              {pricingPreview.shipping !== undefined && (
+                <div className="flex justify-between items-center">
+                  <span className="text-[15px] text-[#999] font-[500]">Shipping</span>
+                  <span className="font-[600] text-[16px]">{pricingPreview.shipping === 0 ? 'FREE' : `£${pricingPreview.shipping.toFixed(2)}`}</span>
+                </div>
+              )}
 
-                    {/* Shipping */}
-                    {pricingPreview.shipping !== undefined && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-[15px] text-[#999] font-[500]">Shipping</span>
-                        <span className="font-[600] text-[16px]">{pricingPreview.shipping === 0 ? 'FREE' : `£${pricingPreview.shipping.toFixed(2)}`}</span>
-                      </div>
-                    )}
+              {/* VAT */}
+              {pricingPreview.vat_amount !== undefined && (
+                <div className="flex justify-between items-center pb-4 border-b border-[#2a2a2a]">
+                  <span className="text-[15px] text-[#999] font-[500]">
+                    VAT {pricingPreview.vat_rate > 0 && `(${(pricingPreview.vat_rate * 100).toFixed(0)}%)`}
+                  </span>
+                  <span className="font-[600] text-[16px]">£{pricingPreview.vat_amount.toFixed(2)}</span>
+                </div>
+              )}
 
-                    {/* VAT */}
-                    {pricingPreview.vat_amount !== undefined && (
-                      <div className="flex justify-between items-center pb-3 border-b border-[#2a2a2a]">
-                        <span className="text-[15px] text-[#999] font-[500]">
-                          VAT {pricingPreview.vat_rate > 0 && `(${(pricingPreview.vat_rate * 100).toFixed(0)}%)`}
-                          {pricingPreview.vat_exempt_reason && ` - ${pricingPreview.vat_exempt_reason}`}
-                        </span>
-                        <span className="font-[600] text-[16px]">£{pricingPreview.vat_amount.toFixed(2)}</span>
-                      </div>
-                    )}
+              {/* Final Total */}
+              {pricingPreview.total !== undefined && (
+                <div className="flex justify-between items-center mb-6">
+                  <span className="text-[20px] font-[700]">Total</span>
+                  <span className="text-[32px] font-[800] text-[#16a34a] tracking-[-0.02em]">£{pricingPreview.total.toFixed(2)}</span>
+                </div>
+              )}
 
-                    {/* Final Total */}
-                    <div className="flex justify-between items-center pt-2">
-                      <span className="text-[17px] font-[700] text-white">Total</span>
-                      <span className="text-[28px] font-[800] text-[#16a34a] tracking-[-0.02em]">
-                        £{pricingPreview.total.toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="text-[15px] font-[700] text-white">Subtotal</div>
-                    <div className="text-[28px] font-[800] text-[#16a34a] tracking-[-0.02em]">
-                      £{subtotal.toFixed(2)}
-                    </div>
-                  </div>
-                )}
-
-                <button
-                  onClick={handleSubmitOrder}
-                  disabled={submitting || cartItems.length === 0 || !selectedAddressId}
-                  className="w-full py-4 bg-[#16a34a] text-white rounded-[10px] font-[700] text-[15px] tracking-[-0.01em] hover:bg-[#15803d] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {submitting ? 'Submitting Order...' : 'Place Order'}
-                </button>
-              </div>
-            </>
-          )}
-        </div>
+              {/* Request Invoice Button */}
+              <button
+                onClick={handleSubmitOrder}
+                disabled={submitting || !selectedAddressId}
+                className="w-full py-4 bg-[#16a34a] text-white rounded-[12px] font-[700] text-[16px] tracking-[-0.01em] hover:bg-[#15803d] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submitting ? 'Creating Invoice...' : 'Request Invoice'}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Recent Invoices */}
         <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8]">
@@ -818,59 +835,130 @@ export default function DistributorDashboard({
         onSuccess={handleAddressSaved}
       />
 
-      {/* Order Confirmation Modal */}
+      {/* Invoice Request Modal */}
       {showConfirmModal && pricingPreview && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-2xl font-semibold">Confirm Order</h2>
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-[#e8e8e8] bg-[#0a0a0a]">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-white">
+                  Request Invoice
+                </h3>
+                {!submitting && (
+                  <button
+                    onClick={() => setShowConfirmModal(false)}
+                    className="text-white hover:text-gray-200 transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
             </div>
 
-            <div className="p-6 space-y-4">
-              <p className="text-gray-700">
-                You're about to place an order for <strong>{cartItems.length} item(s)</strong>.
-              </p>
-
+            <div className="p-6">
               {/* Order Summary */}
-              <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Subtotal</span>
-                  <span className="font-medium">£{pricingPreview.subtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Shipping</span>
-                  <span className="font-medium">{pricingPreview.shipping === 0 ? 'FREE' : `£${pricingPreview.shipping.toFixed(2)}`}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">VAT</span>
-                  <span className="font-medium">£{pricingPreview.vat_amount.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-300">
-                  <span>Total</span>
-                  <span className="text-green-600">£{pricingPreview.total.toFixed(2)}</span>
+              <div className="mb-6">
+                <h4 className="font-semibold text-[#0a0a0a] mb-3">Order Summary</h4>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {cartItems.map((item) => (
+                    <div
+                      key={item.product.product_code}
+                      className="flex justify-between items-center py-2 border-b border-[#f5f5f5] last:border-b-0"
+                    >
+                      <div className="flex-1">
+                        <div className="font-medium text-[#0a0a0a] text-sm">
+                          {item.product.description}
+                        </div>
+                        <div className="text-xs text-[#999] font-mono">
+                          {item.product.product_code}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm text-[#666]">
+                          x{item.quantity}
+                        </span>
+                        <div className="text-right min-w-[80px]">
+                          <span className="font-semibold text-[#0a0a0a] text-sm">
+                            £{(item.quantity * item.product.price).toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              <p className="text-sm text-gray-600">
-                A Stripe invoice will be created and sent to your email. Payment terms: Net 30 days.
-              </p>
-            </div>
+              {/* Pricing Breakdown */}
+              <div className="border-t-2 border-[#e8e8e8] pt-4 mb-6 space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-[#666]">Subtotal:</span>
+                  <span className="font-semibold text-[#0a0a0a]">
+                    £{pricingPreview.subtotal.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-[#666]">Shipping:</span>
+                  <span className="font-semibold text-[#0a0a0a]">
+                    {pricingPreview.shipping === 0 ? 'FREE' : `£${pricingPreview.shipping.toFixed(2)}`}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-[#666]">VAT:</span>
+                  <span className="font-semibold text-[#0a0a0a]">
+                    £{pricingPreview.vat_amount.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center pt-2 border-t border-[#e8e8e8]">
+                  <span className="font-bold text-[#0a0a0a]">Total:</span>
+                  <span className="font-bold text-[#16a34a] text-lg">
+                    £{pricingPreview.total.toFixed(2)}
+                  </span>
+                </div>
+              </div>
 
-            <div className="flex justify-end gap-3 p-6 border-t">
-              <button
-                onClick={() => setShowConfirmModal(false)}
-                className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
-                disabled={submitting}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmOrder}
-                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium disabled:opacity-50"
-                disabled={submitting}
-              >
-                {submitting ? 'Processing...' : 'Confirm Order'}
-              </button>
+              {/* Info Box */}
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  <div className="flex-1 text-sm text-amber-800">
+                    <strong>How it works:</strong> We'll create a Stripe invoice and send it to your email (Net 30 terms).
+                    Your order will be shipped once payment is received.
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  disabled={submitting}
+                  className="flex-1 border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-all disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmOrder}
+                  disabled={submitting}
+                  className="flex-1 bg-[#16a34a] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#15803d] transition-all shadow-lg disabled:opacity-50"
+                >
+                  {submitting ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Creating...
+                    </span>
+                  ) : (
+                    'Request Invoice'
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
