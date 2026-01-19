@@ -151,23 +151,71 @@ export default async function DistributorDashboardPage() {
     }
   }
 
-  // Create pricing map for quick lookup
-  const pricingMap = new Map(
+  // Fetch company-specific custom pricing (with pagination)
+  let allCustomPricing: any[] = [];
+  let customPricingOffset = 0;
+  let hasMoreCustomPricing = true;
+
+  while (hasMoreCustomPricing) {
+    const { data: customPricingBatch, error: customPricingError } = await supabase
+      .from('company_distributor_pricing')
+      .select('product_code, custom_price, currency')
+      .eq('company_id', distributor.company_id)
+      .eq('active', true)
+      .range(customPricingOffset, customPricingOffset + pricingBatchSize - 1);
+
+    if (customPricingError) {
+      console.error('[Distributor Portal] Error fetching custom pricing:', customPricingError);
+      break;
+    }
+
+    if (!customPricingBatch || customPricingBatch.length === 0) {
+      hasMoreCustomPricing = false;
+    } else {
+      allCustomPricing = [...allCustomPricing, ...customPricingBatch];
+      if (customPricingBatch.length < pricingBatchSize) {
+        hasMoreCustomPricing = false;
+      }
+      customPricingOffset += pricingBatchSize;
+    }
+  }
+
+  // Create pricing maps for quick lookup
+  const standardPricingMap = new Map(
     allPricing.map(dp => [dp.product_code, dp])
   );
 
-  // Apply distributor pricing (use standard_price for all distributors)
-  const productsWithPricing = allProducts.map(product => {
-    const pricingData = pricingMap.get(product.product_code);
+  const customPricingMap = new Map(
+    allCustomPricing.map(cp => [cp.product_code, cp])
+  );
 
-    // Use distributor standard_price if available, otherwise fallback to product's base price
-    const distributorPrice = pricingData?.standard_price ?? null;
+  // Apply pricing with priority: Custom price → Standard distributor price → Base price
+  const productsWithPricing = allProducts.map(product => {
+    const customPricingData = customPricingMap.get(product.product_code);
+    const standardPricingData = standardPricingMap.get(product.product_code);
+
+    // Priority: 1. Custom price, 2. Standard distributor price, 3. Base product price
+    let finalPrice = product.price;
+    let currency = product.currency;
+    let hasCustomPricing = false;
+    let hasDistributorPricing = false;
+
+    if (customPricingData?.custom_price !== undefined) {
+      finalPrice = customPricingData.custom_price;
+      currency = customPricingData.currency;
+      hasCustomPricing = true;
+    } else if (standardPricingData?.standard_price !== undefined) {
+      finalPrice = standardPricingData.standard_price;
+      currency = standardPricingData.currency;
+      hasDistributorPricing = true;
+    }
 
     return {
       ...product,
-      price: distributorPrice ?? product.price,
-      currency: pricingData?.currency ?? product.currency,
-      has_distributor_pricing: !!distributorPrice,
+      price: finalPrice,
+      currency,
+      has_custom_pricing: hasCustomPricing,
+      has_distributor_pricing: hasDistributorPricing,
     };
   });
 
