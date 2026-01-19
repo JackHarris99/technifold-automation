@@ -22,28 +22,44 @@ export default async function EngagementsPage() {
   const viewModeCookie = cookieStore.get('view_mode');
   const viewMode = viewModeCookie?.value === 'my_customers' ? 'my_customers' : 'all';
 
-  // Fetch all engagement events
-  let query = supabase
-    .from('engagement_events')
-    .select(`
-      event_id,
-      occurred_at,
-      event_type,
-      event_name,
-      source,
-      company_id,
-      contact_id,
-      offer_key,
-      campaign_key,
-      url,
-      value,
-      currency,
-      companies:company_id(company_name, account_owner),
-      contacts:contact_id(full_name, email)
-    `)
-    .order('occurred_at', { ascending: false });
+  // Fetch all engagement events with pagination
+  let allEngagements: any[] = [];
+  let offset = 0;
+  const batchSize = 1000;
+  let hasMore = true;
 
-  const { data: allEngagements } = await query.limit(1000);
+  while (hasMore) {
+    const { data: batch } = await supabase
+      .from('engagement_events')
+      .select(`
+        event_id,
+        occurred_at,
+        event_type,
+        event_name,
+        source,
+        company_id,
+        contact_id,
+        offer_key,
+        campaign_key,
+        url,
+        value,
+        currency,
+        companies:company_id(company_name, account_owner),
+        contacts:contact_id(full_name, email)
+      `)
+      .order('occurred_at', { ascending: false })
+      .range(offset, offset + batchSize - 1);
+
+    if (!batch || batch.length === 0) {
+      hasMore = false;
+    } else {
+      allEngagements = [...allEngagements, ...batch];
+      if (batch.length < batchSize) {
+        hasMore = false;
+      }
+      offset += batchSize;
+    }
+  }
 
   // Filter by account ownership if in "my_customers" mode
   let filteredEngagements = allEngagements || [];

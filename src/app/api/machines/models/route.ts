@@ -31,25 +31,42 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Build query
-    let query = supabase
-      .from('machines')
-      .select('model, slug, type, brand')
-      .order('model', { ascending: true })
-      .limit(500);
+    // Fetch all models with pagination
+    let data: any[] = [];
+    let offset = 0;
+    const batchSize = 500;
+    let hasMore = true;
 
-    if (typeFilter) {
-      query = query.eq('type', typeFilter);
-    }
-    if (brandFilter) {
-      query = query.eq('brand', brandFilter);
-    }
+    while (hasMore) {
+      let query = supabase
+        .from('machines')
+        .select('model, slug, type, brand')
+        .order('model', { ascending: true })
+        .range(offset, offset + batchSize - 1);
 
-    const { data, error } = await query;
+      if (typeFilter) {
+        query = query.eq('type', typeFilter);
+      }
+      if (brandFilter) {
+        query = query.eq('brand', brandFilter);
+      }
 
-    if (error) {
-      console.error('[machines/models] Error:', error);
-      return NextResponse.json({ error: 'Failed to fetch models' }, { status: 500 });
+      const { data: batch, error } = await query;
+
+      if (error) {
+        console.error('[machines/models] Error:', error);
+        return NextResponse.json({ error: 'Failed to fetch models' }, { status: 500 });
+      }
+
+      if (!batch || batch.length === 0) {
+        hasMore = false;
+      } else {
+        data = [...data, ...batch];
+        if (batch.length < batchSize) {
+          hasMore = false;
+        }
+        offset += batchSize;
+      }
     }
 
     // If brand-only, group by type for better UX

@@ -21,26 +21,44 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
-    let query = supabase
-      .from('companies')
-      .select('company_id, company_name, account_owner')
-      .neq('status', 'dead')  // Hide dead customers from dropdowns
-      .order('company_name')
-      .limit(1000);
+    // Fetch all companies with pagination
+    let companies: any[] = [];
+    let offset = 0;
+    const batchSize = 1000;
+    let hasMore = true;
 
-    // Apply "My Customers" filter if requested
-    if (viewMode === 'my_customers' && user.sales_rep_id) {
-      query = query.eq('account_owner', user.sales_rep_id);
-    }
+    while (hasMore) {
+      let query = supabase
+        .from('companies')
+        .select('company_id, company_name, account_owner')
+        .neq('status', 'dead')  // Hide dead customers from dropdowns
+        .order('company_name')
+        .range(offset, offset + batchSize - 1);
 
-    const { data: companies, error } = await query;
+      // Apply "My Customers" filter if requested
+      if (viewMode === 'my_customers' && user.sales_rep_id) {
+        query = query.eq('account_owner', user.sales_rep_id);
+      }
 
-    if (error) {
-      console.error('[companies/list] Error:', error);
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      );
+      const { data: batch, error } = await query;
+
+      if (error) {
+        console.error('[companies/list] Error:', error);
+        return NextResponse.json(
+          { error: error.message },
+          { status: 500 }
+        );
+      }
+
+      if (!batch || batch.length === 0) {
+        hasMore = false;
+      } else {
+        companies = [...companies, ...batch];
+        if (batch.length < batchSize) {
+          hasMore = false;
+        }
+        offset += batchSize;
+      }
     }
 
     return NextResponse.json({
