@@ -52,23 +52,27 @@ export default async function DistributorControlCenter() {
   const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const monthStart = firstDayOfMonth.toISOString();
 
-  // Fetch metrics in parallel
+  // First, fetch distributor companies
+  const { data: distributorCompanies } = await supabase
+    .from('companies')
+    .select('company_id, company_name')
+    .eq('type', 'distributor')
+    .neq('status', 'dead');
+
+  const distributorCompanyIds = (distributorCompanies || []).map(c => c.company_id);
+
+  // Now fetch metrics in parallel
   const [
-    { data: distributorCompanies, error: distError },
     { data: pendingInvites, error: invitesError },
     { data: pendingOrders, error: ordersError },
     { data: paidInvoices, error: invoicesError },
   ] = await Promise.all([
     supabase
-      .from('companies')
-      .select('company_id, company_name')
-      .eq('type', 'distributor')
-      .neq('status', 'dead'),
-    supabase
       .from('distributor_users')
-      .select('email, invited_at, companies(company_name)')
-      .is('accepted_at', null)
-      .order('invited_at', { ascending: false })
+      .select('email, created_at, companies(company_name)')
+      .not('invitation_token', 'is', null)
+      .is('password_hash', null)
+      .order('created_at', { ascending: false })
       .limit(10),
     supabase
       .from('distributor_orders')
@@ -83,15 +87,14 @@ export default async function DistributorControlCenter() {
       .eq('status', 'pending_review')
       .order('created_at', { ascending: false })
       .limit(10),
-    supabase
-      .from('invoices')
-      .select('subtotal')
-      .eq('payment_status', 'paid')
-      .gte('invoice_date', monthStart)
-      .in('company_id', supabase
-        .from('companies')
-        .select('company_id')
-        .eq('type', 'distributor')),
+    distributorCompanyIds.length > 0
+      ? supabase
+          .from('invoices')
+          .select('subtotal')
+          .eq('payment_status', 'paid')
+          .gte('invoice_date', monthStart)
+          .in('company_id', distributorCompanyIds)
+      : Promise.resolve({ data: [], error: null }),
   ]);
 
   // Calculate metrics
@@ -107,7 +110,7 @@ export default async function DistributorControlCenter() {
   const pendingInvitationsList: PendingInvitation[] = (pendingInvites || []).map((invite: any) => ({
     email: invite.email,
     company_name: invite.companies?.company_name || 'Unknown',
-    invited_at: invite.invited_at,
+    invited_at: invite.created_at,
   }));
 
   // Process recent orders

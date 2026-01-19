@@ -512,7 +512,7 @@ export default async function SalesCenterPage() {
                   </div>
                 </Link>
                 <Link
-                  href="/admin/sales/companies"
+                  href="/admin/companies"
                   className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   <span className="text-2xl">🏢</span>
