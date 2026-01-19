@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { getSupabaseClient } from '@/lib/supabase';
-import { getStripeClient } from '@/lib/stripe-client';
+import { stripe } from '@/lib/stripe-client';
 
 interface ApprovalData {
   item_statuses: Record<string, 'in_stock' | 'back_order'>;
@@ -123,8 +123,7 @@ export async function POST(
     const vatAmount = taxableAmount * vatRate;
     const totalAmount = subtotal + finalShipping + vatAmount;
 
-    const stripe = getStripeClient();
-
+    
     // 1. Create or update Stripe customer
     let stripeCustomerId = order.companies.stripe_customer_id;
 
