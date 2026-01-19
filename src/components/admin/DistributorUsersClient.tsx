@@ -144,6 +144,34 @@ export default function DistributorUsersClient({ companies, users, contacts }: D
     }
   };
 
+  const handleDeleteUser = async (userId: string, userEmail: string) => {
+    if (!confirm(`⚠️ PERMANENTLY DELETE user ${userEmail}?\n\nThis cannot be undone. If they have order history, you should use "Deactivate" instead.`)) return;
+
+    try {
+      const response = await fetch('/api/admin/distributor-users/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.has_orders) {
+          alert(`❌ Cannot Delete\n\n${data.message}\n\nThis user has placed orders. Use "Deactivate" instead to prevent login while preserving order history.`);
+        } else {
+          throw new Error(data.error || 'Failed to delete user');
+        }
+        return;
+      }
+
+      alert(`✓ User deleted successfully`);
+      window.location.reload();
+    } catch (error: any) {
+      alert(`Failed to delete user: ${error.message}`);
+    }
+  };
+
   const handleLoginAs = async (userId: string, userName: string) => {
     if (!confirm(`Preview portal as ${userName}?`)) return;
 
@@ -397,6 +425,13 @@ export default function DistributorUsersClient({ companies, users, contacts }: D
                           }`}
                         >
                           {user.active ? 'Deactivate' : 'Activate'}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(user.user_id, user.email)}
+                          className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 font-medium"
+                          title="Permanently delete (only if no orders)"
+                        >
+                          🗑️ Delete
                         </button>
                       </div>
                     </div>
