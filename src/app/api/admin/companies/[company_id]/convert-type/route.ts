@@ -58,10 +58,88 @@ export async function POST(
       );
     }
 
-    // Update company type
+    let assignedRep: string | null = null;
+
+    // If converting TO customer, auto-assign sales rep using fair distribution
+    if (new_type === 'customer') {
+      // Check if current account_owner is an active sales rep
+      const { data: currentOwner } = await supabase
+        .from('users')
+        .select('sales_rep_id, is_active, role')
+        .eq('sales_rep_id', company.account_owner || '')
+        .eq('role', 'sales_rep')
+        .eq('is_active', true)
+        .single();
+
+      // If no valid owner, assign using same logic as new company creation
+      if (!currentOwner) {
+        // 1. Fetch all ACTIVE sales reps
+        const { data: salesReps, error: repsError } = await supabase
+          .from('users')
+          .select('sales_rep_id, full_name, is_active')
+          .eq('role', 'sales_rep')
+          .eq('is_active', true)
+          .order('sales_rep_id');
+
+        if (!repsError && salesReps && salesReps.length > 0) {
+          // 2. Count TOTAL companies per rep (using pagination)
+          let allCompanies: { account_owner: string | null }[] = [];
+          let start = 0;
+          const batchSize = 1000;
+          let hasMore = true;
+
+          while (hasMore) {
+            const { data: batch } = await supabase
+              .from('companies')
+              .select('account_owner')
+              .not('account_owner', 'is', null)
+              .range(start, start + batchSize - 1);
+
+            if (batch && batch.length > 0) {
+              allCompanies = allCompanies.concat(batch);
+              start += batchSize;
+              hasMore = batch.length === batchSize;
+            } else {
+              hasMore = false;
+            }
+          }
+
+          // 3. Count companies per rep
+          const repCounts: { [key: string]: number } = {};
+          salesReps.forEach(rep => {
+            repCounts[rep.sales_rep_id] = 0;
+          });
+
+          allCompanies.forEach(comp => {
+            if (comp.account_owner && repCounts[comp.account_owner] !== undefined) {
+              repCounts[comp.account_owner]++;
+            }
+          });
+
+          // 4. Find rep(s) with fewest total assignments
+          const minCount = Math.min(...Object.values(repCounts));
+          const repsWithFewest = Object.keys(repCounts).filter(
+            rep => repCounts[rep] === minCount
+          );
+
+          // 5. If multiple reps tied, pick randomly
+          const randomIndex = Math.floor(Math.random() * repsWithFewest.length);
+          assignedRep = repsWithFewest[randomIndex];
+
+          console.log('[Convert Type] Auto-assigned to sales rep:', assignedRep, 'with', minCount, 'companies');
+        }
+      }
+    }
+
+    // Update company type (and account_owner if assigned)
+    const updateData: any = { type: new_type };
+    if (assignedRep) {
+      updateData.account_owner = assignedRep;
+    }
+
     const { error: updateError } = await supabase
       .from('companies')
-      .update({ type: new_type })
+      .update(updateData)
       .eq('company_id', company_id);
 
     if (updateError) {
@@ -96,7 +174,10 @@ export async function POST(
       company_id,
       old_type: company.type,
       new_type,
-      message: `Company converted from ${company.type} to ${new_type}`,
+      assigned_rep: assignedRep,
+      message: assignedRep
+        ? `Company converted from ${company.type} to ${new_type} and assigned to ${assignedRep}`
+        : `Company converted from ${company.type} to ${new_type}`,
     });
   } catch (error) {
     console.error('[Convert Company Type] Error:', error);

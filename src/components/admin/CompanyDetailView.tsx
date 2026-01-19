@@ -65,6 +65,12 @@ export default function CompanyDetailView({
   const [showConvertConfirm, setShowConvertConfirm] = useState(false);
   const [isConverting, setIsConverting] = useState(false);
 
+  // Change owner state
+  const [showChangeOwner, setShowChangeOwner] = useState(false);
+  const [salesReps, setSalesReps] = useState<any[]>([]);
+  const [selectedOwner, setSelectedOwner] = useState('');
+  const [isChangingOwner, setIsChangingOwner] = useState(false);
+
   const isDirector = currentUser.role === 'director';
   const isDistributor = company.type === 'distributor';
   const isCustomer = company.type === 'customer' || !company.type;
@@ -114,6 +120,50 @@ export default function CompanyDetailView({
     } finally {
       setIsConverting(false);
       setShowConvertConfirm(false);
+    }
+  };
+
+  const handleOpenChangeOwner = async () => {
+    // Fetch active sales reps
+    try {
+      const response = await fetch('/api/admin/users/list?role=sales_rep&is_active=true');
+      if (response.ok) {
+        const data = await response.json();
+        setSalesReps(data.users || []);
+        setSelectedOwner(company.account_owner || '');
+        setShowChangeOwner(true);
+      } else {
+        alert('Failed to load sales reps');
+      }
+    } catch (err) {
+      alert('Network error: Failed to load sales reps');
+    }
+  };
+
+  const handleChangeOwner = async () => {
+    if (!selectedOwner) {
+      alert('Please select a sales rep');
+      return;
+    }
+
+    setIsChangingOwner(true);
+    try {
+      const response = await fetch(`/api/admin/companies/${company.company_id}/change-owner`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ new_owner: selectedOwner }),
+      });
+
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        const data = await response.json();
+        alert('Failed to change owner: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err) {
+      alert('Network error: Failed to change owner');
+    } finally {
+      setIsChangingOwner(false);
     }
   };
 
@@ -400,6 +450,51 @@ export default function CompanyDetailView({
           </div>
         </div>
       )}
+
+      {/* Change Owner Modal */}
+      {showChangeOwner && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg max-w-md w-full p-6 mx-4">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Change Sales Rep</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Assign <strong>{company.company_name}</strong> to a different sales rep.
+            </p>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Sales Rep
+              </label>
+              <select
+                value={selectedOwner}
+                onChange={(e) => setSelectedOwner(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">-- Select a sales rep --</option>
+                {salesReps.map((rep) => (
+                  <option key={rep.sales_rep_id} value={rep.sales_rep_id}>
+                    {rep.full_name} ({rep.sales_rep_id})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowChangeOwner(false)}
+                disabled={isChangingOwner}
+                className="flex-1 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleChangeOwner}
+                disabled={isChangingOwner || !selectedOwner}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50"
+              >
+                {isChangingOwner ? 'Changing...' : 'Change Sales Rep'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -527,8 +622,16 @@ function OverviewTab({
           <h2 className="text-[18px] font-[600] mb-4 text-[#0a0a0a]">Company Information</h2>
           <dl className="space-y-3">
             <div>
-              <dt className="text-sm text-[#475569]">Account Owner</dt>
+              <dt className="text-sm text-[#475569] mb-1">Account Owner</dt>
               <dd className="text-[13px] font-[600] text-[#0a0a0a]">{company.account_owner || 'Unassigned'}</dd>
+              {isDirector && (
+                <button
+                  onClick={handleOpenChangeOwner}
+                  className="text-[12px] text-[#1e40af] hover:text-[#1e3a8a] transition-colors font-medium mt-1"
+                >
+                  Change Sales Rep
+                </button>
+              )}
             </div>
             <div>
               <dt className="text-sm text-[#475569]">Type</dt>
