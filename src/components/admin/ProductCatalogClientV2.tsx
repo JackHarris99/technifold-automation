@@ -222,10 +222,10 @@ export default function ProductCatalogClientV2({
         <td className="py-3 px-4 text-sm text-gray-800">{product.description}</td>
         <td className="py-3 px-4 text-sm text-gray-600">{product.category || '-'}</td>
         <td className="py-3 px-4 text-sm text-gray-600 text-right">
-          {basePrice ? `£${basePrice.toFixed(2)}` : '-'}
+          {basePrice != null ? `£${basePrice.toFixed(2)}` : '-'}
         </td>
         <td className="py-3 px-4 text-sm text-gray-600 text-right">
-          {standardDistPrice ? `£${standardDistPrice.toFixed(2)}` : '-'}
+          {standardDistPrice != null ? `£${standardDistPrice.toFixed(2)}` : '-'}
         </td>
         <td className="py-3 px-4">
           {inCatalog ? (
