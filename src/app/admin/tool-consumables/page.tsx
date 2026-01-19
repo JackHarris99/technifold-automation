@@ -18,6 +18,11 @@ export default async function ToolConsumablesAdminPage() {
     .select('tool_code, consumable_code')
     .order('tool_code');
 
+  console.log('[tool-consumables/page] Fetched relationships count:', relationships?.length || 0);
+  if (relError) {
+    console.error('[tool-consumables/page] Error fetching relationships:', relError);
+  }
+
   // Fetch all tools (products with rental_price_monthly)
   const { data: tools, error: toolsError } = await supabase
     .from('products')
