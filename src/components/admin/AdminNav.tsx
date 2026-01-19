@@ -153,6 +153,16 @@ export default function AdminNav() {
           >
             Distributor Users
           </Link>
+          <Link
+            href="/admin/distributor-orders/pending"
+            className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+              pathname?.startsWith('/admin/distributor-orders')
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            Pending Distributor Orders
+          </Link>
         </div>
 
         {/* Quotes */}

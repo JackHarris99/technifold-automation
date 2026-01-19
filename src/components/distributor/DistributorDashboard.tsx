@@ -777,13 +777,13 @@ export default function DistributorDashboard({
                 </div>
               )}
 
-              {/* Request Invoice Button */}
+              {/* Place Order Button */}
               <button
                 onClick={handleSubmitOrder}
                 disabled={submitting || !selectedAddressId}
                 className="w-full py-4 bg-[#16a34a] text-white rounded-[12px] font-[700] text-[16px] tracking-[-0.01em] hover:bg-[#15803d] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {submitting ? 'Creating Invoice...' : 'Request Invoice'}
+                {submitting ? 'Submitting Order...' : 'Place Order'}
               </button>
             </div>
           </div>
@@ -959,7 +959,7 @@ export default function DistributorDashboard({
         onSuccess={handleAddressSaved}
       />
 
-      {/* Invoice Request Modal */}
+      {/* Order Confirmation Modal */}
       {showConfirmModal && pricingPreview && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -967,7 +967,7 @@ export default function DistributorDashboard({
             <div className="px-6 py-4 border-b border-[#e8e8e8] bg-[#0a0a0a]">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold text-white">
-                  Request Invoice
+                  Confirm Order
                 </h3>
                 {!submitting && (
                   <button
@@ -1050,7 +1050,7 @@ export default function DistributorDashboard({
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                   </svg>
                   <div className="flex-1 text-sm text-amber-800">
-                    <strong>How it works:</strong> We'll create a Stripe invoice and send it to your email (Net 30 terms).
+                    <strong>How it works:</strong> We'll review your order and send you an invoice via email.
                     Your order will be shipped once payment is received.
                   </div>
                 </div>
@@ -1076,10 +1076,10 @@ export default function DistributorDashboard({
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Creating...
+                      Submitting...
                     </span>
                   ) : (
-                    'Request Invoice'
+                    'Place Order'
                   )}
                 </button>
               </div>
