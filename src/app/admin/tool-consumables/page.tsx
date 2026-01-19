@@ -12,11 +12,34 @@ export const revalidate = 0;
 export default async function ToolConsumablesAdminPage() {
   const supabase = getSupabaseClient();
 
-  // Fetch all tool-consumable relationships
-  const { data: relationships, error: relError } = await supabase
-    .from('tool_consumable_map')
-    .select('tool_code, consumable_code')
-    .order('tool_code');
+  // Fetch all tool-consumable relationships in batches (Supabase 1000 row limit)
+  let allRelationships: any[] = [];
+  let relStart = 0;
+  const relBatchSize = 1000;
+  let hasMoreRels = true;
+
+  while (hasMoreRels) {
+    const { data: batch, error } = await supabase
+      .from('tool_consumable_map')
+      .select('tool_code, consumable_code')
+      .order('tool_code')
+      .range(relStart, relStart + relBatchSize - 1);
+
+    if (error) {
+      console.error('[tool-consumables] Error fetching relationships:', error);
+      break;
+    }
+
+    if (batch && batch.length > 0) {
+      allRelationships = allRelationships.concat(batch);
+      relStart += relBatchSize;
+      hasMoreRels = batch.length === relBatchSize;
+    } else {
+      hasMoreRels = false;
+    }
+  }
+
+  const relationships = allRelationships;
 
   console.log('[tool-consumables/page] Fetched', relationships?.length || 0, 'relationships from DB');
   if (relationships && relationships.length > 0) {
