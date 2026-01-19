@@ -104,8 +104,8 @@ export default async function ToolConsumablesAdminPage() {
 
   const consumables = allConsumables;
 
-  if (relError || toolsError) {
-    console.error('Error fetching data:', { relError, toolsError });
+  if (toolsError) {
+    console.error('Error fetching tools:', toolsError);
   }
 
   return (
