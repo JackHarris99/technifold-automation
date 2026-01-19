@@ -8,7 +8,7 @@ CREATE SEQUENCE IF NOT EXISTS order_sequence START 1;
 CREATE TABLE IF NOT EXISTS distributor_orders (
     order_id TEXT PRIMARY KEY DEFAULT ('DORD-' || LPAD(NEXTVAL('order_sequence')::TEXT, 6, '0')),
     company_id TEXT NOT NULL REFERENCES companies(company_id),
-    user_id TEXT NOT NULL REFERENCES distributor_users(user_id),
+    user_id UUID NOT NULL REFERENCES distributor_users(user_id),
     user_email TEXT NOT NULL,
     user_name TEXT NOT NULL,
 
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS distributor_orders (
     billing_country TEXT,
     vat_number TEXT,
 
-    shipping_address_id TEXT REFERENCES shipping_addresses(address_id),
+    shipping_address_id UUID REFERENCES shipping_addresses(address_id),
     shipping_address_line_1 TEXT,
     shipping_address_line_2 TEXT,
     shipping_city TEXT,
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS distributor_order_items (
     back_order_notes TEXT,
 
     -- Invoice tracking
-    fulfilled_invoice_id TEXT,
+    fulfilled_invoice_id UUID,
     fulfilled_at TIMESTAMPTZ,
 
     created_at TIMESTAMPTZ DEFAULT NOW()
