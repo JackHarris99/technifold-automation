@@ -460,11 +460,61 @@ export default function ConsumablesQuoteBuilderPage() {
     return { subtotal, totalDiscount, total, itemPricing };
   }
 
+  function applyTierPricingToLineItems() {
+    // Apply tier pricing to line items before saving to database
+    // This ensures static quotes have correct prices locked in
+    const itemsWithQty = lineItems.filter(li => li.quantity > 0);
+    const standardItems = itemsWithQty.filter(li => li.pricing_tier === 'standard');
+    const premiumItems = itemsWithQty.filter(li => li.pricing_tier === 'premium');
+    const otherItems = itemsWithQty.filter(li => !li.pricing_tier || (li.pricing_tier !== 'standard' && li.pricing_tier !== 'premium'));
+
+    const adjustedLineItems = [...lineItems];
+
+    // STANDARD tier: Total quantity determines unit price
+    if (standardItems.length > 0) {
+      const totalQty = standardItems.reduce((sum, li) => sum + li.quantity, 0);
+      const tier = [...standardTiers].reverse().find(t => totalQty >= t.min_quantity);
+      const tierPrice = tier?.unit_price;
+
+      if (tierPrice) {
+        standardItems.forEach(item => {
+          const index = adjustedLineItems.findIndex(li => li.product_code === item.product_code);
+          if (index !== -1) {
+            adjustedLineItems[index] = { ...adjustedLineItems[index], unit_price: tierPrice };
+          }
+        });
+      }
+    }
+
+    // PREMIUM tier: Per-SKU quantity determines discount percentage (but we save effective price)
+    if (premiumItems.length > 0) {
+      premiumItems.forEach(item => {
+        const tier = [...premiumTiers].reverse().find(t => item.quantity >= t.min_quantity);
+        const tierDiscount = tier?.discount_percent || 0;
+
+        if (tierDiscount > 0) {
+          const effectivePrice = item.unit_price * (1 - tierDiscount / 100);
+          const index = adjustedLineItems.findIndex(li => li.product_code === item.product_code);
+          if (index !== -1) {
+            adjustedLineItems[index] = { ...adjustedLineItems[index], unit_price: effectivePrice };
+          }
+        }
+      });
+    }
+
+    // OTHER items: No adjustment needed
+
+    return adjustedLineItems;
+  }
+
   async function generateQuote() {
     if (!selectedCompany || !selectedContact || lineItems.length === 0) {
       alert('Please select company, contact, and add products');
       return;
     }
+
+    // Apply tier pricing to line items before sending to API
+    const tierAdjustedLineItems = applyTierPricingToLineItems();
 
     setGenerating(true);
     try {
@@ -474,7 +524,7 @@ export default function ConsumablesQuoteBuilderPage() {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            line_items: lineItems,
+            line_items: tierAdjustedLineItems,
             free_shipping: freeShipping,
           }),
         });
@@ -494,7 +544,7 @@ export default function ConsumablesQuoteBuilderPage() {
           body: JSON.stringify({
             company_id: selectedCompany.company_id,
             contact_id: selectedContact.contact_id,
-            line_items: lineItems,
+            line_items: tierAdjustedLineItems,
             quote_type: quoteType, // 'static' or 'interactive'
             is_test: isTestToken, // Test tokens bypass address collection
             free_shipping: freeShipping,
