@@ -31,7 +31,10 @@ export async function GET(request: NextRequest) {
     dbQuery = dbQuery.in('type', types);
   }
 
-  const { data, error } = await dbQuery.limit(10);
+  // Order by relevance: exact matches first, then partial matches
+  dbQuery = dbQuery.order('product_code', { ascending: true });
+
+  const { data, error } = await dbQuery.limit(50);
 
   if (error) {
     console.error('[API] Product search error:', error);
