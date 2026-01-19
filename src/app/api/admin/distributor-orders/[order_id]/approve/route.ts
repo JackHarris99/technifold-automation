@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { getSupabaseClient } from '@/lib/supabase';
-import { getStripeClient } from '@/lib/stripe';
+import { getStripeClient } from '@/lib/stripe-client';
 
 interface ApprovalData {
   item_statuses: Record<string, 'in_stock' | 'back_order'>;
