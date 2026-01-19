@@ -428,6 +428,37 @@ export default function ProductDetailView({ product: initialProduct, relatedData
                       </div>
                     )}
                   </div>
+
+                  {product.type === 'consumable' && isDirector && (
+                    <div>
+                      <label className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider mb-2 block">
+                        Quote Pricing Tier
+                        <span className="text-[10px] font-[400] text-[#94a3b8] ml-2 normal-case">(Quote builder only)</span>
+                      </label>
+                      {editing ? (
+                        <select
+                          value={currentValue('pricing_tier') || ''}
+                          onChange={(e) => handleFieldChange('pricing_tier', e.target.value || null)}
+                          className="w-full px-4 py-3 bg-[#f8fafc] border border-[#e2e8f0] rounded-[10px] text-[14px] text-[#0a0a0a] font-[500] focus:outline-none focus:ring-2 focus:ring-[#1e40af]"
+                        >
+                          <option value="">No Tier (Standard Pricing)</option>
+                          <option value="standard">Standard Tier (Volume-based unit price)</option>
+                          <option value="premium">Premium Tier (Volume-based % discount)</option>
+                        </select>
+                      ) : (
+                        <div className="text-[14px] text-[#0a0a0a] font-[600]">
+                          {product.pricing_tier === 'standard' && '✓ Standard Tier (Volume pricing)'}
+                          {product.pricing_tier === 'premium' && '✓ Premium Tier (Volume % discount)'}
+                          {!product.pricing_tier && 'No Tier (Standard pricing)'}
+                        </div>
+                      )}
+                      <p className="text-[11px] text-[#64748b] mt-1">
+                        {!product.pricing_tier && 'Product uses standard pricing with no volume discounts'}
+                        {product.pricing_tier === 'standard' && 'Total quantity across all standard items determines unit price'}
+                        {product.pricing_tier === 'premium' && 'Per-SKU quantity determines percentage discount'}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {product.price && product.cost_price && (
