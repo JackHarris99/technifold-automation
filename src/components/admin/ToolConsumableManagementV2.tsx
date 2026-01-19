@@ -38,37 +38,10 @@ export default function ToolConsumableManagementV2({
   const [searchTerm, setSearchTerm] = useState('');
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
-  // Sync state when props change (after router.refresh())
+  // Sync state when props change (after navigation back)
   useEffect(() => {
     setRelationships(initialRelationships);
   }, [initialRelationships]);
-
-  // Refetch relationships when user returns to tab (proper client-side refetch)
-  useEffect(() => {
-    let wasHidden = false;
-
-    const handleVisibilityChange = async () => {
-      if (document.hidden) {
-        wasHidden = true;
-      } else if (wasHidden) {
-        wasHidden = false;
-        // Refetch data from API
-        try {
-          const response = await fetch('/api/admin/tool-consumables/relationships');
-          if (response.ok) {
-            const data = await response.json();
-            setRelationships(data.relationships || []);
-            setLastRefresh(new Date());
-          }
-        } catch (error) {
-          console.error('Failed to refetch relationships:', error);
-        }
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
 
   // Coverage stats
   const toolCoverage = useMemo(() => {
@@ -131,18 +104,7 @@ export default function ToolConsumableManagementV2({
               Last updated: {lastRefresh.toLocaleTimeString('en-GB')}
             </span>
             <button
-              onClick={async () => {
-                try {
-                  const response = await fetch('/api/admin/tool-consumables/relationships');
-                  if (response.ok) {
-                    const data = await response.json();
-                    setRelationships(data.relationships || []);
-                    setLastRefresh(new Date());
-                  }
-                } catch (error) {
-                  console.error('Failed to refresh relationships:', error);
-                }
-              }}
+              onClick={() => router.refresh()}
               className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors"
             >
               🔄 Refresh
@@ -316,8 +278,6 @@ function ByToolView({ tools, consumables, relationships, searchTerm, coverage, o
             <div className="flex items-start justify-between mb-4">
               <a
                 href={`/admin/tool-consumables/${tool.product_code.replace(/\//g, '--')}`}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="flex-1 hover:opacity-80 transition-opacity"
               >
                 <div className="flex items-center gap-3">
@@ -401,8 +361,6 @@ function ByConsumableView({ tools, consumables, relationships, searchTerm, onDel
                     <div key={rel.tool_code} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
                       <a
                         href={`/admin/tool-consumables/${rel.tool_code.replace(/\//g, '--')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="flex-1 min-w-0 hover:opacity-80 transition-opacity"
                       >
                         <p className="font-medium text-sm text-blue-600 hover:text-blue-700 truncate">
