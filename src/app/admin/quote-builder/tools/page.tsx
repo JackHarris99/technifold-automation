@@ -200,9 +200,26 @@ export default function ToolsQuoteBuilderPage() {
   async function loadAllTools() {
     setLoadingProducts(true);
     try {
-      const response = await fetch('/api/admin/products/list?type=tool&limit=500&sort=category');
-      const data = await response.json();
-      setAllTools(data.products || []);
+      let allProducts: Product[] = [];
+      let offset = 0;
+      const batchSize = 500;
+      let hasMore = true;
+
+      // Fetch all products with pagination
+      while (hasMore) {
+        const response = await fetch(`/api/admin/products/list?type=tool&limit=${batchSize}&offset=${offset}&sort=category`);
+        const data = await response.json();
+
+        if (data.products && data.products.length > 0) {
+          allProducts = [...allProducts, ...data.products];
+          hasMore = data.pagination?.has_more || false;
+          offset += batchSize;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      setAllTools(allProducts);
     } catch (err) {
       console.error('Failed to load tools:', err);
     } finally {

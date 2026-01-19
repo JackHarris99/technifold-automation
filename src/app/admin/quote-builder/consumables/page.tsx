@@ -206,9 +206,26 @@ export default function ConsumablesQuoteBuilderPage() {
   async function loadAllConsumables() {
     setLoadingProducts(true);
     try {
-      const response = await fetch('/api/admin/products/list?type=consumable&limit=500&sort=category');
-      const data = await response.json();
-      setAllConsumables(data.products || []);
+      let allProducts: Product[] = [];
+      let offset = 0;
+      const batchSize = 500;
+      let hasMore = true;
+
+      // Fetch all products with pagination
+      while (hasMore) {
+        const response = await fetch(`/api/admin/products/list?type=consumable&limit=${batchSize}&offset=${offset}&sort=category`);
+        const data = await response.json();
+
+        if (data.products && data.products.length > 0) {
+          allProducts = [...allProducts, ...data.products];
+          hasMore = data.pagination?.has_more || false;
+          offset += batchSize;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      setAllConsumables(allProducts);
     } catch (err) {
       console.error('Failed to load consumables:', err);
     } finally {
