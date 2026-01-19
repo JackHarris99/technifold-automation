@@ -43,16 +43,6 @@ export default function ToolConsumableManagementV2({
     setRelationships(initialRelationships);
   }, [initialRelationships]);
 
-  // DEBUG: Log coverage data in useEffect (not during render)
-  useEffect(() => {
-    if (tools.length > 0 && relationships.length > 0) {
-      console.log('[Coverage Debug] First tool product_code:', tools[0].product_code);
-      console.log('[Coverage Debug] First relationship tool_code:', relationships[0].tool_code);
-      console.log('[Coverage Debug] Sample tool codes from tools:', tools.slice(0, 3).map(t => t.product_code));
-      console.log('[Coverage Debug] Sample tool codes from relationships:', [...new Set(relationships.slice(0, 10).map(r => r.tool_code))]);
-    }
-  }, [tools, relationships]);
-
   // Coverage stats
   const toolCoverage = useMemo(() => {
     const coverage = new Map<string, number>();

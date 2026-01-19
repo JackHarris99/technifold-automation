@@ -154,7 +154,21 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      console.log('[tool-consumables/manage] Created relationship:', tool_code, consumable_code);
+      console.log('[tool-consumables/manage] ✓ Successfully created:', { tool_code, consumable_code });
+
+      // Verify it was written by immediately reading it back
+      const { data: verify, error: verifyError } = await supabase
+        .from('tool_consumable_map')
+        .select('*')
+        .eq('tool_code', tool_code)
+        .eq('consumable_code', consumable_code)
+        .single();
+
+      if (verifyError) {
+        console.error('[tool-consumables/manage] ⚠️ VERIFICATION FAILED:', verifyError);
+      } else {
+        console.log('[tool-consumables/manage] ✓ Verified in DB:', verify);
+      }
 
       return NextResponse.json({
         success: true,

@@ -1,0 +1,29 @@
+FLOW ANALYSIS:
+
+1. Detail page server component (line 21):
+   - URL: /admin/tool-consumables/FF-SM--35-DSF-SV
+   - Decodes: tool_code = "FF-SM--35-DSF-SV".replace(/--/g, '/') = "FF/SM/35/DSF/SV"
+   - Queries: products.product_code = "FF/SM/35/DSF/SV"
+   - Gets tool object
+
+2. User adds consumable (ToolConsumableDetail.tsx line 102):
+   - Sends to API: tool_code = tool.product_code (should be "FF/SM/35/DSF/SV")
+   - API writes to tool_consumable_map (manage/route.ts line 145)
+
+3. Main page queries (page.tsx line 16-18):
+   - SELECT tool_code, consumable_code FROM tool_consumable_map
+   - Should return tool_code = "FF/SM/35/DSF/SV"
+
+4. Main page queries tools (page.tsx line 22-26):
+   - SELECT * FROM products WHERE rental_price_monthly IS NOT NULL
+   - Should return product_code = "FF/SM/35/DSF/SV"
+
+5. Coverage calculation (ToolConsumableManagementV2.tsx line 63-64):
+   - Map built with: rel.tool_code as key
+   - Map looked up with: t.product_code as key
+   - IF THESE DON'T MATCH EXACTLY, COVERAGE IS WRONG
+
+POSSIBLE ISSUES:
+- tool.product_code might not equal the decoded URL value
+- Whitespace or hidden characters
+- Case sensitivity
