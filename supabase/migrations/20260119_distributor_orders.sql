@@ -1,6 +1,9 @@
 -- Distributor Orders System
 -- Orders are created when distributors submit, invoices created after admin review
 
+-- Create sequence FIRST (must exist before tables reference it)
+CREATE SEQUENCE IF NOT EXISTS order_sequence START 1;
+
 -- Distributor Orders table
 CREATE TABLE IF NOT EXISTS distributor_orders (
     order_id TEXT PRIMARY KEY DEFAULT ('DORD-' || LPAD(NEXTVAL('order_sequence')::TEXT, 6, '0')),
@@ -100,9 +103,6 @@ CREATE INDEX idx_distributor_orders_status ON distributor_orders(status);
 CREATE INDEX idx_distributor_orders_created ON distributor_orders(created_at DESC);
 CREATE INDEX idx_distributor_order_items_order ON distributor_order_items(order_id);
 CREATE INDEX idx_distributor_order_items_status ON distributor_order_items(status);
-
--- Create sequence if it doesn't exist
-CREATE SEQUENCE IF NOT EXISTS order_sequence START 1;
 
 COMMENT ON TABLE distributor_orders IS 'Distributor orders awaiting admin review before invoice creation';
 COMMENT ON TABLE distributor_order_items IS 'Line items for distributor orders with stock status tracking';
