@@ -81,6 +81,7 @@ export default function DistributorDashboard({
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [orderResult, setOrderResult] = useState<{ order_id: string } | null>(null);
+  const [poNumber, setPoNumber] = useState('');
 
   // Fetch shipping addresses and billing on mount
   useEffect(() => {
@@ -287,6 +288,7 @@ export default function DistributorDashboard({
             unit_price: item.product.price,
           })),
           shipping_address_id: selectedAddressId,
+          po_number: poNumber || null,
         }),
       });
 
@@ -1041,6 +1043,23 @@ export default function DistributorDashboard({
                     £{pricingPreview.total.toFixed(2)}
                   </span>
                 </div>
+              </div>
+
+              {/* PO Number (Optional) */}
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-[#0a0a0a] mb-2">
+                  Purchase Order Number (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={poNumber}
+                  onChange={(e) => setPoNumber(e.target.value)}
+                  placeholder="Enter your PO number for reference"
+                  className="w-full px-4 py-3 border border-[#e8e8e8] rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
+                <p className="text-xs text-[#666] mt-1">
+                  This will appear on your invoice for your records
+                </p>
               </div>
 
               {/* Info Box */}

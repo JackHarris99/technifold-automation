@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { items, shipping_address_id } = await request.json();
+    const { items, shipping_address_id, po_number } = await request.json();
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
@@ -185,6 +185,8 @@ export async function POST(request: NextRequest) {
         shipping_state_province: shippingAddress.state_province,
         shipping_postal_code: shippingAddress.postal_code,
         shipping_country: shippingAddress.country,
+        // Optional PO number
+        po_number: po_number || null,
       })
       .select('order_id')
       .single();
@@ -300,6 +302,13 @@ export async function POST(request: NextRequest) {
 
                   <!-- Order Summary -->
                   <h2 style="margin: 32px 0 16px; font-size: 18px; font-weight: 600; color: #0a0a0a;">Order Summary</h2>
+
+                  <div style="margin-bottom: 16px; padding: 12px; background-color: #f8fafc; border-radius: 6px;">
+                    <p style="margin: 0; font-size: 13px; color: #64748b;">
+                      <strong>Order ID:</strong> <span style="color: #1e40af; font-family: monospace;">${order.order_id}</span>
+                      ${po_number ? `<br><strong>Your PO Number:</strong> <span style="font-family: monospace;">${po_number}</span>` : ''}
+                    </p>
+                  </div>
 
                   <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
                     <thead>

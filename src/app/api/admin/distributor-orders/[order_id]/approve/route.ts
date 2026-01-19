@@ -160,11 +160,12 @@ export async function POST(
       collection_method: 'send_invoice',
       days_until_due: 30,
       auto_advance: false,
-      description: `Distributor Order ${order_id}`,
+      description: `Distributor Order ${order_id}${order.po_number ? ` (PO: ${order.po_number})` : ''}`,
       metadata: {
         order_id: order_id,
         company_id: order.company_id,
         source: 'distributor_order',
+        po_number: order.po_number || '',
       },
     });
 
@@ -213,6 +214,7 @@ export async function POST(
         total_amount: totalAmount,
         status: 'pending',
         currency: 'GBP',
+        po_number: order.po_number || null,
       })
       .select('invoice_id')
       .single();

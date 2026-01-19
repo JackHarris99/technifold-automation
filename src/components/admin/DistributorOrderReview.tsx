@@ -199,6 +199,11 @@ export default function DistributorOrderReview({ order, items, currentUser }: Pr
             <p className="text-sm text-[#666]">
               {order.companies.company_name} • Submitted by {order.user_name} ({order.user_email})
             </p>
+            {order.po_number && (
+              <p className="text-sm text-[#666] mt-1">
+                <strong>PO Number:</strong> <span className="font-mono text-[#1e40af]">{order.po_number}</span>
+              </p>
+            )}
           </div>
           <a
             href="/admin/distributor-orders/pending"
