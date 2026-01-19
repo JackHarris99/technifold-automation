@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface Product {
   product_code: string;
@@ -29,11 +30,30 @@ export default function ToolConsumableManagementV2({
   tools,
   consumables,
 }: ToolConsumableManagementV2Props) {
+  const router = useRouter();
   const [relationships, setRelationships] = useState<Relationship[]>(initialRelationships);
   const [activeView, setActiveView] = useState<'by-tool' | 'by-consumable'>('by-tool');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showBulkCopyModal, setShowBulkCopyModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+
+  // Sync state when props change (after router.refresh())
+  useEffect(() => {
+    setRelationships(initialRelationships);
+  }, [initialRelationships]);
+
+  // Auto-refresh when page regains focus (user returns from detail page)
+  useEffect(() => {
+    const handleFocus = () => {
+      // Refresh the page data when user returns from another tab
+      router.refresh();
+      setLastRefresh(new Date());
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [router]);
 
   // Coverage stats
   const toolCoverage = useMemo(() => {
@@ -89,7 +109,23 @@ export default function ToolConsumableManagementV2({
     <div className="space-y-6">
       {/* Coverage Dashboard */}
       <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Coverage Dashboard</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold text-gray-900">Coverage Dashboard</h2>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-gray-600">
+              Last updated: {lastRefresh.toLocaleTimeString('en-GB')}
+            </span>
+            <button
+              onClick={() => {
+                router.refresh();
+                setLastRefresh(new Date());
+              }}
+              className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors"
+            >
+              🔄 Refresh
+            </button>
+          </div>
+        </div>
 
         <div className="grid grid-cols-5 gap-4 mb-6">
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
