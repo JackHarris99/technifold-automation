@@ -346,7 +346,7 @@ export async function POST(request: NextRequest) {
                   </p>
                   <p style="margin: 0; font-size: 14px; color: #1e40af;">
                     Email: <a href="mailto:orders@technifold.com" style="color: #1e40af; text-decoration: none;">orders@technifold.com</a><br>
-                    Phone: +44 (0) 1622 235 123
+                    Phone: +44 (0)1455 554491
                   </p>
                   <p style="margin: 16px 0 0; font-size: 12px; color: #64748b;">
                     © ${new Date().getFullYear()} Technifold International Ltd. All rights reserved.
