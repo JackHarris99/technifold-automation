@@ -85,7 +85,11 @@ interface InvoicesData {
   };
 }
 
-export default function PerformanceDashboard() {
+interface PerformanceDashboardProps {
+  salesRepId?: string | null;
+}
+
+export default function PerformanceDashboard({ salesRepId }: PerformanceDashboardProps) {
   const [commissionData, setCommissionData] = useState<CommissionData | null>(null);
   const [teamData, setTeamData] = useState<TeamActivitiesData | null>(null);
   const [invoicesData, setInvoicesData] = useState<InvoicesData | null>(null);
@@ -96,10 +100,11 @@ export default function PerformanceDashboard() {
   useEffect(() => {
     async function fetchData() {
       try {
+        const repParam = salesRepId ? `?sales_rep_id=${encodeURIComponent(salesRepId)}` : '';
         const [commissionRes, teamRes, invoicesRes] = await Promise.all([
-          fetch('/api/admin/commission/current'),
-          fetch('/api/admin/commission/team-activities'),
-          fetch('/api/admin/commission/invoices'),
+          fetch(`/api/admin/commission/current${repParam}`),
+          fetch(`/api/admin/commission/team-activities${repParam}`),
+          fetch(`/api/admin/commission/invoices${repParam}`),
         ]);
 
         if (!commissionRes.ok || !teamRes.ok || !invoicesRes.ok) {
@@ -121,7 +126,7 @@ export default function PerformanceDashboard() {
     }
 
     fetchData();
-  }, []);
+  }, [salesRepId]);
 
   if (loading) {
     return (

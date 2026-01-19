@@ -5,10 +5,9 @@
 
 import { getCurrentUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
-
-// Client component for fetching and displaying data
-import PerformanceDashboard from '@/components/admin/PerformanceDashboard';
+import { cookies } from 'next/headers';
+import { getSalesRepFromViewMode, type ViewMode } from '@/lib/viewMode';
+import PerformanceDashboardWrapper from '@/components/admin/PerformanceDashboardWrapper';
 
 export default async function MyPerformancePage() {
   const currentUser = await getCurrentUser();
@@ -17,42 +16,31 @@ export default async function MyPerformancePage() {
     redirect('/login');
   }
 
+  // Get view mode from cookies
+  const cookieStore = await cookies();
+  const viewModeCookie = cookieStore.get('view_mode');
+  const viewModeValue = viewModeCookie?.value || 'all';
+
+  // Parse view mode
+  let viewMode: ViewMode = 'all';
+  if (viewModeValue === 'my_customers') viewMode = 'my_customers';
+  else if (viewModeValue === 'view_as_lee') viewMode = 'view_as_lee';
+  else if (viewModeValue === 'view_as_steve') viewMode = 'view_as_steve';
+  else if (viewModeValue === 'view_as_callum') viewMode = 'view_as_callum';
+
+  // Determine which sales rep to show performance for
+  const viewingSalesRep = getSalesRepFromViewMode(viewMode, currentUser.sales_rep_id || currentUser.full_name);
+  const isDirector = currentUser.role === 'director';
+
   const currentDate = new Date();
   const monthName = currentDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
-      {/* Header */}
-      <div className="bg-white border-b border-[#e8e8e8] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-        <div className="max-w-6xl mx-auto px-8 py-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <Link
-                  href="/admin/sales"
-                  className="text-[13px] text-[#475569] hover:text-[#1e40af] font-[500] transition-colors flex items-center gap-2"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  Sales Center
-                </Link>
-              </div>
-              <h1 className="text-[32px] font-[700] text-[#0a0a0a] tracking-[-0.02em]">
-                My Performance
-              </h1>
-              <p className="text-[15px] text-[#475569] font-[500] mt-2">
-                {currentUser.full_name} • {monthName}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Dashboard Content */}
-      <div className="max-w-6xl mx-auto px-8 py-8">
-        <PerformanceDashboard />
-      </div>
-    </div>
+    <PerformanceDashboardWrapper
+      currentUser={currentUser}
+      viewingSalesRep={viewingSalesRep}
+      isDirector={isDirector}
+      monthName={monthName}
+    />
   );
 }

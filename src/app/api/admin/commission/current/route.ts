@@ -15,7 +15,16 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = getSupabaseClient();
-    const repId = currentUser.sales_rep_id;
+
+    // Get sales_rep_id from query params (Directors can view any rep)
+    const { searchParams } = new URL(request.url);
+    const querySalesRepId = searchParams.get('sales_rep_id');
+
+    // Determine which rep to show data for
+    let repId = currentUser.sales_rep_id;
+    if (querySalesRepId && currentUser.role === 'director') {
+      repId = querySalesRepId;
+    }
 
     // Get current month boundaries
     const now = new Date();

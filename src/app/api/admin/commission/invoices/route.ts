@@ -47,6 +47,16 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
+    // Get sales_rep_id from query params (Directors can view any rep)
+    const { searchParams } = new URL(request.url);
+    const querySalesRepId = searchParams.get('sales_rep_id');
+
+    // Determine which rep to show data for
+    let targetSalesRepId = user.sales_rep_id;
+    if (querySalesRepId && user.role === 'director') {
+      targetSalesRepId = querySalesRepId;
+    }
+
     // Get current month boundaries
     const now = new Date();
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -117,7 +127,7 @@ export async function GET(request: NextRequest) {
       if (!company) continue;
 
       // SECURITY: Filter by account owner (only show invoices for assigned customers)
-      if (company.account_owner !== user.sales_rep_id) {
+      if (company.account_owner !== targetSalesRepId) {
         continue;
       }
 
