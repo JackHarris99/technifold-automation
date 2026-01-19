@@ -61,7 +61,13 @@ export default function CompanyDetailView({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Convert type state
+  const [showConvertConfirm, setShowConvertConfirm] = useState(false);
+  const [isConverting, setIsConverting] = useState(false);
+
   const isDirector = currentUser.role === 'director';
+  const isDistributor = company.type === 'distributor';
+  const isCustomer = company.type === 'customer' || !company.type;
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -82,6 +88,32 @@ export default function CompanyDetailView({
     } finally {
       setIsDeleting(false);
       setShowDeleteConfirm(false);
+    }
+  };
+
+  const handleConvertType = async () => {
+    setIsConverting(true);
+    const newType = isDistributor ? 'customer' : 'distributor';
+
+    try {
+      const response = await fetch(`/api/admin/companies/${company.company_id}/convert-type`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ new_type: newType }),
+      });
+
+      if (response.ok) {
+        // Reload page to show updated type
+        window.location.reload();
+      } else {
+        const data = await response.json();
+        alert('Failed to convert company: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err) {
+      alert('Network error: Failed to convert company');
+    } finally {
+      setIsConverting(false);
+      setShowConvertConfirm(false);
     }
   };
 
@@ -110,7 +142,14 @@ export default function CompanyDetailView({
                 </svg>
                 All Companies
               </Link>
-              <h1 className="text-[32px] font-[700] text-[#0a0a0a] tracking-[-0.02em]">{company.company_name}</h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-[32px] font-[700] text-[#0a0a0a] tracking-[-0.02em]">{company.company_name}</h1>
+                {isDistributor && (
+                  <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-[13px] font-[600] uppercase tracking-wide">
+                    Distributor
+                  </span>
+                )}
+              </div>
               <p className="text-[13px] text-[#64748b] font-[500] mt-2">{company.company_id}</p>
               <CompanyStatusControl
                 companyId={company.company_id}
@@ -140,12 +179,20 @@ export default function CompanyDetailView({
                 Create Consumables Quote
               </Link>
               {isDirector && (
-                <button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  className="px-5 py-2.5 bg-white border-2 border-[#e8e8e8] text-[#dc2626] rounded-lg text-[13px] font-[600] hover:border-[#dc2626] hover:bg-[#fef2f2] transition-all shadow-sm"
-                >
-                  Delete Company
-                </button>
+                <>
+                  <button
+                    onClick={() => setShowConvertConfirm(true)}
+                    className="px-5 py-2.5 bg-white border-2 border-[#e8e8e8] text-[#1e40af] rounded-lg text-[13px] font-[600] hover:border-[#1e40af] hover:bg-[#eff6ff] transition-all shadow-sm"
+                  >
+                    {isDistributor ? 'Convert to Customer' : 'Convert to Distributor'}
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="px-5 py-2.5 bg-white border-2 border-[#e8e8e8] text-[#dc2626] rounded-lg text-[13px] font-[600] hover:border-[#dc2626] hover:bg-[#fef2f2] transition-all shadow-sm"
+                  >
+                    Delete Company
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -280,6 +327,48 @@ export default function CompanyDetailView({
         context="general"
         onSuccess={() => window.location.reload()}
       />
+
+      {/* Convert Type Confirmation Modal */}
+      {showConvertConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg max-w-md w-full p-6 mx-4">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Convert to {isDistributor ? 'Customer' : 'Distributor'}?
+            </h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Are you sure you want to convert <strong>{company.company_name}</strong> from a{' '}
+              <strong>{isDistributor ? 'distributor' : 'customer'}</strong> to a{' '}
+              <strong>{isDistributor ? 'customer' : 'distributor'}</strong>?
+            </p>
+            {!isDistributor && (
+              <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded p-3 mb-4">
+                ℹ️ Converting to distributor will allow this company to access the distributor portal and place orders with wholesale pricing.
+              </p>
+            )}
+            {isDistributor && (
+              <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded p-3 mb-4">
+                ℹ️ Converting to customer will remove distributor portal access. Any existing distributor users will no longer be able to log in.
+              </p>
+            )}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConvertConfirm(false)}
+                disabled={isConverting}
+                className="flex-1 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConvertType}
+                disabled={isConverting}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50"
+              >
+                {isConverting ? 'Converting...' : `Convert to ${isDistributor ? 'Customer' : 'Distributor'}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
