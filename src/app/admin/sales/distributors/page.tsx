@@ -14,6 +14,14 @@ interface PendingInvitation {
   invited_at: string;
 }
 
+interface AcceptedInvite {
+  email: string;
+  full_name: string;
+  company_name: string;
+  accepted_at: string;
+  last_login_at: string | null;
+}
+
 interface RecentOrder {
   order_id: string;
   company_name: string;
@@ -23,9 +31,19 @@ interface RecentOrder {
   created_at: string;
 }
 
+interface ActivityEvent {
+  activity_id: string;
+  user_name: string;
+  user_email: string;
+  action_type: string;
+  description: string;
+  created_at: string;
+}
+
 interface DistributorMetrics {
   active_distributors: number;
   pending_invitations: number;
+  accepted_invites: number;
   orders_pending_review: number;
   total_distributor_revenue_this_month: number;
 }
@@ -43,6 +61,7 @@ export default async function DistributorControlCenter() {
   let metrics: DistributorMetrics = {
     active_distributors: 0,
     pending_invitations: 0,
+    accepted_invites: 0,
     orders_pending_review: 0,
     total_distributor_revenue_this_month: 0,
   };
@@ -64,8 +83,10 @@ export default async function DistributorControlCenter() {
   // Now fetch metrics in parallel
   const [
     { data: pendingInvites, error: invitesError },
+    { data: acceptedInvites, error: acceptedError },
     { data: pendingOrders, error: ordersError },
     { data: paidInvoices, error: invoicesError },
+    { data: recentActivity, error: activityError },
   ] = await Promise.all([
     supabase
       .from('distributor_users')
@@ -74,6 +95,12 @@ export default async function DistributorControlCenter() {
       .is('password_hash', null)
       .order('created_at', { ascending: false })
       .limit(10),
+    supabase
+      .from('distributor_users')
+      .select('email, full_name, created_at, last_login_at, companies(company_name)')
+      .not('password_hash', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(20),
     supabase
       .from('distributor_orders')
       .select(`
@@ -95,11 +122,18 @@ export default async function DistributorControlCenter() {
           .gte('invoice_date', monthStart)
           .in('company_id', distributorCompanyIds)
       : Promise.resolve({ data: [], error: null }),
+    supabase
+      .from('activity_log')
+      .select('activity_id, user_name, user_email, action_type, description, created_at')
+      .or('action_type.eq.distributor_login,action_type.eq.distributor_order_created,action_type.eq.distributor_user_created')
+      .order('created_at', { ascending: false })
+      .limit(50),
   ]);
 
   // Calculate metrics
   metrics.active_distributors = distributorCompanies?.length || 0;
   metrics.pending_invitations = pendingInvites?.length || 0;
+  metrics.accepted_invites = acceptedInvites?.length || 0;
   metrics.orders_pending_review = pendingOrders?.length || 0;
   metrics.total_distributor_revenue_this_month = (paidInvoices || []).reduce(
     (sum, inv) => sum + (inv.subtotal || 0),
@@ -113,6 +147,15 @@ export default async function DistributorControlCenter() {
     invited_at: invite.created_at,
   }));
 
+  // Process accepted invites
+  const acceptedInvitesList: AcceptedInvite[] = (acceptedInvites || []).map((invite: any) => ({
+    email: invite.email,
+    full_name: invite.full_name,
+    company_name: invite.companies?.company_name || 'Unknown',
+    accepted_at: invite.created_at,
+    last_login_at: invite.last_login_at,
+  }));
+
   // Process recent orders
   const recentOrdersList: RecentOrder[] = (pendingOrders || []).map((order: any) => ({
     order_id: order.order_id,
@@ -122,6 +165,25 @@ export default async function DistributorControlCenter() {
     status: order.status,
     created_at: order.created_at,
   }));
+
+  // Process activity log
+  const activityList: ActivityEvent[] = (recentActivity || []).map((activity: any) => ({
+    activity_id: activity.activity_id,
+    user_name: activity.user_name,
+    user_email: activity.user_email,
+    action_type: activity.action_type,
+    description: activity.description || getActivityDescription(activity.action_type),
+    created_at: activity.created_at,
+  }));
+
+  function getActivityDescription(action_type: string): string {
+    switch (action_type) {
+      case 'distributor_login': return 'Logged in to distributor portal';
+      case 'distributor_order_created': return 'Created new order';
+      case 'distributor_user_created': return 'New distributor user created';
+      default: return action_type;
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -149,11 +211,16 @@ export default async function DistributorControlCenter() {
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
           <MetricCard
             label="Active Distributors"
             value={metrics.active_distributors.toString()}
             color="purple"
+          />
+          <MetricCard
+            label="Accepted Invites"
+            value={metrics.accepted_invites.toString()}
+            color="blue"
           />
           <MetricCard
             label="Pending Invitations"
@@ -176,6 +243,38 @@ export default async function DistributorControlCenter() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* LEFT COLUMN */}
           <div className="space-y-6">
+            {/* Accepted Invites */}
+            <ActionSection
+              title="Accepted Invites"
+              icon="✅"
+              count={acceptedInvitesList.length}
+              emptyMessage="No distributors have accepted invitations yet"
+              emptyIcon="📧"
+              color="blue"
+              viewAllHref="/admin/distributors"
+            >
+              {acceptedInvitesList.slice(0, 10).map((invite, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center justify-between p-4 hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-b-0"
+                >
+                  <div>
+                    <h4 className="font-semibold text-gray-900">{invite.full_name}</h4>
+                    <p className="text-sm text-gray-700">{invite.company_name} • {invite.email}</p>
+                  </div>
+                  <div className="text-right">
+                    {invite.last_login_at ? (
+                      <div className="text-xs text-gray-600">
+                        Last login: {new Date(invite.last_login_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-orange-600 font-medium">Not logged in yet</div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </ActionSection>
+
             {/* Pending Invitations */}
             <ActionSection
               title="Pending Invitations"
@@ -239,6 +338,37 @@ export default async function DistributorControlCenter() {
 
           {/* RIGHT COLUMN */}
           <div className="space-y-6">
+            {/* Activity Feed */}
+            <ActionSection
+              title="Recent Activity"
+              icon="📊"
+              count={activityList.length}
+              emptyMessage="No recent distributor activity"
+              emptyIcon="💤"
+              color="purple"
+            >
+              {activityList.slice(0, 15).map((activity) => (
+                <div
+                  key={activity.activity_id}
+                  className="flex items-start justify-between p-4 hover:bg-purple-50 transition-colors border-b border-gray-100 last:border-b-0"
+                >
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 text-sm">{activity.user_name}</h4>
+                    <p className="text-xs text-gray-700">{activity.user_email}</p>
+                    <p className="text-sm text-gray-800 mt-1">{activity.description}</p>
+                  </div>
+                  <div className="text-xs text-gray-600 whitespace-nowrap ml-4">
+                    {new Date(activity.created_at).toLocaleDateString('en-GB', {
+                      day: 'numeric',
+                      month: 'short',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </div>
+                </div>
+              ))}
+            </ActionSection>
+
             {/* Quick Actions */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
               <div className="px-5 py-4 border-b border-gray-200">
@@ -301,13 +431,14 @@ function MetricCard({
 }: {
   label: string;
   value: string;
-  color: 'green' | 'purple' | 'orange' | 'red';
+  color: 'green' | 'purple' | 'orange' | 'red' | 'blue';
 }) {
   const colorClasses = {
     green: 'border-l-green-500',
     purple: 'border-l-purple-500',
     orange: 'border-l-orange-500',
     red: 'border-l-red-500',
+    blue: 'border-l-blue-500',
   };
 
   return (
@@ -333,7 +464,7 @@ function ActionSection({
   count: number;
   emptyMessage: string;
   emptyIcon: string;
-  color: 'red' | 'orange' | 'purple';
+  color: 'red' | 'orange' | 'purple' | 'blue';
   viewAllHref?: string;
   children: React.ReactNode;
 }) {
@@ -341,12 +472,14 @@ function ActionSection({
     red: 'bg-red-50 border-red-200',
     orange: 'bg-orange-50 border-orange-200',
     purple: 'bg-purple-50 border-purple-200',
+    blue: 'bg-blue-50 border-blue-200',
   };
 
   const badgeColors = {
     red: 'bg-red-100 text-red-700',
     orange: 'bg-orange-100 text-orange-700',
     purple: 'bg-purple-100 text-purple-700',
+    blue: 'bg-blue-100 text-blue-700',
   };
 
   return (

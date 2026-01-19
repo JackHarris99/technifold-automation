@@ -107,6 +107,18 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
           >
             Sales Center
           </Link>
+          {isDirector && (
+            <Link
+              href="/admin/sales/distributors"
+              className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+                pathname === '/admin/sales/distributors'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`}
+            >
+              📦 Distributor Center
+            </Link>
+          )}
           <Link
             href="/admin/sales/reorder-opportunities"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
@@ -136,16 +148,6 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             }`}
           >
             Unpaid Invoices
-          </Link>
-          <Link
-            href="/admin/sales/distributors"
-            className={`block px-4 py-2 text-sm font-[500] transition-colors ${
-              pathname === '/admin/sales/distributors'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-            }`}
-          >
-            📦 Distributor Center
           </Link>
         </div>
 

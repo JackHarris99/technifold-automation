@@ -30,7 +30,7 @@ export default async function AdminLayout({
 
   // Get current user for role-based features
   const user = await getCurrentUser();
-  const isDirector = user?.role === 'Director';
+  const isDirector = user?.role === 'director';
 
   return (
     <div className={inter.className}>
