@@ -292,6 +292,8 @@ export default function CompanyDetailView({
               setActivityType(type);
               setShowActivityModal(true);
             }}
+            isDirector={isDirector}
+            onChangeOwner={handleOpenChangeOwner}
           />
         )}
 
@@ -508,7 +510,9 @@ function OverviewTab({
   onAddAddress,
   onEditAddress,
   onEditBillingAddress,
-  onLogActivity
+  onLogActivity,
+  isDirector,
+  onChangeOwner
 }: {
   company: any;
   contacts: any[];
@@ -518,6 +522,8 @@ function OverviewTab({
   onEditAddress: (address: any) => void;
   onEditBillingAddress: () => void;
   onLogActivity: (type: 'call' | 'visit' | 'email' | 'followup' | 'meeting') => void;
+  isDirector: boolean;
+  onChangeOwner: () => void;
 }) {
   const defaultAddress = shippingAddresses.find(addr => addr.is_default);
 
@@ -626,7 +632,7 @@ function OverviewTab({
               <dd className="text-[13px] font-[600] text-[#0a0a0a]">{company.account_owner || 'Unassigned'}</dd>
               {isDirector && (
                 <button
-                  onClick={handleOpenChangeOwner}
+                  onClick={onChangeOwner}
                   className="text-[12px] text-[#1e40af] hover:text-[#1e3a8a] transition-colors font-medium mt-1"
                 >
                   Change Sales Rep
