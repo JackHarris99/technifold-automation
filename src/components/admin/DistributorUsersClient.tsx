@@ -261,7 +261,7 @@ export default function DistributorUsersClient({ companies, users, contacts }: D
       });
 
       // Redirect to the new distributor's detail page
-      window.location.href = `/admin/distributor-company/${data.company_id}`;
+      window.location.href = `/admin/company/${data.company_id}`;
     } catch (error: any) {
       console.error('Error creating distributor:', error);
       alert(`Failed to create distributor: ${error.message}`);
@@ -302,7 +302,7 @@ export default function DistributorUsersClient({ companies, users, contacts }: D
                     </div>
                   </button>
                   <a
-                    href={`/admin/distributor-company/${company.company_id}`}
+                    href={`/admin/company/${company.company_id}`}
                     className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded"
                     title="View details"
                   >

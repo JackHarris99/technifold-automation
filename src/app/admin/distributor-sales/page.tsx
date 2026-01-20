@@ -233,7 +233,7 @@ export default async function DistributorSalesPage() {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <Link
-                          href={`/admin/distributor-company/${order.company_id}`}
+                          href={`/admin/company/${order.company_id}`}
                           className="font-semibold text-gray-900 hover:text-purple-600"
                         >
                           {order.company_name}
@@ -310,7 +310,7 @@ export default async function DistributorSalesPage() {
                         </div>
                         <div className="flex-1">
                           <Link
-                            href={`/admin/distributor-company/${dist.company_id}`}
+                            href={`/admin/company/${dist.company_id}`}
                             className="font-semibold text-gray-900 hover:text-purple-600"
                           >
                             {dist.company_name}
