@@ -224,6 +224,7 @@ export async function POST(
         tax_amount: vatAmount,
         total_amount: totalAmount,
         status: 'pending',
+        payment_status: 'unpaid',
         currency: 'GBP',
         po_number: order.po_number || null,
       })
@@ -235,6 +236,28 @@ export async function POST(
     }
 
     const invoiceId = invoiceRecord?.invoice_id;
+
+    // 8b. Create invoice_items records for in-stock items
+    if (invoiceId && inStockItems.length > 0) {
+      const invoiceItemsData = inStockItems.map(item => ({
+        invoice_id: invoiceId,
+        product_code: item.product_code,
+        description: item.description,
+        quantity: item.quantity,
+        unit_price: parseFloat(item.unit_price.toString()),
+        line_total: parseFloat(item.line_total.toString()),
+      }));
+
+      const { error: itemsInsertError } = await supabase
+        .from('invoice_items')
+        .insert(invoiceItemsData);
+
+      if (itemsInsertError) {
+        console.error('[Approve Order] Failed to create invoice_items:', itemsInsertError);
+      } else {
+        console.log(`[Approve Order] Created ${invoiceItemsData.length} invoice_items for invoice ${invoiceId}`);
+      }
+    }
 
     // 9. Update order with review details
     await supabase
