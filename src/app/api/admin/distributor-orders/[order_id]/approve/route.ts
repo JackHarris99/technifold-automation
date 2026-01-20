@@ -239,9 +239,10 @@ export async function POST(
 
     // 8b. Create invoice_items records for in-stock items
     if (invoiceId && inStockItems.length > 0) {
-      const invoiceItemsData = inStockItems.map(item => ({
+      const invoiceItemsData = inStockItems.map((item, index) => ({
         invoice_id: invoiceId,
         product_code: item.product_code,
+        line_number: index + 1,
         description: item.description,
         quantity: item.quantity,
         unit_price: parseFloat(item.unit_price.toString()),
