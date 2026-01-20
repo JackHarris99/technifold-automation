@@ -192,15 +192,26 @@ export async function POST(
       });
     }
 
-    // 5. Finalize invoice
+    // 5. Add VAT as line item
+    if (vatAmount > 0) {
+      await stripe.invoiceItems.create({
+        customer: stripeCustomerId,
+        invoice: stripeInvoice.id,
+        description: `VAT (${(vatRate * 100).toFixed(0)}%)`,
+        amount: Math.round(vatAmount * 100),
+        currency: 'gbp',
+      });
+    }
+
+    // 6. Finalize invoice
     const finalizedInvoice = await stripe.invoices.finalizeInvoice(stripeInvoice.id, {
       auto_advance: false,
     });
 
-    // 6. Send invoice
+    // 7. Send invoice
     await stripe.invoices.sendInvoice(finalizedInvoice.id);
 
-    // 7. Create invoice record in database
+    // 8. Create invoice record in database
     const { data: invoiceRecord, error: invoiceError } = await supabase
       .from('invoices')
       .insert({
@@ -225,7 +236,7 @@ export async function POST(
 
     const invoiceId = invoiceRecord?.invoice_id;
 
-    // 8. Update order with review details
+    // 9. Update order with review details
     await supabase
       .from('distributor_orders')
       .update({
@@ -249,7 +260,7 @@ export async function POST(
       })
       .eq('order_id', order_id);
 
-    // 9. Update item statuses
+    // 10. Update item statuses
     for (const item of items) {
       const status = body.item_statuses[item.item_id];
       const updateData: any = { status };
