@@ -551,16 +551,6 @@ export default async function SalesCenterPage() {
                     <p className="text-sm text-gray-700">Manage tiered pricing for distributors</p>
                   </div>
                 </Link>
-                <Link
-                  href="/admin/product-catalogs"
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <span className="text-2xl">📦</span>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">Product Catalogs</h4>
-                    <p className="text-sm text-gray-700">Manage company-specific product visibility</p>
-                  </div>
-                </Link>
               </div>
             </div>
           </div>
