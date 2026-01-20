@@ -24,7 +24,30 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
 
   const supabase = getSupabaseClient();
 
-  // Fetch all data in parallel
+  // Fetch ALL products (no pagination limit)
+  let allProducts: any[] = [];
+  let productStart = 0;
+  const productBatchSize = 1000;
+  let hasMoreProducts = true;
+
+  while (hasMoreProducts) {
+    const { data: batch, error } = await supabase
+      .from('products')
+      .select('product_code, description, type, category, price, active, show_in_distributor_portal')
+      .eq('active', true)
+      .order('product_code')
+      .range(productStart, productStart + productBatchSize - 1);
+
+    if (error || !batch || batch.length === 0) {
+      hasMoreProducts = false;
+    } else {
+      allProducts = allProducts.concat(batch);
+      hasMoreProducts = batch.length === productBatchSize;
+      productStart += productBatchSize;
+    }
+  }
+
+  // Fetch all other data in parallel
   const [
     companyResult,
     contactsResult,
@@ -37,7 +60,6 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
     subscriptionsResult,
     shippingAddressesResult,
     quotesResult,
-    productsResult,
     catalogEntriesResult,
     distributorPricingResult,
     companyPricingResult,
@@ -161,13 +183,6 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
       .eq('company_id', company_id)
       .order('created_at', { ascending: false }),
 
-    // Products (for catalog management)
-    supabase
-      .from('products')
-      .select('product_code, description, type, category, price, active, show_in_distributor_portal')
-      .eq('active', true)
-      .order('product_code'),
-
     // Catalog entries (for distributors)
     supabase
       .from('company_product_catalog')
@@ -204,7 +219,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
       subscriptions={subscriptionsResult.data || []}
       shippingAddresses={shippingAddressesResult.data || []}
       quotes={quotesResult.data || []}
-      products={productsResult.data || []}
+      products={allProducts}
       catalogEntries={catalogEntriesResult.data || []}
       distributorPricing={distributorPricingResult.data || []}
       companyPricing={companyPricingResult.data || []}

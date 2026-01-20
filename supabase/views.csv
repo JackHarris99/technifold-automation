@@ -1,8 +1,8 @@
-schema_name,view_name,view_definition,is_updatable,is_insertable_into
+table_schema,table_name,view_definition
 public,catalog_products," SELECT product_code,
     description,
     category
-   FROM products;",YES,YES
+   FROM products;"
 public,company_consumables_view," SELECT company_id,
     product_code AS consumable_code,
     first_purchased_at AS first_ordered_at,
@@ -10,14 +10,14 @@ public,company_consumables_view," SELECT company_id,
     total_purchases AS total_orders,
     total_quantity
    FROM company_product_history
-  WHERE (product_type = 'consumable'::text);",YES,YES
+  WHERE (product_type = 'consumable'::text);"
 public,company_tools_view," SELECT company_id,
     product_code AS tool_code,
     first_purchased_at AS first_seen_at,
     last_purchased_at AS last_seen_at,
     total_quantity AS total_units
    FROM company_product_history
-  WHERE (product_type = 'tool'::text);",YES,YES
+  WHERE (product_type = 'tool'::text);"
 public,v_active_subscription_tools," SELECT st.subscription_id,
     st.tool_code,
     st.added_at,
@@ -30,7 +30,7 @@ public,v_active_subscription_tools," SELECT st.subscription_id,
    FROM ((subscription_tools st
      JOIN subscriptions s ON ((st.subscription_id = s.subscription_id)))
      JOIN products p ON ((st.tool_code = p.product_code)))
-  WHERE (st.removed_at IS NULL);",NO,NO
+  WHERE (st.removed_at IS NULL);"
 public,v_active_subscriptions," SELECT s.subscription_id,
     s.stripe_subscription_id,
     s.company_id,
@@ -55,4 +55,4 @@ public,v_active_subscriptions," SELECT s.subscription_id,
      JOIN companies c ON ((s.company_id = c.company_id)))
      LEFT JOIN contacts ct ON ((s.contact_id = ct.contact_id)))
   WHERE ((s.status)::text = ANY ((ARRAY['trial'::character varying, 'active'::character varying])::text[]))
-  ORDER BY s.created_at DESC;",NO,NO
+  ORDER BY s.created_at DESC;"

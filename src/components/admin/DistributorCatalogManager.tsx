@@ -35,6 +35,8 @@ interface DistributorCatalogManagerProps {
   companyPricing: CompanyPricing[];
 }
 
+type ProductType = 'tool' | 'consumable';
+
 export default function DistributorCatalogManager({
   companyId,
   products,
@@ -42,6 +44,7 @@ export default function DistributorCatalogManager({
   distributorPricing,
   companyPricing,
 }: DistributorCatalogManagerProps) {
+  const [activeTab, setActiveTab] = useState<ProductType>('tool');
   const [searchTerm, setSearchTerm] = useState('');
   const [customPrices, setCustomPrices] = useState<{ [key: string]: string }>(() => {
     const prices: { [key: string]: string } = {};
@@ -67,9 +70,9 @@ export default function DistributorCatalogManager({
     );
   }, [catalogEntries]);
 
-  // Filter products
-  const filteredProducts = useMemo(() => {
-    return products
+  // Filter and organize products by type and category
+  const organizedProducts = useMemo(() => {
+    const filtered = products
       .filter(p => p.active)
       .filter(p => {
         if (!searchTerm) return true;
@@ -80,10 +83,33 @@ export default function DistributorCatalogManager({
           p.category?.toLowerCase().includes(search)
         );
       });
-  }, [products, searchTerm]);
 
-  const productsInCatalog = filteredProducts.filter(p => companyCatalogProducts.has(p.product_code));
-  const productsNotInCatalog = filteredProducts.filter(p => !companyCatalogProducts.has(p.product_code));
+    // Separate by type
+    const tools = filtered.filter(p => p.type === 'tool');
+    const consumables = filtered.filter(p => p.type === 'consumable');
+
+    // Group by category
+    const groupByCategory = (prods: Product[]) => {
+      const grouped = new Map<string, Product[]>();
+      prods.forEach(p => {
+        const cat = p.category || 'Uncategorized';
+        if (!grouped.has(cat)) grouped.set(cat, []);
+        grouped.get(cat)!.push(p);
+      });
+      return grouped;
+    };
+
+    return {
+      tools: {
+        inCatalog: groupByCategory(tools.filter(p => companyCatalogProducts.has(p.product_code))),
+        notInCatalog: groupByCategory(tools.filter(p => !companyCatalogProducts.has(p.product_code))),
+      },
+      consumables: {
+        inCatalog: groupByCategory(consumables.filter(p => companyCatalogProducts.has(p.product_code))),
+        notInCatalog: groupByCategory(consumables.filter(p => !companyCatalogProducts.has(p.product_code))),
+      },
+    };
+  }, [products, searchTerm, companyCatalogProducts]);
 
   const handleAddProduct = async (productCode: string) => {
     try {
@@ -186,7 +212,6 @@ export default function DistributorCatalogManager({
       <tr className="hover:bg-gray-50">
         <td className="py-3 px-4 font-mono text-sm text-gray-900">{product.product_code}</td>
         <td className="py-3 px-4 text-sm text-gray-800">{product.description}</td>
-        <td className="py-3 px-4 text-sm text-gray-600">{product.category || '-'}</td>
         <td className="py-3 px-4 text-right text-sm text-gray-600">
           {product.price != null ? `£${product.price.toFixed(2)}` : '-'}
         </td>
@@ -244,6 +269,60 @@ export default function DistributorCatalogManager({
     );
   };
 
+  const CategorySection = ({
+    title,
+    categoryMap,
+    inCatalog
+  }: {
+    title: string;
+    categoryMap: Map<string, Product[]>;
+    inCatalog: boolean;
+  }) => {
+    if (categoryMap.size === 0) {
+      return (
+        <div className="py-8 text-center text-gray-500">
+          {inCatalog
+            ? `No ${activeTab}s in custom catalog. Add products below.`
+            : `No ${activeTab}s available. Try adjusting your search.`
+          }
+        </div>
+      );
+    }
+
+    return (
+      <>
+        {Array.from(categoryMap.entries()).map(([category, prods]) => (
+          <div key={category} className="mb-6">
+            <div className="bg-gray-100 px-4 py-2 font-semibold text-gray-700 text-sm">
+              {category} ({prods.length})
+            </div>
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Code</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Description</th>
+                  <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Base Price</th>
+                  <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Std. Dist Price</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Custom Price</th>
+                  <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {prods.map(product => (
+                  <ProductRow key={product.product_code} product={product} inCatalog={inCatalog} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
+      </>
+    );
+  };
+
+  const currentData = activeTab === 'tool' ? organizedProducts.tools : organizedProducts.consumables;
+  const inCatalogCount = Array.from(currentData.inCatalog.values()).reduce((sum, arr) => sum + arr.length, 0);
+  const notInCatalogCount = Array.from(currentData.notInCatalog.values()).reduce((sum, arr) => sum + arr.length, 0);
+
   return (
     <div className="space-y-6">
       {/* Info Box */}
@@ -254,6 +333,30 @@ export default function DistributorCatalogManager({
           <li><strong>Custom pricing</strong> overrides standard distributor pricing for this distributor only</li>
           <li><strong>If no custom catalog</strong> exists, distributor sees all products with "Show in Distributor Portal" checked</li>
         </ul>
+      </div>
+
+      {/* Product Type Tabs */}
+      <div className="flex gap-2 border-b border-gray-200">
+        <button
+          onClick={() => setActiveTab('tool')}
+          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+            activeTab === 'tool'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Tools
+        </button>
+        <button
+          onClick={() => setActiveTab('consumable')}
+          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+            activeTab === 'consumable'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Consumables
+        </button>
       </div>
 
       {/* Search */}
@@ -270,69 +373,28 @@ export default function DistributorCatalogManager({
       {/* In Catalog */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div className="px-6 py-4 bg-green-50 border-b border-gray-200">
-          <h3 className="font-bold text-gray-900">✓ In Catalog ({productsInCatalog.length})</h3>
+          <h3 className="font-bold text-gray-900">✓ In Catalog ({inCatalogCount})</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Code</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Description</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Category</th>
-                <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Base Price</th>
-                <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Std. Dist Price</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Custom Price</th>
-                <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {productsInCatalog.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-8 text-center text-gray-500">
-                    No products in custom catalog. Add products below.
-                  </td>
-                </tr>
-              ) : (
-                productsInCatalog.map(product => (
-                  <ProductRow key={product.product_code} product={product} inCatalog={true} />
-                ))
-              )}
-            </tbody>
-          </table>
+          <CategorySection
+            title="In Catalog"
+            categoryMap={currentData.inCatalog}
+            inCatalog={true}
+          />
         </div>
       </div>
 
       {/* Not In Catalog */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-          <h3 className="font-bold text-gray-900">Available Products ({productsNotInCatalog.length})</h3>
+          <h3 className="font-bold text-gray-900">Available Products ({notInCatalogCount})</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Code</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Description</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Category</th>
-                <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Base Price</th>
-                <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Std. Dist Price</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Custom Price</th>
-                <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {productsNotInCatalog.slice(0, 50).map(product => (
-                <ProductRow key={product.product_code} product={product} inCatalog={false} />
-              ))}
-              {productsNotInCatalog.length > 50 && (
-                <tr>
-                  <td colSpan={7} className="py-4 text-center text-sm text-gray-600">
-                    Showing first 50 of {productsNotInCatalog.length} products. Use search to find more.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          <CategorySection
+            title="Available Products"
+            categoryMap={currentData.notInCatalog}
+            inCatalog={false}
+          />
         </div>
       </div>
     </div>

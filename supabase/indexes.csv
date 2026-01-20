@@ -1,4 +1,4 @@
-schema_name,table_name,index_name,index_definition
+schemaname,tablename,indexname,indexdef
 public,activity_log,activity_log_pkey,CREATE UNIQUE INDEX activity_log_pkey ON public.activity_log USING btree (activity_id)
 public,activity_log,idx_activity_log_action_type,CREATE INDEX idx_activity_log_action_type ON public.activity_log USING btree (action_type)
 public,activity_log,idx_activity_log_created_at,CREATE INDEX idx_activity_log_created_at ON public.activity_log USING btree (created_at DESC)
@@ -20,6 +20,11 @@ public,company_consumables,company_consumables_pkey,"CREATE UNIQUE INDEX company
 public,company_consumables,idx_company_consumables_company,CREATE INDEX idx_company_consumables_company ON public.company_consumables USING btree (company_id)
 public,company_consumables,idx_company_consumables_consumable,CREATE INDEX idx_company_consumables_consumable ON public.company_consumables USING btree (consumable_code)
 public,company_consumables,idx_company_consumables_last_order,CREATE INDEX idx_company_consumables_last_order ON public.company_consumables USING btree (last_ordered_at)
+public,company_distributor_pricing,company_distributor_pricing_company_id_product_code_key,"CREATE UNIQUE INDEX company_distributor_pricing_company_id_product_code_key ON public.company_distributor_pricing USING btree (company_id, product_code)"
+public,company_distributor_pricing,company_distributor_pricing_pkey,CREATE UNIQUE INDEX company_distributor_pricing_pkey ON public.company_distributor_pricing USING btree (pricing_id)
+public,company_distributor_pricing,idx_company_distributor_pricing_active,CREATE INDEX idx_company_distributor_pricing_active ON public.company_distributor_pricing USING btree (active) WHERE (active = true)
+public,company_distributor_pricing,idx_company_distributor_pricing_company,CREATE INDEX idx_company_distributor_pricing_company ON public.company_distributor_pricing USING btree (company_id)
+public,company_distributor_pricing,idx_company_distributor_pricing_product,CREATE INDEX idx_company_distributor_pricing_product ON public.company_distributor_pricing USING btree (product_code)
 public,company_machine,company_machine_company_machine_unique,"CREATE UNIQUE INDEX company_machine_company_machine_unique ON public.company_machine USING btree (company_id, machine_id)"
 public,company_machine,company_machines_pkey,CREATE UNIQUE INDEX company_machines_pkey ON public.company_machine USING btree (id)
 public,company_machine,idx_company_machine_company,CREATE INDEX idx_company_machine_company ON public.company_machine USING btree (company_id)
@@ -54,6 +59,14 @@ public,customer_pricing_overrides,customer_pricing_overrides_pkey,CREATE UNIQUE 
 public,customer_pricing_overrides,idx_customer_overrides_company,CREATE INDEX idx_customer_overrides_company ON public.customer_pricing_overrides USING btree (company_id) WHERE (active = true)
 public,customer_pricing_overrides,idx_customer_overrides_product,CREATE INDEX idx_customer_overrides_product ON public.customer_pricing_overrides USING btree (product_code) WHERE (active = true)
 public,customer_pricing_overrides,idx_customer_overrides_validity,"CREATE INDEX idx_customer_overrides_validity ON public.customer_pricing_overrides USING btree (valid_from, valid_until) WHERE (active = true)"
+public,distributor_order_items,distributor_order_items_pkey,CREATE UNIQUE INDEX distributor_order_items_pkey ON public.distributor_order_items USING btree (item_id)
+public,distributor_order_items,idx_distributor_order_items_order,CREATE INDEX idx_distributor_order_items_order ON public.distributor_order_items USING btree (order_id)
+public,distributor_order_items,idx_distributor_order_items_status,CREATE INDEX idx_distributor_order_items_status ON public.distributor_order_items USING btree (status)
+public,distributor_orders,distributor_orders_pkey,CREATE UNIQUE INDEX distributor_orders_pkey ON public.distributor_orders USING btree (order_id)
+public,distributor_orders,idx_distributor_orders_company,CREATE INDEX idx_distributor_orders_company ON public.distributor_orders USING btree (company_id)
+public,distributor_orders,idx_distributor_orders_created,CREATE INDEX idx_distributor_orders_created ON public.distributor_orders USING btree (created_at DESC)
+public,distributor_orders,idx_distributor_orders_po_number,CREATE INDEX idx_distributor_orders_po_number ON public.distributor_orders USING btree (po_number) WHERE (po_number IS NOT NULL)
+public,distributor_orders,idx_distributor_orders_status,CREATE INDEX idx_distributor_orders_status ON public.distributor_orders USING btree (status)
 public,distributor_pricing,distributor_pricing_pkey,CREATE UNIQUE INDEX distributor_pricing_pkey ON public.distributor_pricing USING btree (pricing_id)
 public,distributor_pricing,distributor_pricing_product_code_key,CREATE UNIQUE INDEX distributor_pricing_product_code_key ON public.distributor_pricing USING btree (product_code)
 public,distributor_pricing,idx_distributor_pricing_active,CREATE INDEX idx_distributor_pricing_active ON public.distributor_pricing USING btree (product_code) WHERE (active = true)
@@ -75,6 +88,7 @@ public,invoices,idx_invoices_company,CREATE INDEX idx_invoices_company ON public
 public,invoices,idx_invoices_contact,CREATE INDEX idx_invoices_contact ON public.invoices USING btree (contact_id)
 public,invoices,idx_invoices_created_by,CREATE INDEX idx_invoices_created_by ON public.invoices USING btree (created_by)
 public,invoices,idx_invoices_date,CREATE INDEX idx_invoices_date ON public.invoices USING btree (invoice_date)
+public,invoices,idx_invoices_po_number,CREATE INDEX idx_invoices_po_number ON public.invoices USING btree (po_number) WHERE (po_number IS NOT NULL)
 public,invoices,idx_invoices_status,"CREATE INDEX idx_invoices_status ON public.invoices USING btree (status, payment_status)"
 public,invoices,idx_invoices_stripe_invoice,CREATE INDEX idx_invoices_stripe_invoice ON public.invoices USING btree (stripe_invoice_id)
 public,invoices,invoices_invoice_number_key,CREATE UNIQUE INDEX invoices_invoice_number_key ON public.invoices USING btree (invoice_number)

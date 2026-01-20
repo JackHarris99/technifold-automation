@@ -1,577 +1,644 @@
-table_name,column_name,data_type,is_nullable,column_default
-activity_log,activity_id,uuid,NO,gen_random_uuid()
-activity_log,user_id,uuid,YES,null
-activity_log,user_email,text,NO,null
-activity_log,user_name,text,NO,null
-activity_log,action_type,text,NO,null
-activity_log,entity_type,text,YES,null
-activity_log,entity_id,text,YES,null
-activity_log,description,text,YES,null
-activity_log,metadata,jsonb,YES,'{}'::jsonb
-activity_log,ip_address,text,YES,null
-activity_log,user_agent,text,YES,null
-activity_log,created_at,timestamp with time zone,NO,now()
-brand_media,brand_slug,text,NO,null
-brand_media,brand_name,text,NO,null
-brand_media,logo_url,text,YES,null
-brand_media,hero_url,text,YES,null
-catalog_products,product_code,text,YES,null
-catalog_products,description,text,YES,null
-catalog_products,category,text,YES,null
-companies,company_id,text,NO,null
-companies,company_name,text,NO,null
-companies,website,text,YES,null
-companies,country,text,YES,null
-companies,type,text,YES,'customer'::text
-companies,source,text,YES,'sage_import'::text
-companies,account_opened_at,date,YES,null
-companies,first_invoice_at,date,YES,null
-companies,last_invoice_at,date,YES,null
-companies,vat_number,text,YES,null
-companies,eori_number,text,YES,null
-companies,company_reg_number,text,YES,null
-companies,created_at,timestamp with time zone,YES,now()
-companies,updated_at,timestamp with time zone,YES,now()
-companies,category,text,YES,null
-companies,stripe_customer_id,text,YES,null
-companies,zoho_account_id,text,YES,null
-companies,account_owner,text,YES,null
-companies,portal_payload,jsonb,YES,null
-companies,domain,text,YES,null
-companies,billing_address_line_1,text,YES,null
-companies,billing_address_line_2,text,YES,null
-companies,billing_city,text,YES,null
-companies,billing_state_province,text,YES,null
-companies,billing_postal_code,text,YES,null
-companies,billing_country,text,YES,null
-companies,status,text,YES,'active'::text
-companies,distributor_email,text,YES,null
-companies,distributor_password,text,YES,null
-companies,pricing_tier,text,YES,'standard'::text
-company_consumables,company_id,text,NO,null
-company_consumables,consumable_code,text,NO,null
-company_consumables,first_ordered_at,date,NO,null
-company_consumables,last_ordered_at,date,NO,null
-company_consumables,total_orders,integer,NO,1
-company_consumables,total_quantity,integer,NO,null
-company_consumables,last_order_amount,numeric,YES,null
-company_consumables,last_order_quantity,integer,YES,null
-company_consumables,last_invoice_id,text,YES,null
-company_consumables_view,company_id,text,YES,null
-company_consumables_view,consumable_code,text,YES,null
-company_consumables_view,first_ordered_at,date,YES,null
-company_consumables_view,last_ordered_at,date,YES,null
-company_consumables_view,total_orders,integer,YES,null
-company_consumables_view,total_quantity,integer,YES,null
-company_machine,id,uuid,NO,gen_random_uuid()
-company_machine,machine_id,uuid,NO,null
-company_machine,quantity,integer,YES,1
-company_machine,location,text,YES,null
-company_machine,verified,boolean,YES,FALSE
-company_machine,source,text,YES,'website_form'::text
-company_machine,notes,text,YES,null
-company_machine,created_at,timestamp with time zone,YES,now()
-company_machine,company_id,text,NO,null
-company_machine,confidence,smallint,YES,1
-company_machine,evidence,jsonb,YES,'{}'::jsonb
-company_product_catalog,catalog_id,uuid,NO,gen_random_uuid()
-company_product_catalog,company_id,text,NO,null
-company_product_catalog,product_code,text,NO,null
-company_product_catalog,visible,boolean,YES,TRUE
-company_product_catalog,display_order,integer,YES,null
-company_product_catalog,created_at,timestamp with time zone,YES,now()
-company_product_catalog,updated_at,timestamp with time zone,YES,now()
-company_product_history,company_id,text,NO,null
-company_product_history,product_code,text,NO,null
-company_product_history,product_type,text,NO,null
-company_product_history,first_purchased_at,date,NO,null
-company_product_history,last_purchased_at,date,NO,null
-company_product_history,total_purchases,integer,NO,1
-company_product_history,total_quantity,integer,NO,1
-company_product_history,source,text,YES,'invoice'::text
-company_product_history,added_by,text,YES,null
-company_product_history,created_at,timestamp with time zone,NO,now()
-company_product_history,updated_at,timestamp with time zone,NO,now()
-company_tools,company_id,text,NO,null
-company_tools,tool_code,text,NO,null
-company_tools,first_seen_at,date,NO,null
-company_tools,last_seen_at,date,NO,null
-company_tools,total_units,integer,NO,null
-company_tools_view,company_id,text,YES,null
-company_tools_view,tool_code,text,YES,null
-company_tools_view,first_seen_at,date,YES,null
-company_tools_view,last_seen_at,date,YES,null
-company_tools_view,total_units,integer,YES,null
-contact_interactions,id,uuid,NO,gen_random_uuid()
-contact_interactions,contact_id,uuid,NO,null
-contact_interactions,interaction_type,text,NO,null
-contact_interactions,url,text,YES,null
-contact_interactions,referrer,text,YES,null
-contact_interactions,metadata,jsonb,YES,null
-contact_interactions,occurred_at,timestamp with time zone,YES,now()
-contact_interactions,company_id,text,NO,null
-contacts,contact_id,uuid,NO,gen_random_uuid()
-contacts,company_id,text,NO,null
-contacts,first_name,text,YES,null
-contacts,last_name,text,YES,null
-contacts,full_name,text,YES,null
-contacts,email,text,YES,null
-contacts,phone,text,YES,null
-contacts,role,text,YES,null
-contacts,source,text,YES,'sage_import'::text
-contacts,status,text,YES,'active'::text
-contacts,created_at,timestamp with time zone,YES,now()
-contacts,updated_at,timestamp with time zone,YES,now()
-contacts,token,uuid,YES,null
-contacts,marketing_status,text,YES,null
-contacts,gdpr_consent_at,timestamp with time zone,YES,null
-contacts,zoho_contact_id,text,YES,null
-customer_pricing_overrides,override_id,uuid,NO,gen_random_uuid()
-customer_pricing_overrides,company_id,text,NO,null
-customer_pricing_overrides,product_code,text,YES,null
-customer_pricing_overrides,category,text,YES,null
-customer_pricing_overrides,pricing_tier,text,YES,null
-customer_pricing_overrides,flat_discount_pct,numeric,YES,null
-customer_pricing_overrides,valid_from,timestamp with time zone,YES,now()
-customer_pricing_overrides,valid_until,timestamp with time zone,YES,null
-customer_pricing_overrides,active,boolean,YES,TRUE
-customer_pricing_overrides,notes,text,YES,null
-customer_pricing_overrides,created_at,timestamp with time zone,YES,now()
-customer_pricing_overrides,created_by,text,YES,null
-distributor_pricing,pricing_id,uuid,NO,gen_random_uuid()
-distributor_pricing,product_code,text,NO,null
-distributor_pricing,standard_price,numeric,YES,null
-distributor_pricing,currency,text,YES,'GBP'::text
-distributor_pricing,active,boolean,YES,TRUE
-distributor_pricing,created_at,timestamp with time zone,YES,now()
-distributor_pricing,updated_at,timestamp with time zone,YES,now()
-distributor_users,user_id,uuid,NO,gen_random_uuid()
-distributor_users,company_id,text,NO,null
-distributor_users,email,text,NO,null
-distributor_users,password_hash,text,YES,null
-distributor_users,full_name,text,NO,null
-distributor_users,role,text,NO,'user'::text
-distributor_users,active,boolean,NO,TRUE
-distributor_users,invitation_token,text,YES,null
-distributor_users,invitation_expires_at,timestamp with time zone,YES,null
-distributor_users,last_login_at,timestamp with time zone,YES,null
-distributor_users,created_at,timestamp with time zone,NO,now()
-distributor_users,updated_at,timestamp with time zone,NO,now()
-engagement_events,event_id,uuid,NO,gen_random_uuid()
-engagement_events,company_id,text,YES,null
-engagement_events,contact_id,uuid,YES,null
-engagement_events,occurred_at,timestamp with time zone,NO,now()
-engagement_events,event_type,text,NO,null
-engagement_events,source,text,YES,null
-engagement_events,url,text,YES,null
-engagement_events,meta,jsonb,NO,'{}'::jsonb
-engagement_events,source_event_id,text,YES,null
-engagement_events,event_name,text,YES,null
-engagement_events,campaign_key,text,YES,null
-engagement_events,offer_key,text,YES,null
-engagement_events,value,numeric,YES,null
-engagement_events,currency,text,YES,null
-invoice_items,invoice_id,uuid,NO,null
-invoice_items,product_code,text,NO,null
-invoice_items,line_number,integer,NO,null
-invoice_items,description,text,NO,null
-invoice_items,quantity,integer,NO,null
-invoice_items,unit_price,numeric,NO,null
-invoice_items,line_total,numeric,NO,null
-invoice_items,notes,text,YES,null
-invoices,invoice_id,uuid,NO,gen_random_uuid()
-invoices,company_id,text,NO,null
-invoices,contact_id,uuid,YES,null
-invoices,stripe_invoice_id,text,YES,null
-invoices,stripe_customer_id,text,YES,null
-invoices,stripe_payment_intent_id,text,YES,null
-invoices,invoice_number,text,YES,null
-invoices,invoice_type,text,YES,null
-invoices,currency,text,NO,'gbp'::text
-invoices,subtotal,numeric,NO,null
-invoices,tax_amount,numeric,YES,0
-invoices,shipping_amount,numeric,YES,0
-invoices,total_amount,numeric,NO,null
-invoices,status,text,NO,null
-invoices,payment_status,text,NO,null
-invoices,invoice_date,date,NO,CURRENT_DATE
-invoices,due_date,date,YES,null
-invoices,paid_at,timestamp with time zone,YES,null
-invoices,sent_at,timestamp with time zone,YES,null
-invoices,voided_at,timestamp with time zone,YES,null
-invoices,invoice_url,text,YES,null
-invoices,invoice_pdf_url,text,YES,null
-invoices,shipping_address_id,uuid,YES,null
-invoices,shipping_country,text,YES,null
-invoices,tracking_number,text,YES,null
-invoices,carrier,text,YES,null
-invoices,shipped_at,timestamp with time zone,YES,null
-invoices,notes,text,YES,null
-invoices,created_by,text,YES,null
-invoices,created_at,timestamp with time zone,NO,now()
-invoices,updated_at,timestamp with time zone,NO,now()
-machines,machine_id,uuid,NO,gen_random_uuid()
-machines,brand,text,NO,null
-machines,model,text,YES,null
-machines,display_name,text,YES,null
-machines,type,text,NO,null
-machines,shaft_size_mm,integer,YES,null
-machines,country,text,YES,null
-machines,oem_url,text,YES,null
-machines,description,text,YES,null
-machines,created_at,timestamp with time zone,YES,now()
-machines,updated_at,timestamp with time zone,YES,now()
-machines,slug,text,YES,null
-machines,type_canonical,text,YES,null
-machines,outer_diameter_mm,numeric,YES,null
-machines,shaft_specs,jsonb,YES,null
-machines,shaft_config_id,integer,YES,null
-notification_preferences,user_id,text,NO,null
-notification_preferences,notify_quote_viewed,boolean,YES,TRUE
-notification_preferences,notify_quote_accepted,boolean,YES,TRUE
-notification_preferences,notify_invoice_paid,boolean,YES,TRUE
-notification_preferences,notify_trial_ending,boolean,YES,TRUE
-notification_preferences,daily_digest_enabled,boolean,YES,TRUE
-notification_preferences,daily_digest_time,time without time zone,YES,'09:00:00'::time without time zone
-notification_preferences,weekly_summary_enabled,boolean,YES,TRUE
-notification_preferences,weekly_summary_day,integer,YES,5
-notification_preferences,weekly_summary_time,time without time zone,YES,'17:00:00'::time without time zone
-notification_preferences,created_at,timestamp with time zone,YES,now()
-notification_preferences,updated_at,timestamp with time zone,YES,now()
-order_items,order_id,uuid,NO,null
-order_items,product_code,text,NO,null
-order_items,description,text,YES,null
-order_items,qty,integer,NO,null
-order_items,unit_price,numeric,NO,null
-order_items,line_total,numeric,NO,null
-orders,order_id,uuid,NO,gen_random_uuid()
-orders,company_id,text,NO,null
-orders,currency,text,NO,'GBP'::text
-orders,payment_channel,text,NO,null
-orders,payment_status,text,NO,'unpaid'::text
-orders,fulfillment_status,text,NO,'hold_unpaid'::text
-orders,subtotal,numeric,NO,0
-orders,shipping_amount,numeric,NO,0
-orders,tax_amount,numeric,NO,0
-orders,total_amount,numeric,NO,0
-orders,shipping_country,text,YES,null
-orders,shipping_name,text,YES,null
-orders,shipping_company,text,YES,null
-orders,shipping_address1,text,YES,null
-orders,shipping_address2,text,YES,null
-orders,shipping_city,text,YES,null
-orders,shipping_postcode,text,YES,null
-orders,stripe_checkout_session_id,text,YES,null
-orders,stripe_payment_intent_id,text,YES,null
-orders,books_customer_id,text,YES,null
-orders,books_invoice_id,text,YES,null
-orders,books_payment_id,text,YES,null
-orders,created_at,timestamp with time zone,NO,now()
-orders,updated_at,timestamp with time zone,NO,now()
-orders,shipping_address_id,uuid,YES,null
-orders,invoice_number,text,YES,null
-orders,order_type,text,YES,null
-orders,rental_agreement_id,uuid,YES,null
-orders,tracking_number,text,YES,null
-orders,carrier,text,YES,null
-orders,shipped_at,timestamp with time zone,YES,null
-orders,estimated_delivery,text,YES,null
-orders,stripe_invoice_id,text,YES,null
-orders,invoice_status,text,YES,null
-orders,invoice_url,text,YES,null
-orders,invoice_pdf_url,text,YES,null
-orders,commercial_invoice_pdf_url,text,YES,null
-orders,invoice_sent_at,timestamp with time zone,YES,null
-orders,invoice_voided_at,timestamp with time zone,YES,null
-orders,shipping_weight_kg,numeric,YES,null
-orders,incoterms,text,YES,null
-outbox,job_id,uuid,NO,gen_random_uuid()
-outbox,job_type,text,NO,null
-outbox,status,text,NO,'pending'::text
-outbox,attempts,integer,NO,0
-outbox,max_attempts,integer,NO,3
-outbox,payload,jsonb,NO,'{}'::jsonb
-outbox,company_id,text,YES,null
-outbox,order_id,uuid,YES,null
-outbox,last_error,text,YES,null
-outbox,locked_until,timestamp with time zone,YES,null
-outbox,created_at,timestamp with time zone,NO,now()
-outbox,updated_at,timestamp with time zone,NO,now()
-outbox,completed_at,timestamp with time zone,YES,null
-premium_pricing_ladder,tier_id,integer,NO,nextval('premium_pricing_ladder_tier_id_seq'::regclass)
-premium_pricing_ladder,min_qty,integer,NO,null
-premium_pricing_ladder,max_qty,integer,NO,null
-premium_pricing_ladder,discount_pct,numeric,NO,null
-premium_pricing_ladder,active,boolean,YES,TRUE
-premium_pricing_ladder,created_at,timestamp with time zone,YES,now()
-premium_pricing_ladder,updated_at,timestamp with time zone,YES,now()
-products,product_code,text,NO,null
-products,description,text,YES,null
-products,type,text,YES,'part'::text
-products,category,text,YES,null
-products,active,boolean,YES,TRUE
-products,is_marketable,boolean,YES,FALSE
-products,is_reminder_eligible,boolean,YES,FALSE
-products,price,numeric,YES,null
-products,currency,text,YES,'GBP'::text
-products,site_visibility,ARRAY,YES,'{technifold}'::text[]
-products,extra,jsonb,YES,'{}'::jsonb
-products,image_url,text,YES,null
-products,image_alt,text,YES,null
-products,video_url,text,YES,null
-products,weight_kg,numeric,YES,null
-products,dimensions_cm,text,YES,null
-products,hs_code,text,YES,null
-products,country_of_origin,text,YES,'GB'::text
-products,rental_price_monthly,numeric,YES,null
-products,customs_value_gbp,numeric,YES,null
-products,width_cm,numeric,YES,null
-products,height_cm,numeric,YES,null
-products,depth_cm,numeric,YES,null
-products,cost_price,numeric,YES,null
-products,pricing_tier,text,YES,'standard'::text
-products,show_in_distributor_portal,boolean,YES,TRUE
-quote_items,quote_id,uuid,NO,null
-quote_items,product_code,text,NO,null
-quote_items,line_number,integer,NO,null
-quote_items,description,text,NO,null
-quote_items,quantity,integer,NO,null
-quote_items,unit_price,numeric,NO,null
-quote_items,discount_percent,numeric,YES,0
-quote_items,line_total,numeric,NO,null
-quote_items,product_type,text,YES,null
-quote_items,category,text,YES,null
-quote_items,image_url,text,YES,null
-quote_notes,note_id,uuid,NO,gen_random_uuid()
-quote_notes,quote_id,uuid,NO,null
-quote_notes,user_id,text,NO,null
-quote_notes,user_name,text,NO,null
-quote_notes,note_text,text,NO,null
-quote_notes,created_at,timestamp with time zone,YES,now()
-quote_notes,updated_at,timestamp with time zone,YES,now()
-quote_requests,quote_request_id,uuid,NO,gen_random_uuid()
-quote_requests,company_id,character varying,NO,null
-quote_requests,contact_id,uuid,NO,null
-quote_requests,machine_slug,character varying,YES,null
-quote_requests,interested_products,jsonb,YES,'[]'::jsonb
-quote_requests,status,character varying,NO,'requested'::character varying
-quote_requests,source,character varying,NO,'manual'::character varying
-quote_requests,assigned_to,character varying,YES,null
-quote_requests,notes,text,YES,null
-quote_requests,marketing_token,text,YES,null
-quote_requests,quote_token,text,YES,null
-quote_requests,lost_reason,text,YES,null
-quote_requests,won_amount,numeric,YES,null
-quote_requests,created_at,timestamp with time zone,YES,now()
-quote_requests,updated_at,timestamp with time zone,YES,now()
-quote_requests,quote_sent_at,timestamp with time zone,YES,null
-quote_requests,closed_at,timestamp with time zone,YES,null
-quotes,quote_id,uuid,NO,gen_random_uuid()
-quotes,company_id,text,NO,null
-quotes,contact_id,uuid,NO,null
-quotes,quote_type,text,NO,null
-quotes,pricing_mode,text,YES,null
-quotes,status,text,NO,'draft'::text
-quotes,currency,text,NO,'GBP'::text
-quotes,subtotal,numeric,NO,null
-quotes,discount_amount,numeric,YES,0
-quotes,total_amount,numeric,NO,null
-quotes,invoice_id,uuid,YES,null
-quotes,expires_at,timestamp with time zone,YES,null
-quotes,sent_at,timestamp with time zone,YES,null
-quotes,viewed_at,timestamp with time zone,YES,null
-quotes,accepted_at,timestamp with time zone,YES,null
-quotes,is_test,boolean,YES,FALSE
-quotes,notes,text,YES,null
-quotes,created_by,text,YES,null
-quotes,created_at,timestamp with time zone,NO,now()
-quotes,updated_at,timestamp with time zone,NO,now()
-quotes,won_at,timestamp with time zone,YES,null
-quotes,lost_at,timestamp with time zone,YES,null
-quotes,lost_reason,text,YES,null
-quotes,free_shipping,boolean,YES,FALSE
-rental_agreements,rental_id,uuid,NO,gen_random_uuid()
-rental_agreements,serial_number,text,NO,null
-rental_agreements,company_id,text,NO,null
-rental_agreements,contact_id,uuid,YES,null
-rental_agreements,product_code,text,NO,null
-rental_agreements,stripe_subscription_id,text,YES,null
-rental_agreements,stripe_customer_id,text,YES,null
-rental_agreements,monthly_price,numeric,NO,null
-rental_agreements,currency,text,NO,'GBP'::text
-rental_agreements,start_date,timestamp with time zone,NO,null
-rental_agreements,trial_end_date,timestamp with time zone,YES,null
-rental_agreements,minimum_term_months,integer,NO,24
-rental_agreements,contract_signed_at,timestamp with time zone,NO,null
-rental_agreements,contract_pdf_url,text,YES,null
-rental_agreements,contract_ip_address,inet,YES,null
-rental_agreements,status,text,NO,'trial'::text
-rental_agreements,cancelled_at,timestamp with time zone,YES,null
-rental_agreements,cancellation_reason,text,YES,null
-rental_agreements,tool_returned_at,timestamp with time zone,YES,null
-rental_agreements,return_condition,text,YES,null
-rental_agreements,created_at,timestamp with time zone,NO,now()
-rental_agreements,updated_at,timestamp with time zone,NO,now()
-shipping_addresses,address_id,uuid,NO,gen_random_uuid()
-shipping_addresses,company_id,text,NO,null
-shipping_addresses,address_line_1,text,NO,null
-shipping_addresses,address_line_2,text,YES,null
-shipping_addresses,city,text,NO,null
-shipping_addresses,state_province,text,YES,null
-shipping_addresses,postal_code,text,NO,null
-shipping_addresses,country,text,NO,'GB'::text
-shipping_addresses,is_default,boolean,YES,FALSE
-shipping_addresses,label,text,YES,null
-shipping_addresses,created_at,timestamp with time zone,NO,now()
-shipping_addresses,updated_at,timestamp with time zone,NO,now()
-shipping_manifests,manifest_id,uuid,NO,gen_random_uuid()
-shipping_manifests,company_id,text,NO,null
-shipping_manifests,subscription_id,character varying,YES,null
-shipping_manifests,destination_country,character varying,NO,null
-shipping_manifests,shipment_type,character varying,NO,null
-shipping_manifests,courier,character varying,YES,null
-shipping_manifests,tracking_number,character varying,YES,null
-shipping_manifests,shipped_at,timestamp without time zone,YES,null
-shipping_manifests,delivered_at,timestamp without time zone,YES,null
-shipping_manifests,customs_invoice_number,character varying,YES,null
-shipping_manifests,total_customs_value_gbp,numeric,YES,null
-shipping_manifests,total_weight_kg,numeric,YES,null
-shipping_manifests,items,jsonb,NO,null
-shipping_manifests,created_at,timestamp without time zone,YES,CURRENT_TIMESTAMP
-shipping_manifests,updated_at,timestamp without time zone,YES,CURRENT_TIMESTAMP
-shipping_manifests,notes,text,YES,null
-shipping_manifests,invoice_id,uuid,YES,null
-shipping_rates,rate_id,uuid,NO,gen_random_uuid()
-shipping_rates,country_code,text,NO,null
-shipping_rates,rate_gbp,numeric,NO,null
-shipping_rates,zone_name,text,YES,null
-shipping_rates,min_order_value,numeric,YES,0
-shipping_rates,free_shipping_threshold,numeric,YES,null
-shipping_rates,active,boolean,NO,TRUE
-shipping_rates,notes,text,YES,null
-shipping_rates,created_at,timestamp with time zone,NO,now()
-shipping_rates,updated_at,timestamp with time zone,NO,now()
-shipping_rates,country_name,text,YES,null
-shipping_rates,display_order,integer,YES,999
-site_branding,brand_key,text,NO,null
-site_branding,brand_name,text,NO,null
-site_branding,logo_url,text,YES,null
-site_branding,created_at,timestamp with time zone,YES,now()
-site_branding,updated_at,timestamp with time zone,YES,now()
-standard_pricing_ladder,tier_id,integer,NO,nextval('standard_pricing_ladder_tier_id_seq'::regclass)
-standard_pricing_ladder,min_qty,integer,NO,null
-standard_pricing_ladder,max_qty,integer,NO,null
-standard_pricing_ladder,unit_price,numeric,NO,null
-standard_pricing_ladder,active,boolean,YES,TRUE
-standard_pricing_ladder,created_at,timestamp with time zone,YES,now()
-standard_pricing_ladder,updated_at,timestamp with time zone,YES,now()
-subscription_events,event_id,uuid,NO,gen_random_uuid()
-subscription_events,subscription_id,uuid,NO,null
-subscription_events,event_type,character varying,NO,null
-subscription_events,event_name,character varying,YES,null
-subscription_events,old_value,jsonb,YES,null
-subscription_events,new_value,jsonb,YES,null
-subscription_events,performed_by,text,YES,null
-subscription_events,performed_at,timestamp without time zone,YES,CURRENT_TIMESTAMP
-subscription_events,notes,text,YES,null
-subscription_tools,subscription_id,uuid,NO,null
-subscription_tools,tool_code,text,NO,null
-subscription_tools,added_at,timestamp with time zone,NO,now()
-subscription_tools,added_by,text,YES,null
-subscription_tools,removed_at,timestamp with time zone,YES,null
-subscription_tools,removed_by,text,YES,null
-subscription_tools,removal_reason,text,YES,null
-subscriptions,subscription_id,uuid,NO,gen_random_uuid()
-subscriptions,stripe_subscription_id,character varying,YES,null
-subscriptions,stripe_customer_id,character varying,YES,null
-subscriptions,company_id,text,NO,null
-subscriptions,contact_id,uuid,YES,null
-subscriptions,monthly_price,numeric,NO,null
-subscriptions,currency,character varying,YES,'GBP'::character varying
-subscriptions,tools,jsonb,YES,'[]'::jsonb
-subscriptions,status,character varying,YES,'trial'::character varying
-subscriptions,trial_start_date,timestamp without time zone,YES,null
-subscriptions,trial_end_date,timestamp without time zone,YES,null
-subscriptions,current_period_start,timestamp without time zone,YES,null
-subscriptions,current_period_end,timestamp without time zone,YES,null
-subscriptions,next_billing_date,timestamp without time zone,YES,null
-subscriptions,ratchet_max,numeric,YES,null
-subscriptions,cancel_at_period_end,boolean,YES,FALSE
-subscriptions,cancelled_at,timestamp without time zone,YES,null
-subscriptions,cancellation_reason,text,YES,null
-subscriptions,created_at,timestamp without time zone,YES,CURRENT_TIMESTAMP
-subscriptions,updated_at,timestamp without time zone,YES,CURRENT_TIMESTAMP
-subscriptions,notes,text,YES,null
-subscriptions,created_by,text,YES,null
-subscriptions,updated_by,text,YES,null
-tasks,task_id,uuid,NO,gen_random_uuid()
-tasks,user_id,text,NO,null
-tasks,task_type,text,NO,null
-tasks,priority,integer,YES,50
-tasks,status,text,YES,'pending'::text
-tasks,title,text,NO,null
-tasks,description,text,YES,null
-tasks,company_id,text,YES,null
-tasks,contact_id,text,YES,null
-tasks,quote_id,uuid,YES,null
-tasks,invoice_id,uuid,YES,null
-tasks,subscription_id,uuid,YES,null
-tasks,due_date,timestamp with time zone,YES,null
-tasks,completed_at,timestamp with time zone,YES,null
-tasks,dismissed_at,timestamp with time zone,YES,null
-tasks,auto_generated,boolean,YES,FALSE
-tasks,created_at,timestamp with time zone,YES,now()
-tasks,updated_at,timestamp with time zone,YES,now()
-tool_consumable_map,tool_code,text,NO,null
-tool_consumable_map,consumable_code,text,NO,null
-tool_pricing_ladder,id,integer,NO,nextval('tool_pricing_ladder_id_seq'::regclass)
-tool_pricing_ladder,min_qty,integer,NO,null
-tool_pricing_ladder,max_qty,integer,NO,null
-tool_pricing_ladder,discount_pct,numeric,NO,null
-tool_pricing_ladder,active,boolean,YES,TRUE
-tool_pricing_ladder,created_at,timestamp with time zone,YES,now()
-tool_pricing_ladder,updated_at,timestamp with time zone,YES,now()
-trial_intents,id,uuid,NO,gen_random_uuid()
-trial_intents,token,text,NO,null
-trial_intents,company_id,text,YES,null
-trial_intents,contact_id,uuid,YES,null
-trial_intents,machine_id,uuid,YES,null
-trial_intents,created_at,timestamp with time zone,YES,now()
-users,user_id,uuid,NO,gen_random_uuid()
-users,email,text,NO,null
-users,password_hash,text,NO,null
-users,full_name,text,NO,null
-users,role,text,NO,null
-users,sales_rep_id,text,YES,null
-users,is_active,boolean,NO,TRUE
-users,last_login_at,timestamp with time zone,YES,null
-users,created_at,timestamp with time zone,NO,now()
-users,updated_at,timestamp with time zone,NO,now()
-users,reset_token,text,YES,null
-users,reset_token_expires,timestamp with time zone,YES,null
-v_active_subscription_tools,subscription_id,uuid,YES,null
-v_active_subscription_tools,tool_code,text,YES,null
-v_active_subscription_tools,added_at,timestamp with time zone,YES,null
-v_active_subscription_tools,added_by,text,YES,null
-v_active_subscription_tools,company_id,text,YES,null
-v_active_subscription_tools,contact_id,uuid,YES,null
-v_active_subscription_tools,subscription_status,character varying,YES,null
-v_active_subscription_tools,tool_name,text,YES,null
-v_active_subscription_tools,tool_rental_price,numeric,YES,null
-v_active_subscriptions,subscription_id,uuid,YES,null
-v_active_subscriptions,stripe_subscription_id,character varying,YES,null
-v_active_subscriptions,company_id,text,YES,null
-v_active_subscriptions,company_name,text,YES,null
-v_active_subscriptions,contact_id,uuid,YES,null
-v_active_subscriptions,contact_name,text,YES,null
-v_active_subscriptions,contact_email,text,YES,null
-v_active_subscriptions,monthly_price,numeric,YES,null
-v_active_subscriptions,currency,character varying,YES,null
-v_active_subscriptions,tools,jsonb,YES,null
-v_active_subscriptions,status,character varying,YES,null
-v_active_subscriptions,trial_end_date,timestamp without time zone,YES,null
-v_active_subscriptions,next_billing_date,timestamp without time zone,YES,null
-v_active_subscriptions,ratchet_max,numeric,YES,null
-v_active_subscriptions,created_at,timestamp without time zone,YES,null
-v_active_subscriptions,trial_days_remaining,integer,YES,null
-v_active_subscriptions,tool_count,integer,YES,null
+table_schema,table_name,column_name,ordinal_position,column_default,is_nullable,data_type,character_maximum_length,numeric_precision,numeric_scale
+public,activity_log,activity_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,activity_log,user_id,2,null,YES,uuid,null,null,null
+public,activity_log,user_email,3,null,NO,text,null,null,null
+public,activity_log,user_name,4,null,NO,text,null,null,null
+public,activity_log,action_type,5,null,NO,text,null,null,null
+public,activity_log,entity_type,6,null,YES,text,null,null,null
+public,activity_log,entity_id,7,null,YES,text,null,null,null
+public,activity_log,description,8,null,YES,text,null,null,null
+public,activity_log,metadata,9,'{}'::jsonb,YES,jsonb,null,null,null
+public,activity_log,ip_address,10,null,YES,text,null,null,null
+public,activity_log,user_agent,11,null,YES,text,null,null,null
+public,activity_log,created_at,12,now(),NO,timestamp with time zone,null,null,null
+public,brand_media,brand_slug,1,null,NO,text,null,null,null
+public,brand_media,brand_name,2,null,NO,text,null,null,null
+public,brand_media,logo_url,3,null,YES,text,null,null,null
+public,brand_media,hero_url,4,null,YES,text,null,null,null
+public,catalog_products,product_code,1,null,YES,text,null,null,null
+public,catalog_products,description,2,null,YES,text,null,null,null
+public,catalog_products,category,3,null,YES,text,null,null,null
+public,companies,company_id,1,null,NO,text,null,null,null
+public,companies,company_name,2,null,NO,text,null,null,null
+public,companies,website,3,null,YES,text,null,null,null
+public,companies,country,4,null,YES,text,null,null,null
+public,companies,type,5,'customer'::text,YES,text,null,null,null
+public,companies,source,6,'sage_import'::text,YES,text,null,null,null
+public,companies,account_opened_at,7,null,YES,date,null,null,null
+public,companies,first_invoice_at,8,null,YES,date,null,null,null
+public,companies,last_invoice_at,9,null,YES,date,null,null,null
+public,companies,vat_number,10,null,YES,text,null,null,null
+public,companies,eori_number,11,null,YES,text,null,null,null
+public,companies,company_reg_number,12,null,YES,text,null,null,null
+public,companies,created_at,13,now(),YES,timestamp with time zone,null,null,null
+public,companies,updated_at,14,now(),YES,timestamp with time zone,null,null,null
+public,companies,category,17,null,YES,text,null,null,null
+public,companies,stripe_customer_id,18,null,YES,text,null,null,null
+public,companies,zoho_account_id,19,null,YES,text,null,null,null
+public,companies,account_owner,20,null,YES,text,null,null,null
+public,companies,portal_payload,21,null,YES,jsonb,null,null,null
+public,companies,domain,25,null,YES,text,null,null,null
+public,companies,billing_address_line_1,26,null,YES,text,null,null,null
+public,companies,billing_address_line_2,27,null,YES,text,null,null,null
+public,companies,billing_city,28,null,YES,text,null,null,null
+public,companies,billing_state_province,29,null,YES,text,null,null,null
+public,companies,billing_postal_code,30,null,YES,text,null,null,null
+public,companies,billing_country,31,null,YES,text,null,null,null
+public,companies,status,32,'active'::text,YES,text,null,null,null
+public,companies,distributor_email,33,null,YES,text,null,null,null
+public,companies,distributor_password,34,null,YES,text,null,null,null
+public,companies,pricing_tier,35,'standard'::text,YES,text,null,null,null
+public,company_consumables,company_id,1,null,NO,text,null,null,null
+public,company_consumables,consumable_code,2,null,NO,text,null,null,null
+public,company_consumables,first_ordered_at,3,null,NO,date,null,null,null
+public,company_consumables,last_ordered_at,4,null,NO,date,null,null,null
+public,company_consumables,total_orders,5,1,NO,integer,null,32,0
+public,company_consumables,total_quantity,6,null,NO,integer,null,32,0
+public,company_consumables,last_order_amount,7,null,YES,numeric,null,10,2
+public,company_consumables,last_order_quantity,8,null,YES,integer,null,32,0
+public,company_consumables,last_invoice_id,9,null,YES,text,null,null,null
+public,company_consumables_view,company_id,1,null,YES,text,null,null,null
+public,company_consumables_view,consumable_code,2,null,YES,text,null,null,null
+public,company_consumables_view,first_ordered_at,3,null,YES,date,null,null,null
+public,company_consumables_view,last_ordered_at,4,null,YES,date,null,null,null
+public,company_consumables_view,total_orders,5,null,YES,integer,null,32,0
+public,company_consumables_view,total_quantity,6,null,YES,integer,null,32,0
+public,company_distributor_pricing,pricing_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,company_distributor_pricing,company_id,2,null,NO,text,null,null,null
+public,company_distributor_pricing,product_code,3,null,NO,text,null,null,null
+public,company_distributor_pricing,custom_price,4,null,NO,numeric,null,null,null
+public,company_distributor_pricing,currency,5,'GBP'::text,YES,text,null,null,null
+public,company_distributor_pricing,active,6,TRUE,YES,boolean,null,null,null
+public,company_distributor_pricing,created_at,7,now(),YES,timestamp with time zone,null,null,null
+public,company_distributor_pricing,updated_at,8,now(),YES,timestamp with time zone,null,null,null
+public,company_machine,id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,company_machine,machine_id,3,null,NO,uuid,null,null,null
+public,company_machine,quantity,4,1,YES,integer,null,32,0
+public,company_machine,location,5,null,YES,text,null,null,null
+public,company_machine,verified,6,FALSE,YES,boolean,null,null,null
+public,company_machine,source,7,'website_form'::text,YES,text,null,null,null
+public,company_machine,notes,8,null,YES,text,null,null,null
+public,company_machine,created_at,9,now(),YES,timestamp with time zone,null,null,null
+public,company_machine,company_id,10,null,NO,text,null,null,null
+public,company_machine,confidence,11,1,YES,smallint,null,16,0
+public,company_machine,evidence,12,'{}'::jsonb,YES,jsonb,null,null,null
+public,company_product_catalog,catalog_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,company_product_catalog,company_id,2,null,NO,text,null,null,null
+public,company_product_catalog,product_code,3,null,NO,text,null,null,null
+public,company_product_catalog,visible,4,TRUE,YES,boolean,null,null,null
+public,company_product_catalog,display_order,5,null,YES,integer,null,32,0
+public,company_product_catalog,created_at,6,now(),YES,timestamp with time zone,null,null,null
+public,company_product_catalog,updated_at,7,now(),YES,timestamp with time zone,null,null,null
+public,company_product_history,company_id,1,null,NO,text,null,null,null
+public,company_product_history,product_code,2,null,NO,text,null,null,null
+public,company_product_history,product_type,3,null,NO,text,null,null,null
+public,company_product_history,first_purchased_at,4,null,NO,date,null,null,null
+public,company_product_history,last_purchased_at,5,null,NO,date,null,null,null
+public,company_product_history,total_purchases,6,1,NO,integer,null,32,0
+public,company_product_history,total_quantity,7,1,NO,integer,null,32,0
+public,company_product_history,source,8,'invoice'::text,YES,text,null,null,null
+public,company_product_history,added_by,9,null,YES,text,null,null,null
+public,company_product_history,created_at,10,now(),NO,timestamp with time zone,null,null,null
+public,company_product_history,updated_at,11,now(),NO,timestamp with time zone,null,null,null
+public,company_tools,company_id,1,null,NO,text,null,null,null
+public,company_tools,tool_code,2,null,NO,text,null,null,null
+public,company_tools,first_seen_at,3,null,NO,date,null,null,null
+public,company_tools,last_seen_at,4,null,NO,date,null,null,null
+public,company_tools,total_units,5,null,NO,integer,null,32,0
+public,company_tools_view,company_id,1,null,YES,text,null,null,null
+public,company_tools_view,tool_code,2,null,YES,text,null,null,null
+public,company_tools_view,first_seen_at,3,null,YES,date,null,null,null
+public,company_tools_view,last_seen_at,4,null,YES,date,null,null,null
+public,company_tools_view,total_units,5,null,YES,integer,null,32,0
+public,contact_interactions,id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,contact_interactions,contact_id,2,null,NO,uuid,null,null,null
+public,contact_interactions,interaction_type,4,null,NO,text,null,null,null
+public,contact_interactions,url,5,null,YES,text,null,null,null
+public,contact_interactions,referrer,6,null,YES,text,null,null,null
+public,contact_interactions,metadata,7,null,YES,jsonb,null,null,null
+public,contact_interactions,occurred_at,8,now(),YES,timestamp with time zone,null,null,null
+public,contact_interactions,company_id,10,null,NO,text,null,null,null
+public,contacts,contact_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,contacts,company_id,2,null,NO,text,null,null,null
+public,contacts,first_name,3,null,YES,text,null,null,null
+public,contacts,last_name,4,null,YES,text,null,null,null
+public,contacts,full_name,5,null,YES,text,null,null,null
+public,contacts,email,6,null,YES,text,null,null,null
+public,contacts,phone,7,null,YES,text,null,null,null
+public,contacts,role,8,null,YES,text,null,null,null
+public,contacts,source,9,'sage_import'::text,YES,text,null,null,null
+public,contacts,status,10,'active'::text,YES,text,null,null,null
+public,contacts,created_at,11,now(),YES,timestamp with time zone,null,null,null
+public,contacts,updated_at,12,now(),YES,timestamp with time zone,null,null,null
+public,contacts,token,14,null,YES,uuid,null,null,null
+public,contacts,marketing_status,15,null,YES,text,null,null,null
+public,contacts,gdpr_consent_at,16,null,YES,timestamp with time zone,null,null,null
+public,contacts,zoho_contact_id,18,null,YES,text,null,null,null
+public,customer_pricing_overrides,override_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,customer_pricing_overrides,company_id,2,null,NO,text,null,null,null
+public,customer_pricing_overrides,product_code,3,null,YES,text,null,null,null
+public,customer_pricing_overrides,category,4,null,YES,text,null,null,null
+public,customer_pricing_overrides,pricing_tier,5,null,YES,text,null,null,null
+public,customer_pricing_overrides,flat_discount_pct,6,null,YES,numeric,null,5,2
+public,customer_pricing_overrides,valid_from,7,now(),YES,timestamp with time zone,null,null,null
+public,customer_pricing_overrides,valid_until,8,null,YES,timestamp with time zone,null,null,null
+public,customer_pricing_overrides,active,9,TRUE,YES,boolean,null,null,null
+public,customer_pricing_overrides,notes,10,null,YES,text,null,null,null
+public,customer_pricing_overrides,created_at,11,now(),YES,timestamp with time zone,null,null,null
+public,customer_pricing_overrides,created_by,12,null,YES,text,null,null,null
+public,distributor_order_items,item_id,1,"('DITEM-'::text || lpad((nextval('order_sequence'::regclass))::text, 6, '0'::text))",NO,text,null,null,null
+public,distributor_order_items,order_id,2,null,NO,text,null,null,null
+public,distributor_order_items,product_code,3,null,NO,text,null,null,null
+public,distributor_order_items,description,4,null,NO,text,null,null,null
+public,distributor_order_items,quantity,5,null,NO,integer,null,32,0
+public,distributor_order_items,unit_price,6,null,NO,numeric,null,10,2
+public,distributor_order_items,line_total,7,null,NO,numeric,null,10,2
+public,distributor_order_items,status,8,'pending_review'::text,NO,text,null,null,null
+public,distributor_order_items,back_order_date,9,null,YES,date,null,null,null
+public,distributor_order_items,predicted_delivery_date,10,null,YES,date,null,null,null
+public,distributor_order_items,back_order_notes,11,null,YES,text,null,null,null
+public,distributor_order_items,fulfilled_invoice_id,12,null,YES,uuid,null,null,null
+public,distributor_order_items,fulfilled_at,13,null,YES,timestamp with time zone,null,null,null
+public,distributor_order_items,created_at,14,now(),YES,timestamp with time zone,null,null,null
+public,distributor_orders,order_id,1,"('DORD-'::text || lpad((nextval('order_sequence'::regclass))::text, 6, '0'::text))",NO,text,null,null,null
+public,distributor_orders,company_id,2,null,NO,text,null,null,null
+public,distributor_orders,user_id,3,null,NO,uuid,null,null,null
+public,distributor_orders,user_email,4,null,NO,text,null,null,null
+public,distributor_orders,user_name,5,null,NO,text,null,null,null
+public,distributor_orders,status,6,'pending_review'::text,NO,text,null,null,null
+public,distributor_orders,subtotal,7,null,NO,numeric,null,10,2
+public,distributor_orders,predicted_shipping,8,null,NO,numeric,null,10,2
+public,distributor_orders,confirmed_shipping,9,null,YES,numeric,null,10,2
+public,distributor_orders,vat_amount,10,null,NO,numeric,null,10,2
+public,distributor_orders,total_amount,11,null,NO,numeric,null,10,2
+public,distributor_orders,currency,12,'GBP'::text,YES,text,null,null,null
+public,distributor_orders,billing_address_line_1,13,null,YES,text,null,null,null
+public,distributor_orders,billing_address_line_2,14,null,YES,text,null,null,null
+public,distributor_orders,billing_city,15,null,YES,text,null,null,null
+public,distributor_orders,billing_state_province,16,null,YES,text,null,null,null
+public,distributor_orders,billing_postal_code,17,null,YES,text,null,null,null
+public,distributor_orders,billing_country,18,null,YES,text,null,null,null
+public,distributor_orders,vat_number,19,null,YES,text,null,null,null
+public,distributor_orders,shipping_address_id,20,null,YES,uuid,null,null,null
+public,distributor_orders,shipping_address_line_1,21,null,YES,text,null,null,null
+public,distributor_orders,shipping_address_line_2,22,null,YES,text,null,null,null
+public,distributor_orders,shipping_city,23,null,YES,text,null,null,null
+public,distributor_orders,shipping_state_province,24,null,YES,text,null,null,null
+public,distributor_orders,shipping_postal_code,25,null,YES,text,null,null,null
+public,distributor_orders,shipping_country,26,null,YES,text,null,null,null
+public,distributor_orders,admin_billing_address_line_1,27,null,YES,text,null,null,null
+public,distributor_orders,admin_billing_address_line_2,28,null,YES,text,null,null,null
+public,distributor_orders,admin_billing_city,29,null,YES,text,null,null,null
+public,distributor_orders,admin_billing_state_province,30,null,YES,text,null,null,null
+public,distributor_orders,admin_billing_postal_code,31,null,YES,text,null,null,null
+public,distributor_orders,admin_billing_country,32,null,YES,text,null,null,null
+public,distributor_orders,admin_shipping_address_line_1,33,null,YES,text,null,null,null
+public,distributor_orders,admin_shipping_address_line_2,34,null,YES,text,null,null,null
+public,distributor_orders,admin_shipping_city,35,null,YES,text,null,null,null
+public,distributor_orders,admin_shipping_state_province,36,null,YES,text,null,null,null
+public,distributor_orders,admin_shipping_postal_code,37,null,YES,text,null,null,null
+public,distributor_orders,admin_shipping_country,38,null,YES,text,null,null,null
+public,distributor_orders,shipping_override_reason,39,null,YES,text,null,null,null
+public,distributor_orders,reviewed_by,40,null,YES,text,null,null,null
+public,distributor_orders,reviewed_at,41,null,YES,timestamp with time zone,null,null,null
+public,distributor_orders,created_at,42,now(),YES,timestamp with time zone,null,null,null
+public,distributor_orders,updated_at,43,now(),YES,timestamp with time zone,null,null,null
+public,distributor_orders,po_number,44,null,YES,text,null,null,null
+public,distributor_pricing,pricing_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,distributor_pricing,product_code,2,null,NO,text,null,null,null
+public,distributor_pricing,standard_price,3,null,YES,numeric,null,10,2
+public,distributor_pricing,currency,5,'GBP'::text,YES,text,null,null,null
+public,distributor_pricing,active,6,TRUE,YES,boolean,null,null,null
+public,distributor_pricing,created_at,7,now(),YES,timestamp with time zone,null,null,null
+public,distributor_pricing,updated_at,8,now(),YES,timestamp with time zone,null,null,null
+public,distributor_users,user_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,distributor_users,company_id,2,null,NO,text,null,null,null
+public,distributor_users,email,3,null,NO,text,null,null,null
+public,distributor_users,password_hash,4,null,YES,text,null,null,null
+public,distributor_users,full_name,5,null,NO,text,null,null,null
+public,distributor_users,role,6,'user'::text,NO,text,null,null,null
+public,distributor_users,active,7,TRUE,NO,boolean,null,null,null
+public,distributor_users,invitation_token,8,null,YES,text,null,null,null
+public,distributor_users,invitation_expires_at,9,null,YES,timestamp with time zone,null,null,null
+public,distributor_users,last_login_at,10,null,YES,timestamp with time zone,null,null,null
+public,distributor_users,created_at,11,now(),NO,timestamp with time zone,null,null,null
+public,distributor_users,updated_at,12,now(),NO,timestamp with time zone,null,null,null
+public,engagement_events,event_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,engagement_events,company_id,2,null,YES,text,null,null,null
+public,engagement_events,contact_id,3,null,YES,uuid,null,null,null
+public,engagement_events,occurred_at,4,now(),NO,timestamp with time zone,null,null,null
+public,engagement_events,event_type,5,null,NO,text,null,null,null
+public,engagement_events,source,6,null,YES,text,null,null,null
+public,engagement_events,url,7,null,YES,text,null,null,null
+public,engagement_events,meta,8,'{}'::jsonb,NO,jsonb,null,null,null
+public,engagement_events,source_event_id,9,null,YES,text,null,null,null
+public,engagement_events,event_name,10,null,YES,text,null,null,null
+public,engagement_events,campaign_key,11,null,YES,text,null,null,null
+public,engagement_events,offer_key,12,null,YES,text,null,null,null
+public,engagement_events,value,13,null,YES,numeric,null,null,null
+public,engagement_events,currency,14,null,YES,text,null,null,null
+public,invoice_items,invoice_id,1,null,NO,uuid,null,null,null
+public,invoice_items,product_code,2,null,NO,text,null,null,null
+public,invoice_items,line_number,3,null,NO,integer,null,32,0
+public,invoice_items,description,4,null,NO,text,null,null,null
+public,invoice_items,quantity,5,null,NO,integer,null,32,0
+public,invoice_items,unit_price,6,null,NO,numeric,null,10,2
+public,invoice_items,line_total,7,null,NO,numeric,null,10,2
+public,invoice_items,notes,8,null,YES,text,null,null,null
+public,invoices,invoice_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,invoices,company_id,2,null,NO,text,null,null,null
+public,invoices,contact_id,3,null,YES,uuid,null,null,null
+public,invoices,stripe_invoice_id,4,null,YES,text,null,null,null
+public,invoices,stripe_customer_id,5,null,YES,text,null,null,null
+public,invoices,stripe_payment_intent_id,6,null,YES,text,null,null,null
+public,invoices,invoice_number,7,null,YES,text,null,null,null
+public,invoices,invoice_type,8,null,YES,text,null,null,null
+public,invoices,currency,9,'gbp'::text,NO,text,null,null,null
+public,invoices,subtotal,10,null,NO,numeric,null,10,2
+public,invoices,tax_amount,11,0,YES,numeric,null,10,2
+public,invoices,shipping_amount,12,0,YES,numeric,null,10,2
+public,invoices,total_amount,13,null,NO,numeric,null,10,2
+public,invoices,status,14,null,NO,text,null,null,null
+public,invoices,payment_status,15,null,NO,text,null,null,null
+public,invoices,invoice_date,16,CURRENT_DATE,NO,date,null,null,null
+public,invoices,due_date,17,null,YES,date,null,null,null
+public,invoices,paid_at,18,null,YES,timestamp with time zone,null,null,null
+public,invoices,sent_at,19,null,YES,timestamp with time zone,null,null,null
+public,invoices,voided_at,20,null,YES,timestamp with time zone,null,null,null
+public,invoices,invoice_url,21,null,YES,text,null,null,null
+public,invoices,invoice_pdf_url,22,null,YES,text,null,null,null
+public,invoices,shipping_address_id,23,null,YES,uuid,null,null,null
+public,invoices,shipping_country,24,null,YES,text,null,null,null
+public,invoices,tracking_number,25,null,YES,text,null,null,null
+public,invoices,carrier,26,null,YES,text,null,null,null
+public,invoices,shipped_at,27,null,YES,timestamp with time zone,null,null,null
+public,invoices,notes,28,null,YES,text,null,null,null
+public,invoices,created_by,29,null,YES,text,null,null,null
+public,invoices,created_at,30,now(),NO,timestamp with time zone,null,null,null
+public,invoices,updated_at,31,now(),NO,timestamp with time zone,null,null,null
+public,invoices,po_number,32,null,YES,text,null,null,null
+public,machines,machine_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,machines,brand,2,null,NO,text,null,null,null
+public,machines,model,3,null,YES,text,null,null,null
+public,machines,display_name,4,null,YES,text,null,null,null
+public,machines,type,5,null,NO,text,null,null,null
+public,machines,shaft_size_mm,6,null,YES,integer,null,32,0
+public,machines,country,7,null,YES,text,null,null,null
+public,machines,oem_url,8,null,YES,text,null,null,null
+public,machines,description,9,null,YES,text,null,null,null
+public,machines,created_at,10,now(),YES,timestamp with time zone,null,null,null
+public,machines,updated_at,11,now(),YES,timestamp with time zone,null,null,null
+public,machines,slug,12,null,YES,text,null,null,null
+public,machines,type_canonical,13,null,YES,text,null,null,null
+public,machines,outer_diameter_mm,14,null,YES,numeric,null,6,2
+public,machines,shaft_specs,15,null,YES,jsonb,null,null,null
+public,machines,shaft_config_id,16,null,YES,integer,null,32,0
+public,notification_preferences,user_id,1,null,NO,text,null,null,null
+public,notification_preferences,notify_quote_viewed,2,TRUE,YES,boolean,null,null,null
+public,notification_preferences,notify_quote_accepted,3,TRUE,YES,boolean,null,null,null
+public,notification_preferences,notify_invoice_paid,4,TRUE,YES,boolean,null,null,null
+public,notification_preferences,notify_trial_ending,5,TRUE,YES,boolean,null,null,null
+public,notification_preferences,daily_digest_enabled,6,TRUE,YES,boolean,null,null,null
+public,notification_preferences,daily_digest_time,7,'09:00:00'::time without time zone,YES,time without time zone,null,null,null
+public,notification_preferences,weekly_summary_enabled,8,TRUE,YES,boolean,null,null,null
+public,notification_preferences,weekly_summary_day,9,5,YES,integer,null,32,0
+public,notification_preferences,weekly_summary_time,10,'17:00:00'::time without time zone,YES,time without time zone,null,null,null
+public,notification_preferences,created_at,11,now(),YES,timestamp with time zone,null,null,null
+public,notification_preferences,updated_at,12,now(),YES,timestamp with time zone,null,null,null
+public,order_items,order_id,1,null,NO,uuid,null,null,null
+public,order_items,product_code,2,null,NO,text,null,null,null
+public,order_items,description,3,null,YES,text,null,null,null
+public,order_items,qty,4,null,NO,integer,null,32,0
+public,order_items,unit_price,5,null,NO,numeric,null,12,2
+public,order_items,line_total,6,null,NO,numeric,null,12,2
+public,orders,order_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,orders,company_id,2,null,NO,text,null,null,null
+public,orders,currency,3,'GBP'::text,NO,text,null,null,null
+public,orders,payment_channel,4,null,NO,text,null,null,null
+public,orders,payment_status,5,'unpaid'::text,NO,text,null,null,null
+public,orders,fulfillment_status,6,'hold_unpaid'::text,NO,text,null,null,null
+public,orders,subtotal,7,0,NO,numeric,null,12,2
+public,orders,shipping_amount,8,0,NO,numeric,null,12,2
+public,orders,tax_amount,9,0,NO,numeric,null,12,2
+public,orders,total_amount,10,0,NO,numeric,null,12,2
+public,orders,shipping_country,11,null,YES,text,null,null,null
+public,orders,shipping_name,12,null,YES,text,null,null,null
+public,orders,shipping_company,13,null,YES,text,null,null,null
+public,orders,shipping_address1,14,null,YES,text,null,null,null
+public,orders,shipping_address2,15,null,YES,text,null,null,null
+public,orders,shipping_city,16,null,YES,text,null,null,null
+public,orders,shipping_postcode,17,null,YES,text,null,null,null
+public,orders,stripe_checkout_session_id,18,null,YES,text,null,null,null
+public,orders,stripe_payment_intent_id,19,null,YES,text,null,null,null
+public,orders,books_customer_id,20,null,YES,text,null,null,null
+public,orders,books_invoice_id,21,null,YES,text,null,null,null
+public,orders,books_payment_id,22,null,YES,text,null,null,null
+public,orders,created_at,23,now(),NO,timestamp with time zone,null,null,null
+public,orders,updated_at,24,now(),NO,timestamp with time zone,null,null,null
+public,orders,shipping_address_id,25,null,YES,uuid,null,null,null
+public,orders,invoice_number,26,null,YES,text,null,null,null
+public,orders,order_type,27,null,YES,text,null,null,null
+public,orders,rental_agreement_id,28,null,YES,uuid,null,null,null
+public,orders,tracking_number,29,null,YES,text,null,null,null
+public,orders,carrier,30,null,YES,text,null,null,null
+public,orders,shipped_at,31,null,YES,timestamp with time zone,null,null,null
+public,orders,estimated_delivery,32,null,YES,text,null,null,null
+public,orders,stripe_invoice_id,33,null,YES,text,null,null,null
+public,orders,invoice_status,34,null,YES,text,null,null,null
+public,orders,invoice_url,35,null,YES,text,null,null,null
+public,orders,invoice_pdf_url,36,null,YES,text,null,null,null
+public,orders,commercial_invoice_pdf_url,37,null,YES,text,null,null,null
+public,orders,invoice_sent_at,38,null,YES,timestamp with time zone,null,null,null
+public,orders,invoice_voided_at,39,null,YES,timestamp with time zone,null,null,null
+public,orders,shipping_weight_kg,40,null,YES,numeric,null,10,2
+public,orders,incoterms,41,null,YES,text,null,null,null
+public,outbox,job_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,outbox,job_type,2,null,NO,text,null,null,null
+public,outbox,status,3,'pending'::text,NO,text,null,null,null
+public,outbox,attempts,4,0,NO,integer,null,32,0
+public,outbox,max_attempts,5,3,NO,integer,null,32,0
+public,outbox,payload,6,'{}'::jsonb,NO,jsonb,null,null,null
+public,outbox,company_id,7,null,YES,text,null,null,null
+public,outbox,order_id,8,null,YES,uuid,null,null,null
+public,outbox,last_error,9,null,YES,text,null,null,null
+public,outbox,locked_until,10,null,YES,timestamp with time zone,null,null,null
+public,outbox,created_at,11,now(),NO,timestamp with time zone,null,null,null
+public,outbox,updated_at,12,now(),NO,timestamp with time zone,null,null,null
+public,outbox,completed_at,13,null,YES,timestamp with time zone,null,null,null
+public,premium_pricing_ladder,tier_id,1,nextval('premium_pricing_ladder_tier_id_seq'::regclass),NO,integer,null,32,0
+public,premium_pricing_ladder,min_qty,2,null,NO,integer,null,32,0
+public,premium_pricing_ladder,max_qty,3,null,NO,integer,null,32,0
+public,premium_pricing_ladder,discount_pct,4,null,NO,numeric,null,5,2
+public,premium_pricing_ladder,active,5,TRUE,YES,boolean,null,null,null
+public,premium_pricing_ladder,created_at,6,now(),YES,timestamp with time zone,null,null,null
+public,premium_pricing_ladder,updated_at,7,now(),YES,timestamp with time zone,null,null,null
+public,products,product_code,1,null,NO,text,null,null,null
+public,products,description,2,null,YES,text,null,null,null
+public,products,type,3,'part'::text,YES,text,null,null,null
+public,products,category,4,null,YES,text,null,null,null
+public,products,active,5,TRUE,YES,boolean,null,null,null
+public,products,is_marketable,6,FALSE,YES,boolean,null,null,null
+public,products,is_reminder_eligible,7,FALSE,YES,boolean,null,null,null
+public,products,price,8,null,YES,numeric,null,null,null
+public,products,currency,9,'GBP'::text,YES,text,null,null,null
+public,products,site_visibility,10,'{technifold}'::text[],YES,ARRAY,null,null,null
+public,products,extra,11,'{}'::jsonb,YES,jsonb,null,null,null
+public,products,image_url,12,null,YES,text,null,null,null
+public,products,image_alt,13,null,YES,text,null,null,null
+public,products,video_url,14,null,YES,text,null,null,null
+public,products,weight_kg,15,null,YES,numeric,null,10,3
+public,products,dimensions_cm,16,null,YES,text,null,null,null
+public,products,hs_code,17,null,YES,text,null,null,null
+public,products,country_of_origin,18,'GB'::text,YES,text,null,null,null
+public,products,rental_price_monthly,19,null,YES,numeric,null,10,2
+public,products,customs_value_gbp,20,null,YES,numeric,null,10,2
+public,products,width_cm,21,null,YES,numeric,null,8,2
+public,products,height_cm,22,null,YES,numeric,null,8,2
+public,products,depth_cm,23,null,YES,numeric,null,8,2
+public,products,cost_price,24,null,YES,numeric,null,null,null
+public,products,pricing_tier,25,'standard'::text,YES,text,null,null,null
+public,products,show_in_distributor_portal,26,TRUE,YES,boolean,null,null,null
+public,quote_items,quote_id,1,null,NO,uuid,null,null,null
+public,quote_items,product_code,2,null,NO,text,null,null,null
+public,quote_items,line_number,3,null,NO,integer,null,32,0
+public,quote_items,description,4,null,NO,text,null,null,null
+public,quote_items,quantity,5,null,NO,integer,null,32,0
+public,quote_items,unit_price,6,null,NO,numeric,null,null,null
+public,quote_items,discount_percent,7,0,YES,numeric,null,null,null
+public,quote_items,line_total,8,null,NO,numeric,null,null,null
+public,quote_items,product_type,9,null,YES,text,null,null,null
+public,quote_items,category,10,null,YES,text,null,null,null
+public,quote_items,image_url,11,null,YES,text,null,null,null
+public,quote_notes,note_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,quote_notes,quote_id,2,null,NO,uuid,null,null,null
+public,quote_notes,user_id,3,null,NO,text,null,null,null
+public,quote_notes,user_name,4,null,NO,text,null,null,null
+public,quote_notes,note_text,5,null,NO,text,null,null,null
+public,quote_notes,created_at,6,now(),YES,timestamp with time zone,null,null,null
+public,quote_notes,updated_at,7,now(),YES,timestamp with time zone,null,null,null
+public,quote_requests,quote_request_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,quote_requests,company_id,2,null,NO,character varying,10,null,null
+public,quote_requests,contact_id,3,null,NO,uuid,null,null,null
+public,quote_requests,machine_slug,4,null,YES,character varying,255,null,null
+public,quote_requests,interested_products,5,'[]'::jsonb,YES,jsonb,null,null,null
+public,quote_requests,status,6,'requested'::character varying,NO,character varying,50,null,null
+public,quote_requests,source,7,'manual'::character varying,NO,character varying,50,null,null
+public,quote_requests,assigned_to,8,null,YES,character varying,50,null,null
+public,quote_requests,notes,9,null,YES,text,null,null,null
+public,quote_requests,marketing_token,10,null,YES,text,null,null,null
+public,quote_requests,quote_token,11,null,YES,text,null,null,null
+public,quote_requests,lost_reason,12,null,YES,text,null,null,null
+public,quote_requests,won_amount,13,null,YES,numeric,null,10,2
+public,quote_requests,created_at,14,now(),YES,timestamp with time zone,null,null,null
+public,quote_requests,updated_at,15,now(),YES,timestamp with time zone,null,null,null
+public,quote_requests,quote_sent_at,16,null,YES,timestamp with time zone,null,null,null
+public,quote_requests,closed_at,17,null,YES,timestamp with time zone,null,null,null
+public,quotes,quote_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,quotes,company_id,2,null,NO,text,null,null,null
+public,quotes,contact_id,3,null,NO,uuid,null,null,null
+public,quotes,quote_type,4,null,NO,text,null,null,null
+public,quotes,pricing_mode,5,null,YES,text,null,null,null
+public,quotes,status,6,'draft'::text,NO,text,null,null,null
+public,quotes,currency,7,'GBP'::text,NO,text,null,null,null
+public,quotes,subtotal,8,null,NO,numeric,null,null,null
+public,quotes,discount_amount,9,0,YES,numeric,null,null,null
+public,quotes,total_amount,10,null,NO,numeric,null,null,null
+public,quotes,invoice_id,11,null,YES,uuid,null,null,null
+public,quotes,expires_at,12,null,YES,timestamp with time zone,null,null,null
+public,quotes,sent_at,13,null,YES,timestamp with time zone,null,null,null
+public,quotes,viewed_at,14,null,YES,timestamp with time zone,null,null,null
+public,quotes,accepted_at,15,null,YES,timestamp with time zone,null,null,null
+public,quotes,is_test,16,FALSE,YES,boolean,null,null,null
+public,quotes,notes,17,null,YES,text,null,null,null
+public,quotes,created_by,18,null,YES,text,null,null,null
+public,quotes,created_at,19,now(),NO,timestamp with time zone,null,null,null
+public,quotes,updated_at,20,now(),NO,timestamp with time zone,null,null,null
+public,quotes,won_at,21,null,YES,timestamp with time zone,null,null,null
+public,quotes,lost_at,22,null,YES,timestamp with time zone,null,null,null
+public,quotes,lost_reason,23,null,YES,text,null,null,null
+public,quotes,free_shipping,24,FALSE,YES,boolean,null,null,null
+public,rental_agreements,rental_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,rental_agreements,serial_number,2,null,NO,text,null,null,null
+public,rental_agreements,company_id,3,null,NO,text,null,null,null
+public,rental_agreements,contact_id,4,null,YES,uuid,null,null,null
+public,rental_agreements,product_code,5,null,NO,text,null,null,null
+public,rental_agreements,stripe_subscription_id,6,null,YES,text,null,null,null
+public,rental_agreements,stripe_customer_id,7,null,YES,text,null,null,null
+public,rental_agreements,monthly_price,8,null,NO,numeric,null,10,2
+public,rental_agreements,currency,9,'GBP'::text,NO,text,null,null,null
+public,rental_agreements,start_date,10,null,NO,timestamp with time zone,null,null,null
+public,rental_agreements,trial_end_date,11,null,YES,timestamp with time zone,null,null,null
+public,rental_agreements,minimum_term_months,12,24,NO,integer,null,32,0
+public,rental_agreements,contract_signed_at,13,null,NO,timestamp with time zone,null,null,null
+public,rental_agreements,contract_pdf_url,14,null,YES,text,null,null,null
+public,rental_agreements,contract_ip_address,15,null,YES,inet,null,null,null
+public,rental_agreements,status,16,'trial'::text,NO,text,null,null,null
+public,rental_agreements,cancelled_at,17,null,YES,timestamp with time zone,null,null,null
+public,rental_agreements,cancellation_reason,18,null,YES,text,null,null,null
+public,rental_agreements,tool_returned_at,19,null,YES,timestamp with time zone,null,null,null
+public,rental_agreements,return_condition,20,null,YES,text,null,null,null
+public,rental_agreements,created_at,21,now(),NO,timestamp with time zone,null,null,null
+public,rental_agreements,updated_at,22,now(),NO,timestamp with time zone,null,null,null
+public,shipping_addresses,address_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,shipping_addresses,company_id,2,null,NO,text,null,null,null
+public,shipping_addresses,address_line_1,3,null,NO,text,null,null,null
+public,shipping_addresses,address_line_2,4,null,YES,text,null,null,null
+public,shipping_addresses,city,5,null,NO,text,null,null,null
+public,shipping_addresses,state_province,6,null,YES,text,null,null,null
+public,shipping_addresses,postal_code,7,null,NO,text,null,null,null
+public,shipping_addresses,country,8,'GB'::text,NO,text,null,null,null
+public,shipping_addresses,is_default,9,FALSE,YES,boolean,null,null,null
+public,shipping_addresses,label,10,null,YES,text,null,null,null
+public,shipping_addresses,created_at,11,now(),NO,timestamp with time zone,null,null,null
+public,shipping_addresses,updated_at,12,now(),NO,timestamp with time zone,null,null,null
+public,shipping_manifests,manifest_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,shipping_manifests,company_id,2,null,NO,text,null,null,null
+public,shipping_manifests,subscription_id,3,null,YES,character varying,255,null,null
+public,shipping_manifests,destination_country,5,null,NO,character varying,2,null,null
+public,shipping_manifests,shipment_type,6,null,NO,character varying,50,null,null
+public,shipping_manifests,courier,7,null,YES,character varying,100,null,null
+public,shipping_manifests,tracking_number,8,null,YES,character varying,255,null,null
+public,shipping_manifests,shipped_at,9,null,YES,timestamp without time zone,null,null,null
+public,shipping_manifests,delivered_at,10,null,YES,timestamp without time zone,null,null,null
+public,shipping_manifests,customs_invoice_number,11,null,YES,character varying,100,null,null
+public,shipping_manifests,total_customs_value_gbp,12,null,YES,numeric,null,10,2
+public,shipping_manifests,total_weight_kg,13,null,YES,numeric,null,10,3
+public,shipping_manifests,items,14,null,NO,jsonb,null,null,null
+public,shipping_manifests,created_at,15,CURRENT_TIMESTAMP,YES,timestamp without time zone,null,null,null
+public,shipping_manifests,updated_at,16,CURRENT_TIMESTAMP,YES,timestamp without time zone,null,null,null
+public,shipping_manifests,notes,17,null,YES,text,null,null,null
+public,shipping_manifests,invoice_id,18,null,YES,uuid,null,null,null
+public,shipping_rates,rate_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,shipping_rates,country_code,2,null,NO,text,null,null,null
+public,shipping_rates,rate_gbp,3,null,NO,numeric,null,null,null
+public,shipping_rates,zone_name,4,null,YES,text,null,null,null
+public,shipping_rates,min_order_value,5,0,YES,numeric,null,null,null
+public,shipping_rates,free_shipping_threshold,6,null,YES,numeric,null,null,null
+public,shipping_rates,active,7,TRUE,NO,boolean,null,null,null
+public,shipping_rates,notes,8,null,YES,text,null,null,null
+public,shipping_rates,created_at,9,now(),NO,timestamp with time zone,null,null,null
+public,shipping_rates,updated_at,10,now(),NO,timestamp with time zone,null,null,null
+public,shipping_rates,country_name,11,null,YES,text,null,null,null
+public,shipping_rates,display_order,12,999,YES,integer,null,32,0
+public,site_branding,brand_key,1,null,NO,text,null,null,null
+public,site_branding,brand_name,2,null,NO,text,null,null,null
+public,site_branding,logo_url,3,null,YES,text,null,null,null
+public,site_branding,created_at,4,now(),YES,timestamp with time zone,null,null,null
+public,site_branding,updated_at,5,now(),YES,timestamp with time zone,null,null,null
+public,standard_pricing_ladder,tier_id,1,nextval('standard_pricing_ladder_tier_id_seq'::regclass),NO,integer,null,32,0
+public,standard_pricing_ladder,min_qty,2,null,NO,integer,null,32,0
+public,standard_pricing_ladder,max_qty,3,null,NO,integer,null,32,0
+public,standard_pricing_ladder,unit_price,4,null,NO,numeric,null,10,2
+public,standard_pricing_ladder,active,5,TRUE,YES,boolean,null,null,null
+public,standard_pricing_ladder,created_at,6,now(),YES,timestamp with time zone,null,null,null
+public,standard_pricing_ladder,updated_at,7,now(),YES,timestamp with time zone,null,null,null
+public,subscription_events,event_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,subscription_events,subscription_id,2,null,NO,uuid,null,null,null
+public,subscription_events,event_type,3,null,NO,character varying,50,null,null
+public,subscription_events,event_name,4,null,YES,character varying,100,null,null
+public,subscription_events,old_value,5,null,YES,jsonb,null,null,null
+public,subscription_events,new_value,6,null,YES,jsonb,null,null,null
+public,subscription_events,performed_by,7,null,YES,text,null,null,null
+public,subscription_events,performed_at,8,CURRENT_TIMESTAMP,YES,timestamp without time zone,null,null,null
+public,subscription_events,notes,9,null,YES,text,null,null,null
+public,subscription_tools,subscription_id,1,null,NO,uuid,null,null,null
+public,subscription_tools,tool_code,2,null,NO,text,null,null,null
+public,subscription_tools,added_at,3,now(),NO,timestamp with time zone,null,null,null
+public,subscription_tools,added_by,4,null,YES,text,null,null,null
+public,subscription_tools,removed_at,5,null,YES,timestamp with time zone,null,null,null
+public,subscription_tools,removed_by,6,null,YES,text,null,null,null
+public,subscription_tools,removal_reason,7,null,YES,text,null,null,null
+public,subscriptions,subscription_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,subscriptions,stripe_subscription_id,2,null,YES,character varying,255,null,null
+public,subscriptions,stripe_customer_id,3,null,YES,character varying,255,null,null
+public,subscriptions,company_id,4,null,NO,text,null,null,null
+public,subscriptions,contact_id,5,null,YES,uuid,null,null,null
+public,subscriptions,monthly_price,6,null,NO,numeric,null,10,2
+public,subscriptions,currency,7,'GBP'::character varying,YES,character varying,3,null,null
+public,subscriptions,tools,8,'[]'::jsonb,YES,jsonb,null,null,null
+public,subscriptions,status,9,'trial'::character varying,YES,character varying,50,null,null
+public,subscriptions,trial_start_date,10,null,YES,timestamp without time zone,null,null,null
+public,subscriptions,trial_end_date,11,null,YES,timestamp without time zone,null,null,null
+public,subscriptions,current_period_start,12,null,YES,timestamp without time zone,null,null,null
+public,subscriptions,current_period_end,13,null,YES,timestamp without time zone,null,null,null
+public,subscriptions,next_billing_date,14,null,YES,timestamp without time zone,null,null,null
+public,subscriptions,ratchet_max,15,null,YES,numeric,null,10,2
+public,subscriptions,cancel_at_period_end,16,FALSE,YES,boolean,null,null,null
+public,subscriptions,cancelled_at,17,null,YES,timestamp without time zone,null,null,null
+public,subscriptions,cancellation_reason,18,null,YES,text,null,null,null
+public,subscriptions,created_at,19,CURRENT_TIMESTAMP,YES,timestamp without time zone,null,null,null
+public,subscriptions,updated_at,20,CURRENT_TIMESTAMP,YES,timestamp without time zone,null,null,null
+public,subscriptions,notes,21,null,YES,text,null,null,null
+public,subscriptions,created_by,22,null,YES,text,null,null,null
+public,subscriptions,updated_by,23,null,YES,text,null,null,null
+public,tasks,task_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,tasks,user_id,2,null,NO,text,null,null,null
+public,tasks,task_type,3,null,NO,text,null,null,null
+public,tasks,priority,4,50,YES,integer,null,32,0
+public,tasks,status,5,'pending'::text,YES,text,null,null,null
+public,tasks,title,6,null,NO,text,null,null,null
+public,tasks,description,7,null,YES,text,null,null,null
+public,tasks,company_id,8,null,YES,text,null,null,null
+public,tasks,contact_id,9,null,YES,text,null,null,null
+public,tasks,quote_id,10,null,YES,uuid,null,null,null
+public,tasks,invoice_id,11,null,YES,uuid,null,null,null
+public,tasks,subscription_id,12,null,YES,uuid,null,null,null
+public,tasks,due_date,13,null,YES,timestamp with time zone,null,null,null
+public,tasks,completed_at,14,null,YES,timestamp with time zone,null,null,null
+public,tasks,dismissed_at,15,null,YES,timestamp with time zone,null,null,null
+public,tasks,auto_generated,16,FALSE,YES,boolean,null,null,null
+public,tasks,created_at,17,now(),YES,timestamp with time zone,null,null,null
+public,tasks,updated_at,18,now(),YES,timestamp with time zone,null,null,null
+public,tool_consumable_map,tool_code,1,null,NO,text,null,null,null
+public,tool_consumable_map,consumable_code,2,null,NO,text,null,null,null
+public,tool_pricing_ladder,id,1,nextval('tool_pricing_ladder_id_seq'::regclass),NO,integer,null,32,0
+public,tool_pricing_ladder,min_qty,2,null,NO,integer,null,32,0
+public,tool_pricing_ladder,max_qty,3,null,NO,integer,null,32,0
+public,tool_pricing_ladder,discount_pct,4,null,NO,numeric,null,5,2
+public,tool_pricing_ladder,active,5,TRUE,YES,boolean,null,null,null
+public,tool_pricing_ladder,created_at,6,now(),YES,timestamp with time zone,null,null,null
+public,tool_pricing_ladder,updated_at,7,now(),YES,timestamp with time zone,null,null,null
+public,trial_intents,id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,trial_intents,token,2,null,NO,text,null,null,null
+public,trial_intents,company_id,3,null,YES,text,null,null,null
+public,trial_intents,contact_id,4,null,YES,uuid,null,null,null
+public,trial_intents,machine_id,5,null,YES,uuid,null,null,null
+public,trial_intents,created_at,6,now(),YES,timestamp with time zone,null,null,null
+public,users,user_id,1,gen_random_uuid(),NO,uuid,null,null,null
+public,users,email,2,null,NO,text,null,null,null
+public,users,password_hash,3,null,NO,text,null,null,null
+public,users,full_name,4,null,NO,text,null,null,null
+public,users,role,5,null,NO,text,null,null,null
+public,users,sales_rep_id,6,null,YES,text,null,null,null
+public,users,is_active,7,TRUE,NO,boolean,null,null,null
+public,users,last_login_at,8,null,YES,timestamp with time zone,null,null,null
+public,users,created_at,9,now(),NO,timestamp with time zone,null,null,null
+public,users,updated_at,10,now(),NO,timestamp with time zone,null,null,null
+public,users,reset_token,11,null,YES,text,null,null,null
+public,users,reset_token_expires,12,null,YES,timestamp with time zone,null,null,null
+public,v_active_subscription_tools,subscription_id,1,null,YES,uuid,null,null,null
+public,v_active_subscription_tools,tool_code,2,null,YES,text,null,null,null
+public,v_active_subscription_tools,added_at,3,null,YES,timestamp with time zone,null,null,null
+public,v_active_subscription_tools,added_by,4,null,YES,text,null,null,null
+public,v_active_subscription_tools,company_id,5,null,YES,text,null,null,null
+public,v_active_subscription_tools,contact_id,6,null,YES,uuid,null,null,null
+public,v_active_subscription_tools,subscription_status,7,null,YES,character varying,50,null,null
+public,v_active_subscription_tools,tool_name,8,null,YES,text,null,null,null
+public,v_active_subscription_tools,tool_rental_price,9,null,YES,numeric,null,10,2
+public,v_active_subscriptions,subscription_id,1,null,YES,uuid,null,null,null
+public,v_active_subscriptions,stripe_subscription_id,2,null,YES,character varying,255,null,null
+public,v_active_subscriptions,company_id,3,null,YES,text,null,null,null
+public,v_active_subscriptions,company_name,4,null,YES,text,null,null,null
+public,v_active_subscriptions,contact_id,5,null,YES,uuid,null,null,null
+public,v_active_subscriptions,contact_name,6,null,YES,text,null,null,null
+public,v_active_subscriptions,contact_email,7,null,YES,text,null,null,null
+public,v_active_subscriptions,monthly_price,8,null,YES,numeric,null,10,2
+public,v_active_subscriptions,currency,9,null,YES,character varying,3,null,null
+public,v_active_subscriptions,tools,10,null,YES,jsonb,null,null,null
+public,v_active_subscriptions,status,11,null,YES,character varying,50,null,null
+public,v_active_subscriptions,trial_end_date,12,null,YES,timestamp without time zone,null,null,null
+public,v_active_subscriptions,next_billing_date,13,null,YES,timestamp without time zone,null,null,null
+public,v_active_subscriptions,ratchet_max,14,null,YES,numeric,null,10,2
+public,v_active_subscriptions,created_at,15,null,YES,timestamp without time zone,null,null,null
+public,v_active_subscriptions,trial_days_remaining,16,null,YES,integer,null,32,0
+public,v_active_subscriptions,tool_count,17,null,YES,integer,null,32,0

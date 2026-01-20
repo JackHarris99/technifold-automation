@@ -1,52 +1,675 @@
-schema_name,function_name,arguments,return_type,volatility,security_type,language
-public,calculate_shipping_cost,"p_country_code text, p_order_subtotal numeric",numeric,STABLE,SECURITY INVOKER,plpgsql
-public,current_user_company_id,,text,STABLE,SECURITY DEFINER,sql
-public,current_user_role,,text,STABLE,SECURITY DEFINER,sql
-public,current_user_sales_rep_id,,text,STABLE,SECURITY DEFINER,sql
-public,generate_rental_serial_number,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
-public,gin_extract_query_trgm,"text, internal, smallint, internal, internal, internal, internal",internal,IMMUTABLE,SECURITY INVOKER,c
-public,gin_extract_value_trgm,"text, internal",internal,IMMUTABLE,SECURITY INVOKER,c
-public,gin_trgm_consistent,"internal, smallint, text, integer, internal, internal, internal, internal",boolean,IMMUTABLE,SECURITY INVOKER,c
-public,gin_trgm_triconsistent,"internal, smallint, text, integer, internal, internal, internal","""char""",IMMUTABLE,SECURITY INVOKER,c
-public,gtrgm_compress,internal,internal,IMMUTABLE,SECURITY INVOKER,c
-public,gtrgm_consistent,"internal, text, smallint, oid, internal",boolean,IMMUTABLE,SECURITY INVOKER,c
-public,gtrgm_decompress,internal,internal,IMMUTABLE,SECURITY INVOKER,c
-public,gtrgm_distance,"internal, text, smallint, oid, internal",double precision,IMMUTABLE,SECURITY INVOKER,c
-public,gtrgm_in,cstring,gtrgm,IMMUTABLE,SECURITY INVOKER,c
-public,gtrgm_options,internal,void,IMMUTABLE,SECURITY INVOKER,c
-public,gtrgm_out,gtrgm,cstring,IMMUTABLE,SECURITY INVOKER,c
-public,gtrgm_penalty,"internal, internal, internal",internal,IMMUTABLE,SECURITY INVOKER,c
-public,gtrgm_picksplit,"internal, internal",internal,IMMUTABLE,SECURITY INVOKER,c
-public,gtrgm_same,"gtrgm, gtrgm, internal",internal,IMMUTABLE,SECURITY INVOKER,c
-public,gtrgm_union,"internal, internal",gtrgm,IMMUTABLE,SECURITY INVOKER,c
-public,regenerate_company_payload,p_company_id text,void,VOLATILE,SECURITY INVOKER,plpgsql
-public,set_engagement_company_from_contact,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
-public,set_limit,real,real,VOLATILE,SECURITY INVOKER,c
-public,set_rental_serial_number,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
-public,set_updated_at,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
-public,show_limit,,real,STABLE,SECURITY INVOKER,c
-public,show_trgm,text,text[],IMMUTABLE,SECURITY INVOKER,c
-public,similarity,"text, text",real,IMMUTABLE,SECURITY INVOKER,c
-public,similarity_dist,"text, text",real,IMMUTABLE,SECURITY INVOKER,c
-public,similarity_op,"text, text",boolean,STABLE,SECURITY INVOKER,c
-public,strict_word_similarity,"text, text",real,IMMUTABLE,SECURITY INVOKER,c
-public,strict_word_similarity_commutator_op,"text, text",boolean,STABLE,SECURITY INVOKER,c
-public,strict_word_similarity_dist_commutator_op,"text, text",real,IMMUTABLE,SECURITY INVOKER,c
-public,strict_word_similarity_dist_op,"text, text",real,IMMUTABLE,SECURITY INVOKER,c
-public,strict_word_similarity_op,"text, text",boolean,STABLE,SECURITY INVOKER,c
-public,sync_invoice_to_product_history,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
-public,sync_product_history_to_consumables,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
-public,sync_product_history_to_tools,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
-public,update_company_machine_updated_at,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
-public,update_quote_requests_updated_at,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
-public,update_quotes_updated_at,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
-public,update_updated_at_column,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
-public,update_users_updated_at,,trigger,VOLATILE,SECURITY INVOKER,plpgsql
-public,upsert_company_consumable,"p_company_id text, p_consumable_code text, p_order_date date, p_quantity integer, p_amount numeric, p_invoice_id text",void,VOLATILE,SECURITY INVOKER,plpgsql
-public,upsert_company_product_history,"p_company_id text, p_product_code text, p_product_type text, p_purchase_date date, p_quantity integer",void,VOLATILE,SECURITY INVOKER,plpgsql
-public,upsert_company_tool,"p_company_id text, p_tool_code text, p_purchase_date date, p_quantity integer, p_amount numeric, p_invoice_id text",void,VOLATILE,SECURITY INVOKER,plpgsql
-public,word_similarity,"text, text",real,IMMUTABLE,SECURITY INVOKER,c
-public,word_similarity_commutator_op,"text, text",boolean,STABLE,SECURITY INVOKER,c
-public,word_similarity_dist_commutator_op,"text, text",real,IMMUTABLE,SECURITY INVOKER,c
-public,word_similarity_dist_op,"text, text",real,IMMUTABLE,SECURITY INVOKER,c
-public,word_similarity_op,"text, text",boolean,STABLE,SECURITY INVOKER,c
+schema,function_name,definition
+public,calculate_shipping_cost,"CREATE OR REPLACE FUNCTION public.calculate_shipping_cost(p_country_code text, p_order_subtotal numeric)
+ RETURNS numeric
+ LANGUAGE plpgsql
+ STABLE
+AS $function$
+DECLARE
+  v_shipping_cost NUMERIC;
+  v_free_threshold NUMERIC;
+BEGIN
+  -- Look up shipping rate for the country
+  SELECT
+    rate_gbp,
+    free_shipping_threshold
+  INTO
+    v_shipping_cost,
+    v_free_threshold
+  FROM shipping_rates
+  WHERE
+    country_code = UPPER(p_country_code)
+    AND active = TRUE
+  LIMIT 1;
+
+  -- If country found in table
+  IF FOUND THEN
+    -- Check if order qualifies for free shipping
+    IF v_free_threshold IS NOT NULL AND p_order_subtotal >= v_free_threshold THEN
+      RETURN 0;
+    END IF;
+
+    RETURN COALESCE(v_shipping_cost, 0);
+  END IF;
+
+  -- ============================================================================
+  -- FALLBACK LOGIC for countries NOT in shipping_rates table
+  -- ============================================================================
+
+  -- UK - free shipping (or low cost)
+  IF UPPER(p_country_code) IN ('GB', 'UK') THEN
+    RETURN 10.00; -- £10 UK shipping
+  END IF;
+
+  -- EU countries - medium cost
+  IF UPPER(p_country_code) IN (
+    'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR',
+    'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL',
+    'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE'
+  ) THEN
+    RETURN 50.00; -- £50 EU shipping
+  END IF;
+
+  -- European (non-EU) - medium-high cost
+  IF UPPER(p_country_code) IN ('NO', 'CH', 'IS', 'LI') THEN
+    RETURN 60.00; -- £60 European shipping
+  END IF;
+
+  -- North America - high cost
+  IF UPPER(p_country_code) IN ('US', 'CA', 'MX') THEN
+    RETURN 80.00; -- £80 North America shipping
+  END IF;
+
+  -- Rest of World - very high cost
+  RETURN 100.00; -- £100 Rest of World shipping
+
+END;
+$function$
+"
+public,current_user_company_id,"CREATE OR REPLACE FUNCTION public.current_user_company_id()
+ RETURNS text
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+AS $function$
+    SELECT COALESCE(
+      current_setting('request.jwt.claims', true)::json->>'company_id',
+      NULL
+    )::TEXT;
+  $function$
+"
+public,current_user_role,"CREATE OR REPLACE FUNCTION public.current_user_role()
+ RETURNS text
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+AS $function$
+    SELECT COALESCE(
+      current_setting('request.jwt.claims', true)::json->>'role',
+      NULL
+    )::TEXT;
+  $function$
+"
+public,current_user_sales_rep_id,"CREATE OR REPLACE FUNCTION public.current_user_sales_rep_id()
+ RETURNS text
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+AS $function$
+    SELECT COALESCE(
+      current_setting('request.jwt.claims', true)::json->>'sales_rep_id',
+      NULL
+    )::TEXT;
+  $function$
+"
+public,generate_rental_serial_number,"CREATE OR REPLACE FUNCTION public.generate_rental_serial_number()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+  DECLARE
+    year_part TEXT;
+    next_num INTEGER;
+    new_serial TEXT;
+  BEGIN
+    -- Get current year
+    year_part := TO_CHAR(CURRENT_DATE, 'YYYY');
+
+    -- Get next number for this year
+    SELECT COALESCE(MAX(CAST(SUBSTRING(serial_number FROM 'RNT-\d{4}-(\d+)') AS INTEGER)), 0) + 1
+    INTO next_num
+    FROM public.rental_agreements
+    WHERE serial_number LIKE 'RNT-' || year_part || '-%';
+
+    -- Generate serial: RNT-2025-00001
+    new_serial := 'RNT-' || year_part || '-' || LPAD(next_num::TEXT, 5, '0');
+
+    NEW.serial_number := new_serial;
+    RETURN NEW;
+  END;
+  $function$
+"
+public,gin_extract_query_trgm,"CREATE OR REPLACE FUNCTION public.gin_extract_query_trgm(text, internal, smallint, internal, internal, internal, internal)
+ RETURNS internal
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gin_extract_query_trgm$function$
+"
+public,gin_extract_value_trgm,"CREATE OR REPLACE FUNCTION public.gin_extract_value_trgm(text, internal)
+ RETURNS internal
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gin_extract_value_trgm$function$
+"
+public,gin_trgm_consistent,"CREATE OR REPLACE FUNCTION public.gin_trgm_consistent(internal, smallint, text, integer, internal, internal, internal, internal)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gin_trgm_consistent$function$
+"
+public,gin_trgm_triconsistent,"CREATE OR REPLACE FUNCTION public.gin_trgm_triconsistent(internal, smallint, text, integer, internal, internal, internal)
+ RETURNS ""char""
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gin_trgm_triconsistent$function$
+"
+public,gtrgm_compress,"CREATE OR REPLACE FUNCTION public.gtrgm_compress(internal)
+ RETURNS internal
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gtrgm_compress$function$
+"
+public,gtrgm_consistent,"CREATE OR REPLACE FUNCTION public.gtrgm_consistent(internal, text, smallint, oid, internal)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gtrgm_consistent$function$
+"
+public,gtrgm_decompress,"CREATE OR REPLACE FUNCTION public.gtrgm_decompress(internal)
+ RETURNS internal
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gtrgm_decompress$function$
+"
+public,gtrgm_distance,"CREATE OR REPLACE FUNCTION public.gtrgm_distance(internal, text, smallint, oid, internal)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gtrgm_distance$function$
+"
+public,gtrgm_in,"CREATE OR REPLACE FUNCTION public.gtrgm_in(cstring)
+ RETURNS gtrgm
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gtrgm_in$function$
+"
+public,gtrgm_options,"CREATE OR REPLACE FUNCTION public.gtrgm_options(internal)
+ RETURNS void
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE
+AS '$libdir/pg_trgm', $function$gtrgm_options$function$
+"
+public,gtrgm_out,"CREATE OR REPLACE FUNCTION public.gtrgm_out(gtrgm)
+ RETURNS cstring
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gtrgm_out$function$
+"
+public,gtrgm_penalty,"CREATE OR REPLACE FUNCTION public.gtrgm_penalty(internal, internal, internal)
+ RETURNS internal
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gtrgm_penalty$function$
+"
+public,gtrgm_picksplit,"CREATE OR REPLACE FUNCTION public.gtrgm_picksplit(internal, internal)
+ RETURNS internal
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gtrgm_picksplit$function$
+"
+public,gtrgm_same,"CREATE OR REPLACE FUNCTION public.gtrgm_same(gtrgm, gtrgm, internal)
+ RETURNS internal
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gtrgm_same$function$
+"
+public,gtrgm_union,"CREATE OR REPLACE FUNCTION public.gtrgm_union(internal, internal)
+ RETURNS gtrgm
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gtrgm_union$function$
+"
+public,regenerate_company_payload,"CREATE OR REPLACE FUNCTION public.regenerate_company_payload(p_company_id text)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+  BEGIN
+    UPDATE companies
+    SET
+      portal_payload = (
+        SELECT jsonb_build_object(
+          'company_id', company_id,
+          'company_name', company_name,
+          'reorder_items', reorder_items,
+          'by_tool_tabs', by_tool_tabs
+        )
+        FROM vw_company_consumable_payload
+        WHERE company_id = p_company_id
+      ),
+      payload_generated_at = NOW()
+    WHERE company_id = p_company_id;
+  END;
+  $function$
+"
+public,set_engagement_company_from_contact,"CREATE OR REPLACE FUNCTION public.set_engagement_company_from_contact()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+begin
+  if (NEW.company_id is null) and (NEW.contact_id is not null) then
+    select c.company_id into NEW.company_id
+    from public.contacts c
+    where c.contact_id = NEW.contact_id;
+  end if;
+
+  if NEW.company_id is null then
+    raise exception 'engagement_events.company_id cannot be null (provide company_id or a contact_id that maps to a company)';
+  end if;
+
+  return NEW;
+end;
+$function$
+"
+public,set_limit,"CREATE OR REPLACE FUNCTION public.set_limit(real)
+ RETURNS real
+ LANGUAGE c
+ STRICT
+AS '$libdir/pg_trgm', $function$set_limit$function$
+"
+public,set_rental_serial_number,"CREATE OR REPLACE FUNCTION public.set_rental_serial_number()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+  BEGIN
+    IF NEW.serial_number IS NULL OR NEW.serial_number = '' THEN
+      NEW.serial_number := generate_rental_serial_number();
+    END IF;
+    RETURN NEW;
+  END;
+  $function$
+"
+public,set_updated_at,"CREATE OR REPLACE FUNCTION public.set_updated_at()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN NEW.updated_at = now(); RETURN NEW; END;
+$function$
+"
+public,show_limit,"CREATE OR REPLACE FUNCTION public.show_limit()
+ RETURNS real
+ LANGUAGE c
+ STABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$show_limit$function$
+"
+public,show_trgm,"CREATE OR REPLACE FUNCTION public.show_trgm(text)
+ RETURNS text[]
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$show_trgm$function$
+"
+public,similarity,"CREATE OR REPLACE FUNCTION public.similarity(text, text)
+ RETURNS real
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$similarity$function$
+"
+public,similarity_dist,"CREATE OR REPLACE FUNCTION public.similarity_dist(text, text)
+ RETURNS real
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$similarity_dist$function$
+"
+public,similarity_op,"CREATE OR REPLACE FUNCTION public.similarity_op(text, text)
+ RETURNS boolean
+ LANGUAGE c
+ STABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$similarity_op$function$
+"
+public,strict_word_similarity,"CREATE OR REPLACE FUNCTION public.strict_word_similarity(text, text)
+ RETURNS real
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$strict_word_similarity$function$
+"
+public,strict_word_similarity_commutator_op,"CREATE OR REPLACE FUNCTION public.strict_word_similarity_commutator_op(text, text)
+ RETURNS boolean
+ LANGUAGE c
+ STABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$strict_word_similarity_commutator_op$function$
+"
+public,strict_word_similarity_dist_commutator_op,"CREATE OR REPLACE FUNCTION public.strict_word_similarity_dist_commutator_op(text, text)
+ RETURNS real
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$strict_word_similarity_dist_commutator_op$function$
+"
+public,strict_word_similarity_dist_op,"CREATE OR REPLACE FUNCTION public.strict_word_similarity_dist_op(text, text)
+ RETURNS real
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$strict_word_similarity_dist_op$function$
+"
+public,strict_word_similarity_op,"CREATE OR REPLACE FUNCTION public.strict_word_similarity_op(text, text)
+ RETURNS boolean
+ LANGUAGE c
+ STABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$strict_word_similarity_op$function$
+"
+public,sync_invoice_to_product_history,"CREATE OR REPLACE FUNCTION public.sync_invoice_to_product_history()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+  v_company_id text;
+  v_invoice_date date;
+  v_payment_status text;
+  v_product_type text;
+  v_item record;
+BEGIN
+  -- Only process if invoice is paid
+  IF (TG_OP = 'INSERT' AND NEW.payment_status = 'paid') OR
+     (TG_OP = 'UPDATE' AND OLD.payment_status != 'paid' AND NEW.payment_status = 'paid') THEN
+
+    -- Get company_id and invoice_date from the invoice
+    SELECT company_id, invoice_date, payment_status
+    INTO v_company_id, v_invoice_date, v_payment_status
+    FROM invoices
+    WHERE invoice_id = NEW.invoice_id;
+
+    -- Only proceed if invoice is actually paid
+    IF v_payment_status != 'paid' THEN
+      RETURN NEW;
+    END IF;
+
+    -- Loop through all items in this invoice
+    FOR v_item IN
+      SELECT product_code, quantity
+      FROM invoice_items
+      WHERE invoice_id = NEW.invoice_id
+    LOOP
+      -- Get product type from products table
+      SELECT type INTO v_product_type
+      FROM products
+      WHERE product_code = v_item.product_code;
+
+      -- Default to 'other' if product not found
+      IF v_product_type IS NULL THEN
+        v_product_type := 'other';
+      END IF;
+
+      -- Upsert into company_product_history
+      INSERT INTO company_product_history (
+        company_id,
+        product_code,
+        product_type,
+        first_purchased_at,
+        last_purchased_at,
+        total_purchases,
+        total_quantity,
+        source,
+        created_at,
+        updated_at
+      ) VALUES (
+        v_company_id,
+        v_item.product_code,
+        v_product_type,
+        v_invoice_date,
+        v_invoice_date,
+        1,
+        v_item.quantity,
+        'invoice',
+        NOW(),
+        NOW()
+      )
+      ON CONFLICT (company_id, product_code)
+      DO UPDATE SET
+        last_purchased_at = EXCLUDED.last_purchased_at,
+        total_purchases = company_product_history.total_purchases + 1,
+        total_quantity = company_product_history.total_quantity + EXCLUDED.total_quantity,
+        updated_at = NOW();
+    END LOOP;
+
+    RAISE NOTICE 'Synced invoice % items to product_history for company %', NEW.invoice_id, v_company_id;
+  END IF;
+
+  RETURN NEW;
+END;
+$function$
+"
+public,sync_product_history_to_consumables,"CREATE OR REPLACE FUNCTION public.sync_product_history_to_consumables()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  -- Only process consumable products
+  IF NEW.product_type = 'consumable' THEN
+
+    -- Upsert into company_consumables
+    INSERT INTO company_consumables (
+      company_id,
+      consumable_code,
+      first_ordered_at,
+      last_ordered_at,
+      total_orders,
+      total_quantity,
+      last_order_amount,
+      last_order_quantity
+    ) VALUES (
+      NEW.company_id,
+      NEW.product_code,
+      NEW.first_purchased_at,
+      NEW.last_purchased_at,
+      NEW.total_purchases,
+      NEW.total_quantity,
+      NULL, -- We don't track amount in product_history
+      NULL  -- We don't track last order quantity separately
+    )
+    ON CONFLICT (company_id, consumable_code)
+    DO UPDATE SET
+      first_ordered_at = LEAST(company_consumables.first_ordered_at, EXCLUDED.first_ordered_at),
+      last_ordered_at = GREATEST(company_consumables.last_ordered_at, EXCLUDED.last_ordered_at),
+      total_orders = EXCLUDED.total_orders,
+      total_quantity = EXCLUDED.total_quantity;
+
+    RAISE NOTICE 'Synced consumable % for company % to company_consumables', NEW.product_code, NEW.company_id;
+  END IF;
+
+  RETURN NEW;
+END;
+$function$
+"
+public,sync_product_history_to_tools,"CREATE OR REPLACE FUNCTION public.sync_product_history_to_tools()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  -- Only process tool products
+  IF NEW.product_type = 'tool' THEN
+
+    -- Upsert into company_tools
+    INSERT INTO company_tools (
+      company_id,
+      tool_code,
+      first_seen_at,
+      last_seen_at,
+      total_units
+    ) VALUES (
+      NEW.company_id,
+      NEW.product_code,
+      NEW.first_purchased_at,
+      NEW.last_purchased_at,
+      NEW.total_quantity
+    )
+    ON CONFLICT (company_id, tool_code)
+    DO UPDATE SET
+      first_seen_at = LEAST(company_tools.first_seen_at, EXCLUDED.first_seen_at),
+      last_seen_at = GREATEST(company_tools.last_seen_at, EXCLUDED.last_seen_at),
+      total_units = EXCLUDED.total_units;
+
+    RAISE NOTICE 'Synced tool % for company % to company_tools', NEW.product_code, NEW.company_id;
+  END IF;
+
+  RETURN NEW;
+END;
+$function$
+"
+public,update_company_machine_updated_at,"CREATE OR REPLACE FUNCTION public.update_company_machine_updated_at()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$function$
+"
+public,update_quote_requests_updated_at,"CREATE OR REPLACE FUNCTION public.update_quote_requests_updated_at()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+  BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+  END;
+  $function$
+"
+public,update_quotes_updated_at,"CREATE OR REPLACE FUNCTION public.update_quotes_updated_at()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$function$
+"
+public,update_updated_at_column,"CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$function$
+"
+public,update_users_updated_at,"CREATE OR REPLACE FUNCTION public.update_users_updated_at()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+  BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+  END;
+  $function$
+"
+public,upsert_company_consumable,"CREATE OR REPLACE FUNCTION public.upsert_company_consumable(p_company_id text, p_consumable_code text, p_order_date date, p_quantity integer, p_amount numeric, p_invoice_id text)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+  BEGIN
+    INSERT INTO company_consumables (
+      company_id,
+      consumable_code,
+      first_ordered_at,
+      last_ordered_at,
+      total_orders,
+      total_quantity,
+      last_order_amount,
+      last_order_quantity,
+      last_invoice_id
+    ) VALUES (
+      p_company_id,
+      p_consumable_code,
+      p_order_date,
+      p_order_date,
+      1,
+      p_quantity,
+      p_amount,
+      p_quantity,
+      p_invoice_id
+    )
+    ON CONFLICT (company_id, consumable_code)
+    DO UPDATE SET
+      last_ordered_at = p_order_date,
+      total_orders = company_consumables.total_orders + 1,
+      total_quantity = company_consumables.total_quantity + p_quantity,
+      last_order_amount = p_amount,
+      last_order_quantity = p_quantity,
+      last_invoice_id = p_invoice_id;
+  END;
+  $function$
+"
+public,upsert_company_product_history,"CREATE OR REPLACE FUNCTION public.upsert_company_product_history(p_company_id text, p_product_code text, p_product_type text, p_purchase_date date, p_quantity integer)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  INSERT INTO company_product_history (
+    company_id,
+    product_code,
+    product_type,
+    first_purchased_at,
+    last_purchased_at,
+    total_purchases,
+    total_quantity,
+    source
+  ) VALUES (
+    p_company_id,
+    p_product_code,
+    p_product_type,
+    p_purchase_date,
+    p_purchase_date,
+    1,
+    p_quantity,
+    'invoice'
+  )
+  ON CONFLICT (company_id, product_code)
+  DO UPDATE SET
+    last_purchased_at = p_purchase_date,
+    total_purchases = company_product_history.total_purchases + 1,
+    total_quantity = company_product_history.total_quantity + p_quantity,
+    updated_at = now();
+END;
+$function$
+"
+public,upsert_company_tool,"CREATE OR REPLACE FUNCTION public.upsert_company_tool(p_company_id text, p_tool_code text, p_purchase_date date, p_quantity integer, p_amount numeric, p_invoice_id text)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+  BEGIN
+    INSERT INTO company_tool (
+      company_id,
+      tool_code,
+      first_seen_at,
+      last_seen_at,
+      total_units
+    ) VALUES (
+      p_company_id,
+      p_tool_code,
+      p_purchase_date,
+      p_purchase_date,
+      p_quantity
+    )
+    ON CONFLICT (company_id, tool_code)
+    DO UPDATE SET
+      last_seen_at = p_purchase_date,
+      total_units = company_tool.total_units + p_quantity;
+  END;
+  $function$
+"
+public,word_similarity,"CREATE OR REPLACE FUNCTION public.word_similarity(text, text)
+ RETURNS real
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$word_similarity$function$
+"
+public,word_similarity_commutator_op,"CREATE OR REPLACE FUNCTION public.word_similarity_commutator_op(text, text)
+ RETURNS boolean
+ LANGUAGE c
+ STABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$word_similarity_commutator_op$function$
+"
+public,word_similarity_dist_commutator_op,"CREATE OR REPLACE FUNCTION public.word_similarity_dist_commutator_op(text, text)
+ RETURNS real
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$word_similarity_dist_commutator_op$function$
+"
+public,word_similarity_dist_op,"CREATE OR REPLACE FUNCTION public.word_similarity_dist_op(text, text)
+ RETURNS real
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$word_similarity_dist_op$function$
+"
+public,word_similarity_op,"CREATE OR REPLACE FUNCTION public.word_similarity_op(text, text)
+ RETURNS boolean
+ LANGUAGE c
+ STABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$word_similarity_op$function$
+"
