@@ -16,6 +16,7 @@ import EditBillingAddressModal from './modals/EditBillingAddressModal';
 import CompanyStatusControl from './CompanyStatusControl';
 import { LogActivityModal } from './LogActivityModal';
 import DistributorCatalogManager from './DistributorCatalogManager';
+import DistributorPortalProducts from './DistributorPortalProducts';
 
 interface CompanyDetailViewProps {
   company: any;
@@ -183,7 +184,10 @@ export default function CompanyDetailView({
     { id: 'quotes', label: 'Quotes', count: quotes.length },
     { id: 'invoices', label: 'Invoices', count: invoices.length },
     { id: 'engagement', label: 'Engagement', count: engagement.length },
-    ...(isDistributor ? [{ id: 'catalog', label: 'Catalog & Pricing', count: catalogEntries.filter((e: any) => e.visible).length }] : []),
+    ...(isDistributor ? [
+      { id: 'portal-products', label: 'Portal Products', count: null },
+      { id: 'catalog', label: 'Catalog & Pricing', count: catalogEntries.filter((e: any) => e.visible).length }
+    ] : []),
   ];
 
   return (
@@ -336,6 +340,21 @@ export default function CompanyDetailView({
 
         {activeTab === 'engagement' && (
           <EngagementTab engagement={engagement} />
+        )}
+
+        {activeTab === 'portal-products' && isDistributor && (
+          <DistributorPortalProducts
+            companyId={company.company_id}
+            products={products}
+            catalogEntries={catalogEntries}
+            distributorPricing={distributorPricing}
+            companyPricing={companyPricing}
+            purchasedProducts={[...purchasedTools, ...purchasedConsumables, ...purchasedParts].map(p => ({
+              product_code: p.product_code,
+              total_quantity: p.total_quantity,
+              last_purchased_at: p.last_purchased_at,
+            }))}
+          />
         )}
 
         {activeTab === 'catalog' && isDistributor && (
