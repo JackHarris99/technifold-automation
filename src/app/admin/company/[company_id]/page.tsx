@@ -37,6 +37,10 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
     subscriptionsResult,
     shippingAddressesResult,
     quotesResult,
+    productsResult,
+    catalogEntriesResult,
+    distributorPricingResult,
+    companyPricingResult,
   ] = await Promise.all([
     // Company
     supabase
@@ -156,6 +160,30 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
       .select('*')
       .eq('company_id', company_id)
       .order('created_at', { ascending: false }),
+
+    // Products (for catalog management)
+    supabase
+      .from('products')
+      .select('product_code, description, type, category, price, active, show_in_distributor_portal')
+      .eq('active', true)
+      .order('product_code'),
+
+    // Catalog entries (for distributors)
+    supabase
+      .from('company_product_catalog')
+      .select('product_code, visible')
+      .eq('company_id', company_id),
+
+    // Standard distributor pricing
+    supabase
+      .from('distributor_pricing')
+      .select('product_code, standard_price'),
+
+    // Company-specific pricing (for distributors)
+    supabase
+      .from('company_distributor_pricing')
+      .select('product_code, custom_price')
+      .eq('company_id', company_id),
   ]);
 
   if (companyResult.error || !companyResult.data) {
@@ -176,6 +204,10 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
       subscriptions={subscriptionsResult.data || []}
       shippingAddresses={shippingAddressesResult.data || []}
       quotes={quotesResult.data || []}
+      products={productsResult.data || []}
+      catalogEntries={catalogEntriesResult.data || []}
+      distributorPricing={distributorPricingResult.data || []}
+      companyPricing={companyPricingResult.data || []}
       currentUser={user}
     />
   );

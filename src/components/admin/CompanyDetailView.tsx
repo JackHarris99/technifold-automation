@@ -15,6 +15,7 @@ import ManageAddressModal from './modals/ManageAddressModal';
 import EditBillingAddressModal from './modals/EditBillingAddressModal';
 import CompanyStatusControl from './CompanyStatusControl';
 import { LogActivityModal } from './LogActivityModal';
+import DistributorCatalogManager from './DistributorCatalogManager';
 
 interface CompanyDetailViewProps {
   company: any;
@@ -28,6 +29,10 @@ interface CompanyDetailViewProps {
   subscriptions: any[];
   shippingAddresses: any[];
   quotes: any[];
+  products: any[];
+  catalogEntries: any[];
+  distributorPricing: any[];
+  companyPricing: any[];
   currentUser: any;
 }
 
@@ -43,6 +48,10 @@ export default function CompanyDetailView({
   subscriptions,
   shippingAddresses,
   quotes,
+  products,
+  catalogEntries,
+  distributorPricing,
+  companyPricing,
   currentUser,
 }: CompanyDetailViewProps) {
   const [activeTab, setActiveTab] = useState('overview');
@@ -174,6 +183,7 @@ export default function CompanyDetailView({
     { id: 'quotes', label: 'Quotes', count: quotes.length },
     { id: 'invoices', label: 'Invoices', count: invoices.length },
     { id: 'engagement', label: 'Engagement', count: engagement.length },
+    ...(isDistributor ? [{ id: 'catalog', label: 'Catalog & Pricing', count: catalogEntries.filter((e: any) => e.visible).length }] : []),
   ];
 
   return (
@@ -326,6 +336,16 @@ export default function CompanyDetailView({
 
         {activeTab === 'engagement' && (
           <EngagementTab engagement={engagement} />
+        )}
+
+        {activeTab === 'catalog' && isDistributor && (
+          <DistributorCatalogManager
+            companyId={company.company_id}
+            products={products}
+            catalogEntries={catalogEntries}
+            distributorPricing={distributorPricing}
+            companyPricing={companyPricing}
+          />
         )}
       </div>
 
