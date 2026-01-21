@@ -35,6 +35,7 @@ export default function InvoiceListClient({ initialInvoices, viewMode }: Invoice
   const [showVoidInvoices, setShowVoidInvoices] = useState(false);
   const [bulkSyncing, setBulkSyncing] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [syncingProductHistory, setSyncingProductHistory] = useState(false);
 
   const handleBulkSync = async () => {
     if (!confirm('Sync all invoice statuses from Stripe? This may take a moment.')) {
@@ -93,6 +94,36 @@ export default function InvoiceListClient({ initialInvoices, viewMode }: Invoice
       console.error('Error importing invoices:', error);
       alert('An error occurred while importing invoices');
       setImporting(false);
+    }
+  };
+
+  const handleSyncProductHistory = async () => {
+    if (!confirm('Sync Stripe invoice line items and update all customer Products tabs? This will:\n\n1. Import missing line items for Stripe invoices\n2. Update company_product_history for all paid invoices\n3. Populate Products tab for all customers\n\nThis may take several minutes.')) {
+      return;
+    }
+
+    setSyncingProductHistory(true);
+
+    try {
+      const response = await fetch('/api/admin/invoices/sync-stripe-product-history', {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(`Failed to sync: ${data.error}`);
+        setSyncingProductHistory(false);
+        return;
+      }
+
+      // Show success message
+      alert(`✅ Success!\n\nProcessed ${data.total_invoices} Stripe invoices\n${data.line_items_imported} line items imported\n${data.product_history_synced} invoices synced to product history\n\nAll customer Products tabs have been updated!`);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error syncing product history:', error);
+      alert('An error occurred while syncing product history');
+      setSyncingProductHistory(false);
     }
   };
 
@@ -221,17 +252,25 @@ export default function InvoiceListClient({ initialInvoices, viewMode }: Invoice
         <div className="flex items-center gap-3">
           <button
             onClick={handleImport}
-            disabled={importing || bulkSyncing}
+            disabled={importing || bulkSyncing || syncingProductHistory}
             className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {importing ? 'Importing...' : 'Import from Stripe'}
           </button>
           <button
             onClick={handleBulkSync}
-            disabled={bulkSyncing || importing}
+            disabled={bulkSyncing || importing || syncingProductHistory}
             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {bulkSyncing ? 'Syncing...' : 'Sync All from Stripe'}
+          </button>
+          <button
+            onClick={handleSyncProductHistory}
+            disabled={syncingProductHistory || importing || bulkSyncing}
+            className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Re-import line items and sync product history for all Stripe invoices"
+          >
+            {syncingProductHistory ? 'Syncing Products...' : '🔄 Sync Products Tab'}
           </button>
         </div>
       </div>
