@@ -6,20 +6,23 @@ interface AddContactModalProps {
   isOpen: boolean;
   onClose: () => void;
   companyId: string;
+  existingContact?: any;
 }
 
-export default function AddContactModal({ isOpen, onClose, companyId }: AddContactModalProps) {
+export default function AddContactModal({ isOpen, onClose, companyId, existingContact }: AddContactModalProps) {
   const [formData, setFormData] = useState({
-    first_name: '',
-    last_name: '',
-    full_name: '',
-    email: '',
-    phone: '',
-    role: '',
-    marketing_status: 'subscribed',
+    first_name: existingContact?.first_name || '',
+    last_name: existingContact?.last_name || '',
+    full_name: existingContact?.full_name || '',
+    email: existingContact?.email || '',
+    phone: existingContact?.phone || '',
+    role: existingContact?.role || '',
+    marketing_status: existingContact?.marketing_status || 'subscribed',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const isEditing = !!existingContact;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,32 +30,49 @@ export default function AddContactModal({ isOpen, onClose, companyId }: AddConta
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/contacts/create', {
-        method: 'POST',
+      const url = isEditing
+        ? `/api/admin/companies/${companyId}/contacts/${existingContact.contact_id}`
+        : '/api/admin/contacts/create';
+
+      const method = isEditing ? 'PATCH' : 'POST';
+
+      const body = isEditing
+        ? {
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            email: formData.email,
+            phone: formData.phone,
+            role: formData.role,
+            marketing_status: formData.marketing_status,
+          }
+        : {
+            company_id: companyId,
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            full_name: formData.full_name,
+            email: formData.email,
+            phone: formData.phone,
+            role: formData.role,
+            marketing_status: formData.marketing_status,
+          };
+
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          company_id: companyId,
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          full_name: formData.full_name,
-          email: formData.email,
-          phone: formData.phone,
-          role: formData.role,
-          marketing_status: formData.marketing_status,
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to add contact');
+        throw new Error(data.error || `Failed to ${isEditing ? 'update' : 'add'} contact`);
       }
 
       // Success - reload page
       window.location.reload();
     } catch (err: any) {
-      console.error('Error adding contact:', err);
-      setError(err.message || 'Failed to add contact');
+      console.error(`Error ${isEditing ? 'updating' : 'adding'} contact:`, err);
+      setError(err.message || `Failed to ${isEditing ? 'update' : 'add'} contact`);
       setLoading(false);
     }
   };
@@ -63,7 +83,7 @@ export default function AddContactModal({ isOpen, onClose, companyId }: AddConta
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">Add Contact</h2>
+          <h2 className="text-xl font-bold">{isEditing ? 'Edit Contact' : 'Add Contact'}</h2>
           <button
             onClick={onClose}
             className="text-gray-800 hover:text-gray-800"
@@ -170,7 +190,7 @@ export default function AddContactModal({ isOpen, onClose, companyId }: AddConta
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
               disabled={loading}
             >
-              {loading ? 'Adding...' : 'Add Contact'}
+              {loading ? (isEditing ? 'Updating...' : 'Adding...') : (isEditing ? 'Update Contact' : 'Add Contact')}
             </button>
           </div>
         </form>

@@ -62,6 +62,9 @@ export default function ProductDetailView({ product: initialProduct, relatedData
   const handleSave = async () => {
     setSaving(true);
     try {
+      // Check if product_code is being changed
+      const isProductCodeChanged = editedFields.product_code && editedFields.product_code !== product.product_code;
+
       // Encode product code: replace / with -- for URL routing
       const encodedProductCode = product.product_code.replace(/\//g, '--');
       const response = await fetch(`/api/admin/products/${encodedProductCode}`, {
@@ -73,10 +76,17 @@ export default function ProductDetailView({ product: initialProduct, relatedData
       if (!response.ok) throw new Error('Failed to save');
 
       const { product: updatedProduct } = await response.json();
-      setProduct(updatedProduct);
-      setEditedFields({});
-      setEditing(false);
-      router.refresh();
+
+      // If product code changed, redirect to new URL
+      if (isProductCodeChanged) {
+        const newEncodedProductCode = updatedProduct.product_code.replace(/\//g, '--');
+        window.location.href = `/admin/products/${newEncodedProductCode}`;
+      } else {
+        setProduct(updatedProduct);
+        setEditedFields({});
+        setEditing(false);
+        router.refresh();
+      }
     } catch (error) {
       console.error('Save error:', error);
       alert('Failed to save changes');
@@ -207,6 +217,32 @@ export default function ProductDetailView({ product: initialProduct, relatedData
                 <h2 className="text-[20px] font-[600] text-[#1e40af] tracking-[-0.01em]">Basic Information</h2>
               </div>
               <div className="p-6 space-y-4">
+                {/* Product Code Row - Directors Only */}
+                {isDirector && (
+                  <div>
+                    <label className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider mb-2 block">
+                      Product Code
+                      <span className="ml-2 text-[10px] font-[400] text-red-600">(Directors Only - Use with caution)</span>
+                    </label>
+                    {editing ? (
+                      <input
+                        type="text"
+                        value={currentValue('product_code') || ''}
+                        onChange={(e) => handleFieldChange('product_code', e.target.value)}
+                        className="w-full px-4 py-3 bg-[#fff9e6] border-2 border-yellow-300 rounded-[10px] text-[14px] text-[#0a0a0a] font-[500] font-mono focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                        placeholder="e.g. JV-BLADE-001"
+                      />
+                    ) : (
+                      <div className="text-[14px] text-[#0a0a0a] font-[500] font-mono">{product.product_code}</div>
+                    )}
+                    {editing && (
+                      <p className="text-[10px] text-red-600 mt-1">
+                        ⚠️ Changing the product code will update all references. Ensure no orders/quotes are using this code.
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 {/* Type and Category Row */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>

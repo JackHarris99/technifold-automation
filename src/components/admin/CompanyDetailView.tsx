@@ -81,6 +81,14 @@ export default function CompanyDetailView({
   const [selectedOwner, setSelectedOwner] = useState('');
   const [isChangingOwner, setIsChangingOwner] = useState(false);
 
+  // Company name editing state
+  const [isEditingCompanyName, setIsEditingCompanyName] = useState(false);
+  const [editedCompanyName, setEditedCompanyName] = useState(company.company_name);
+  const [isSavingCompanyName, setIsSavingCompanyName] = useState(false);
+
+  // Contact editing state
+  const [editingContact, setEditingContact] = useState<any>(null);
+
   const isDirector = currentUser.role === 'director';
   const isDistributor = company.type === 'distributor';
   const isCustomer = company.type === 'customer' || !company.type;
@@ -177,6 +185,54 @@ export default function CompanyDetailView({
     }
   };
 
+  const handleSaveCompanyName = async () => {
+    if (!editedCompanyName.trim()) {
+      alert('Company name cannot be empty');
+      return;
+    }
+
+    setIsSavingCompanyName(true);
+    try {
+      const response = await fetch(`/api/admin/companies/${company.company_id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ company_name: editedCompanyName.trim() }),
+      });
+
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        const data = await response.json();
+        alert('Failed to update company name: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err) {
+      alert('Network error: Failed to update company name');
+    } finally {
+      setIsSavingCompanyName(false);
+    }
+  };
+
+  const handleDeleteContact = async (contactId: string) => {
+    if (!confirm('Are you sure you want to delete this contact?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/companies/${company.company_id}/contacts/${contactId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        const data = await response.json();
+        alert('Failed to delete contact: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err) {
+      alert('Network error: Failed to delete contact');
+    }
+  };
+
   const tabs = [
     { id: 'overview', label: 'Overview', count: null },
     { id: 'products', label: 'Products', count: purchasedTools.length + purchasedConsumables.length + purchasedParts.length },
@@ -206,8 +262,47 @@ export default function CompanyDetailView({
                 </svg>
                 All Companies
               </Link>
-              <div className="flex items-center gap-3">
-                <h1 className="text-[32px] font-[700] text-[#0a0a0a] tracking-[-0.02em]">{company.company_name}</h1>
+              <div className="flex items-center gap-3 flex-wrap">
+                {isEditingCompanyName ? (
+                  <div className="flex items-center gap-2 flex-1">
+                    <input
+                      type="text"
+                      value={editedCompanyName}
+                      onChange={(e) => setEditedCompanyName(e.target.value)}
+                      className="text-[24px] font-[700] text-[#0a0a0a] tracking-[-0.02em] px-3 py-2 border-2 border-blue-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      autoFocus
+                    />
+                    <button
+                      onClick={handleSaveCompanyName}
+                      disabled={isSavingCompanyName}
+                      className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+                    >
+                      {isSavingCompanyName ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsEditingCompanyName(false);
+                        setEditedCompanyName(company.company_name);
+                      }}
+                      className="px-4 py-2 bg-gray-200 text-gray-800 text-sm rounded-lg hover:bg-gray-300"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <h1 className="text-[32px] font-[700] text-[#0a0a0a] tracking-[-0.02em]">{company.company_name}</h1>
+                    <button
+                      onClick={() => setIsEditingCompanyName(true)}
+                      className="text-blue-600 hover:text-blue-700 text-sm font-[600] flex items-center gap-1"
+                      title="Edit company name"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </button>
+                  </>
+                )}
                 {isDistributor && (
                   <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-[13px] font-[600] uppercase tracking-wide">
                     Distributor
@@ -370,9 +465,13 @@ export default function CompanyDetailView({
 
       {/* Modals */}
       <AddContactModal
-        isOpen={showAddContactModal}
-        onClose={() => setShowAddContactModal(false)}
+        isOpen={showAddContactModal || !!editingContact}
+        onClose={() => {
+          setShowAddContactModal(false);
+          setEditingContact(null);
+        }}
         companyId={company.company_id}
+        existingContact={editingContact}
       />
       <AddToolModal
         isOpen={showAddToolModal}
@@ -759,9 +858,29 @@ function OverviewTab({
             <div className="space-y-3">
               {contacts.slice(0, 5).map((contact) => (
                 <div key={contact.contact_id} className="border-b border-[#f1f5f9] pb-3 last:border-0">
-                  <div className="font-medium text-sm text-[#0a0a0a]">{contact.full_name || `${contact.first_name} ${contact.last_name}`}</div>
-                  <div className="text-sm text-[#475569]">{contact.email}</div>
-                  {contact.role && <div className="text-xs text-[#64748b] mt-1">{contact.role}</div>}
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="font-medium text-sm text-[#0a0a0a]">{contact.full_name || `${contact.first_name} ${contact.last_name}`}</div>
+                      <div className="text-sm text-[#475569]">{contact.email}</div>
+                      {contact.role && <div className="text-xs text-[#64748b] mt-1">{contact.role}</div>}
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setEditingContact(contact)}
+                        className="text-blue-600 hover:text-blue-700 text-xs font-[600]"
+                        title="Edit contact"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteContact(contact.contact_id)}
+                        className="text-red-600 hover:text-red-700 text-xs font-[600]"
+                        title="Delete contact"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>

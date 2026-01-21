@@ -84,19 +84,48 @@ export async function PATCH(
   { params }: { params: Promise<{ product_code: string }> }
 ) {
   try {
+    // SECURITY: Require authentication
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { product_code: encodedProductCode } = await params;
     // Decode -- back to / for product codes with slashes
     const productCode = decodeURIComponent(encodedProductCode).replace(/--/g, '/');
     const updates = await request.json();
 
-    // Remove read-only fields that shouldn't be updated via this endpoint
-    const { product_code: _, created_at, updated_at, ...allowedUpdates } = updates;
+    const supabase = getSupabaseClient();
+
+    // Check if product_code is being changed (directors only)
+    let allowedUpdates: any = {};
+    if (updates.product_code && updates.product_code !== productCode) {
+      // Only directors can change product_code
+      if (user.role !== 'director') {
+        return NextResponse.json({ error: 'Only directors can change product codes' }, { status: 403 });
+      }
+
+      // Verify new product_code doesn't already exist
+      const { data: existing } = await supabase
+        .from('products')
+        .select('product_code')
+        .eq('product_code', updates.product_code)
+        .single();
+
+      if (existing) {
+        return NextResponse.json({ error: 'Product code already exists' }, { status: 409 });
+      }
+
+      allowedUpdates.product_code = updates.product_code;
+    }
+
+    // Remove read-only fields and handle remaining updates
+    const { product_code: _, created_at, updated_at, ...otherUpdates } = updates;
+    allowedUpdates = { ...allowedUpdates, ...otherUpdates };
 
     if (Object.keys(allowedUpdates).length === 0) {
       return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
     }
-
-    const supabase = getSupabaseClient();
 
     const { data, error } = await supabase
       .from('products')
