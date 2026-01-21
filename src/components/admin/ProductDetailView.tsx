@@ -45,9 +45,10 @@ interface ProductDetailViewProps {
     availableConsumables?: any[];
     availableTools?: any[];
   };
+  isDirector: boolean;
 }
 
-export default function ProductDetailView({ product: initialProduct, relatedData }: ProductDetailViewProps) {
+export default function ProductDetailView({ product: initialProduct, relatedData, isDirector }: ProductDetailViewProps) {
   const router = useRouter();
   const [product, setProduct] = useState(initialProduct);
   const [editing, setEditing] = useState(false);

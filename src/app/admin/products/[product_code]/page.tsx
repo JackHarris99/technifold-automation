@@ -6,6 +6,7 @@
 import { getSupabaseClient } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
 import ProductDetailView from '@/components/admin/ProductDetailView';
+import { isDirector } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -19,6 +20,7 @@ export default async function ProductDetailPage({
   // Decode product code: replace -- with / for codes containing slashes
   const product_code = encodedProductCode.replace(/--/g, '/');
   const supabase = getSupabaseClient();
+  const userIsDirector = await isDirector();
 
   // Fetch product details
   const { data: product, error: productError } = await supabase
@@ -104,6 +106,7 @@ export default async function ProductDetailPage({
       <ProductDetailView
         product={product}
         relatedData={relatedData}
+        isDirector={userIsDirector}
       />
     </div>
   );
