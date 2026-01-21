@@ -145,19 +145,21 @@ export async function POST(request: NextRequest) {
           const invoiceData = {
             company_id: company.company_id,
             stripe_invoice_id: stripeInvoice.id,
+            stripe_customer_id: customerId,
+            stripe_payment_intent_id: stripeInvoice.payment_intent as string || null,
             invoice_number: stripeInvoice.number,
+            invoice_type: 'stripe',
             invoice_date: new Date(stripeInvoice.created * 1000).toISOString(),
             due_date: stripeInvoice.due_date ? new Date(stripeInvoice.due_date * 1000).toISOString() : null,
             subtotal: (stripeInvoice.subtotal || 0) / 100,
-            tax: (stripeInvoice.tax || 0) / 100,
+            tax_amount: (stripeInvoice.tax || 0) / 100,
+            shipping_amount: 0,
             total_amount: (stripeInvoice.total || 0) / 100,
-            amount_due: (stripeInvoice.amount_due || 0) / 100,
-            amount_paid: (stripeInvoice.amount_paid || 0) / 100,
             currency: stripeInvoice.currency?.toUpperCase() || 'GBP',
             payment_status: paymentStatus,
             status: stripeInvoice.status,
             invoice_url: stripeInvoice.hosted_invoice_url,
-            invoice_pdf: stripeInvoice.invoice_pdf,
+            invoice_pdf_url: stripeInvoice.invoice_pdf,
             paid_at: stripeInvoice.status_transitions?.paid_at
               ? new Date(stripeInvoice.status_transitions.paid_at * 1000).toISOString()
               : null,
@@ -181,12 +183,11 @@ export async function POST(request: NextRequest) {
             const lineItems = stripeInvoice.lines.data.map((line, index) => ({
               invoice_id: newInvoice.invoice_id,
               product_code: line.price?.product as string || null,
-              description: line.description,
+              line_number: index + 1,
+              description: line.description || 'Stripe line item',
               quantity: line.quantity || 0,
               unit_price: (line.price?.unit_amount || 0) / 100,
               line_total: (line.amount || 0) / 100,
-              currency: line.currency?.toUpperCase() || 'GBP',
-              line_order: index + 1,
             }));
 
             const { error: itemsError } = await supabase
