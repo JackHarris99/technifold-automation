@@ -64,12 +64,11 @@ export async function POST(request: NextRequest) {
 
     for (const invoice of stripeInvoices) {
       try {
-        // Check if line items already exist
+        // Check if line items already exist and if they need fixing
         const { data: existingItems, error: checkError } = await supabase
           .from('invoice_items')
-          .select('line_number')
-          .eq('invoice_id', invoice.invoice_id)
-          .limit(1);
+          .select('line_number, product_code, description')
+          .eq('invoice_id', invoice.invoice_id);
 
         if (checkError) {
           console.error(`[sync-stripe-product-history] Error checking items for invoice ${invoice.invoice_id}:`, checkError);
@@ -77,8 +76,16 @@ export async function POST(request: NextRequest) {
           continue;
         }
 
-        // If line items exist and have content, skip re-import
-        if (existingItems && existingItems.length > 0 && existingItems[0].line_number !== null) {
+        // Check if items need re-import:
+        // 1. No items exist, OR
+        // 2. Items have NULL line_number (broken), OR
+        // 3. Items have extractable product codes in descriptions but product_code is NULL
+        const needsReimport = !existingItems || existingItems.length === 0 ||
+          existingItems.some(item => item.line_number === null ||
+            (item.product_code === null && (item.description?.includes(' - ') || item.description?.match(/^[A-Z0-9-]+$/i))));
+
+        // If line items exist and look good, skip re-import
+        if (!needsReimport) {
           lineItemsSkipped++;
 
           // But still sync to product history if paid
