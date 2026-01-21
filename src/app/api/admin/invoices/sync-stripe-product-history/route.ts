@@ -105,15 +105,51 @@ export async function POST(request: NextRequest) {
           .delete()
           .eq('invoice_id', invoice.invoice_id);
 
-        // Import line items
-        const lineItems = stripeInvoice.lines.data.map((line, index) => ({
-          invoice_id: invoice.invoice_id,
-          product_code: null, // Stripe product IDs don't map to our codes
-          line_number: index + 1,
-          description: line.description || `Stripe product: ${line.price?.product}` || 'Stripe subscription',
-          quantity: line.quantity || 1,
-          unit_price: (line.price?.unit_amount || 0) / 100,
-          line_total: (line.amount || 0) / 100,
+        // Import line items with smart product code extraction
+        const lineItems = await Promise.all(stripeInvoice.lines.data.map(async (line, index) => {
+          const description = line.description || `Stripe product: ${line.price?.product}` || 'Stripe subscription';
+
+          // Try to extract product code from description
+          let extractedProductCode: string | null = null;
+
+          // Method 1: Check if description starts with "CODE - Description" format
+          if (description.includes(' - ')) {
+            const potentialCode = description.split(' - ')[0].trim();
+
+            // Check if this matches a product (case-insensitive)
+            const { data: matchedProduct } = await supabase
+              .from('products')
+              .select('product_code')
+              .ilike('product_code', potentialCode)
+              .single();
+
+            if (matchedProduct) {
+              extractedProductCode = matchedProduct.product_code; // Use correct capitalization
+            }
+          }
+
+          // Method 2: Check if the entire description is just a product code (case-insensitive)
+          if (!extractedProductCode) {
+            const { data: matchedProduct } = await supabase
+              .from('products')
+              .select('product_code')
+              .ilike('product_code', description.trim())
+              .single();
+
+            if (matchedProduct) {
+              extractedProductCode = matchedProduct.product_code; // Use correct capitalization
+            }
+          }
+
+          return {
+            invoice_id: invoice.invoice_id,
+            product_code: extractedProductCode,
+            line_number: index + 1,
+            description: description,
+            quantity: line.quantity || 1,
+            unit_price: (line.price?.unit_amount || 0) / 100,
+            line_total: (line.amount || 0) / 100,
+          };
         }));
 
         const { error: insertError } = await supabase
