@@ -180,12 +180,14 @@ export async function POST(request: NextRequest) {
 
           // Import line items
           if (stripeInvoice.lines && stripeInvoice.lines.data.length > 0) {
+            // Stripe uses product IDs (prod_XXX) which don't match our product codes (JV-BLADE-001)
+            // Set product_code to null to avoid foreign key constraint violations
             const lineItems = stripeInvoice.lines.data.map((line, index) => ({
               invoice_id: newInvoice.invoice_id,
-              product_code: line.price?.product as string || null,
+              product_code: null, // Don't use Stripe product IDs - they violate FK constraint
               line_number: index + 1,
-              description: line.description || 'Stripe line item',
-              quantity: line.quantity || 0,
+              description: line.description || `Stripe product: ${line.price?.product}` || 'Stripe subscription',
+              quantity: line.quantity || 1,
               unit_price: (line.price?.unit_amount || 0) / 100,
               line_total: (line.amount || 0) / 100,
             }));
