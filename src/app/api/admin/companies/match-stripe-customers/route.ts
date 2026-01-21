@@ -5,6 +5,9 @@
  * Directors only
  */
 
+export const maxDuration = 300; // 5 minutes for this endpoint
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { isDirector } from '@/lib/auth';
@@ -97,13 +100,16 @@ export async function GET(request: NextRequest) {
         startingAfter = customers.data[customers.data.length - 1].id;
       }
 
+      // Progress logging
+      console.log(`[match-stripe-customers] Fetched ${stripeCustomers.length} Stripe customers so far...`);
+
       // Rate limit protection
       if (hasMoreStripeCustomers) {
         await new Promise(resolve => setTimeout(resolve, 100));
       }
     }
 
-    console.log(`[match-stripe-customers] Found ${stripeCustomers.length} Stripe customers`);
+    console.log(`[match-stripe-customers] Found ${stripeCustomers.length} total Stripe customers`);
 
     // Create lookup maps for efficient matching
     const stripeByEmail = new Map<string, any>();

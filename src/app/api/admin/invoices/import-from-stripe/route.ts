@@ -4,6 +4,9 @@
  * Directors only
  */
 
+export const maxDuration = 300; // 5 minutes for this endpoint
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { isDirector } from '@/lib/auth';
@@ -53,7 +56,7 @@ export async function POST(request: NextRequest) {
       });
 
       totalFetched += stripeInvoices.data.length;
-      console.log(`[import-from-stripe] Fetched ${stripeInvoices.data.length} invoices from Stripe (total: ${totalFetched})`);
+      console.log(`[import-from-stripe] Fetched batch of ${stripeInvoices.data.length} invoices (total so far: ${totalFetched}, imported: ${imported}, skipped: ${skipped}, errors: ${errors})`);
 
       for (const stripeInvoice of stripeInvoices.data) {
         try {
@@ -80,14 +83,50 @@ export async function POST(request: NextRequest) {
             continue;
           }
 
-          const { data: company } = await supabase
+          let company = null;
+          let customerEmail: string | null = null;
+
+          // Try to find company by stripe_customer_id first
+          const { data: companyByStripeId } = await supabase
             .from('companies')
             .select('company_id, company_name')
             .eq('stripe_customer_id', customerId)
             .single();
 
+          if (companyByStripeId) {
+            company = companyByStripeId;
+          } else {
+            // If no company found by stripe_customer_id, try to match by customer email
+            // This helps recover invoices for customers that aren't linked yet
+            customerEmail = typeof stripeInvoice.customer === 'string'
+              ? (await stripe.customers.retrieve(stripeInvoice.customer)).email || null
+              : stripeInvoice.customer?.email || null;
+
+            if (customerEmail) {
+              const { data: companyByEmail } = await supabase
+                .from('companies')
+                .select('company_id, company_name, contacts!inner(email)')
+                .eq('contacts.email', customerEmail)
+                .limit(1)
+                .single();
+
+              if (companyByEmail) {
+                company = companyByEmail;
+                console.log(`[import-from-stripe] Matched company via contact email: ${customerEmail} -> ${companyByEmail.company_name}`);
+
+                // Auto-link the stripe_customer_id for future efficiency
+                await supabase
+                  .from('companies')
+                  .update({ stripe_customer_id: customerId })
+                  .eq('company_id', companyByEmail.company_id);
+
+                console.log(`[import-from-stripe] Auto-linked stripe_customer_id ${customerId} to company ${companyByEmail.company_name}`);
+              }
+            }
+          }
+
           if (!company) {
-            console.error(`[import-from-stripe] No company found for customer ${customerId} (invoice ${stripeInvoice.id})`);
+            console.error(`[import-from-stripe] No company found for customer ${customerId} (invoice ${stripeInvoice.id}). Customer email: ${customerEmail || 'N/A'}`);
             errors++;
             continue;
           }
@@ -188,16 +227,26 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log(`[import-from-stripe] Completed: ${imported} imported, ${skipped} skipped, ${errors} errors out of ${totalFetched} total`);
+    console.log(`[import-from-stripe] ===== IMPORT SUMMARY =====`);
+    console.log(`[import-from-stripe] Total fetched from Stripe: ${totalFetched}`);
+    console.log(`[import-from-stripe] Successfully imported: ${imported}`);
+    console.log(`[import-from-stripe] Skipped (already exist or draft): ${skipped}`);
+    console.log(`[import-from-stripe] Errors (no company match): ${errors}`);
+    console.log(`[import-from-stripe] ===========================`);
 
     return NextResponse.json({
       success: true,
-      message: `Processed ${totalFetched} invoices from Stripe`,
+      message: `Processed ${totalFetched} invoices from Stripe. ${imported} imported, ${skipped} skipped, ${errors} errors.`,
       total: totalFetched,
       imported,
       skipped,
       errors,
       invoices: importedInvoices.slice(0, 20), // Return first 20 imported for display
+      summary: {
+        message: errors > 0
+          ? `${errors} invoices could not be imported because no matching company was found. Check server logs for customer IDs.`
+          : 'All invoices processed successfully.',
+      },
     });
 
   } catch (err: any) {

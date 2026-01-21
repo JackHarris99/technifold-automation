@@ -4,6 +4,9 @@
  * Directors only
  */
 
+export const maxDuration = 300; // 5 minutes for this endpoint
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { isDirector } from '@/lib/auth';

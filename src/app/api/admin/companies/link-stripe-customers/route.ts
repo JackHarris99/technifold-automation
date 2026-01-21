@@ -4,6 +4,9 @@
  * Directors only
  */
 
+export const maxDuration = 300; // 5 minutes for this endpoint
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { isDirector, getCurrentUser } from '@/lib/auth';
@@ -95,15 +98,24 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log(`[link-stripe-customers] Completed: ${updated} updated, ${errors} errors`);
+    console.log(`[link-stripe-customers] ===== LINK SUMMARY =====`);
+    console.log(`[link-stripe-customers] Total requested: ${links.length}`);
+    console.log(`[link-stripe-customers] Successfully linked: ${updated}`);
+    console.log(`[link-stripe-customers] Errors: ${errors}`);
+    console.log(`[link-stripe-customers] ===========================`);
 
     return NextResponse.json({
       success: true,
-      message: `Linked ${updated} companies`,
+      message: `Linked ${updated} of ${links.length} companies. ${errors} errors.`,
       total: links.length,
       updated,
       errors,
       results,
+      summary: {
+        message: errors > 0
+          ? `${errors} companies could not be linked. Check server logs for details.`
+          : 'All companies linked successfully.',
+      },
     });
 
   } catch (err: any) {
