@@ -35,13 +35,13 @@ export async function POST(
 
     const supabase = getSupabaseClient();
 
-    // Verify new owner is an active sales rep
+    // Verify new owner is an active sales rep or director with sales_rep_id
     const { data: salesRep, error: repError } = await supabase
       .from('users')
       .select('sales_rep_id, full_name, is_active, role')
       .eq('sales_rep_id', new_owner)
-      .eq('role', 'sales_rep')
       .eq('is_active', true)
+      .or('role.eq.sales_rep,role.eq.director')
       .single();
 
     if (repError || !salesRep) {
