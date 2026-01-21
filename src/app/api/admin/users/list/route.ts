@@ -32,7 +32,12 @@ export async function GET(request: NextRequest) {
 
     // Apply filters
     if (role) {
-      query = query.eq('role', role);
+      // Special case: if requesting sales_reps, also include directors with sales_rep_id
+      if (role === 'sales_rep') {
+        query = query.or(`role.eq.sales_rep,and(role.eq.director,sales_rep_id.not.is.null)`);
+      } else {
+        query = query.eq('role', role);
+      }
     }
 
     if (isActive === 'true') {

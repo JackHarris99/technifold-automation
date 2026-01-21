@@ -71,9 +71,15 @@ export async function GET(request: NextRequest) {
       const itemSubtotal = item.quantity * item.unit_price;
       const productType = item.products.type;
       const accountOwner = item.invoices.companies.account_owner;
+      const companyType = item.invoices.companies.type;
 
       // Only process items for customers assigned to this rep
       if (accountOwner !== repId) {
+        return;
+      }
+
+      // Exclude distributor invoices from commission
+      if (companyType === 'distributor') {
         return;
       }
 

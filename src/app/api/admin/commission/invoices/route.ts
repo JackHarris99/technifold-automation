@@ -131,6 +131,11 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
+      // Exclude distributor invoices from commission
+      if (company.type === 'distributor') {
+        continue;
+      }
+
       // Calculate commission for this line item
       const productType = item.products?.type || 'other';
       let itemCommission = 0;
