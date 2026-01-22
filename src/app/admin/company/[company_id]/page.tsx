@@ -63,6 +63,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
     catalogEntriesResult,
     distributorPricingResult,
     companyPricingResult,
+    companyMachinesResult,
   ] = await Promise.all([
     // Company
     supabase
@@ -199,6 +200,29 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
       .from('company_distributor_pricing')
       .select('product_code, custom_price')
       .eq('company_id', company_id),
+
+    // Company Machines (Plant List)
+    supabase
+      .from('company_machine')
+      .select(`
+        id,
+        machine_id,
+        quantity,
+        location,
+        verified,
+        source,
+        notes,
+        created_at,
+        machine:machine_id (
+          machine_id,
+          brand,
+          model,
+          display_name,
+          type
+        )
+      `)
+      .eq('company_id', company_id)
+      .order('created_at', { ascending: false }),
   ]);
 
   if (companyResult.error || !companyResult.data) {
@@ -223,6 +247,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
       catalogEntries={catalogEntriesResult.data || []}
       distributorPricing={distributorPricingResult.data || []}
       companyPricing={companyPricingResult.data || []}
+      companyMachines={companyMachinesResult.data || []}
       currentUser={user}
     />
   );

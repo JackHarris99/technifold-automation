@@ -17,6 +17,7 @@ import CompanyStatusControl from './CompanyStatusControl';
 import { LogActivityModal } from './LogActivityModal';
 import DistributorCatalogManager from './DistributorCatalogManager';
 import DistributorPortalProducts from './DistributorPortalProducts';
+import PlantListTab from './PlantListTab';
 
 interface CompanyDetailViewProps {
   company: any;
@@ -34,6 +35,7 @@ interface CompanyDetailViewProps {
   catalogEntries: any[];
   distributorPricing: any[];
   companyPricing: any[];
+  companyMachines: any[];
   currentUser: any;
 }
 
@@ -53,6 +55,7 @@ export default function CompanyDetailView({
   catalogEntries,
   distributorPricing,
   companyPricing,
+  companyMachines,
   currentUser,
 }: CompanyDetailViewProps) {
   const [activeTab, setActiveTab] = useState('overview');
@@ -237,6 +240,7 @@ export default function CompanyDetailView({
     { id: 'overview', label: 'Overview', count: null },
     { id: 'products', label: 'Products', count: purchasedTools.length + purchasedConsumables.length + purchasedParts.length },
     { id: 'subscriptions', label: 'Subscriptions', count: subscriptionTools.length },
+    { id: 'plant-list', label: 'Plant List', count: companyMachines.length },
     { id: 'quotes', label: 'Quotes', count: quotes.length },
     { id: 'invoices', label: 'Invoices', count: invoices.length },
     { id: 'engagement', label: 'Engagement', count: engagement.length },
@@ -422,6 +426,13 @@ export default function CompanyDetailView({
             subscriptions={subscriptions}
             companyId={company.company_id}
             onAddTool={() => setShowAddSubToolModal(true)}
+          />
+        )}
+
+        {activeTab === 'plant-list' && (
+          <PlantListTab
+            companyId={company.company_id}
+            companyMachines={companyMachines}
           />
         )}
 
@@ -784,6 +795,18 @@ function OverviewTab({
             <div>
               <dt className="text-sm text-[#475569]">Country</dt>
               <dd className="text-[13px] font-[600] text-[#0a0a0a]">{company.country || '-'}</dd>
+            </div>
+            <div>
+              <dt className="text-sm text-[#475569]">Phone</dt>
+              <dd className="text-[13px] font-[600] text-[#0a0a0a]">
+                {company.phone ? (
+                  <a href={`tel:${company.phone}`} className="text-blue-600 hover:underline">
+                    {company.phone}
+                  </a>
+                ) : (
+                  <span className="text-[#64748b] italic">—</span>
+                )}
+              </dd>
             </div>
 
             {/* VAT Number - Editable */}
