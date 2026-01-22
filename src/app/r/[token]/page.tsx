@@ -58,15 +58,17 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
 
   const uniqueToolCodes = [...toolQuantities.keys()];
 
-  // Get tool details from products table (for descriptions)
+  // Get tool details from products table (for descriptions and images)
   const { data: toolProducts } = await supabase
     .from('products')
-    .select('product_code, description')
+    .select('product_code, description, image_url')
     .in('product_code', uniqueToolCodes);
 
   const toolDescriptions = new Map<string, string>();
+  const toolImages = new Map<string, string | null>();
   toolProducts?.forEach(tp => {
     toolDescriptions.set(tp.product_code, tp.description || tp.product_code);
+    toolImages.set(tp.product_code, tp.image_url || null);
   });
 
   // Get company's consumable order history from unified product history table
@@ -95,6 +97,7 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
     uniqueToolCodes.map(async (toolCode) => {
       const quantity = toolQuantities.get(toolCode) || 1;
       const description = toolDescriptions.get(toolCode) || toolCode;
+      const imageUrl = toolImages.get(toolCode) || null;
 
       // Get consumables for this tool
       const { data: consumableMap } = await supabase
@@ -111,6 +114,7 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
           tool_code: toolCode,
           tool_desc: description,
           quantity: quantity > 1 ? quantity : undefined,
+          image_url: imageUrl,
           items: [] as ReorderItem[]
         };
       }
@@ -137,6 +141,7 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
         tool_code: toolCode,
         tool_desc: description,
         quantity: quantity > 1 ? quantity : undefined,
+        image_url: imageUrl,
         items
       };
     })

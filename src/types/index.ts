@@ -12,6 +12,7 @@ export type ToolTab = {
   tool_code: string;
   tool_desc: string | null;
   quantity?: number;
+  image_url?: string | null;
   items: ReorderItem[];
 };
 
