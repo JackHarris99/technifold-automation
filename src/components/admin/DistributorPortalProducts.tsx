@@ -206,7 +206,7 @@ export default function DistributorPortalProducts({
                       <div className="flex items-start gap-3">
                         <div className="relative w-16 h-16 bg-gray-50 rounded-lg flex-shrink-0 overflow-hidden border border-gray-200">
                           <Image
-                            src={product.image_url || `/product_images/${product.product_code}.jpg`}
+                            src={product.image_url || '/product-placeholder.svg'}
                             alt={product.description}
                             fill
                             className="object-contain p-1"
@@ -287,7 +287,7 @@ export default function DistributorPortalProducts({
                     <div className="flex items-start gap-3 mb-3">
                       <div className="relative w-16 h-16 bg-gray-50 rounded-lg flex-shrink-0 overflow-hidden border border-gray-200">
                         <Image
-                          src={product.image_url || `/product_images/${product.product_code}.jpg`}
+                          src={product.image_url || '/product-placeholder.svg'}
                           alt={product.description}
                           fill
                           className="object-contain p-1"

@@ -885,7 +885,14 @@ function OverviewTab({
                     <div className="flex-1">
                       <div className="font-medium text-sm text-[#0a0a0a]">{contact.full_name || `${contact.first_name} ${contact.last_name}`}</div>
                       <div className="text-sm text-[#475569]">{contact.email}</div>
-                      {contact.role && <div className="text-xs text-[#64748b] mt-1">{contact.role}</div>}
+                      {contact.phone && (
+                        <div className="text-sm text-[#475569] mt-0.5">
+                          <a href={`tel:${contact.phone}`} className="text-blue-600 hover:underline">
+                            {contact.phone}
+                          </a>
+                        </div>
+                      )}
+                      {contact.role && <div className="text-xs text-[#64748b] mt-1 italic">Role: {contact.role}</div>}
                     </div>
                     <div className="flex gap-2">
                       <button
@@ -990,7 +997,7 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
                   <div className="flex items-start gap-3">
                     <div className="relative w-16 h-16 bg-[#f8fafc] rounded-lg flex-shrink-0 overflow-hidden border border-[#e8e8e8]">
                       <Image
-                        src={item.products?.image_url || `/product_images/${item.product_code}.jpg`}
+                        src={item.products?.image_url || '/product-placeholder.svg'}
                         alt={item.products?.description || item.product_code}
                         fill
                         className="object-contain p-1"
@@ -1037,7 +1044,7 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
                   <div className="flex items-start gap-3">
                     <div className="relative w-16 h-16 bg-[#f8fafc] rounded-lg flex-shrink-0 overflow-hidden border border-[#e8e8e8]">
                       <Image
-                        src={item.products?.image_url || `/product_images/${item.product_code}.jpg`}
+                        src={item.products?.image_url || '/product-placeholder.svg'}
                         alt={item.products?.description || item.product_code}
                         fill
                         className="object-contain p-1"
@@ -1077,7 +1084,7 @@ function ProductsTab({ tools, consumables, parts, companyId, onAddTool }: any) {
                   <div className="flex items-start gap-3">
                     <div className="relative w-16 h-16 bg-[#f8fafc] rounded-lg flex-shrink-0 overflow-hidden border border-[#e8e8e8]">
                       <Image
-                        src={item.products?.image_url || `/product_images/${item.product_code}.jpg`}
+                        src={item.products?.image_url || '/product-placeholder.svg'}
                         alt={item.products?.description || item.product_code}
                         fill
                         className="object-contain p-1"

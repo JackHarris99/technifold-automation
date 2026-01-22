@@ -320,7 +320,7 @@ export default function DistributorDashboard({
       >
         <div className="relative w-20 h-20 bg-[#f9fafb] rounded-[8px] flex-shrink-0 overflow-hidden">
           <Image
-            src={product.image_url || `/product_images/${product.product_code}.jpg`}
+            src={product.image_url || '/product-placeholder.svg'}
             alt={product.description}
             fill
             className="object-contain p-2"
@@ -429,7 +429,7 @@ export default function DistributorDashboard({
                 >
                   <div className="relative w-12 h-12 bg-[#f9fafb] rounded-[6px] flex-shrink-0 overflow-hidden">
                     <Image
-                      src={product.image_url || `/product_images/${product.product_code}.jpg`}
+                      src={product.image_url || '/product-placeholder.svg'}
                       alt={product.description}
                       fill
                       className="object-contain p-1"

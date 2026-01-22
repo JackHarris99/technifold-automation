@@ -476,7 +476,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                         }`}>
                           <div className="relative w-20 h-20 bg-[#f9fafb] rounded-[8px] flex-shrink-0 overflow-hidden">
                             <Image
-                              src={item.image_url || `/product_images/${item.consumable_code}.jpg`}
+                              src={item.image_url || '/product-placeholder.svg'}
                               alt={item.description}
                               fill
                               className="object-contain p-2"
@@ -598,7 +598,7 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                         }`}>
                           <div className="relative w-20 h-20 bg-[#f9fafb] rounded-[8px] flex-shrink-0 overflow-hidden">
                             <Image
-                              src={(item as any).image_url || `/product_images/${item.consumable_code}.jpg`}
+                              src={(item as any).image_url || '/product-placeholder.svg'}
                               alt={item.description}
                               fill
                               className="object-contain p-2"

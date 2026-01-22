@@ -228,7 +228,7 @@ export default function DistributorOrderReview({ order, items, currentUser }: Pr
                 {/* Product Image */}
                 <div className="relative w-24 h-24 bg-[#f9fafb] rounded-lg flex-shrink-0 overflow-hidden border border-[#e8e8e8]">
                   <Image
-                    src={item.image_url || `/product_images/${item.product_code}.jpg`}
+                    src={item.image_url || '/product-placeholder.svg'}
                     alt={item.description}
                     fill
                     className="object-contain p-2"

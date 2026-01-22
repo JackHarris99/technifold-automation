@@ -384,7 +384,7 @@ export function StaticQuotePortal({
                       }`}>
                         <div className="relative w-20 h-20 bg-[#f9fafb] rounded-[8px] flex-shrink-0 overflow-hidden">
                           <Image
-                            src={item.image_url || `/product_images/${item.product_code}.jpg`}
+                            src={item.image_url || '/product-placeholder.svg'}
                             alt={item.description}
                             fill
                             className="object-contain p-2"

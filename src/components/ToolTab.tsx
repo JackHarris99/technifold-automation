@@ -83,7 +83,7 @@ export function ToolTab({
         <div className="flex items-center gap-5">
           <div className="relative w-24 h-24 bg-white/10 rounded-xl flex-shrink-0 overflow-hidden">
             <Image
-              src={`/product_images/${toolTab.tool_code}.jpg`}
+              src={(toolTab as any).image_url || '/product-placeholder.svg'}
               alt={toolTab.tool_desc || toolTab.tool_code}
               fill
               className="object-contain p-3"
@@ -149,7 +149,7 @@ export function ToolTab({
                           {/* Product Image */}
                           <div className="relative w-20 h-20 bg-[#fafafa] rounded-lg flex-shrink-0 overflow-hidden border border-[#e8e8e8]">
                             <Image
-                              src={(item as any).image_url || `/product_images/${item.consumable_code}.jpg`}
+                              src={(item as any).image_url || '/product-placeholder.svg'}
                               alt={item.description}
                               fill
                               className="object-contain p-2"
