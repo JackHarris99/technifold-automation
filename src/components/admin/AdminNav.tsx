@@ -20,10 +20,18 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [viewMode, setViewModeState] = useState<ViewMode>('all');
+  const [systemMode, setSystemMode] = useState<'sales' | 'marketing'>('sales');
 
   useEffect(() => {
     // Load view mode from localStorage on mount
     setViewModeState(getViewMode());
+
+    // Detect which system we're in based on URL
+    if (pathname?.startsWith('/admin/marketing')) {
+      setSystemMode('marketing');
+    } else {
+      setSystemMode('sales');
+    }
 
     // Listen for changes from other tabs/components
     const handleStorageChange = (e: StorageEvent) => {
@@ -34,7 +42,7 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  }, [pathname]);
 
   async function handleViewModeChange(mode: ViewMode) {
     setViewMode(mode);
@@ -52,46 +60,165 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
     router.push('/login');
   }
 
-  return (
-    <nav className="fixed left-0 top-0 h-screen w-64 bg-gray-900 text-white flex flex-col z-50">
-      {/* Header */}
-      <div className="p-4 border-b border-gray-800">
-        <h1 className="text-lg font-bold">Technifold Admin</h1>
-        <p className="text-xs text-gray-400">Sales Engine</p>
-      </div>
+  const bgColor = systemMode === 'marketing' ? 'bg-orange-900' : 'bg-gray-900';
+  const borderColor = systemMode === 'marketing' ? 'border-orange-800' : 'border-gray-800';
+  const highlightColor = systemMode === 'marketing' ? 'bg-orange-600' : 'bg-blue-600';
+  const hoverColor = systemMode === 'marketing' ? 'hover:bg-orange-800' : 'hover:bg-gray-800';
+  const selectBgColor = systemMode === 'marketing' ? 'bg-orange-700' : 'bg-gray-700';
+  const selectBorderColor = systemMode === 'marketing' ? 'border-orange-600' : 'border-gray-600';
+  const selectHoverColor = systemMode === 'marketing' ? 'hover:bg-orange-600' : 'hover:bg-gray-600';
 
-      {/* GLOBAL VIEW MODE TOGGLE */}
-      <div className="p-4 border-b border-gray-800 bg-gray-800">
-        <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
-          View Mode
-        </label>
-        <select
-          value={viewMode}
-          onChange={(e) => handleViewModeChange(e.target.value as ViewMode)}
-          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-sm font-semibold text-white hover:bg-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option value="all">🌍 All Companies (Team)</option>
-          <option value="my_customers">👤 My Customers Only</option>
-          {isDirector && (
-            <>
-              <option value="view_as_lee">🟡 Lee's Customers</option>
-              <option value="view_as_steve">🟠 Steve's Customers</option>
-              <option value="view_as_callum">🔴 Callum's Customers</option>
-            </>
-          )}
-        </select>
-        <p className="text-xs text-gray-400 mt-2">
-          {getViewModeLabel(viewMode)}
+  return (
+    <nav className={`fixed left-0 top-0 h-screen w-64 ${bgColor} text-white flex flex-col z-50`}>
+      {/* System Mode Toggle - DIRECTORS ONLY */}
+      {isDirector && (
+        <div className={`p-4 border-b ${borderColor} ${systemMode === 'marketing' ? 'bg-orange-800' : 'bg-gray-800'}`}>
+          <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+            System
+          </label>
+          <select
+            value={systemMode}
+            onChange={(e) => {
+              const newMode = e.target.value as 'sales' | 'marketing';
+              setSystemMode(newMode);
+              if (newMode === 'marketing') {
+                router.push('/admin/marketing/dashboard');
+              } else {
+                router.push('/admin/sales');
+              }
+            }}
+            className={`w-full px-3 py-2 ${selectBgColor} border ${selectBorderColor} rounded text-sm font-semibold text-white ${selectHoverColor} focus:ring-2 focus:ring-${systemMode === 'marketing' ? 'orange' : 'blue'}-500 focus:border-${systemMode === 'marketing' ? 'orange' : 'blue'}-500`}
+          >
+            <option value="sales">🏢 Sales Engine</option>
+            <option value="marketing">📧 Marketing System</option>
+          </select>
+        </div>
+      )}
+
+      {/* Header */}
+      <div className={`p-4 border-b ${borderColor}`}>
+        <h1 className="text-lg font-bold">Technifold Admin</h1>
+        <p className="text-xs text-gray-400">
+          {systemMode === 'marketing' ? 'Marketing System' : 'Sales Engine'}
         </p>
       </div>
 
-      {/* Universal Company Search */}
-      <div className="p-4 border-b border-gray-800">
-        <CompanySearchBar />
-      </div>
+      {/* GLOBAL VIEW MODE TOGGLE - Only show in Sales mode */}
+      {systemMode === 'sales' && (
+        <div className={`p-4 border-b ${borderColor} ${systemMode === 'marketing' ? 'bg-orange-800' : 'bg-gray-800'}`}>
+          <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+            View Mode
+          </label>
+          <select
+            value={viewMode}
+            onChange={(e) => handleViewModeChange(e.target.value as ViewMode)}
+            className={`w-full px-3 py-2 ${selectBgColor} border ${selectBorderColor} rounded text-sm font-semibold text-white ${selectHoverColor} focus:ring-2 focus:ring-${systemMode === 'marketing' ? 'orange' : 'blue'}-500 focus:border-${systemMode === 'marketing' ? 'orange' : 'blue'}-500`}
+          >
+            <option value="all">🌍 All Companies (Team)</option>
+            <option value="my_customers">👤 My Customers Only</option>
+            {isDirector && (
+              <>
+                <option value="view_as_lee">🟡 Lee's Customers</option>
+                <option value="view_as_steve">🟠 Steve's Customers</option>
+                <option value="view_as_callum">🔴 Callum's Customers</option>
+              </>
+            )}
+          </select>
+          <p className="text-xs text-gray-400 mt-2">
+            {getViewModeLabel(viewMode)}
+          </p>
+        </div>
+      )}
+
+      {/* Universal Company Search - Only in Sales mode */}
+      {systemMode === 'sales' && (
+        <div className={`p-4 border-b ${borderColor}`}>
+          <CompanySearchBar />
+        </div>
+      )}
 
       {/* Navigation - Scrollable */}
       <div className="py-4 flex-1 overflow-y-auto">
+
+        {/* ==================== MARKETING SYSTEM NAV ==================== */}
+        {systemMode === 'marketing' && isDirector && (
+          <>
+            {/* Dashboard */}
+            <div className="mb-6">
+              <div className="px-4 mb-2 text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                Dashboard
+              </div>
+              <Link
+                href="/admin/marketing/dashboard"
+                className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+                  pathname === '/admin/marketing/dashboard'
+                    ? `${highlightColor} text-white`
+                    : `text-gray-300 ${hoverColor} hover:text-white`
+                }`}
+              >
+                📊 Marketing Dashboard
+              </Link>
+            </div>
+
+            {/* Campaigns */}
+            <div className="mb-6">
+              <div className="px-4 mb-2 text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                Campaigns
+              </div>
+              <Link
+                href="/admin/marketing/campaigns/list"
+                className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+                  pathname === '/admin/marketing/campaigns/list' || pathname?.startsWith('/admin/marketing/campaigns/')
+                    ? `${highlightColor} text-white`
+                    : `text-gray-300 ${hoverColor} hover:text-white`
+                }`}
+              >
+                📧 All Campaigns
+              </Link>
+              <Link
+                href="/admin/marketing/campaigns/create"
+                className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+                  pathname === '/admin/marketing/campaigns/create'
+                    ? `${highlightColor} text-white`
+                    : `text-gray-300 ${hoverColor} hover:text-white`
+                }`}
+              >
+                ✨ Create Campaign
+              </Link>
+            </div>
+
+            {/* Prospects */}
+            <div className="mb-6">
+              <div className="px-4 mb-2 text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                Prospects
+              </div>
+              <Link
+                href="/admin/marketing/prospects/list"
+                className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+                  pathname === '/admin/marketing/prospects/list' || pathname?.startsWith('/admin/marketing/prospects/')
+                    ? `${highlightColor} text-white`
+                    : `text-gray-300 ${hoverColor} hover:text-white`
+                }`}
+              >
+                👥 All Prospects
+              </Link>
+              <Link
+                href="/admin/marketing/prospects/import"
+                className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+                  pathname === '/admin/marketing/prospects/import'
+                    ? `${highlightColor} text-white`
+                    : `text-gray-300 ${hoverColor} hover:text-white`
+                }`}
+              >
+                📥 Import Prospects
+              </Link>
+            </div>
+          </>
+        )}
+
+        {/* ==================== SALES ENGINE NAV ==================== */}
+        {systemMode === 'sales' && (
+          <>
         {/* Dashboard */}
         <div className="mb-6">
           <div className="px-4 mb-2 text-xs font-semibold text-gray-300 uppercase tracking-wider">
@@ -101,8 +228,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/sales"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname === '/admin/sales' || pathname === '/admin'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             Sales Center
@@ -112,8 +239,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
               href="/admin/sales/distributors"
               className={`block px-4 py-2 text-sm font-[500] transition-colors ${
                 pathname === '/admin/sales/distributors'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                  ? `${highlightColor} text-white`
+                  : `text-gray-300 ${hoverColor} hover:text-white`
               }`}
             >
               📦 Distributor Center
@@ -123,8 +250,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/sales/reorder-opportunities"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname === '/admin/sales/reorder-opportunities'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             Reorder Opportunities
@@ -133,8 +260,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/sales/trials-ending"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname === '/admin/sales/trials-ending'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             Trials Ending
@@ -143,8 +270,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/sales/unpaid-invoices"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname === '/admin/sales/unpaid-invoices'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             Unpaid Invoices
@@ -160,8 +287,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/companies"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname === '/admin/companies' || pathname?.startsWith('/admin/company/')
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             All Companies
@@ -170,8 +297,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/distributors"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname === '/admin/distributors'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             Distributor Users
@@ -180,8 +307,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/distributor-orders/pending"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname?.startsWith('/admin/distributor-orders')
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             Pending Distributor Orders
@@ -197,8 +324,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/quotes"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname === '/admin/quotes' || pathname?.startsWith('/admin/quotes/')
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             All Quotes
@@ -207,8 +334,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/quote-builder/tools"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname?.startsWith('/admin/quote-builder/tools')
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             🔧 Tools Quote Builder
@@ -217,8 +344,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/quote-builder/consumables"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname?.startsWith('/admin/quote-builder/consumables')
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             📦 Consumables Quote Builder
@@ -234,8 +361,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/invoices"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname === '/admin/invoices'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             Invoices
@@ -251,8 +378,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/subscriptions"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname === '/admin/subscriptions'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             All Subscriptions
@@ -261,8 +388,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/trials"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname === '/admin/trials'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             Active Trials
@@ -278,8 +405,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/products"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname === '/admin/products'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             Product Catalog
@@ -288,8 +415,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/tool-consumables"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname === '/admin/tool-consumables'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             Tool-Consumable Links
@@ -305,8 +432,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/send-reorder"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname === '/admin/send-reorder'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             Send Reorder Email
@@ -315,8 +442,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/test-reorder-link"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname === '/admin/test-reorder-link'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             Test Reorder Link
@@ -332,8 +459,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/shipping-manifests"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname === '/admin/shipping-manifests'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             Shipping Manifests
@@ -342,8 +469,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/shipping-rates"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname === '/admin/shipping-rates'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             Shipping Rates
@@ -352,8 +479,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/engagements"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname === '/admin/engagements'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             Engagement Events
@@ -362,8 +489,8 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/brand-media"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname === '/admin/brand-media'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             Brand Media
@@ -372,20 +499,22 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             href="/admin/users"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname === '/admin/users'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
             Users
           </Link>
         </div>
+          </>
+        )}
       </div>
 
       {/* Footer - Logout */}
-      <div className="p-4 border-t border-gray-800 bg-gray-900">
+      <div className={`p-4 border-t ${borderColor} ${bgColor}`}>
         <button
           onClick={handleLogout}
-          className="w-full px-4 py-2 text-sm font-[500] text-gray-300 hover:bg-gray-800 hover:text-white rounded transition-colors"
+          className={`w-full px-4 py-2 text-sm font-[500] text-gray-300 ${hoverColor} hover:text-white rounded transition-colors`}
         >
           Logout
         </button>
