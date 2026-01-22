@@ -166,7 +166,7 @@ export default function AddContactModal({ isOpen, onClose, companyId, existingCo
             >
               <option value="subscribed">Subscribed</option>
               <option value="unsubscribed">Unsubscribed</option>
-              <option value="bounced">Bounced</option>
+              <option value="pending">Pending</option>
             </select>
           </div>
 
