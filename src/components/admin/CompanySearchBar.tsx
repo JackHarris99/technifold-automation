@@ -12,6 +12,9 @@ interface Company {
   company_id: string;
   company_name: string;
   account_owner?: string;
+  country?: string;
+  billing_city?: string;
+  billing_postal_code?: string;
 }
 
 export default function CompanySearchBar() {
@@ -148,6 +151,24 @@ export default function CompanySearchBar() {
               <div className="font-semibold text-gray-900">{company.company_name}</div>
               <div className="flex items-center gap-2 mt-1 text-xs">
                 <span className="text-gray-700">{company.company_id}</span>
+                {company.billing_city && (
+                  <>
+                    <span className="text-gray-800">•</span>
+                    <span className="text-gray-700">{company.billing_city}</span>
+                  </>
+                )}
+                {company.billing_postal_code && (
+                  <>
+                    <span className="text-gray-800">•</span>
+                    <span className="text-gray-700">{company.billing_postal_code}</span>
+                  </>
+                )}
+                {company.country && (
+                  <>
+                    <span className="text-gray-800">•</span>
+                    <span className="text-gray-700">{company.country}</span>
+                  </>
+                )}
                 {company.account_owner && (
                   <>
                     <span className="text-gray-800">•</span>
