@@ -385,24 +385,14 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             Subscriptions
           </div>
           <Link
-            href="/admin/subscriptions"
+            href="/admin/subscriptions-hub"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
-              pathname === '/admin/subscriptions'
+              pathname === '/admin/subscriptions-hub' || pathname === '/admin/subscriptions' || pathname === '/admin/trials'
                 ? `${highlightColor} text-white`
                 : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
-            All Subscriptions
-          </Link>
-          <Link
-            href="/admin/trials"
-            className={`block px-4 py-2 text-sm font-[500] transition-colors ${
-              pathname === '/admin/trials'
-                ? `${highlightColor} text-white`
-                : `text-gray-300 ${hoverColor} hover:text-white`
-            }`}
-          >
-            Active Trials
+            Subscriptions & Trials
           </Link>
         </div>
 
@@ -431,6 +421,16 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
           >
             Tool-Consumable Links
           </Link>
+          <Link
+            href="/admin/products/bulk-edit"
+            className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+              pathname === '/admin/products/bulk-edit'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
+            }`}
+          >
+            Bulk Edit Products
+          </Link>
         </div>
 
         {/* Tools */}
@@ -439,24 +439,14 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             Tools
           </div>
           <Link
-            href="/admin/send-reorder"
+            href="/admin/reorder-tools"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
-              pathname === '/admin/send-reorder'
+              pathname === '/admin/reorder-tools' || pathname === '/admin/send-reorder' || pathname === '/admin/test-reorder-link'
                 ? `${highlightColor} text-white`
                 : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
-            Send Reorder Email
-          </Link>
-          <Link
-            href="/admin/test-reorder-link"
-            className={`block px-4 py-2 text-sm font-[500] transition-colors ${
-              pathname === '/admin/test-reorder-link'
-                ? `${highlightColor} text-white`
-                : `text-gray-300 ${hoverColor} hover:text-white`
-            }`}
-          >
-            Test Reorder Link
+            Reorder Tools
           </Link>
         </div>
 
@@ -466,24 +456,14 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             Other
           </div>
           <Link
-            href="/admin/shipping-manifests"
+            href="/admin/shipping"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
-              pathname === '/admin/shipping-manifests'
+              pathname === '/admin/shipping' || pathname === '/admin/shipping-manifests' || pathname === '/admin/shipping-rates'
                 ? `${highlightColor} text-white`
                 : `text-gray-300 ${hoverColor} hover:text-white`
             }`}
           >
-            Shipping Manifests
-          </Link>
-          <Link
-            href="/admin/shipping-rates"
-            className={`block px-4 py-2 text-sm font-[500] transition-colors ${
-              pathname === '/admin/shipping-rates'
-                ? `${highlightColor} text-white`
-                : `text-gray-300 ${hoverColor} hover:text-white`
-            }`}
-          >
-            Shipping Rates
+            Shipping Management
           </Link>
           <Link
             href="/admin/engagements"
