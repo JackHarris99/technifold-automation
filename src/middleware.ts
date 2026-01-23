@@ -1,26 +1,24 @@
 /**
- * Next.js Middleware
- * Intercepts all requests to track prospect engagement via tokens
+ * Next.js Middleware - Universal Activity Tracking
+ * Tracks ALL users: prospects, customers, distributors, authenticated users
+ * Detects tokens from URLs, paths, and cookies
  */
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { verifyToken } from '@/lib/tokens';
 
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
   const response = NextResponse.next();
 
-  // Check for tracking tokens in query params
-  const urlProspectToken = searchParams.get('pt'); // Permanent prospect token from URL
+  // ========== PROSPECT MARKETING TOKENS (Query Params) ==========
+  const urlProspectToken = searchParams.get('pt'); // Permanent prospect token
   const campaignToken = searchParams.get('ct'); // Campaign-specific token
-
-  // Check for existing prospect cookie
   const cookieProspectToken = request.cookies.get('prospect_token')?.value;
-
-  // Determine which prospect token to use (URL takes precedence)
   const prospectToken = urlProspectToken || cookieProspectToken;
 
-  // If we have a prospect token in URL, set/update the cookie (1 year expiry)
+  // Set/update prospect cookie if URL has token
   if (urlProspectToken) {
     response.cookies.set('prospect_token', urlProspectToken, {
       maxAge: 60 * 60 * 24 * 365, // 1 year
@@ -31,37 +29,119 @@ export async function middleware(request: NextRequest) {
     });
   }
 
-  // If we have any tracking data (URL tokens OR cookie), log the engagement
-  if (prospectToken || campaignToken) {
-    // Don't await - let tracking happen in background
-    trackEngagement(request, prospectToken, campaignToken);
+  // ========== CUSTOMER TOKENS (Path-based /r/, /q/, /x/) ==========
+  let customerCompanyId = request.cookies.get('customer_company_id')?.value || null;
+  let customerContactId = request.cookies.get('customer_contact_id')?.value || null;
+  let tokenObjectType = request.cookies.get('token_object_type')?.value || null;
+
+  // Detect path-based tokens and decode them
+  const pathToken = extractPathToken(pathname);
+  if (pathToken) {
+    const decoded = verifyToken(pathToken);
+    if (decoded) {
+      // Set cookies for future visits
+      if (decoded.company_id) {
+        customerCompanyId = decoded.company_id;
+        response.cookies.set('customer_company_id', decoded.company_id, {
+          maxAge: 60 * 60 * 24 * 90, // 90 days for customers
+          path: '/',
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+        });
+      }
+
+      if (decoded.contact_id) {
+        customerContactId = decoded.contact_id;
+        response.cookies.set('customer_contact_id', decoded.contact_id, {
+          maxAge: 60 * 60 * 24 * 90,
+          path: '/',
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+        });
+      }
+
+      if (decoded.object_type) {
+        tokenObjectType = decoded.object_type;
+        response.cookies.set('token_object_type', decoded.object_type, {
+          maxAge: 60 * 60 * 24 * 90,
+          path: '/',
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+        });
+      }
+    }
+  }
+
+  // ========== TRACK ALL ACTIVITY ==========
+  // Track if we have ANY identification
+  if (prospectToken || campaignToken || customerCompanyId || customerContactId) {
+    trackActivity(request, {
+      prospectToken,
+      campaignToken,
+      customerCompanyId,
+      customerContactId,
+      tokenObjectType,
+      pathname,
+    });
   }
 
   return response;
 }
 
-async function trackEngagement(
+/**
+ * Extract token from path-based routes
+ * /r/{token} - Reorder portal
+ * /q/{token} - Quote view
+ * /x/{token} - Offer/trial links
+ * /u/{token} - Unsubscribe links
+ */
+function extractPathToken(pathname: string): string | null {
+  const match = pathname.match(/^\/(r|q|x|u)\/([^\/]+)/);
+  if (match) {
+    return match[2]; // The token part
+  }
+  return null;
+}
+
+/**
+ * Track activity to universal tracking API
+ */
+async function trackActivity(
   request: NextRequest,
-  prospectToken: string | null,
-  campaignToken: string | null
+  data: {
+    prospectToken: string | null;
+    campaignToken: string | null;
+    customerCompanyId: string | null;
+    customerContactId: string | null;
+    tokenObjectType: string | null;
+    pathname: string;
+  }
 ) {
   try {
-    const { pathname, searchParams } = request.nextUrl;
+    const { searchParams } = request.nextUrl;
 
-    // Build tracking payload
     const payload: any = {
-      url: pathname,
+      url: data.pathname,
       query_params: Object.fromEntries(searchParams),
       referrer: request.headers.get('referer'),
       user_agent: request.headers.get('user-agent'),
       ip_address: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip'),
+
+      // Prospect data
+      prospect_token: data.prospectToken,
+      campaign_token: data.campaignToken,
+
+      // Customer data
+      customer_company_id: data.customerCompanyId,
+      customer_contact_id: data.customerContactId,
+      token_object_type: data.tokenObjectType,
     };
 
-    if (prospectToken) payload.prospect_token = prospectToken;
-    if (campaignToken) payload.campaign_token = campaignToken;
-
-    // Send to tracking API (non-blocking)
-    fetch(new URL('/api/track/engagement', request.url), {
+    // Send to universal tracking API (non-blocking)
+    fetch(new URL('/api/track/activity', request.url), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
