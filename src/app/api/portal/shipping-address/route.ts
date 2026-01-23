@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/tokens';
+import { verifyToken, getCompanyQueryField } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
@@ -30,11 +30,27 @@ export async function GET(request: NextRequest) {
     const supabase = getSupabaseClient();
     const company_id = payload.company_id;
 
-    // Fetch ALL shipping addresses for the company
+    // First fetch company to get UUID (handles backward compatibility for old TEXT company_id values)
+    const companyQuery = getCompanyQueryField(company_id);
+    const { data: company, error: companyError } = await supabase
+      .from('companies')
+      .select('company_id')
+      .eq(companyQuery.column, companyQuery.value)
+      .single();
+
+    if (companyError || !company) {
+      console.error('[portal/shipping-address] Company not found:', companyError);
+      return NextResponse.json(
+        { error: 'Company not found' },
+        { status: 404 }
+      );
+    }
+
+    // Fetch ALL shipping addresses for the company using UUID company_id
     const { data: shippingAddresses, error: addressError } = await supabase
       .from('shipping_addresses')
       .select('address_id, address_line_1, address_line_2, city, state_province, postal_code, country, is_default, label')
-      .eq('company_id', company_id)
+      .eq('company_id', company.company_id)
       .order('is_default', { ascending: false }); // Default address first
 
     if (addressError) {

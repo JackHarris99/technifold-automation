@@ -6,7 +6,7 @@
 
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
-import { verifyToken } from '@/lib/tokens';
+import { verifyToken, getCompanyQueryField } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 import { StaticQuotePortal } from '@/components/quotes/StaticQuotePortal';
 import { InteractiveQuotePortal } from '@/components/quotes/InteractiveQuotePortal';
@@ -76,11 +76,12 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
     notFound();
   }
 
-  // 4. Fetch company with billing address and VAT
+  // 4. Fetch company with billing address and VAT (with backward compatibility for old TEXT company_id values)
+  const companyQuery = getCompanyQueryField(company_id);
   const { data: company, error: companyError } = await supabase
     .from('companies')
     .select('company_id, company_name, billing_address_line_1, billing_address_line_2, billing_city, billing_state_province, billing_postal_code, billing_country, vat_number')
-    .eq('company_id', company_id)
+    .eq(companyQuery.column, companyQuery.value)
     .single();
 
   if (companyError || !company) {
@@ -252,10 +253,11 @@ export async function generateMetadata({ params }: QuoteViewerProps) {
   }
 
   const supabase = getSupabaseClient();
+  const companyQuery = getCompanyQueryField(payload.company_id);
   const { data: company } = await supabase
     .from('companies')
     .select('company_name')
-    .eq('company_id', payload.company_id)
+    .eq(companyQuery.column, companyQuery.value)
     .single();
 
   return {

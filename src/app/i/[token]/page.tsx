@@ -4,7 +4,7 @@
  */
 
 import { notFound } from 'next/navigation';
-import { verifyToken } from '@/lib/tokens';
+import { verifyToken, getCompanyQueryField } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 
 interface InvoiceViewerProps {
@@ -41,11 +41,12 @@ export default async function InvoiceViewerPage({ params }: InvoiceViewerProps) 
   const { company_id, contact_id } = payload;
   const supabase = getSupabaseClient();
 
-  // 2. Fetch company
+  // 2. Fetch company (with backward compatibility for old TEXT company_id values)
+  const companyQuery = getCompanyQueryField(company_id);
   const { data: company } = await supabase
     .from('companies')
     .select('company_id, company_name, billing_address_line_1, billing_address_line_2, billing_city, billing_state_province, billing_postal_code, billing_country')
-    .eq('company_id', company_id)
+    .eq(companyQuery.column, companyQuery.value)
     .single();
 
   if (!company) {
@@ -63,11 +64,11 @@ export default async function InvoiceViewerPage({ params }: InvoiceViewerProps) 
     contact = data;
   }
 
-  // 4. Fetch invoices (recent completed orders)
+  // 4. Fetch invoices (recent completed orders) - using UUID company_id
   const { data: invoices } = await supabase
     .from('orders')
     .select('order_id, total_amount, subtotal, tax_amount, shipping_amount, currency, payment_status, created_at')
-    .eq('company_id', company_id)
+    .eq('company_id', company.company_id)
     .eq('payment_status', 'paid')
     .order('created_at', { ascending: false })
     .limit(10);
@@ -205,10 +206,11 @@ export async function generateMetadata({ params }: InvoiceViewerProps) {
   }
 
   const supabase = getSupabaseClient();
+  const companyQuery = getCompanyQueryField(payload.company_id);
   const { data: company } = await supabase
     .from('companies')
     .select('company_name')
-    .eq('company_id', payload.company_id)
+    .eq(companyQuery.column, companyQuery.value)
     .single();
 
   return {

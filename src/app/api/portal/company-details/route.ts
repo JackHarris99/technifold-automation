@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/tokens';
+import { verifyToken, getCompanyQueryField } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
@@ -30,7 +30,8 @@ export async function GET(request: NextRequest) {
     const supabase = getSupabaseClient();
     const company_id = payload.company_id;
 
-    // Fetch company billing details
+    // Fetch company billing details (with backward compatibility for old TEXT company_id values)
+    const companyQuery = getCompanyQueryField(company_id);
     const { data: company, error: companyError } = await supabase
       .from('companies')
       .select(`
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
         billing_country,
         vat_number
       `)
-      .eq('company_id', company_id)
+      .eq(companyQuery.column, companyQuery.value)
       .single();
 
     if (companyError) {

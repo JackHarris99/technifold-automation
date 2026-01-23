@@ -6,7 +6,7 @@
  */
 
 import { notFound } from 'next/navigation';
-import { verifyToken } from '@/lib/tokens';
+import { verifyToken, getCompanyQueryField } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
@@ -88,22 +88,23 @@ export default async function TokenPage({ params, searchParams }: TokenPageProps
     console.error('[token-page] Failed to track engagement event:', err);
   }
 
-  // 3. FETCH COMPANY DETAILS
+  // 3. FETCH COMPANY DETAILS (with backward compatibility for old TEXT company_id values)
+  const companyQuery = getCompanyQueryField(company_id);
   const { data: company } = await supabase
     .from('companies')
     .select('company_id, company_name')
-    .eq('company_id', company_id)
+    .eq(companyQuery.column, companyQuery.value)
     .single();
 
   if (!company) {
     notFound();
   }
 
-  // 4. FETCH COMPANY MACHINES WITH FULL DETAILS
+  // 4. FETCH COMPANY MACHINES WITH FULL DETAILS (using UUID company_id)
   const { data: companyMachines } = await supabase
     .from('company_machine')
     .select('machine_id, machines(machine_id, brand, model, display_name, type, slug)')
-    .eq('company_id', company_id);
+    .eq('company_id', company.company_id);
 
   // Get primary machine for narrative selection
   const primaryMachine = companyMachines?.[0]?.machines as any;

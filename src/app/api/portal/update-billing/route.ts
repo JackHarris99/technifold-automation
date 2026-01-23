@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/tokens';
+import { verifyToken, getCompanyQueryField } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export async function PATCH(request: NextRequest) {
@@ -43,7 +43,8 @@ export async function PATCH(request: NextRequest) {
     const supabase = getSupabaseClient();
     const company_id = payload.company_id;
 
-    // Update company billing address
+    // Update company billing address (with backward compatibility for old TEXT company_id values)
+    const companyQuery = getCompanyQueryField(company_id);
     const { error: updateError } = await supabase
       .from('companies')
       .update({
@@ -56,7 +57,7 @@ export async function PATCH(request: NextRequest) {
         vat_number,
         updated_at: new Date().toISOString(),
       })
-      .eq('company_id', company_id);
+      .eq(companyQuery.column, companyQuery.value);
 
     if (updateError) {
       console.error('[portal/update-billing] Error:', updateError);

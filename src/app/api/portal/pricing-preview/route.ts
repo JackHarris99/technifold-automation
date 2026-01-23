@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/tokens';
+import { verifyToken, getCompanyQueryField } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 import { calculateCartPricing, CartItem } from '@/lib/pricing-v2';
 
@@ -72,11 +72,12 @@ export async function POST(request: NextRequest) {
       return product?.type !== 'tool' && product?.type !== 'consumable';
     });
 
-    // 2. Fetch company details for tax calculation
+    // 2. Fetch company details for tax calculation (with backward compatibility for old TEXT company_id values)
+    const companyQuery = getCompanyQueryField(company_id);
     const { data: company, error: companyError } = await supabase
       .from('companies')
       .select('company_id, company_name, country, vat_number, billing_country')
-      .eq('company_id', company_id)
+      .eq(companyQuery.column, companyQuery.value)
       .single();
 
     if (companyError || !company) {
@@ -86,11 +87,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Fetch shipping address to determine destination
+    // 3. Fetch shipping address to determine destination (using UUID company_id)
     const { data: shippingAddress } = await supabase
       .from('shipping_addresses')
       .select('country')
-      .eq('company_id', company_id)
+      .eq('company_id', company.company_id)
       .eq('is_default', true)
       .single();
 

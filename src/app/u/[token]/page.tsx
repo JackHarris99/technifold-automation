@@ -4,7 +4,7 @@
  * Updates contact's marketing_status to 'unsubscribed'
  */
 
-import { verifyToken } from '@/lib/tokens';
+import { verifyToken, getCompanyQueryField } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 import UnsubscribeClient from './UnsubscribeClient';
 
@@ -56,18 +56,19 @@ export default async function UnsubscribePage({ params }: UnsubscribePageProps) 
   }
 
   if (company_id) {
+    const companyQuery = getCompanyQueryField(company_id);
     const { data } = await supabase
       .from('companies')
       .select('company_id, company_name')
-      .eq('company_id', company_id)
+      .eq(companyQuery.column, companyQuery.value)
       .single();
     company = data;
   }
 
-  // 3. Track page view
+  // 3. Track page view (use UUID company_id from fetched company)
   await supabase.from('engagement_events').insert({
     contact_id: contact_id || null,
-    company_id: company_id || null,
+    company_id: company?.company_id || null,
     event_type: 'unsubscribe_page_view',
     event_name: 'unsubscribe_page_view',
     source: 'email_link',

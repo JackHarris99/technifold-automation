@@ -7,12 +7,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { isEUCountry } from '@/lib/vat-helpers';
-import { verifyToken } from '@/lib/tokens';
+import { verifyToken, getCompanyQueryField } from '@/lib/tokens';
 
 async function checkCompanyDetails(companyId: string) {
   const supabase = getSupabaseClient();
 
   // Get company details (including billing address and VAT number)
+  // Handle backward compatibility for old TEXT company_id values from tokens
+  const companyQuery = getCompanyQueryField(companyId);
   const { data: company, error: companyError } = await supabase
     .from('companies')
     .select(`
@@ -27,18 +29,18 @@ async function checkCompanyDetails(companyId: string) {
       billing_postal_code,
       billing_country
     `)
-    .eq('company_id', companyId)
+    .eq(companyQuery.column, companyQuery.value)
     .single();
 
   if (companyError || !company) {
     return { error: 'Company not found', status: 404 };
   }
 
-  // Get default shipping address
+  // Get default shipping address (using UUID company_id)
   const { data: shippingAddress } = await supabase
     .from('shipping_addresses')
     .select('address_line_1, address_line_2, city, state_province, postal_code, country')
-    .eq('company_id', companyId)
+    .eq('company_id', company.company_id)
     .eq('is_default', true)
     .single();
 

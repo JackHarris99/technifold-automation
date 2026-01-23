@@ -5,7 +5,7 @@
  */
 
 import { notFound } from 'next/navigation';
-import { verifyToken } from '@/lib/tokens';
+import { verifyToken, getCompanyQueryField } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 import Link from 'next/link';
 
@@ -43,11 +43,12 @@ export default async function MarketingFollowUpPage({ params }: MarketingPagePro
   const { company_id, contact_id, offer_key } = payload;
   const supabase = getSupabaseClient();
 
-  // 2. Fetch company
+  // 2. Fetch company (with backward compatibility for old TEXT company_id values)
+  const companyQuery = getCompanyQueryField(company_id);
   const { data: company } = await supabase
     .from('companies')
     .select('company_id, company_name')
-    .eq('company_id', company_id)
+    .eq(companyQuery.column, companyQuery.value)
     .single();
 
   if (!company) {
@@ -219,10 +220,11 @@ export async function generateMetadata({ params }: MarketingPageProps) {
   }
 
   const supabase = getSupabaseClient();
+  const companyQuery = getCompanyQueryField(payload.company_id);
   const { data: company } = await supabase
     .from('companies')
     .select('company_name')
-    .eq('company_id', payload.company_id)
+    .eq(companyQuery.column, companyQuery.value)
     .single();
 
   return {

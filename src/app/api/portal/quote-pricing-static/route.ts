@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/tokens';
+import { verifyToken, getCompanyQueryField } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 
 interface CartItemInput {
@@ -106,18 +106,19 @@ export async function POST(request: NextRequest) {
 
     const subtotal = lineItems.reduce((sum, item) => sum + item.line_total, 0);
 
-    // Fetch company shipping address to determine VAT
+    // Fetch company shipping address to determine VAT (with backward compatibility for old TEXT company_id values)
+    const companyQuery = getCompanyQueryField(company_id);
     const { data: company } = await supabase
       .from('companies')
       .select('company_id, country')
-      .eq('company_id', company_id)
+      .eq(companyQuery.column, companyQuery.value)
       .single();
 
-    // Get default shipping address
+    // Get default shipping address (using UUID company_id)
     const { data: defaultAddress } = await supabase
       .from('shipping_addresses')
       .select('country')
-      .eq('company_id', company_id)
+      .eq('company_id', company?.company_id || company_id)
       .eq('is_default', true)
       .single();
 

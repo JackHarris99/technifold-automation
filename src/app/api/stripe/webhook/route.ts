@@ -8,6 +8,7 @@ import { verifyWebhookSignature, stripe } from '@/lib/stripe-client';
 import { getSupabaseClient } from '@/lib/supabase';
 import { sendOrderConfirmation, sendTrialConfirmation } from '@/lib/resend-client';
 import { notifyInvoicePaid } from '@/lib/salesNotifications';
+import { getCompanyQueryField } from '@/lib/tokens';
 import Stripe from 'stripe';
 
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -142,6 +143,21 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
+  // Resolve company_id to UUID (handles backward compatibility for old Stripe sessions with TEXT company_id)
+  const companyQuery = getCompanyQueryField(companyId);
+  const { data: company } = await supabase
+    .from('companies')
+    .select('company_id')
+    .eq(companyQuery.column, companyQuery.value)
+    .single();
+
+  if (!company) {
+    console.error('[stripe-webhook] Company not found:', companyId);
+    return;
+  }
+
+  const resolvedCompanyId = company.company_id;
+
   // Retrieve full session with line items
   const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
     expand: ['line_items.data.price.product'],
@@ -191,7 +207,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const { data: invoice, error: invoiceError } = await supabase
     .from('invoices')
     .insert({
-      company_id: companyId,
+      company_id: resolvedCompanyId,
       contact_id: contactId,
       stripe_payment_intent_id: session.payment_intent as string,
       stripe_customer_id: session.customer as string,
@@ -229,7 +245,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       collection_method: 'charge_automatically',
       metadata: {
         invoice_id: invoice.invoice_id,
-        company_id: companyId,
+        company_id: resolvedCompanyId,
       },
     });
 
@@ -457,6 +473,21 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
     return;
   }
 
+  // Resolve company_id to UUID (handles backward compatibility for old Stripe sessions with TEXT company_id)
+  const companyQuery = getCompanyQueryField(companyId);
+  const { data: company } = await supabase
+    .from('companies')
+    .select('company_id')
+    .eq(companyQuery.column, companyQuery.value)
+    .single();
+
+  if (!company) {
+    console.error('[stripe-webhook] Company not found:', companyId);
+    return;
+  }
+
+  const resolvedCompanyId = company.company_id;
+
   // Parse line items from metadata
   let lineItems: Array<{
     product_code: string;
@@ -482,7 +513,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   const { data: invoice, error: invoiceError } = await supabase
     .from('invoices')
     .insert({
-      company_id: companyId,
+      company_id: resolvedCompanyId,
       contact_id: contactId,
       stripe_payment_intent_id: paymentIntent.id,
       stripe_customer_id: paymentIntent.customer as string,

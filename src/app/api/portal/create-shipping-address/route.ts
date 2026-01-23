@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/tokens';
+import { verifyToken, getCompanyQueryField } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
@@ -42,17 +42,33 @@ export async function POST(request: NextRequest) {
     const supabase = getSupabaseClient();
     const company_id = payload.company_id;
 
-    // First, set all existing addresses to non-default
+    // First fetch company to get UUID (handles backward compatibility for old TEXT company_id values)
+    const companyQuery = getCompanyQueryField(company_id);
+    const { data: company, error: companyError } = await supabase
+      .from('companies')
+      .select('company_id')
+      .eq(companyQuery.column, companyQuery.value)
+      .single();
+
+    if (companyError || !company) {
+      console.error('[portal/create-shipping-address] Company not found:', companyError);
+      return NextResponse.json(
+        { error: 'Company not found' },
+        { status: 404 }
+      );
+    }
+
+    // Set all existing addresses to non-default
     await supabase
       .from('shipping_addresses')
       .update({ is_default: false })
-      .eq('company_id', company_id);
+      .eq('company_id', company.company_id);
 
-    // Create new default shipping address
+    // Create new default shipping address using UUID company_id
     const { error: insertError } = await supabase
       .from('shipping_addresses')
       .insert({
-        company_id,
+        company_id: company.company_id,
         address_line_1,
         address_line_2,
         city,

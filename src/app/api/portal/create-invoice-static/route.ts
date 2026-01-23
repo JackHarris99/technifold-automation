@@ -8,7 +8,7 @@
 export const maxDuration = 60; // Allow up to 60 seconds for Stripe API calls
 
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/tokens';
+import { verifyToken, getCompanyQueryField } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 import { notifyQuoteAccepted } from '@/lib/salesNotifications';
 import Stripe from 'stripe';
@@ -168,10 +168,12 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
-    // Get company details
+    // Get company details (with backward compatibility for old TEXT company_id values)
+    const companyQuery = getCompanyQueryField(company_id);
     const { data: company, error: companyError } = await supabase
       .from('companies')
       .select(`
+        company_id,
         company_name,
         country,
         vat_number,
@@ -183,7 +185,7 @@ export async function POST(request: NextRequest) {
         billing_postal_code,
         billing_country
       `)
-      .eq('company_id', company_id)
+      .eq(companyQuery.column, companyQuery.value)
       .single();
 
     if (companyError || !company) {
@@ -201,11 +203,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Contact not found' }, { status: 404 });
     }
 
-    // Get shipping address
+    // Get shipping address (using UUID company_id)
     const { data: shippingAddress } = await supabase
       .from('shipping_addresses')
       .select('address_line_1, address_line_2, city, state_province, postal_code, country')
-      .eq('company_id', company_id)
+      .eq('company_id', company.company_id)
       .eq('is_default', true)
       .single();
 
@@ -285,7 +287,7 @@ export async function POST(request: NextRequest) {
       await supabase
         .from('companies')
         .update({ stripe_customer_id: stripeCustomerId })
-        .eq('company_id', company_id);
+        .eq('company_id', company.company_id);
     } else {
       // Update existing customer's billing and shipping addresses
       await getStripeClient().customers.update(stripeCustomerId, {

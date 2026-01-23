@@ -172,15 +172,15 @@ export async function POST(request: NextRequest) {
     // Send email to each contact
     for (const contact of contacts) {
       try {
-        // Generate personalized reorder portal URL
-        const tokenUrl = generateReorderUrl(baseUrl, company_id, contact.contact_id);
+        // Generate personalized reorder portal URL (use company.company_id from database to ensure UUID)
+        const tokenUrl = generateReorderUrl(baseUrl, company.company_id, contact.contact_id);
 
         // Generate unsubscribe URL
         const unsubscribeUrl = generateUnsubscribeUrl(
           baseUrl,
           contact.contact_id,
           contact.email,
-          company_id
+          company.company_id
         );
 
         const contactName = contact.first_name || contact.full_name?.split(' ')[0];
@@ -208,7 +208,7 @@ export async function POST(request: NextRequest) {
         // Track engagement event for this email
         await supabase.from('engagement_events').insert({
           contact_id: contact.contact_id,
-          company_id,
+          company_id: company.company_id,
           event_type: 'reorder_reminder_sent',
           event_name: 'reorder_reminder_sent',
           source: 'admin',

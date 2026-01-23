@@ -39,6 +39,20 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
+    // Verify company exists and get UUID company_id (ensures new tokens always use UUID)
+    const { data: company, error: companyError } = await supabase
+      .from('companies')
+      .select('company_id')
+      .eq('company_id', company_id)
+      .single();
+
+    if (companyError || !company) {
+      return NextResponse.json(
+        { error: 'Company not found' },
+        { status: 404 }
+      );
+    }
+
     // Calculate totals
     const subtotal = line_items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
     const discountAmount = line_items.reduce((sum, item) =>
@@ -50,11 +64,11 @@ export async function POST(request: NextRequest) {
     const validQuoteTypes = ['interactive', 'static'];
     const finalQuoteType = validQuoteTypes.includes(quote_type) ? quote_type : 'interactive';
 
-    // 1. Create quote in database
-    const { data: quote, error: quoteError } = await supabase
+    // 1. Create quote in database (use company.company_id to ensure UUID)
+    const { data: quote, error: quoteInsertError } = await supabase
       .from('quotes')
       .insert({
-        company_id,
+        company_id: company.company_id,
         contact_id,
         quote_type: finalQuoteType,
         pricing_mode: pricing_mode || (finalQuoteType === 'interactive' ? 'standard' : null),
@@ -71,8 +85,8 @@ export async function POST(request: NextRequest) {
       .select('quote_id')
       .single();
 
-    if (quoteError || !quote) {
-      console.error('[generate-quote] Database error:', quoteError);
+    if (quoteInsertError || !quote) {
+      console.error('[generate-quote] Database error:', quoteInsertError);
       return NextResponse.json(
         { error: 'Failed to create quote in database' },
         { status: 500 }
@@ -108,10 +122,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Generate SHORT token with just IDs (like reorder tokens)
+    // 3. Generate SHORT token with just IDs (use company.company_id to ensure UUID in token)
     const token = generateToken({
       quote_id: quote.quote_id,
-      company_id,
+      company_id: company.company_id,
       contact_id,
       object_type: 'quote', // Marks this as a quote link (not reorder)
       is_test: is_test || false,

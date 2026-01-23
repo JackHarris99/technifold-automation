@@ -185,3 +185,24 @@ export function generateUnsubscribeUrl(
 
   return `${baseUrl}/u/${token}`;
 }
+
+/**
+ * Backward compatibility helper for UUID migration
+ * Detects if company_id is old TEXT format (Sage code) or new UUID format
+ * Returns correct column name and value for querying
+ *
+ * @param companyId - Company ID from token (could be TEXT or UUID)
+ * @returns Object with column name and value for .eq() query
+ */
+export function getCompanyQueryField(companyId: string): { column: string; value: string } {
+  // UUID regex pattern: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+  if (uuidPattern.test(companyId)) {
+    // New UUID format - query by company_id
+    return { column: 'company_id', value: companyId };
+  } else {
+    // Old TEXT format (Sage customer code) - query by sage_customer_code
+    return { column: 'sage_customer_code', value: companyId };
+  }
+}
