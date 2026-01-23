@@ -102,6 +102,71 @@ export default function ProspectDetailClient({
                 </div>
               </div>
 
+              {/* Proposed Plant List */}
+              {prospect.identified_machines && prospect.identified_machines.length > 0 && (
+                <div>
+                  <h3 className="text-[16px] font-[600] text-[#0a0a0a] mb-4">
+                    Proposed Plant List (Based on Page Visits)
+                  </h3>
+                  <div className="space-y-3">
+                    {prospect.identified_machines
+                      .sort((a: any, b: any) => {
+                        // Sort by confidence (high, medium, low)
+                        const confidenceOrder: Record<string, number> = { high: 3, medium: 2, low: 1 };
+                        return (confidenceOrder[b.confidence] || 0) - (confidenceOrder[a.confidence] || 0);
+                      })
+                      .map((machine: any, idx: number) => (
+                        <div key={idx} className="border border-[#e8e8e8] rounded-lg p-4">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <div className="font-[600] text-[15px] text-[#0a0a0a]">
+                                  {machine.brand} {machine.model}
+                                </div>
+                                <span className={`px-2 py-1 rounded-full text-[11px] font-[600] ${
+                                  machine.confidence === 'high' ? 'bg-green-100 text-green-700' :
+                                  machine.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                                  'bg-gray-100 text-gray-700'
+                                }`}>
+                                  {machine.confidence.toUpperCase()} confidence
+                                </span>
+                              </div>
+                              <div className="text-[13px] text-[#64748b] mt-2">
+                                <div>First seen: {new Date(machine.first_seen).toLocaleDateString('en-GB')}</div>
+                                <div>Last seen: {new Date(machine.last_seen).toLocaleDateString('en-GB')}</div>
+                                <div>Page visits: {machine.visit_count}</div>
+                              </div>
+                              {machine.pages_viewed && machine.pages_viewed.length > 0 && (
+                                <div className="mt-2">
+                                  <div className="text-[12px] text-[#64748b] mb-1">Pages viewed:</div>
+                                  <div className="space-y-1">
+                                    {machine.pages_viewed.slice(0, 3).map((page: string, pidx: number) => (
+                                      <div key={pidx} className="text-[11px] text-blue-600">
+                                        {page}
+                                      </div>
+                                    ))}
+                                    {machine.pages_viewed.length > 3 && (
+                                      <div className="text-[11px] text-[#94a3b8]">
+                                        +{machine.pages_viewed.length - 3} more
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                  <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="text-[12px] text-blue-800 font-[600] mb-1">💡 Marketing Tip</div>
+                    <div className="text-[12px] text-blue-700">
+                      This prospect has shown interest in specific machine brands. Consider sending targeted campaigns featuring solutions for their identified machines.
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Contacts */}
               <div>
                 <h3 className="text-[16px] font-[600] text-[#0a0a0a] mb-4">Contacts ({contacts.length})</h3>

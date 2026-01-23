@@ -8,18 +8,36 @@ import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
+  const response = NextResponse.next();
 
   // Check for tracking tokens in query params
-  const prospectToken = searchParams.get('pt'); // Permanent prospect token
+  const urlProspectToken = searchParams.get('pt'); // Permanent prospect token from URL
   const campaignToken = searchParams.get('ct'); // Campaign-specific token
 
-  // If we have tokens, log the engagement
+  // Check for existing prospect cookie
+  const cookieProspectToken = request.cookies.get('prospect_token')?.value;
+
+  // Determine which prospect token to use (URL takes precedence)
+  const prospectToken = urlProspectToken || cookieProspectToken;
+
+  // If we have a prospect token in URL, set/update the cookie (1 year expiry)
+  if (urlProspectToken) {
+    response.cookies.set('prospect_token', urlProspectToken, {
+      maxAge: 60 * 60 * 24 * 365, // 1 year
+      path: '/',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+  }
+
+  // If we have any tracking data (URL tokens OR cookie), log the engagement
   if (prospectToken || campaignToken) {
     // Don't await - let tracking happen in background
     trackEngagement(request, prospectToken, campaignToken);
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 async function trackEngagement(

@@ -212,6 +212,16 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
               >
                 📥 Import Prospects
               </Link>
+              <Link
+                href="/admin/marketing/prospects/process-csv"
+                className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+                  pathname === '/admin/marketing/prospects/process-csv'
+                    ? `${highlightColor} text-white`
+                    : `text-gray-300 ${hoverColor} hover:text-white`
+                }`}
+              >
+                🔍 CSV Processor
+              </Link>
             </div>
           </>
         )}
