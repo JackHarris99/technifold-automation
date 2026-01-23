@@ -392,6 +392,8 @@ export default function CompanyDetailView({
             contacts={contacts}
             shippingAddresses={shippingAddresses}
             onAddContact={() => setShowAddContactModal(true)}
+            onEditContact={(contact) => setEditingContact(contact)}
+            onDeleteContact={handleDeleteContact}
             onAddAddress={() => {
               setEditingAddress(null);
               setShowAddressModal(true);
@@ -656,6 +658,8 @@ function OverviewTab({
   contacts,
   shippingAddresses,
   onAddContact,
+  onEditContact,
+  onDeleteContact,
   onAddAddress,
   onEditAddress,
   onEditBillingAddress,
@@ -667,6 +671,8 @@ function OverviewTab({
   contacts: any[];
   shippingAddresses: any[];
   onAddContact: () => void;
+  onEditContact: (contact: any) => void;
+  onDeleteContact: (contactId: string) => void;
   onAddAddress: () => void;
   onEditAddress: (address: any) => void;
   onEditBillingAddress: () => void;
@@ -896,14 +902,14 @@ function OverviewTab({
                     </div>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => setEditingContact(contact)}
+                        onClick={() => onEditContact(contact)}
                         className="text-blue-600 hover:text-blue-700 text-xs font-[600]"
                         title="Edit contact"
                       >
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDeleteContact(contact.contact_id)}
+                        onClick={() => onDeleteContact(contact.contact_id)}
                         className="text-red-600 hover:text-red-700 text-xs font-[600]"
                         title="Delete contact"
                       >
