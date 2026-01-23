@@ -35,25 +35,47 @@ export async function GET(request: NextRequest) {
     // All users can see all companies (no territory filter on search)
     // But exclude dead customers from search results
     console.log('[companies/search] Running query...');
-    const { data, error } = await supabase
+
+    // Search across multiple fields: name, address, country
+    const searchPattern = `%${q}%`;
+    const { data: companyData, error: companyError } = await supabase
       .from('companies')
-      .select('company_id, company_name, account_owner, status')
-      .ilike('company_name', `%${q}%`)
-      .neq('status', 'dead')  // Hide dead customers from search
+      .select('company_id, company_name, account_owner, status, country, billing_city, billing_postal_code')
+      .or(`company_name.ilike.${searchPattern},company_id.ilike.${searchPattern},country.ilike.${searchPattern},billing_city.ilike.${searchPattern},billing_postal_code.ilike.${searchPattern},billing_address_line_1.ilike.${searchPattern}`)
+      .neq('status', 'dead')
       .order('company_name')
-      .limit(20);
+      .limit(15);
+
+    // Also search in contacts (name and email)
+    const { data: contactData, error: contactError } = await supabase
+      .from('contacts')
+      .select('company_id, email, full_name, first_name, last_name, companies!inner(company_id, company_name, account_owner, status, country)')
+      .or(`email.ilike.${searchPattern},full_name.ilike.${searchPattern},first_name.ilike.${searchPattern},last_name.ilike.${searchPattern}`)
+      .neq('companies.status', 'dead')
+      .limit(10);
 
     console.log('[companies/search] Query completed', {
-      success: !error,
-      count: data?.length
+      companyMatches: companyData?.length || 0,
+      contactMatches: contactData?.length || 0
     });
 
-    if (error) {
-      console.error('[companies/search] Database error:', error);
+    if (companyError && contactError) {
+      console.error('[companies/search] Database error:', companyError || contactError);
       return NextResponse.json({ error: 'Search failed' }, { status: 500 });
     }
 
-    return NextResponse.json({ companies: data || [] });
+    // Merge results and deduplicate
+    const companiesFromContacts = contactData?.map(c => c.companies).filter(Boolean) || [];
+    const allCompanies = [...(companyData || []), ...companiesFromContacts];
+
+    // Deduplicate by company_id
+    const uniqueCompanies = Array.from(
+      new Map(allCompanies.map(c => [c.company_id, c])).values()
+    ).slice(0, 20);
+
+    console.log('[companies/search] Final results:', uniqueCompanies.length);
+
+    return NextResponse.json({ companies: uniqueCompanies });
   } catch (err) {
     console.error('[companies/search] Exception:', err);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });

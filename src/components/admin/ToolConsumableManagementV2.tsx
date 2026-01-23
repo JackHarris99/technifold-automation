@@ -278,6 +278,8 @@ function ByToolView({ tools, consumables, relationships, searchTerm, coverage, o
             <div className="flex items-start justify-between mb-4">
               <a
                 href={`/admin/tool-consumables/${tool.product_code.replace(/\//g, '--')}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex-1 hover:opacity-80 transition-opacity"
               >
                 <div className="flex items-center gap-3">
@@ -361,6 +363,8 @@ function ByConsumableView({ tools, consumables, relationships, searchTerm, onDel
                     <div key={rel.tool_code} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
                       <a
                         href={`/admin/tool-consumables/${rel.tool_code.replace(/\//g, '--')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="flex-1 min-w-0 hover:opacity-80 transition-opacity"
                       >
                         <p className="font-medium text-sm text-blue-600 hover:text-blue-700 truncate">
