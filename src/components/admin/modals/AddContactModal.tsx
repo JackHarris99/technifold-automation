@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface AddContactModalProps {
   isOpen: boolean;
@@ -11,18 +11,47 @@ interface AddContactModalProps {
 
 export default function AddContactModal({ isOpen, onClose, companyId, existingContact }: AddContactModalProps) {
   const [formData, setFormData] = useState({
-    first_name: existingContact?.first_name || '',
-    last_name: existingContact?.last_name || '',
-    full_name: existingContact?.full_name || '',
-    email: existingContact?.email || '',
-    phone: existingContact?.phone || '',
-    role: existingContact?.role || '',
-    marketing_status: existingContact?.marketing_status || 'subscribed',
+    first_name: '',
+    last_name: '',
+    full_name: '',
+    email: '',
+    phone: '',
+    role: '',
+    marketing_status: 'subscribed',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isEditing = !!existingContact;
+
+  // Update form data when existingContact changes or modal opens
+  useEffect(() => {
+    if (isOpen) {
+      if (existingContact) {
+        setFormData({
+          first_name: existingContact.first_name || '',
+          last_name: existingContact.last_name || '',
+          full_name: existingContact.full_name || '',
+          email: existingContact.email || '',
+          phone: existingContact.phone || '',
+          role: existingContact.role || '',
+          marketing_status: existingContact.marketing_status || 'subscribed',
+        });
+      } else {
+        // Reset form for new contact
+        setFormData({
+          first_name: '',
+          last_name: '',
+          full_name: '',
+          email: '',
+          phone: '',
+          role: '',
+          marketing_status: 'subscribed',
+        });
+      }
+      setError(null);
+    }
+  }, [isOpen, existingContact]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
