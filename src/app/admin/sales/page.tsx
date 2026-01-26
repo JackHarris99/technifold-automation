@@ -286,58 +286,14 @@ export default async function SalesCenterPage() {
           />
         </div>
 
-        {/* Main Content Grid - 2 columns on desktop */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* LEFT COLUMN */}
-          <div className="space-y-6">
-            <SalesCenterClient
-              companies={companies.map(c => ({ company_id: c.company_id, company_name: c.company_name }))}
-              reorderOpportunities={reorderOpportunities}
-              trialsEnding={trialsEnding}
-              unpaidInvoices={unpaidInvoices}
-            />
-          </div>
-
-          {/* RIGHT COLUMN - Quick Actions */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-              <div className="px-5 py-4 border-b border-gray-200">
-                <h3 className="font-bold text-gray-900">Quick Actions</h3>
-              </div>
-              <div className="p-4 space-y-3">
-                <Link
-                  href="/admin/companies"
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <span className="text-2xl">🏢</span>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">My Territory</h4>
-                    <p className="text-sm text-gray-700">View all companies in your territory</p>
-                  </div>
-                </Link>
-                <Link
-                  href="/admin/companies"
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <span className="text-2xl">🔍</span>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">Search All Companies</h4>
-                    <p className="text-sm text-gray-700">Cross-territory lookup (CRM)</p>
-                  </div>
-                </Link>
-                <Link
-                  href="/admin/invoices"
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <span className="text-2xl">📄</span>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">All Invoices</h4>
-                    <p className="text-sm text-gray-700">View and manage invoices</p>
-                  </div>
-                </Link>
-              </div>
-            </div>
-          </div>
+        {/* Main Content */}
+        <div className="max-w-4xl">
+          <SalesCenterClient
+            companies={companies.map(c => ({ company_id: c.company_id, company_name: c.company_name }))}
+            reorderOpportunities={reorderOpportunities}
+            trialsEnding={trialsEnding}
+            unpaidInvoices={unpaidInvoices}
+          />
         </div>
       </div>
     </div>
