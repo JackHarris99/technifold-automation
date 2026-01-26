@@ -9,6 +9,10 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import DistributorOrderDetailClient from '@/components/admin/distributors/DistributorOrderDetailClient';
 
+// Disable caching for this page - always fetch fresh order data
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
+
 export default async function DistributorOrderDetailPage({
   params,
 }: {
@@ -23,7 +27,7 @@ export default async function DistributorOrderDetailPage({
   const supabase = getSupabaseClient();
 
   // Fetch order details
-  const { data: order } = await supabase
+  const { data: order, error: orderError } = await supabase
     .from('distributor_orders')
     .select(
       `
@@ -33,35 +37,35 @@ export default async function DistributorOrderDetailPage({
       status,
       total_amount,
       currency,
-      notes,
-      approved_at,
-      approved_by,
-      rejected_at,
-      rejected_by,
-      rejection_reason,
+      reviewed_at,
+      reviewed_by,
+      billing_address_line_1,
+      billing_address_line_2,
+      billing_city,
+      billing_state_province,
+      billing_postal_code,
+      billing_country,
+      vat_number,
+      shipping_address_line_1,
+      shipping_address_line_2,
+      shipping_city,
+      shipping_state_province,
+      shipping_postal_code,
+      shipping_country,
       companies!distributor_orders_company_id_fkey (
         company_id,
         company_name,
         sage_customer_code,
-        distributor_email,
-        phone,
-        billing_address,
-        billing_city,
-        billing_postcode,
-        billing_country
-      ),
-      approved_by_user:users!distributor_orders_approved_by_fkey (
-        full_name,
-        email
-      ),
-      rejected_by_user:users!distributor_orders_rejected_by_fkey (
-        full_name,
-        email
+        distributor_email
       )
     `
     )
     .eq('order_id', params.orderId)
     .single();
+
+  if (orderError) {
+    console.error('[Order Detail] Error fetching order:', orderError);
+  }
 
   if (!order) {
     redirect('/admin/distributors/orders');

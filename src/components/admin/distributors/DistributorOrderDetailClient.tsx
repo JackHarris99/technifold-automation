@@ -21,30 +21,26 @@ interface Order {
   status: string;
   total_amount: number;
   currency: string;
-  notes: string | null;
-  approved_at: string | null;
-  approved_by: string | null;
-  rejected_at: string | null;
-  rejected_by: string | null;
-  rejection_reason: string | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+  billing_address_line_1: string | null;
+  billing_address_line_2: string | null;
+  billing_city: string | null;
+  billing_state_province: string | null;
+  billing_postal_code: string | null;
+  billing_country: string | null;
+  vat_number: string | null;
+  shipping_address_line_1: string | null;
+  shipping_address_line_2: string | null;
+  shipping_city: string | null;
+  shipping_state_province: string | null;
+  shipping_postal_code: string | null;
+  shipping_country: string | null;
   companies: {
     company_id: string;
     company_name: string;
     sage_customer_code: string | null;
     distributor_email: string | null;
-    phone: string | null;
-    billing_address: string | null;
-    billing_city: string | null;
-    billing_postcode: string | null;
-    billing_country: string | null;
-  } | null;
-  approved_by_user: {
-    full_name: string;
-    email: string;
-  } | null;
-  rejected_by_user: {
-    full_name: string;
-    email: string;
   } | null;
 }
 
@@ -65,14 +61,28 @@ export default function DistributorOrderDetailClient({
   // Get status badge classes
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'pending':
+      case 'pending_review':
         return 'bg-orange-100 text-orange-800';
-      case 'approved':
+      case 'fully_fulfilled':
         return 'bg-green-100 text-green-800';
       case 'rejected':
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  // Format status for display
+  const formatStatus = (status: string) => {
+    switch (status) {
+      case 'pending_review':
+        return 'Pending Review';
+      case 'fully_fulfilled':
+        return 'Fulfilled';
+      case 'rejected':
+        return 'Rejected';
+      default:
+        return status;
     }
   };
 
@@ -149,7 +159,7 @@ export default function DistributorOrderDetailClient({
                 order.status
               )}`}
             >
-              {order.status.toUpperCase()}
+              {formatStatus(order.status)}
             </span>
           </div>
         </div>
@@ -234,51 +244,26 @@ export default function DistributorOrderDetailClient({
       </div>
 
       {/* Status Information */}
-      {(order.approved_at || order.rejected_at) && (
+      {order.reviewed_at && (
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Status History</h2>
-          {order.approved_at && (
-            <div className="mb-4">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm font-medium text-green-700">✓ Approved</span>
-              </div>
-              <p className="text-sm text-gray-700">
-                By {order.approved_by_user?.full_name || 'Unknown'} on{' '}
-                {new Date(order.approved_at).toLocaleDateString('en-GB', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </p>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Review History</h2>
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className={`text-sm font-medium ${order.status === 'fully_fulfilled' ? 'text-green-700' : 'text-gray-700'}`}>
+                Reviewed
+              </span>
             </div>
-          )}
-          {order.rejected_at && (
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm font-medium text-red-700">✗ Rejected</span>
-              </div>
-              <p className="text-sm text-gray-700 mb-2">
-                By {order.rejected_by_user?.full_name || 'Unknown'} on{' '}
-                {new Date(order.rejected_at).toLocaleDateString('en-GB', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </p>
-              {order.rejection_reason && (
-                <div className="mt-2 p-3 bg-red-50 rounded-lg">
-                  <p className="text-sm text-gray-900">
-                    <span className="font-medium">Reason: </span>
-                    {order.rejection_reason}
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
+            <p className="text-sm text-gray-700">
+              By {order.reviewed_by || 'Unknown'} on{' '}
+              {new Date(order.reviewed_at).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </p>
+          </div>
         </div>
       )}
 
@@ -368,19 +353,50 @@ export default function DistributorOrderDetailClient({
         </div>
       )}
 
-      {/* Billing Address */}
-      {order.companies && (
+      {/* Billing and Shipping Addresses */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Billing Address */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Billing Address</h2>
           <div className="text-sm text-gray-900 space-y-1">
-            <p>{order.companies.company_name}</p>
-            {order.companies.billing_address && <p>{order.companies.billing_address}</p>}
-            {order.companies.billing_city && <p>{order.companies.billing_city}</p>}
-            {order.companies.billing_postcode && <p>{order.companies.billing_postcode}</p>}
-            {order.companies.billing_country && <p>{order.companies.billing_country}</p>}
+            <p className="font-medium">{order.companies?.company_name}</p>
+            {order.billing_address_line_1 && <p>{order.billing_address_line_1}</p>}
+            {order.billing_address_line_2 && <p>{order.billing_address_line_2}</p>}
+            {order.billing_city && (
+              <p>
+                {order.billing_city}
+                {order.billing_state_province && `, ${order.billing_state_province}`}
+              </p>
+            )}
+            {order.billing_postal_code && <p>{order.billing_postal_code}</p>}
+            {order.billing_country && <p><strong>{order.billing_country}</strong></p>}
+            {order.vat_number && (
+              <p className="mt-2 pt-2 border-t border-gray-200">
+                <span className="text-gray-700">VAT: </span>
+                <span className="font-mono">{order.vat_number}</span>
+              </p>
+            )}
           </div>
         </div>
-      )}
+
+        {/* Shipping Address */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Shipping Address</h2>
+          <div className="text-sm text-gray-900 space-y-1">
+            <p className="font-medium">{order.companies?.company_name}</p>
+            {order.shipping_address_line_1 && <p>{order.shipping_address_line_1}</p>}
+            {order.shipping_address_line_2 && <p>{order.shipping_address_line_2}</p>}
+            {order.shipping_city && (
+              <p>
+                {order.shipping_city}
+                {order.shipping_state_province && `, ${order.shipping_state_province}`}
+              </p>
+            )}
+            {order.shipping_postal_code && <p>{order.shipping_postal_code}</p>}
+            {order.shipping_country && <p><strong>{order.shipping_country}</strong></p>}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
