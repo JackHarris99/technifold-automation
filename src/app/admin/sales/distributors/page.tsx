@@ -309,12 +309,12 @@ export default async function DistributorControlCenter() {
               emptyMessage="No orders awaiting review"
               emptyIcon="✅"
               color="red"
-              viewAllHref="/admin/distributor-orders/pending"
+              viewAllHref="/admin/distributors/orders/pending"
             >
               {recentOrdersList.map((order) => (
                 <Link
                   key={order.order_id}
-                  href={`/admin/distributor-orders/${order.order_id}/review`}
+                  href={`/admin/distributors/orders/${order.order_id}/review`}
                   className="flex items-center justify-between p-4 hover:bg-red-50 transition-colors border-b border-gray-100 last:border-b-0"
                 >
                   <div>
@@ -386,7 +386,7 @@ export default async function DistributorControlCenter() {
                   </div>
                 </Link>
                 <Link
-                  href="/admin/distributor-orders/pending"
+                  href="/admin/distributors/orders/pending"
                   className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   <span className="text-2xl">📦</span>
@@ -396,7 +396,7 @@ export default async function DistributorControlCenter() {
                   </div>
                 </Link>
                 <Link
-                  href="/admin/distributor-pricing"
+                  href="/admin/distributors/pricing"
                   className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   <span className="text-2xl">💰</span>
@@ -406,7 +406,7 @@ export default async function DistributorControlCenter() {
                   </div>
                 </Link>
                 <Link
-                  href="/admin/distributor-sales"
+                  href="/admin/distributors/sales"
                   className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   <span className="text-2xl">📊</span>
