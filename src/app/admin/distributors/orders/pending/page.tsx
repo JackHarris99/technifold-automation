@@ -35,7 +35,7 @@ export default async function PendingDistributorOrdersPage() {
         distributor_email
       )
     `)
-    .eq('status', 'pending')
+    .eq('status', 'pending_review')
     .order('created_at', { ascending: false });
 
   // Fetch order items for each order

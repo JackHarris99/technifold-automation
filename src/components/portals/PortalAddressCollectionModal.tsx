@@ -94,10 +94,20 @@ export default function PortalAddressCollectionModal({
 
     try {
       // Validate VAT number for EU companies
-      if (requiresVAT && formData.vat_number.trim()) {
-        if (!vatVerificationResult || !vatVerificationResult.valid) {
+      if (requiresVAT) {
+        if (!formData.vat_number.trim()) {
+          // No VAT number provided for EU company
           const proceedAnyway = confirm(
-            'VAT number could not be verified. If you proceed, UK VAT (20%) will be applied. Do you want to continue?'
+            'WARNING: No VAT number provided.\n\n20% UK VAT will be charged on all orders.\n\nWe strongly recommend adding your VAT number to qualify for 0% reverse charge.\n\nDo you want to continue without a VAT number?'
+          );
+          if (!proceedAnyway) {
+            setIsSubmitting(false);
+            return;
+          }
+        } else if (!vatVerificationResult || !vatVerificationResult.valid) {
+          // VAT number provided but not verified
+          const proceedAnyway = confirm(
+            'WARNING: VAT number could not be verified.\n\n20% UK VAT will be charged on all orders until you provide a valid VAT number.\n\nYou can update your VAT number later to apply 0% reverse charge.\n\nDo you want to continue with unverified VAT number?'
           );
           if (!proceedAnyway) {
             setIsSubmitting(false);
@@ -225,9 +235,23 @@ export default function PortalAddressCollectionModal({
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Important Notice */}
+          <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+            <h4 className="text-sm font-bold text-blue-900 mb-2 flex items-center gap-2">
+              <span className="text-xl">ℹ️</span> Required Information
+            </h4>
+            <p className="text-sm text-blue-800">
+              All fields marked with <span className="text-red-600 font-bold text-lg">*</span> are <strong>required</strong> before you can place orders.
+            </p>
+            <p className="text-sm text-blue-800 mt-1">
+              Complete billing and shipping addresses are needed for tax calculation and delivery.
+            </p>
+          </div>
+
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {error}
+            <div className="bg-red-50 border-2 border-red-400 text-red-700 px-4 py-3 rounded-lg">
+              <p className="font-bold">Error:</p>
+              <p>{error}</p>
             </div>
           )}
 
@@ -324,21 +348,26 @@ export default function PortalAddressCollectionModal({
                 </div>
               </div>
 
-              {/* VAT Number (EU only) */}
+              {/* VAT Number (EU only) - PROMINENT SECTION */}
               {requiresVAT && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    VAT Number
+                <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-4">
+                  <label className="block text-base font-bold text-gray-900 mb-2 flex items-center gap-2">
+                    <span className="text-amber-600">⚠</span>
+                    VAT Number <span className="text-red-600 text-lg">*</span>
+                    <span className="text-xs font-normal text-amber-700 ml-2">(Required for EU companies)</span>
                   </label>
                   <input
                     type="text"
                     value={formData.vat_number}
                     onChange={(e) => handleChange('vat_number', e.target.value.toUpperCase())}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border-2 border-amber-400 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-mono text-base"
                     placeholder={`${formData.billing_country}123456789`}
                   />
+                  <p className="text-sm text-amber-900 mt-2 font-medium">
+                    💡 Without a valid VAT number, 20% UK VAT will be charged on your orders.
+                  </p>
                   <p className="text-xs text-gray-700 mt-1">
-                    Required for EU companies to apply 0% reverse charge. Format: {formData.billing_country}123456789
+                    Format: {formData.billing_country}123456789
                   </p>
 
                   {isVerifyingVAT && (
@@ -346,21 +375,27 @@ export default function PortalAddressCollectionModal({
                   )}
 
                   {vatVerificationResult && !isVerifyingVAT && (
-                    <div className={`mt-2 p-3 rounded-lg ${vatVerificationResult.valid ? 'bg-green-50 border border-green-200' : 'bg-yellow-50 border border-yellow-200'}`}>
+                    <div className={`mt-3 p-4 rounded-lg border-2 ${vatVerificationResult.valid ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-400'}`}>
                       {vatVerificationResult.valid ? (
                         <div>
-                          <p className="text-sm font-medium text-green-700">✓ VAT Number Verified</p>
+                          <p className="text-base font-bold text-green-700 flex items-center gap-2">
+                            <span className="text-xl">✓</span> VAT Number Verified Successfully
+                          </p>
                           {vatVerificationResult.companyName && (
-                            <p className="text-xs text-green-600 mt-1">Company: {vatVerificationResult.companyName}</p>
+                            <p className="text-sm text-green-600 mt-1 font-medium">Company: {vatVerificationResult.companyName}</p>
                           )}
-                          <p className="text-xs text-green-600 mt-1">0% VAT will be applied (EU Reverse Charge)</p>
+                          <p className="text-sm text-green-700 mt-2 font-semibold">
+                            ✓ 0% VAT will be applied (EU Reverse Charge)
+                          </p>
                         </div>
                       ) : (
                         <div>
-                          <p className="text-sm font-medium text-yellow-700">⚠ VAT Number Not Verified</p>
-                          <p className="text-xs text-yellow-600 mt-1">{vatVerificationResult.error}</p>
-                          <p className="text-xs text-yellow-600 mt-1">
-                            If you proceed, UK VAT (20%) will be applied to your orders.
+                          <p className="text-base font-bold text-red-700 flex items-center gap-2">
+                            <span className="text-xl">✗</span> VAT Number Could Not Be Verified
+                          </p>
+                          <p className="text-sm text-red-600 mt-2 font-medium">{vatVerificationResult.error}</p>
+                          <p className="text-sm text-red-700 mt-3 font-bold bg-red-100 p-2 rounded">
+                            ⚠ WARNING: 20% UK VAT will be charged on all orders until a valid VAT number is provided.
                           </p>
                         </div>
                       )}
