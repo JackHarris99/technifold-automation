@@ -171,8 +171,13 @@
 - ✅ FIXED: Should query `engagement_events` (480 rows)
 - ✅ FIXED: Wrong column name (`customer_company_id` → `company_id`)
 - ✅ FIXED: EVENT_SCORES mapping had wrong event types
-- ✅ FIXED: Sales Center passing ALL 2,428 companies to component (over 100 limit, so it skipped loading)
-- ✅ FIXED: Now queries engagement_events server-side and passes only companies with recent activity (~38 companies)
+- ✅ FIXED: Sales Center passing ALL 2,428 companies via URL (over 100 limit, URL length issue)
+- ✅ FIXED: **ARCHITECTURAL IMPROVEMENT** - Refactored to industry-standard server-side processing
+  - API now accepts `sales_rep_id` and `limit` parameters (no company IDs via URL)
+  - Single JOIN query: `engagement_events` INNER JOIN `companies`
+  - Server-side filtering, scoring, sorting, and limiting
+  - Scales to unlimited companies (no URL length limits)
+  - Ready for automated marketing campaigns with 500+ engaged companies
 
 ---
 
@@ -229,12 +234,16 @@
 
 ### Schema-Code Mismatches
 1. ✅ FIXED: **Active Engagement API** (`/api/admin/engagement/company-activity`):
-   - Was querying `activity_tracking` table (0 rows) instead of `engagement_events` (480 rows)
-   - Wrong column name: `customer_company_id` should be `company_id`
-   - EVENT_SCORES mapping had wrong event types
-   - Sales Center passing 2,428 companies (over 100-company limit) so component skipped loading
-   - Fixed: Now queries engagement_events server-side, passes only companies with recent activity
-   - Result: Engagement timeline now displays companies ordered by activity score
+   - **Table mismatch**: Was querying `activity_tracking` (0 rows) instead of `engagement_events` (480 rows)
+   - **Column mismatch**: Wrong column name `customer_company_id` should be `company_id`
+   - **Event type mismatch**: EVENT_SCORES mapping had wrong event types
+   - **Scalability issue**: Sales Center passing 2,428 companies via URL (100-company limit, URL length issue)
+   - **ARCHITECTURAL FIX**: Refactored to industry-standard server-side processing
+     - API now queries `engagement_events INNER JOIN companies` server-side
+     - Accepts `sales_rep_id` and `limit` parameters (no company IDs via URL)
+     - Filters, scores, sorts, and limits all on server
+     - Scales to unlimited companies (ready for 500+ automated marketing campaigns)
+   - Result: Engagement timeline displays top engaged companies, fully scalable
 
 ### Redundant Pages
 - [To document as we find them]
