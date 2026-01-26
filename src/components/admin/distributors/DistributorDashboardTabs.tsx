@@ -365,27 +365,38 @@ function PartnerNetworkTab({ metrics }: { metrics: PartnerNetworkMetrics }) {
         </div>
       </div>
 
-      {/* Coming Soon Message */}
-      <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-        <div className="text-6xl mb-4">🤝</div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Partner Network Coming Soon</h2>
-        <p className="text-gray-700 mb-6 max-w-2xl mx-auto">
-          The Partner Network system is being built. Partners will sell on your behalf and earn commission
-          on tools (20%) and consumables (10%). Their customers will live in your system, assigned to your
-          sales reps, while partners track their own sales and commission through their portal.
-        </p>
-        <div className="text-left max-w-md mx-auto bg-teal-50 border border-teal-200 rounded-lg p-4">
-          <h3 className="font-semibold text-teal-900 mb-2">Planned Features:</h3>
-          <ul className="text-sm text-teal-800 space-y-1 list-disc list-inside">
-            <li>Create new partner distributors</li>
-            <li>Link customers to partners</li>
-            <li>Set custom commission rates per partner</li>
-            <li>Auto-calculate commissions on invoices</li>
-            <li>Partner portal (view customers, sales, commission)</li>
-            <li>Commission payment tracking</li>
-            <li>Sales rep commission (on remainder after partner cut)</li>
-          </ul>
+      {/* Quick Actions */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Link
+            href="/admin/partners"
+            className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-teal-500 hover:bg-teal-50 transition-colors"
+          >
+            <div className="text-2xl">🤝</div>
+            <div>
+              <p className="font-medium text-gray-900">Manage Partners</p>
+              <p className="text-xs text-gray-700">View and create partner distributors</p>
+            </div>
+          </Link>
+          <div className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg bg-gray-50 opacity-60">
+            <div className="text-2xl">🔗</div>
+            <div>
+              <p className="font-medium text-gray-900">Link Customers</p>
+              <p className="text-xs text-gray-700">Associate customers with partners</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg bg-gray-50 opacity-60">
+            <div className="text-2xl">💰</div>
+            <div>
+              <p className="font-medium text-gray-900">Commission Payments</p>
+              <p className="text-xs text-gray-700">Track and pay commissions</p>
+            </div>
+          </div>
         </div>
+        <p className="text-xs text-gray-600 mt-4">
+          More features coming: customer association interface, automatic commission calculation, partner portal
+        </p>
       </div>
     </>
   );
