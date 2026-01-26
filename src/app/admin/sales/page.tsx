@@ -162,7 +162,12 @@ export default async function SalesCenterPage() {
 
     let endingTrialsQuery = supabase
       .from('subscriptions')
-      .select('subscription_id, company_id, trial_end_date')
+      .select(`
+        subscription_id,
+        company_id,
+        trial_end_date,
+        companies!inner(account_owner)
+      `)
       .eq('status', 'trial')
       .lt('trial_end_date', sevenDaysFromNow)
       .gt('trial_end_date', new Date().toISOString())
@@ -173,8 +178,10 @@ export default async function SalesCenterPage() {
       paidInvoicesQuery = paidInvoicesQuery.in('company_id', companyIds);
       unpaidInvoicesQuery = unpaidInvoicesQuery.in('company_id', companyIds);
       trialsQuery = trialsQuery.in('company_id', companyIds);
-      reorderQuery = reorderQuery.in('company_id', companyIds);
-      endingTrialsQuery = endingTrialsQuery.in('company_id', companyIds);
+      // For reorder query, filter by account_owner directly (more efficient than .in() with 800+ IDs)
+      reorderQuery = reorderQuery.eq('account_owner', filterBySalesRep);
+      // For trials, filter by account_owner via JOIN
+      endingTrialsQuery = endingTrialsQuery.eq('companies.account_owner', filterBySalesRep);
     }
 
     // Apply limits AFTER filtering
