@@ -145,8 +145,7 @@ export default async function SalesCenterPage() {
       .from('invoices')
       .select('invoice_id, company_id, total_amount, invoice_date, invoice_url')
       .eq('payment_status', 'unpaid')
-      .order('invoice_date', { ascending: true })
-      .limit(10);
+      .order('invoice_date', { ascending: true });
 
     let trialsQuery = supabase
       .from('subscriptions')
@@ -159,8 +158,7 @@ export default async function SalesCenterPage() {
       .eq('type', 'customer')  // Only customers for reorder opportunities
       .not('last_invoice_at', 'is', null)
       .lt('last_invoice_at', ninetyDaysAgo)
-      .order('last_invoice_at', { ascending: true })
-      .limit(10);
+      .order('last_invoice_at', { ascending: true });
 
     let endingTrialsQuery = supabase
       .from('subscriptions')
@@ -168,10 +166,9 @@ export default async function SalesCenterPage() {
       .eq('status', 'trial')
       .lt('trial_end_date', sevenDaysFromNow)
       .gt('trial_end_date', new Date().toISOString())
-      .order('trial_end_date', { ascending: true })
-      .limit(10);
+      .order('trial_end_date', { ascending: true });
 
-    // Apply company filter when filtering by specific sales rep
+    // Apply company filter when filtering by specific sales rep (BEFORE limit)
     if (filterBySalesRep) {
       paidInvoicesQuery = paidInvoicesQuery.in('company_id', companyIds);
       unpaidInvoicesQuery = unpaidInvoicesQuery.in('company_id', companyIds);
@@ -179,6 +176,11 @@ export default async function SalesCenterPage() {
       reorderQuery = reorderQuery.in('company_id', companyIds);
       endingTrialsQuery = endingTrialsQuery.in('company_id', companyIds);
     }
+
+    // Apply limits AFTER filtering
+    unpaidInvoicesQuery = unpaidInvoicesQuery.limit(10);
+    reorderQuery = reorderQuery.limit(10);
+    endingTrialsQuery = endingTrialsQuery.limit(10);
 
     const [
       paidInvoicesResult,
