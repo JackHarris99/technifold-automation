@@ -368,6 +368,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     // See: supabase/migrations/20260111_sync_invoice_to_history.sql
   }
 
+  // Calculate partner commissions since invoice is paid immediately
+  await calculatePartnerCommissions(supabase, invoice.invoice_id, resolvedCompanyId);
+
   // Regenerate portal cache for this company
   const { error: cacheError } = await supabase
     .rpc('regenerate_company_payload', { p_company_id: companyId });
@@ -621,6 +624,9 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
     // Fact tables auto-update via trigger when payment_status = 'paid'
   }
 
+  // Calculate partner commissions since invoice is paid immediately
+  await calculatePartnerCommissions(supabase, invoice.invoice_id, resolvedCompanyId);
+
   // Send order confirmation email
   try {
     const { data: company } = await supabase
@@ -830,6 +836,126 @@ async function handleInvoiceSent(invoice: Stripe.Invoice) {
 }
 
 /**
+ * Calculate and record partner/sales rep commissions for an invoice
+ * Called when invoice is paid
+ */
+async function calculatePartnerCommissions(
+  supabase: ReturnType<typeof getSupabaseClient>,
+  invoiceId: string,
+  companyId: string
+) {
+  console.log(`[commission] Checking for partner association for invoice ${invoiceId}, company ${companyId}`);
+
+  // Check if this customer is associated with a partner
+  const { data: partnerAssoc, error: assocError } = await supabase
+    .from('distributor_customers')
+    .select(`
+      distributor_id,
+      tool_commission_rate,
+      consumable_commission_rate,
+      companies!distributor_customers_distributor_id_fkey (
+        company_id,
+        company_name
+      )
+    `)
+    .eq('customer_id', companyId)
+    .eq('status', 'active')
+    .single();
+
+  if (assocError || !partnerAssoc) {
+    console.log('[commission] No active partner association found - skipping commission calculation');
+    return;
+  }
+
+  console.log(`[commission] Partner found: ${partnerAssoc.companies?.company_name}, calculating commissions...`);
+
+  // Fetch invoice items to calculate commission per product type
+  const { data: invoiceItems, error: itemsError } = await supabase
+    .from('invoice_items')
+    .select(`
+      product_code,
+      quantity,
+      unit_price,
+      line_total,
+      products:product_code (type)
+    `)
+    .eq('invoice_id', invoiceId);
+
+  if (itemsError || !invoiceItems || invoiceItems.length === 0) {
+    console.error('[commission] Failed to fetch invoice items:', itemsError);
+    return;
+  }
+
+  // Calculate commissions per product line
+  let totalPartnerCommission = 0;
+  let totalSalesRepCommission = 0;
+  let invoiceSubtotal = 0;
+
+  for (const item of invoiceItems) {
+    const lineTotal = item.line_total || 0;
+    invoiceSubtotal += lineTotal;
+
+    const productType = item.products?.type;
+    let partnerRate = 0;
+
+    // Determine partner commission rate based on product type
+    if (productType === 'tool') {
+      partnerRate = partnerAssoc.tool_commission_rate || 20;
+    } else if (productType === 'consumable') {
+      partnerRate = partnerAssoc.consumable_commission_rate || 10;
+    } else {
+      // For parts or unknown types, use consumable rate as default
+      partnerRate = partnerAssoc.consumable_commission_rate || 10;
+    }
+
+    // Calculate partner commission
+    const partnerCommission = (lineTotal * partnerRate) / 100;
+    totalPartnerCommission += partnerCommission;
+
+    // Calculate sales rep commission (5% of remainder after partner commission)
+    const remainder = lineTotal - partnerCommission;
+    const salesRepCommission = (remainder * 5) / 100;
+    totalSalesRepCommission += salesRepCommission;
+
+    console.log(`[commission] ${item.product_code} (${productType}): £${lineTotal.toFixed(2)} → Partner: £${partnerCommission.toFixed(2)} (${partnerRate}%), Sales Rep: £${salesRepCommission.toFixed(2)} (5% of £${remainder.toFixed(2)})`);
+  }
+
+  // Get sales rep for this customer
+  const { data: company } = await supabase
+    .from('companies')
+    .select('account_owner')
+    .eq('company_id', companyId)
+    .single();
+
+  const salesRepId = company?.account_owner || null;
+
+  console.log(`[commission] Total commissions - Partner: £${totalPartnerCommission.toFixed(2)}, Sales Rep (${salesRepId || 'unassigned'}): £${totalSalesRepCommission.toFixed(2)}`);
+
+  // Create commission record
+  const { error: commissionError } = await supabase
+    .from('distributor_commissions')
+    .insert({
+      invoice_id: invoiceId,
+      distributor_id: partnerAssoc.distributor_id,
+      customer_id: companyId,
+      sales_rep_id: salesRepId,
+      invoice_subtotal: invoiceSubtotal,
+      distributor_commission_rate: 0, // Not used - calculated per product
+      distributor_commission_amount: totalPartnerCommission,
+      sales_rep_commission_rate: 5, // Always 5% of remainder
+      sales_rep_commission_amount: totalSalesRepCommission,
+      distributor_payment_status: 'pending',
+      sales_rep_payment_status: 'pending',
+    });
+
+  if (commissionError) {
+    console.error('[commission] Failed to create commission record:', commissionError);
+  } else {
+    console.log(`[commission] ✅ Commission record created for invoice ${invoiceId}`);
+  }
+}
+
+/**
  * Handle invoice.paid (for invoice-led orders and subscriptions)
  */
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
@@ -864,6 +990,9 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   if (newInvoice) {
     console.log('[stripe-webhook] SUCCESS: Invoice marked as PAID in database:', newInvoice.invoice_id);
     console.log('[stripe-webhook] New invoice table updated (fact tables auto-updated via trigger):', newInvoice.invoice_id);
+
+    // Calculate partner commissions if applicable
+    await calculatePartnerCommissions(supabase, newInvoice.invoice_id, newInvoice.company_id);
 
     // AUTO-WON: Mark related quote as won when invoice is paid
     const { data: relatedQuote } = await supabase
