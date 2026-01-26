@@ -48,8 +48,7 @@ export async function GET(request: NextRequest) {
           payment_status,
           invoice_date,
           companies!inner (
-            account_owner,
-            type
+            account_owner
           )
         ),
         products!inner (
