@@ -9,6 +9,10 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import DistributorOrdersClient from '@/components/admin/distributors/DistributorOrdersClient';
 
+// Disable caching for this page - always fetch fresh orders
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
+
 export default async function DistributorOrdersPage() {
   const currentUser = await getCurrentUser();
 
@@ -19,7 +23,7 @@ export default async function DistributorOrdersPage() {
   const supabase = getSupabaseClient();
 
   // Fetch all distributor orders
-  const { data: orders } = await supabase
+  const { data: orders, error: ordersError } = await supabase
     .from('distributor_orders')
     .select(`
       order_id,
@@ -28,18 +32,19 @@ export default async function DistributorOrdersPage() {
       status,
       total_amount,
       currency,
-      approved_at,
-      approved_by,
+      reviewed_at,
+      reviewed_by,
       companies!distributor_orders_company_id_fkey (
         company_id,
         company_name,
         sage_customer_code
-      ),
-      users!distributor_orders_approved_by_fkey (
-        full_name
       )
     `)
     .order('created_at', { ascending: false });
+
+  if (ordersError) {
+    console.error('[Distributor Orders] Error fetching orders:', ordersError);
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -77,10 +82,10 @@ export default async function DistributorOrdersPage() {
           <h3 className="text-sm font-semibold text-teal-900 mb-2">Order Status Guide</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-teal-800">
             <div>
-              <span className="font-medium">Pending:</span> Awaiting director approval
+              <span className="font-medium">Pending Review:</span> Awaiting director approval
             </div>
             <div>
-              <span className="font-medium">Approved:</span> Ready for fulfillment
+              <span className="font-medium">Fulfilled:</span> Order completed and fulfilled
             </div>
             <div>
               <span className="font-medium">Rejected:</span> Order declined

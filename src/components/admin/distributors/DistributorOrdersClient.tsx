@@ -15,15 +15,12 @@ interface OrderItem {
   status: string;
   total_amount: number;
   currency: string;
-  approved_at: string | null;
-  approved_by: string | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
   companies: {
     company_id: string;
     company_name: string;
     sage_customer_code: string | null;
-  } | null;
-  users: {
-    full_name: string;
   } | null;
 }
 
@@ -33,7 +30,7 @@ interface Props {
 
 export default function DistributorOrdersClient({ orders }: Props) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending_review' | 'fully_fulfilled' | 'rejected'>('all');
 
   // Filter orders
   const filteredOrders = orders.filter(order => {
@@ -51,14 +48,28 @@ export default function DistributorOrdersClient({ orders }: Props) {
   // Get status badge classes
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'pending':
+      case 'pending_review':
         return 'bg-orange-100 text-orange-800';
-      case 'approved':
+      case 'fully_fulfilled':
         return 'bg-green-100 text-green-800';
       case 'rejected':
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  // Format status for display
+  const formatStatus = (status: string) => {
+    switch (status) {
+      case 'pending_review':
+        return 'Pending Review';
+      case 'fully_fulfilled':
+        return 'Fulfilled';
+      case 'rejected':
+        return 'Rejected';
+      default:
+        return status;
     }
   };
 
@@ -83,8 +94,8 @@ export default function DistributorOrdersClient({ orders }: Props) {
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white"
             >
               <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
+              <option value="pending_review">Pending Review</option>
+              <option value="fully_fulfilled">Fulfilled</option>
               <option value="rejected">Rejected</option>
             </select>
           </div>
@@ -118,7 +129,7 @@ export default function DistributorOrdersClient({ orders }: Props) {
                 Status
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                Approved By
+                Reviewed By
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
                 Actions
@@ -172,18 +183,18 @@ export default function DistributorOrdersClient({ orders }: Props) {
                         order.status
                       )}`}
                     >
-                      {order.status}
+                      {formatStatus(order.status)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {order.users?.full_name ? (
-                      <div className="text-sm text-gray-900">{order.users.full_name}</div>
+                    {order.reviewed_by ? (
+                      <div className="text-sm text-gray-900">{order.reviewed_by}</div>
                     ) : (
                       <div className="text-sm text-gray-500">—</div>
                     )}
-                    {order.approved_at && (
+                    {order.reviewed_at && (
                       <div className="text-xs text-gray-600">
-                        {new Date(order.approved_at).toLocaleDateString('en-GB', {
+                        {new Date(order.reviewed_at).toLocaleDateString('en-GB', {
                           day: 'numeric',
                           month: 'short',
                         })}
@@ -214,15 +225,15 @@ export default function DistributorOrdersClient({ orders }: Props) {
               <span className="text-gray-700">{orders.length}</span>
             </div>
             <div>
-              <span className="font-medium text-gray-900">Pending:</span>{' '}
+              <span className="font-medium text-gray-900">Pending Review:</span>{' '}
               <span className="text-orange-600">
-                {orders.filter((o) => o.status === 'pending').length}
+                {orders.filter((o) => o.status === 'pending_review').length}
               </span>
             </div>
             <div>
-              <span className="font-medium text-gray-900">Approved:</span>{' '}
+              <span className="font-medium text-gray-900">Fulfilled:</span>{' '}
               <span className="text-green-600">
-                {orders.filter((o) => o.status === 'approved').length}
+                {orders.filter((o) => o.status === 'fully_fulfilled').length}
               </span>
             </div>
             <div>
