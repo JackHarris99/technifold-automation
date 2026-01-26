@@ -53,6 +53,7 @@
 **Issues Found:**
 - ✅ FIXED: Line 349: Links to old `/admin/distributor-pricing` route (removed entire Quick Actions panel)
 - ✅ FIXED: Active Engagement querying wrong table (`activity_tracking` with 0 rows instead of `engagement_events` with 480 rows)
+- ✅ FIXED: Active Engagement showing zero data because passing 2,428 companies (over 100-company limit, so component skipped loading)
 
 ---
 
@@ -170,6 +171,8 @@
 - ✅ FIXED: Should query `engagement_events` (480 rows)
 - ✅ FIXED: Wrong column name (`customer_company_id` → `company_id`)
 - ✅ FIXED: EVENT_SCORES mapping had wrong event types
+- ✅ FIXED: Sales Center passing ALL 2,428 companies to component (over 100 limit, so it skipped loading)
+- ✅ FIXED: Now queries engagement_events server-side and passes only companies with recent activity (~38 companies)
 
 ---
 
@@ -229,7 +232,9 @@
    - Was querying `activity_tracking` table (0 rows) instead of `engagement_events` (480 rows)
    - Wrong column name: `customer_company_id` should be `company_id`
    - EVENT_SCORES mapping had wrong event types
-   - Caused "No engagement data yet" message on Sales Center dashboard
+   - Sales Center passing 2,428 companies (over 100-company limit) so component skipped loading
+   - Fixed: Now queries engagement_events server-side, passes only companies with recent activity
+   - Result: Engagement timeline now displays companies ordered by activity score
 
 ### Redundant Pages
 - [To document as we find them]
