@@ -53,9 +53,10 @@ interface Props {
   order: Order;
   items: OrderItem[];
   currentUser: any;
+  backUrl?: string;
 }
 
-export default function DistributorOrderReview({ order, items, currentUser }: Props) {
+export default function DistributorOrderReview({ order, items, currentUser, backUrl = '/admin/distributor-orders/pending' }: Props) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
@@ -178,7 +179,7 @@ export default function DistributorOrderReview({ order, items, currentUser }: Pr
       }
 
       alert(`Invoice created successfully!\nInvoice ID: ${data.invoice_id}\nStripe Invoice: ${data.stripe_invoice_id}`);
-      router.push('/admin/distributor-orders/pending');
+      router.push(backUrl);
       router.refresh();
     } catch (error: any) {
       console.error('Error approving order:', error);
@@ -206,7 +207,7 @@ export default function DistributorOrderReview({ order, items, currentUser }: Pr
             )}
           </div>
           <a
-            href="/admin/distributor-orders/pending"
+            href={backUrl}
             className="px-4 py-2 border border-[#e8e8e8] text-[#475569] rounded-lg hover:bg-gray-50 transition-colors"
           >
             ← Back to Orders

@@ -123,7 +123,7 @@ export default async function PendingDistributorOrdersPage() {
           </p>
         </div>
 
-        <DistributorPendingOrdersClient orders={ordersWithItems} currentUserId={currentUser.user_id} />
+        <DistributorPendingOrdersClient orders={ordersWithItems} />
       </div>
     </div>
   );

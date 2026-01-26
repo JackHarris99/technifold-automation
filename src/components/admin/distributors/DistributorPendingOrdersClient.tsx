@@ -7,6 +7,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface OrderItem {
   product_code: string;
@@ -39,13 +40,10 @@ interface Order {
 
 interface Props {
   orders: Order[];
-  currentUserId: string;
 }
 
-export default function DistributorPendingOrdersClient({ orders, currentUserId }: Props) {
-  const router = useRouter();
+export default function DistributorPendingOrdersClient({ orders }: Props) {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
-  const [processing, setProcessing] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Filter orders
@@ -54,61 +52,6 @@ export default function DistributorPendingOrdersClient({ orders, currentUserId }
     order.companies?.sage_customer_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order.po_number?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  // Handle approve order
-  const handleApprove = async (orderId: string) => {
-    if (!confirm('Are you sure you want to approve this order?')) {
-      return;
-    }
-
-    setProcessing(orderId);
-    try {
-      const response = await fetch(`/api/admin/distributors/orders/${orderId}/approve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ approved_by: currentUserId }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to approve order');
-      }
-
-      router.refresh();
-    } catch (error) {
-      console.error('Error approving order:', error);
-      alert('Failed to approve order. Please try again.');
-    } finally {
-      setProcessing(null);
-    }
-  };
-
-  // Handle reject order
-  const handleReject = async (orderId: string) => {
-    const reason = prompt('Please provide a reason for rejecting this order:');
-    if (!reason) {
-      return;
-    }
-
-    setProcessing(orderId);
-    try {
-      const response = await fetch(`/api/admin/distributors/orders/${orderId}/reject`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason, rejected_by: currentUserId }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to reject order');
-      }
-
-      router.refresh();
-    } catch (error) {
-      console.error('Error rejecting order:', error);
-      alert('Failed to reject order. Please try again.');
-    } finally {
-      setProcessing(null);
-    }
-  };
 
   return (
     <div className="space-y-4">
@@ -309,20 +252,12 @@ export default function DistributorPendingOrdersClient({ orders, currentUserId }
 
             {/* Action Buttons */}
             <div className="p-6 bg-gray-50 flex gap-3 justify-end">
-              <button
-                onClick={() => handleReject(order.order_id)}
-                disabled={processing === order.order_id}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              <Link
+                href={`/admin/distributors/orders/${order.order_id}/review`}
+                className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-bold text-lg shadow-lg transition-all"
               >
-                {processing === order.order_id ? 'Processing...' : 'Reject'}
-              </button>
-              <button
-                onClick={() => handleApprove(order.order_id)}
-                disabled={processing === order.order_id}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {processing === order.order_id ? 'Processing...' : 'Approve Order'}
-              </button>
+                Review Order & Create Invoice →
+              </Link>
             </div>
           </div>
         ))
