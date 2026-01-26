@@ -28,6 +28,13 @@ export default async function PendingDistributorOrdersPage() {
       total_amount,
       currency,
       notes,
+      billing_address_line_1,
+      billing_address_line_2,
+      billing_city,
+      billing_state_province,
+      billing_postal_code,
+      billing_country,
+      vat_number,
       companies!distributor_orders_company_id_fkey (
         company_id,
         company_name,

@@ -21,6 +21,13 @@ interface Order {
   total_amount: number;
   currency: string;
   notes: string | null;
+  billing_address_line_1: string | null;
+  billing_address_line_2: string | null;
+  billing_city: string | null;
+  billing_state_province: string | null;
+  billing_postal_code: string | null;
+  billing_country: string | null;
+  vat_number: string | null;
   companies: {
     company_id: string;
     company_name: string;
@@ -185,6 +192,53 @@ export default function DistributorPendingOrdersClient({ orders, currentUserId }
                       <span className="text-gray-900">{order.notes}</span>
                     </div>
                   )}
+
+                  {/* BILLING INFO - Critical for invoice generation */}
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <h4 className="text-xs font-semibold text-gray-700 uppercase mb-2">
+                      Billing Information (for Invoice)
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-700 font-medium">Address:</span>{' '}
+                        <div className="text-gray-900 mt-1">
+                          {order.billing_address_line_1 ? (
+                            <>
+                              {order.billing_address_line_1}
+                              {order.billing_address_line_2 && (
+                                <>
+                                  <br />
+                                  {order.billing_address_line_2}
+                                </>
+                              )}
+                              <br />
+                              {order.billing_city && `${order.billing_city}, `}
+                              {order.billing_state_province && `${order.billing_state_province} `}
+                              {order.billing_postal_code}
+                              <br />
+                              <strong>{order.billing_country}</strong>
+                            </>
+                          ) : (
+                            <span className="text-red-600 font-semibold">⚠️ No billing address provided</span>
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-gray-700 font-medium">VAT Number:</span>{' '}
+                        <div className="text-gray-900 mt-1 font-mono">
+                          {order.vat_number ? (
+                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
+                              ✓ {order.vat_number}
+                            </span>
+                          ) : (
+                            <span className="bg-red-100 text-red-800 px-2 py-1 rounded font-semibold">
+                              ⚠️ NO VAT - Apply 20% VAT
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div className="text-right ml-6">
                   <div className="text-2xl font-bold text-gray-900">
