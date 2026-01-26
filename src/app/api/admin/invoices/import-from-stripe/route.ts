@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
             paymentStatus = 'unpaid';
           }
 
-          // Create invoice record
+          // Create invoice record - INSERT AS UNPAID FIRST to avoid trigger race condition
           const invoiceData = {
             company_id: company.company_id,
             stripe_invoice_id: stripeInvoice.id,
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
             shipping_amount: 0,
             total_amount: (stripeInvoice.total || 0) / 100,
             currency: stripeInvoice.currency?.toUpperCase() || 'GBP',
-            payment_status: paymentStatus,
+            payment_status: 'unpaid', // Temporarily unpaid - will update after items inserted
             status: stripeInvoice.status,
             invoice_url: stripeInvoice.hosted_invoice_url,
             invoice_pdf_url: stripeInvoice.invoice_pdf,
@@ -233,6 +233,20 @@ export async function POST(request: NextRequest) {
             if (itemsError) {
               console.error(`[import-from-stripe] Failed to insert line items for invoice ${stripeInvoice.id}:`, itemsError);
               // Non-critical - invoice already created
+            }
+          }
+
+          // Now update invoice to correct payment_status - this triggers product history sync
+          if (paymentStatus !== 'unpaid') {
+            const { error: updateError } = await supabase
+              .from('invoices')
+              .update({
+                payment_status: paymentStatus, // Update to actual status (paid/void)
+              })
+              .eq('invoice_id', newInvoice.invoice_id);
+
+            if (updateError) {
+              console.error(`[import-from-stripe] Failed to update payment status for invoice ${stripeInvoice.id}:`, updateError);
             }
           }
 
