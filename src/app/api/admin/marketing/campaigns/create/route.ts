@@ -121,8 +121,31 @@ export async function POST(request: NextRequest) {
           })
           .eq('campaign_id', campaign.campaign_id);
 
-        // TODO: Trigger background job to actually send emails
-        // For now, we'll just queue them
+        // Trigger batch email processor to start sending emails
+        try {
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+          const sendResponse = await fetch(`${baseUrl}/api/admin/marketing/send-emails`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              campaign_id: campaign.campaign_id,
+              batch_size: 50, // Process 50 emails at a time
+            }),
+          });
+
+          if (!sendResponse.ok) {
+            console.error('[Campaign Create] Failed to trigger email sending:', await sendResponse.text());
+            // Don't fail the campaign creation - emails are queued and can be retried
+          } else {
+            const sendResult = await sendResponse.json();
+            console.log(`[Campaign Create] Email batch processing started: ${sendResult.sent_count} sent, ${sendResult.failed_count} failed`);
+          }
+        } catch (triggerError) {
+          console.error('[Campaign Create] Error triggering email batch processor:', triggerError);
+          // Don't fail the campaign creation - emails are queued and can be retried manually
+        }
       }
     }
 
