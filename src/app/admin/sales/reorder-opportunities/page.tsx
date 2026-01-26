@@ -38,6 +38,7 @@ export default async function ReorderOpportunitiesPage() {
   let query = supabase
     .from('companies')
     .select('company_id, company_name, account_owner, last_invoice_at, total_revenue')
+    .eq('type', 'customer')  // Only customers for reorder opportunities
     .not('last_invoice_at', 'is', null)
     .lt('last_invoice_at', ninetyDaysAgo)
     .order('last_invoice_at', { ascending: true });

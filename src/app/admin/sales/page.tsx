@@ -78,6 +78,7 @@ export default async function SalesCenterPage() {
     let query = supabase
       .from('companies')
       .select('company_id, company_name, account_owner')
+      .eq('type', 'customer')  // ONLY customers in sales centre (not prospects/distributors)
       .neq('status', 'dead')  // Exclude dead customers from sales metrics
       .range(start, start + batchSize - 1);
 
@@ -155,6 +156,7 @@ export default async function SalesCenterPage() {
     let reorderQuery = supabase
       .from('companies')
       .select('company_id, company_name, last_invoice_at')
+      .eq('type', 'customer')  // Only customers for reorder opportunities
       .not('last_invoice_at', 'is', null)
       .lt('last_invoice_at', ninetyDaysAgo)
       .order('last_invoice_at', { ascending: true })

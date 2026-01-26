@@ -36,7 +36,8 @@ export default async function TrialsEndingPage() {
   // Get companies based on view mode
   let companiesQuery = supabase
     .from('companies')
-    .select('company_id, company_name, account_owner');
+    .select('company_id, company_name, account_owner')
+    .eq('type', 'customer');  // Only customers in sales centre
 
   // Apply "My Customers" filter
   if (viewMode === 'my_customers') {
