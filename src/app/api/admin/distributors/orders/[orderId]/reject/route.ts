@@ -37,7 +37,7 @@ export async function POST(
         rejection_reason: reason,
       })
       .eq('order_id', orderId)
-      .eq('status', 'pending'); // Only update if still pending
+      .eq('status', 'pending_review'); // Only update if still pending review
 
     if (updateError) {
       console.error('Error rejecting order:', updateError);

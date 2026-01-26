@@ -23,16 +23,16 @@ export async function POST(
 
     const supabase = getSupabaseClient();
 
-    // Update order status to approved
+    // Update order status to fully_fulfilled
     const { error: updateError } = await supabase
       .from('distributor_orders')
       .update({
-        status: 'approved',
-        approved_by: approved_by,
-        approved_at: new Date().toISOString(),
+        status: 'fully_fulfilled',
+        reviewed_by: approved_by,
+        reviewed_at: new Date().toISOString(),
       })
       .eq('order_id', orderId)
-      .eq('status', 'pending'); // Only update if still pending
+      .eq('status', 'pending_review'); // Only update if still pending review
 
     if (updateError) {
       console.error('Error approving order:', updateError);

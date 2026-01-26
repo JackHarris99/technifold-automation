@@ -330,8 +330,8 @@ export default function DistributorOrderDetailClient({
         </div>
       </div>
 
-      {/* Actions (only for pending orders) */}
-      {order.status === 'pending' && (
+      {/* Actions (only for pending_review orders) */}
+      {order.status === 'pending_review' && (
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Actions</h2>
           <div className="flex gap-3">

@@ -34,7 +34,7 @@ export default async function DistributorDashboardPage() {
     supabase
       .from('distributor_orders')
       .select('order_id', { count: 'exact', head: true })
-      .eq('status', 'pending'),
+      .eq('status', 'pending_review'),
 
     // Total orders this month
     supabase
@@ -46,7 +46,7 @@ export default async function DistributorDashboardPage() {
     supabase
       .from('distributor_orders')
       .select('total_amount')
-      .eq('status', 'approved')
+      .eq('status', 'fully_fulfilled')
       .gte('created_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
   ]);
 
@@ -68,7 +68,7 @@ export default async function DistributorDashboardPage() {
         company_name
       )
     `)
-    .eq('status', 'pending')
+    .eq('status', 'pending_review')
     .order('created_at', { ascending: false })
     .limit(5);
 
@@ -83,7 +83,7 @@ export default async function DistributorDashboardPage() {
         company_name
       )
     `)
-    .eq('status', 'approved')
+    .eq('status', 'fully_fulfilled')
     .gte('created_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString())
     .order('total_amount', { ascending: false })
     .limit(5);
