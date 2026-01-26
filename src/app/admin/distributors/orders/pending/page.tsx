@@ -23,7 +23,7 @@ export default async function PendingDistributorOrdersPage() {
   const supabase = getSupabaseClient();
 
   // Fetch pending distributor orders
-  const { data: orders } = await supabase
+  const { data: orders, error: ordersError } = await supabase
     .from('distributor_orders')
     .select(`
       order_id,
@@ -31,7 +31,6 @@ export default async function PendingDistributorOrdersPage() {
       created_at,
       total_amount,
       currency,
-      notes,
       billing_address_line_1,
       billing_address_line_2,
       billing_city,
@@ -48,6 +47,12 @@ export default async function PendingDistributorOrdersPage() {
     `)
     .eq('status', 'pending_review')
     .order('created_at', { ascending: false });
+
+  if (ordersError) {
+    console.error('[Pending Orders] Error fetching orders:', ordersError);
+  }
+
+  console.log('[Pending Orders] Fetched orders:', orders?.length || 0);
 
   // Fetch order items for each order
   const orderIds = orders?.map(o => o.order_id) || [];
