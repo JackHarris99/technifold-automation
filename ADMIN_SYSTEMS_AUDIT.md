@@ -263,6 +263,25 @@
      4. Result: Steve's 10 oldest unpaid invoices displayed correctly
    - Applied to: unpaidInvoicesQuery, reorderQuery, endingTrialsQuery
 
+3. ✅ FIXED: **Large .in() Array Limits Breaking Sales Rep Views** (`/admin/sales` page):
+   - **Root cause**: All queries used `.in('company_id', companyIds)` with 800+ company IDs
+   - PostgREST/Supabase has limits on large .in() arrays → returned 0 results
+   - Impact: When viewing "Steve's Customers" (813 companies):
+     - Revenue: £0 (should show actual revenue)
+     - Invoices Paid: 0 (should show actual count)
+     - Active Trials: 0 (should show actual count)
+     - Unpaid Invoices: 0 results (should show actual invoices)
+     - Reorder Opportunities: 0 results (should show 774 opportunities)
+     - Trials Ending: 0 results
+   - **ARCHITECTURAL FIX**: Changed all queries to use INNER JOIN with companies table
+     - BEFORE: `.select('subtotal').in('company_id', companyIds)` (800+ IDs fails)
+     - AFTER: `.select('subtotal, companies!inner(account_owner, type)').eq('companies.account_owner', filterBySalesRep)`
+   - Benefits:
+     - No large .in() arrays (avoids PostgREST limits)
+     - More efficient (indexed account_owner filter)
+     - Filters type='customer' at database level
+   - Applied to ALL queries: paidInvoices, unpaidInvoices, trials, reorder, endingTrials
+
 ### Redundant Pages
 - [To document as we find them]
 
