@@ -15,7 +15,6 @@ interface ActivityEvent {
   url: string;
   occurred_at: string;
   score: number;
-  object_type?: string;
 }
 
 interface CompanyEngagement {
@@ -102,32 +101,33 @@ export default function CompanyEngagementTimeline({ companies, limit = 10, showE
 
   const getEventLabel = (eventType: string) => {
     const labels: Record<string, string> = {
-      'order_placed': '💰 Placed Order',
-      'subscription_created': '📋 Created Subscription',
+      'purchase': '💰 Placed Order',
+      'trial_checkout_created': '🧪 Started Trial',
       'quote_requested': '💬 Requested Quote',
-      'trial_started': '🧪 Started Trial',
-      'reorder_view': '🔄 Viewed Reorder Portal',
       'quote_view': '📄 Viewed Quote',
-      'offer_view': '🎁 Viewed Offer',
-      'product_view': '📦 Viewed Product',
-      'solution_page_view': '🎯 Viewed Solution',
-      'machine_page_view': '🏭 Viewed Machine Page',
-      'email_click': '📧 Clicked Email',
-      'page_view': '👁️ Viewed Page',
-      'subscription_page_view': '📋 Viewed Subscription Page',
+      'portal_view': '🔄 Viewed Portal',
+      'quote_page_view': '📄 Viewed Quote Page',
+      'email_sent': '📧 Email Sent',
+      'reorder_reminder_sent': '🔔 Reorder Reminder Sent',
+      'distributor_activity': '🏢 Distributor Activity',
+      'manual_activity': '✍️ Manual Contact',
+      'admin_action': '⚙️ Admin Action',
+      'payment_issue': '⚠️ Payment Issue',
+      'quote_lost': '❌ Quote Lost',
+      'distributor_order_submitted': '📦 Distributor Order',
     };
     return labels[eventType] || `📌 ${eventType}`;
   };
 
   const getSourceLabel = (source: string) => {
     const labels: Record<string, string> = {
-      'marketing_email': 'Email Campaign',
-      'reorder_link': 'Reorder Link',
-      'quote_link': 'Quote Link',
-      'offer_link': 'Offer Link',
-      'google': 'Google Search',
-      'direct': 'Direct Visit',
-      'customer_cookie': 'Returning Customer',
+      'vercel': 'Customer Portal',
+      'admin': 'Admin',
+      'admin_portal': 'Admin Portal',
+      'distributor_portal': 'Distributor Portal',
+      'stripe': 'Stripe',
+      'crm_manual': 'Manual Entry',
+      'email_campaign': 'Email Campaign',
     };
     return labels[source] || source;
   };

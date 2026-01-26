@@ -9,26 +9,26 @@ import { getCurrentUser } from '@/lib/auth';
 
 export const maxDuration = 10;
 
-// Event scoring weights
+// Event scoring weights (based on actual event_type values in engagement_events table)
 const EVENT_SCORES = {
   // High value actions
-  'order_placed': 100,
-  'subscription_created': 80,
+  'purchase': 100,
+  'trial_checkout_created': 80,
   'quote_requested': 50,
-  'trial_started': 40,
 
   // Medium value actions
-  'reorder_view': 10,
-  'quote_view': 8,
-  'offer_view': 6,
-  'product_view': 5,
-  'solution_page_view': 4,
-  'machine_page_view': 3,
+  'quote_view': 10,
+  'portal_view': 8,
+  'email_sent': 5,
+  'distributor_activity': 5,
+  'quote_page_view': 8,
 
   // Lower value actions
-  'email_click': 2,
-  'page_view': 1,
-  'subscription_page_view': 2,
+  'reorder_reminder_sent': 3,
+  'manual_activity': 2,
+  'admin_action': 1,
+  'payment_issue': -5,  // Negative score for payment failures
+  'quote_lost': -10,
 };
 
 interface CompanyEngagement {
@@ -49,7 +49,6 @@ interface ActivityEvent {
   url: string;
   occurred_at: string;
   score: number;
-  object_type?: string;
 }
 
 export async function GET(request: NextRequest) {
@@ -76,9 +75,9 @@ export async function GET(request: NextRequest) {
 
     // Fetch activity for all companies
     const { data: activities, error } = await supabase
-      .from('activity_tracking')
-      .select('activity_id, customer_company_id, event_type, source, url, occurred_at, object_type')
-      .in('customer_company_id', companyIds)
+      .from('engagement_events')
+      .select('event_id, company_id, event_type, event_name, source, url, occurred_at')
+      .in('company_id', companyIds)
       .order('occurred_at', { ascending: false })
       .limit(500); // Get last 500 events across all companies
 
@@ -105,7 +104,7 @@ export async function GET(request: NextRequest) {
 
     // Process activities
     (activities || []).forEach(activity => {
-      const companyId = activity.customer_company_id;
+      const companyId = activity.company_id;
       if (!companyId) return;
 
       const engagement = engagementMap.get(companyId);
@@ -134,13 +133,12 @@ export async function GET(request: NextRequest) {
       // Add to recent events (keep top 20 per company)
       if (engagement.recent_events.length < 20) {
         engagement.recent_events.push({
-          activity_id: activity.activity_id,
+          activity_id: activity.event_id,
           event_type: activity.event_type,
-          source: activity.source,
-          url: activity.url,
+          source: activity.source || 'unknown',
+          url: activity.url || '',
           occurred_at: activity.occurred_at,
           score: eventScore,
-          object_type: activity.object_type || undefined,
         });
       }
     });
