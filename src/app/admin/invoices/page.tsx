@@ -66,8 +66,8 @@ export default async function InvoicesPage() {
   if (viewMode === 'my_customers' && companyIds.length > 0) {
     invoicesQuery = invoicesQuery.in('company_id', companyIds);
   } else if (viewMode === 'my_customers' && companyIds.length === 0) {
-    // My customers mode with no companies - show nothing
-    invoicesQuery = invoicesQuery.eq('company_id', 'none');
+    // My customers mode with no companies - use a UUID that will never match
+    invoicesQuery = invoicesQuery.eq('company_id', '00000000-0000-0000-0000-000000000000');
   }
 
   const { data: invoices, error } = await invoicesQuery;
