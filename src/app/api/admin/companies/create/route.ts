@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { getCurrentUser } from '@/lib/auth';
 import { randomUUID } from 'crypto';
+import { validateCompanyCreation, sanitizeString } from '@/lib/request-validation';
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,6 +21,20 @@ export async function POST(request: NextRequest) {
     const supabase = getSupabaseClient();
 
     const body = await request.json();
+
+    // VALIDATION: Validate request body
+    const validation = validateCompanyCreation(body);
+    if (!validation.isValid) {
+      return NextResponse.json(
+        {
+          error: 'Validation failed',
+          errors: validation.errors,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Sanitize inputs
     const {
       company_name,
       website,
@@ -33,13 +48,6 @@ export async function POST(request: NextRequest) {
       vat_number,
       company_reg_number,
     } = body;
-
-    if (!company_name) {
-      return NextResponse.json(
-        { error: 'company_name is required' },
-        { status: 400 }
-      );
-    }
 
     // 1. Fetch all ACTIVE sales reps only
     const { data: salesReps, error: repsError } = await supabase
@@ -126,22 +134,22 @@ export async function POST(request: NextRequest) {
     // 6. Generate unique company_id (UUID for new companies)
     const companyId = randomUUID();
 
-    // 7. Create company with assigned rep
+    // 7. Create company with assigned rep (with sanitized inputs)
     const { data: newCompany, error: createError } = await supabase
       .from('companies')
       .insert({
         company_id: companyId,
-        company_name,
-        website: website || null,
-        country: country || null,
-        billing_address_line_1: billing_address_line_1 || null,
-        billing_address_line_2: billing_address_line_2 || null,
-        billing_city: billing_city || null,
-        billing_state_province: billing_state_province || null,
-        billing_postal_code: billing_postal_code || null,
-        billing_country: billing_country || null,
-        vat_number: vat_number || null,
-        company_reg_number: company_reg_number || null,
+        company_name: sanitizeString(company_name),
+        website: sanitizeString(website),
+        country: sanitizeString(country),
+        billing_address_line_1: sanitizeString(billing_address_line_1),
+        billing_address_line_2: sanitizeString(billing_address_line_2),
+        billing_city: sanitizeString(billing_city),
+        billing_state_province: sanitizeString(billing_state_province),
+        billing_postal_code: sanitizeString(billing_postal_code),
+        billing_country: sanitizeString(billing_country),
+        vat_number: sanitizeString(vat_number),
+        company_reg_number: sanitizeString(company_reg_number),
         account_owner: assignedRep,
         type: 'customer',
         source: 'manual_entry',

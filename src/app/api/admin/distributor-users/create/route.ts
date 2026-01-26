@@ -9,6 +9,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { getCurrentUser } from '@/lib/auth';
 import { Resend } from 'resend';
 import crypto from 'crypto';
+import { validateDistributorUserCreation, sanitizeString, validateEnum } from '@/lib/request-validation';
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -20,22 +21,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { company_id, email, full_name, role } = await request.json();
+    const body = await request.json();
 
-    if (!company_id || !email || !full_name) {
+    // VALIDATION: Validate request body
+    const validation = validateDistributorUserCreation(body);
+    if (!validation.isValid) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        {
+          error: 'Validation failed',
+          errors: validation.errors,
+        },
         { status: 400 }
       );
     }
 
-    // Validate role
-    if (!['admin', 'user', 'viewer'].includes(role)) {
+    // Additional role validation
+    const roleError = validateEnum(body.role, 'role', ['admin', 'user', 'viewer'], true);
+    if (roleError) {
       return NextResponse.json(
-        { error: 'Invalid role' },
+        { error: roleError.message },
         { status: 400 }
       );
     }
+
+    const { company_id, email, full_name, role } = body;
 
     const supabase = getSupabaseClient();
 
@@ -57,13 +66,13 @@ export async function POST(request: NextRequest) {
     const invitation_token = crypto.randomBytes(32).toString('hex');
     const invitation_expires_at = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    // Create user
+    // Create user (with sanitized inputs)
     const { data: newUser, error: createError } = await supabase
       .from('distributor_users')
       .insert({
         company_id,
-        email,
-        full_name,
+        email: sanitizeString(email),
+        full_name: sanitizeString(full_name),
         role,
         invitation_token,
         invitation_expires_at,

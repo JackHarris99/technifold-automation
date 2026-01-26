@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { getCurrentUser } from '@/lib/auth';
+import { validateContactCreation, sanitizeString } from '@/lib/request-validation';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,6 +17,19 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+
+    // VALIDATION: Validate request body
+    const validation = validateContactCreation(body);
+    if (!validation.isValid) {
+      return NextResponse.json(
+        {
+          error: 'Validation failed',
+          errors: validation.errors,
+        },
+        { status: 400 }
+      );
+    }
+
     const {
       company_id,
       first_name,
@@ -27,37 +41,22 @@ export async function POST(request: NextRequest) {
       marketing_status,
     } = body;
 
-    // Validation
-    if (!company_id) {
-      return NextResponse.json(
-        { error: 'company_id is required' },
-        { status: 400 }
-      );
-    }
-
-    if (!email) {
-      return NextResponse.json(
-        { error: 'email is required' },
-        { status: 400 }
-      );
-    }
-
     const supabase = getSupabaseClient();
 
     // Generate unique token for contact (for tokenized links)
     const contactToken = crypto.randomUUID();
 
-    // Create contact
+    // Create contact (with sanitized inputs)
     const { data: contact, error: insertError } = await supabase
       .from('contacts')
       .insert({
         company_id,
-        first_name: first_name || null,
-        last_name: last_name || null,
-        full_name: full_name || `${first_name || ''} ${last_name || ''}`.trim() || null,
-        email,
-        phone: phone || null,
-        role: role || null,
+        first_name: sanitizeString(first_name),
+        last_name: sanitizeString(last_name),
+        full_name: sanitizeString(full_name || `${first_name || ''} ${last_name || ''}`.trim()),
+        email: sanitizeString(email),
+        phone: sanitizeString(phone),
+        role: sanitizeString(role),
         marketing_status: marketing_status || 'subscribed',
         source: 'manual',
         status: 'active',
