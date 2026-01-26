@@ -137,20 +137,36 @@ export default async function SalesCenterPage() {
     // Build queries conditionally based on viewMode
     let paidInvoicesQuery = supabase
       .from('invoices')
-      .select('subtotal')  // Use subtotal for commission (excludes VAT & shipping)
+      .select(`
+        subtotal,
+        companies!inner(account_owner, type)
+      `)
       .eq('payment_status', 'paid')
-      .gte('invoice_date', monthStart);  // Changed to current month
+      .gte('invoice_date', monthStart)
+      .eq('companies.type', 'customer');
 
     let unpaidInvoicesQuery = supabase
       .from('invoices')
-      .select('invoice_id, company_id, total_amount, invoice_date, invoice_url')
+      .select(`
+        invoice_id,
+        company_id,
+        total_amount,
+        invoice_date,
+        invoice_url,
+        companies!inner(account_owner, type)
+      `)
       .eq('payment_status', 'unpaid')
+      .eq('companies.type', 'customer')
       .order('invoice_date', { ascending: true });
 
     let trialsQuery = supabase
       .from('subscriptions')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'trial');
+      .select(`
+        subscription_id,
+        companies!inner(account_owner, type)
+      `, { count: 'exact', head: true })
+      .eq('status', 'trial')
+      .eq('companies.type', 'customer');
 
     let reorderQuery = supabase
       .from('companies')
@@ -175,12 +191,11 @@ export default async function SalesCenterPage() {
 
     // Apply company filter when filtering by specific sales rep (BEFORE limit)
     if (filterBySalesRep) {
-      paidInvoicesQuery = paidInvoicesQuery.in('company_id', companyIds);
-      unpaidInvoicesQuery = unpaidInvoicesQuery.in('company_id', companyIds);
-      trialsQuery = trialsQuery.in('company_id', companyIds);
-      // For reorder query, filter by account_owner directly (more efficient than .in() with 800+ IDs)
+      // Use JOIN filters instead of .in() to avoid 800+ ID array limits
+      paidInvoicesQuery = paidInvoicesQuery.eq('companies.account_owner', filterBySalesRep);
+      unpaidInvoicesQuery = unpaidInvoicesQuery.eq('companies.account_owner', filterBySalesRep);
+      trialsQuery = trialsQuery.eq('companies.account_owner', filterBySalesRep);
       reorderQuery = reorderQuery.eq('account_owner', filterBySalesRep);
-      // For trials, filter by account_owner via JOIN
       endingTrialsQuery = endingTrialsQuery.eq('companies.account_owner', filterBySalesRep);
     }
 
