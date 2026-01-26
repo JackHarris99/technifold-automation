@@ -36,38 +36,62 @@ export default async function InvoicesPage() {
 
   const supabase = getSupabaseClient();
 
-  // Get company IDs for filtering
-  let companyIds: string[] = [];
+  // Fetch invoices with optional filtering by account owner
+  // Use JOIN pattern to avoid URL length limits with .in() on large arrays
+  let invoicesQuery;
+
   if (viewMode === 'my_customers' && currentUser.sales_rep_id) {
-    const { data: companies } = await supabase
-      .from('companies')
-      .select('company_id')
-      .eq('account_owner', currentUser.sales_rep_id);
-    companyIds = companies?.map(c => c.company_id) || [];
-  }
-
-  // Fetch invoices
-  let invoicesQuery = supabase
-    .from('invoices')
-    .select(`
-      invoice_id,
-      company_id,
-      invoice_number,
-      total_amount,
-      payment_status,
-      invoice_date,
-      invoice_url,
-      stripe_invoice_id
-    `)
-    .order('invoice_date', { ascending: false })
-    .limit(100);
-
-  // Apply "My Customers" filter
-  if (viewMode === 'my_customers' && companyIds.length > 0) {
-    invoicesQuery = invoicesQuery.in('company_id', companyIds);
-  } else if (viewMode === 'my_customers' && companyIds.length === 0) {
-    // My customers mode with no companies - use a UUID that will never match
-    invoicesQuery = invoicesQuery.eq('company_id', '00000000-0000-0000-0000-000000000000');
+    // Join with companies to filter by account_owner (avoids .in() with 686 UUIDs)
+    invoicesQuery = supabase
+      .from('invoices')
+      .select(`
+        invoice_id,
+        company_id,
+        invoice_number,
+        total_amount,
+        payment_status,
+        invoice_date,
+        invoice_url,
+        stripe_invoice_id,
+        companies!inner (
+          account_owner
+        )
+      `)
+      .eq('companies.account_owner', currentUser.sales_rep_id)
+      .order('invoice_date', { ascending: false })
+      .limit(100);
+  } else if (viewMode === 'my_customers') {
+    // My customers mode but no sales_rep_id - return empty
+    invoicesQuery = supabase
+      .from('invoices')
+      .select(`
+        invoice_id,
+        company_id,
+        invoice_number,
+        total_amount,
+        payment_status,
+        invoice_date,
+        invoice_url,
+        stripe_invoice_id
+      `)
+      .eq('company_id', '00000000-0000-0000-0000-000000000000')
+      .limit(100);
+  } else {
+    // All companies mode
+    invoicesQuery = supabase
+      .from('invoices')
+      .select(`
+        invoice_id,
+        company_id,
+        invoice_number,
+        total_amount,
+        payment_status,
+        invoice_date,
+        invoice_url,
+        stripe_invoice_id
+      `)
+      .order('invoice_date', { ascending: false })
+      .limit(100);
   }
 
   const { data: invoices, error } = await invoicesQuery;

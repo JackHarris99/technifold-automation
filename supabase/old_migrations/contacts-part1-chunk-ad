@@ -1,0 +1,5000 @@
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Midas Printing'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Jigsaw Colour Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Paul', 'Martin', 'Paul Martin', 'paul@jigsawcolour.co.uk', '0207 3942799', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Jigsaw Colour Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Windsor
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Paul', 'Lyward', 'Paul Lyward', 'hello@windsor.uk.com', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Windsor'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Character Graphics
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Paul', 'Maverick', 'Paul Maverick', 'paul@charactergraphics.co.uk', '01823279008', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Character Graphics'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Anstey Wallpaper Co Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Paul', 'Mullen', 'Paul Mullen', 'enquiries@anstey.uk.com', '01509225250', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Anstey Wallpaper Co Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Warrington Borough Council
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Paul', 'Phillips', 'Paul Phillips', 'pphillips@warrington.gov.uk', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Warrington Borough Council'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Absolute Proof
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Paul', 'Newman', 'Paul Newman', 'abproof@btinternet.com', '02078288357', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Absolute Proof'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: PDP
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Paul', 'Pocklington', 'Paul Pocklington', 'paul@pdpprint.co.uk', '01529 461278', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('PDP'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Blueprint
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Paul', 'Pomery', 'Paul Pomery', 'paul.pomery@blueprint-london.com', '02071839666', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Blueprint'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Selman's Print Co
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Paul', 'Selman', 'Paul Selman', 'paul@selmanprint.co.uk', '020 83455534', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Selman''s Print Co'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Whitebox Group
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Paul', 'Stephenson', 'Paul Stephenson', 'paulstephenson1951@icloud.com', '01482212161', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Whitebox Group'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Pure Graphics Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Paul', NULL, 'Paul', 'paul@pure-graphics.co.uk', '07595 022 134', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Pure Graphics Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Flippinimage Limited
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Pauleen', 'Hawthorne', 'Pauleen Hawthorne', 'info@flippinimage.co.uk', '01483 570086', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Flippinimage Limited'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Circadisc
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Pete', 'Upson', 'Pete Upson', 'pete@circadisc.com', '07880 641885', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Circadisc'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Rother Valley Press Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Peter', 'Collins', 'Peter Collins', 'sales@rvpress.co.uk', '01580 764055', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Rother Valley Press Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Prontaprint
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sir/Madam', NULL, 'Sir/Madam', 'sales@ppleicester.com', '0116 2753333', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Prontaprint'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: PC Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Peter', 'Croft', 'Peter Croft', 'peter.croft@pcprintandmailing.com', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('PC Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Kimco Hot Foil Printers
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Peter', 'Drury', 'Peter Drury', 'petekimco@aol.com', '01635 30154', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Kimco Hot Foil Printers'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Harris Bros (Gazette) Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Peter', 'Harris', 'Peter Harris', 'peterandjoan1@mac.com', '01977 792252', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Harris Bros (Gazette) Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Well Finished
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Peter', 'Saffery', 'Peter Saffery', 'peter.saffery@wellfinished.co.uk', '01764662824', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Well Finished'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Newhouse Press
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Peter', 'Nowell', 'Peter Nowell', 'newhouse58@hotmail.com', '07766 106246', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Newhouse Press'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Wyngarth Graphics
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Peter', 'Vince', 'Peter Vince', 'peter.vince@wyngarth-graphics.co.uk', '01430873996', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Wyngarth Graphics'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: J Rogers & Co
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Phil', NULL, 'Phil', 'phil@jruk.co.uk', '01604 639174', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('J Rogers & Co'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: G S M Graphic Arts
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Peter', 'Young', 'Peter Young', 'peter@gsmgroup.co.uk', '01845522184', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('G S M Graphic Arts'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Transy
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Phil', 'Harmer', 'Phil Harmer', 'phil.harmer@transy.co.uk', '020 7368 3393', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Transy'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Dempack Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Phil', 'Mowbray', 'Phil Mowbray', 'phil@demprint.com', '0116 251 1223', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Dempack Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: R P Printers
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Phil', 'Richardson', 'Phil Richardson', 'phil@rpprinters.co.uk', '01202557917', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('R P Printers'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Tri-Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Phil', 'Suddard', 'Phil Suddard', 'sales@triprint.co.uk', '01274 553930', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Tri-Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Hahnemuhle UK Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Phil', 'Tomlinson', 'Phil Tomlinson', 'phil.tomlinson@hahnemuehle.com', '07774654439', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Hahnemuhle UK Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Pressplus Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Philip', 'Moulds', 'Philip Moulds', 'philip.moulds@pressplusltd.com', '07879 496636', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Pressplus Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Reprographics Northern Lincolnshire & Go
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Philip', 'Johnstone', 'Philip Johnstone', 'philip.johnstone@nhs.net', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Reprographics Northern Lincolnshire & Go'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: PP Print Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Philip', 'Powell', 'Philip Powell', 'phil@ppprint.co.uk', '01623 656629', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('PP Print Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Anyprint2design Uk
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Philton', 'Alfred', 'Philton Alfred', 'philtonalfred@yahoo.com', '07913617172', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Anyprint2design Uk'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Enveco Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Piyush', 'Shah', 'Piyush Shah', 'info@enveco.co.uk', '01908 378866', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Enveco Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Scratch Print Products
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Philip', 'Woodwards', 'Philip Woodwards', 'neil@scratchprintproducts.co.uk', '01264748209', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Scratch Print Products'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Pollyanna Harmsworth
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Pollyanna', 'Montagu', 'Pollyanna Montagu', 'hello@pollyannaharmsworth.com', '07773 797 271', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Pollyanna Harmsworth'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Sw19 Design & Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Prakash', 'Joshi', 'Prakash Joshi', 'design@sw19designandprint.co.uk', '08005999597', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Sw19 Design & Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Prestige Colour Solutions Limited
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Prakash', 'Rathod', 'Prakash Rathod', 'prestige.f@btconnect.com', '0116 251-3233', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Prestige Colour Solutions Limited'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Sel Printers
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Pushpan', 'Bla', 'Pushpan Bla', 'selprinters@btinternet.com', '0208 4786766', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Sel Printers'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Yo Crackers
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Rachel', 'Awoyemi', 'Rachel Awoyemi', 'support@yocrackers.customerdesk.io', '07903639016', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Yo Crackers'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Stag Print & Packaging
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Rajendra', 'Patel', 'Rajendra Patel', 'info@stagprint.co.uk', '01483 303 333', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Stag Print & Packaging'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Print Connections
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Rajiv', 'Patel', 'Rajiv Patel', 'rajiv@printconnections.co.uk', '02082055560', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Print Connections'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: R Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Ralph', 'Armstrong', 'Ralph Armstrong', 'sales@rprint.co.uk', '01926 332969', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('R Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: GISTUDIO
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Ravi', 'Selvaraja', 'Ravi Selvaraja', 'aasravi1985@gmail.com', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('GISTUDIO'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Labelsco Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Raymond', 'Young', 'Raymond Young', 'raymond@reflexlabelplus.co.uk', '01455852400', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Labelsco Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Porky Penguin Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Rebecca', 'Kellett', 'Rebecca Kellett', 'info@porkypenguin.co.uk', '0800 019 6053', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Porky Penguin Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Tabbers Ltd.
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Reece', 'Robinson', 'Reece Robinson', 'reece@tabbers.co.uk', '01279 444 535', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Tabbers Ltd.'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Kudu Products
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Richard', 'Beverley', 'Richard Beverley', 'studio@kuduproducts.co.uk', '0113 204 7062', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Kudu Products'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Colour Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Ric', 'Martin', 'Ric Martin', 'ric@col-print.co.uk', '07966440057', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Colour Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Dawson Print & Design Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Ric', 'Dawson', 'Ric Dawson', 'sales.dpd@btconnect.com', '01623 722522', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Dawson Print & Design Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Warwick District Council
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Rebecca', 'Reading', 'Rebecca Reading', 'rebecca.reading@warwickdc.gov.uk', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Warwick District Council'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Pollywood Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Richard', NULL, 'Richard', 'richard@pollywood-natural.com', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Pollywood Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: The Classic Printed Bag Company
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Rich', NULL, 'Rich', 'rp@madebyclassic.co.uk', '01202488144', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('The Classic Printed Bag Company'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Phoenix Designs (uk) Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Richard', 'Cory', 'Richard Cory', 'phoedesigns@sosi.net', '(140)925-5407', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Phoenix Designs (uk) Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Point Control Print Finishing Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Richard', 'Berwick', 'Richard Berwick', 'richard.b@point-control.co.uk', '01254 384008', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Point Control Print Finishing Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Mekes Graphics
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Richard', 'Dance', 'Richard Dance', 'richard.dance@mekes.com', '07788367069', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Mekes Graphics'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: PRO20 LTD
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Richard', 'Gilder', 'Richard Gilder', 'richard@pro20.co.uk', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('PRO20 LTD'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Teaching Art
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Richard', 'Hope-hawkins', 'Richard Hope-hawkins', 'richard@saa.co.uk', '0800 980 1123', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Teaching Art'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Bluwave Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Richard', 'Mctherson', 'Richard Mctherson', 'info@thebluwavegroup.com', '02072777663', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Bluwave Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Ripe Digital Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Richard', 'Penny', 'Richard Penny', 'rik@ripedigital.co.uk', '01225815030', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Ripe Digital Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Brackley Labels Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Richard', 'Waddingham', 'Richard Waddingham', 'richard@brackleylabels.net', '01280 704979', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Brackley Labels Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Blueprint Digital
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Richard', 'Westley- Smith', 'Richard Westley- Smith', 'blueprintdigital@me.com', '01384880068', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Blueprint Digital'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: ADVENT PRINT & DESIGN
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Riz', NULL, 'Riz', 'adventprint@hotmail.com', '07912 848745', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('ADVENT PRINT & DESIGN'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Signfit
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Rob', 'Fisher', 'Rob Fisher', 'andy@signfit.co.uk', '01909567577', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Signfit'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: MPD Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Rob', 'Jackson', 'Rob Jackson', 'sales@mpd-ltd.com', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('MPD Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Southside Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Rob', 'Phillips', 'Rob Phillips', 'rob.phillips@southsideprintse1.london', '020 73786754', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Southside Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Rlh Print Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Robert', 'Hickey', 'Robert Hickey', 'rob@rlhprint.co.uk', '01270610611', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Rlh Print Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Blaby Print Company
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Robert', 'Foster', 'Robert Foster', 'rob@blabyprint.co.uk', '0116-277 1170', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Blaby Print Company'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Derby City Council
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Robert', 'Hines', 'Robert Hines', 'robert.hines@derby.gov.uk', '01332 643659', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Derby City Council'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Solomon Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Robert', 'MacCormak', 'Robert MacCormak', 'info@solomonprint.co.uk', '07913 998269', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Solomon Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: University of Oxford
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Robert', 'Malloy', 'Robert Malloy', 'robert.malloy@admin.ox.ac.uk', '01865 270000', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('University of Oxford'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Grimsby Copy Centre
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Robert', 'Melton', 'Robert Melton', 'sales@printcopy.co.uk', '01472350442', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Grimsby Copy Centre'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Queens Park Community School
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Roberto', 'Fiorentino', 'Roberto Fiorentino', 'rfiorentino@qpcs.brent.sch.uk', '020 8438 1700', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Queens Park Community School'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Grafoparts & Visiongraphics Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Robert', 'Morris', 'Robert Morris', 'grafoparts@graphictraders.com', '0703 188 6788', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Grafoparts & Visiongraphics Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Baytype -Digital Artwork & Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Roger', 'Cleet', 'Roger Cleet', 'r.cleet@btopenworld.com', '07710 405864', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Baytype -Digital Artwork & Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: gt products europe ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Roger', 'gillam', 'Roger gillam', 'roger@gtproductseurope.com', '01243555303', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('gt products europe ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Wotton Printers Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Roger', 'Man', 'Roger Man', 'info@wottonprinters.co.uk', '01626 353698', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Wotton Printers Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Soterra
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Roger', 'Whitten', 'Roger Whitten', 'roger@soterra.co.uk', '07774679825', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Soterra'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Nitecrest Ltd.
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Ronnie', 'Hart', 'Ronnie Hart', 'ronnie@nitecrest.com', '01772431888', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Nitecrest Ltd.'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Palace Printers
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Roy', 'Crocker', 'Roy Crocker', 'palaceprinters@btinternet.com', '01208873187', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Palace Printers'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: City Of York Council
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Roy', 'Grant', 'Roy Grant', 'roy.grant@york.gov.uk', '01904551550', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('City Of York Council'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Celloglas ltd.
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('S', 'Mountain', 'S Mountain', 'leedsfactory@celloglas.co.uk', '0113-244 8742', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Celloglas ltd.'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Classic Printers
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('S', 'S Gahunia', 'S S Gahunia', 'classicprinters@tiscali.co.uk', '01926 888042', 'subscribed'),
+    ('Rajesh', 'Malakar', 'Rajesh Malakar', 'classicprinters23@gmail.com', '7005621540', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Classic Printers'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Kernow Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('S', 'Smith', 'S Smith', 'threeamp@mail.com', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Kernow Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Platinum Labels
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Saffina', 'Butt', 'Saffina Butt', 'sales2@platinumlabels.co.uk', '01274 492 776', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Platinum Labels'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Colormax
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sahil', 'Sasan', 'Sahil Sasan', 'ealing@colormaxuk.com', '020 8566 1155', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Colormax'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Image Focus
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Saiyethu', 'Siraj', 'Saiyethu Siraj', 'mailsupercom@yahoo.com', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Image Focus'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: OH-HO Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Saminathan', 'Sanjayan', 'Saminathan Sanjayan', 'ssanjayan@yahoo.com', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('OH-HO Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Minuteman Press Clapham
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sam', 'H', 'Sam H', 'sam.h@minutemanpress.com', '020 7720 8500', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Minuteman Press Clapham'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Ppc Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sallie', 'Taylor', 'Sallie Taylor', 'accounts@ppcbristol.co.uk', '01179533888', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Ppc Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Printplus UK
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Salman', 'Ahmed Malik', 'Salman Ahmed Malik', 'salman@printplusuk.com', '07515439454', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Printplus UK'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Maryul
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sammy', 'Deesi', 'Sammy Deesi', 'deesisammy@gmail.com', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Maryul'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Headland Printers Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sandra', 'Church', 'Sandra Church', 'office@headlandprinters.co.uk', '01736 364694', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Headland Printers Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Tawakkel Printers UK LTD
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Saqib', 'Irshad', 'Saqib Irshad', 'tawakkelprintersuk@gmail.com', '07944000389', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Tawakkel Printers UK LTD'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Alexander Paper Supplies
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sandy', 'Cowen', 'Sandy Cowen', 'sandy@alexanderpapersupplies.co.uk', '01270842021', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Alexander Paper Supplies'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Ihkos Digital Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Satpal', 'Sokhi', 'Satpal Sokhi', 'info@ihkos.co.uk', '02476267622', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Ihkos Digital Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Sara DM Enterprises Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sathish', 'Govindaraj', 'Sathish Govindaraj', 'sathish@packwith.co.uk', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Sara DM Enterprises Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Coastline
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Scott', 'Braker', 'Scott Braker', 'scott@coastlinegraphics.co.uk', '07860 260870, 01284 717760', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Coastline'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: CPI Card Group
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Scott', 'Maxted', 'Scott Maxted', 'smaxted@cpicardgroup.com', '07739 663372', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('CPI Card Group'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: MacroPrint
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Seamus', 'MacRory', 'Seamus MacRory', 'seamusmacrory@hotmail.co.uk', '07904219606', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('MacroPrint'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Vanacomm
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sean', 'Allen', 'Sean Allen', 'sean.allen@vanacomm.com', '01709 768001', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Vanacomm'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: JD Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sean', 'Dudgeon', 'Sean Dudgeon', 'jdprint@btinternet.com', '02871 885585', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('JD Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Woodward Printers
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sean', 'Woodward', 'Sean Woodward', 'woodwardsprinters@live.co.uk', '01538752217', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Woodward Printers'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Crestar Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Semeena', 'Rani', 'Semeena Rani', 'rani.semeena@googelmail.com', '07861225041', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Crestar Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Style Printing
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Shabibi', NULL, 'Shabibi', 'design@styleprinting.co.uk', '02084597863', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Style Printing'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: ARTECH
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Shahem', 'Shams', 'Shahem Shams', 'artech1999@hotmail.com', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('ARTECH'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: sw highfield
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('shane', 'bull', 'shane bull', 'shanebull1@outlook.com', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('sw highfield'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Graphico Printing Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Shaukat', 'Dungarwalla', 'Shaukat Dungarwalla', 'shaukat@graphico.com', '07515 685004', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Graphico Printing Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Printaz / Excel Design & Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Shamsul', 'Hafez', 'Shamsul Hafez', 'shafak@talktalk.net', '07811720145', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Printaz / Excel Design & Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Dearne Valley Printers Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sharon', 'Fletcher', 'Sharon Fletcher', 'sales@dvpl.co.uk', '01709 872188', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Dearne Valley Printers Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: 321 Printing
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Shaun', NULL, 'Shaun', 'shaun@321print.co.uk', '01473 281999', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('321 Printing'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Box Three Studio Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Shaun', 'Goddard', 'Shaun Goddard', 'shaun@box-3.co.uk', '01789 459090', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Box Three Studio Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Surefire Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Simon', 'Garrett', 'Simon Garrett', 'orders@surefireprint.co.uk', '4.41933E+11', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Surefire Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: K C PRINTING
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Simon', 'King', 'Simon King', 'mail@kc-printing.co.uk, accounts@kc-printing.co.uk', '01761 490361', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('K C PRINTING'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Catton Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Simon', 'Laskey', 'Simon Laskey', 'sales@cattonprint.com', '01603 404616', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Catton Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: sm print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Simon', 'Minto', 'Simon Minto', 'simon@sm-print.co.uk', '077988966420', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('sm print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Plusart
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Simon', 'Owen', 'Simon Owen', 'simon.owen@plusart.co.uk', '0115 9724000', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Plusart'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Imagefactory
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Simon', 'Tilley', 'Simon Tilley', 'simon@imagefactoryuk.com', '01249 456654', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Imagefactory'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Multi Packaging Solutions
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Simon', 'Tokelove', 'Simon Tokelove', 'simon.tokelove@westrock.com', NULL, 'subscribed'),
+    ('Laurent', 'Breton', 'Laurent Breton', 'laurent.breton@westrock.com', '''+33 0 247327570', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Multi Packaging Solutions'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Soabar Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Simon', 'Tolley', 'Simon Tolley', 'simon.tolley@soabar.co.uk', '01162847000', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Soabar Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Dream Cards
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sir', NULL, 'Sir', 'info@sendadream.com', '''+44 (0)20 7052 8280', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Dream Cards'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Joseph Ball Printers
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sonia', 'Carruthers', 'Sonia Carruthers', 'sonia@josephball.co.uk', '0116 2713322', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Joseph Ball Printers'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Business Printing UK
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sonia', 'Clarke', 'Sonia Clarke', 'sonia.clarke@businessprintinguk.co.uk', '020 3832 2733', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Business Printing UK'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Jrl & Co Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sonny', 'Phillips', 'Sonny Phillips', 'sonnyfphillips@aol.co.uk', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Jrl & Co Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Printscene Print & Signs Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Stephen', 'Ball', 'Stephen Ball', 'stephen@printscene.co.uk', '01773 608071', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Printscene Print & Signs Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Castelli Diaries
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Stephen', 'Fowler', 'Stephen Fowler', 'retail@castelli.co.uk', '01892 612 215', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Castelli Diaries'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Eason Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Stephen', 'Samson', 'Stephen Samson', 'office@easonprint.co.uk', '01623 624115', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Eason Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: H P E Printers
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Stephen', 'Smith', 'Stephen Smith', 'hpeprint@aol.com', '01751 473578', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('H P E Printers'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Central Print & Binding Services Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Stan', 'Cichosz', 'Stan Cichosz', 'printmanstan@icloud.com', '07980 321 321', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Central Print & Binding Services Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Shepway District Council
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Stephen', 'Rees', 'Stephen Rees', 'printrm@folkestone-hythe.gov.uk', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Shepway District Council'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Acushnet Europe Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Steve', 'Amps', 'Steve Amps', 'steve_amps@acushnetgolf.com', '01480302430', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Acushnet Europe Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Copywise Ltd.
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Stephen', 'Whitehouse', 'Stephen Whitehouse', 'stephen@copywise.net', '01215503994', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Copywise Ltd.'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Kitz Katz Print Shop
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Steve', 'Beresford', 'Steve Beresford', 'sales@kitzkatz.com', '01726 833385', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Kitz Katz Print Shop'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Stroma Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Steve', 'Brown', 'Steve Brown', 'steve@stromaltd.co.uk', '02088677770', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Stroma Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: St Andrews Press
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Steve', 'Collins', 'Steve Collins', 'steve@standrewspress.co.uk', '07951654164', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('St Andrews Press'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Price Right Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Steve', 'Dempster', 'Steve Dempster', 'stevedempster@hotmail.com', '07961346826', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Price Right Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Fresh Printing
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Steve', 'Dewe', 'Steve Dewe', 'steve@freshprintinguk.co.uk', '020 8942 7766', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Fresh Printing'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Lime Solutions
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Steve', 'Jones', 'Steve Jones', 'steve@lime-solutions.net', '01925 244727', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Lime Solutions'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Alexir Packaging
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Steve', 'King', 'Steve King', 'sking@alexir.co.uk', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Alexir Packaging'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Roman Print Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Steve', 'Sly', 'Steve Sly', 'steve@romanprint.co.uk', '01543377200', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Roman Print Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Tams Packaging Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Steve', 'Tammadge', 'Steve Tammadge', 'steve@tamspackaging.com', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Tams Packaging Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: On The Vine
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Steven', 'Allen', 'Steven Allen', 'steven.allen.1396@gmail.com', '0739786090', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('On The Vine'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Jadan Press Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Steven', 'Hurst', 'Steven Hurst', 'sales@jadan-press.co.uk', '01482 610902', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Jadan Press Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Drayton Press
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Stuart', NULL, 'Stuart', 'print@drayton.co.uk', '01184022777', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Drayton Press'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: The High Arcal School
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Steven', 'Tomlinson', 'Steven Tomlinson', 'info@high-arcal.dudley.sch.uk', '08451550411', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('The High Arcal School'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Traybond Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Steven', 'Kehoe', 'Steven Kehoe', 'sales@traybond.co.uk', '01616788777', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Traybond Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Worcester Printers
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Stuart', 'Burton', 'Stuart Burton', 'info@worcesterprinters.co.uk', '01905616944', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Worcester Printers'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Claridges Copy & Print Warwick
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Stuart', 'McBeth', 'Stuart McBeth', 'sales@claridgeswarwick.co.uk', '01926 492266', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Claridges Copy & Print Warwick'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Menzies Design & Print Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Stuart', 'Menzies', 'Stuart Menzies', 'stuart@menziesprint.co.uk', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Menzies Design & Print Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: United Kingdom Atomic Energy Authority
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Stuart', 'Morris', 'Stuart Morris', 'stuart.morris@ccfe.ac.uk', '01235 464904', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('United Kingdom Atomic Energy Authority'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Excelsior Graphic Designers
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sunil', 'Mistry', 'Sunil Mistry', 'sunil@egdltd.com', '07811 419 342', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Excelsior Graphic Designers'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Sunny Digital Prints
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sunny', 'Chana', 'Sunny Chana', 'info@sunnydigitalprints.com', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Sunny Digital Prints'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: London Graphics
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Suresh', 'Gajjar', 'Suresh Gajjar', 'londongraphics2000@yahoo.co.uk', '07438873151', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('London Graphics'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: City Screen Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Suzanne', 'De Grussa', 'Suzanne De Grussa', 'suzanne@cityscreenprint.co.uk', '01634297779', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('City Screen Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Kall Kwik Birmingham
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Suzanne', 'Carter', 'Suzanne Carter', 'sales@kallkwikbirmingham.co.uk', '0121 212 0500', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Kall Kwik Birmingham'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Sanders Print People
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Teresa', 'Sanders', 'Teresa Sanders', 'sandersuk@btconnect.com', '01604 630195', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Sanders Print People'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: D3 Creative
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Terry', NULL, 'Terry', 'terry@d3design.net', '01279 639865', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('D3 Creative'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Ace Digital
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tim', NULL, 'Tim', 'tim@acedigital.biz', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Ace Digital'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Impression Design & Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tim', 'Berry', 'Tim Berry', 'enquiries@impressionderby.co.uk', '4.474E+11', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Impression Design & Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: South Bucks Business Products
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tim', 'Cooper', 'Tim Cooper', 'sales@southbucks.co.uk', '01494 437470', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('South Bucks Business Products'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Harwell Labels
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tim', 'Fountain', 'Tim Fountain', 'tim.fountain@hotmail.com', '01983753161', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Harwell Labels'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Discount Displays
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tim', 'Fuller', 'Tim Fuller', 'sales@discountdisplays.co.uk', '02086645660', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Discount Displays'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Toad Diaries
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tim', 'Grinsdale', 'Tim Grinsdale', 'tim@toaddiaries.co.uk', '07771888774', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Toad Diaries'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: 4pm Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tim', 'Hurrell', 'Tim Hurrell', 'tim.hurrell@4pm-print.uk', '02393200116, 07595289562', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('4pm Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Printconcern
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tim', 'Underwood', 'Tim Underwood', 'timprint@icloud.com', '01865712211', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Printconcern'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Carfax Cards Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tim', 'Jones', 'Tim Jones', 'carfax@business-cards.co.uk', '020 87481122', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Carfax Cards Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Grayson Design & Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Timothy', 'Langford', 'Timothy Langford', 'tim@graysonprint.com', '01543 876 962', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Grayson Design & Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Stormdfx Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Timothy', 'Wilson', 'Timothy Wilson', 'info@stormdfx.com', '01773546724', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Stormdfx Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Arbor Print Management Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tina', NULL, 'Tina', 'enquiries@arbor-pm.co.uk', '01530 230 528', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Arbor Print Management Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Small Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tom', NULL, 'Tom', 'tom@smallprintmenston.co.uk', '01943884835', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Small Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: The Mail House
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tina', 'Aissou', 'Tina Aissou', 'tina@mhmailingservices.co.uk', '0208 870 1144', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('The Mail House'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Thomas Fattorini Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tom', 'Fattorini', 'Tom Fattorini', 'tomf@fattorini.co.uk', '01212361307', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Thomas Fattorini Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Heron Dawson & Sawyer
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tom', 'Heron', 'Tom Heron', 'tom@hdsuk.com', '020 78332795', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Heron Dawson & Sawyer'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Proimage
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tom', 'Roberts', 'Tom Roberts', 'dproimage@btinternet.com', '01978291046', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Proimage'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Lydia Digital Limited
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tony', 'Chaplin', 'Tony Chaplin', 'tony.chaplin@lydiadigital.co.uk', '07500464504', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Lydia Digital Limited'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Halcyon of Bushey
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tony', 'Cowham', 'Tony Cowham', 'tony.cowham@ntlworld.com', '020 8950 3513', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Halcyon of Bushey'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Gartree Press
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tony', NULL, 'Tony', 'stewart@gartree.com', '0116 251 3339', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Gartree Press'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Midland Trade Stringing Service Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tony', 'Fusco', 'Tony Fusco', 'mail@midlandtradestringing.co.uk', '01604 810420', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Midland Trade Stringing Service Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: AllDigital Solutions
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tony', 'Selwood', 'Tony Selwood', 'tony.selwood@alldigitalsolutions.co.uk', '07912 734689', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('AllDigital Solutions'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Chris Cook Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tina', NULL, 'Tina', 'tina@chriscookprint.co.uk', '01205 355355', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Chris Cook Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Ont
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tony', 'Tony', 'Tony Tony', 'tonytony@gmail.com', '07766566765', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Ont'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Just Personalised Prints Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tony', 'Waterman', 'Tony Waterman', 'hello@printstoremember.co.uk', '08001337290', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Just Personalised Prints Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Greenleafcrafts
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tony', 'Weaver', 'Tony Weaver', 'tweave@me.com', '07395834281', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Greenleafcrafts'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Pingles Publishing
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Tony', NULL, 'Tony', 'tony@pinglespublishing.co.uk', '01842-861142', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Pingles Publishing'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Apple Print & Creative Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Trevor', 'Ford', 'Trevor Ford', 'trevor.ford@appleprint.co.uk', '01635 521654', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Apple Print & Creative Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: The Printing Chambers
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Trevor', 'Chambers', 'Trevor Chambers', 'trevor@theprintingchambers.com', '01326 618 027', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('The Printing Chambers'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Heron Jader Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Trevor', 'Heaps', 'Trevor Heaps', 'tmh@heronjader.co.uk', '01277 624444', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Heron Jader Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Minuteman Press Nottingham
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Uche', 'Ofor', 'Uche Ofor', 'nottingham@minutemanpress.com', '0115 8378874', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Minuteman Press Nottingham'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Bartec Paper & Packaging Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Ute', 'Cooper', 'Ute Cooper', 'ute.cooper@good.co.uk', '01606354664', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Bartec Paper & Packaging Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: East Midlands Print Company
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Usman', 'Butt', 'Usman Butt', 'eastmidsprint@yahoo.co.uk', '01530 815222', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('East Midlands Print Company'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Lear Stationers & Printers
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Uton', 'Lear', 'Uton Lear', 'info@learprint.co.uk', '01902408660', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Lear Stationers & Printers'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Team Tea
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Valerie', 'Diederichs', 'Valerie Diederichs', 'valerie@teamtea.co.uk', '07801277739', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Team Tea'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Bolton Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Victoria', 'Chapel', 'Victoria Chapel', 'artwork@boltonprint.co.uk', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Bolton Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Vincent Publishing Limited
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Vincent', 'Gbo', 'Vincent Gbo', 'mabeottrou@yahoo.com', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Vincent Publishing Limited'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Wiseprint Solutions
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Vipan', 'Sadhra', 'Vipan Sadhra', 'vipan.sadhra@wiseprintsolutions.com', '07460215111', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Wiseprint Solutions'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Evolution Print & Design Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Vipul', 'Naker', 'Vipul Naker', 'vipul.naker@evolutiondc.co.uk', '07545 697786', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Evolution Print & Design Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: UNIQUE DIGITAL & PRINTERS LTD
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Waqas', 'Baig', 'Waqas Baig', 'baig2010@yahoo.co.uk', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('UNIQUE DIGITAL & PRINTERS LTD'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Crownhills School
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sir/Madam', NULL, 'Sir/Madam', 'office@crownhills.leicester.sch.uk', '0116 2736893', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Crownhills School'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: W T Lynn Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Wes', 'Lynn', 'Wes Lynn', 'wes@wtlynn.co.uk', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('W T Lynn Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: The Great British Printhouse
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('William', 'Archard', 'William Archard', 'enquiries@thegreatbritishprinthouse.com', '07909977129', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('The Great British Printhouse'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Mailing Guy
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Wayne', 'Nugent', 'Wayne Nugent', 'wayne@mailingguy.co.uk', '01708 86 55 44', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Mailing Guy'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Joshua Horgan Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Wayne', 'Greenslade', 'Wayne Greenslade', 'print@joshuahorgan.co.uk', '01865246762', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Joshua Horgan Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Cut Above
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('William', 'Webb', 'William Webb', 'enquiries@cutaboveuk.co.uk', '0116 2789420', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Cut Above'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: I Design Signs
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Zahid', NULL, 'Zahid', 'diamondpress@hotmail.com', '0115 979 1791', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('I Design Signs'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Cranfield University
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Zhaorong', 'Huang', 'Zhaorong Huang', 'z.huang@cranfield.ac.uk', '01234754175', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Cranfield University'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Mbobanjack Enterprise
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Aji', 'Fatou Bobb', 'Aji Fatou Bobb', 'bobisfa@yahoo.com', '(220)902-2272', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Mbobanjack Enterprise'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Socos Teo
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Martin', 'Treacy', 'Martin Treacy', 'martin@socos.ie', '35395193301', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Socos Teo'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Clandeboye Printing services
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Aaron', 'McMahon', 'Aaron McMahon', 'aaron.mcmahon@btopenworld.com', '02891 271917', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Clandeboye Printing services'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Hish Printing Services
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Menachem', 'Spizer', 'Menachem Spizer', 'tomy@hish.co.il', '(054)218-4000', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Hish Printing Services'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Mailmate Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Allistair', 'Williams', 'Allistair Williams', 'allistair.williams@mailmateprint.com', '01534493300', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Mailmate Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Aspect Media
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Andrew', 'McFeeters', 'Andrew McFeeters', 'andrew@aspect-media.co.uk', '028 9050 3705', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Aspect Media'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Priory Press
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Ben', 'Jones', 'Ben Jones', 'ben.jones@priorypress.net', '02890 422918', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Priory Press'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Zing Design & Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Bryan', NULL, 'Bryan', 'info@zingdp.com', '028 70342472', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Zing Design & Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Creative Zoo
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Chris', 'Holland', 'Chris Holland', 'chris@creativezoo.co.uk', '02890460043', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Creative Zoo'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Mourne Office Supplies
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Chris', 'O''Hare', 'Chris O''Hare', 'chris@mourneofficesupplies.com', '028 4175 3646, 028 4175 3175', 'subscribed'),
+    ('Sean', 'Kelly', 'Sean Kelly', 'sean@mourneofficesupplies.com', '07738 862359', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Mourne Office Supplies'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Graphic Answers
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Chris', NULL, 'Chris', 'info@graphicanswers.co.uk', NULL, 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Graphic Answers'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Cartridges Inc.
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sir/Madam', NULL, 'Sir/Madam', 'darlington@cartridgesinc.co.uk', '01325248972', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Cartridges Inc.'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: David Mahon Properties
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('David', 'Mahon', 'David Mahon', 'drm@davidmahon.biz', '07808206141', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('David Mahon Properties'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Victor Stationery
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('David', 'McClay', 'David McClay', 'david.mcclay@vsy.biz', '''+44 [0] 7753 881000', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Victor Stationery'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Northside Graphics Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Richard', 'Campbell', 'Richard Campbell', 'richard.campbell@northsidegraphics.com', '02890222111', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Northside Graphics Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: DMC Design
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Dearbhla', NULL, 'Dearbhla', 'info@designdmc.com', '028 3086 1466', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('DMC Design'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Colour Copy Services
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Frederick', NULL, 'Frederick', 'frederick@colourcopyservices.co.uk', '02879300827', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Colour Copy Services'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Regency Print And Display
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Johnnie', 'Johnston', 'Johnnie Johnston', 'johnnie@regency-press.co.uk', '02890782900', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Regency Print And Display'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Sparks In Colour
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Ken', NULL, 'Ken', 'ken@sparksincolour.co.uk', '02838391536', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Sparks In Colour'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Darwin Press Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Sir/Madam', NULL, 'Sir/Madam', 'askushow@darwindidit.com', '020 8844 3780', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Darwin Press Ltd'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Media Design and Print
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Michael', 'Beckinsale', 'Michael Beckinsale', 'printing@mediadesignandprint.com', '028 9045 9864', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Media Design and Print'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Pico Studios
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Peter', 'Grieve', 'Peter Grieve', 'peter@picostudios.co.uk', '028 77 277 177', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Pico Studios'))
+  AND NOT EXISTS (
+    SELECT 1 FROM contacts
+    WHERE LOWER(TRIM(contacts.email)) = LOWER(TRIM(v.email))
+  );
+
+
+
+-- Contacts for: Ream Ltd
+INSERT INTO contacts (company_id, first_name, last_name, full_name, email, phone, marketing_status)
+SELECT
+  c.company_id,
+  v.first_name,
+  v.last_name,
+  v.full_name,
+  v.email,
+  v.phone,
+  v.marketing_status
+FROM (VALUES
+    ('Ryan', 'Quinn', 'Ryan Quinn', 'ryan@theream.co.uk', '07890 314685', 'subscribed')
+) AS v(first_name, last_name, full_name, email, phone, marketing_status)
+CROSS JOIN companies c
+WHERE LOWER(TRIM(c.company_name)) = LOWER(TRIM('Ream Ltd'))
+  AND NOT EXISTS (

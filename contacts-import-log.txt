@@ -1,0 +1,327 @@
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+[dotenv@17.2.3] injecting env (17) from .env.local -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+🚀 Contacts Import - Raw SQL Execution
+======================================
+
+
+📦 Batch 001/43: contacts-combined-001.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 002/43: contacts-combined-002.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 003/43: contacts-combined-003.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 004/43: contacts-combined-004.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 005/43: contacts-combined-005.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 006/43: contacts-combined-006.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 007/43: contacts-combined-007.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 008/43: contacts-combined-008.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 009/43: contacts-combined-009.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 010/43: contacts-combined-010.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+  📊 Progress: 10/43 batches
+  Total: 0 succeeded, 1000 errors
+
+
+📦 Batch 011/43: contacts-combined-011.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 012/43: contacts-combined-012.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 013/43: contacts-combined-013.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 014/43: contacts-combined-014.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 015/43: contacts-combined-015.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 016/43: contacts-combined-016.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 017/43: contacts-combined-017.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 018/43: contacts-combined-018.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 019/43: contacts-combined-019.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 020/43: contacts-combined-020.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+  📊 Progress: 20/43 batches
+  Total: 0 succeeded, 2000 errors
+
+
+📦 Batch 021/43: contacts-combined-021.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 022/43: contacts-combined-022.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 023/43: contacts-combined-023.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 024/43: contacts-combined-024.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 025/43: contacts-combined-025.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 026/43: contacts-combined-026.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 027/43: contacts-combined-027.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 028/43: contacts-combined-028.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 029/43: contacts-combined-029.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 030/43: contacts-combined-030.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+  📊 Progress: 30/43 batches
+  Total: 0 succeeded, 3000 errors
+
+
+📦 Batch 031/43: contacts-combined-031.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 032/43: contacts-combined-032.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 033/43: contacts-combined-033.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 034/43: contacts-combined-034.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 035/43: contacts-combined-035.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 036/43: contacts-combined-036.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 037/43: contacts-combined-037.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 038/43: contacts-combined-038.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 039/43: contacts-combined-039.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 040/43: contacts-combined-040.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+  📊 Progress: 40/43 batches
+  Total: 0 succeeded, 4000 errors
+
+
+📦 Batch 041/43: contacts-combined-041.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 042/43: contacts-combined-042.sql
+  Found 100 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 100 errors
+
+📦 Batch 043/43: contacts-combined-043.sql
+  Found 92 INSERT statements
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ⚠️  Error: Could not find the function public.exec_sql(sql_query) in the schema cache
+  ✅ Batch complete: 0 succeeded, 92 errors
+
+✅ Import complete!
+  Succeeded: 0
+  Errors: 4292
+  Total contacts in database: 3920

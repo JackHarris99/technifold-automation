@@ -1,0 +1,19 @@
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+/mnt/c/Users/Jack.Harris/technifold-march/node_modules/@supabase/supabase-js/src/SupabaseClient.ts:104
+    if (!supabaseUrl) throw new Error('supabaseUrl is required.')
+                            ^
+
+
+Error: supabaseUrl is required.
+    at SupabaseClient (/mnt/c/Users/Jack.Harris/technifold-march/node_modules/@supabase/supabase-js/src/SupabaseClient.ts:104:29)
+    at createClient (/mnt/c/Users/Jack.Harris/technifold-march/node_modules/@supabase/supabase-js/src/index.ts:46:10)
+    at <anonymous> (/mnt/c/Users/Jack.Harris/technifold-march/scripts/import-pipedrive.ts:12:18)
+    at Object.<anonymous> (/mnt/c/Users/Jack.Harris/technifold-march/scripts/import-pipedrive.ts:330:27)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Object.transformer (/mnt/c/Users/Jack.Harris/technifold-march/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1104)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:203:29)
+    at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+
+Node.js v18.20.8

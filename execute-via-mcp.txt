@@ -1,0 +1,11 @@
+Execute contacts-combined-001.sql through contacts-combined-043.sql using the mcp__supabase__apply_migration tool in batches of 5.
+
+Batch 1: 001-005
+Batch 2: 006-010
+Batch 3: 011-015
+Batch 4: 016-020
+Batch 5: 021-025
+Batch 6: 026-030
+Batch 7: 031-035
+Batch 8: 036-040
+Batch 9: 041-043
