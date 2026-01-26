@@ -74,10 +74,16 @@ export default async function InvoicesPage() {
 
   // Fetch company names for invoices
   const uniqueCompanyIds = [...new Set((invoices || []).map(inv => inv.company_id))];
-  const { data: companies } = await supabase
-    .from('companies')
-    .select('company_id, company_name')
-    .in('company_id', uniqueCompanyIds);
+
+  // Only fetch companies if we have invoice company IDs (avoid .in() with empty array)
+  let companies: { company_id: string; company_name: string }[] | null = null;
+  if (uniqueCompanyIds.length > 0) {
+    const { data } = await supabase
+      .from('companies')
+      .select('company_id, company_name')
+      .in('company_id', uniqueCompanyIds);
+    companies = data;
+  }
 
   const companyMap = new Map(companies?.map(c => [c.company_id, c.company_name]) || []);
 
