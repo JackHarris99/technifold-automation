@@ -51,7 +51,8 @@
 - Batch loads companies in 1000-row chunks to avoid limit
 
 **Issues Found:**
-- ❌ Line 349: Links to old `/admin/distributor-pricing` route (should be `/admin/distributors/pricing`)
+- ✅ FIXED: Line 349: Links to old `/admin/distributor-pricing` route (removed entire Quick Actions panel)
+- ✅ FIXED: Active Engagement querying wrong table (`activity_tracking` with 0 rows instead of `engagement_events` with 480 rows)
 
 ---
 
@@ -134,15 +135,54 @@
 
 ---
 
+#### 1.6 Active Engagement (Sales Center Dashboard Section)
+**Component:** `SalesCenterClient.tsx` (calls `CompanyEngagementTimeline.tsx`)
+**API:** `/api/admin/engagement/company-activity?company_ids=...`
+**What it does:**
+- Shows top 10 most engaged companies based on 7-day engagement score
+- Tracks customer interactions: quote views, portal logins, emails, purchases, etc.
+- Calculates heat level (🔥 fire, 🌡️ hot, ☀️ warm, ❄️ cold) based on recent activity
+- Expandable timeline shows recent events for each company
+- Click company name → goes to company detail page
+
+**How scoring works:**
+- Purchase: +100 points
+- Trial checkout: +80 points
+- Quote view: +10 points
+- Portal view: +8 points
+- Email sent: +5 points
+- Payment issue: -5 points
+- Quote lost: -10 points
+
+**Heat levels (7-day score):**
+- 🔥 Fire: 50+ points
+- 🌡️ Hot: 20-49 points
+- ☀️ Warm: 5-19 points
+- ❄️ Cold: 0-4 points
+
+**Schema Links:**
+- `engagement_events` table: Tracks all customer activity (quote views, portal logins, purchases, etc.)
+- Fields: `company_id`, `event_type`, `event_name`, `source`, `url`, `occurred_at`
+- 480 events tracked across 75 companies
+
+**Issues Found:**
+- ✅ FIXED: API was querying wrong table (`activity_tracking` with 0 rows)
+- ✅ FIXED: Should query `engagement_events` (480 rows)
+- ✅ FIXED: Wrong column name (`customer_company_id` → `company_id`)
+- ✅ FIXED: EVENT_SCORES mapping had wrong event types
+
+---
+
 ## Progress Tracker (Sales Engine)
 - ✅ Dashboard (1.1) - COMPLETE
 - ✅ Reorder Opportunities (1.2) - COMPLETE
 - ✅ Trials Ending (1.3) - COMPLETE
 - ✅ Unpaid Invoices (1.4) - COMPLETE
 - ⏸️ Distributor Control (1.5) - Will audit in Distributors section
+- ✅ Active Engagement (1.6) - COMPLETE
 
 **Schema Filtering:** ✅ CLEAN - All queries correctly filter `type='customer'`
-**Issues to Fix:** 1 broken link
+**Issues Fixed:** 2 (broken link in Quick Actions removed, wrong table query in Active Engagement)
 
 ---
 
@@ -182,10 +222,14 @@
    - **Fix needed:** Consolidate to single source of truth
 
 ### Broken Links
-1. **Sales Center Dashboard** (`/admin/sales` line 349):
-   - Links to `/admin/distributor-pricing` (old route that doesn't exist)
-   - Should link to `/admin/distributors/pricing` (new consolidated route)
-   - **Fix needed:** Update href in Quick Actions section
+1. ✅ FIXED: **Sales Center Dashboard** - Removed entire Quick Actions panel (had broken distributor-pricing link)
+
+### Schema-Code Mismatches
+1. ✅ FIXED: **Active Engagement API** (`/api/admin/engagement/company-activity`):
+   - Was querying `activity_tracking` table (0 rows) instead of `engagement_events` (480 rows)
+   - Wrong column name: `customer_company_id` should be `company_id`
+   - EVENT_SCORES mapping had wrong event types
+   - Caused "No engagement data yet" message on Sales Center dashboard
 
 ### Redundant Pages
 - [To document as we find them]
@@ -196,10 +240,10 @@
 ---
 
 ## Progress Tracker
-- Sales Engine: ✅ 4/4 pages documented (100% - Distributor Control is cross-link)
+- Sales Engine: ✅ 5/5 pages documented (100% - Distributor Control is cross-link)
 - Marketing: 0% complete
 - Distributors: 0% complete
 - Press & Media: 0% complete
 - Suppliers: 0% complete
 
-**Issues Found So Far:** 2 (1 broken link, 1 table duplication)
+**Issues Found & Fixed:** 3 (broken link removed, engagement tracking fixed, prospect table duplication documented)
