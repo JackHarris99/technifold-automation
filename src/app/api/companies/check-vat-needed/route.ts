@@ -7,6 +7,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkVATNumberNeeded } from '@/lib/vat-helpers';
 import { getCurrentUser } from '@/lib/auth';
+import { verifyToken, getCompanyQueryField } from '@/lib/tokens';
+import { getSupabaseClient } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
@@ -34,7 +36,51 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // TODO: If token provided, validate it belongs to this company_id
+    // SECURITY: If token provided, validate it belongs to this company_id
+    if (token && !user) {
+      // Verify HMAC token signature
+      const payload = verifyToken(token);
+      if (!payload) {
+        return NextResponse.json(
+          { error: 'Invalid or expired token' },
+          { status: 401 }
+        );
+      }
+
+      // Extract company_id from token
+      const tokenCompanyId = payload.company_id;
+
+      // Verify token's company_id matches requested company_id
+      // Need to handle backward compatibility (old TEXT company_id vs new UUID)
+      const supabase = getSupabaseClient();
+
+      // Get company record using token's company_id
+      const tokenCompanyQuery = getCompanyQueryField(tokenCompanyId);
+      const { data: tokenCompany } = await supabase
+        .from('companies')
+        .select('company_id')
+        .eq(tokenCompanyQuery.column, tokenCompanyQuery.value)
+        .single();
+
+      // Get company record using requested company_id
+      const requestedCompanyQuery = getCompanyQueryField(companyId);
+      const { data: requestedCompany } = await supabase
+        .from('companies')
+        .select('company_id')
+        .eq(requestedCompanyQuery.column, requestedCompanyQuery.value)
+        .single();
+
+      // Compare UUIDs to prevent privilege escalation
+      if (!tokenCompany || !requestedCompany || tokenCompany.company_id !== requestedCompany.company_id) {
+        console.warn('[check-vat-needed] Token mismatch: token belongs to', tokenCompanyId, 'but requested', companyId);
+        return NextResponse.json(
+          { error: 'Forbidden - token does not belong to this company' },
+          { status: 403 }
+        );
+      }
+
+      console.log('[check-vat-needed] Token validated successfully for company:', tokenCompany.company_id);
+    }
 
     const result = await checkVATNumberNeeded(companyId);
 
