@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { isDirector } from '@/lib/auth';
+import { randomUUID } from 'crypto';
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,25 +29,8 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
-    // Generate company_id (e.g., "DIST-001", "DIST-002", etc.)
-    const { data: existingDistributors } = await supabase
-      .from('companies')
-      .select('company_id')
-      .eq('type', 'distributor')
-      .like('company_id', 'DIST-%')
-      .order('company_id', { ascending: false })
-      .limit(1);
-
-    let nextNumber = 1;
-    if (existingDistributors && existingDistributors.length > 0) {
-      const lastId = existingDistributors[0].company_id;
-      const match = lastId.match(/DIST-(\d+)/);
-      if (match) {
-        nextNumber = parseInt(match[1]) + 1;
-      }
-    }
-
-    const company_id = `DIST-${String(nextNumber).padStart(3, '0')}`;
+    // Generate unique company_id (UUID for new companies)
+    const company_id = randomUUID();
 
     // Create company record
     const { data: company, error: companyError } = await supabase

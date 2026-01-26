@@ -16,6 +16,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe-client';
 import { createServerClient } from '@/lib/supabase-server';
+import { randomUUID } from 'crypto';
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,8 +65,8 @@ export async function POST(request: NextRequest) {
     let company = existingCompany;
 
     if (!company) {
-      // Generate unique company_id (TRL + timestamp + random)
-      const companyId = `TRL${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
+      // Generate unique company_id (UUID for new companies)
+      const companyId = randomUUID();
 
       const { data: newCompany, error: companyError } = await supabase
         .from('companies')

@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { getCurrentUser } from '@/lib/auth';
+import { randomUUID } from 'crypto';
 
 export async function POST(request: NextRequest) {
   try {
@@ -122,8 +123,8 @@ export async function POST(request: NextRequest) {
     const assignedRepName = salesReps.find(r => r.sales_rep_id === assignedRep)?.full_name;
     console.log('[companies/create] Assigned to:', `${assignedRepName} (${assignedRep})`);
 
-    // 6. Generate unique company_id (MAN prefix for manually created)
-    const companyId = `MAN${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
+    // 6. Generate unique company_id (UUID for new companies)
+    const companyId = randomUUID();
 
     // 7. Create company with assigned rep
     const { data: newCompany, error: createError } = await supabase

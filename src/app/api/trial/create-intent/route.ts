@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
         company_id = existingCompany.company_id;
       } else {
         // Create new company
-        const newCompanyId = `TRL${Date.now().toString(36).toUpperCase()}${crypto.randomBytes(2).toString('hex').toUpperCase()}`;
+        const newCompanyId = crypto.randomUUID();
 
         const { data: newCompany, error: companyError } = await supabase
           .from('companies')
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
         company_id = existingByDomain.company_id;
       } else {
         // Create company with derived name
-        const newCompanyId = `TRL${Date.now().toString(36).toUpperCase()}${crypto.randomBytes(2).toString('hex').toUpperCase()}`;
+        const newCompanyId = crypto.randomUUID();
 
         const { data: newCompany, error: companyError } = await supabase
           .from('companies')
