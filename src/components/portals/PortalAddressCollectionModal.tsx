@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { verifyVATNumber, isEUCountry, type VATVerificationResult } from '@/lib/vat-helpers';
+import { isEUCountry, type VATVerificationResult } from '@/lib/vat-helpers';
 import CountrySelect from '@/components/shared/CountrySelect';
 
 interface PortalAddressCollectionModalProps {
@@ -75,8 +75,29 @@ export default function PortalAddressCollectionModal({
 
     const timeoutId = setTimeout(async () => {
       setIsVerifyingVAT(true);
-      const result = await verifyVATNumber(formData.billing_country, formData.vat_number);
-      setVatVerificationResult(result);
+
+      try {
+        // Call backend API to verify VAT (avoids CORS issues)
+        const response = await fetch('/api/vat/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            countryCode: formData.billing_country,
+            vatNumber: formData.vat_number,
+          }),
+        });
+
+        const result = await response.json();
+        setVatVerificationResult(result);
+      } catch (error) {
+        console.error('[VAT Verification] Error:', error);
+        setVatVerificationResult({
+          valid: false,
+          error: 'VAT verification service unavailable',
+          errorCode: 'SERVICE_UNAVAILABLE',
+        });
+      }
+
       setIsVerifyingVAT(false);
     }, 1000);
 
