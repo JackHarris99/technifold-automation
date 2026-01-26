@@ -211,98 +211,126 @@ export async function POST(
     // 7. Send invoice
     await stripe.invoices.sendInvoice(finalizedInvoice.id);
 
-    // 8. Create invoice record in database
-    const { data: invoiceRecord, error: invoiceError } = await supabase
-      .from('invoices')
-      .insert({
-        company_id: order.company_id,
-        stripe_invoice_id: finalizedInvoice.id,
-        invoice_number: finalizedInvoice.number || undefined,
-        invoice_date: new Date(finalizedInvoice.created * 1000).toISOString(),
-        due_date: finalizedInvoice.due_date ? new Date(finalizedInvoice.due_date * 1000).toISOString() : undefined,
-        subtotal: subtotal,
-        tax_amount: vatAmount,
-        total_amount: totalAmount,
-        status: 'pending',
-        payment_status: 'unpaid',
-        currency: 'GBP',
-        po_number: order.po_number || null,
-      })
-      .select('invoice_id')
-      .single();
+    // === CRITICAL SECTION: Database updates with transaction-like behavior ===
+    // If any database operation fails, rollback Stripe invoice
+    let invoiceId: string | undefined;
 
-    if (invoiceError) {
-      console.error('[Approve Order] Failed to create invoice record:', invoiceError);
-    }
+    try {
+      // 8. Create invoice record in database
+      const { data: invoiceRecord, error: invoiceError } = await supabase
+        .from('invoices')
+        .insert({
+          company_id: order.company_id,
+          stripe_invoice_id: finalizedInvoice.id,
+          invoice_number: finalizedInvoice.number || undefined,
+          invoice_date: new Date(finalizedInvoice.created * 1000).toISOString(),
+          due_date: finalizedInvoice.due_date ? new Date(finalizedInvoice.due_date * 1000).toISOString() : undefined,
+          subtotal: subtotal,
+          tax_amount: vatAmount,
+          total_amount: totalAmount,
+          status: 'pending',
+          payment_status: 'unpaid',
+          currency: 'GBP',
+          po_number: order.po_number || null,
+        })
+        .select('invoice_id')
+        .single();
 
-    const invoiceId = invoiceRecord?.invoice_id;
+      if (invoiceError || !invoiceRecord) {
+        throw new Error(`Failed to create invoice record: ${invoiceError?.message || 'Unknown error'}`);
+      }
 
-    // 8b. Create invoice_items records for in-stock items
-    if (invoiceId && inStockItems.length > 0) {
-      const invoiceItemsData = inStockItems.map((item, index) => ({
-        invoice_id: invoiceId,
-        product_code: item.product_code,
-        line_number: index + 1,
-        description: item.description,
-        quantity: item.quantity,
-        unit_price: parseFloat(item.unit_price.toString()),
-        line_total: parseFloat(item.line_total.toString()),
-      }));
+      invoiceId = invoiceRecord.invoice_id;
 
-      const { error: itemsInsertError } = await supabase
-        .from('invoice_items')
-        .insert(invoiceItemsData);
+      // 8b. Create invoice_items records for in-stock items
+      if (inStockItems.length > 0) {
+        const invoiceItemsData = inStockItems.map((item, index) => ({
+          invoice_id: invoiceId,
+          product_code: item.product_code,
+          line_number: index + 1,
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: parseFloat(item.unit_price.toString()),
+          line_total: parseFloat(item.line_total.toString()),
+        }));
 
-      if (itemsInsertError) {
-        console.error('[Approve Order] Failed to create invoice_items:', itemsInsertError);
-      } else {
+        const { error: itemsInsertError } = await supabase
+          .from('invoice_items')
+          .insert(invoiceItemsData);
+
+        if (itemsInsertError) {
+          throw new Error(`Failed to create invoice items: ${itemsInsertError.message}`);
+        }
+
         console.log(`[Approve Order] Created ${invoiceItemsData.length} invoice_items for invoice ${invoiceId}`);
       }
-    }
 
-    // 9. Update order with review details
-    await supabase
-      .from('distributor_orders')
-      .update({
-        status: inStockItems.length === items.length ? 'fully_fulfilled' : 'partially_fulfilled',
-        reviewed_by: body.reviewed_by,
-        reviewed_at: new Date().toISOString(),
-        confirmed_shipping: body.confirmed_shipping,
-        shipping_override_reason: body.shipping_override_reason,
-        admin_billing_address_line_1: body.admin_billing_line_1,
-        admin_billing_address_line_2: body.admin_billing_line_2,
-        admin_billing_city: body.admin_billing_city,
-        admin_billing_state_province: body.admin_billing_state,
-        admin_billing_postal_code: body.admin_billing_postal,
-        admin_billing_country: body.admin_billing_country,
-        admin_shipping_address_line_1: body.admin_shipping_line_1,
-        admin_shipping_address_line_2: body.admin_shipping_line_2,
-        admin_shipping_city: body.admin_shipping_city,
-        admin_shipping_state_province: body.admin_shipping_state,
-        admin_shipping_postal_code: body.admin_shipping_postal,
-        admin_shipping_country: body.admin_shipping_country,
-      })
-      .eq('order_id', order_id);
+      // 9. Update order with review details
+      const { error: orderUpdateError } = await supabase
+        .from('distributor_orders')
+        .update({
+          status: inStockItems.length === items.length ? 'fully_fulfilled' : 'partially_fulfilled',
+          reviewed_by: body.reviewed_by,
+          reviewed_at: new Date().toISOString(),
+          confirmed_shipping: body.confirmed_shipping,
+          shipping_override_reason: body.shipping_override_reason,
+          admin_billing_address_line_1: body.admin_billing_line_1,
+          admin_billing_address_line_2: body.admin_billing_line_2,
+          admin_billing_city: body.admin_billing_city,
+          admin_billing_state_province: body.admin_billing_state,
+          admin_billing_postal_code: body.admin_billing_postal,
+          admin_billing_country: body.admin_billing_country,
+          admin_shipping_address_line_1: body.admin_shipping_line_1,
+          admin_shipping_address_line_2: body.admin_shipping_line_2,
+          admin_shipping_city: body.admin_shipping_city,
+          admin_shipping_state_province: body.admin_shipping_state,
+          admin_shipping_postal_code: body.admin_shipping_postal,
+          admin_shipping_country: body.admin_shipping_country,
+        })
+        .eq('order_id', order_id);
 
-    // 10. Update item statuses
-    for (const item of items) {
-      const status = body.item_statuses[item.item_id];
-      const updateData: any = { status };
-
-      if (status === 'in_stock') {
-        updateData.status = 'fulfilled';
-        updateData.fulfilled_invoice_id = invoiceId;
-        updateData.fulfilled_at = new Date().toISOString();
-      } else if (status === 'back_order') {
-        updateData.back_order_date = new Date().toISOString();
-        updateData.predicted_delivery_date = body.back_order_dates[item.item_id];
-        updateData.back_order_notes = body.back_order_notes[item.item_id] || null;
+      if (orderUpdateError) {
+        throw new Error(`Failed to update order: ${orderUpdateError.message}`);
       }
 
-      await supabase
-        .from('distributor_order_items')
-        .update(updateData)
-        .eq('item_id', item.item_id);
+      // 10. Update item statuses
+      for (const item of items) {
+        const status = body.item_statuses[item.item_id];
+        const updateData: any = { status };
+
+        if (status === 'in_stock') {
+          updateData.status = 'fulfilled';
+          updateData.fulfilled_invoice_id = invoiceId;
+          updateData.fulfilled_at = new Date().toISOString();
+        } else if (status === 'back_order') {
+          updateData.back_order_date = new Date().toISOString();
+          updateData.predicted_delivery_date = body.back_order_dates[item.item_id];
+          updateData.back_order_notes = body.back_order_notes[item.item_id] || null;
+        }
+
+        const { error: itemUpdateError } = await supabase
+          .from('distributor_order_items')
+          .update(updateData)
+          .eq('item_id', item.item_id);
+
+        if (itemUpdateError) {
+          throw new Error(`Failed to update item ${item.item_id}: ${itemUpdateError.message}`);
+        }
+      }
+    } catch (dbError) {
+      // ROLLBACK: Void the Stripe invoice if database operations failed
+      console.error('[Approve Order] Database operation failed, rolling back Stripe invoice:', dbError);
+
+      try {
+        await stripe.invoices.voidInvoice(finalizedInvoice.id);
+        console.log('[Approve Order] Successfully voided Stripe invoice:', finalizedInvoice.id);
+      } catch (rollbackError) {
+        console.error('[Approve Order] CRITICAL: Failed to void Stripe invoice during rollback:', rollbackError);
+        // Log critical error - manual intervention may be needed
+      }
+
+      // Re-throw the original error
+      throw dbError;
     }
 
     return NextResponse.json({
