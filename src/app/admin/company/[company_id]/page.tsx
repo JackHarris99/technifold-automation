@@ -64,6 +64,8 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
     distributorPricingResult,
     companyPricingResult,
     companyMachinesResult,
+    partnerAssociationResult,
+    allPartnersResult,
   ] = await Promise.all([
     // Company
     supabase
@@ -223,6 +225,35 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
       `)
       .eq('company_id', company_id)
       .order('created_at', { ascending: false }),
+
+    // Partner Association (if this customer is associated with a partner)
+    supabase
+      .from('distributor_customers')
+      .select(`
+        id,
+        distributor_id,
+        tool_commission_rate,
+        consumable_commission_rate,
+        status,
+        relationship_started_at,
+        notes,
+        companies!distributor_customers_distributor_id_fkey (
+          company_id,
+          company_name,
+          distributor_type
+        )
+      `)
+      .eq('customer_id', company_id)
+      .eq('status', 'active')
+      .single(),
+
+    // All partner distributors (for dropdown when associating)
+    supabase
+      .from('companies')
+      .select('company_id, company_name')
+      .eq('type', 'distributor')
+      .eq('distributor_type', 'partner')
+      .order('company_name', { ascending: true }),
   ]);
 
   if (companyResult.error || !companyResult.data) {
@@ -248,6 +279,8 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
       distributorPricing={distributorPricingResult.data || []}
       companyPricing={companyPricingResult.data || []}
       companyMachines={companyMachinesResult.data || []}
+      partnerAssociation={partnerAssociationResult.data || null}
+      allPartners={allPartnersResult.data || []}
       currentUser={user}
     />
   );

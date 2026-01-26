@@ -36,6 +36,8 @@ interface CompanyDetailViewProps {
   distributorPricing: any[];
   companyPricing: any[];
   companyMachines: any[];
+  partnerAssociation: any;
+  allPartners: any[];
   currentUser: any;
 }
 
@@ -56,6 +58,8 @@ export default function CompanyDetailView({
   distributorPricing,
   companyPricing,
   companyMachines,
+  partnerAssociation,
+  allPartners,
   currentUser,
 }: CompanyDetailViewProps) {
   const [activeTab, setActiveTab] = useState('overview');
@@ -91,6 +95,14 @@ export default function CompanyDetailView({
 
   // Contact editing state
   const [editingContact, setEditingContact] = useState<any>(null);
+
+  // Partner association state
+  const [showPartnerModal, setShowPartnerModal] = useState(false);
+  const [selectedPartner, setSelectedPartner] = useState('');
+  const [toolCommissionRate, setToolCommissionRate] = useState(20);
+  const [consumableCommissionRate, setConsumableCommissionRate] = useState(10);
+  const [isAssociatingPartner, setIsAssociatingPartner] = useState(false);
+  const [isDissociatingPartner, setIsDissociatingPartner] = useState(false);
 
   const isDirector = currentUser.role === 'director';
   const isDistributor = company.type === 'distributor';
@@ -236,6 +248,69 @@ export default function CompanyDetailView({
     }
   };
 
+  const handleAssociatePartner = async () => {
+    if (!selectedPartner) {
+      alert('Please select a partner distributor');
+      return;
+    }
+
+    setIsAssociatingPartner(true);
+    try {
+      const response = await fetch('/api/admin/customers/associate-partner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_id: company.company_id,
+          distributor_id: selectedPartner,
+          tool_commission_rate: toolCommissionRate,
+          consumable_commission_rate: consumableCommissionRate,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(`✅ ${data.message}`);
+        window.location.reload();
+      } else {
+        alert('Failed to associate partner: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err) {
+      alert('Network error: Failed to associate partner');
+    } finally {
+      setIsAssociatingPartner(false);
+    }
+  };
+
+  const handleDissociatePartner = async () => {
+    if (!partnerAssociation) return;
+
+    if (!confirm('Are you sure you want to remove this partner association?')) {
+      return;
+    }
+
+    setIsDissociatingPartner(true);
+    try {
+      const response = await fetch(
+        `/api/admin/customers/associate-partner?customer_id=${company.company_id}&distributor_id=${partnerAssociation.distributor_id}`,
+        { method: 'DELETE' }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('✅ Partner association removed');
+        window.location.reload();
+      } else {
+        alert('Failed to remove association: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err) {
+      alert('Network error: Failed to remove association');
+    } finally {
+      setIsDissociatingPartner(false);
+    }
+  };
+
   const tabs = [
     { id: 'overview', label: 'Overview', count: null },
     { id: 'products', label: 'Products', count: purchasedTools.length + purchasedConsumables.length + purchasedParts.length },
@@ -310,6 +385,11 @@ export default function CompanyDetailView({
                 {isDistributor && (
                   <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-[13px] font-[600] uppercase tracking-wide">
                     Distributor
+                  </span>
+                )}
+                {isCustomer && partnerAssociation && (
+                  <span className="px-3 py-1 bg-teal-100 text-teal-800 rounded-full text-[13px] font-[600] uppercase tracking-wide flex items-center gap-1">
+                    🤝 Partner Customer
                   </span>
                 )}
               </div>
@@ -391,6 +471,7 @@ export default function CompanyDetailView({
             company={company}
             contacts={contacts}
             shippingAddresses={shippingAddresses}
+            partnerAssociation={partnerAssociation}
             onAddContact={() => setShowAddContactModal(true)}
             onEditContact={(contact) => setEditingContact(contact)}
             onDeleteContact={handleDeleteContact}
@@ -409,6 +490,9 @@ export default function CompanyDetailView({
             }}
             isDirector={isDirector}
             onChangeOwner={handleOpenChangeOwner}
+            onAssociatePartner={() => setShowPartnerModal(true)}
+            onDissociatePartner={handleDissociatePartner}
+            isDissociatingPartner={isDissociatingPartner}
           />
         )}
 
@@ -648,6 +732,99 @@ export default function CompanyDetailView({
           </div>
         </div>
       )}
+
+      {/* Associate Partner Modal */}
+      {showPartnerModal && isCustomer && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg max-w-md w-full p-6 mx-4">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Associate with Partner</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Link <strong>{company.company_name}</strong> to a partner distributor for commission tracking.
+            </p>
+
+            <div className="space-y-4">
+              {/* Partner Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Partner Distributor
+                </label>
+                <select
+                  value={selectedPartner}
+                  onChange={(e) => setSelectedPartner(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                >
+                  <option value="">-- Select a partner --</option>
+                  {allPartners.map((partner) => (
+                    <option key={partner.company_id} value={partner.company_id}>
+                      {partner.company_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Commission Rates */}
+              <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
+                <h3 className="font-semibold text-teal-900 mb-3">Commission Rates</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-teal-900 mb-1">
+                      Tools (%)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      value={toolCommissionRate}
+                      onChange={(e) => setToolCommissionRate(parseFloat(e.target.value))}
+                      className="w-full px-3 py-2 border border-teal-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-teal-900 mb-1">
+                      Consumables (%)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      value={consumableCommissionRate}
+                      onChange={(e) => setConsumableCommissionRate(parseFloat(e.target.value))}
+                      className="w-full px-3 py-2 border border-teal-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-teal-800 mt-2">
+                  Partner earns commission on this customer's purchases. Sales rep earns 5% of remainder.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowPartnerModal(false);
+                  setSelectedPartner('');
+                  setToolCommissionRate(20);
+                  setConsumableCommissionRate(10);
+                }}
+                disabled={isAssociatingPartner}
+                className="flex-1 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAssociatePartner}
+                disabled={isAssociatingPartner || !selectedPartner}
+                className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg font-semibold hover:bg-teal-700 disabled:opacity-50"
+              >
+                {isAssociatingPartner ? 'Associating...' : 'Associate Partner'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -657,6 +834,7 @@ function OverviewTab({
   company,
   contacts,
   shippingAddresses,
+  partnerAssociation,
   onAddContact,
   onEditContact,
   onDeleteContact,
@@ -665,11 +843,15 @@ function OverviewTab({
   onEditBillingAddress,
   onLogActivity,
   isDirector,
-  onChangeOwner
+  onChangeOwner,
+  onAssociatePartner,
+  onDissociatePartner,
+  isDissociatingPartner,
 }: {
   company: any;
   contacts: any[];
   shippingAddresses: any[];
+  partnerAssociation: any;
   onAddContact: () => void;
   onEditContact: (contact: any) => void;
   onDeleteContact: (contactId: string) => void;
@@ -679,7 +861,11 @@ function OverviewTab({
   onLogActivity: (type: 'call' | 'visit' | 'email' | 'followup' | 'meeting') => void;
   isDirector: boolean;
   onChangeOwner: () => void;
+  onAssociatePartner: () => void;
+  onDissociatePartner: () => void;
+  isDissociatingPartner: boolean;
 }) {
+  const isCustomer = company.type === 'customer' || !company.type;
   const defaultAddress = shippingAddresses.find(addr => addr.is_default);
 
   async function handleUpdateVAT() {
@@ -798,6 +984,47 @@ function OverviewTab({
               <dt className="text-sm text-[#475569]">Type</dt>
               <dd className="text-[13px] font-[600] text-[#0a0a0a]">{company.type || '-'}</dd>
             </div>
+
+            {/* Partner Association - Only for customers */}
+            {isCustomer && (
+              <div className="border-t pt-3">
+                <dt className="text-sm text-[#475569] mb-1">Partner Association</dt>
+                {partnerAssociation ? (
+                  <div className="space-y-2">
+                    <dd className="text-[13px] font-[600] text-teal-700">
+                      🤝 {partnerAssociation.companies?.company_name || 'Unknown Partner'}
+                    </dd>
+                    <div className="text-xs text-[#64748b]">
+                      Commission: {partnerAssociation.tool_commission_rate}% tools, {partnerAssociation.consumable_commission_rate}% consumables
+                    </div>
+                    <div className="text-xs text-[#64748b]">
+                      Since: {new Date(partnerAssociation.relationship_started_at).toLocaleDateString('en-GB')}
+                    </div>
+                    {isDirector && (
+                      <button
+                        onClick={onDissociatePartner}
+                        disabled={isDissociatingPartner}
+                        className="text-[12px] text-red-600 hover:text-red-700 transition-colors font-medium mt-1 disabled:opacity-50"
+                      >
+                        {isDissociatingPartner ? 'Removing...' : 'Remove Partner Association'}
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <dd className="text-[13px] text-[#64748b] italic">Not associated with a partner</dd>
+                    {isDirector && (
+                      <button
+                        onClick={onAssociatePartner}
+                        className="text-[12px] text-teal-600 hover:text-teal-700 transition-colors font-medium"
+                      >
+                        + Associate with Partner
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
             <div>
               <dt className="text-sm text-[#475569]">Country</dt>
               <dd className="text-[13px] font-[600] text-[#0a0a0a]">{company.country || '-'}</dd>
