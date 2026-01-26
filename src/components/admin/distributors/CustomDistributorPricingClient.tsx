@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 interface Product {
   product_code: string;
   description: string;
-  price: number;
+  price: number | null;
   type: string;
   category: string;
   active: boolean;
@@ -213,7 +213,7 @@ export default function CustomDistributorPricingClient({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="text-sm text-gray-900">
-                        £{product.price.toFixed(2)}
+                        {product.price != null ? `£${product.price.toFixed(2)}` : '—'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">

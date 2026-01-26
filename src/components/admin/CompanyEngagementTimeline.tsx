@@ -47,6 +47,13 @@ export default function CompanyEngagementTimeline({ companies, limit = 10, showE
       return;
     }
 
+    // Skip loading if there are too many companies (to avoid URL length issues)
+    if (companies.length > 100) {
+      console.log(`Skipping engagement load for ${companies.length} companies (too many)`);
+      setLoading(false);
+      return;
+    }
+
     const companyIds = companies.map(c => c.company_id).join(',');
 
     fetch(`/api/admin/engagement/company-activity?company_ids=${encodeURIComponent(companyIds)}`)

@@ -20,7 +20,7 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [viewMode, setViewModeState] = useState<ViewMode>('all');
-  const [systemMode, setSystemMode] = useState<'sales' | 'marketing' | 'distributors'>('sales');
+  const [systemMode, setSystemMode] = useState<'sales' | 'marketing' | 'distributors' | 'press' | 'suppliers'>('sales');
 
   useEffect(() => {
     // Load view mode from localStorage on mount
@@ -31,6 +31,10 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
       setSystemMode('marketing');
     } else if (pathname?.startsWith('/admin/distributors')) {
       setSystemMode('distributors');
+    } else if (pathname?.startsWith('/admin/press')) {
+      setSystemMode('press');
+    } else if (pathname?.startsWith('/admin/suppliers')) {
+      setSystemMode('suppliers');
     } else {
       setSystemMode('sales');
     }
@@ -62,40 +66,55 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
     router.push('/login');
   }
 
-  const bgColor = systemMode === 'marketing' ? 'bg-orange-900' : systemMode === 'distributors' ? 'bg-teal-900' : 'bg-gray-900';
-  const borderColor = systemMode === 'marketing' ? 'border-orange-800' : systemMode === 'distributors' ? 'border-teal-800' : 'border-gray-800';
-  const highlightColor = systemMode === 'marketing' ? 'bg-orange-600' : systemMode === 'distributors' ? 'bg-teal-600' : 'bg-blue-600';
-  const hoverColor = systemMode === 'marketing' ? 'hover:bg-orange-800' : systemMode === 'distributors' ? 'hover:bg-teal-800' : 'hover:bg-gray-800';
-  const selectBgColor = systemMode === 'marketing' ? 'bg-orange-700' : systemMode === 'distributors' ? 'bg-teal-700' : 'bg-gray-700';
-  const selectBorderColor = systemMode === 'marketing' ? 'border-orange-600' : systemMode === 'distributors' ? 'border-teal-600' : 'border-gray-600';
-  const selectHoverColor = systemMode === 'marketing' ? 'hover:bg-orange-600' : systemMode === 'distributors' ? 'hover:bg-teal-600' : 'hover:bg-gray-600';
+  const colorMaps = {
+    marketing: { bg: 'bg-orange-900', border: 'border-orange-800', highlight: 'bg-orange-600', hover: 'hover:bg-orange-800', selectBg: 'bg-orange-700', selectBorder: 'border-orange-600', selectHover: 'hover:bg-orange-600' },
+    distributors: { bg: 'bg-teal-900', border: 'border-teal-800', highlight: 'bg-teal-600', hover: 'hover:bg-teal-800', selectBg: 'bg-teal-700', selectBorder: 'border-teal-600', selectHover: 'hover:bg-teal-600' },
+    press: { bg: 'bg-purple-900', border: 'border-purple-800', highlight: 'bg-purple-600', hover: 'hover:bg-purple-800', selectBg: 'bg-purple-700', selectBorder: 'border-purple-600', selectHover: 'hover:bg-purple-600' },
+    suppliers: { bg: 'bg-emerald-900', border: 'border-emerald-800', highlight: 'bg-emerald-600', hover: 'hover:bg-emerald-800', selectBg: 'bg-emerald-700', selectBorder: 'border-emerald-600', selectHover: 'hover:bg-emerald-600' },
+    sales: { bg: 'bg-gray-900', border: 'border-gray-800', highlight: 'bg-blue-600', hover: 'hover:bg-gray-800', selectBg: 'bg-gray-700', selectBorder: 'border-gray-600', selectHover: 'hover:bg-gray-600' }
+  };
+
+  const colors = colorMaps[systemMode];
+  const bgColor = colors.bg;
+  const borderColor = colors.border;
+  const highlightColor = colors.highlight;
+  const hoverColor = colors.hover;
+  const selectBgColor = colors.selectBg;
+  const selectBorderColor = colors.selectBorder;
+  const selectHoverColor = colors.selectHover;
 
   return (
     <nav className={`fixed left-0 top-0 h-screen w-64 ${bgColor} text-white flex flex-col z-50`}>
       {/* System Mode Toggle - DIRECTORS ONLY */}
       {isDirector && (
-        <div className={`p-4 border-b ${borderColor} ${systemMode === 'marketing' ? 'bg-orange-800' : systemMode === 'distributors' ? 'bg-teal-800' : 'bg-gray-800'}`}>
+        <div className={`p-4 border-b ${borderColor} ${selectBgColor.replace('bg-', 'bg-').replace('-700', '-800')}`}>
           <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
             System
           </label>
           <select
             value={systemMode}
             onChange={(e) => {
-              const newMode = e.target.value as 'sales' | 'marketing' | 'distributors';
+              const newMode = e.target.value as 'sales' | 'marketing' | 'distributors' | 'press' | 'suppliers';
               setSystemMode(newMode);
               if (newMode === 'marketing') {
                 router.push('/admin/marketing/dashboard');
               } else if (newMode === 'distributors') {
                 router.push('/admin/distributors/dashboard');
+              } else if (newMode === 'press') {
+                router.push('/admin/press/dashboard');
+              } else if (newMode === 'suppliers') {
+                router.push('/admin/suppliers/dashboard');
               } else {
                 router.push('/admin/sales');
               }
             }}
-            className={`w-full px-3 py-2 ${selectBgColor} border ${selectBorderColor} rounded text-sm font-semibold text-white ${selectHoverColor} focus:ring-2 focus:ring-${systemMode === 'marketing' ? 'orange' : systemMode === 'distributors' ? 'teal' : 'blue'}-500 focus:border-${systemMode === 'marketing' ? 'orange' : systemMode === 'distributors' ? 'teal' : 'blue'}-500`}
+            className={`w-full px-3 py-2 ${selectBgColor} border ${selectBorderColor} rounded text-sm font-semibold text-white ${selectHoverColor} focus:ring-2 focus:ring-opacity-50`}
           >
             <option value="sales">🏢 Sales Engine</option>
             <option value="marketing">📧 Marketing System</option>
             <option value="distributors">📦 Distributor System</option>
+            <option value="press">📰 Press & Media</option>
+            <option value="suppliers">🏭 Suppliers</option>
           </select>
         </div>
       )}
@@ -104,20 +123,24 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
       <div className={`p-4 border-b ${borderColor}`}>
         <h1 className="text-lg font-bold">Technifold Admin</h1>
         <p className="text-xs text-gray-400">
-          {systemMode === 'marketing' ? 'Marketing System' : systemMode === 'distributors' ? 'Distributor System' : 'Sales Engine'}
+          {systemMode === 'marketing' ? 'Marketing System' :
+           systemMode === 'distributors' ? 'Distributor System' :
+           systemMode === 'press' ? 'Press & Media Relations' :
+           systemMode === 'suppliers' ? 'Supplier Management' :
+           'Sales Engine'}
         </p>
       </div>
 
       {/* GLOBAL VIEW MODE TOGGLE - Only show in Sales mode */}
       {systemMode === 'sales' && (
-        <div className={`p-4 border-b ${borderColor} ${systemMode === 'marketing' ? 'bg-orange-800' : 'bg-gray-800'}`}>
+        <div className={`p-4 border-b ${borderColor} ${selectBgColor.replace('bg-', 'bg-').replace('-700', '-800')}`}>
           <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
             View Mode
           </label>
           <select
             value={viewMode}
             onChange={(e) => handleViewModeChange(e.target.value as ViewMode)}
-            className={`w-full px-3 py-2 ${selectBgColor} border ${selectBorderColor} rounded text-sm font-semibold text-white ${selectHoverColor} focus:ring-2 focus:ring-${systemMode === 'marketing' ? 'orange' : 'blue'}-500 focus:border-${systemMode === 'marketing' ? 'orange' : 'blue'}-500`}
+            className={`w-full px-3 py-2 ${selectBgColor} border ${selectBorderColor} rounded text-sm font-semibold text-white ${selectHoverColor} focus:ring-2 focus:ring-opacity-50`}
           >
             <option value="all">🌍 All Companies (Team)</option>
             <option value="my_customers">👤 My Customers Only</option>
@@ -366,6 +389,185 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
                 }`}
               >
                 🎯 Performance Dashboard
+              </Link>
+            </div>
+          </>
+        )}
+
+        {/* ==================== PRESS & MEDIA NAV ==================== */}
+        {systemMode === 'press' && isDirector && (
+          <>
+            {/* Dashboard */}
+            <div className="mb-6">
+              <div className="px-4 mb-2 text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                Dashboard
+              </div>
+              <Link
+                href="/admin/press/dashboard"
+                className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+                  pathname === '/admin/press/dashboard' || pathname === '/admin/press'
+                    ? `${highlightColor} text-white`
+                    : `text-gray-300 ${hoverColor} hover:text-white`
+                }`}
+              >
+                📊 Press Dashboard
+              </Link>
+            </div>
+
+            {/* Media Contacts */}
+            <div className="mb-6">
+              <div className="px-4 mb-2 text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                Media Contacts
+              </div>
+              <Link
+                href="/admin/press/contacts"
+                className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+                  pathname === '/admin/press/contacts'
+                    ? `${highlightColor} text-white`
+                    : `text-gray-300 ${hoverColor} hover:text-white`
+                }`}
+              >
+                📰 All Press Contacts
+              </Link>
+              <Link
+                href="/admin/press/outlets"
+                className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+                  pathname === '/admin/press/outlets'
+                    ? `${highlightColor} text-white`
+                    : `text-gray-300 ${hoverColor} hover:text-white`
+                }`}
+              >
+                🏢 Media Outlets
+              </Link>
+            </div>
+
+            {/* Coverage */}
+            <div className="mb-6">
+              <div className="px-4 mb-2 text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                Media Coverage
+              </div>
+              <Link
+                href="/admin/press/coverage"
+                className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+                  pathname === '/admin/press/coverage'
+                    ? `${highlightColor} text-white`
+                    : `text-gray-300 ${hoverColor} hover:text-white`
+                }`}
+              >
+                📰 All Coverage
+              </Link>
+              <Link
+                href="/admin/press/releases"
+                className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+                  pathname === '/admin/press/releases'
+                    ? `${highlightColor} text-white`
+                    : `text-gray-300 ${hoverColor} hover:text-white`
+                }`}
+              >
+                📝 Press Releases
+              </Link>
+            </div>
+          </>
+        )}
+
+        {/* ==================== SUPPLIERS NAV ==================== */}
+        {systemMode === 'suppliers' && isDirector && (
+          <>
+            {/* Dashboard */}
+            <div className="mb-6">
+              <div className="px-4 mb-2 text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                Dashboard
+              </div>
+              <Link
+                href="/admin/suppliers/dashboard"
+                className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+                  pathname === '/admin/suppliers/dashboard' || pathname === '/admin/suppliers'
+                    ? `${highlightColor} text-white`
+                    : `text-gray-300 ${hoverColor} hover:text-white`
+                }`}
+              >
+                📊 Supplier Dashboard
+              </Link>
+            </div>
+
+            {/* Suppliers */}
+            <div className="mb-6">
+              <div className="px-4 mb-2 text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                Suppliers
+              </div>
+              <Link
+                href="/admin/suppliers/companies"
+                className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+                  pathname === '/admin/suppliers/companies'
+                    ? `${highlightColor} text-white`
+                    : `text-gray-300 ${hoverColor} hover:text-white`
+                }`}
+              >
+                🏭 All Suppliers
+              </Link>
+              <Link
+                href="/admin/suppliers/contacts"
+                className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+                  pathname === '/admin/suppliers/contacts'
+                    ? `${highlightColor} text-white`
+                    : `text-gray-300 ${hoverColor} hover:text-white`
+                }`}
+              >
+                👥 Supplier Contacts
+              </Link>
+            </div>
+
+            {/* Purchase Orders */}
+            <div className="mb-6">
+              <div className="px-4 mb-2 text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                Purchase Orders
+              </div>
+              <Link
+                href="/admin/suppliers/orders"
+                className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+                  pathname === '/admin/suppliers/orders'
+                    ? `${highlightColor} text-white`
+                    : `text-gray-300 ${hoverColor} hover:text-white`
+                }`}
+              >
+                📦 All Orders
+              </Link>
+              <Link
+                href="/admin/suppliers/orders/pending"
+                className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+                  pathname === '/admin/suppliers/orders/pending'
+                    ? `${highlightColor} text-white`
+                    : `text-gray-300 ${hoverColor} hover:text-white`
+                }`}
+              >
+                ⏳ Pending Delivery
+              </Link>
+            </div>
+
+            {/* Catalogs */}
+            <div className="mb-6">
+              <div className="px-4 mb-2 text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                Catalogs & Pricing
+              </div>
+              <Link
+                href="/admin/suppliers/catalogs"
+                className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+                  pathname === '/admin/suppliers/catalogs'
+                    ? `${highlightColor} text-white`
+                    : `text-gray-300 ${hoverColor} hover:text-white`
+                }`}
+              >
+                📑 Product Catalogs
+              </Link>
+              <Link
+                href="/admin/suppliers/pricing"
+                className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+                  pathname === '/admin/suppliers/pricing'
+                    ? `${highlightColor} text-white`
+                    : `text-gray-300 ${hoverColor} hover:text-white`
+                }`}
+              >
+                💰 Pricing History
               </Link>
             </div>
           </>
