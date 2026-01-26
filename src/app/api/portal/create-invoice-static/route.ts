@@ -278,7 +278,7 @@ export async function POST(request: NextRequest) {
         address: billingAddress,
         shipping: shippingDetails,
         metadata: {
-          company_id,
+          company_id: company.company_id, // Use resolved UUID
           contact_id,
         }
       });
@@ -327,7 +327,7 @@ export async function POST(request: NextRequest) {
       description: po_number ? `PO: ${po_number}` : undefined,
       // Note: customer_shipping was removed from Stripe API - shipping address is on customer record
       metadata: {
-        company_id,
+        company_id: company.company_id, // Use resolved UUID for consistency
         contact_id,
         offer_key: offer_key || 'portal_quote_static',
         campaign_key: campaign_key || `quote_${new Date().toISOString().split('T')[0]}`,
@@ -395,7 +395,7 @@ export async function POST(request: NextRequest) {
     const { data: dbInvoice, error: invoiceError } = await supabase
       .from('invoices')
       .insert({
-        company_id,
+        company_id: company.company_id, // Use resolved UUID, not raw token value
         contact_id,
         stripe_invoice_id: finalizedInvoice.id,
         stripe_customer_id: stripeCustomerId,
@@ -490,7 +490,7 @@ export async function POST(request: NextRequest) {
               user_email: user.email,
               user_name: user.full_name || user.email,
               quote_id: updatedQuote.quote_id,
-              company_id: company_id,
+              company_id: company.company_id, // Use resolved UUID
               company_name: company.company_name,
               contact_name: contact.full_name,
               total_amount: total, // Use actual invoice amount, not quote amount

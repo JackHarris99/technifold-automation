@@ -554,7 +554,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
         collection_method: 'charge_automatically',
         metadata: {
           invoice_id: invoice.invoice_id,
-          company_id: companyId,
+          company_id: resolvedCompanyId, // Use resolved UUID for consistency
         },
       });
 
