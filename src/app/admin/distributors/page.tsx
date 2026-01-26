@@ -77,8 +77,8 @@ export default async function DistributorsPage() {
 
         {/* Back Link */}
         <div className="mt-8">
-          <Link href="/admin/sales" className="text-blue-600 hover:text-blue-800 font-medium">
-            ← Back to Sales Center
+          <Link href="/admin/distributors/dashboard" className="text-blue-600 hover:text-blue-800 font-medium">
+            ← Back to Distributor Dashboard
           </Link>
         </div>
       </div>

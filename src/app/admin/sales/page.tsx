@@ -306,16 +306,6 @@ export default async function SalesCenterPage() {
               </div>
               <div className="p-4 space-y-3">
                 <Link
-                  href="/admin/sales/distributors"
-                  className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 border-2 border-purple-200 hover:bg-purple-100 transition-colors"
-                >
-                  <span className="text-2xl">📦</span>
-                  <div>
-                    <h4 className="font-semibold text-purple-900">Distributor Control Center</h4>
-                    <p className="text-sm text-purple-700">Manage distributors, orders, and wholesale relationships</p>
-                  </div>
-                </Link>
-                <Link
                   href="/admin/companies"
                   className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
                 >
@@ -343,16 +333,6 @@ export default async function SalesCenterPage() {
                   <div>
                     <h4 className="font-semibold text-gray-900">All Invoices</h4>
                     <p className="text-sm text-gray-700">View and manage invoices</p>
-                  </div>
-                </Link>
-                <Link
-                  href="/admin/distributor-pricing"
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <span className="text-2xl">💰</span>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">Distributor Pricing</h4>
-                    <p className="text-sm text-gray-700">Manage tiered pricing for distributors</p>
                   </div>
                 </Link>
               </div>

@@ -60,6 +60,13 @@ export async function GET(request: NextRequest) {
       .gte('invoices.invoice_date', monthStart)
       .lt('invoices.invoice_date', monthEnd);
 
+    // Filter invoice items to only this rep's customers (non-distributors)
+    const repInvoiceItems = (invoiceItems || []).filter((item: any) => {
+      const accountOwner = item.invoices.companies.account_owner;
+      const companyType = item.invoices.companies.type;
+      return accountOwner === repId && companyType !== 'distributor';
+    });
+
     // Calculate commission by product type
     let toolRevenue = 0;
     let toolCommission = 0;
@@ -67,21 +74,9 @@ export async function GET(request: NextRequest) {
     let consumableCommission = 0;
     const topProductsMap = new Map<string, { name: string; units: number; revenue: number }>();
 
-    (invoiceItems || []).forEach((item: any) => {
+    repInvoiceItems.forEach((item: any) => {
       const itemSubtotal = item.quantity * item.unit_price;
       const productType = item.products.type;
-      const accountOwner = item.invoices.companies.account_owner;
-      const companyType = item.invoices.companies.type;
-
-      // Only process items for customers assigned to this rep
-      if (accountOwner !== repId) {
-        return;
-      }
-
-      // Exclude distributor invoices from commission
-      if (companyType === 'distributor') {
-        return;
-      }
 
       // Track top products
       if (!topProductsMap.has(item.product_code)) {
@@ -111,43 +106,48 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 5);
 
-    // Count invoices closed (unique invoices)
-    const uniqueInvoices = new Set((invoiceItems || []).map((item: any) => item.invoice_id));
+    // Count invoices closed (unique invoices for this rep only)
+    const uniqueInvoices = new Set(repInvoiceItems.map((item: any) => item.invoice_id));
     const invoicesClosedCount = uniqueInvoices.size;
 
-    // Get activity metrics
+    // Get activity metrics (filtered by rep's companies)
     const { data: calls } = await supabase
       .from('engagement_events')
-      .select('event_id', { count: 'exact', head: true })
+      .select('event_id, companies!inner(account_owner)', { count: 'exact', head: true })
       .ilike('event_name', 'manual_contact_call%')
+      .eq('companies.account_owner', repId)
       .gte('occurred_at', firstDayOfMonth.toISOString())
       .lt('occurred_at', firstDayOfNextMonth.toISOString());
 
     const { data: visits } = await supabase
       .from('engagement_events')
-      .select('event_id', { count: 'exact', head: true })
+      .select('event_id, companies!inner(account_owner)', { count: 'exact', head: true })
       .ilike('event_name', 'manual_contact_visit%')
+      .eq('companies.account_owner', repId)
       .gte('occurred_at', firstDayOfMonth.toISOString())
       .lt('occurred_at', firstDayOfNextMonth.toISOString());
 
     const { data: emails } = await supabase
       .from('engagement_events')
-      .select('event_id', { count: 'exact', head: true })
+      .select('event_id, companies!inner(account_owner)', { count: 'exact', head: true })
       .ilike('event_name', 'manual_contact_email%')
+      .eq('companies.account_owner', repId)
       .gte('occurred_at', firstDayOfMonth.toISOString())
       .lt('occurred_at', firstDayOfNextMonth.toISOString());
 
     const { data: followups } = await supabase
       .from('engagement_events')
-      .select('event_id', { count: 'exact', head: true })
+      .select('event_id, companies!inner(account_owner)', { count: 'exact', head: true })
       .ilike('event_name', 'manual_contact_followup%')
+      .eq('companies.account_owner', repId)
       .gte('occurred_at', firstDayOfMonth.toISOString())
       .lt('occurred_at', firstDayOfNextMonth.toISOString());
 
     const { data: meetings } = await supabase
       .from('engagement_events')
-      .select('event_id', { count: 'exact', head: true })
+      .select('event_id, companies!inner(account_owner)', { count: 'exact', head: true })
       .ilike('event_name', 'manual_contact_meeting%')
+      .eq('companies.account_owner', repId)
       .gte('occurred_at', firstDayOfMonth.toISOString())
       .lt('occurred_at', firstDayOfNextMonth.toISOString());
 

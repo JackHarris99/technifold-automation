@@ -166,6 +166,12 @@ export default async function DistributorDashboardPage() {
             </div>
             <div className="flex gap-3">
               <Link
+                href="/admin/distributors"
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium"
+              >
+                Distributor Users
+              </Link>
+              <Link
                 href="/admin/distributors/orders/pending"
                 className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium"
               >
