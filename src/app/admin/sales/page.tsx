@@ -123,7 +123,6 @@ export default async function SalesCenterPage() {
   let reorderOpportunities: ReorderOpportunity[] = [];
   let trialsEnding: TrialEnding[] = [];
   let unpaidInvoices: UnpaidInvoice[] = [];
-  let companiesWithEngagement: { company_id: string; company_name: string }[] = [];
 
   if (companies.length > 0) {
     // Get current month boundaries
@@ -172,14 +171,6 @@ export default async function SalesCenterPage() {
       .order('trial_end_date', { ascending: true })
       .limit(10);
 
-    // Get companies with recent engagement (last 30 days)
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-    let engagementQuery = supabase
-      .from('engagement_events')
-      .select('company_id')
-      .gte('occurred_at', thirtyDaysAgo)
-      .not('company_id', 'is', null);
-
     // Apply company filter when filtering by specific sales rep
     if (filterBySalesRep) {
       paidInvoicesQuery = paidInvoicesQuery.in('company_id', companyIds);
@@ -187,7 +178,6 @@ export default async function SalesCenterPage() {
       trialsQuery = trialsQuery.in('company_id', companyIds);
       reorderQuery = reorderQuery.in('company_id', companyIds);
       endingTrialsQuery = endingTrialsQuery.in('company_id', companyIds);
-      engagementQuery = engagementQuery.in('company_id', companyIds);
     }
 
     const [
@@ -196,14 +186,12 @@ export default async function SalesCenterPage() {
       trialsResult,
       reorderResult,
       endingTrialsResult,
-      engagementResult,
     ] = await Promise.all([
       paidInvoicesQuery,
       unpaidInvoicesQuery,
       trialsQuery,
       reorderQuery,
       endingTrialsQuery,
-      engagementQuery,
     ]);
 
     // Process metrics
@@ -241,17 +229,6 @@ export default async function SalesCenterPage() {
       days_left: Math.ceil((new Date(trial.trial_end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
       trial_end_date: trial.trial_end_date,
     }));
-
-    // Process engagement events - get unique companies with activity
-    const uniqueEngagementCompanyIds = new Set(
-      (engagementResult.data || []).map(e => e.company_id).filter(Boolean)
-    );
-    companiesWithEngagement = Array.from(uniqueEngagementCompanyIds)
-      .map(companyId => ({
-        company_id: companyId,
-        company_name: companyMap.get(companyId) || 'Unknown Company',
-      }))
-      .filter(c => c.company_name !== 'Unknown Company'); // Only include companies we have names for
   }
 
   return (
@@ -312,7 +289,7 @@ export default async function SalesCenterPage() {
         {/* Main Content */}
         <div className="max-w-4xl">
           <SalesCenterClient
-            companies={companiesWithEngagement}
+            salesRepId={filterBySalesRep}
             reorderOpportunities={reorderOpportunities}
             trialsEnding={trialsEnding}
             unpaidInvoices={unpaidInvoices}

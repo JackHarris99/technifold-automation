@@ -59,13 +59,10 @@ export async function GET(request: NextRequest) {
     }
 
     const searchParams = request.nextUrl.searchParams;
-    const companyIdsParam = searchParams.get('company_ids');
+    const salesRepId = searchParams.get('sales_rep_id');
+    const limitParam = searchParams.get('limit');
+    const limit = limitParam ? parseInt(limitParam, 10) : 10;
 
-    if (!companyIdsParam) {
-      return NextResponse.json({ error: 'company_ids required' }, { status: 400 });
-    }
-
-    const companyIds = companyIdsParam.split(',').map(id => id.trim());
     const supabase = getSupabaseClient();
 
     // Calculate date boundaries
@@ -73,13 +70,38 @@ export async function GET(request: NextRequest) {
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-    // Fetch activity for all companies
-    const { data: activities, error } = await supabase
+    // Fetch activity for customer companies (with optional sales rep filter)
+    // Join to companies table to filter by type='customer' and status != 'dead'
+    let query = supabase
       .from('engagement_events')
-      .select('event_id, company_id, event_type, event_name, source, url, occurred_at')
-      .in('company_id', companyIds)
-      .order('occurred_at', { ascending: false })
-      .limit(500); // Get last 500 events across all companies
+      .select(`
+        event_id,
+        company_id,
+        event_type,
+        event_name,
+        source,
+        url,
+        occurred_at,
+        companies!inner (
+          company_id,
+          company_name,
+          type,
+          status,
+          account_owner
+        )
+      `)
+      .gte('occurred_at', thirtyDaysAgo)
+      .eq('companies.type', 'customer')
+      .neq('companies.status', 'dead')
+      .not('company_id', 'is', null)
+      .order('occurred_at', { ascending: false });
+
+    // Apply sales rep filter if provided
+    if (salesRepId) {
+      query = query.eq('companies.account_owner', salesRepId);
+    }
+
+    const { data: activities, error } = await query;
 
     if (error) {
       console.error('[CompanyActivity] Query error:', error);
@@ -87,31 +109,30 @@ export async function GET(request: NextRequest) {
     }
 
     // Process engagement data per company
-    const engagementMap = new Map<string, CompanyEngagement>();
-
-    companyIds.forEach(companyId => {
-      engagementMap.set(companyId, {
-        company_id: companyId,
-        total_score: 0,
-        score_30d: 0,
-        score_7d: 0,
-        last_activity_at: null,
-        activity_count: 0,
-        recent_events: [],
-        heat_level: 'cold',
-      });
-    });
+    const engagementMap = new Map<string, CompanyEngagement & { company_name: string }>();
 
     // Process activities
-    (activities || []).forEach(activity => {
+    (activities || []).forEach((activity: any) => {
       const companyId = activity.company_id;
       if (!companyId) return;
 
-      const engagement = engagementMap.get(companyId);
-      if (!engagement) return;
+      // Initialize engagement tracking for this company if not exists
+      if (!engagementMap.has(companyId)) {
+        engagementMap.set(companyId, {
+          company_id: companyId,
+          company_name: activity.companies.company_name,
+          total_score: 0,
+          score_30d: 0,
+          score_7d: 0,
+          last_activity_at: null,
+          activity_count: 0,
+          recent_events: [],
+          heat_level: 'cold',
+        });
+      }
 
+      const engagement = engagementMap.get(companyId)!;
       const eventScore = EVENT_SCORES[activity.event_type as keyof typeof EVENT_SCORES] || 1;
-      const occurredAt = new Date(activity.occurred_at);
 
       // Add to total score
       engagement.total_score += eventScore;
@@ -153,10 +174,14 @@ export async function GET(request: NextRequest) {
       else engagement.heat_level = 'cold';
     });
 
-    const result = Array.from(engagementMap.values());
+    // Sort by 7-day score (most engaged first) and limit results
+    const result = Array.from(engagementMap.values())
+      .sort((a, b) => b.score_7d - a.score_7d)
+      .slice(0, limit);
 
     return NextResponse.json({
       engagements: result,
+      total_companies: engagementMap.size,
       total_activities: activities?.length || 0,
     });
 

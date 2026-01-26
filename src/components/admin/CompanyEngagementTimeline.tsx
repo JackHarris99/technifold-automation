@@ -30,54 +30,36 @@ interface CompanyEngagement {
 }
 
 interface Props {
-  companies: { company_id: string; company_name: string }[];
+  salesRepId?: string | null;
   limit?: number;
   showExpanded?: boolean;
 }
 
-export default function CompanyEngagementTimeline({ companies, limit = 10, showExpanded = false }: Props) {
+export default function CompanyEngagementTimeline({ salesRepId, limit = 10, showExpanded = false }: Props) {
   const [engagements, setEngagements] = useState<CompanyEngagement[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedCompany, setExpandedCompany] = useState<string | null>(null);
 
   useEffect(() => {
-    if (companies.length === 0) {
-      setLoading(false);
-      return;
+    // Build API URL with optional sales rep filter
+    const params = new URLSearchParams();
+    if (salesRepId) {
+      params.set('sales_rep_id', salesRepId);
     }
+    params.set('limit', limit.toString());
 
-    // Skip loading if there are too many companies (to avoid URL length issues)
-    if (companies.length > 100) {
-      console.log(`Skipping engagement load for ${companies.length} companies (too many)`);
-      setLoading(false);
-      return;
-    }
-
-    const companyIds = companies.map(c => c.company_id).join(',');
-
-    fetch(`/api/admin/engagement/company-activity?company_ids=${encodeURIComponent(companyIds)}`)
+    fetch(`/api/admin/engagement/company-activity?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
-        // Merge company names with engagement data
-        const enriched = data.engagements.map((eng: any) => {
-          const company = companies.find(c => c.company_id === eng.company_id);
-          return {
-            ...eng,
-            company_name: company?.company_name || 'Unknown',
-          };
-        });
-
-        // Sort by 7-day score (most engaged first)
-        enriched.sort((a: CompanyEngagement, b: CompanyEngagement) => b.score_7d - a.score_7d);
-
-        setEngagements(enriched.slice(0, limit));
+        // Data already includes company names and is sorted by score
+        setEngagements(data.engagements || []);
         setLoading(false);
       })
       .catch(err => {
         console.error('Failed to load engagement:', err);
         setLoading(false);
       });
-  }, [companies, limit]);
+  }, [salesRepId, limit]);
 
   const getHeatEmoji = (heat: string) => {
     switch (heat) {

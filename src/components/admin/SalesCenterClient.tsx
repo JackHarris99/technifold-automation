@@ -8,20 +8,15 @@
 import Link from 'next/link';
 import CompanyEngagementTimeline from './CompanyEngagementTimeline';
 
-interface Company {
-  company_id: string;
-  company_name: string;
-}
-
 interface Props {
-  companies: Company[];
+  salesRepId?: string | null;
   reorderOpportunities: any[];
   trialsEnding: any[];
   unpaidInvoices: any[];
 }
 
 export default function SalesCenterClient({
-  companies,
+  salesRepId,
   reorderOpportunities,
   trialsEnding,
   unpaidInvoices,
@@ -32,13 +27,12 @@ export default function SalesCenterClient({
       <ActionSection
         title="Active Engagement"
         icon="📊"
-        count={companies.length}
-        emptyMessage="No companies in territory"
-        emptyIcon="🏢"
+        emptyMessage="No engagement activity yet"
+        emptyIcon="📊"
         color="blue"
       >
         <div className="p-4">
-          <CompanyEngagementTimeline companies={companies} limit={10} />
+          <CompanyEngagementTimeline salesRepId={salesRepId} limit={10} />
         </div>
       </ActionSection>
 
@@ -161,7 +155,7 @@ function ActionSection({
 }: {
   title: string;
   icon: string;
-  count: number;
+  count?: number;
   total?: string;
   emptyMessage: string;
   emptyIcon: string;
@@ -189,7 +183,7 @@ function ActionSection({
         <div className="flex items-center gap-2">
           <span className="text-xl">{icon}</span>
           <h3 className="font-bold text-gray-900">{title}</h3>
-          {count > 0 && (
+          {count !== undefined && count > 0 && (
             <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${badgeColors[color]}`}>
               {count}
             </span>
@@ -199,7 +193,7 @@ function ActionSection({
           {total && (
             <span className="text-sm font-semibold text-gray-700">{total}</span>
           )}
-          {viewAllHref && count > 0 && (
+          {viewAllHref && count !== undefined && count > 0 && (
             <Link
               href={viewAllHref}
               className="text-sm text-blue-600 hover:text-blue-800 font-medium"
@@ -210,7 +204,7 @@ function ActionSection({
         </div>
       </div>
 
-      {count === 0 ? (
+      {count !== undefined && count === 0 ? (
         <div className="p-8 text-center">
           <div className="text-4xl mb-2">{emptyIcon}</div>
           <p className="text-gray-700">{emptyMessage}</p>
