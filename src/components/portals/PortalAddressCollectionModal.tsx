@@ -107,7 +107,7 @@ export default function PortalAddressCollectionModal({
         } else if (!vatVerificationResult || !vatVerificationResult.valid) {
           // VAT number provided but not verified
           const proceedAnyway = confirm(
-            'WARNING: VAT number could not be verified.\n\n20% UK VAT will be charged on all orders until you provide a valid VAT number.\n\nYou can update your VAT number later to apply 0% reverse charge.\n\nDo you want to continue with unverified VAT number?'
+            'VAT Verification Notice:\n\nYour VAT number could not be verified automatically (this may be due to the EU verification system being temporarily unavailable).\n\nYour VAT number will still be saved and used for orders. Our team will verify it manually.\n\nDo you want to proceed?'
           );
           if (!proceedAnyway) {
             setIsSubmitting(false);
@@ -227,11 +227,25 @@ export default function PortalAddressCollectionModal({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          <h2 className="text-2xl font-semibold">Edit Addresses</h2>
+
+          {/* PROMINENT WARNING: Why this modal appeared */}
+          <div className="bg-red-50 border-2 border-red-400 rounded-lg p-4 mb-4">
+            <h3 className="text-lg font-bold text-red-900 flex items-center gap-2 mb-2">
+              <span className="text-2xl">🚫</span> Action Required to Place Orders
+            </h3>
+            <p className="text-sm text-red-800 font-semibold">
+              You cannot place orders until you complete BOTH your billing address and shipping address below.
+            </p>
+            <p className="text-sm text-red-700 mt-1">
+              This information is required for tax calculation and delivery of your products.
+            </p>
+          </div>
+
+          <h2 className="text-2xl font-semibold">Complete Your Addresses</h2>
           <p className="text-sm text-gray-800 mt-2">
-            Update your company's billing and delivery addresses for shipping and tax calculation.
+            Fill in your company's billing and delivery addresses to enable order placement.
           </p>
-          <p className="text-sm text-gray-700 mt-1">{companyName}</p>
+          <p className="text-sm text-gray-700 mt-1 font-medium">{companyName}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -390,12 +404,15 @@ export default function PortalAddressCollectionModal({
                         </div>
                       ) : (
                         <div>
-                          <p className="text-base font-bold text-red-700 flex items-center gap-2">
-                            <span className="text-xl">✗</span> VAT Number Could Not Be Verified
+                          <p className="text-base font-bold text-amber-700 flex items-center gap-2">
+                            <span className="text-xl">⚠</span> Automatic Verification Unavailable
                           </p>
-                          <p className="text-sm text-red-600 mt-2 font-medium">{vatVerificationResult.error}</p>
-                          <p className="text-sm text-red-700 mt-3 font-bold bg-red-100 p-2 rounded">
-                            ⚠ WARNING: 20% UK VAT will be charged on all orders until a valid VAT number is provided.
+                          <p className="text-sm text-amber-600 mt-2 font-medium">{vatVerificationResult.error}</p>
+                          <p className="text-sm text-amber-800 mt-3 font-semibold bg-amber-100 p-3 rounded border border-amber-300">
+                            ℹ️ The EU VAT verification system is temporarily unavailable. Your VAT number will be saved and verified manually by our team. If valid, 0% reverse charge VAT will apply to your orders.
+                          </p>
+                          <p className="text-xs text-gray-600 mt-2">
+                            If your VAT number is incorrect, you can update it later in your account settings.
                           </p>
                         </div>
                       )}
@@ -410,19 +427,25 @@ export default function PortalAddressCollectionModal({
           <div className="space-y-4 border-t pt-6">
             <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">2</span>
-              Delivery Address
+              Delivery Address <span className="text-red-600 text-lg ml-2">*</span>
             </h3>
 
-            <div className="flex items-center gap-2">
+            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-3">
+              <p className="text-sm text-blue-900 font-semibold">
+                📦 You must provide a delivery address (or check the box below to use your billing address)
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 bg-gray-50 p-3 rounded-lg border-2 border-gray-300">
               <input
                 type="checkbox"
                 id="use_billing"
                 checked={formData.use_billing_for_shipping}
                 onChange={(e) => handleChange('use_billing_for_shipping', e.target.checked)}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <label htmlFor="use_billing" className="text-sm font-medium text-gray-700">
-                Ship to billing address (same as above)
+              <label htmlFor="use_billing" className="text-sm font-semibold text-gray-900">
+                ✓ Ship to billing address (same as above)
               </label>
             </div>
 

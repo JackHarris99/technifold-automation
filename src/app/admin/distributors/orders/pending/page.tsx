@@ -9,6 +9,10 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import DistributorPendingOrdersClient from '@/components/admin/distributors/DistributorPendingOrdersClient';
 
+// Disable caching for this page - always fetch fresh pending orders
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
+
 export default async function PendingDistributorOrdersPage() {
   const currentUser = await getCurrentUser();
 

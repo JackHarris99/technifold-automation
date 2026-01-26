@@ -779,6 +779,18 @@ export default function DistributorDashboard({
                 </div>
               )}
 
+              {/* Warning: No Shipping Address Selected */}
+              {!selectedAddressId && (
+                <div className="mb-4 bg-red-50 border-2 border-red-400 rounded-lg p-4">
+                  <p className="text-sm font-bold text-red-900 flex items-center gap-2">
+                    <span className="text-xl">⚠️</span> Shipping Address Required
+                  </p>
+                  <p className="text-sm text-red-800 mt-1">
+                    Select or add a shipping address above to place your order.
+                  </p>
+                </div>
+              )}
+
               {/* Place Order Button */}
               <button
                 onClick={handleSubmitOrder}
