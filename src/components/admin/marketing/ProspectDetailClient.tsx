@@ -6,6 +6,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface ProspectDetailClientProps {
   prospect: any;
@@ -21,9 +22,115 @@ export default function ProspectDetailClient({
   campaignSends,
 }: ProspectDetailClientProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'timeline' | 'campaigns'>('overview');
+  const [showConvertModal, setShowConvertModal] = useState(false);
+  const [converting, setConverting] = useState(false);
+  const [convertError, setConvertError] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleConvertToCustomer = async () => {
+    setConverting(true);
+    setConvertError(null);
+
+    try {
+      const response = await fetch('/api/admin/prospects/convert-to-customer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prospect_company_id: prospect.prospect_company_id,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to convert prospect');
+      }
+
+      // Success! Redirect to the new customer page
+      alert(`✅ ${data.message}\n\n${data.migrated_contacts} contact(s) migrated.`);
+      router.push(`/admin/company/${data.company.company_id}`);
+      router.refresh();
+    } catch (error: any) {
+      console.error('[Convert Prospect] Error:', error);
+      setConvertError(error.message);
+      setConverting(false);
+    }
+  };
+
+  // Don't show convert button if already converted
+  const isConverted = prospect.lead_status === 'converted';
 
   return (
     <div className="space-y-6">
+      {/* Action Bar - Convert to Customer */}
+      {!isConverted && (
+        <div className="bg-white rounded-xl border border-[#e8e8e8] p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-[14px] font-[600] text-[#0a0a0a]">Ready to convert?</h3>
+              <p className="text-[12px] text-[#64748b] mt-1">
+                Convert this prospect to a customer and assign to a sales rep
+              </p>
+            </div>
+            <button
+              onClick={() => setShowConvertModal(true)}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-[14px] font-[600] transition-colors"
+            >
+              Convert to Customer
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Conversion Modal */}
+      {showConvertModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4">
+            <div className="p-6">
+              <h2 className="text-[20px] font-[700] text-[#0a0a0a] mb-2">
+                Convert to Customer?
+              </h2>
+              <p className="text-[14px] text-[#64748b] mb-4">
+                This will:
+              </p>
+              <ul className="list-disc list-inside text-[14px] text-[#64748b] space-y-1 mb-6">
+                <li>Create a new customer record</li>
+                <li>Auto-assign to sales rep (fair distribution)</li>
+                <li>Migrate {contacts.length} contact(s)</li>
+                <li>Mark this prospect as "converted"</li>
+                <li>Move to Sales Centre</li>
+              </ul>
+
+              {convertError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-[13px] mb-4">
+                  {convertError}
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowConvertModal(false);
+                    setConvertError(null);
+                  }}
+                  disabled={converting}
+                  className="flex-1 px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg text-[14px] font-[600] transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConvertToCustomer}
+                  disabled={converting}
+                  className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-[14px] font-[600] transition-colors disabled:opacity-50"
+                >
+                  {converting ? 'Converting...' : 'Yes, Convert'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="bg-white rounded-xl border border-[#e8e8e8]">
         <div className="border-b border-[#e8e8e8]">
