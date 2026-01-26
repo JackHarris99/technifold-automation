@@ -54,6 +54,10 @@
 - ✅ FIXED: Line 349: Links to old `/admin/distributor-pricing` route (removed entire Quick Actions panel)
 - ✅ FIXED: Active Engagement querying wrong table (`activity_tracking` with 0 rows instead of `engagement_events` with 480 rows)
 - ✅ FIXED: Active Engagement showing zero data because passing 2,428 companies (over 100-company limit, so component skipped loading)
+- ✅ FIXED: **CRITICAL** - Sales rep view showing 0 results for unpaid invoices & reorder opportunities
+  - Root cause: `.limit(10)` applied BEFORE `.in('company_id', companyIds)` filter
+  - Got 10 records from ALL reps, then filtered to specific rep (often resulting in 0)
+  - Fixed: Apply `.limit(10)` AFTER filtering by sales rep
 
 ---
 
@@ -244,6 +248,20 @@
      - Filters, scores, sorts, and limits all on server
      - Scales to unlimited companies (ready for 500+ automated marketing campaigns)
    - Result: Engagement timeline displays top engaged companies, fully scalable
+
+2. ✅ FIXED: **Sales Rep View Query Order Bug** (`/admin/sales` page):
+   - **Query order bug**: `.limit(10)` applied BEFORE `.in('company_id', companyIds)` filter
+   - Impact: When viewing "Steve's Customers", showed 0 unpaid invoices and 0 reorder opportunities
+   - Logic flow (BROKEN):
+     1. Get 10 oldest unpaid invoices from ALL customers
+     2. Filter those 10 to Steve's companies
+     3. Result: If those 10 don't belong to Steve → 0 results
+   - Logic flow (FIXED):
+     1. Get all unpaid invoices
+     2. Filter to Steve's companies
+     3. THEN limit to 10 oldest
+     4. Result: Steve's 10 oldest unpaid invoices displayed correctly
+   - Applied to: unpaidInvoicesQuery, reorderQuery, endingTrialsQuery
 
 ### Redundant Pages
 - [To document as we find them]
