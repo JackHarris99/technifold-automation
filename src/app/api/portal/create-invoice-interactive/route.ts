@@ -278,9 +278,7 @@ export async function POST(request: NextRequest) {
       if (pricingResult.validation_errors && pricingResult.validation_errors.length > 0) {
         console.error('[create-invoice-interactive] Validation errors:', pricingResult.validation_errors);
         return NextResponse.json({
-          error: 'Validation failed',
-          validation_errors: pricingResult.validation_errors,
-          message: pricingResult.validation_errors.join('. '),
+          error: 'Please reduce the quantity of some items to continue. ' + pricingResult.validation_errors.join('. '),
         }, { status: 400 });
       }
 
