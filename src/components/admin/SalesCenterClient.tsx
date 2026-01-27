@@ -12,15 +12,17 @@ interface Props {
   salesRepId?: string | null;
   trialsEnding: any[];
   unpaidInvoices: any[];
+  quotesFollowUp: any[];
 }
 
 export default function SalesCenterClient({
   salesRepId,
   trialsEnding,
   unpaidInvoices,
+  quotesFollowUp,
 }: Props) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
       {/* Active Engagement */}
       <ActionSection
         title="Active Engagement"
@@ -30,6 +32,38 @@ export default function SalesCenterClient({
         color="blue"
       >
         <CompanyEngagementTimeline salesRepId={salesRepId} limit={10} />
+      </ActionSection>
+
+      {/* Quotes Need Follow-Up */}
+      <ActionSection
+        title="Quotes Need Follow-Up"
+        icon="📄"
+        count={quotesFollowUp.length}
+        emptyMessage="No quotes need follow-up"
+        emptyIcon="✅"
+        color="purple"
+        viewAllHref="/admin/quotes?status=need_followup"
+      >
+        {quotesFollowUp.map((quote: any) => (
+          <Link
+            key={quote.quote_id}
+            href={`/admin/company/${quote.company_id}`}
+            className="flex items-start justify-between p-4 hover:bg-purple-50 transition-colors border-b border-gray-100 last:border-b-0"
+          >
+            <div className="flex-1">
+              <h4 className="font-semibold text-gray-900">{quote.company_name}</h4>
+              <p className="text-sm text-gray-700 mt-1">{quote.next_action}</p>
+              <p className="text-xs text-gray-500 mt-1">
+                £{quote.total_amount.toLocaleString('en-GB')}
+              </p>
+            </div>
+            <div className={`px-3 py-1 rounded-full text-xs font-bold ml-3 flex-shrink-0 ${
+              quote.next_action_priority === 'high' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'
+            }`}>
+              {quote.next_action_priority === 'high' ? 'HIGH' : 'MED'}
+            </div>
+          </Link>
+        ))}
       </ActionSection>
 
       {/* Trials Ending Soon */}

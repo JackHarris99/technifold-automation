@@ -29,12 +29,14 @@
 **What it does:**
 - Main hub for sales team showing action items and performance metrics
 - Displays current month revenue, paid invoices count, active trials, territory company count
-- Shows top 10 items from each action category (expandable engagement timeline)
+- 4-column grid layout showing: Active Engagement, Quotes Need Follow-Up, Trials Ending Soon, Unpaid Invoices
+- Shows top 10 items from each action category with priority indicators
 - Filters by view mode: "All Companies" or "My Customers Only" or "View as [Rep]"
 
 **Buttons/Actions:**
 - ✅ 💰 My Performance → `/admin/my-performance` (view commissions earned)
 - ✅ 📊 Active Engagement (expandable timeline) - shows recent company activity
+- ✅ 📄 Quotes Need Follow-Up → `/admin/quotes?status=need_followup` (NEW - shows quotes with high/medium priority actions)
 - ✅ View All Trials Ending → `/admin/sales/trials-ending`
 - ✅ 📄 All Invoices → `/admin/invoices` (with Paid/Unpaid/Void tabs)
 - ✅ 📦 Distributor Control Center → `/admin/sales/distributors`
@@ -57,6 +59,13 @@
   - Fixed: Apply `.limit(10)` AFTER filtering by sales rep
 - ✅ REMOVED: Standalone unpaid invoices page (`/admin/sales/unpaid-invoices`) - redundant with invoices page
 - ✅ REMOVED: Reorder Opportunities section and standalone page - replaced with "Last order: Xd ago" badges on company cards and detail pages
+- ✅ ADDED: **Quotes Need Follow-Up** section (NEW - 2026-01-27)
+  - Shows top 10 quotes with high/medium priority next actions
+  - Uses optimized quotes API with server-side calculation
+  - Priority badges: HIGH (red) or MED (orange)
+  - Click company → go to company detail page
+  - View All → `/admin/quotes?status=need_followup`
+  - Helps sales reps prioritize quote follow-ups (e.g., "Not opened in 7 days", "Customer viewed 5 days ago")
 
 ---
 

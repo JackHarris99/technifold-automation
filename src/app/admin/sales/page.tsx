@@ -28,6 +28,16 @@ interface UnpaidInvoice {
   invoice_url: string | null;
 }
 
+interface QuoteFollowUp {
+  quote_id: string;
+  company_id: string;
+  company_name: string;
+  total_amount: number;
+  next_action: string;
+  next_action_priority: 'high' | 'medium';
+  preview_url: string;
+}
+
 interface SalesMetrics {
   total_revenue: number;
   deals_closed: number;
@@ -115,6 +125,7 @@ export default async function SalesCenterPage() {
   // Data collections for each section
   let trialsEnding: TrialEnding[] = [];
   let unpaidInvoices: UnpaidInvoice[] = [];
+  let quotesFollowUp: QuoteFollowUp[] = [];
 
   if (companies.length > 0) {
     // Get current month boundaries
@@ -224,6 +235,40 @@ export default async function SalesCenterPage() {
       days_left: Math.ceil((new Date(trial.trial_end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
       trial_end_date: trial.trial_end_date,
     }));
+
+    // Fetch quotes needing follow-up (high/medium priority) using the optimized quotes API
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.technifold.com';
+      const params = new URLSearchParams();
+      if (viewMode !== 'all') params.set('viewMode', viewMode);
+      params.set('status', 'need_followup');
+      params.set('limit', '10');
+
+      const quotesResponse = await fetch(`${baseUrl}/api/admin/quotes/list?${params}`, {
+        cache: 'no-store', // Don't cache dashboard data
+        credentials: 'include', // Include cookies for auth
+      });
+
+      if (quotesResponse.ok) {
+        const quotesData = await quotesResponse.json();
+        if (quotesData.success && quotesData.quotes) {
+          // API already filters to need_followup, just take top 10
+          quotesFollowUp = quotesData.quotes
+            .slice(0, 10)
+            .map((q: any) => ({
+              quote_id: q.quote_id,
+              company_id: q.company_id,
+              company_name: q.company_name,
+              total_amount: q.total_amount,
+              next_action: q.next_action,
+              next_action_priority: q.next_action_priority,
+              preview_url: q.preview_url,
+            }));
+        }
+      }
+    } catch (error) {
+      console.error('[Sales Center] Failed to fetch quotes:', error);
+    }
   }
 
   return (
@@ -286,6 +331,7 @@ export default async function SalesCenterPage() {
           salesRepId={filterBySalesRep}
           trialsEnding={trialsEnding}
           unpaidInvoices={unpaidInvoices}
+          quotesFollowUp={quotesFollowUp}
         />
       </div>
     </div>
