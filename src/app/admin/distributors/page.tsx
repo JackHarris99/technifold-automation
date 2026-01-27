@@ -21,25 +21,41 @@ export default async function DistributorsPage() {
   const supabase = getSupabaseClient();
 
   // Fetch all distributor companies
-  const { data: companies } = await supabase
+  const { data: companies, error: companiesError } = await supabase
     .from('companies')
     .select('company_id, company_name, type')
     .eq('type', 'distributor')
-    .order('company_name');
+    .order('company_name')
+    .limit(5000);
+
+  if (companiesError) {
+    console.error('Error fetching distributor companies:', companiesError);
+  }
 
   // Fetch all distributor users
-  const { data: users } = await supabase
+  const { data: users, error: usersError } = await supabase
     .from('distributor_users')
     .select('*')
-    .order('company_id, created_at');
+    .order('company_id, created_at')
+    .limit(10000);
+
+  if (usersError) {
+    console.error('Error fetching distributor users:', usersError);
+  }
 
   // Fetch all contacts for distributor companies
-  const { data: contacts } = await supabase
+  const { data: contacts, error: contactsError } = await supabase
     .from('contacts')
     .select('contact_id, company_id, full_name, email, role')
     .in('company_id', (companies || []).map(c => c.company_id))
     .order('company_id, full_name')
     .limit(10000);
+
+  if (contactsError) {
+    console.error('Error fetching contacts for distributors:', contactsError);
+  }
+
+  console.log(`[distributors/page] Loaded ${companies?.length || 0} companies, ${users?.length || 0} users, ${contacts?.length || 0} contacts`);
 
   return (
     <div className="min-h-screen bg-gray-50">
