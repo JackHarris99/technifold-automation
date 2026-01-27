@@ -108,24 +108,31 @@ export async function POST(request: NextRequest) {
 
     const lineItems = [];
 
-    // TOOLS: Apply quantity-based discount tiers
-    // 1 tool = 0%, 2 = 10%, 3 = 20%, 4 = 30%, 5+ = 40% off
+    // TOOLS: Apply quantity-based discount tiers from database
     const totalToolQuantity = toolItems.reduce((sum, item) => sum + item.quantity, 0);
     let toolDiscountPercent = 0;
     let toolDiscountLabel = '';
 
-    if (totalToolQuantity >= 5) {
-      toolDiscountPercent = 40;
-      toolDiscountLabel = '5+ tools - 40% off';
-    } else if (totalToolQuantity === 4) {
-      toolDiscountPercent = 30;
-      toolDiscountLabel = '4 tools - 30% off';
-    } else if (totalToolQuantity === 3) {
-      toolDiscountPercent = 20;
-      toolDiscountLabel = '3 tools - 20% off';
-    } else if (totalToolQuantity === 2) {
-      toolDiscountPercent = 10;
-      toolDiscountLabel = '2 tools - 10% off';
+    if (totalToolQuantity > 0) {
+      // Query tool_pricing_ladder for discount based on total tool quantity
+      const { data: toolTier } = await supabase
+        .from('tool_pricing_ladder')
+        .select('discount_pct, min_qty, max_qty')
+        .lte('min_qty', totalToolQuantity)
+        .gte('max_qty', totalToolQuantity)
+        .eq('active', true)
+        .single();
+
+      if (toolTier) {
+        toolDiscountPercent = parseFloat(toolTier.discount_pct);
+        if (toolTier.max_qty === 999) {
+          toolDiscountLabel = `${toolTier.min_qty}+ tools - ${toolDiscountPercent}% off`;
+        } else if (toolTier.min_qty === toolTier.max_qty) {
+          toolDiscountLabel = `${toolTier.min_qty} tool${toolTier.min_qty > 1 ? 's' : ''} - ${toolDiscountPercent}% off`;
+        } else {
+          toolDiscountLabel = `${toolTier.min_qty}-${toolTier.max_qty} tools - ${toolDiscountPercent}% off`;
+        }
+      }
     }
 
     for (const item of toolItems) {
@@ -167,6 +174,9 @@ export async function POST(request: NextRequest) {
 
       const pricingResult = await calculateCartPricing(cartItems);
 
+      // Collect validation errors from pricing calculation
+      const validationErrors = pricingResult.validation_errors || [];
+
       for (const pricedItem of pricingResult.items) {
         const quoteItem = quoteItems?.find(qi => qi.product_code === pricedItem.product_code);
         lineItems.push({
@@ -179,6 +189,21 @@ export async function POST(request: NextRequest) {
           discount_applied: pricedItem.discount_applied,
           image_url: quoteItem?.image_url || null,
           currency: 'GBP',
+        });
+      }
+
+      // Return validation errors so UI can display them
+      if (validationErrors.length > 0) {
+        return NextResponse.json({
+          success: false,
+          validation_errors: validationErrors,
+          preview: {
+            line_items: lineItems,
+            subtotal: lineItems.reduce((sum, item) => sum + item.line_total, 0),
+            vat_amount: 0,
+            shipping_amount: 0,
+            total: 0,
+          }
         });
       }
     }

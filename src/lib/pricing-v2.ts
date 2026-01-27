@@ -55,19 +55,9 @@ async function getStandardPricingLadder(): Promise<StandardPricingTier[]> {
     .eq('active', true)
     .order('min_qty', { ascending: true });
 
-  if (error) {
-    console.error('[pricing] Failed to load standard ladder:', error);
-    // Fallback to hardcoded if database fails
-    return [
-      { min_qty: 1, max_qty: 3, unit_price: 33.00 },
-      { min_qty: 4, max_qty: 7, unit_price: 29.00 },
-      { min_qty: 8, max_qty: 9, unit_price: 27.00 },
-      { min_qty: 10, max_qty: 19, unit_price: 25.00 },
-      { min_qty: 20, max_qty: 24, unit_price: 23.00 },
-      { min_qty: 25, max_qty: 29, unit_price: 22.00 },
-      { min_qty: 30, max_qty: 34, unit_price: 21.00 },
-      { min_qty: 35, max_qty: 999, unit_price: 20.00 },
-    ];
+  if (error || !data || data.length === 0) {
+    console.error('[pricing] CRITICAL: Failed to load standard_pricing_ladder from database:', error);
+    throw new Error('Pricing system failure: Could not load standard consumable pricing tiers');
   }
 
   standardLadderCache = {
@@ -95,15 +85,9 @@ async function getPremiumPricingLadder(): Promise<PremiumPricingTier[]> {
     .eq('active', true)
     .order('min_qty', { ascending: true });
 
-  if (error) {
-    console.error('[pricing] Failed to load premium ladder:', error);
-    // Fallback to hardcoded if database fails
-    return [
-      { min_qty: 1, max_qty: 2, discount_pct: 0.00 },
-      { min_qty: 3, max_qty: 4, discount_pct: 7.00 },
-      { min_qty: 5, max_qty: 9, discount_pct: 15.00 },
-      { min_qty: 10, max_qty: 999, discount_pct: 25.00 },
-    ];
+  if (error || !data || data.length === 0) {
+    console.error('[pricing] CRITICAL: Failed to load premium_pricing_ladder from database:', error);
+    throw new Error('Pricing system failure: Could not load premium consumable pricing tiers');
   }
 
   premiumLadderCache = {
@@ -124,7 +108,11 @@ function getStandardTierPrice(quantity: number, ladder: StandardPricingTier[]): 
     }
   }
   // Default to highest tier if quantity exceeds ladder
-  return ladder[ladder.length - 1]?.unit_price || 33.00;
+  const highestTierPrice = ladder[ladder.length - 1]?.unit_price;
+  if (!highestTierPrice) {
+    throw new Error('Pricing system failure: No pricing tiers found in standard ladder');
+  }
+  return highestTierPrice;
 }
 
 /**
@@ -162,22 +150,36 @@ export async function calculateCartPricing(items: CartItem[]): Promise<{
   const premiumItems = items.filter(item => item.pricing_tier === 'premium');
   const otherItems = items.filter(item => !item.pricing_tier || (item.pricing_tier !== 'standard' && item.pricing_tier !== 'premium'));
 
-  // Validate max quantities (hardcoded business rules)
-  const MAX_QTY_STANDARD = 20;
-  const MAX_QTY_PREMIUM = 10;
+  // Load max quantity rules from database
+  const supabase = getSupabaseClient();
+  const { data: maxQtyRules, error: rulesError } = await supabase
+    .from('pricing_rules')
+    .select('pricing_tier, value')
+    .eq('rule_type', 'max_qty_per_sku')
+    .eq('active', true);
 
+  if (rulesError || !maxQtyRules) {
+    console.error('[pricing] Failed to load max quantity rules:', rulesError);
+    throw new Error('Pricing system failure: Could not load max quantity rules');
+  }
+
+  // Extract max quantities by tier (parse to number since DB returns numeric as string)
+  const maxQtyStandard = parseFloat(maxQtyRules.find(r => r.pricing_tier === 'standard')?.value || '15');
+  const maxQtyPremium = parseFloat(maxQtyRules.find(r => r.pricing_tier === 'premium')?.value || '10');
+
+  // Validate max quantities per SKU (forces product diversification)
   standardItems.forEach(item => {
-    if (item.quantity > MAX_QTY_STANDARD) {
+    if (item.quantity > maxQtyStandard) {
       validation_errors.push(
-        `${item.product_code}: Maximum ${MAX_QTY_STANDARD} units per SKU (you have ${item.quantity})`
+        `${item.product_code}: Maximum ${maxQtyStandard} units per SKU (you have ${item.quantity})`
       );
     }
   });
 
   premiumItems.forEach(item => {
-    if (item.quantity > MAX_QTY_PREMIUM) {
+    if (item.quantity > maxQtyPremium) {
       validation_errors.push(
-        `${item.product_code}: Maximum ${MAX_QTY_PREMIUM} units per SKU (you have ${item.quantity})`
+        `${item.product_code}: Maximum ${maxQtyPremium} units per SKU (you have ${item.quantity})`
       );
     }
   });

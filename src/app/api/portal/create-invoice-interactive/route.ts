@@ -222,18 +222,23 @@ export async function POST(request: NextRequest) {
       return product?.type !== 'tool' && product?.type !== 'consumable';
     });
 
-    // TOOLS: Apply quantity-based discount tiers
+    // TOOLS: Apply quantity-based discount tiers from database
     const totalToolQuantity = toolItems.reduce((sum: number, item: InvoiceLineItemInput) => sum + item.quantity, 0);
     let toolDiscountPercent = 0;
 
-    if (totalToolQuantity >= 5) {
-      toolDiscountPercent = 40;
-    } else if (totalToolQuantity === 4) {
-      toolDiscountPercent = 30;
-    } else if (totalToolQuantity === 3) {
-      toolDiscountPercent = 20;
-    } else if (totalToolQuantity === 2) {
-      toolDiscountPercent = 10;
+    if (totalToolQuantity > 0) {
+      // Query tool_pricing_ladder for discount based on total tool quantity
+      const { data: toolTier } = await supabase
+        .from('tool_pricing_ladder')
+        .select('discount_pct')
+        .lte('min_qty', totalToolQuantity)
+        .gte('max_qty', totalToolQuantity)
+        .eq('active', true)
+        .single();
+
+      if (toolTier) {
+        toolDiscountPercent = parseFloat(toolTier.discount_pct);
+      }
     }
 
     for (const item of toolItems) {
@@ -268,6 +273,16 @@ export async function POST(request: NextRequest) {
       });
 
       const pricingResult = await calculateCartPricing(cartItems);
+
+      // CRITICAL: Block invoice creation if validation errors exist
+      if (pricingResult.validation_errors && pricingResult.validation_errors.length > 0) {
+        console.error('[create-invoice-interactive] Validation errors:', pricingResult.validation_errors);
+        return NextResponse.json({
+          error: 'Validation failed',
+          validation_errors: pricingResult.validation_errors,
+          message: pricingResult.validation_errors.join('. '),
+        }, { status: 400 });
+      }
 
       for (const pricedItem of pricingResult.items) {
         const originalItem = consumableItems.find((item: InvoiceLineItemInput) => item.product_code === pricedItem.product_code);
