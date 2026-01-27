@@ -38,7 +38,8 @@ export default async function DistributorsPage() {
     .from('contacts')
     .select('contact_id, company_id, full_name, email, role')
     .in('company_id', (companies || []).map(c => c.company_id))
-    .order('company_id, full_name');
+    .order('company_id, full_name')
+    .limit(10000);
 
   return (
     <div className="min-h-screen bg-gray-50">
