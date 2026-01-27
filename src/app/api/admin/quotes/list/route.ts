@@ -1,6 +1,7 @@
 /**
  * GET /api/admin/quotes/list
- * Fetch all quotes with filtering options
+ * Fetch quotes with JOIN queries for performance
+ * Server-side filtering, pagination, and next action calculation
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -37,25 +38,39 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const viewModeParam = searchParams.get('viewMode'); // 'my_customers', 'view_as_lee', etc., or null (all)
-    const statusFilter = searchParams.get('status'); // 'sent', 'viewed', 'accepted', 'expired', 'need_followup'
+    const viewModeParam = searchParams.get('viewMode');
+    const statusFilter = searchParams.get('status');
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = parseInt(searchParams.get('limit') || '50', 10);
+    const offset = (page - 1) * limit;
 
-    // Determine which sales rep to filter by (supports all Director view modes)
+    // Determine which sales rep to filter by
     const viewMode = (viewModeParam as ViewMode) || 'all';
     const filterBySalesRep = getSalesRepFromViewMode(viewMode, session.sales_rep_id);
 
     const supabase = getSupabaseClient();
+    const now = new Date().toISOString();
 
-    // Build query - fetch quotes without nested company select to avoid issues
+    // Build single JOIN query for performance
     let query = supabase
       .from('quotes')
-      .select('*')
+      .select(`
+        *,
+        companies!inner(company_id, company_name, account_owner),
+        contacts(contact_id, full_name, email),
+        invoices(invoice_id, invoice_number, total_amount, payment_status, paid_at, due_date, status, invoice_pdf_url),
+        users!quotes_created_by_fkey(user_id, full_name)
+      `, { count: 'exact' })
+      .eq('companies.type', 'customer')
       .order('created_at', { ascending: false });
 
-    // Apply status filter
-    if (statusFilter) {
-      const now = new Date().toISOString();
+    // Filter by sales rep territory
+    if (filterBySalesRep) {
+      query = query.eq('companies.account_owner', filterBySalesRep);
+    }
 
+    // Apply status filters server-side
+    if (statusFilter) {
       switch (statusFilter) {
         case 'sent':
           query = query.not('sent_at', 'is', null).is('viewed_at', null);
@@ -69,202 +84,151 @@ export async function GET(request: NextRequest) {
         case 'expired':
           query = query.lt('expires_at', now).is('accepted_at', null);
           break;
+        case 'need_followup':
+          // Server-side followup logic
+          const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+          const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
+          query = query
+            .not('sent_at', 'is', null)
+            .is('accepted_at', null)
+            .or(`viewed_at.is.null.and.sent_at.lt.${threeDaysAgo},viewed_at.lt.${fiveDaysAgo}`);
+          break;
       }
     }
 
-    const { data: quotes, error: quotesError } = await query;
+    // Apply pagination
+    query = query.range(offset, offset + limit - 1);
+
+    const { data: quotes, error: quotesError, count } = await query;
 
     if (quotesError) {
       console.error('[quotes/list] Error fetching quotes:', quotesError);
-      return NextResponse.json(
-        { error: 'Failed to fetch quotes' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to fetch quotes' }, { status: 500 });
     }
 
-    console.log('[quotes/list] Fetched quotes count:', quotes?.length || 0);
+    console.log('[quotes/list] Fetched quotes:', quotes?.length || 0, 'Total count:', count);
 
-    // Early return if no quotes
     if (!quotes || quotes.length === 0) {
-      console.log('[quotes/list] No quotes found in database');
       return NextResponse.json({
         success: true,
         quotes: [],
+        pagination: { page, limit, total: count || 0, hasMore: false }
       });
     }
 
-    // Fetch ALL company data first
-    const allCompanyIds = [...new Set(quotes.map(q => q.company_id))];
-    console.log('[quotes/list] Company IDs to fetch:', allCompanyIds.length);
+    // Calculate server-side next action and priority for each quote
+    const enrichedQuotes = quotes.map((quote: any) => {
+      const company = quote.companies;
+      const contact = quote.contacts;
+      const invoice = quote.invoices;
+      const creator = quote.users;
 
-    const { data: companies, error: companiesError } = await supabase
-      .from('companies')
-      .select('company_id, company_name, account_owner')
-      .in('company_id', allCompanyIds);
-
-    if (companiesError) {
-      console.error('[quotes/list] Error fetching companies:', companiesError);
-    }
-
-    console.log('[quotes/list] Fetched companies count:', companies?.length || 0);
-
-    // Filter by company account_owner based on view mode
-    let ownerFilteredQuotes = quotes;
-    if (filterBySalesRep) {
-      ownerFilteredQuotes = quotes.filter((quote: any) => {
-        const company = companies?.find(c => c.company_id === quote.company_id);
-        return company?.account_owner === filterBySalesRep;
-      });
-      console.log('[quotes/list] After owner filter:', ownerFilteredQuotes.length);
-    }
-
-    // Early return if no quotes after filtering
-    if (!ownerFilteredQuotes || ownerFilteredQuotes.length === 0) {
-      console.log('[quotes/list] No quotes after filtering');
-      return NextResponse.json({
-        success: true,
-        quotes: [],
-      });
-    }
-
-    // Companies already fetched above, no need to fetch again
-
-    // Fetch contact names for quotes that have contact_id
-    const contactIds = [...new Set(ownerFilteredQuotes.map(q => q.contact_id).filter(Boolean))];
-    let contacts: any[] = [];
-    if (contactIds.length > 0) {
-      const { data: contactsData, error: contactsError } = await supabase
-        .from('contacts')
-        .select('contact_id, full_name, email')
-        .in('contact_id', contactIds);
-
-      if (contactsError) {
-        console.error('[quotes/list] Error fetching contacts:', contactsError);
-      } else {
-        contacts = contactsData || [];
-      }
-    }
-
-    // Fetch engagement events to count unique contacts per quote
-    const quoteIds = ownerFilteredQuotes.map(q => q.quote_id);
-    const { data: engagementEvents } = await supabase
-      .from('engagement_events')
-      .select('contact_id, meta')
-      .in('contact_id', contactIds.length > 0 ? contactIds : ['']);
-
-    // Count unique contacts per quote from engagement events
-    const quoteContactCounts: { [key: string]: Set<string> } = {};
-    if (engagementEvents) {
-      engagementEvents.forEach(event => {
-        const quoteId = event.meta?.quote_id;
-        if (quoteId && event.contact_id) {
-          if (!quoteContactCounts[quoteId]) {
-            quoteContactCounts[quoteId] = new Set();
-          }
-          quoteContactCounts[quoteId].add(event.contact_id);
-        }
-      });
-    }
-
-    // Get user names for created_by (filter out non-UUID values like "system")
-    const userIds = [...new Set(ownerFilteredQuotes.map(q => q.created_by).filter(id => id && id !== 'system'))];
-    let users: any[] = [];
-    if (userIds.length > 0) {
-      const { data: usersData, error: usersError } = await supabase
-        .from('users')
-        .select('user_id, full_name')
-        .in('user_id', userIds);
-
-      if (usersError) {
-        console.error('[quotes/list] Error fetching users:', usersError);
-      } else {
-        users = usersData || [];
-      }
-    }
-
-    // Fetch invoices for quotes that have invoice_id
-    const invoiceIds = [...new Set(ownerFilteredQuotes.map(q => q.invoice_id).filter(Boolean))];
-    let invoices: any[] = [];
-    if (invoiceIds.length > 0) {
-      const { data: invoicesData, error: invoicesError } = await supabase
-        .from('invoices')
-        .select('invoice_id, invoice_number, total_amount, payment_status, paid_at, due_date, status, invoice_pdf_url')
-        .in('invoice_id', invoiceIds);
-
-      if (invoicesError) {
-        console.error('[quotes/list] Error fetching invoices:', invoicesError);
-      } else {
-        invoices = invoicesData || [];
-      }
-    }
-
-    // Merge data
-    const enrichedQuotes = ownerFilteredQuotes.map(quote => {
-      const company = companies?.find(c => c.company_id === quote.company_id);
-      const creator = users?.find(u => u.user_id === quote.created_by);
-      const contact = contacts?.find(c => c.contact_id === quote.contact_id);
-      const invoice = invoices?.find(i => i.invoice_id === quote.invoice_id);
-      const uniqueContactCount = quoteContactCounts[quote.quote_id]?.size || 0;
-
-      // Determine contact display
-      let contactName = null;
-      let contactEmail = null;
-
-      if (uniqueContactCount > 1) {
-        contactName = 'Multiple contacts';
-      } else if (contact) {
-        contactName = contact.full_name;
-        contactEmail = contact.email;
-      }
-
-      // Generate preview token for this quote
+      // Generate preview token
       const previewToken = generateToken({
         quote_id: quote.quote_id,
         company_id: quote.company_id,
         contact_id: quote.contact_id,
         object_type: 'quote',
         is_test: false,
-      }, 720); // 30 days
+      }, 720);
 
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.technifold.com';
       const preview_url = `${baseUrl}/q/${previewToken}`;
 
+      // Server-side next action calculation
+      const nextAction = calculateNextAction(quote, invoice);
+
       return {
-        ...quote,
+        quote_id: quote.quote_id,
+        company_id: quote.company_id,
         company_name: company?.company_name || 'Unknown Company',
         account_owner: company?.account_owner === session.sales_rep_id ? 'current_user' : company?.account_owner,
+        contact_name: contact?.full_name || null,
+        contact_email: contact?.email || null,
+        created_by: quote.created_by,
         created_by_name: creator?.full_name || quote.created_by,
-        contact_name: contactName,
-        contact_email: contactEmail,
+        quote_type: quote.quote_type,
+        status: quote.status,
+        total_amount: quote.total_amount,
+        created_at: quote.created_at,
+        sent_at: quote.sent_at,
+        viewed_at: quote.viewed_at,
+        accepted_at: quote.accepted_at,
+        expires_at: quote.expires_at,
+        last_activity: quote.last_activity,
+        free_shipping: quote.free_shipping,
+        invoice_id: quote.invoice_id,
         invoice: invoice || null,
         preview_url,
+        won_at: quote.won_at,
+        lost_at: quote.lost_at,
+        lost_reason: quote.lost_reason,
+        next_action: nextAction.action,
+        next_action_priority: nextAction.priority,
       };
     });
 
-    // Apply "need_followup" filter post-fetch (requires date calculations)
-    let finalQuotes = enrichedQuotes;
-    if (statusFilter === 'need_followup') {
-      const now = new Date();
-      finalQuotes = enrichedQuotes.filter(q => {
-        if (!q.sent_at || q.accepted_at) return false;
-
-        const daysSinceSent = Math.floor((now.getTime() - new Date(q.sent_at).getTime()) / 86400000);
-        if (!q.viewed_at) return daysSinceSent >= 3;
-
-        const daysSinceViewed = Math.floor((now.getTime() - new Date(q.viewed_at).getTime()) / 86400000);
-        return daysSinceViewed >= 5;
-      });
-    }
-
     return NextResponse.json({
       success: true,
-      quotes: finalQuotes,
+      quotes: enrichedQuotes,
+      pagination: {
+        page,
+        limit,
+        total: count || 0,
+        hasMore: (offset + limit) < (count || 0)
+      }
     });
   } catch (error) {
     console.error('[quotes/list] Unexpected error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
+}
+
+// Server-side next action calculation
+function calculateNextAction(quote: any, invoice: any): { action: string; priority: 'low' | 'medium' | 'high' | 'none' } {
+  const now = new Date();
+
+  // If paid, no action needed
+  if (invoice?.paid_at) {
+    return { action: 'Quote completed - invoice paid', priority: 'none' };
+  }
+
+  // If invoice exists but not paid, check if overdue
+  if (invoice && !invoice.paid_at) {
+    if (invoice.due_date && new Date(invoice.due_date) < now) {
+      const daysOverdue = Math.floor((now.getTime() - new Date(invoice.due_date).getTime()) / 86400000);
+      return { action: `Invoice overdue by ${daysOverdue} day${daysOverdue > 1 ? 's' : ''} - chase payment`, priority: 'high' };
+    }
+    return { action: 'Awaiting invoice payment', priority: 'medium' };
+  }
+
+  // If expired
+  if (quote.expires_at && new Date(quote.expires_at) < now) {
+    return { action: 'Quote expired - create new quote if customer interested', priority: 'low' };
+  }
+
+  // If viewed but no action
+  if (quote.viewed_at) {
+    const daysSinceViewed = Math.floor((now.getTime() - new Date(quote.viewed_at).getTime()) / 86400000);
+    if (daysSinceViewed >= 5) {
+      return { action: `Follow up - customer viewed ${daysSinceViewed} days ago`, priority: 'high' };
+    } else if (daysSinceViewed >= 3) {
+      return { action: `Consider follow up - viewed ${daysSinceViewed} days ago`, priority: 'medium' };
+    }
+    return { action: 'Wait for customer response', priority: 'low' };
+  }
+
+  // If sent but not viewed
+  if (quote.sent_at) {
+    const daysSinceSent = Math.floor((now.getTime() - new Date(quote.sent_at).getTime()) / 86400000);
+    if (daysSinceSent >= 7) {
+      return { action: `Not opened in ${daysSinceSent} days - send reminder`, priority: 'high' };
+    } else if (daysSinceSent >= 3) {
+      return { action: `Not opened yet (${daysSinceSent} days) - consider reminder`, priority: 'medium' };
+    }
+    return { action: 'Wait for customer to open quote', priority: 'low' };
+  }
+
+  // Draft
+  return { action: 'Draft - complete and send to customer', priority: 'medium' };
 }

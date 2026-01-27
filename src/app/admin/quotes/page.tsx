@@ -45,6 +45,8 @@ interface Quote {
   won_at: string | null;
   lost_at: string | null;
   lost_reason: string | null;
+  next_action: string;
+  next_action_priority: 'low' | 'medium' | 'high' | 'none';
 }
 
 export default function QuotesPage() {
@@ -242,53 +244,6 @@ export default function QuotesPage() {
     return { label: 'Draft', description: 'Not sent yet', type: 'draft' };
   }
 
-  function getNextAction(quote: Quote): { action: string; priority: 'low' | 'medium' | 'high' | 'none' } {
-    const now = new Date();
-
-    // If paid, no action needed
-    if (quote.invoice?.paid_at) {
-      return { action: 'Quote completed - invoice paid', priority: 'none' };
-    }
-
-    // If invoice exists but not paid, check if overdue
-    if (quote.invoice && !quote.invoice.paid_at) {
-      if (quote.invoice.due_date && new Date(quote.invoice.due_date) < now) {
-        const daysOverdue = Math.floor((now.getTime() - new Date(quote.invoice.due_date).getTime()) / 86400000);
-        return { action: `Invoice overdue by ${daysOverdue} day${daysOverdue > 1 ? 's' : ''} - chase payment`, priority: 'high' };
-      }
-      return { action: 'Awaiting invoice payment', priority: 'medium' };
-    }
-
-    // If expired
-    if (quote.expires_at && new Date(quote.expires_at) < now) {
-      return { action: 'Quote expired - create new quote if customer interested', priority: 'low' };
-    }
-
-    // If viewed but no action
-    if (quote.viewed_at) {
-      const daysSinceViewed = Math.floor((now.getTime() - new Date(quote.viewed_at).getTime()) / 86400000);
-      if (daysSinceViewed >= 5) {
-        return { action: `Follow up - customer viewed ${daysSinceViewed} days ago`, priority: 'high' };
-      } else if (daysSinceViewed >= 3) {
-        return { action: `Consider follow up - viewed ${daysSinceViewed} days ago`, priority: 'medium' };
-      }
-      return { action: 'Wait for customer response', priority: 'low' };
-    }
-
-    // If sent but not viewed
-    if (quote.sent_at) {
-      const daysSinceSent = Math.floor((now.getTime() - new Date(quote.sent_at).getTime()) / 86400000);
-      if (daysSinceSent >= 7) {
-        return { action: `Not opened in ${daysSinceSent} days - send reminder`, priority: 'high' };
-      } else if (daysSinceSent >= 3) {
-        return { action: `Not opened yet (${daysSinceSent} days) - consider reminder`, priority: 'medium' };
-      }
-      return { action: 'Wait for customer to open quote', priority: 'low' };
-    }
-
-    // Draft
-    return { action: 'Draft - complete and send to customer', priority: 'medium' };
-  }
 
   function formatDate(dateString: string) {
     const date = new Date(dateString);
@@ -313,22 +268,6 @@ export default function QuotesPage() {
     return date.toLocaleDateString();
   }
 
-  const stats = {
-    total: quotes.length,
-    draft: quotes.filter(q => !q.sent_at && !q.lost_at).length,
-    active: quotes.filter(q => q.sent_at && !q.accepted_at && !q.invoice?.paid_at && !q.lost_at).length,
-    invoiced: quotes.filter(q => q.accepted_at && !q.invoice?.paid_at && !q.lost_at).length,
-    paid: quotes.filter(q => q.invoice?.paid_at).length,
-    lost: quotes.filter(q => q.lost_at).length,
-    needAction: quotes.filter(q => {
-      if (q.lost_at) return false; // Don't count lost quotes
-      const action = getNextAction(q);
-      return action.priority === 'high' || action.priority === 'medium';
-    }).length,
-    totalValue: quotes.reduce((sum, q) => sum + (q.total_amount || 0), 0),
-    paidValue: quotes.filter(q => q.invoice?.paid_at).reduce((sum, q) => sum + (q.total_amount || 0), 0),
-    lostValue: quotes.filter(q => q.lost_at).reduce((sum, q) => sum + (q.total_amount || 0), 0),
-  };
 
   return (
     <div className="p-8">
@@ -338,45 +277,6 @@ export default function QuotesPage() {
         <p className="text-sm text-gray-800 mt-1">
           Track and manage all customer quotes
         </p>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-7 gap-4 mb-6">
-        <div className="bg-white rounded-lg p-4 border-2 border-gray-200">
-          <div className="text-xs font-medium text-gray-500 uppercase mb-1">Total Quotes</div>
-          <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-          <div className="text-xs text-gray-600 mt-1">£{stats.totalValue.toLocaleString()}</div>
-        </div>
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-          <div className="text-xs font-medium text-gray-500 uppercase mb-1">Drafts</div>
-          <div className="text-2xl font-bold text-gray-700">{stats.draft}</div>
-          <div className="text-xs text-gray-500 mt-1">Not sent yet</div>
-        </div>
-        <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-          <div className="text-xs font-medium text-blue-700 uppercase mb-1">Active</div>
-          <div className="text-2xl font-bold text-blue-900">{stats.active}</div>
-          <div className="text-xs text-blue-600 mt-1">Awaiting response</div>
-        </div>
-        <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
-          <div className="text-xs font-medium text-purple-700 uppercase mb-1">Invoiced</div>
-          <div className="text-2xl font-bold text-purple-900">{stats.invoiced}</div>
-          <div className="text-xs text-purple-600 mt-1">Payment pending</div>
-        </div>
-        <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-          <div className="text-xs font-medium text-green-700 uppercase mb-1">Won (Paid)</div>
-          <div className="text-2xl font-bold text-green-900">{stats.paid}</div>
-          <div className="text-xs text-green-600 mt-1">£{stats.paidValue.toLocaleString()}</div>
-        </div>
-        <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
-          <div className="text-xs font-medium text-orange-700 uppercase mb-1">Lost</div>
-          <div className="text-2xl font-bold text-orange-900">{stats.lost}</div>
-          <div className="text-xs text-orange-600 mt-1">£{stats.lostValue.toLocaleString()}</div>
-        </div>
-        <div className="bg-red-50 rounded-lg p-4 border border-red-200">
-          <div className="text-xs font-medium text-red-700 uppercase mb-1">Need Action</div>
-          <div className="text-2xl font-bold text-red-900">{stats.needAction}</div>
-          <div className="text-xs text-red-600 mt-1">Require follow-up</div>
-        </div>
       </div>
 
       {/* Status Filter */}
@@ -411,7 +311,10 @@ export default function QuotesPage() {
         ) : (
           quotes.map((quote) => {
             const status = getQuoteStatus(quote);
-            const nextAction = getNextAction(quote);
+            const nextAction = {
+              action: quote.next_action,
+              priority: quote.next_action_priority
+            };
 
             return (
               <div key={quote.quote_id} className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
@@ -576,7 +479,7 @@ export default function QuotesPage() {
       {/* Summary */}
       {!loading && quotes.length > 0 && (
         <div className="mt-4 text-sm text-gray-800 text-center">
-          Showing {quotes.length} quotes • Total pipeline value: £{stats.totalValue.toLocaleString()}
+          Showing {quotes.length} quotes
         </div>
       )}
 

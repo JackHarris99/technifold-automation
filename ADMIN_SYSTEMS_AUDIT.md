@@ -212,6 +212,47 @@
 
 ---
 
+#### 1.8 Quotes Page (`/admin/quotes`)
+**Route:** `/admin/quotes`
+**Access:** All users (filtered by view mode)
+**What it does:**
+- Shows all quotes with filtering by status (sent, viewed, accepted, expired, need follow-up)
+- Displays quote cards with company, contact, amount, status, invoice, and timeline
+- Actions: Preview quote, Edit quote, View invoice PDF, Mark as Lost, Delete
+- Server-side next action calculation with priority levels (high/medium/low/none)
+
+**Features:**
+- ✅ Status filter dropdown (All, Sent, Viewed, Accepted, Expired, Need Follow-up)
+- ✅ Quote status badges (Draft/Sent/Viewed/Invoice Generated/Paid/Expired/Lost)
+- ✅ Invoice status (Paid/Awaiting Payment/No invoice yet)
+- ✅ Timeline showing quote lifecycle events
+- ✅ Next action row with priority indicator (red/orange/blue/green dot)
+- ✅ Mark as Lost modal with predefined reasons
+- ✅ Interactive quote warnings when invoice amount differs from quote
+
+**Schema Links:**
+- `quotes` table: All quote data
+- `companies` table: Filters `type='customer'`, optional `account_owner` filter
+- `contacts` table: Contact name and email
+- `invoices` table: Invoice status, amount, PDF URL
+- `users` table: Created by user name
+
+**Performance Optimizations Applied:**
+- ✅ **Single JOIN Query:** Changed from 4+ separate queries to 1 JOIN query with all related data
+- ✅ **Server-Side Pagination:** Added page/limit/offset parameters (default: 50 quotes per page)
+- ✅ **Server-Side Business Logic:** Moved `calculateNextAction()` from client to server
+- ✅ **Server-Side Filtering:** All status filters applied in database query (not client-side)
+
+**Issues Found:**
+- ✅ FIXED: Multiple separate queries causing N+1 query problem
+- ✅ FIXED: No pagination - was loading ALL quotes at once (potential performance issue with 1000+ quotes)
+- ✅ FIXED: Client-side next action calculation (moved to server for consistency)
+- ✅ REMOVED: Confusing stat cards (Total, Drafts, Active, Invoiced, Won, Lost, Need Action)
+  - User feedback: "i dont really understand the numbers at the top of the quotes page, total, drafts, active etc. seems a bit vague"
+  - Replaced with simple "Showing X quotes" summary
+
+---
+
 ## Progress Tracker (Sales Engine)
 - ✅ Dashboard (1.1) - COMPLETE
 - ✅ Reorder Opportunities (1.2) - DELETED (replaced with badges on company pages)
@@ -220,9 +261,10 @@
 - ⏸️ Distributor Control (1.5) - Will audit in Distributors section
 - ✅ Active Engagement (1.6) - COMPLETE
 - ✅ All Companies (1.7) - COMPLETE (fixed critical filter bug + redesigned)
+- ✅ Quotes (1.8) - COMPLETE (performance optimizations + removed confusing stats)
 
 **Schema Filtering:** ✅ CLEAN - All queries correctly filter `type='customer'`
-**Issues Fixed:** 5 (broken link, engagement table, unpaid invoices consolidated, reorder opportunities replaced, companies filter bug)
+**Issues Fixed:** 8 (broken link, engagement table, unpaid invoices consolidated, reorder opportunities replaced, companies filter bug, quotes N+1 queries, quotes pagination, quotes client-side logic)
 
 ---
 
