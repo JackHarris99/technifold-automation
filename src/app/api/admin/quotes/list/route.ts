@@ -61,7 +61,6 @@ export async function GET(request: NextRequest) {
         invoices(invoice_id, invoice_number, total_amount, payment_status, paid_at, due_date, status, invoice_pdf_url),
         users!quotes_created_by_fkey(user_id, full_name)
       `, { count: 'exact' })
-      .eq('companies.type', 'customer')
       .order('created_at', { ascending: false });
 
     // Filter by sales rep territory
