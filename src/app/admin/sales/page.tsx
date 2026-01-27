@@ -303,7 +303,7 @@ export default async function SalesCenterPage() {
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Performance Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 gap-6 mb-8">
           <MetricCard
             label="Revenue (This Month)"
             value={`£${salesMetrics.total_revenue.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
