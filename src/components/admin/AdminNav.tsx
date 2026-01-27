@@ -592,16 +592,6 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             Sales Center
           </Link>
           <Link
-            href="/admin/sales/reorder-opportunities"
-            className={`block px-4 py-2 text-sm font-[500] transition-colors ${
-              pathname === '/admin/sales/reorder-opportunities'
-                ? `${highlightColor} text-white`
-                : `text-gray-300 ${hoverColor} hover:text-white`
-            }`}
-          >
-            Reorder Opportunities
-          </Link>
-          <Link
             href="/admin/sales/trials-ending"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname === '/admin/sales/trials-ending'
@@ -610,16 +600,6 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             }`}
           >
             Trials Ending
-          </Link>
-          <Link
-            href="/admin/sales/unpaid-invoices"
-            className={`block px-4 py-2 text-sm font-[500] transition-colors ${
-              pathname === '/admin/sales/unpaid-invoices'
-                ? `${highlightColor} text-white`
-                : `text-gray-300 ${hoverColor} hover:text-white`
-            }`}
-          >
-            Unpaid Invoices
           </Link>
         </div>
 

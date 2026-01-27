@@ -21,7 +21,7 @@ export default function SalesCenterClient({
 }: Props) {
   return (
     <div className="space-y-6">
-      {/* Active Engagement Section */}
+      {/* Active Engagement Section - Full Width */}
       <ActionSection
         title="Active Engagement"
         icon="📊"
@@ -34,76 +34,79 @@ export default function SalesCenterClient({
         </div>
       </ActionSection>
 
-      {/* Trials Ending Soon */}
-      <ActionSection
-        title="Trials Ending Soon"
-        icon="⏰"
-        count={trialsEnding.length}
-        emptyMessage="No trials ending this week"
-        emptyIcon="✅"
-        color="red"
-        viewAllHref="/admin/sales/trials-ending"
-      >
-        {trialsEnding.map((trial: any) => (
-          <Link
-            key={trial.subscription_id}
-            href={`/admin/company/${trial.company_id}`}
-            className="flex items-center justify-between p-4 hover:bg-red-50 transition-colors border-b border-gray-100 last:border-b-0"
-          >
-            <div>
-              <h4 className="font-semibold text-gray-900">{trial.company_name}</h4>
-              <p className="text-sm text-red-600 font-medium">
-                {trial.days_left <= 0 ? 'Ending today!' : `${trial.days_left} day${trial.days_left !== 1 ? 's' : ''} left`}
-              </p>
-            </div>
-            <div className={`px-3 py-1 rounded-full text-sm font-bold ${
-              trial.days_left <= 2 ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'
-            }`}>
-              {trial.days_left}d
-            </div>
-          </Link>
-        ))}
-      </ActionSection>
+      {/* Two Column Grid for Trials and Unpaid Invoices */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Trials Ending Soon */}
+        <ActionSection
+          title="Trials Ending Soon"
+          icon="⏰"
+          count={trialsEnding.length}
+          emptyMessage="No trials ending this week"
+          emptyIcon="✅"
+          color="red"
+          viewAllHref="/admin/sales/trials-ending"
+        >
+          {trialsEnding.map((trial: any) => (
+            <Link
+              key={trial.subscription_id}
+              href={`/admin/company/${trial.company_id}`}
+              className="flex items-center justify-between p-4 hover:bg-red-50 transition-colors border-b border-gray-100 last:border-b-0"
+            >
+              <div>
+                <h4 className="font-semibold text-gray-900">{trial.company_name}</h4>
+                <p className="text-sm text-red-600 font-medium">
+                  {trial.days_left <= 0 ? 'Ending today!' : `${trial.days_left} day${trial.days_left !== 1 ? 's' : ''} left`}
+                </p>
+              </div>
+              <div className={`px-3 py-1 rounded-full text-sm font-bold ${
+                trial.days_left <= 2 ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'
+              }`}>
+                {trial.days_left}d
+              </div>
+            </Link>
+          ))}
+        </ActionSection>
 
-      {/* Unpaid Invoices */}
-      <ActionSection
-        title="Unpaid Invoices"
-        icon="💳"
-        count={unpaidInvoices.length}
-        total={unpaidInvoices.length > 0 ? `£${unpaidInvoices.reduce((s: number, i: any) => s + i.total_amount, 0).toLocaleString('en-GB', { minimumFractionDigits: 2 })}` : undefined}
-        emptyMessage="All invoices paid"
-        emptyIcon="💰"
-        color="orange"
-      >
-        {unpaidInvoices.map((invoice: any) => (
-          <div
-            key={invoice.invoice_id}
-            className="flex items-center justify-between p-4 hover:bg-orange-50 transition-colors border-b border-gray-100 last:border-b-0"
-          >
-            <div>
-              <h4 className="font-semibold text-gray-900">{invoice.company_name}</h4>
-              <p className="text-sm text-gray-700">
-                {new Date(invoice.invoice_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-              </p>
+        {/* Unpaid Invoices */}
+        <ActionSection
+          title="Unpaid Invoices"
+          icon="💳"
+          count={unpaidInvoices.length}
+          total={unpaidInvoices.length > 0 ? `£${unpaidInvoices.reduce((s: number, i: any) => s + i.total_amount, 0).toLocaleString('en-GB', { minimumFractionDigits: 2 })}` : undefined}
+          emptyMessage="All invoices paid"
+          emptyIcon="💰"
+          color="orange"
+        >
+          {unpaidInvoices.map((invoice: any) => (
+            <div
+              key={invoice.invoice_id}
+              className="flex items-center justify-between p-4 hover:bg-orange-50 transition-colors border-b border-gray-100 last:border-b-0"
+            >
+              <div>
+                <h4 className="font-semibold text-gray-900">{invoice.company_name}</h4>
+                <p className="text-sm text-gray-700">
+                  {new Date(invoice.invoice_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="font-bold text-gray-900">
+                  £{invoice.total_amount.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
+                </span>
+                {invoice.invoice_url && (
+                  <a
+                    href={invoice.invoice_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1 bg-orange-100 text-orange-700 rounded text-sm font-medium hover:bg-orange-200"
+                  >
+                    View
+                  </a>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="font-bold text-gray-900">
-                £{invoice.total_amount.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
-              </span>
-              {invoice.invoice_url && (
-                <a
-                  href={invoice.invoice_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-3 py-1 bg-orange-100 text-orange-700 rounded text-sm font-medium hover:bg-orange-200"
-                >
-                  View
-                </a>
-              )}
-            </div>
-          </div>
-        ))}
-      </ActionSection>
+          ))}
+        </ActionSection>
+      </div>
     </div>
   );
 }
