@@ -1,6 +1,6 @@
 /**
  * GET /api/admin/companies/search?q=searchterm
- * Search companies (filtered by sales rep territory)
+ * Search customer companies only (excludes distributors, suppliers, etc.)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -36,21 +36,23 @@ export async function GET(request: NextRequest) {
     // But exclude dead customers from search results
     console.log('[companies/search] Running query...');
 
-    // Search across multiple fields: name, address, country
+    // Search across multiple fields: name, ID, city (customers only)
     const searchPattern = `%${q}%`;
     const { data: companyData, error: companyError } = await supabase
       .from('companies')
       .select('company_id, company_name, account_owner, status, country, billing_city, billing_postal_code')
-      .or(`company_name.ilike.${searchPattern},company_id.ilike.${searchPattern},country.ilike.${searchPattern},billing_city.ilike.${searchPattern},billing_postal_code.ilike.${searchPattern},billing_address_line_1.ilike.${searchPattern}`)
+      .eq('type', 'customer')
+      .or(`company_name.ilike.${searchPattern},company_id.ilike.${searchPattern},billing_city.ilike.${searchPattern}`)
       .neq('status', 'dead')
       .order('company_name')
       .limit(15);
 
-    // Also search in contacts (name and email)
+    // Also search in contacts (name and email) - customers only
     const { data: contactData, error: contactError } = await supabase
       .from('contacts')
-      .select('company_id, email, full_name, first_name, last_name, companies!inner(company_id, company_name, account_owner, status, country)')
-      .or(`email.ilike.${searchPattern},full_name.ilike.${searchPattern},first_name.ilike.${searchPattern},last_name.ilike.${searchPattern}`)
+      .select('company_id, email, full_name, first_name, last_name, companies!inner(company_id, company_name, account_owner, status, country, type)')
+      .eq('companies.type', 'customer')
+      .or(`email.ilike.${searchPattern},full_name.ilike.${searchPattern}`)
       .neq('companies.status', 'dead')
       .limit(10);
 

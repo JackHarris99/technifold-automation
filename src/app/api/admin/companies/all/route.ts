@@ -1,6 +1,6 @@
 /**
  * GET /api/admin/companies/all
- * Fetch all companies with tool/subscription counts (for directors)
+ * Fetch all customer companies with tool/subscription counts (excludes distributors, suppliers, etc.)
  * Optimized with bulk queries
  * SECURITY: Requires authentication
  */
@@ -19,7 +19,7 @@ export async function GET() {
 
     const supabase = getSupabaseClient();
 
-    // 1. Fetch ALL companies in batches (Supabase has 1000 row limit per query)
+    // 1. Fetch ALL customer companies in batches (Supabase has 1000 row limit per query)
     let allCompanies: any[] = [];
     let start = 0;
     const batchSize = 1000;
@@ -29,6 +29,7 @@ export async function GET() {
       const { data: batch, error } = await supabase
         .from('companies')
         .select('company_id, company_name, country, account_owner, category')
+        .eq('type', 'customer')
         .order('company_name')
         .range(start, start + batchSize - 1);
 
