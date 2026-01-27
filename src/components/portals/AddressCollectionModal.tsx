@@ -62,9 +62,61 @@ export default function AddressCollectionModal({
   const [error, setError] = useState<string | null>(null);
   const [vatVerificationResult, setVatVerificationResult] = useState<VATVerificationResult | null>(null);
   const [isVerifyingVAT, setIsVerifyingVAT] = useState(false);
+  const [isLoadingExisting, setIsLoadingExisting] = useState(true);
 
   const isEU = isEUCountry(formData.billing_country);
   const requiresVAT = isEU;
+
+  // Load existing company data when modal opens
+  useEffect(() => {
+    if (!isOpen) return;
+
+    async function loadExistingData() {
+      setIsLoadingExisting(true);
+      try {
+        // Fetch company details (billing address & VAT)
+        const companyResponse = await fetch(`/api/portal/company-details?token=${encodeURIComponent(token)}`);
+        const companyData = await companyResponse.json();
+
+        // Check if shipping addresses exist
+        const shippingResponse = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
+        const shippingData = await shippingResponse.json();
+        const hasShippingAddresses = shippingData.success && shippingData.addresses && shippingData.addresses.length > 0;
+
+        if (companyData.success && companyData.company) {
+          const company = companyData.company;
+
+          // Pre-fill billing address if exists
+          if (company.billing_address_line_1) {
+            setFormData(prev => ({
+              ...prev,
+              billing_address_line_1: company.billing_address_line_1 || '',
+              billing_address_line_2: company.billing_address_line_2 || '',
+              billing_city: company.billing_city || '',
+              billing_state_province: company.billing_state_province || '',
+              billing_postal_code: company.billing_postal_code || '',
+              billing_country: company.billing_country || 'GB',
+              vat_number: company.vat_number || '',
+              // Auto-copy billing to shipping if no shipping addresses exist
+              use_billing_for_shipping: !hasShippingAddresses,
+              shipping_address_line_1: hasShippingAddresses ? '' : (company.billing_address_line_1 || ''),
+              shipping_address_line_2: hasShippingAddresses ? '' : (company.billing_address_line_2 || ''),
+              shipping_city: hasShippingAddresses ? '' : (company.billing_city || ''),
+              shipping_state_province: hasShippingAddresses ? '' : (company.billing_state_province || ''),
+              shipping_postal_code: hasShippingAddresses ? '' : (company.billing_postal_code || ''),
+              shipping_country: hasShippingAddresses ? 'GB' : (company.billing_country || 'GB'),
+            }));
+          }
+        }
+      } catch (err) {
+        console.error('[AddressCollectionModal] Failed to load existing data:', err);
+      } finally {
+        setIsLoadingExisting(false);
+      }
+    }
+
+    loadExistingData();
+  }, [isOpen, token]);
 
   // Auto-verify VAT when user finishes typing
   useEffect(() => {
@@ -188,14 +240,24 @@ export default function AddressCollectionModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4"
+      onClick={(e) => {
+        // Prevent closing if submitting
+        if (isSubmitting) return;
+        // Close if clicking the backdrop
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
       <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-2xl font-semibold">Company Address Required</h2>
           <p className="text-sm text-gray-800 mt-2">
             Before creating your invoice, we need your company's billing address to calculate tax and shipping correctly.
           </p>
-          <p className="text-sm text-gray-700 mt-1">{companyName}</p>
+          <p className="text-sm text-gray-900 mt-1">{companyName}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -217,7 +279,7 @@ export default function AddressCollectionModal({
 
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-900 mb-1">
                   Address Line 1 <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -231,7 +293,7 @@ export default function AddressCollectionModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-900 mb-1">
                   Address Line 2
                 </label>
                 <input
@@ -245,7 +307,7 @@ export default function AddressCollectionModal({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-900 mb-1">
                     City <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -258,7 +320,7 @@ export default function AddressCollectionModal({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-900 mb-1">
                     County/State
                   </label>
                   <input
@@ -273,7 +335,7 @@ export default function AddressCollectionModal({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-900 mb-1">
                     Postcode <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -286,7 +348,7 @@ export default function AddressCollectionModal({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-900 mb-1">
                     Country <span className="text-red-500">*</span>
                   </label>
                   <CountrySelect
@@ -301,7 +363,7 @@ export default function AddressCollectionModal({
               {/* VAT Number (EU only) */}
               {requiresVAT && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-900 mb-1">
                     VAT Number <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -312,7 +374,7 @@ export default function AddressCollectionModal({
                     placeholder={`${formData.billing_country}123456789`}
                     required
                   />
-                  <p className="text-xs text-gray-700 mt-1">
+                  <p className="text-xs text-gray-900 mt-1">
                     Required for EU companies to apply 0% reverse charge. Format: {formData.billing_country}123456789
                   </p>
 
@@ -369,7 +431,7 @@ export default function AddressCollectionModal({
             {!formData.use_billing_for_shipping && (
               <div className="grid grid-cols-1 gap-4 pl-6 border-l-2 border-gray-200">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-900 mb-1">
                     Address Line 1 <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -383,7 +445,7 @@ export default function AddressCollectionModal({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-900 mb-1">
                     Address Line 2
                   </label>
                   <input
@@ -397,7 +459,7 @@ export default function AddressCollectionModal({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-900 mb-1">
                       City <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -409,7 +471,7 @@ export default function AddressCollectionModal({
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-900 mb-1">
                       County/State
                     </label>
                     <input
@@ -423,7 +485,7 @@ export default function AddressCollectionModal({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-900 mb-1">
                       Postcode <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -435,7 +497,7 @@ export default function AddressCollectionModal({
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-900 mb-1">
                       Country <span className="text-red-500">*</span>
                     </label>
                     <CountrySelect
@@ -455,17 +517,17 @@ export default function AddressCollectionModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2 text-gray-700 hover:bg-gray-100 rounded-lg font-medium"
+              className="px-6 py-2 text-gray-700 hover:bg-gray-100 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isSubmitting}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50"
-              disabled={isSubmitting}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoadingExisting || isSubmitting}
             >
-              {isSubmitting ? 'Saving...' : 'Save and Continue'}
+              {isLoadingExisting ? 'Loading...' : isSubmitting ? 'Saving...' : 'Save and Continue'}
             </button>
           </div>
         </form>

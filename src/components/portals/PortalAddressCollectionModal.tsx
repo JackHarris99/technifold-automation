@@ -75,15 +75,26 @@ export default function PortalAddressCollectionModal({
       setIsLoadingExisting(true);
       try {
         const useDistributorEndpoints = !token;
-        const endpoint = useDistributorEndpoints
+
+        // Fetch company details (billing address & VAT)
+        const companyEndpoint = useDistributorEndpoints
           ? `/api/distributor/company-details`
           : `/api/portal/company-details?token=${encodeURIComponent(token!)}`;
 
-        const response = await fetch(endpoint);
-        const data = await response.json();
+        const companyResponse = await fetch(companyEndpoint);
+        const companyData = await companyResponse.json();
 
-        if (data.success && data.company) {
-          const company = data.company;
+        // Check if shipping addresses exist
+        const shippingEndpoint = useDistributorEndpoints
+          ? `/api/distributor/shipping-addresses`
+          : `/api/portal/shipping-address?token=${encodeURIComponent(token!)}`;
+
+        const shippingResponse = await fetch(shippingEndpoint);
+        const shippingData = await shippingResponse.json();
+        const hasShippingAddresses = shippingData.success && shippingData.addresses && shippingData.addresses.length > 0;
+
+        if (companyData.success && companyData.company) {
+          const company = companyData.company;
 
           // Pre-fill billing address if exists
           if (company.billing_address_line_1) {
@@ -96,6 +107,14 @@ export default function PortalAddressCollectionModal({
               billing_postal_code: company.billing_postal_code || '',
               billing_country: company.billing_country || 'GB',
               vat_number: company.vat_number || '',
+              // Auto-copy billing to shipping if no shipping addresses exist
+              use_billing_for_shipping: !hasShippingAddresses,
+              shipping_address_line_1: hasShippingAddresses ? '' : (company.billing_address_line_1 || ''),
+              shipping_address_line_2: hasShippingAddresses ? '' : (company.billing_address_line_2 || ''),
+              shipping_city: hasShippingAddresses ? '' : (company.billing_city || ''),
+              shipping_state_province: hasShippingAddresses ? '' : (company.billing_state_province || ''),
+              shipping_postal_code: hasShippingAddresses ? '' : (company.billing_postal_code || ''),
+              shipping_country: hasShippingAddresses ? 'GB' : (company.billing_country || 'GB'),
             }));
           }
         }
@@ -312,7 +331,7 @@ export default function PortalAddressCollectionModal({
           <p className="text-sm text-gray-800 mt-2">
             Fill in your company's billing and delivery addresses to enable order placement.
           </p>
-          <p className="text-sm text-gray-700 mt-1 font-medium">{companyName}</p>
+          <p className="text-sm text-gray-900 mt-1 font-medium">{companyName}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -371,7 +390,7 @@ export default function PortalAddressCollectionModal({
 
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-900 mb-1">
                   Address Line 1 <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -386,7 +405,7 @@ export default function PortalAddressCollectionModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-900 mb-1">
                   Address Line 2
                 </label>
                 <input
@@ -400,7 +419,7 @@ export default function PortalAddressCollectionModal({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-900 mb-1">
                     City <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -413,7 +432,7 @@ export default function PortalAddressCollectionModal({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-900 mb-1">
                     County/State
                   </label>
                   <input
@@ -428,7 +447,7 @@ export default function PortalAddressCollectionModal({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-900 mb-1">
                     Postcode <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -441,7 +460,7 @@ export default function PortalAddressCollectionModal({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-900 mb-1">
                     Country <span className="text-red-500">*</span>
                   </label>
                   <CountrySelect
@@ -471,7 +490,7 @@ export default function PortalAddressCollectionModal({
                   <p className="text-sm text-amber-900 mt-2 font-medium">
                     💡 Without a valid VAT number, 20% UK VAT will be charged on your orders.
                   </p>
-                  <p className="text-xs text-gray-700 mt-1">
+                  <p className="text-xs text-gray-900 mt-1">
                     Format: {formData.billing_country}123456789
                   </p>
 
@@ -543,7 +562,7 @@ export default function PortalAddressCollectionModal({
             {!formData.use_billing_for_shipping && (
               <div className="grid grid-cols-1 gap-4 pl-6 border-l-2 border-gray-200">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-900 mb-1">
                     Address Line 1 <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -557,7 +576,7 @@ export default function PortalAddressCollectionModal({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-900 mb-1">
                     Address Line 2
                   </label>
                   <input
@@ -571,7 +590,7 @@ export default function PortalAddressCollectionModal({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-900 mb-1">
                       City <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -583,7 +602,7 @@ export default function PortalAddressCollectionModal({
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-900 mb-1">
                       County/State
                     </label>
                     <input
@@ -597,7 +616,7 @@ export default function PortalAddressCollectionModal({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-900 mb-1">
                       Postcode <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -609,7 +628,7 @@ export default function PortalAddressCollectionModal({
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-900 mb-1">
                       Country <span className="text-red-500">*</span>
                     </label>
                     <CountrySelect

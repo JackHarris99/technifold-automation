@@ -373,6 +373,12 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                       <div className="text-[11px] text-[#334155]">{billingAddress.billing_city}{billingAddress.billing_state_province ? `, ${billingAddress.billing_state_province}` : ''}</div>
                       <div className="text-[11px] text-[#334155]">{billingAddress.billing_postal_code}</div>
                       <div className="text-[12px] font-[500] text-[#1e293b] mt-1">{billingAddress.billing_country}</div>
+                      {billingAddress.vat_number && (
+                        <div className="mt-2 pt-2 border-t border-[#e2e8f0]">
+                          <div className="text-[10px] font-[600] text-[#475569] uppercase tracking-wider mb-1">VAT Number</div>
+                          <div className="text-[12px] font-mono font-[600] text-[#059669]">{billingAddress.vat_number}</div>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
