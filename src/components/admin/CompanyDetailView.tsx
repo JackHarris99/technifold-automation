@@ -392,6 +392,22 @@ export default function CompanyDetailView({
                     🤝 Partner Customer
                   </span>
                 )}
+                {company.last_invoice_at && (
+                  <span className={`px-3 py-1 rounded-full text-[13px] font-[600] flex items-center gap-1 ${
+                    (() => {
+                      const daysSince = Math.floor((Date.now() - new Date(company.last_invoice_at).getTime()) / (1000 * 60 * 60 * 24));
+                      if (daysSince > 365) return 'bg-red-100 text-red-700';
+                      if (daysSince > 180) return 'bg-orange-100 text-orange-700';
+                      if (daysSince > 90) return 'bg-yellow-100 text-yellow-700';
+                      return 'bg-green-100 text-green-700';
+                    })()
+                  }`}>
+                    Last order: {(() => {
+                      const daysSince = Math.floor((Date.now() - new Date(company.last_invoice_at).getTime()) / (1000 * 60 * 60 * 24));
+                      return `${daysSince}d ago`;
+                    })()}
+                  </span>
+                )}
               </div>
               <p className="text-[13px] text-[#64748b] font-[500] mt-2">{company.company_id}</p>
               <CompanyStatusControl

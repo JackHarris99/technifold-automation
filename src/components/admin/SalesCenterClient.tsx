@@ -10,14 +10,12 @@ import CompanyEngagementTimeline from './CompanyEngagementTimeline';
 
 interface Props {
   salesRepId?: string | null;
-  reorderOpportunities: any[];
   trialsEnding: any[];
   unpaidInvoices: any[];
 }
 
 export default function SalesCenterClient({
   salesRepId,
-  reorderOpportunities,
   trialsEnding,
   unpaidInvoices,
 }: Props) {
@@ -104,37 +102,6 @@ export default function SalesCenterClient({
               )}
             </div>
           </div>
-        ))}
-      </ActionSection>
-
-      {/* Reorder Opportunities */}
-      <ActionSection
-        title="Reorder Opportunities"
-        icon="🔄"
-        count={reorderOpportunities.length}
-        emptyMessage="No reorder opportunities found"
-        emptyIcon="📦"
-        color="purple"
-        viewAllHref="/admin/sales/reorder-opportunities"
-      >
-        {reorderOpportunities.map((opp: any) => (
-          <Link
-            key={opp.company_id}
-            href={`/admin/company/${opp.company_id}`}
-            className="flex items-center justify-between p-4 hover:bg-purple-50 transition-colors border-b border-gray-100 last:border-b-0"
-          >
-            <div>
-              <h4 className="font-semibold text-gray-900">{opp.company_name}</h4>
-              <p className="text-sm text-gray-700">
-                Last order: {new Date(opp.last_invoice_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-              </p>
-            </div>
-            <div className={`px-3 py-1 rounded-full text-sm font-bold ${
-              opp.days_since_order > 180 ? 'bg-red-100 text-red-700' : 'bg-purple-100 text-purple-700'
-            }`}>
-              {opp.days_since_order}d ago
-            </div>
-          </Link>
         ))}
       </ActionSection>
     </div>

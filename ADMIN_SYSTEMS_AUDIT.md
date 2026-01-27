@@ -36,13 +36,10 @@
 - ✅ 💰 My Performance → `/admin/my-performance` (view commissions earned)
 - ✅ 📊 Active Engagement (expandable timeline) - shows recent company activity
 - ✅ View All Trials Ending → `/admin/sales/trials-ending`
-- ✅ View All Unpaid Invoices → `/admin/sales/unpaid-invoices`
-- ✅ View All Reorder Opportunities → `/admin/sales/reorder-opportunities`
+- ✅ 📄 All Invoices → `/admin/invoices` (with Paid/Unpaid/Void tabs)
 - ✅ 📦 Distributor Control Center → `/admin/sales/distributors`
 - ✅ 🏢 My Territory → `/admin/companies`
 - ✅ 🔍 Search All Companies → `/admin/companies`
-- ✅ 📄 All Invoices → `/admin/invoices`
-- ❌ 💰 Distributor Pricing → `/admin/distributor-pricing` **[BROKEN LINK]**
 
 **Schema Links:**
 - `companies` table: Filters `type='customer'`, `status != 'dead'`, optional `account_owner` filter
@@ -58,29 +55,28 @@
   - Root cause: `.limit(10)` applied BEFORE `.in('company_id', companyIds)` filter
   - Got 10 records from ALL reps, then filtered to specific rep (often resulting in 0)
   - Fixed: Apply `.limit(10)` AFTER filtering by sales rep
+- ✅ REMOVED: Standalone unpaid invoices page (`/admin/sales/unpaid-invoices`) - redundant with invoices page
+- ✅ REMOVED: Reorder Opportunities section and standalone page - replaced with "Last order: Xd ago" badges on company cards and detail pages
 
 ---
 
-#### 1.2 Reorder Opportunities (`/admin/sales/reorder-opportunities`)
-**Route:** `/admin/sales/reorder-opportunities`
-**Access:** All users (filtered by view mode)
-**What it does:**
-- Shows ALL customers who haven't ordered in 90+ days
-- Groups by urgency: Dormant (365+ days), At Risk (180-364 days), Due Soon (90-179 days)
-- Displays total spent lifetime and total order count for context
-- Click company name → goes to company detail page
+#### 1.2 Reorder Opportunities (DELETED - Replaced with badges)
+**Status:** ❌ DELETED
+**Previous Route:** `/admin/sales/reorder-opportunities`
+**Replacement:** Color-coded "Last order: Xd ago" badges on:
+- Company cards in `/admin/companies` list
+- Company detail page header in `/admin/company/[company_id]`
 
-**Buttons/Actions:**
-- ✅ Click company row → `/admin/company/[company_id]`
-- ✅ ← Back to Sales Center → `/admin/sales`
+**Color Coding:**
+- 🔴 Red (365+ days): Dormant customers
+- 🟠 Orange (180-364 days): At Risk customers
+- 🟡 Yellow (90-179 days): Due Soon customers
+- 🟢 Green (<90 days): Recent customers
 
-**Schema Links:**
-- `companies` table: Filters `type='customer'`, `last_invoice_at < 90 days ago`, optional `account_owner` filter
-- `invoices` table: Counts paid invoices per company for order history
-- Uses `total_revenue` and `last_invoice_at` fields from companies table
-
-**Issues Found:**
-- None
+**Reason for Deletion:**
+- Standalone page was redundant placeholder from early build
+- User automating reorder reminders via email
+- Better UX to show "days since last order" directly on company pages
 
 ---
 
@@ -107,26 +103,19 @@
 
 ---
 
-#### 1.4 Unpaid Invoices (`/admin/sales/unpaid-invoices`)
-**Route:** `/admin/sales/unpaid-invoices`
-**Access:** All users (filtered by view mode)
-**What it does:**
-- Shows ALL unpaid invoices for territory customers
-- Groups by age: Overdue 30+ days, Overdue 14-29 days, Recent (under 14 days)
-- Displays total unpaid amount in header
-- Each invoice shows company name, date, amount, "View" button (opens Stripe invoice URL)
+#### 1.4 Unpaid Invoices (DELETED - Consolidated into Invoices page)
+**Status:** ❌ DELETED
+**Previous Route:** `/admin/sales/unpaid-invoices`
+**Replacement:** `/admin/invoices` with tab navigation:
+- All (with "Show void" checkbox)
+- Paid
+- Unpaid
+- Void
 
-**Buttons/Actions:**
-- ✅ View (per invoice) → Opens Stripe invoice_url in new tab
-- ✅ Click invoice row → `/admin/company/[company_id]`
-- ✅ ← Back to Sales Center → `/admin/sales`
-
-**Schema Links:**
-- `companies` table: Filters `type='customer'`, optional `account_owner` filter
-- `invoices` table: Filters `payment_status='unpaid'` and company_id IN territory
-
-**Issues Found:**
-- None
+**Reason for Deletion:**
+- Redundant with main invoices page
+- Unpaid invoices shown directly on Sales Center dashboard (no "View All" needed)
+- Team should be constantly reminded of unpaid invoices, not click through to separate page
 
 ---
 
@@ -187,14 +176,14 @@
 
 ## Progress Tracker (Sales Engine)
 - ✅ Dashboard (1.1) - COMPLETE
-- ✅ Reorder Opportunities (1.2) - COMPLETE
+- ✅ Reorder Opportunities (1.2) - DELETED (replaced with badges on company pages)
 - ✅ Trials Ending (1.3) - COMPLETE
-- ✅ Unpaid Invoices (1.4) - COMPLETE
+- ✅ Unpaid Invoices (1.4) - DELETED (consolidated into /admin/invoices with tabs)
 - ⏸️ Distributor Control (1.5) - Will audit in Distributors section
 - ✅ Active Engagement (1.6) - COMPLETE
 
 **Schema Filtering:** ✅ CLEAN - All queries correctly filter `type='customer'`
-**Issues Fixed:** 2 (broken link in Quick Actions removed, wrong table query in Active Engagement)
+**Issues Fixed:** 4 (broken link removed, engagement table fixed, unpaid invoices consolidated, reorder opportunities replaced with badges)
 
 ---
 
@@ -297,4 +286,4 @@
 - Press & Media: 0% complete
 - Suppliers: 0% complete
 
-**Issues Found & Fixed:** 3 (broken link removed, engagement tracking fixed, prospect table duplication documented)
+**Issues Found & Fixed:** 5 (broken link removed, engagement tracking fixed, prospect table duplication documented, unpaid invoices page consolidated, reorder opportunities section replaced with badges)

@@ -11,13 +11,6 @@ import { cookies } from 'next/headers';
 import { getSalesRepFromViewMode, type ViewMode } from '@/lib/viewMode';
 import SalesCenterClient from '@/components/admin/SalesCenterClient';
 
-interface ReorderOpportunity {
-  company_id: string;
-  company_name: string;
-  days_since_order: number;
-  last_invoice_at: string;
-}
-
 interface TrialEnding {
   company_id: string;
   company_name: string;
@@ -120,7 +113,6 @@ export default async function SalesCenterPage() {
   };
 
   // Data collections for each section
-  let reorderOpportunities: ReorderOpportunity[] = [];
   let trialsEnding: TrialEnding[] = [];
   let unpaidInvoices: UnpaidInvoice[] = [];
 
@@ -131,7 +123,6 @@ export default async function SalesCenterPage() {
     const monthStart = firstDayOfMonth.toISOString();
 
     // Other date ranges
-    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
     const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
     // Build queries conditionally based on viewMode
@@ -168,14 +159,6 @@ export default async function SalesCenterPage() {
       .eq('status', 'trial')
       .eq('companies.type', 'customer');
 
-    let reorderQuery = supabase
-      .from('companies')
-      .select('company_id, company_name, last_invoice_at')
-      .eq('type', 'customer')  // Only customers for reorder opportunities
-      .not('last_invoice_at', 'is', null)
-      .lt('last_invoice_at', ninetyDaysAgo)
-      .order('last_invoice_at', { ascending: true });
-
     let endingTrialsQuery = supabase
       .from('subscriptions')
       .select(`
@@ -195,26 +178,22 @@ export default async function SalesCenterPage() {
       paidInvoicesQuery = paidInvoicesQuery.eq('companies.account_owner', filterBySalesRep);
       unpaidInvoicesQuery = unpaidInvoicesQuery.eq('companies.account_owner', filterBySalesRep);
       trialsQuery = trialsQuery.eq('companies.account_owner', filterBySalesRep);
-      reorderQuery = reorderQuery.eq('account_owner', filterBySalesRep);
       endingTrialsQuery = endingTrialsQuery.eq('companies.account_owner', filterBySalesRep);
     }
 
     // Apply limits AFTER filtering
     unpaidInvoicesQuery = unpaidInvoicesQuery.limit(10);
-    reorderQuery = reorderQuery.limit(10);
     endingTrialsQuery = endingTrialsQuery.limit(10);
 
     const [
       paidInvoicesResult,
       unpaidInvoicesResult,
       trialsResult,
-      reorderResult,
       endingTrialsResult,
     ] = await Promise.all([
       paidInvoicesQuery,
       unpaidInvoicesQuery,
       trialsQuery,
-      reorderQuery,
       endingTrialsQuery,
     ]);
 
@@ -235,14 +214,6 @@ export default async function SalesCenterPage() {
       total_amount: inv.total_amount,
       invoice_date: inv.invoice_date,
       invoice_url: inv.invoice_url,
-    }));
-
-    // Process reorder opportunities
-    reorderOpportunities = (reorderResult.data || []).map(company => ({
-      company_id: company.company_id,
-      company_name: company.company_name,
-      days_since_order: Math.floor((Date.now() - new Date(company.last_invoice_at).getTime()) / (1000 * 60 * 60 * 24)),
-      last_invoice_at: company.last_invoice_at,
     }));
 
     // Process trials ending
@@ -314,7 +285,6 @@ export default async function SalesCenterPage() {
         <div className="max-w-4xl">
           <SalesCenterClient
             salesRepId={filterBySalesRep}
-            reorderOpportunities={reorderOpportunities}
             trialsEnding={trialsEnding}
             unpaidInvoices={unpaidInvoices}
           />

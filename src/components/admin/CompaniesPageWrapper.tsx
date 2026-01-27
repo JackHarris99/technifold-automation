@@ -230,11 +230,29 @@ export default function CompaniesPageWrapper({ companies, totalCompanies, viewMo
                       <div className="text-sm text-gray-700">{company.country || '-'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-700">
-                        {company.last_invoice_at
-                          ? new Date(company.last_invoice_at).toLocaleDateString('en-GB')
-                          : 'Never'}
-                      </div>
+                      {company.last_invoice_at ? (
+                        <div className="flex items-center gap-2">
+                          <div className="text-sm text-gray-700">
+                            {new Date(company.last_invoice_at).toLocaleDateString('en-GB')}
+                          </div>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                            (() => {
+                              const daysSince = Math.floor((Date.now() - new Date(company.last_invoice_at).getTime()) / (1000 * 60 * 60 * 24));
+                              if (daysSince > 365) return 'bg-red-100 text-red-700';
+                              if (daysSince > 180) return 'bg-orange-100 text-orange-700';
+                              if (daysSince > 90) return 'bg-yellow-100 text-yellow-700';
+                              return 'bg-green-100 text-green-700';
+                            })()
+                          }`}>
+                            {(() => {
+                              const daysSince = Math.floor((Date.now() - new Date(company.last_invoice_at).getTime()) / (1000 * 60 * 60 * 24));
+                              return `${daysSince}d ago`;
+                            })()}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="text-sm text-gray-500">Never</div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <Link
