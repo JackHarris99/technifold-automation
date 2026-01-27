@@ -191,7 +191,7 @@ export default function CompaniesPageWrapper({ companies, totalCompanies, viewMo
               <div key={company.company_id} className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
                 <div className="p-5">
                   {/* Header Row */}
-                  <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-1">
                         <Link
@@ -206,8 +206,8 @@ export default function CompaniesPageWrapper({ companies, totalCompanies, viewMo
                           </span>
                         )}
                       </div>
-                      <div className="text-sm text-gray-600">
-                        {company.account_owner || 'Unassigned'} • {company.company_id.slice(0, 8)}
+                      <div className="text-xs text-gray-500">
+                        ID: {company.company_id}
                       </div>
                     </div>
                     <Link
@@ -219,7 +219,7 @@ export default function CompaniesPageWrapper({ companies, totalCompanies, viewMo
                   </div>
 
                   {/* Info Grid */}
-                  <div className="grid grid-cols-4 gap-4 pb-4 border-b border-gray-200">
+                  <div className="grid grid-cols-4 gap-4">
                     {/* Location */}
                     <div>
                       <div className="text-xs font-medium text-gray-500 uppercase mb-1">Location</div>
@@ -266,33 +266,6 @@ export default function CompaniesPageWrapper({ companies, totalCompanies, viewMo
                       <div className="text-sm font-medium text-gray-900">
                         {company.account_owner || 'Unassigned'}
                       </div>
-                    </div>
-                  </div>
-
-                  {/* Actions Row */}
-                  <div className="flex items-center justify-between pt-3">
-                    <div className="text-xs text-gray-500">
-                      Company ID: {company.company_id}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Link
-                        href={`/admin/send-reorder?company_id=${company.company_id}`}
-                        className="px-3 py-1.5 text-sm font-medium text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md transition-colors"
-                      >
-                        📧 Send Reorder
-                      </Link>
-                      <Link
-                        href={`/admin/quote-builder/tools?company_id=${company.company_id}`}
-                        className="px-3 py-1.5 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-md transition-colors"
-                      >
-                        🔧 Tools Quote
-                      </Link>
-                      <Link
-                        href={`/admin/quote-builder/consumables?company_id=${company.company_id}`}
-                        className="px-3 py-1.5 text-sm font-medium text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-md transition-colors"
-                      >
-                        📦 Consumables Quote
-                      </Link>
                     </div>
                   </div>
                 </div>
