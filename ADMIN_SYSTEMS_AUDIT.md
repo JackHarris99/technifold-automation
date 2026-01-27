@@ -174,6 +174,44 @@
 
 ---
 
+#### 1.7 All Companies (`/admin/companies`)
+**Route:** `/admin/companies`
+**Access:** All users (filtered by view mode)
+**What it does:**
+- Shows ALL active customers (type='customer', status != 'dead')
+- Excludes distributors, prospects, press, suppliers (they have their own sections)
+- Modern card-based layout with company info grid
+- Search across name, location, owner, Sage code
+- Sort by name, owner, city, country, or last order date
+
+**Features:**
+- ✅ Add Company button - Opens modal with auto-assignment to sales rep
+- ✅ Search bar - Includes Sage customer code search
+- ✅ Sort dropdown - 5 sort options with asc/desc toggle
+- ✅ Sage code badges - Shows purple badge when company has Sage code
+- ✅ Last order badges - Color-coded (Red 365+d, Orange 180-364d, Yellow 90-179d, Green <90d)
+- ✅ Quick actions per card:
+  - 📧 Send Reorder Email → `/admin/send-reorder?company_id=X`
+  - 🔧 Tools Quote Builder → `/admin/quote-builder/tools?company_id=X`
+  - 📦 Consumables Quote Builder → `/admin/quote-builder/consumables?company_id=X`
+- ✅ View Details → `/admin/company/[company_id]`
+
+**Schema Links:**
+- `companies` table: Filters `type='customer'`, `status != 'dead'`, optional `account_owner` filter
+- Loads: company_id, name, owner, category, country, city, postcode, address, last_invoice_at, sage_customer_code
+- Batch loading (1000 rows per batch) to bypass Supabase limits
+
+**Issues Found:**
+- ✅ FIXED: **CRITICAL** - Was showing ALL company types (7,148 companies)
+  - Bug: Used `.neq('type', 'distributor')` instead of `.eq('type', 'customer')`
+  - Showed prospects, press, suppliers, etc. alongside customers
+  - Fixed: Changed to `.eq('type', 'customer')` - now shows only ~2,726 customers
+- ✅ FIXED: Old table design (1990s style) - redesigned to modern card layout matching quotes page
+- ✅ ADDED: Sage customer code display with purple badge
+- ✅ ADDED: Quick action buttons on each card for common workflows
+
+---
+
 ## Progress Tracker (Sales Engine)
 - ✅ Dashboard (1.1) - COMPLETE
 - ✅ Reorder Opportunities (1.2) - DELETED (replaced with badges on company pages)
@@ -181,9 +219,10 @@
 - ✅ Unpaid Invoices (1.4) - DELETED (consolidated into /admin/invoices with tabs)
 - ⏸️ Distributor Control (1.5) - Will audit in Distributors section
 - ✅ Active Engagement (1.6) - COMPLETE
+- ✅ All Companies (1.7) - COMPLETE (fixed critical filter bug + redesigned)
 
 **Schema Filtering:** ✅ CLEAN - All queries correctly filter `type='customer'`
-**Issues Fixed:** 4 (broken link removed, engagement table fixed, unpaid invoices consolidated, reorder opportunities replaced with badges)
+**Issues Fixed:** 5 (broken link, engagement table, unpaid invoices consolidated, reorder opportunities replaced, companies filter bug)
 
 ---
 
