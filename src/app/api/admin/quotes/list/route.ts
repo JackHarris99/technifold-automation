@@ -56,11 +56,11 @@ export async function GET(request: NextRequest) {
       .from('quotes')
       .select(`
         *,
-        companies!inner(company_id, company_name, account_owner),
+        companies!inner(company_id, company_name, account_owner, type),
         contacts(contact_id, full_name, email),
-        invoices(invoice_id, invoice_number, total_amount, payment_status, paid_at, due_date, status, invoice_pdf_url),
-        users!quotes_created_by_fkey(user_id, full_name)
+        invoices(invoice_id, invoice_number, total_amount, payment_status, paid_at, due_date, status, invoice_pdf_url)
       `, { count: 'exact' })
+      .eq('companies.type', 'customer')
       .order('created_at', { ascending: false });
 
     // Filter by sales rep territory
@@ -120,7 +120,6 @@ export async function GET(request: NextRequest) {
       const company = quote.companies;
       const contact = quote.contacts;
       const invoice = quote.invoices;
-      const creator = quote.users;
 
       // Generate preview token
       const previewToken = generateToken({
@@ -145,7 +144,7 @@ export async function GET(request: NextRequest) {
         contact_name: contact?.full_name || null,
         contact_email: contact?.email || null,
         created_by: quote.created_by,
-        created_by_name: creator?.full_name || quote.created_by,
+        created_by_name: quote.created_by,
         quote_type: quote.quote_type,
         status: quote.status,
         total_amount: quote.total_amount,
