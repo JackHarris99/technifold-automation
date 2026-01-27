@@ -43,9 +43,9 @@ export default async function CompaniesPage() {
   while (hasMore) {
     let query = supabase
       .from('companies')
-      .select('company_id, company_name, account_owner, category, country, billing_city, billing_postal_code, billing_address_line_1, last_invoice_at')
+      .select('company_id, company_name, account_owner, category, country, billing_city, billing_postal_code, billing_address_line_1, last_invoice_at, sage_customer_code')
+      .eq('type', 'customer')  // ONLY customers (not prospects, distributors, press, suppliers)
       .neq('status', 'dead')  // Exclude dead customers
-      .neq('type', 'distributor')  // Exclude distributors (they have their own page)
       .order('company_name')
       .range(start, start + batchSize - 1);
 
