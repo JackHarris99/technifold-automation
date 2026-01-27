@@ -282,13 +282,11 @@ export default async function SalesCenterPage() {
         </div>
 
         {/* Main Content */}
-        <div className="max-w-4xl">
-          <SalesCenterClient
-            salesRepId={filterBySalesRep}
-            trialsEnding={trialsEnding}
-            unpaidInvoices={unpaidInvoices}
-          />
-        </div>
+        <SalesCenterClient
+          salesRepId={filterBySalesRep}
+          trialsEnding={trialsEnding}
+          unpaidInvoices={unpaidInvoices}
+        />
       </div>
     </div>
   );
