@@ -62,9 +62,52 @@ export default function PortalAddressCollectionModal({
   const [error, setError] = useState<string | null>(null);
   const [vatVerificationResult, setVatVerificationResult] = useState<VATVerificationResult | null>(null);
   const [isVerifyingVAT, setIsVerifyingVAT] = useState(false);
+  const [isLoadingExisting, setIsLoadingExisting] = useState(true);
 
   const isEU = isEUCountry(formData.billing_country);
   const requiresVAT = isEU;
+
+  // Load existing company data when modal opens
+  useEffect(() => {
+    if (!isOpen) return;
+
+    async function loadExistingData() {
+      setIsLoadingExisting(true);
+      try {
+        const useDistributorEndpoints = !token;
+        const endpoint = useDistributorEndpoints
+          ? `/api/distributor/company-details`
+          : `/api/portal/company-details?token=${encodeURIComponent(token!)}`;
+
+        const response = await fetch(endpoint);
+        const data = await response.json();
+
+        if (data.success && data.company) {
+          const company = data.company;
+
+          // Pre-fill billing address if exists
+          if (company.billing_address_line_1) {
+            setFormData(prev => ({
+              ...prev,
+              billing_address_line_1: company.billing_address_line_1 || '',
+              billing_address_line_2: company.billing_address_line_2 || '',
+              billing_city: company.billing_city || '',
+              billing_state_province: company.billing_state_province || '',
+              billing_postal_code: company.billing_postal_code || '',
+              billing_country: company.billing_country || 'GB',
+              vat_number: company.vat_number || '',
+            }));
+          }
+        }
+      } catch (err) {
+        console.error('[PortalAddressCollectionModal] Failed to load existing data:', err);
+      } finally {
+        setIsLoadingExisting(false);
+      }
+    }
+
+    loadExistingData();
+  }, [isOpen, token]);
 
   // Auto-verify VAT when user finishes typing
   useEffect(() => {
@@ -231,6 +274,8 @@ export default function PortalAddressCollectionModal({
     <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4"
       onClick={(e) => {
+        // Prevent closing if submitting
+        if (isSubmitting) return;
         // Close if clicking the backdrop
         if (e.target === e.currentTarget) {
           onClose();
@@ -241,7 +286,8 @@ export default function PortalAddressCollectionModal({
         <div className="p-6 border-b border-gray-200 relative">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            disabled={isSubmitting}
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             type="button"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -270,23 +316,46 @@ export default function PortalAddressCollectionModal({
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Loading existing data */}
+          {isLoadingExisting && (
+            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4 text-center">
+              <div className="inline-block animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full mr-2"></div>
+              <span className="text-sm font-semibold text-blue-900">Loading your existing details...</span>
+            </div>
+          )}
+
           {/* Important Notice */}
-          <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
-            <h4 className="text-sm font-bold text-blue-900 mb-2 flex items-center gap-2">
-              <span className="text-xl">ℹ️</span> Required Information
-            </h4>
-            <p className="text-sm text-blue-800">
-              All fields marked with <span className="text-red-600 font-bold text-lg">*</span> are <strong>required</strong> before you can place orders.
-            </p>
-            <p className="text-sm text-blue-800 mt-1">
-              Complete billing and shipping addresses are needed for tax calculation and delivery.
-            </p>
-          </div>
+          {!isLoadingExisting && (
+            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+              <h4 className="text-sm font-bold text-blue-900 mb-2 flex items-center gap-2">
+                <span className="text-xl">ℹ️</span> Required Information
+              </h4>
+              <p className="text-sm text-blue-800">
+                All fields marked with <span className="text-red-600 font-bold text-lg">*</span> are <strong>required</strong> before you can place orders.
+              </p>
+              <p className="text-sm text-blue-800 mt-1">
+                Complete billing and shipping addresses are needed for tax calculation and delivery.
+              </p>
+            </div>
+          )}
 
           {error && (
             <div className="bg-red-50 border-2 border-red-400 text-red-700 px-4 py-3 rounded-lg">
               <p className="font-bold">Error:</p>
               <p>{error}</p>
+            </div>
+          )}
+
+          {/* Submitting indicator */}
+          {isSubmitting && (
+            <div className="bg-green-50 border-2 border-green-400 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <div className="inline-block animate-spin h-6 w-6 border-3 border-green-600 border-t-transparent rounded-full"></div>
+                <div>
+                  <p className="text-sm font-bold text-green-900">Saving your details...</p>
+                  <p className="text-xs text-green-700 mt-1">Please wait, do not close this window.</p>
+                </div>
+              </div>
             </div>
           )}
 
@@ -309,9 +378,10 @@ export default function PortalAddressCollectionModal({
                   type="text"
                   value={formData.billing_address_line_1}
                   onChange={(e) => handleChange('billing_address_line_1', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="123 Business Street"
                   required
+                  disabled={isLoadingExisting || isSubmitting}
                 />
               </div>
 
@@ -559,17 +629,17 @@ export default function PortalAddressCollectionModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
+              className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isSubmitting}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50"
-              disabled={isSubmitting}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoadingExisting || isSubmitting}
             >
-              {isSubmitting ? 'Saving...' : 'Save and Continue'}
+              {isLoadingExisting ? 'Loading...' : isSubmitting ? 'Saving...' : 'Save and Continue'}
             </button>
           </div>
         </form>
