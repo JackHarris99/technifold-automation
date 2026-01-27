@@ -43,16 +43,25 @@ export default async function DistributorsPage() {
     console.error('Error fetching distributor users:', usersError);
   }
 
-  // Fetch all contacts for distributor companies
-  const { data: contacts, error: contactsError } = await supabase
-    .from('contacts')
-    .select('contact_id, company_id, full_name, email, role')
-    .in('company_id', (companies || []).map(c => c.company_id))
-    .order('company_id, full_name')
-    .limit(10000);
+  // Fetch all contacts for distributor companies (in batches to avoid query size limits)
+  let contacts: any[] = [];
+  const companyIds = (companies || []).map(c => c.company_id);
+  const batchSize = 100; // Supabase .in() works well with batches of 100
 
-  if (contactsError) {
-    console.error('Error fetching contacts for distributors:', contactsError);
+  for (let i = 0; i < companyIds.length; i += batchSize) {
+    const batch = companyIds.slice(i, i + batchSize);
+    const { data: batchContacts, error: batchError } = await supabase
+      .from('contacts')
+      .select('contact_id, company_id, full_name, email, role')
+      .in('company_id', batch)
+      .order('company_id, full_name')
+      .limit(10000);
+
+    if (batchError) {
+      console.error(`Error fetching contacts batch ${i / batchSize + 1}:`, batchError);
+    } else if (batchContacts) {
+      contacts = contacts.concat(batchContacts);
+    }
   }
 
   console.log(`[distributors/page] Loaded ${companies?.length || 0} companies, ${users?.length || 0} users, ${contacts?.length || 0} contacts`);
