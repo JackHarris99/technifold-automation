@@ -26,12 +26,15 @@ interface InvoiceListClientProps {
   viewMode: string;
 }
 
+type InvoiceTab = 'all' | 'paid' | 'unpaid' | 'void';
+
 export default function InvoiceListClient({ initialInvoices, viewMode }: InvoiceListClientProps) {
   const [invoices, setInvoices] = useState(initialInvoices);
   const [voidingInvoiceId, setVoidingInvoiceId] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [stripeStatuses, setStripeStatuses] = useState<Map<string, StripeStatusInfo>>(new Map());
+  const [activeTab, setActiveTab] = useState<InvoiceTab>('all');
   const [showVoidInvoices, setShowVoidInvoices] = useState(false);
   const [bulkSyncing, setBulkSyncing] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -229,25 +232,86 @@ export default function InvoiceListClient({ initialInvoices, viewMode }: Invoice
     }
   };
 
-  // Filter invoices based on showVoidInvoices toggle
-  const filteredInvoices = showVoidInvoices
-    ? invoices
-    : invoices.filter(inv => inv.payment_status !== 'void');
+  // Filter invoices based on active tab and showVoidInvoices toggle
+  const filteredInvoices = invoices.filter(inv => {
+    // Apply tab filter
+    if (activeTab === 'paid' && inv.payment_status !== 'paid') return false;
+    if (activeTab === 'unpaid' && inv.payment_status !== 'unpaid') return false;
+    if (activeTab === 'void' && inv.payment_status !== 'void') return false;
+
+    // Apply void filter (only when on 'all' tab)
+    if (activeTab === 'all' && !showVoidInvoices && inv.payment_status === 'void') return false;
+
+    return true;
+  });
+
+  // Count invoices by status
+  const paidCount = invoices.filter(inv => inv.payment_status === 'paid').length;
+  const unpaidCount = invoices.filter(inv => inv.payment_status === 'unpaid').length;
+  const voidCount = invoices.filter(inv => inv.payment_status === 'void').length;
 
   return (
     <>
+      {/* Tabs */}
+      <div className="border-b border-gray-200 mb-6">
+        <div className="flex gap-2">
+          <button
+            onClick={() => setActiveTab('all')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'all'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+            }`}
+          >
+            All ({invoices.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('paid')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'paid'
+                ? 'border-green-600 text-green-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+            }`}
+          >
+            Paid ({paidCount})
+          </button>
+          <button
+            onClick={() => setActiveTab('unpaid')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'unpaid'
+                ? 'border-orange-600 text-orange-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+            }`}
+          >
+            Unpaid ({unpaidCount})
+          </button>
+          <button
+            onClick={() => setActiveTab('void')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'void'
+                ? 'border-gray-600 text-gray-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+            }`}
+          >
+            Void ({voidCount})
+          </button>
+        </div>
+      </div>
+
       {/* Controls */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2 text-sm text-gray-700">
-            <input
-              type="checkbox"
-              checked={showVoidInvoices}
-              onChange={(e) => setShowVoidInvoices(e.target.checked)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            Show void invoices ({invoices.filter(inv => inv.payment_status === 'void').length})
-          </label>
+          {activeTab === 'all' && (
+            <label className="flex items-center gap-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={showVoidInvoices}
+                onChange={(e) => setShowVoidInvoices(e.target.checked)}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              Show void invoices ({voidCount})
+            </label>
+          )}
         </div>
         <div className="flex items-center gap-3">
           <button

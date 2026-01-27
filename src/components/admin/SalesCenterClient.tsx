@@ -76,7 +76,6 @@ export default function SalesCenterClient({
         emptyMessage="All invoices paid"
         emptyIcon="💰"
         color="orange"
-        viewAllHref="/admin/sales/unpaid-invoices"
       >
         {unpaidInvoices.map((invoice: any) => (
           <div
