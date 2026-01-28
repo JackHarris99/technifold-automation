@@ -41,12 +41,7 @@ async function fetchAllProducts() {
 }
 
 export default async function CategorizationPage() {
-  const director = await isDirector();
-
-  if (!director) {
-    redirect('/admin');
-  }
-
+  // Allow all admin users to access this page (not just directors)
   const products = await fetchAllProducts();
 
   return <ProductCategorizationClient products={products} />;

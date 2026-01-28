@@ -41,12 +41,7 @@ async function fetchAllProducts() {
 }
 
 export default async function BulkEditPage() {
-  const director = await isDirector();
-
-  if (!director) {
-    redirect('/admin');
-  }
-
+  // Allow all admin users to access this page (not just directors)
   const products = await fetchAllProducts();
 
   return <BulkEditClient products={products} />;
