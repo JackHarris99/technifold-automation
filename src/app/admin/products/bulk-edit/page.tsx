@@ -8,6 +8,38 @@ import { isDirector } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import BulkEditClient from '@/components/admin/BulkEditClient';
 
+async function fetchAllProducts() {
+  const supabase = getSupabaseClient();
+  const BATCH_SIZE = 1000;
+  let allProducts: any[] = [];
+  let start = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from('products')
+      .select('product_code, description, type, category, pricing_tier, price, active, extra')
+      .order('product_code')
+      .range(start, start + BATCH_SIZE - 1);
+
+    if (error) {
+      console.error('Error fetching products batch:', error);
+      break;
+    }
+
+    if (data && data.length > 0) {
+      allProducts = [...allProducts, ...data];
+      start += BATCH_SIZE;
+      hasMore = data.length === BATCH_SIZE;
+    } else {
+      hasMore = false;
+    }
+  }
+
+  console.log(`[Bulk Edit] Loaded ${allProducts.length} products in ${Math.ceil(allProducts.length / BATCH_SIZE)} batches`);
+  return allProducts;
+}
+
 export default async function BulkEditPage() {
   const director = await isDirector();
 
@@ -15,16 +47,7 @@ export default async function BulkEditPage() {
     redirect('/admin');
   }
 
-  const supabase = getSupabaseClient();
+  const products = await fetchAllProducts();
 
-  // Fetch all products for both tabs (no limit - fetch everything)
-  const { data: products, count } = await supabase
-    .from('products')
-    .select('product_code, description, type, category, pricing_tier, price, active, extra', { count: 'exact' })
-    .order('product_code')
-    .range(0, 100000);
-
-  console.log(`[Bulk Edit] Loaded ${products?.length || 0} products (total: ${count})`);
-
-  return <BulkEditClient products={products || []} />;
+  return <BulkEditClient products={products} />;
 }
