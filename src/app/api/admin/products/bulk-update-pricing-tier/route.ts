@@ -1,20 +1,20 @@
 /**
  * POST /api/admin/products/bulk-update-pricing-tier
  * Update pricing_tier for multiple products at once
- * Directors only
+ * All admin users
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
-import { isDirector } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
-    const director = await isDirector();
-    if (!director) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json(
-        { error: 'Unauthorized - Directors only' },
-        { status: 403 }
+        { error: 'Unauthorized' },
+        { status: 401 }
       );
     }
 

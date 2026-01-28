@@ -4,8 +4,6 @@
  */
 
 import { getSupabaseClient } from '@/lib/supabase';
-import { isDirector } from '@/lib/auth';
-import { redirect } from 'next/navigation';
 import ProductCategorizationClient from '@/components/admin/ProductCategorizationClient';
 
 async function fetchAllProducts() {
