@@ -17,12 +17,14 @@ export default async function CategorizationPage() {
 
   const supabase = getSupabaseClient();
 
-  // Fetch all products with all fields
-  const { data: products } = await supabase
+  // Fetch all products with all fields (no limit - fetch everything)
+  const { data: products, count } = await supabase
     .from('products')
-    .select('*')
+    .select('*', { count: 'exact' })
     .order('product_code')
-    .limit(10000);
+    .range(0, 100000);
+
+  console.log(`[Categorization] Loaded ${products?.length || 0} products (total: ${count})`);
 
   return <ProductCategorizationClient products={products || []} />;
 }
