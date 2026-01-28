@@ -5,13 +5,13 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
-import { isDirector } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
   try {
-    // Check authorization
-    const director = await isDirector();
-    if (!director) {
+    // Check authorization - allow all admin users
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
