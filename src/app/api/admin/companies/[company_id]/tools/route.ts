@@ -1,5 +1,5 @@
 /**
- * GET/POST /api/admin/companies/[companyId]/tools
+ * GET/POST /api/admin/companies/[company_id]/tools
  * Manage tools assigned to a company
  */
 
@@ -12,7 +12,7 @@ import { getCurrentUser } from '@/lib/auth';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ companyId: string }> }
+  { params }: { params: Promise<{ company_id: string }> }
 ) {
   try {
     // SECURITY: Require authentication
@@ -21,7 +21,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { companyId } = await params;
+    const { company_id: companyId } = await params;
     const supabase = getSupabaseClient();
 
     const { data: tools, error } = await supabase
@@ -57,10 +57,10 @@ export async function GET(
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ companyId: string }> }
+  { params }: { params: Promise<{ company_id: string }> }
 ) {
   try {
-    const { companyId } = await params;
+    const { company_id: companyId } = await params;
     const body = await request.json();
     const { tool_code, total_units } = body;
 
@@ -126,10 +126,10 @@ export async function POST(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ companyId: string }> }
+  { params }: { params: Promise<{ company_id: string }> }
 ) {
   try {
-    const { companyId } = await params;
+    const { company_id: companyId } = await params;
     const { searchParams } = new URL(request.url);
     const tool_code = searchParams.get('tool_code');
 

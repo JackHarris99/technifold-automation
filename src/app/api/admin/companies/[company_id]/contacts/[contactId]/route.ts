@@ -12,7 +12,7 @@ import { getCurrentUser } from '@/lib/auth';
 
 export async function PATCH(
   request: NextRequest,
-  context: { params: Promise<{ companyId: string; contactId: string }> }
+  context: { params: Promise<{ company_id: string; contactId: string }> }
 ) {
   try {
     // SECURITY: Require authentication
@@ -21,12 +21,12 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { companyId, contactId } = await context.params;
+    const { company_id, contactId } = await context.params;
     const body = await request.json();
 
     // Check territory permission
     const { canActOnCompany } = await import('@/lib/auth');
-    const permission = await canActOnCompany(companyId);
+    const permission = await canActOnCompany(company_id);
     if (!permission.allowed) {
       return NextResponse.json(
         { error: permission.error },
@@ -82,14 +82,14 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: Promise<{ companyId: string; contactId: string }> }
+  context: { params: Promise<{ company_id: string; contactId: string }> }
 ) {
   try {
-    const { companyId, contactId } = await context.params;
+    const { company_id, contactId } = await context.params;
 
     // Check territory permission
     const { canActOnCompany } = await import('@/lib/auth');
-    const permission = await canActOnCompany(companyId);
+    const permission = await canActOnCompany(company_id);
     if (!permission.allowed) {
       return NextResponse.json(
         { error: permission.error },

@@ -9,7 +9,7 @@ import { getCurrentUser } from '@/lib/auth';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { company_id: string } }
+  { params }: { params: Promise<{ company_id: string }> }
 ) {
   try {
     // SECURITY: Require authentication
@@ -18,7 +18,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const companyId = params.company_id;
+    const { company_id: companyId } = await params;
 
     if (!companyId) {
       return NextResponse.json(
