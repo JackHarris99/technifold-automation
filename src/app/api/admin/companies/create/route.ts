@@ -1,7 +1,7 @@
 /**
  * POST /api/admin/companies/create
- * Create new company with automatic fair assignment to sales rep
- * Assignment logic: Assign to rep with fewest TOTAL companies (active + inactive + dead)
+ * Create new company with automatic round-robin assignment to sales rep
+ * Assignment logic: Rotate through sales reps in order (rep 1, rep 2, rep 3, etc.)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -67,74 +67,34 @@ export async function POST(request: NextRequest) {
 
     console.log('[companies/create] Active sales reps found:', salesReps.map(r => `${r.full_name} (${r.sales_rep_id})`));
 
-    // 2. Count TOTAL companies per rep (regardless of status - ensures fairness)
-    // IMPORTANT: Use batching to get ALL companies (Supabase default limit is 1000)
-    let allCompanies: { account_owner: string | null }[] = [];
-    let start = 0;
-    const batchSize = 1000;
-    let hasMore = true;
+    // 2. Count total companies to determine round-robin position
+    const { count: totalCompaniesCount, error: countError } = await supabase
+      .from('companies')
+      .select('*', { count: 'exact', head: true });
 
-    while (hasMore) {
-      const { data: batch, error: batchError } = await supabase
-        .from('companies')
-        .select('account_owner')
-        .not('account_owner', 'is', null)
-        .range(start, start + batchSize - 1);
-
-      if (batchError) {
-        console.error('[companies/create] Error counting companies:', batchError);
-        return NextResponse.json(
-          { error: 'Failed to calculate assignment' },
-          { status: 500 }
-        );
-      }
-
-      if (batch && batch.length > 0) {
-        allCompanies = allCompanies.concat(batch);
-        start += batchSize;
-        hasMore = batch.length === batchSize;
-      } else {
-        hasMore = false;
-      }
+    if (countError) {
+      console.error('[companies/create] Error counting companies:', countError);
+      return NextResponse.json(
+        { error: 'Failed to calculate assignment' },
+        { status: 500 }
+      );
     }
 
-    console.log('[companies/create] Total companies counted:', allCompanies.length);
+    // 3. Use round-robin: next rep = (total_companies % number_of_reps)
+    const totalCompanies = totalCompaniesCount || 0;
+    const repIndex = totalCompanies % salesReps.length;
+    const assignedRep = salesReps[repIndex].sales_rep_id;
 
-    // 3. Count companies per rep
-    const repCounts: { [key: string]: number } = {};
-    salesReps.forEach(rep => {
-      repCounts[rep.sales_rep_id] = 0;
-    });
+    console.log('[companies/create] ===== ROUND-ROBIN ASSIGNMENT =====');
+    console.log('[companies/create] Total companies:', totalCompanies);
+    console.log('[companies/create] Number of sales reps:', salesReps.length);
+    console.log('[companies/create] Next rep index:', repIndex);
+    console.log('[companies/create] Assigned to:', `${salesReps[repIndex].full_name} (${assignedRep})`);
 
-    allCompanies?.forEach(company => {
-      if (company.account_owner && repCounts[company.account_owner] !== undefined) {
-        repCounts[company.account_owner]++;
-      }
-    });
-
-    // 4. Find rep(s) with fewest total assignments
-    const minCount = Math.min(...Object.values(repCounts));
-    const repsWithFewest = Object.keys(repCounts).filter(
-      rep => repCounts[rep] === minCount
-    );
-
-    // 5. If multiple reps tied for fewest, pick randomly
-    const randomIndex = Math.floor(Math.random() * repsWithFewest.length);
-    const assignedRep = repsWithFewest[randomIndex];
-
-    // Detailed logging for debugging
-    console.log('[companies/create] ===== ASSIGNMENT CALCULATION =====');
-    console.log('[companies/create] Current company counts per rep:', repCounts);
-    console.log('[companies/create] Minimum count:', minCount);
-    console.log('[companies/create] Reps with fewest companies:', repsWithFewest);
-    console.log('[companies/create] Randomly selected:', assignedRep);
-    const assignedRepName = salesReps.find(r => r.sales_rep_id === assignedRep)?.full_name;
-    console.log('[companies/create] Assigned to:', `${assignedRepName} (${assignedRep})`);
-
-    // 6. Generate unique company_id (UUID for new companies)
+    // 4. Generate unique company_id (UUID for new companies)
     const companyId = randomUUID();
 
-    // 7. Create company with assigned rep (with sanitized inputs)
+    // 5. Create company with assigned rep (with sanitized inputs)
     const { data: newCompany, error: createError } = await supabase
       .from('companies')
       .insert({
@@ -166,7 +126,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 8. Get assigned rep name for response
+    // 6. Get assigned rep name for response
     const assignedRepData = salesReps.find(r => r.sales_rep_id === assignedRep);
 
     return NextResponse.json({
@@ -176,7 +136,6 @@ export async function POST(request: NextRequest) {
         sales_rep_id: assignedRep,
         full_name: assignedRepData?.full_name || assignedRep,
       },
-      assignment_counts: repCounts,
     });
   } catch (error) {
     console.error('[companies/create] Exception:', error);
