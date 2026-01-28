@@ -726,6 +726,16 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
           >
             Bulk Edit Products
           </Link>
+          <Link
+            href="/admin/products/categorize"
+            className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+              pathname === '/admin/products/categorize'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
+            }`}
+          >
+            📋 Categorize Products
+          </Link>
         </div>
 
         {/* Tools */}
