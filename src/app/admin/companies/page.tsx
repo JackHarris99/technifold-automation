@@ -10,6 +10,8 @@ import { cookies } from 'next/headers';
 import CompaniesPageWrapper from '@/components/admin/CompaniesPageWrapper';
 import { getSalesRepFromViewMode, type ViewMode } from '@/lib/viewMode';
 
+export const revalidate = 0; // Disable caching, always fetch fresh data
+
 export default async function CompaniesPage() {
   const user = await getCurrentUser();
 
