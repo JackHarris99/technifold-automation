@@ -53,6 +53,7 @@ export default function TechnicreaseQuoteBuilderPage() {
   const [generating, setGenerating] = useState(false);
   const [quoteUrl, setQuoteUrl] = useState('');
   const [quoteId, setQuoteId] = useState('');
+  const [sendingEmail, setSendingEmail] = useState(false);
 
   useEffect(() => {
     loadCompanies();
@@ -185,6 +186,39 @@ export default function TechnicreaseQuoteBuilderPage() {
       console.error(err);
     } finally {
       setGenerating(false);
+    }
+  }
+
+  async function sendQuoteEmail() {
+    if (!selectedCompany || !selectedContact || !quoteUrl || !quoteId) {
+      alert('Please generate a quote first');
+      return;
+    }
+
+    setSendingEmail(true);
+    try {
+      const response = await fetch('/api/admin/quote/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company_id: selectedCompany.company_id,
+          contact_id: selectedContact.contact_id,
+          quote_id: quoteId,
+          quote_url: quoteUrl,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert(`✓ Quote email sent successfully to ${selectedContact.email}`);
+      } else {
+        alert('Failed to send email: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err) {
+      alert('Error sending email');
+      console.error(err);
+    } finally {
+      setSendingEmail(false);
     }
   }
 
@@ -374,7 +408,7 @@ export default function TechnicreaseQuoteBuilderPage() {
                   </button>
                 </div>
               </div>
-              <div>
+              <div className="flex gap-3">
                 <a
                   href={`/admin/quotes/${quoteId}`}
                   target="_blank"
@@ -382,7 +416,21 @@ export default function TechnicreaseQuoteBuilderPage() {
                 >
                   View Quote Details →
                 </a>
+                {!isTestToken && (
+                  <button
+                    onClick={sendQuoteEmail}
+                    disabled={sendingEmail}
+                    className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {sendingEmail ? 'Sending...' : '📧 Send Quote Email'}
+                  </button>
+                )}
               </div>
+              {isTestToken && (
+                <p className="text-sm text-gray-600 mt-2">
+                  Test links are for internal preview only - not sent to customers
+                </p>
+              )}
             </div>
           </div>
         )}
