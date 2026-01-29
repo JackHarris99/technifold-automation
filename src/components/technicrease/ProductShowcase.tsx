@@ -4,23 +4,23 @@ export default function ProductShowcase() {
   const finishTypes = [
     {
       name: 'Creasing',
-      image: '/images/single-yellow-crease.jpg'
+      image: '/technicrease/single-yellow-crease.jpg'
     },
     {
       name: 'Micro-Perforation',
-      image: '/images/micro-perforation-2.jpg'
+      image: '/technicrease/micro-perforation-2.jpg'
     },
     {
       name: 'Slitting',
-      image: '/images/double-cut.jpg'
+      image: '/technicrease/double-cut.jpg'
     },
     {
       name: 'Kiss-Cutting',
-      image: '/images/double-kiss-cut.JPG'
+      image: '/technicrease/double-kiss-cut.JPG'
     },
     {
       name: 'Scoring',
-      image: '/images/single-orange-crease.jpg'
+      image: '/technicrease/single-orange-crease.jpg'
     }
   ]
 

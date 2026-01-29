@@ -11,52 +11,52 @@ export default function FinishingSettings() {
       id: 'crease-settings',
       title: 'Crease Settings',
       items: [
-        { name: 'Orange Creasing Band', image: '/images/orange-creasing-band.jpg' },
-        { name: 'Blue Creasing Band', image: '/images/blue-creasing-band.jpg' },
-        { name: 'Yellow Creasing Band', image: '/images/yellow-creasing-band.jpg' },
-        { name: 'Black Creasing Band', image: '/images/black-creasing-band.jpg' }
+        { name: 'Orange Creasing Band', image: '/technicrease/orange-creasing-band.jpg' },
+        { name: 'Blue Creasing Band', image: '/technicrease/blue-creasing-band.jpg' },
+        { name: 'Yellow Creasing Band', image: '/technicrease/yellow-creasing-band.jpg' },
+        { name: 'Black Creasing Band', image: '/technicrease/black-creasing-band.jpg' }
       ]
     },
     {
       id: 'digital-crease-settings',
       title: 'Digital Crease Settings',
       items: [
-        { name: 'Red Creasing Band', image: '/images/red-creasing-band.jpg' },
-        { name: 'Green Creasing Band', image: '/images/green-creasing-band.jpg' },
-        { name: 'Pink Creasing Band', image: '/images/pink-creasing-band.jpg' },
-        { name: 'Black Digital Creasing Band', image: '/images/black-creasing-band-digital.jpg' }
+        { name: 'Red Creasing Band', image: '/technicrease/red-creasing-band.jpg' },
+        { name: 'Green Creasing Band', image: '/technicrease/green-creasing-band.jpg' },
+        { name: 'Pink Creasing Band', image: '/technicrease/pink-creasing-band.jpg' },
+        { name: 'Black Digital Creasing Band', image: '/technicrease/black-creasing-band-digital.jpg' }
       ]
     },
     {
       id: 'micro-perforation-settings',
       title: 'Micro-Perforation Settings',
       items: [
-        { name: '10 TPI Microperforation', image: '/images/10tpi-microperforation.jpg' },
-        { name: '12 TPI Microperforation', image: '/images/12tpi-microperforation.jpg' },
-        { name: '17 TPI Microperforation', image: '/images/17tpi-microperforation.jpg' },
-        { name: '25 TPI Microperforation', image: '/images/25tpi-microperforation.jpg' },
-        { name: '40 TPI Microperforation', image: '/images/40tpi-microperforation.jpg' },
-        { name: '52 TPI Microperforation', image: '/images/52tpi-microperforation.jpg' },
-        { name: '72 TPI Microperforation', image: '/images/72tpi-microperforation.jpg' }
+        { name: '10 TPI Microperforation', image: '/technicrease/10tpi-microperforation.jpg' },
+        { name: '12 TPI Microperforation', image: '/technicrease/12tpi-microperforation.jpg' },
+        { name: '17 TPI Microperforation', image: '/technicrease/17tpi-microperforation.jpg' },
+        { name: '25 TPI Microperforation', image: '/technicrease/25tpi-microperforation.jpg' },
+        { name: '40 TPI Microperforation', image: '/technicrease/40tpi-microperforation.jpg' },
+        { name: '52 TPI Microperforation', image: '/technicrease/52tpi-microperforation.jpg' },
+        { name: '72 TPI Microperforation', image: '/technicrease/72tpi-microperforation.jpg' }
       ]
     },
     {
       id: 'cutting-settings',
       title: 'Cutting Settings',
       items: [
-        { name: 'Cutting Knife', image: '/images/cutting-knife.jpg' },
-        { name: 'Long Cutting Knife', image: '/images/long-cutting-knife.jpg' },
-        { name: 'Kiss Cutting Knife', image: '/images/kiss-cutting-knife.jpg' }
+        { name: 'Cutting Knife', image: '/technicrease/cutting-knife.jpg' },
+        { name: 'Long Cutting Knife', image: '/technicrease/long-cutting-knife.jpg' },
+        { name: 'Kiss Cutting Knife', image: '/technicrease/kiss-cutting-knife.jpg' }
       ]
     },
     {
       id: 'scoring-settings',
       title: 'Scoring Settings',
       items: [
-        { name: 'White Scoring Band', image: '/images/white-plastic-female.jpg' },
-        { name: 'Red Scoring Band', image: '/images/red-plastic-female.jpg' },
-        { name: 'Blue Scoring Band', image: '/images/blue-plastic-female.jpg' },
-        { name: 'Yellow Scoring Band', image: '/images/yellow-plastic-female.jpg' }
+        { name: 'White Scoring Band', image: '/technicrease/white-plastic-female.jpg' },
+        { name: 'Red Scoring Band', image: '/technicrease/red-plastic-female.jpg' },
+        { name: 'Blue Scoring Band', image: '/technicrease/blue-plastic-female.jpg' },
+        { name: 'Yellow Scoring Band', image: '/technicrease/yellow-plastic-female.jpg' }
       ]
     }
   ]
