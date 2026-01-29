@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Create quote line items
-    const quoteItems = line_items.map((item: QuoteLineItem, index: number) => ({
+    const quoteItems = line_items.map((item: any, index: number) => ({
       quote_id: quote.quote_id,
       product_code: item.product_code,
       line_number: index + 1,
@@ -107,6 +107,8 @@ export async function POST(request: NextRequest) {
       product_type: item.product_type,
       category: item.category,
       image_url: item.image_url,
+      parent_line_number: item.parent_line_number || null,
+      configuration: item.configuration || null,
     }));
 
     const { error: itemsError } = await supabase
