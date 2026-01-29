@@ -7,7 +7,7 @@ export default function VideoShowcase() {
             See TechniCrease in Action
           </h2>
           <p className="text-lg text-gray-700 max-w-3xl mx-auto">
-            Watch how our TechniCrease system transforms this Hunkeler web line, enabling complete in-line micro-perforation at full production speed
+            Watch how our TechniCrease system transforms this Hunkeler line, enabling complete in-line micro-perforation at full production speed
           </p>
         </div>
 
