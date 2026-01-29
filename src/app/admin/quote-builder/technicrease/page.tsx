@@ -21,6 +21,7 @@ interface MachineConfig {
   width: string;
   price: number;
   tools: ToolConfig[];
+  imageUrl?: string;
 }
 
 interface ToolConfig {
@@ -29,6 +30,7 @@ interface ToolConfig {
   name: string;
   quantity: number;
   price: number;
+  imageUrl?: string;
 }
 
 export default function TechnicreaseQuoteBuilderPage() {
@@ -135,6 +137,7 @@ export default function TechnicreaseQuoteBuilderPage() {
           product_type: 'technicrease',
           parent_line_number: null,
           configuration: { width: config.width },
+          image_url: config.imageUrl,
         });
 
         // Add tools as child line items
@@ -147,6 +150,7 @@ export default function TechnicreaseQuoteBuilderPage() {
             discount_percent: 0,
             product_type: 'technicrease',
             parent_line_number: machineLineNumber,
+            image_url: tool.imageUrl,
           });
           lineNumber++;
         });

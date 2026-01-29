@@ -9,6 +9,7 @@ interface MachineConfig {
   width: string;
   price: number;
   tools: ToolConfig[];
+  imageUrl?: string;
 }
 
 interface ToolConfig {
@@ -17,6 +18,7 @@ interface ToolConfig {
   name: string;
   quantity: number;
   price: number;
+  imageUrl?: string;
 }
 
 interface Props {
@@ -30,12 +32,13 @@ export default function TechnicreaseConfigQuoteBuilder({ onConfigurationsChange,
 
   function startNewMachine() {
     setEditingConfig({
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       machineType: 'TECHNICREASE-V1',
       machineName: 'TechniCrease V1',
       width: '',
       price: 0,
       tools: [],
+      imageUrl: 'https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/products/TECHNICREASE-V1.png',
     });
     setShowMachineModal(true);
   }
@@ -79,26 +82,37 @@ export default function TechnicreaseConfigQuoteBuilder({ onConfigurationsChange,
       <div className="space-y-4">
         {configurations.map((config) => (
           <div key={config.id} className="border-2 border-gray-300 rounded-lg p-4 bg-gray-50">
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">
-                  {config.machineName} (Width: {config.width})
-                </h3>
-                <p className="text-xl font-bold text-orange-600">£{config.price.toLocaleString('en-GB')}</p>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => editMachine(config)}
-                  className="text-sm text-blue-600 hover:text-blue-700 font-semibold"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => removeMachine(config.id)}
-                  className="text-sm text-red-600 hover:text-red-700 font-semibold"
-                >
-                  Remove
-                </button>
+            <div className="flex items-start gap-4 mb-3">
+              {config.imageUrl && (
+                <img
+                  src={config.imageUrl}
+                  alt={config.machineName}
+                  className="w-24 h-24 object-cover rounded-lg border border-gray-300"
+                />
+              )}
+              <div className="flex-1">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">
+                      {config.machineName} (Width: {config.width})
+                    </h3>
+                    <p className="text-xl font-bold text-orange-600">£{config.price.toLocaleString('en-GB')}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => editMachine(config)}
+                      className="text-sm text-blue-600 hover:text-blue-700 font-semibold"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => removeMachine(config.id)}
+                      className="text-sm text-red-600 hover:text-red-700 font-semibold"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -107,14 +121,23 @@ export default function TechnicreaseConfigQuoteBuilder({ onConfigurationsChange,
               <div className="ml-6 mt-3 space-y-2">
                 <p className="text-sm font-semibold text-gray-700">Tools for this machine:</p>
                 {config.tools.map((tool) => (
-                  <div key={tool.id} className="flex items-center justify-between text-sm bg-white p-2 rounded border border-gray-200">
-                    <span className="text-gray-900">
-                      └ {tool.name} <span className="text-gray-600">(x{tool.quantity})</span>
-                    </span>
-                    <span className="font-semibold text-gray-900">
-                      £{tool.price.toLocaleString('en-GB')}
-                      {tool.price === 0 && <span className="ml-2 text-green-600 text-xs">(Included)</span>}
-                    </span>
+                  <div key={tool.id} className="flex items-center gap-3 text-sm bg-white p-2 rounded border border-gray-200">
+                    {tool.imageUrl && (
+                      <img
+                        src={tool.imageUrl}
+                        alt={tool.name}
+                        className="w-12 h-12 object-cover rounded border border-gray-200"
+                      />
+                    )}
+                    <div className="flex-1 flex items-center justify-between">
+                      <span className="text-gray-900">
+                        └ {tool.name} <span className="text-gray-600">(x{tool.quantity})</span>
+                      </span>
+                      <span className="font-semibold text-gray-900">
+                        £{tool.price.toLocaleString('en-GB')}
+                        {tool.price === 0 && <span className="ml-2 text-green-600 text-xs">(Included)</span>}
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -158,20 +181,34 @@ function MachineConfigModal({
   });
 
   const availableTools = [
-    { code: 'TECHNICREASE-MICROPERF', name: 'TechniCrease Microperf' },
-    { code: 'TECHNICREASE-TRICREASER', name: 'TechniCrease Tri-Creaser' },
-    { code: 'TECHNICREASE-SCORING', name: 'TechniCrease Scoring Device' },
+    {
+      code: 'TECHNICREASE-MICROPERF',
+      name: 'TechniCrease Microperf',
+      imageUrl: 'https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/products/TECHNICREASE-MICROPERF.jpg',
+    },
+    {
+      code: 'TECHNICREASE-TRICREASER',
+      name: 'TechniCrease Tri-Creaser',
+      imageUrl: 'https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/products/TECHNICREASE-TRICREASER.jpg',
+    },
+    {
+      code: 'TECHNICREASE-SCORING',
+      name: 'TechniCrease Scoring Device',
+      imageUrl: 'https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/products/TECHNICREASE-SCORING.jpg',
+    },
   ];
 
   function addTool() {
     if (!newTool.productCode || !newTool.name) return;
 
+    const selectedTool = availableTools.find(t => t.code === newTool.productCode);
     const tool: ToolConfig = {
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       productCode: newTool.productCode,
       name: newTool.name,
       quantity: newTool.quantity || 1,
       price: newTool.price || 0,
+      imageUrl: selectedTool?.imageUrl,
     };
 
     setLocalConfig({
@@ -214,11 +251,17 @@ function MachineConfigModal({
             <label className="block text-sm font-semibold text-gray-700 mb-2">Machine Type</label>
             <select
               value={localConfig.machineType}
-              onChange={(e) => setLocalConfig({
-                ...localConfig,
-                machineType: e.target.value as any,
-                machineName: e.target.value === 'TECHNICREASE-V1' ? 'TechniCrease V1' : 'TechniCrease V2',
-              })}
+              onChange={(e) => {
+                const isV1 = e.target.value === 'TECHNICREASE-V1';
+                setLocalConfig({
+                  ...localConfig,
+                  machineType: e.target.value as any,
+                  machineName: isV1 ? 'TechniCrease V1' : 'TechniCrease V2',
+                  imageUrl: isV1
+                    ? 'https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/products/TECHNICREASE-V1.png'
+                    : 'https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/products/TECHNICREASE-V2.webp',
+                });
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             >
               <option value="TECHNICREASE-V1">TechniCrease V1 - Webfed finishing system</option>
