@@ -636,6 +636,16 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             All Quotes
           </Link>
           <Link
+            href="/admin/technicrease-quotes"
+            className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+              pathname?.startsWith('/admin/technicrease-quotes')
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
+            }`}
+          >
+            ⚙️ TechniCrease Quotes
+          </Link>
+          <Link
             href="/admin/quote-builder/tools"
             className={`block px-4 py-2 text-sm font-[500] transition-colors ${
               pathname?.startsWith('/admin/quote-builder/tools')
@@ -654,6 +664,16 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
             }`}
           >
             📦 Consumables Quote Builder
+          </Link>
+          <Link
+            href="/admin/quote-builder/technicrease"
+            className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+              pathname?.startsWith('/admin/quote-builder/technicrease')
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
+            }`}
+          >
+            ⚙️ TechniCrease Quote Builder
           </Link>
         </div>
 
