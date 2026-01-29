@@ -36,13 +36,13 @@ export async function GET(request: NextRequest) {
     // But exclude dead customers from search results
     console.log('[companies/search] Running query...');
 
-    // Search across multiple fields: name, ID, city (customers only)
+    // Search across multiple fields: name, ID, city, postal code, address, sage code, owner, country (customers only)
     const searchPattern = `%${q}%`;
     const { data: companyData, error: companyError } = await supabase
       .from('companies')
-      .select('company_id, company_name, account_owner, status, country, billing_city, billing_postal_code')
+      .select('company_id, company_name, account_owner, status, country, billing_city, billing_postal_code, billing_address_line_1, sage_customer_code')
       .eq('type', 'customer')
-      .or(`company_name.ilike.${searchPattern},company_id.ilike.${searchPattern},billing_city.ilike.${searchPattern}`)
+      .or(`company_name.ilike.${searchPattern},company_id.ilike.${searchPattern},billing_city.ilike.${searchPattern},billing_postal_code.ilike.${searchPattern},billing_address_line_1.ilike.${searchPattern},sage_customer_code.ilike.${searchPattern},account_owner.ilike.${searchPattern},country.ilike.${searchPattern}`)
       .neq('status', 'dead')
       .order('company_name')
       .limit(15);
