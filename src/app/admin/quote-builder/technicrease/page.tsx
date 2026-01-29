@@ -48,6 +48,7 @@ export default function TechnicreaseQuoteBuilderPage() {
   const [quoteType, setQuoteType] = useState<'interactive' | 'static'>('static');
   const [isTestToken, setIsTestToken] = useState(false);
   const [freeShipping, setFreeShipping] = useState(false);
+  const [shippingTbc, setShippingTbc] = useState(false);
 
   const [generating, setGenerating] = useState(false);
   const [quoteUrl, setQuoteUrl] = useState('');
@@ -167,6 +168,7 @@ export default function TechnicreaseQuoteBuilderPage() {
           quote_type: quoteType,
           is_test: isTestToken,
           free_shipping: freeShipping,
+          shipping_tbc: shippingTbc,
           requires_approval: true,
         }),
       });
@@ -286,11 +288,30 @@ export default function TechnicreaseQuoteBuilderPage() {
                   type="checkbox"
                   id="freeShipping"
                   checked={freeShipping}
-                  onChange={(e) => setFreeShipping(e.target.checked)}
+                  onChange={(e) => {
+                    setFreeShipping(e.target.checked);
+                    if (e.target.checked) setShippingTbc(false);
+                  }}
+                  disabled={shippingTbc}
                   className="w-4 h-4"
                 />
                 <label htmlFor="freeShipping" className="text-sm font-semibold text-gray-700">
                   Free Shipping
+                </label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="shippingTbc"
+                  checked={shippingTbc}
+                  onChange={(e) => {
+                    setShippingTbc(e.target.checked);
+                    if (e.target.checked) setFreeShipping(false);
+                  }}
+                  className="w-4 h-4"
+                />
+                <label htmlFor="shippingTbc" className="text-sm font-semibold text-gray-700">
+                  Shipping TBC (To Be Confirmed)
                 </label>
               </div>
               <div className="flex items-center gap-2">

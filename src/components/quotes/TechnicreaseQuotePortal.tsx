@@ -65,6 +65,7 @@ export function TechnicreaseQuotePortal({
   const totalAmount = Number(quote.total_amount) || 0;
   const shippingAmount = quote.free_shipping ? 0 : 0;
   const vatAmount = 0;
+  const isShippingTbc = quote.shipping_tbc || false;
 
   // Group line items by parent (machines with their tools)
   const machineGroups = lineItems
@@ -256,9 +257,12 @@ export function TechnicreaseQuotePortal({
                     </div>
                     <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0] max-h-[120px] overflow-y-auto">
                       {shippingAddresses.length > 0 ? (
-                        shippingAddresses.map((addr) => (
-                          <div key={addr.address_id} className="text-[11px] text-[#334155] mb-1">
-                            {addr.city}, {addr.country}
+                        shippingAddresses.map((addr, idx) => (
+                          <div key={addr.address_id} className={`text-[11px] text-[#334155] ${idx > 0 ? 'mt-2 pt-2 border-t border-[#e2e8f0]' : ''}`}>
+                            <div className="font-[500] text-[#1e293b]">{addr.address_line_1}</div>
+                            {addr.address_line_2 && <div>{addr.address_line_2}</div>}
+                            <div>{addr.city}, {addr.postal_code}</div>
+                            <div className="font-[500]">{addr.country}</div>
                           </div>
                         ))
                       ) : (
@@ -357,7 +361,9 @@ export function TechnicreaseQuotePortal({
 
                   <div className="flex justify-between items-center">
                     <span className="text-[15px] text-[#999] font-[500]">Shipping</span>
-                    <span className="font-[600] text-[16px]">FREE</span>
+                    <span className="font-[600] text-[16px]">
+                      {isShippingTbc ? 'TBC' : 'FREE'}
+                    </span>
                   </div>
 
                   <div className="flex justify-between items-center pb-4 border-b border-[#2a2a2a]">
