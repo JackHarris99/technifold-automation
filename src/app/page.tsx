@@ -111,6 +111,26 @@ export default async function HomePage() {
           </div>
         </section>
 
+        {/* TechniCrease Guide CTA */}
+        <section className="py-8 bg-gradient-to-r from-orange-500 to-orange-600">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="text-white">
+                <h2 className="text-2xl font-bold mb-2">The Complete TechniCrease Guide</h2>
+                <p className="text-orange-100">
+                  Learn everything about TechniCrease technology, applications, and proven results
+                </p>
+              </div>
+              <a
+                href="/technicrease"
+                className="bg-white text-orange-600 px-8 py-3 font-bold hover:bg-gray-100 transition-colors whitespace-nowrap shadow-lg"
+              >
+                View Guide →
+              </a>
+            </div>
+          </div>
+        </section>
+
         {/* Rolling Manufacturer Logos Banner */}
         <LogoBanner />
 
