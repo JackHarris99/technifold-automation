@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     const company_id = payload.company_id;
 
     // IDEMPOTENCY CHECK: If this is a quote request, check if invoice already exists
-    // Also fetch free_shipping flag for later use
+    // Also fetch free_shipping and requires_approval flags for later use
     let quoteFreeShipping = false;
     if (payload.quote_id && payload.object_type === 'quote') {
       console.log(`[create-invoice-interactive] Checking idempotency for quote ${payload.quote_id}`);
@@ -113,11 +113,32 @@ export async function POST(request: NextRequest) {
       const supabase = getSupabaseClient();
       const { data: existingQuote } = await supabase
         .from('quotes')
-        .select('quote_id, invoice_id, accepted_at, status, free_shipping')
+        .select('quote_id, invoice_id, accepted_at, status, free_shipping, requires_approval, approval_status')
         .eq('quote_id', payload.quote_id)
         .single();
 
       quoteFreeShipping = existingQuote?.free_shipping || false;
+
+      // CHECK FOR APPROVAL REQUIREMENT (TechniCrease quotes)
+      if (existingQuote?.requires_approval && existingQuote.approval_status !== 'approved') {
+        console.log(`[create-invoice-interactive] Quote ${payload.quote_id} requires approval - setting pending_approval status`);
+
+        // Update quote to pending approval instead of creating invoice
+        await supabase
+          .from('quotes')
+          .update({
+            status: 'accepted',
+            approval_status: 'pending_approval',
+            accepted_at: new Date().toISOString(),
+          })
+          .eq('quote_id', payload.quote_id);
+
+        return NextResponse.json({
+          success: true,
+          requires_approval: true,
+          message: 'Quote submitted for approval. Our team will review and contact you shortly.',
+        });
+      }
 
       if (existingQuote?.invoice_id) {
         // Invoice already exists - return it instead of creating duplicate
