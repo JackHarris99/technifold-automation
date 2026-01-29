@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import PortalAddressCollectionModal from '../portals/PortalAddressCollectionModal';
 
 interface LineItem {
   quote_item_id: string;
@@ -19,12 +21,26 @@ interface LineItem {
 interface TechnicreaseQuotePortalProps {
   quote: any;
   lineItems: LineItem[];
-  company: any;
-  contact: any;
+  company: {
+    company_id: string;
+    company_name: string;
+    billing_address_line_1?: string;
+    billing_address_line_2?: string;
+    billing_city?: string;
+    billing_state_province?: string;
+    billing_postal_code?: string;
+    billing_country?: string;
+    vat_number?: string;
+  };
+  contact: {
+    contact_id: string;
+    full_name: string;
+    email: string;
+  } | null;
   token: string;
   isTest: boolean;
   readOnly?: boolean;
-  previewMode?: 'admin';
+  previewMode?: 'admin' | 'original';
 }
 
 export function TechnicreaseQuotePortal({
@@ -47,8 +63,8 @@ export function TechnicreaseQuotePortal({
   // Use totals directly from quote (no recalculation)
   const subtotal = Number(quote.subtotal) || 0;
   const totalAmount = Number(quote.total_amount) || 0;
-  const shippingAmount = quote.free_shipping ? 0 : 0; // TechniCrease typically has free shipping
-  const vatAmount = 0; // VAT calculated on backend
+  const shippingAmount = quote.free_shipping ? 0 : 0;
+  const vatAmount = 0;
 
   // Group line items by parent (machines with their tools)
   const machineGroups = lineItems
@@ -62,18 +78,16 @@ export function TechnicreaseQuotePortal({
   useEffect(() => {
     const fetchAddresses = async () => {
       try {
-        const response = await fetch('/api/portal/shipping-addresses', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token }),
-        });
-
+        const response = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
         const data = await response.json();
+
         if (data.success && data.addresses) {
           setShippingAddresses(data.addresses);
-          const defaultAddr = data.addresses.find((a: any) => a.is_default);
-          if (defaultAddr) {
-            setSelectedAddressId(defaultAddr.shipping_address_id);
+          const defaultAddress = data.addresses.find((addr: any) => addr.is_default);
+          if (defaultAddress) {
+            setSelectedAddressId(defaultAddress.address_id);
+          } else if (data.addresses.length > 0) {
+            setSelectedAddressId(data.addresses[0].address_id);
           }
         }
       } catch (error) {
@@ -107,7 +121,6 @@ export function TechnicreaseQuotePortal({
       const data = await response.json();
 
       if (data.requires_approval) {
-        // TechniCrease quote submitted for approval
         router.push('/quote/submitted-approval');
       } else if (data.success) {
         router.push('/quote/success');
@@ -123,158 +136,277 @@ export function TechnicreaseQuotePortal({
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-orange-600 to-orange-500 py-8">
-        <div className="max-w-5xl mx-auto px-6">
-          <h1 className="text-3xl font-bold mb-2">TechniCrease Quote</h1>
-          <p className="text-orange-100">
-            Custom configured TechniCrease finishing system for {company.company_name}
-          </p>
+    <>
+      <div className="min-h-screen bg-[#f8fafc]">
+        {/* Test Mode Banner */}
+        {isTest && (
+          <div className="bg-yellow-50 border-b-2 border-yellow-400 px-6 py-3">
+            <div className="max-w-[1600px] mx-auto">
+              <p className="text-yellow-800 text-sm font-semibold">⚠️ TEST QUOTE - Not for production use</p>
+            </div>
+          </div>
+        )}
+
+        {/* Admin Preview Banner */}
+        {previewMode === 'admin' && (
+          <div className="bg-blue-50 border-b-2 border-blue-400 px-6 py-3">
+            <div className="max-w-[1600px] mx-auto">
+              <p className="text-blue-800 text-sm font-semibold">👁️ Admin Preview - Customers cannot see this banner</p>
+            </div>
+          </div>
+        )}
+
+        {/* Top Branding Bar */}
+        <div className="bg-white border-b border-[#e8e8e8]">
+          <div className="max-w-[1600px] mx-auto px-6 py-4">
+            <div className="flex items-center justify-center gap-8">
+              <div className="relative h-10 w-32">
+                <Image
+                  src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/technifold.png"
+                  alt="Technifold"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <div className="relative h-10 w-32">
+                <Image
+                  src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/technicrease.png"
+                  alt="Technicrease"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <div className="relative h-10 w-32">
+                <Image
+                  src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/creasestream.png"
+                  alt="Creasestream"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content - Quote Items */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Test Mode Banner */}
-            {isTest && (
-              <div className="bg-yellow-500/10 border-2 border-yellow-500 rounded-lg p-4">
-                <p className="text-yellow-500 font-semibold">⚠️ TEST QUOTE - Not for production use</p>
-              </div>
-            )}
+        <div className="max-w-[1600px] mx-auto px-6 py-12">
+          {/* Main Grid */}
+          <div className="grid grid-cols-12 gap-8">
+            {/* Main Content Area */}
+            <div className="col-span-7 space-y-4">
+              {/* Customer Information Card */}
+              <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8] p-6">
+                <div className="mb-6">
+                  <h1 className="text-[28px] font-[600] text-[#1e40af] mb-1 tracking-[-0.02em] leading-[1.2]">
+                    {company.company_name}
+                  </h1>
+                  <p className="text-[13px] text-[#334155] font-[400]">
+                    TechniCrease machine quotation
+                  </p>
+                </div>
 
-            {/* Admin Preview Banner */}
-            {previewMode === 'admin' && (
-              <div className="bg-blue-500/10 border-2 border-blue-500 rounded-lg p-4">
-                <p className="text-blue-400 font-semibold">👁️ Admin Preview - Customers cannot see this banner</p>
-              </div>
-            )}
-
-            {/* Quote Items Card */}
-            <div className="bg-[#1a1a1a] rounded-lg p-6">
-              <h2 className="text-xl font-bold mb-4">Quote Items</h2>
-              <p className="text-sm text-gray-400 mb-6">
-                {machineGroups.length} machine{machineGroups.length !== 1 ? 's' : ''} configured
-              </p>
-
-              <div className="space-y-6">
-                {machineGroups.map(({ machine, tools }, index) => (
-                  <div key={machine.quote_item_id} className="border border-gray-800 rounded-lg p-4">
-                    {/* Machine */}
-                    <div className="flex gap-4 mb-4">
-                      {machine.image_url && (
-                        <img
-                          src={machine.image_url}
-                          alt={machine.description}
-                          className="w-24 h-24 object-cover rounded-lg border border-gray-700"
-                        />
-                      )}
-                      <div className="flex-1">
-                        <h3 className="font-bold text-lg text-white">{machine.description}</h3>
-                        <p className="text-sm text-gray-400 mb-2">{machine.product_code}</p>
-                        {machine.configuration?.width && (
-                          <p className="text-sm text-orange-400">Width: {machine.configuration.width}</p>
-                        )}
-                        <div className="mt-2">
-                          <span className="text-2xl font-bold text-orange-500">
-                            £{machine.unit_price.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
-                          </span>
-                        </div>
+                <div className="grid grid-cols-3 gap-4">
+                  {/* Contact Info */}
+                  <div>
+                    <div className="text-[11px] font-[600] text-[#475569] mb-2 uppercase tracking-wider">Contact</div>
+                    {contact ? (
+                      <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                        <div className="text-[13px] text-[#1e293b] font-[600]">{contact.full_name}</div>
+                        <div className="text-[12px] text-[#334155] mt-0.5">{contact.email}</div>
                       </div>
-                    </div>
-
-                    {/* Tools for this machine */}
-                    {tools.length > 0 && (
-                      <div className="ml-6 mt-4 space-y-2 border-l-2 border-gray-800 pl-4">
-                        <p className="text-sm font-semibold text-gray-400 mb-2">Included Tools:</p>
-                        {tools.map(tool => (
-                          <div key={tool.quote_item_id} className="flex items-center gap-3 bg-[#0a0a0a] p-3 rounded-lg">
-                            {tool.image_url && (
-                              <img
-                                src={tool.image_url}
-                                alt={tool.description}
-                                className="w-12 h-12 object-cover rounded border border-gray-700"
-                              />
-                            )}
-                            <div className="flex-1">
-                              <p className="font-semibold text-white">{tool.description}</p>
-                              <p className="text-xs text-gray-500">{tool.product_code}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm text-gray-400">Qty: {tool.quantity}</p>
-                              <p className="font-semibold text-white">
-                                {tool.unit_price === 0 ? (
-                                  <span className="text-green-500">Included</span>
-                                ) : (
-                                  `£${tool.unit_price.toLocaleString('en-GB', { minimumFractionDigits: 2 })}`
-                                )}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
+                    ) : (
+                      <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                        <p className="text-[12px] text-[#475569] italic">No contact assigned</p>
                       </div>
                     )}
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
 
-          {/* Sidebar - Order Summary */}
-          <div className="lg:col-span-1">
-            <div className="bg-[#1a1a1a] rounded-lg p-6 sticky top-6">
-              <h2 className="text-lg font-bold mb-4">Order Summary</h2>
+                  {/* Billing Address */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider">Billing Address</div>
+                      {!readOnly && (
+                        <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
+                      )}
+                    </div>
+                    {company.billing_address_line_1 ? (
+                      <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                        <div className="text-[12px] font-[500] text-[#1e293b]">{company.billing_address_line_1}</div>
+                        {company.billing_address_line_2 && <div className="text-[11px] text-[#334155]">{company.billing_address_line_2}</div>}
+                        <div className="text-[11px] text-[#334155]">{company.billing_city}{company.billing_state_province ? `, ${company.billing_state_province}` : ''}</div>
+                        <div className="text-[11px] text-[#334155]">{company.billing_postal_code}</div>
+                        <div className="text-[12px] font-[500] text-[#1e293b] mt-1">{company.billing_country}</div>
+                      </div>
+                    ) : (
+                      <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                        <p className="text-[11px] text-red-600 italic">No billing address</p>
+                      </div>
+                    )}
+                  </div>
 
-              <div className="space-y-3 mb-6">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Subtotal</span>
-                  <span className="font-semibold">£{subtotal.toLocaleString('en-GB', { minimumFractionDigits: 2 })}</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Shipping</span>
-                  <span className="font-semibold text-green-500">FREE</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-gray-400">VAT</span>
-                  <span className="font-semibold">£{vatAmount.toFixed(2)}</span>
-                </div>
-
-                <div className="border-t border-gray-800 pt-3 mt-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-bold">Final Total</span>
-                    <span className="text-2xl font-bold text-orange-500">
-                      £{totalAmount.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
-                    </span>
+                  {/* Delivery Addresses */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider">Delivery Addresses</div>
+                      {!readOnly && (
+                        <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">+ Add</button>
+                      )}
+                    </div>
+                    <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0] max-h-[120px] overflow-y-auto">
+                      {shippingAddresses.length > 0 ? (
+                        shippingAddresses.map((addr) => (
+                          <div key={addr.address_id} className="text-[11px] text-[#334155] mb-1">
+                            {addr.city}, {addr.country}
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-[11px] text-[#475569] italic">No delivery addresses</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {readOnly ? (
-                <div className="w-full py-4 bg-gray-700 text-gray-300 rounded-lg text-center border-2 border-dashed border-gray-600">
-                  {previewMode === 'admin' ? 'Customers will see "Request Invoice" button here' : 'Quote Accepted - Invoice Sent'}
-                </div>
-              ) : (
-                <>
-                  <button
-                    onClick={handleRequestInvoice}
-                    disabled={isSubmitting || (shippingAddresses.length > 0 && !selectedAddressId)}
-                    className="w-full bg-orange-600 hover:bg-orange-700 text-white py-4 rounded-lg font-bold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSubmitting ? 'Submitting...' : 'Request Invoice'}
-                  </button>
-                  <p className="text-xs text-gray-500 text-center mt-3">
-                    This quote requires approval. Our team will review and contact you shortly.
+              {/* Quote Items Card */}
+              <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8] p-6">
+                <div className="mb-4">
+                  <div className="text-[12px] font-[700] text-[#475569] uppercase tracking-[0.05em]">Quote Items</div>
+                  <p className="text-[13px] text-[#64748b] mt-1">
+                    {machineGroups.length} machine{machineGroups.length !== 1 ? 's' : ''} quoted
                   </p>
-                </>
-              )}
+                </div>
+
+                <div className="space-y-6">
+                  {machineGroups.map(({ machine, tools }) => (
+                    <div key={machine.quote_item_id} className="border border-[#e2e8f0] rounded-[12px] p-4 bg-[#f8fafc]">
+                      {/* Machine */}
+                      <div className="flex gap-4 mb-4">
+                        {machine.image_url && (
+                          <div className="flex-shrink-0">
+                            <Image
+                              src={machine.image_url}
+                              alt={machine.description}
+                              width={96}
+                              height={96}
+                              className="rounded-[10px] border border-[#e2e8f0] object-cover"
+                            />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <h3 className="text-[16px] font-[600] text-[#1e293b] mb-1">{machine.description}</h3>
+                          <p className="text-[12px] text-[#64748b] mb-2">{machine.product_code}</p>
+                          {machine.configuration?.width && (
+                            <p className="text-[13px] text-[#0ea5e9] font-[500] mb-2">Width: {machine.configuration.width}</p>
+                          )}
+                          <div className="text-[20px] font-[700] text-[#1e293b]">
+                            £{machine.unit_price.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Tools for this machine */}
+                      {tools.length > 0 && (
+                        <div className="ml-6 mt-4 pl-4 border-l-2 border-[#cbd5e1] space-y-2">
+                          <p className="text-[11px] font-[600] text-[#64748b] uppercase tracking-wider mb-2">Included Tools</p>
+                          {tools.map(tool => (
+                            <div key={tool.quote_item_id} className="flex items-center gap-3 bg-white p-3 rounded-[10px] border border-[#e2e8f0]">
+                              {tool.image_url && (
+                                <Image
+                                  src={tool.image_url}
+                                  alt={tool.description}
+                                  width={48}
+                                  height={48}
+                                  className="rounded-[8px] border border-[#e2e8f0] object-cover"
+                                />
+                              )}
+                              <div className="flex-1">
+                                <p className="text-[13px] font-[600] text-[#1e293b]">{tool.description}</p>
+                                <p className="text-[11px] text-[#64748b]">{tool.product_code}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-[12px] text-[#64748b]">Qty: {tool.quantity}</p>
+                                <p className="text-[14px] font-[600] text-[#1e293b]">
+                                  {tool.unit_price === 0 ? (
+                                    <span className="text-[#16a34a]">Included</span>
+                                  ) : (
+                                    `£${tool.unit_price.toLocaleString('en-GB', { minimumFractionDigits: 2 })}`
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Sidebar - Order Summary */}
+            <div className="col-span-5">
+              <div className="bg-[#0a0a0a] rounded-[20px] p-8 text-white shadow-[0_16px_48px_rgba(0,0,0,0.24)] sticky top-6">
+                <div className="text-[12px] font-[700] text-[#999] uppercase tracking-[0.05em] mb-6">Order Summary</div>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[15px] text-[#999] font-[500]">Subtotal</span>
+                    <span className="font-[700] text-[17px] tracking-[-0.01em]">£{subtotal.toFixed(2)}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-[15px] text-[#999] font-[500]">Shipping</span>
+                    <span className="font-[600] text-[16px]">FREE</span>
+                  </div>
+
+                  <div className="flex justify-between items-center pb-4 border-b border-[#2a2a2a]">
+                    <span className="text-[15px] text-[#999] font-[500]">VAT</span>
+                    <span className="font-[600] text-[16px]">£{vatAmount.toFixed(2)}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center pt-4 border-t border-[#2a2a2a]">
+                    <span className="text-[17px] font-[700]">Final Total</span>
+                    <span className="font-[800] text-[28px] tracking-[-0.02em] text-[#16a34a]">£{totalAmount.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                {readOnly ? (
+                  <div className="w-full mt-6 py-4 bg-gray-700 text-gray-300 rounded-[14px] text-[15px] font-[700] text-center border-2 border-dashed border-gray-600">
+                    {previewMode === 'admin' ? 'Customers will see "Request Invoice" button here' : 'Quote Accepted - Invoice Sent'}
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleRequestInvoice}
+                      disabled={isSubmitting}
+                      className="w-full mt-6 bg-[#16a34a] hover:bg-[#15803d] text-white py-4 rounded-[14px] text-[15px] font-[700] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_16px_rgba(22,163,74,0.3)]"
+                    >
+                      {isSubmitting ? 'Submitting for Approval...' : 'Request Invoice'}
+                    </button>
+                    <p className="text-[11px] text-[#999] text-center mt-3">
+                      This quote requires approval. Our team will review and contact you shortly.
+                    </p>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Address Modal */}
+      {showAddressModal && (
+        <PortalAddressCollectionModal
+          token={token}
+          onClose={() => setShowAddressModal(false)}
+          onSuccess={() => {
+            setShowAddressModal(false);
+            // Refresh page to update addresses
+            window.location.reload();
+          }}
+        />
+      )}
+    </>
   );
 }
