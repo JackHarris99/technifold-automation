@@ -10,6 +10,7 @@ import { verifyToken, getCompanyQueryField } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 import { StaticQuotePortal } from '@/components/quotes/StaticQuotePortal';
 import { InteractiveQuotePortal } from '@/components/quotes/InteractiveQuotePortal';
+import { TechnicreaseQuotePortal } from '@/components/quotes/TechnicreaseQuotePortal';
 import { notifyQuoteViewed } from '@/lib/salesNotifications';
 
 interface QuoteViewerProps {
@@ -224,7 +225,7 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
       .catch(err => console.error('[Quote] Tracking failed:', err));
   }
 
-  // 8. Render correct portal component based on quote_type
+  // 8. Render correct portal component based on quote_type and product_type
   const portalProps = {
     quote,
     lineItems,
@@ -236,8 +237,13 @@ export default async function QuoteViewerPage({ params }: QuoteViewerProps) {
     previewMode: isInternalView ? ('admin' as const) : undefined,
   };
 
-  // Load StaticQuotePortal for static quotes, InteractiveQuotePortal for interactive
-  if (quote.quote_type === 'static') {
+  // Check if this is a TechniCrease quote
+  const isTechnicreaseQuote = lineItems.some(item => item.product_type === 'technicrease');
+
+  if (isTechnicreaseQuote) {
+    // Use TechniCrease-specific portal (no quantity changes, hierarchical display)
+    return <TechnicreaseQuotePortal {...portalProps} />;
+  } else if (quote.quote_type === 'static') {
     return <StaticQuotePortal {...portalProps} />;
   } else {
     return <InteractiveQuotePortal {...portalProps} />;
