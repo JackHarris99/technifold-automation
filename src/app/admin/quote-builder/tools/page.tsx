@@ -372,6 +372,12 @@ export default function ToolsQuoteBuilderPage() {
     ));
   }
 
+  function updatePrice(productCode: string, unit_price: number) {
+    setLineItems(lineItems.map(li =>
+      li.product_code === productCode ? { ...li, unit_price } : li
+    ));
+  }
+
   function removeLineItem(productCode: string) {
     setLineItems(lineItems.filter(li => li.product_code !== productCode));
   }
@@ -967,15 +973,29 @@ export default function ToolsQuoteBuilderPage() {
                               </span>
                             )}
                           </div>
-                          <div>
-                            <label className="text-[12px] text-[#666] font-[500] block mb-1">Quantity</label>
-                            <input
-                              type="number"
-                              min="0"
-                              value={item.quantity}
-                              onChange={(e) => updateQuantity(item.product_code, parseInt(e.target.value) || 0)}
-                              className="w-24 px-3 py-1.5 border border-[#e8e8e8] rounded-[8px] text-[14px] text-[#0a0a0a] font-[500] focus:outline-none focus:ring-2 focus:ring-[#0a0a0a]"
-                            />
+                          <div className="flex gap-4">
+                            <div>
+                              <label className="text-[12px] text-[#666] font-[500] block mb-1">Unit Price (£)</label>
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={item.unit_price}
+                                onChange={(e) => updatePrice(item.product_code, parseFloat(e.target.value) || 0)}
+                                className="w-28 px-3 py-1.5 border border-[#e8e8e8] rounded-[8px] text-[14px] text-[#0a0a0a] font-[500] focus:outline-none focus:ring-2 focus:ring-[#0a0a0a]"
+                                placeholder="0.00"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[12px] text-[#666] font-[500] block mb-1">Quantity</label>
+                              <input
+                                type="number"
+                                min="0"
+                                value={item.quantity}
+                                onChange={(e) => updateQuantity(item.product_code, parseInt(e.target.value) || 0)}
+                                className="w-24 px-3 py-1.5 border border-[#e8e8e8] rounded-[8px] text-[14px] text-[#0a0a0a] font-[500] focus:outline-none focus:ring-2 focus:ring-[#0a0a0a]"
+                              />
+                            </div>
                           </div>
                         </div>
                         <div className="text-right">
