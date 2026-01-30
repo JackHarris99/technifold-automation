@@ -429,6 +429,12 @@ export default function QuotesPage() {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
+                      <Link
+                        href={`/admin/quotes/${quote.quote_id}`}
+                        className="px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
+                      >
+                        📋 View Details
+                      </Link>
                       <a
                         href={quote.preview_url}
                         target="_blank"
