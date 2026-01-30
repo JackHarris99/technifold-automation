@@ -403,8 +403,9 @@ export async function POST(request: NextRequest) {
     // Create or retrieve Stripe Customer
     let stripeCustomerId = company.stripe_customer_id;
 
+    // Convert null to undefined for Stripe compatibility
     const billingAddress = company.billing_address_line_1 ? {
-      line1: company.billing_address_line_1,
+      line1: company.billing_address_line_1 || undefined,
       line2: company.billing_address_line_2 || undefined,
       city: company.billing_city || undefined,
       state: company.billing_state_province || undefined,
@@ -412,10 +413,10 @@ export async function POST(request: NextRequest) {
       country: company.billing_country || undefined,
     } : undefined;
 
-    const shippingDetails = shippingAddress ? {
+    const shippingDetails = shippingAddress?.address_line_1 ? {
       name: company.company_name,
       address: {
-        line1: shippingAddress.address_line_1,
+        line1: shippingAddress.address_line_1 || undefined,
         line2: shippingAddress.address_line_2 || undefined,
         city: shippingAddress.city || undefined,
         state: shippingAddress.state_province || undefined,
