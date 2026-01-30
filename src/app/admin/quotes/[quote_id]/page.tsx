@@ -221,11 +221,17 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
 
   async function handleResendQuote() {
     if (!quote || !quote.contact_email) {
-      alert('Cannot resend: Contact email is missing');
+      alert('Cannot send quote: Contact email is missing. Please assign a contact to this quote first.');
       return;
     }
 
-    if (!confirm(`Resend quote to ${quote.contact_email}?`)) {
+    if (!quote.contact_id) {
+      alert('Cannot send quote: No contact assigned. Please assign a contact to this quote first.');
+      return;
+    }
+
+    const action = quote.sent_at ? 'Resend' : 'Send';
+    if (!confirm(`${action} quote to ${quote.contact_email}?`)) {
       return;
     }
 
@@ -245,14 +251,14 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
       const data = await response.json();
 
       if (data.success) {
-        alert(`✓ Quote resent successfully to ${quote.contact_email}`);
+        alert(`✓ Quote ${quote.sent_at ? 'resent' : 'sent'} successfully to ${quote.contact_email}`);
         fetchQuoteDetail(); // Refresh to update sent_at timestamp
       } else {
-        alert(`Failed to resend: ${data.error || 'Unknown error'}`);
+        alert(`Failed to ${action.toLowerCase()}: ${data.error || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error('Failed to resend quote:', error);
-      alert('Error resending quote');
+      console.error('Failed to send quote:', error);
+      alert('Error sending quote');
     } finally {
       setResendingEmail(false);
     }
@@ -559,7 +565,7 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
                 className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 title={!quote.contact_email ? 'Contact email required' : ''}
               >
-                {resendingEmail ? '⏳ Sending...' : '📧 Resend Quote'}
+                {resendingEmail ? '⏳ Sending...' : quote.sent_at ? '📧 Resend Quote' : '📧 Send Quote'}
               </button>
               <button
                 onClick={handleMarkAsWon}
