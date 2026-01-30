@@ -47,6 +47,12 @@ export async function POST(
     const { order_id } = await context.params;
     const body = await request.json() as ApprovalData;
 
+    // Validate request body
+    if (!body.item_statuses || typeof body.item_statuses !== 'object') {
+      console.error('[Approve Order] Missing or invalid item_statuses in request body:', body);
+      return NextResponse.json({ error: 'Invalid request: item_statuses is required' }, { status: 400 });
+    }
+
     const supabase = getSupabaseClient();
 
     // Fetch order
@@ -82,9 +88,16 @@ export async function POST(
     }
 
     // Filter in-stock items
-    const inStockItems = items.filter(item => body.item_statuses[item.item_id] === 'in_stock');
+    const inStockItems = items.filter(item => {
+      if (!body.item_statuses.hasOwnProperty(item.item_id)) {
+        console.warn(`[Approve Order] item_id ${item.item_id} (product: ${item.product_code}) not found in item_statuses`);
+        return false;
+      }
+      return body.item_statuses[item.item_id] === 'in_stock';
+    });
 
     if (inStockItems.length === 0) {
+      console.error('[Approve Order] No in-stock items found. item_statuses:', body.item_statuses, 'items:', items.map(i => ({ item_id: i.item_id, product_code: i.product_code })));
       return NextResponse.json({ error: 'No items marked as in stock' }, { status: 400 });
     }
 
@@ -296,6 +309,12 @@ export async function POST(
       // 10. Update item statuses
       for (const item of items) {
         const status = body.item_statuses[item.item_id];
+
+        if (!status) {
+          console.warn(`[Approve Order] Skipping item ${item.item_id} - no status provided`);
+          continue;
+        }
+
         const updateData: any = { status };
 
         if (status === 'in_stock') {
