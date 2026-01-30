@@ -65,10 +65,19 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
   // Activity logging state
   const [showActivityModal, setShowActivityModal] = useState(false);
   const [activityType, setActivityType] = useState<'call' | 'visit' | 'email' | 'followup' | 'meeting'>('call');
+  const [resendingEmail, setResendingEmail] = useState(false);
+  const [quoteUrl, setQuoteUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetchQuoteDetail();
   }, [quote_id]);
+
+  // Generate quote URL when quote data is loaded
+  useEffect(() => {
+    if (quote && quote.company_id && quote.contact_id) {
+      generateQuoteUrl();
+    }
+  }, [quote]);
 
   async function fetchQuoteDetail() {
     try {
@@ -184,6 +193,75 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
 
   function handleActivitySuccess() {
     fetchQuoteDetail(); // Refresh to show new activity in timeline
+  }
+
+  async function generateQuoteUrl() {
+    if (!quote) return;
+
+    try {
+      const response = await fetch('/api/admin/quotes/regenerate-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          quote_id: quote.quote_id,
+          company_id: quote.company_id,
+          contact_id: quote.contact_id,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setQuoteUrl(data.url);
+      }
+    } catch (error) {
+      console.error('Failed to generate quote URL:', error);
+    }
+  }
+
+  async function handleResendQuote() {
+    if (!quote || !quote.contact_email) {
+      alert('Cannot resend: Contact email is missing');
+      return;
+    }
+
+    if (!confirm(`Resend quote to ${quote.contact_email}?`)) {
+      return;
+    }
+
+    setResendingEmail(true);
+    try {
+      const response = await fetch('/api/admin/quote/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company_id: quote.company_id,
+          contact_id: quote.contact_id,
+          quote_id: quote.quote_id,
+          quote_url: quoteUrl,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert(`✓ Quote resent successfully to ${quote.contact_email}`);
+        fetchQuoteDetail(); // Refresh to update sent_at timestamp
+      } else {
+        alert(`Failed to resend: ${data.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Failed to resend quote:', error);
+      alert('Error resending quote');
+    } finally {
+      setResendingEmail(false);
+    }
+  }
+
+  function copyQuoteUrl() {
+    if (quoteUrl) {
+      navigator.clipboard.writeText(quoteUrl);
+      alert('✓ Quote link copied to clipboard!');
+    }
   }
 
   function getStatusBadge() {
@@ -448,6 +526,25 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
             <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
 
             <div className="space-y-2">
+              {quoteUrl && (
+                <div className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="text-xs font-semibold text-gray-700 mb-2">Quote Link</div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={quoteUrl}
+                      readOnly
+                      className="flex-1 px-2 py-1 text-xs bg-white border border-gray-300 rounded font-mono"
+                    />
+                    <button
+                      onClick={copyQuoteUrl}
+                      className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </div>
+              )}
               <Link
                 href={`/admin/quotes/${quote_id}/preview`}
                 target="_blank"
@@ -455,8 +552,13 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
               >
                 🔍 Preview as Customer
               </Link>
-              <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">
-                📧 Resend Quote
+              <button
+                onClick={handleResendQuote}
+                disabled={resendingEmail || !quote.contact_email}
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                title={!quote.contact_email ? 'Contact email required' : ''}
+              >
+                {resendingEmail ? '⏳ Sending...' : '📧 Resend Quote'}
               </button>
               <button
                 onClick={handleMarkAsWon}
