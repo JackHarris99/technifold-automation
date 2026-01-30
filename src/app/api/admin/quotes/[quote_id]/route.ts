@@ -65,7 +65,7 @@ export async function GET(
     if (quote.contact_id) {
       const { data: contactData } = await supabase
         .from('contacts')
-        .select('contact_name, email')
+        .select('full_name, email')
         .eq('contact_id', quote.contact_id)
         .single();
       contact = contactData;
@@ -147,7 +147,7 @@ export async function GET(
     const enrichedQuote = {
       ...quote,
       company_name: company?.company_name || 'Unknown Company',
-      contact_name: contact?.contact_name || null,
+      contact_name: contact?.full_name || null,
       contact_email: contact?.email || null,
       created_by_name: creator?.full_name || quote.created_by,
       line_items: lineItems || [],
