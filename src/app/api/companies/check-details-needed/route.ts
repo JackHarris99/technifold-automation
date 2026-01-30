@@ -44,20 +44,11 @@ async function checkCompanyDetails(companyId: string) {
     .eq('is_default', true)
     .single();
 
-  // Check what's missing
-  const hasBillingAddress = !!(
-    company.billing_address_line_1 &&
-    company.billing_city &&
-    company.billing_postal_code &&
-    company.billing_country
-  );
+  // Check what's missing - ONLY REQUIRE COUNTRY (for VAT and shipping calculations)
+  // All other fields are optional - can be completed before shipping
+  const hasBillingAddress = !!(company.billing_country);
 
-  const hasShippingAddress = !!(
-    shippingAddress?.address_line_1 &&
-    shippingAddress?.city &&
-    shippingAddress?.postal_code &&
-    shippingAddress?.country
-  );
+  const hasShippingAddress = !!(shippingAddress?.country);
 
   // Check if VAT number is needed (EU companies)
   const billingCountry = company.billing_country || company.country || '';

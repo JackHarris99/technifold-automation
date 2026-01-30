@@ -253,9 +253,9 @@ export default function AddressCollectionModal({
     >
       <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-semibold">Company Address Required</h2>
+          <h2 className="text-2xl font-semibold">Company Country Required</h2>
           <p className="text-sm text-gray-800 mt-2">
-            Before creating your invoice, we need your company's billing address to calculate tax and shipping correctly.
+            Before creating your invoice, we need your company's country to calculate tax and shipping correctly. Other address details are optional but appreciated.
           </p>
           <p className="text-sm text-gray-900 mt-1">{companyName}</p>
         </div>
@@ -280,15 +280,14 @@ export default function AddressCollectionModal({
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-1">
-                  Address Line 1 <span className="text-red-500">*</span>
+                  Address Line 1
                 </label>
                 <input
                   type="text"
                   value={formData.billing_address_line_1}
                   onChange={(e) => handleChange('billing_address_line_1', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="123 Business Street"
-                  required
+                  placeholder="123 Business Street (optional)"
                 />
               </div>
 
@@ -308,15 +307,14 @@ export default function AddressCollectionModal({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-900 mb-1">
-                    City <span className="text-red-500">*</span>
+                    City
                   </label>
                   <input
                     type="text"
                     value={formData.billing_city}
                     onChange={(e) => handleChange('billing_city', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="London"
-                    required
+                    placeholder="London (optional)"
                   />
                 </div>
                 <div>
@@ -336,15 +334,14 @@ export default function AddressCollectionModal({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-900 mb-1">
-                    Postcode <span className="text-red-500">*</span>
+                    Postcode
                   </label>
                   <input
                     type="text"
                     value={formData.billing_postal_code}
                     onChange={(e) => handleChange('billing_postal_code', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="SW1A 1AA"
-                    required
+                    placeholder="SW1A 1AA (optional)"
                   />
                 </div>
                 <div>
@@ -432,15 +429,14 @@ export default function AddressCollectionModal({
               <div className="grid grid-cols-1 gap-4 pl-6 border-l-2 border-gray-200">
                 <div>
                   <label className="block text-sm font-medium text-gray-900 mb-1">
-                    Address Line 1 <span className="text-red-500">*</span>
+                    Address Line 1
                   </label>
                   <input
                     type="text"
                     value={formData.shipping_address_line_1}
                     onChange={(e) => handleChange('shipping_address_line_1', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Delivery address"
-                    required
+                    placeholder="Delivery address (optional)"
                   />
                 </div>
 
@@ -460,14 +456,14 @@ export default function AddressCollectionModal({
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-1">
-                      City <span className="text-red-500">*</span>
+                      City
                     </label>
                     <input
                       type="text"
                       value={formData.shipping_city}
                       onChange={(e) => handleChange('shipping_city', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
+                      placeholder="Optional"
                     />
                   </div>
                   <div>
@@ -486,14 +482,14 @@ export default function AddressCollectionModal({
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-1">
-                      Postcode <span className="text-red-500">*</span>
+                      Postcode
                     </label>
                     <input
                       type="text"
                       value={formData.shipping_postal_code}
                       onChange={(e) => handleChange('shipping_postal_code', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
+                      placeholder="Optional"
                     />
                   </div>
                   <div>

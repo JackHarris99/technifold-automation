@@ -182,13 +182,13 @@ export default function ManageAddressModal({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Address Line 1 <span className="text-red-500">*</span>
+              Address Line 1
             </label>
             <input
               type="text"
-              required
               value={formData.address_line_1}
               onChange={(e) => setFormData({ ...formData, address_line_1: e.target.value })}
+              placeholder="Optional (can be completed before shipping)"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -208,13 +208,13 @@ export default function ManageAddressModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                City <span className="text-red-500">*</span>
+                City
               </label>
               <input
                 type="text"
-                required
                 value={formData.city}
                 onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                placeholder="Optional"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -235,13 +235,13 @@ export default function ManageAddressModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Postal Code <span className="text-red-500">*</span>
+                Postal Code
               </label>
               <input
                 type="text"
-                required
                 value={formData.postal_code}
                 onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })}
+                placeholder="Optional"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>

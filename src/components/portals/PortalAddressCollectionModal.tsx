@@ -315,21 +315,21 @@ export default function PortalAddressCollectionModal({
           </button>
 
           {/* PROMINENT WARNING: Why this modal appeared */}
-          <div className="bg-red-50 border-2 border-red-400 rounded-lg p-4 mb-4">
-            <h3 className="text-lg font-bold text-red-900 flex items-center gap-2 mb-2">
-              <span className="text-2xl">🚫</span> Action Required to Place Orders
+          <div className="bg-blue-50 border-2 border-blue-400 rounded-lg p-4 mb-4">
+            <h3 className="text-lg font-bold text-blue-900 flex items-center gap-2 mb-2">
+              <span className="text-2xl">🌍</span> Country Required for Pricing
             </h3>
-            <p className="text-sm text-red-800 font-semibold">
-              You cannot place orders until you complete BOTH your billing address and shipping address below.
+            <p className="text-sm text-blue-800 font-semibold">
+              We need your billing and shipping country to calculate tax and shipping costs.
             </p>
-            <p className="text-sm text-red-700 mt-1">
-              This information is required for tax calculation and delivery of your products.
+            <p className="text-sm text-blue-700 mt-1">
+              Other address details are optional but appreciated for smoother delivery.
             </p>
           </div>
 
-          <h2 className="text-2xl font-semibold">Complete Your Addresses</h2>
+          <h2 className="text-2xl font-semibold">Confirm Your Country</h2>
           <p className="text-sm text-gray-800 mt-2">
-            Fill in your company's billing and delivery addresses to enable order placement.
+            Country is required for pricing. Other fields are optional but help us deliver to you efficiently.
           </p>
           <p className="text-sm text-gray-900 mt-1 font-medium">{companyName}</p>
         </div>
@@ -347,13 +347,13 @@ export default function PortalAddressCollectionModal({
           {!isLoadingExisting && (
             <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
               <h4 className="text-sm font-bold text-blue-900 mb-2 flex items-center gap-2">
-                <span className="text-xl">ℹ️</span> Required Information
+                <span className="text-xl">ℹ️</span> What's Required
               </h4>
               <p className="text-sm text-blue-800">
-                All fields marked with <span className="text-red-600 font-bold text-lg">*</span> are <strong>required</strong> before you can place orders.
+                Only fields marked with <span className="text-red-600 font-bold text-lg">*</span> are required. Country is needed for tax and shipping calculations.
               </p>
               <p className="text-sm text-blue-800 mt-1">
-                Complete billing and shipping addresses are needed for tax calculation and delivery.
+                Other details are optional but help ensure smooth delivery.
               </p>
             </div>
           )}
@@ -391,15 +391,14 @@ export default function PortalAddressCollectionModal({
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-1">
-                  Address Line 1 <span className="text-red-500">*</span>
+                  Address Line 1
                 </label>
                 <input
                   type="text"
                   value={formData.billing_address_line_1}
                   onChange={(e) => handleChange('billing_address_line_1', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="123 Business Street"
-                  required
+                  placeholder="123 Business Street (optional)"
                   disabled={isLoadingExisting || isSubmitting}
                 />
               </div>
@@ -420,15 +419,14 @@ export default function PortalAddressCollectionModal({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-900 mb-1">
-                    City <span className="text-red-500">*</span>
+                    City
                   </label>
                   <input
                     type="text"
                     value={formData.billing_city}
                     onChange={(e) => handleChange('billing_city', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="London"
-                    required
+                    placeholder="London (optional)"
                   />
                 </div>
                 <div>
@@ -448,15 +446,14 @@ export default function PortalAddressCollectionModal({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-900 mb-1">
-                    Postcode <span className="text-red-500">*</span>
+                    Postcode
                   </label>
                   <input
                     type="text"
                     value={formData.billing_postal_code}
                     onChange={(e) => handleChange('billing_postal_code', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="SW1A 1AA"
-                    required
+                    placeholder="SW1A 1AA (optional)"
                   />
                 </div>
                 <div>
@@ -537,12 +534,12 @@ export default function PortalAddressCollectionModal({
           <div className="space-y-4 border-t pt-6">
             <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">2</span>
-              Delivery Address <span className="text-red-600 text-lg ml-2">*</span>
+              Delivery Address
             </h3>
 
             <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-3">
               <p className="text-sm text-blue-900 font-semibold">
-                📦 You must provide a delivery address (or check the box below to use your billing address)
+                📦 Delivery country is required. Other details are optional.
               </p>
             </div>
 
@@ -563,15 +560,14 @@ export default function PortalAddressCollectionModal({
               <div className="grid grid-cols-1 gap-4 pl-6 border-l-2 border-gray-200">
                 <div>
                   <label className="block text-sm font-medium text-gray-900 mb-1">
-                    Address Line 1 <span className="text-red-500">*</span>
+                    Address Line 1
                   </label>
                   <input
                     type="text"
                     value={formData.shipping_address_line_1}
                     onChange={(e) => handleChange('shipping_address_line_1', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Delivery address"
-                    required
+                    placeholder="Delivery address (optional)"
                   />
                 </div>
 
@@ -591,14 +587,14 @@ export default function PortalAddressCollectionModal({
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-1">
-                      City <span className="text-red-500">*</span>
+                      City
                     </label>
                     <input
                       type="text"
                       value={formData.shipping_city}
                       onChange={(e) => handleChange('shipping_city', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
+                      placeholder="Optional"
                     />
                   </div>
                   <div>
@@ -617,14 +613,14 @@ export default function PortalAddressCollectionModal({
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-1">
-                      Postcode <span className="text-red-500">*</span>
+                      Postcode
                     </label>
                     <input
                       type="text"
                       value={formData.shipping_postal_code}
                       onChange={(e) => handleChange('shipping_postal_code', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
+                      placeholder="Optional"
                     />
                   </div>
                   <div>
