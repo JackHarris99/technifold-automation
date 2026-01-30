@@ -561,12 +561,22 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ quote_id
               </Link>
               <button
                 onClick={handleResendQuote}
-                disabled={resendingEmail || !quote.contact_email}
+                disabled={resendingEmail || !quote.contact_email || !quote.contact_id}
                 className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                title={!quote.contact_email ? 'Contact email required' : ''}
+                title={
+                  !quote.contact_id ? 'No contact assigned to quote' :
+                  !quote.contact_email ? 'Contact email required' :
+                  ''
+                }
               >
                 {resendingEmail ? '⏳ Sending...' : quote.sent_at ? '📧 Resend Quote' : '📧 Send Quote'}
               </button>
+              {/* Debug info - remove after testing */}
+              {(!quote.contact_email || !quote.contact_id) && (
+                <div className="text-xs text-red-600 mt-1">
+                  Debug: contact_id={quote.contact_id || 'missing'}, contact_email={quote.contact_email || 'missing'}
+                </div>
+              )}
               <button
                 onClick={handleMarkAsWon}
                 disabled={updatingStatus}
