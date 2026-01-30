@@ -102,23 +102,24 @@ export async function POST(
     }
 
     // Determine final addresses (use admin override if provided, else use original)
+    // Convert null to undefined for Stripe compatibility
     const finalBillingAddress = {
-      line1: body.admin_billing_line_1 || order.billing_address_line_1,
+      line1: body.admin_billing_line_1 || order.billing_address_line_1 || undefined,
       line2: body.admin_billing_line_2 || order.billing_address_line_2 || undefined,
-      city: body.admin_billing_city || order.billing_city,
+      city: body.admin_billing_city || order.billing_city || undefined,
       state: body.admin_billing_state || order.billing_state_province || undefined,
-      postal_code: body.admin_billing_postal || order.billing_postal_code,
+      postal_code: body.admin_billing_postal || order.billing_postal_code || undefined,
       country: body.admin_billing_country || order.billing_country,
     };
 
     const finalShippingAddress = {
       name: order.companies.company_name,
       address: {
-        line1: body.admin_shipping_line_1 || order.shipping_address_line_1,
+        line1: body.admin_shipping_line_1 || order.shipping_address_line_1 || undefined,
         line2: body.admin_shipping_line_2 || order.shipping_address_line_2 || undefined,
-        city: body.admin_shipping_city || order.shipping_city,
+        city: body.admin_shipping_city || order.shipping_city || undefined,
         state: body.admin_shipping_state || order.shipping_state_province || undefined,
-        postal_code: body.admin_shipping_postal || order.shipping_postal_code,
+        postal_code: body.admin_shipping_postal || order.shipping_postal_code || undefined,
         country: body.admin_shipping_country || order.shipping_country,
       },
     };

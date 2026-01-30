@@ -31,6 +31,7 @@ interface EngagementEvent {
 interface QuoteDetail {
   quote_id: string;
   company_id: string;
+  contact_id: string | null;
   company_name: string;
   contact_name: string | null;
   contact_email: string | null;
