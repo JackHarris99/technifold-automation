@@ -31,18 +31,6 @@ interface Props {
   products: Product[];
 }
 
-// Predefined categories for the dropdown
-const CATEGORIES = [
-  'Blade Seal',
-  'Belt',
-  'Cutting Boss',
-  'CP Applicator',
-  'Creasing Channel',
-  'Creasing Matrix',
-  'NEGLECTED',
-  // Add more as needed
-].sort();
-
 export default function ProductCategorizationClient({ products: initialProducts }: Props) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [searchTerm, setSearchTerm] = useState('');
@@ -51,6 +39,17 @@ export default function ProductCategorizationClient({ products: initialProducts 
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [modifiedCodes, setModifiedCodes] = useState<Set<string>>(new Set());
+
+  // Extract all unique categories from all products (dynamically)
+  const allCategories = useMemo(() => {
+    const categorySet = new Set<string>();
+    products.forEach((p) => {
+      if (p.category) {
+        categorySet.add(p.category);
+      }
+    });
+    return Array.from(categorySet).sort();
+  }, [products]);
 
   // Filter products by type (tab) and search
   const filteredProducts = useMemo(() => {
@@ -353,7 +352,7 @@ export default function ProductCategorizationClient({ products: initialProducts 
                                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
                                 >
                                   <option value="">Uncategorized</option>
-                                  {CATEGORIES.map((cat) => (
+                                  {allCategories.map((cat) => (
                                     <option key={cat} value={cat}>
                                       {cat}
                                     </option>
