@@ -18,10 +18,12 @@ import { LogActivityModal } from './LogActivityModal';
 import DistributorCatalogManager from './DistributorCatalogManager';
 import DistributorPortalProducts from './DistributorPortalProducts';
 import PlantListTab from './PlantListTab';
+import DistributorInvitationPanel from './DistributorInvitationPanel';
 
 interface CompanyDetailViewProps {
   company: any;
   contacts: any[];
+  distributorUsers: any[];
   purchasedTools: any[];
   purchasedConsumables: any[];
   purchasedParts: any[];
@@ -44,6 +46,7 @@ interface CompanyDetailViewProps {
 export default function CompanyDetailView({
   company,
   contacts,
+  distributorUsers,
   purchasedTools,
   purchasedConsumables,
   purchasedParts,
@@ -1165,6 +1168,13 @@ function OverviewTab({
             </div>
           )}
         </div>
+
+        {/* Distributor Portal Invitations */}
+        <DistributorInvitationPanel
+          company={company}
+          distributorUsers={distributorUsers}
+          contacts={contacts}
+        />
       </div>
 
       {/* Shipping Addresses */}
