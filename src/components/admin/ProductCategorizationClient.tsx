@@ -40,17 +40,6 @@ export default function ProductCategorizationClient({ products: initialProducts 
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [modifiedCodes, setModifiedCodes] = useState<Set<string>>(new Set());
 
-  // Extract all unique categories from all products (dynamically)
-  const allCategories = useMemo(() => {
-    const categorySet = new Set<string>();
-    products.forEach((p) => {
-      if (p.category) {
-        categorySet.add(p.category);
-      }
-    });
-    return Array.from(categorySet).sort();
-  }, [products]);
-
   // Filter products by type (tab) and search
   const filteredProducts = useMemo(() => {
     let filtered = products.filter((p) => p.type === activeTab);
@@ -60,64 +49,14 @@ export default function ProductCategorizationClient({ products: initialProducts 
       filtered = filtered.filter(
         (p) =>
           p.product_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          p.description.toLowerCase().includes(searchTerm.toLowerCase())
+          p.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (p.category && p.category.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
-    return filtered;
+    // Sort by product code
+    return filtered.sort((a, b) => a.product_code.localeCompare(b.product_code));
   }, [products, activeTab, searchTerm]);
-
-  // Group products by category
-  const groupedProducts = useMemo(() => {
-    const groups: { [key: string]: Product[] } = {};
-
-    filteredProducts.forEach((product) => {
-      const category = product.category || 'Uncategorized';
-      if (!groups[category]) {
-        groups[category] = [];
-      }
-      groups[category].push(product);
-    });
-
-    // Sort categories alphabetically, but put Uncategorized last
-    const sortedCategories = Object.keys(groups).sort((a, b) => {
-      if (a === 'Uncategorized') return 1;
-      if (b === 'Uncategorized') return -1;
-      return a.localeCompare(b);
-    });
-
-    const sorted: { [key: string]: Product[] } = {};
-    sortedCategories.forEach((cat) => {
-      sorted[cat] = groups[cat].sort((a, b) =>
-        a.product_code.localeCompare(b.product_code)
-      );
-    });
-
-    return sorted;
-  }, [filteredProducts]);
-
-  // Toggle category expansion
-  const toggleCategory = (category: string) => {
-    setExpandedCategories((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(category)) {
-        newSet.delete(category);
-      } else {
-        newSet.add(category);
-      }
-      return newSet;
-    });
-  };
-
-  // Expand all categories
-  const expandAll = () => {
-    setExpandedCategories(new Set(Object.keys(groupedProducts)));
-  };
-
-  // Collapse all categories
-  const collapseAll = () => {
-    setExpandedCategories(new Set());
-  };
 
   // Update a field for a product
   const updateField = (productCode: string, field: keyof Product, value: any) => {
@@ -232,251 +171,205 @@ export default function ProductCategorizationClient({ products: initialProducts 
             </button>
           </div>
 
-          {/* Search and Controls */}
-          <div className="flex gap-4 mt-4">
+          {/* Search */}
+          <div className="mt-4">
             <input
               type="text"
-              placeholder="Search by product code or description..."
+              placeholder="Search by product code, description, or category..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-            <button
-              onClick={expandAll}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium"
-            >
-              Expand All
-            </button>
-            <button
-              onClick={collapseAll}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium"
-            >
-              Collapse All
-            </button>
           </div>
         </div>
       </div>
 
-      {/* Grouped Products */}
-      <div className="px-6 py-4 space-y-4">
-        {Object.entries(groupedProducts).map(([category, categoryProducts]) => {
-          const isExpanded = expandedCategories.has(category);
-
-          return (
-            <div key={category} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              {/* Category Header */}
-              <button
-                onClick={() => toggleCategory(category)}
-                className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-lg">
-                    {isExpanded ? '▼' : '▶'}
-                  </span>
-                  <h2 className="text-lg font-bold text-gray-900">{category}</h2>
-                  <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
-                    {categoryProducts.length} products
-                  </span>
-                </div>
-              </button>
-
-              {/* Products in Category */}
-              {isExpanded && (
-                <div className="border-t border-gray-200">
-                  <div className="divide-y divide-gray-100">
-                    {categoryProducts.map((product) => (
-                      <div
-                        key={product.product_code}
-                        className={`p-4 hover:bg-gray-50 transition-colors ${
-                          modifiedCodes.has(product.product_code) ? 'bg-orange-50' : ''
-                        }`}
-                      >
-                        <div className="flex gap-4">
-                          {/* Product Image */}
-                          <div className="flex-shrink-0">
-                            {product.image_url ? (
-                              <Image
-                                src={product.image_url}
-                                alt={product.description}
-                                width={80}
-                                height={80}
-                                className="rounded-lg object-cover border border-gray-200"
-                              />
-                            ) : (
-                              <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
-                                <span className="text-gray-400 text-xs">No image</span>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Product Details */}
-                          <div className="flex-1 grid grid-cols-2 gap-4">
-                            {/* Left Column */}
-                            <div className="space-y-3">
-                              <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">
-                                  Product Code
-                                </label>
-                                <div className="font-mono text-sm font-medium text-gray-900">
-                                  {product.product_code}
-                                </div>
-                              </div>
-
-                              <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">
-                                  Description
-                                </label>
-                                <input
-                                  type="text"
-                                  value={product.description}
-                                  onChange={(e) =>
-                                    updateField(product.product_code, 'description', e.target.value)
-                                  }
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                                />
-                              </div>
-
-                              <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">
-                                  Category
-                                </label>
-                                <select
-                                  value={product.category || ''}
-                                  onChange={(e) =>
-                                    updateField(
-                                      product.product_code,
-                                      'category',
-                                      e.target.value || null
-                                    )
-                                  }
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
-                                >
-                                  <option value="">Uncategorized</option>
-                                  {allCategories.map((cat) => (
-                                    <option key={cat} value={cat}>
-                                      {cat}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-
-                              <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                                    Price (£)
-                                  </label>
-                                  <input
-                                    type="number"
-                                    value={parseFloat(product.price) || 0}
-                                    onChange={(e) =>
-                                      updateField(product.product_code, 'price', e.target.value)
-                                    }
-                                    step="0.01"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                                    Pricing Tier
-                                  </label>
-                                  <select
-                                    value={product.pricing_tier || 'null'}
-                                    onChange={(e) =>
-                                      updateField(
-                                        product.product_code,
-                                        'pricing_tier',
-                                        e.target.value === 'null' ? null : e.target.value
-                                      )
-                                    }
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
-                                  >
-                                    <option value="null">None</option>
-                                    <option value="standard">Standard</option>
-                                    <option value="premium">Premium</option>
-                                  </select>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Right Column */}
-                            <div className="space-y-3">
-                              <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">
-                                  Image URL
-                                </label>
-                                <input
-                                  type="text"
-                                  value={product.image_url || ''}
-                                  onChange={(e) =>
-                                    updateField(
-                                      product.product_code,
-                                      'image_url',
-                                      e.target.value || null
-                                    )
-                                  }
-                                  placeholder="https://..."
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                                />
-                              </div>
-
-                              <div className="grid grid-cols-3 gap-3">
-                                <label className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                                  <input
-                                    type="checkbox"
-                                    checked={product.active}
-                                    onChange={(e) =>
-                                      updateField(product.product_code, 'active', e.target.checked)
-                                    }
-                                    className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                  />
-                                  <span className="text-xs font-medium text-gray-700">Active</span>
-                                </label>
-
-                                <label className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                                  <input
-                                    type="checkbox"
-                                    checked={product.is_marketable}
-                                    onChange={(e) =>
-                                      updateField(product.product_code, 'is_marketable', e.target.checked)
-                                    }
-                                    className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                  />
-                                  <span className="text-xs font-medium text-gray-700">Marketable</span>
-                                </label>
-
-                                <label className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                                  <input
-                                    type="checkbox"
-                                    checked={product.show_in_distributor_portal}
-                                    onChange={(e) =>
-                                      updateField(
-                                        product.product_code,
-                                        'show_in_distributor_portal',
-                                        e.target.checked
-                                      )
-                                    }
-                                    className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                  />
-                                  <span className="text-xs font-medium text-gray-700">Portal</span>
-                                </label>
-                              </div>
-                            </div>
-                          </div>
+      {/* Products Table */}
+      <div className="px-6 py-4">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Image
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Product Code
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider w-1/4">
+                    Description
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Category
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Price (£)
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Tier
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Image URL
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Active
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Market
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Portal
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {filteredProducts.map((product) => (
+                  <tr
+                    key={product.product_code}
+                    className={`hover:bg-gray-50 transition-colors ${
+                      modifiedCodes.has(product.product_code) ? 'bg-orange-50' : ''
+                    }`}
+                  >
+                    <td className="px-4 py-3">
+                      {product.image_url ? (
+                        <Image
+                          src={product.image_url}
+                          alt={product.description}
+                          width={40}
+                          height={40}
+                          className="rounded object-cover border border-gray-200"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center border border-gray-200">
+                          <span className="text-gray-400 text-xs">-</span>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-
-        {Object.keys(groupedProducts).length === 0 && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 text-center py-12 text-gray-500">
-            No products found matching your search
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="font-mono text-sm font-medium text-gray-900">
+                        {product.product_code}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="text"
+                        value={product.description}
+                        onChange={(e) =>
+                          updateField(product.product_code, 'description', e.target.value)
+                        }
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="text"
+                        value={product.category || ''}
+                        onChange={(e) =>
+                          updateField(
+                            product.product_code,
+                            'category',
+                            e.target.value || null
+                          )
+                        }
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="number"
+                        value={parseFloat(product.price) || 0}
+                        onChange={(e) =>
+                          updateField(product.product_code, 'price', e.target.value)
+                        }
+                        step="0.01"
+                        className="w-24 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <select
+                        value={product.pricing_tier || 'null'}
+                        onChange={(e) =>
+                          updateField(
+                            product.product_code,
+                            'pricing_tier',
+                            e.target.value === 'null' ? null : e.target.value
+                          )
+                        }
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="null">None</option>
+                        <option value="standard">Standard</option>
+                        <option value="premium">Premium</option>
+                      </select>
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="text"
+                        value={product.image_url || ''}
+                        onChange={(e) =>
+                          updateField(
+                            product.product_code,
+                            'image_url',
+                            e.target.value || null
+                          )
+                        }
+                        placeholder="https://..."
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500"
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <input
+                        type="checkbox"
+                        checked={product.active}
+                        onChange={(e) =>
+                          updateField(product.product_code, 'active', e.target.checked)
+                        }
+                        className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <input
+                        type="checkbox"
+                        checked={product.is_marketable}
+                        onChange={(e) =>
+                          updateField(product.product_code, 'is_marketable', e.target.checked)
+                        }
+                        className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <input
+                        type="checkbox"
+                        checked={product.show_in_distributor_portal}
+                        onChange={(e) =>
+                          updateField(
+                            product.product_code,
+                            'show_in_distributor_portal',
+                            e.target.checked
+                          )
+                        }
+                        className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
+
+          {filteredProducts.length === 0 && (
+            <div className="text-center py-12 text-gray-500">
+              No products found matching your search
+            </div>
+          )}
+
+          {filteredProducts.length > 0 && (
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 text-sm text-gray-600">
+              Showing {filteredProducts.length} products
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
