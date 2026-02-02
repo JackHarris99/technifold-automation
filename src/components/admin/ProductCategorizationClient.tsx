@@ -40,7 +40,37 @@ export default function ProductCategorizationClient({ products: initialProducts 
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [modifiedCodes, setModifiedCodes] = useState<Set<string>>(new Set());
 
-  // Filter products by type (tab) and search
+  // Sort and filter state
+  const [sortColumn, setSortColumn] = useState<keyof Product>('product_code');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [tierFilter, setTierFilter] = useState<string>('');
+  const [activeFilter, setActiveFilter] = useState<string>('');
+  const [marketableFilter, setMarketableFilter] = useState<string>('');
+  const [portalFilter, setPortalFilter] = useState<string>('');
+
+  // Get all unique categories
+  const allCategories = useMemo(() => {
+    const categorySet = new Set<string>();
+    products.forEach((p) => {
+      if (p.category) {
+        categorySet.add(p.category);
+      }
+    });
+    return Array.from(categorySet).sort();
+  }, [products]);
+
+  // Sort handler
+  const handleSort = (column: keyof Product) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  // Filter and sort products
   const filteredProducts = useMemo(() => {
     let filtered = products.filter((p) => p.type === activeTab);
 
@@ -54,9 +84,61 @@ export default function ProductCategorizationClient({ products: initialProducts 
       );
     }
 
-    // Sort by product code
-    return filtered.sort((a, b) => a.product_code.localeCompare(b.product_code));
-  }, [products, activeTab, searchTerm]);
+    // Column filters
+    if (categoryFilter) {
+      if (categoryFilter === '__uncategorized__') {
+        filtered = filtered.filter((p) => !p.category);
+      } else {
+        filtered = filtered.filter((p) => p.category === categoryFilter);
+      }
+    }
+    if (tierFilter) {
+      if (tierFilter === 'null') {
+        filtered = filtered.filter((p) => !p.pricing_tier);
+      } else {
+        filtered = filtered.filter((p) => p.pricing_tier === tierFilter);
+      }
+    }
+    if (activeFilter) {
+      filtered = filtered.filter((p) => p.active === (activeFilter === 'true'));
+    }
+    if (marketableFilter) {
+      filtered = filtered.filter((p) => p.is_marketable === (marketableFilter === 'true'));
+    }
+    if (portalFilter) {
+      filtered = filtered.filter((p) => p.show_in_distributor_portal === (portalFilter === 'true'));
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      let aVal = a[sortColumn];
+      let bVal = b[sortColumn];
+
+      // Handle null/undefined
+      if (aVal === null || aVal === undefined) aVal = '';
+      if (bVal === null || bVal === undefined) bVal = '';
+
+      // Convert to string for comparison
+      const aStr = String(aVal).toLowerCase();
+      const bStr = String(bVal).toLowerCase();
+
+      if (aStr < bStr) return sortDirection === 'asc' ? -1 : 1;
+      if (aStr > bStr) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return filtered;
+  }, [products, activeTab, searchTerm, categoryFilter, tierFilter, activeFilter, marketableFilter, portalFilter, sortColumn, sortDirection]);
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchTerm('');
+    setCategoryFilter('');
+    setTierFilter('');
+    setActiveFilter('');
+    setMarketableFilter('');
+    setPortalFilter('');
+  };
 
   // Update a field for a product
   const updateField = (productCode: string, field: keyof Product, value: any) => {
@@ -171,8 +253,8 @@ export default function ProductCategorizationClient({ products: initialProducts 
             </button>
           </div>
 
-          {/* Search */}
-          <div className="mt-4">
+          {/* Search and Filter Controls */}
+          <div className="mt-4 space-y-3">
             <input
               type="text"
               placeholder="Search by product code, description, or category..."
@@ -180,6 +262,15 @@ export default function ProductCategorizationClient({ products: initialProducts 
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
+
+            {(categoryFilter || tierFilter || activeFilter || marketableFilter || portalFilter) && (
+              <button
+                onClick={clearFilters}
+                className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+              >
+                Clear Filters
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -194,32 +285,164 @@ export default function ProductCategorizationClient({ products: initialProducts 
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                     Image
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                    Product Code
+                  <th
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('product_code')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Product Code
+                      {sortColumn === 'product_code' && (
+                        <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                      )}
+                    </div>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider w-1/4">
-                    Description
+                  <th
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider w-1/4 cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('description')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Description
+                      {sortColumn === 'description' && (
+                        <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                      )}
+                    </div>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                    Category
+                  <th
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('category')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Category
+                      {sortColumn === 'category' && (
+                        <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                      )}
+                    </div>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                    Price (£)
+                  <th
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('price')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Price (£)
+                      {sortColumn === 'price' && (
+                        <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                      )}
+                    </div>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                    Tier
+                  <th
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('pricing_tier')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Tier
+                      {sortColumn === 'pricing_tier' && (
+                        <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                      )}
+                    </div>
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                     Image URL
                   </th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">
-                    Active
+                  <th
+                    className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('active')}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      Active
+                      {sortColumn === 'active' && (
+                        <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                      )}
+                    </div>
                   </th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">
-                    Market
+                  <th
+                    className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('is_marketable')}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      Market
+                      {sortColumn === 'is_marketable' && (
+                        <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                      )}
+                    </div>
                   </th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">
-                    Portal
+                  <th
+                    className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('show_in_distributor_portal')}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      Portal
+                      {sortColumn === 'show_in_distributor_portal' && (
+                        <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                      )}
+                    </div>
+                  </th>
+                </tr>
+                {/* Filter Row */}
+                <tr className="bg-white">
+                  <th className="px-4 py-2"></th>
+                  <th className="px-4 py-2"></th>
+                  <th className="px-4 py-2"></th>
+                  <th className="px-4 py-2">
+                    <select
+                      value={categoryFilter}
+                      onChange={(e) => setCategoryFilter(e.target.value)}
+                      className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">All Categories</option>
+                      <option value="__uncategorized__">Uncategorized</option>
+                      {allCategories.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                  </th>
+                  <th className="px-4 py-2"></th>
+                  <th className="px-4 py-2">
+                    <select
+                      value={tierFilter}
+                      onChange={(e) => setTierFilter(e.target.value)}
+                      className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">All Tiers</option>
+                      <option value="null">None</option>
+                      <option value="standard">Standard</option>
+                      <option value="premium">Premium</option>
+                    </select>
+                  </th>
+                  <th className="px-4 py-2"></th>
+                  <th className="px-4 py-2">
+                    <select
+                      value={activeFilter}
+                      onChange={(e) => setActiveFilter(e.target.value)}
+                      className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">All</option>
+                      <option value="true">Yes</option>
+                      <option value="false">No</option>
+                    </select>
+                  </th>
+                  <th className="px-4 py-2">
+                    <select
+                      value={marketableFilter}
+                      onChange={(e) => setMarketableFilter(e.target.value)}
+                      className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">All</option>
+                      <option value="true">Yes</option>
+                      <option value="false">No</option>
+                    </select>
+                  </th>
+                  <th className="px-4 py-2">
+                    <select
+                      value={portalFilter}
+                      onChange={(e) => setPortalFilter(e.target.value)}
+                      className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">All</option>
+                      <option value="true">Yes</option>
+                      <option value="false">No</option>
+                    </select>
                   </th>
                 </tr>
               </thead>
@@ -264,6 +487,7 @@ export default function ProductCategorizationClient({ products: initialProducts 
                     <td className="px-4 py-3">
                       <input
                         type="text"
+                        list={`categories-${product.product_code}`}
                         value={product.category || ''}
                         onChange={(e) =>
                           updateField(
@@ -272,8 +496,14 @@ export default function ProductCategorizationClient({ products: initialProducts 
                             e.target.value || null
                           )
                         }
+                        placeholder="Type or select..."
                         className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
+                      <datalist id={`categories-${product.product_code}`}>
+                        {allCategories.map((cat) => (
+                          <option key={cat} value={cat} />
+                        ))}
+                      </datalist>
                     </td>
                     <td className="px-4 py-3">
                       <input
