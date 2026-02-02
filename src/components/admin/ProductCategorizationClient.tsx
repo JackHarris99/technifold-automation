@@ -485,9 +485,7 @@ export default function ProductCategorizationClient({ products: initialProducts 
                       />
                     </td>
                     <td className="px-4 py-3">
-                      <input
-                        type="text"
-                        list={`categories-${product.product_code}`}
+                      <select
                         value={product.category || ''}
                         onChange={(e) =>
                           updateField(
@@ -496,14 +494,18 @@ export default function ProductCategorizationClient({ products: initialProducts 
                             e.target.value || null
                           )
                         }
-                        placeholder="Type or select..."
-                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                      <datalist id={`categories-${product.product_code}`}>
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Uncategorized</option>
                         {allCategories.map((cat) => (
-                          <option key={cat} value={cat} />
+                          <option key={cat} value={cat}>
+                            {cat}
+                          </option>
                         ))}
-                      </datalist>
+                        <option value="__new__" disabled>
+                          ─── Add New Category ───
+                        </option>
+                      </select>
                     </td>
                     <td className="px-4 py-3">
                       <input
