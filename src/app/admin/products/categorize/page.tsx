@@ -1,6 +1,6 @@
 /**
- * Product Categorization Page
- * Inline editing for all product fields - spreadsheet-style interface
+ * Product Categorization Page - Enhanced
+ * Spreadsheet-style interface with sales history and distributor pricing
  */
 
 import { getSupabaseClient } from '@/lib/supabase';
@@ -8,39 +8,25 @@ import ProductCategorizationClient from '@/components/admin/ProductCategorizatio
 
 async function fetchAllProducts() {
   const supabase = getSupabaseClient();
-  const BATCH_SIZE = 1000;
-  let allProducts: any[] = [];
-  let start = 0;
-  let hasMore = true;
 
-  while (hasMore) {
-    const { data, error } = await supabase
+  // Fetch products with sales history in a single query
+  const { data: productsData, error: productsError } = await supabase.rpc('get_products_with_sales_history');
+
+  if (productsError) {
+    console.error('[Categorization] Error fetching products:', productsError);
+    // Fallback to basic fetch if RPC fails
+    const { data: fallbackData } = await supabase
       .from('products')
       .select('*')
-      .order('product_code')
-      .range(start, start + BATCH_SIZE - 1);
-
-    if (error) {
-      console.error('Error fetching products batch:', error);
-      break;
-    }
-
-    if (data && data.length > 0) {
-      allProducts = [...allProducts, ...data];
-      start += BATCH_SIZE;
-      hasMore = data.length === BATCH_SIZE;
-    } else {
-      hasMore = false;
-    }
+      .order('product_code');
+    return fallbackData || [];
   }
 
-  console.log(`[Categorization] Loaded ${allProducts.length} products in ${Math.ceil(allProducts.length / BATCH_SIZE)} batches`);
-  return allProducts;
+  console.log(`[Categorization] Loaded ${productsData?.length || 0} products with sales history`);
+  return productsData || [];
 }
 
 export default async function CategorizationPage() {
-  // Allow all admin users to access this page (not just directors)
   const products = await fetchAllProducts();
-
   return <ProductCategorizationClient products={products} />;
 }
