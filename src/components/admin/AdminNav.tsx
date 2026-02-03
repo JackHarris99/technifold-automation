@@ -290,14 +290,14 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
                 🏢 All Distributors
               </Link>
               <Link
-                href="/admin/distributors/users"
+                href="/admin/distributors/manage"
                 className={`block px-4 py-2 text-sm font-[500] transition-colors ${
-                  pathname === '/admin/distributors/users'
+                  pathname === '/admin/distributors/manage'
                     ? `${highlightColor} text-white`
                     : `text-gray-300 ${hoverColor} hover:text-white`
                 }`}
               >
-                👥 Distributor Users
+                👥 Manage Users & Tiers
               </Link>
             </div>
 
@@ -353,6 +353,7 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
               >
                 🎯 Custom Pricing
               </Link>
+              {/* Commission Tracking - Coming Soon
               <Link
                 href="/admin/distributors/commission"
                 className={`block px-4 py-2 text-sm font-[500] transition-colors ${
@@ -363,6 +364,7 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
               >
                 💵 Commission Tracking
               </Link>
+              */}
             </div>
 
             {/* Reporting */}
@@ -380,6 +382,7 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
               >
                 📈 Sales Report
               </Link>
+              {/* Performance Dashboard - Coming Soon
               <Link
                 href="/admin/distributors/performance"
                 className={`block px-4 py-2 text-sm font-[500] transition-colors ${
@@ -390,6 +393,7 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
               >
                 🎯 Performance Dashboard
               </Link>
+              */}
             </div>
           </>
         )}

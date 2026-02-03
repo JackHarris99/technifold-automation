@@ -489,6 +489,7 @@ export default function CompanyDetailView({
           <OverviewTab
             company={company}
             contacts={contacts}
+            distributorUsers={distributorUsers}
             shippingAddresses={shippingAddresses}
             partnerAssociation={partnerAssociation}
             onAddContact={() => setShowAddContactModal(true)}
@@ -852,6 +853,7 @@ export default function CompanyDetailView({
 function OverviewTab({
   company,
   contacts,
+  distributorUsers,
   shippingAddresses,
   partnerAssociation,
   onAddContact,
@@ -869,6 +871,7 @@ function OverviewTab({
 }: {
   company: any;
   contacts: any[];
+  distributorUsers: any[];
   shippingAddresses: any[];
   partnerAssociation: any;
   onAddContact: () => void;
