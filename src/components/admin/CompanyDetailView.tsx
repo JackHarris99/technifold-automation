@@ -18,7 +18,7 @@ import { LogActivityModal } from './LogActivityModal';
 import DistributorCatalogManager from './DistributorCatalogManager';
 import DistributorPortalProducts from './DistributorPortalProducts';
 import PlantListTab from './PlantListTab';
-import DistributorInvitationPanel from './DistributorInvitationPanel';
+import DistributorUsersTab from './DistributorUsersTab';
 
 interface CompanyDetailViewProps {
   company: any;
@@ -323,6 +323,7 @@ export default function CompanyDetailView({
     { id: 'invoices', label: 'Invoices', count: invoices.length },
     { id: 'engagement', label: 'Engagement', count: engagement.length },
     ...(isDistributor ? [
+      { id: 'portal-users', label: 'Portal Users', count: distributorUsers.length },
       { id: 'portal-products', label: 'Portal Products', count: null },
       { id: 'catalog', label: 'Catalog & Pricing', count: catalogEntries.filter((e: any) => e.visible).length }
     ] : []),
@@ -552,6 +553,14 @@ export default function CompanyDetailView({
 
         {activeTab === 'engagement' && (
           <EngagementTab engagement={engagement} />
+        )}
+
+        {activeTab === 'portal-users' && isDistributor && (
+          <DistributorUsersTab
+            company={company}
+            distributorUsers={distributorUsers}
+            contacts={contacts}
+          />
         )}
 
         {activeTab === 'portal-products' && isDistributor && (
@@ -1171,13 +1180,6 @@ function OverviewTab({
             </div>
           )}
         </div>
-
-        {/* Distributor Portal Invitations */}
-        <DistributorInvitationPanel
-          company={company}
-          distributorUsers={distributorUsers}
-          contacts={contacts}
-        />
       </div>
 
       {/* Shipping Addresses */}
