@@ -1,19 +1,19 @@
 /**
  * POST /api/admin/product-catalogs/add-product
  * Add a single product to company catalog (and optionally set custom price)
- * Directors only
+ * Directors and sales reps
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
-import { isDirector } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
-    const director = await isDirector();
-    if (!director) {
+    const user = await getCurrentUser();
+    if (!user || !['director', 'sales_rep'].includes(user.role)) {
       return NextResponse.json(
-        { error: 'Unauthorized - Directors only' },
+        { error: 'Unauthorized' },
         { status: 403 }
       );
     }
