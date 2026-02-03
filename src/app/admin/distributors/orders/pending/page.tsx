@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic';
 export default async function PendingDistributorOrdersPage() {
   const currentUser = await getCurrentUser();
 
-  if (!currentUser || currentUser.role !== 'director') {
+  if (!currentUser || !['director', 'sales_rep'].includes(currentUser.role)) {
     redirect('/login');
   }
 

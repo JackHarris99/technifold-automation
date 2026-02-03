@@ -20,7 +20,7 @@ interface Props {
 export default async function DistributorOrderReviewPage({ params }: Props) {
   const user = await getCurrentUser();
 
-  if (!user || user.role !== 'director') {
+  if (!user || !['director', 'sales_rep'].includes(user.role)) {
     redirect('/login');
   }
 
