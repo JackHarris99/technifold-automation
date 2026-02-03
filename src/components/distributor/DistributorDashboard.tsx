@@ -70,8 +70,7 @@ export default function DistributorDashboard({
   const [cart, setCart] = useState<Map<string, number>>(new Map());
   const [searchTerm, setSearchTerm] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
-  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
   const [shippingAddresses, setShippingAddresses] = useState<any[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [loadingAddresses, setLoadingAddresses] = useState(true);
@@ -153,38 +152,37 @@ export default function DistributorDashboard({
   }, [cart, selectedAddressId]);
 
   // Group products by type and category
-  const groupedProducts = useMemo(() => {
-    const tools: Record<string, Product[]> = {};
-    const consumables: Record<string, Product[]> = {};
+  // Get all unique categories for the active tab
+  const availableCategories = useMemo(() => {
+    const currentProducts = products.filter(p => p.type === activeTab.slice(0, -1)); // 'tools' -> 'tool'
+    const categories = new Set(currentProducts.map(p => p.category || 'Uncategorized'));
+    return Array.from(categories).sort();
+  }, [products, activeTab]);
 
-    products.forEach((product) => {
-      const category = product.category || 'Uncategorized';
+  // Filtered products based on tab, categories, and search
+  const filteredProducts = useMemo(() => {
+    let filtered = products.filter(p => p.type === activeTab.slice(0, -1)); // 'tools' -> 'tool'
 
-      if (product.type === 'tool') {
-        if (!tools[category]) tools[category] = [];
-        tools[category].push(product);
-      } else {
-        if (!consumables[category]) consumables[category] = [];
-        consumables[category].push(product);
-      }
-    });
+    // Filter by selected categories
+    if (selectedCategories.size > 0) {
+      filtered = filtered.filter(p => {
+        const category = p.category || 'Uncategorized';
+        return selectedCategories.has(category);
+      });
+    }
 
-    return { tools, consumables };
-  }, [products]);
-
-  // Search results
-  const searchResults = useMemo(() => {
-    if (!searchTerm || searchTerm.length < 2) return [];
-
-    const term = searchTerm.toLowerCase();
-    return products
-      .filter(p =>
+    // Filter by search term
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(p =>
         p.description.toLowerCase().includes(term) ||
         p.product_code.toLowerCase().includes(term) ||
-        p.category?.toLowerCase().includes(term)
-      )
-      .slice(0, 10);
-  }, [searchTerm, products]);
+        (p.category || 'Uncategorized').toLowerCase().includes(term)
+      );
+    }
+
+    return filtered;
+  }, [products, activeTab, selectedCategories, searchTerm]);
 
   const updateQuantity = (productCode: string, quantity: number) => {
     const newCart = new Map(cart);
@@ -196,16 +194,20 @@ export default function DistributorDashboard({
     setCart(newCart);
   };
 
-  const toggleSection = (sectionId: string) => {
-    setExpandedSections(prev => {
+  const toggleCategory = (category: string) => {
+    setSelectedCategories(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(sectionId)) {
-        newSet.delete(sectionId);
+      if (newSet.has(category)) {
+        newSet.delete(category);
       } else {
-        newSet.add(sectionId);
+        newSet.add(category);
       }
       return newSet;
     });
+  };
+
+  const clearAllCategories = () => {
+    setSelectedCategories(new Set());
   };
 
   const cartItems = Array.from(cart.entries())
@@ -317,9 +319,9 @@ export default function DistributorDashboard({
     return (
       <div
         key={product.product_code}
-        className="flex items-center gap-4 p-4 rounded-[12px] border-2 border-blue-200 hover:border-blue-400 transition-all bg-white"
+        className="flex flex-col p-4 rounded-[12px] border-2 border-blue-200 hover:border-blue-400 transition-all bg-white"
       >
-        <div className="relative w-20 h-20 bg-[#f9fafb] rounded-[8px] flex-shrink-0 overflow-hidden">
+        <div className="relative w-full aspect-square bg-[#f9fafb] rounded-[8px] mb-3 overflow-hidden">
           <Image
             src={product.image_url || '/product-placeholder.svg'}
             alt={product.description}
@@ -333,13 +335,13 @@ export default function DistributorDashboard({
           />
         </div>
         <div className="flex-1">
-          <div className="font-[600] text-[15px] text-[#0a0a0a]">{product.description}</div>
-          <div className="text-[13px] text-[#1e293b] mt-1">{product.product_code}</div>
-          <div className="mt-2 space-y-1">
-            <div className="text-[18px] font-[700] text-[#16a34a]">
-              £{product.price.toFixed(2)} <span className="text-[11px] font-[500] text-[#64748b]">Your Price</span>
+          <div className="font-[600] text-[14px] text-[#0a0a0a] line-clamp-2 mb-1">{product.description}</div>
+          <div className="text-[11px] text-[#1e293b] font-mono mb-3">{product.product_code}</div>
+          <div className="space-y-0.5 mb-3">
+            <div className="text-[16px] font-[700] text-[#16a34a]">
+              £{product.price.toFixed(2)} <span className="text-[10px] font-[500] text-[#64748b]">Your Price</span>
             </div>
-            <div className="text-[13px] text-[#64748b]">
+            <div className="text-[11px] text-[#64748b]">
               RRP: £{product.base_price.toFixed(2)}
             </div>
           </div>
@@ -356,7 +358,7 @@ export default function DistributorDashboard({
             min="0"
             value={currentQty}
             onChange={(e) => updateQuantity(product.product_code, parseInt(e.target.value) || 0)}
-            className="w-16 px-2 py-2 border border-[#e8e8e8] rounded-[8px] text-center font-[600] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            className="flex-1 px-2 py-2 border border-[#e8e8e8] rounded-[8px] text-center font-[600] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
           <button
             onClick={() => updateQuantity(product.product_code, currentQty + 1)}
@@ -371,7 +373,37 @@ export default function DistributorDashboard({
 
   return (
     <div className="grid grid-cols-12 gap-6">
-      {/* Left Column - Product Catalog */}
+      {/* Left Sidebar - Category Filters */}
+      <div className="col-span-2 space-y-4">
+        <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8] p-4 sticky top-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-[14px] font-[700] text-[#0a0a0a]">Categories</h3>
+            {selectedCategories.size > 0 && (
+              <button
+                onClick={clearAllCategories}
+                className="text-[11px] text-blue-600 hover:text-blue-800 font-[600]"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          <div className="space-y-2 max-h-[600px] overflow-y-auto">
+            {availableCategories.map(category => (
+              <label key={category} className="flex items-center gap-2 cursor-pointer hover:bg-blue-50 p-2 rounded-lg transition-colors">
+                <input
+                  type="checkbox"
+                  checked={selectedCategories.has(category)}
+                  onChange={() => toggleCategory(category)}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <span className="text-[13px] text-[#334155] font-[500]">{category}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Middle Column - Product Catalog */}
       <div className="col-span-7 space-y-4">
         {/* Company Branding */}
         <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8] p-6">
@@ -407,53 +439,17 @@ export default function DistributorDashboard({
         </div>
 
         {/* Search */}
-        <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8] p-6 relative">
+        <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8] p-6">
           <input
             type="text"
             placeholder="Search products by name, code, or category..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            onFocus={() => setShowSearchDropdown(true)}
-            onBlur={() => setTimeout(() => setShowSearchDropdown(false), 200)}
             className="w-full px-4 py-3 bg-[#f8fafc] border border-[#e2e8f0] rounded-[10px] text-[14px] text-[#0a0a0a] font-[500] focus:outline-none focus:ring-2 focus:ring-[#1e40af] focus:border-transparent transition-all"
           />
-
-          {/* Search Dropdown */}
-          {showSearchDropdown && searchResults.length > 0 && (
-            <div className="absolute top-[calc(100%+0.5rem)] left-6 right-6 bg-white rounded-[12px] border-2 border-blue-200 shadow-lg z-50 max-h-[400px] overflow-y-auto">
-              {searchResults.map((product) => (
-                <div
-                  key={product.product_code}
-                  onClick={() => {
-                    updateQuantity(product.product_code, (cart.get(product.product_code) || 0) + 1);
-                    setSearchTerm('');
-                    setShowSearchDropdown(false);
-                  }}
-                  className="flex items-center gap-3 p-3 hover:bg-blue-50 cursor-pointer border-b border-[#e8e8e8] last:border-0"
-                >
-                  <div className="relative w-12 h-12 bg-[#f9fafb] rounded-[6px] flex-shrink-0 overflow-hidden">
-                    <Image
-                      src={product.image_url || '/product-placeholder.svg'}
-                      alt={product.description}
-                      fill
-                      className="object-contain p-1"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.onerror = null;
-                        target.src = '/product-placeholder.svg';
-                      }}
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[13px] font-[600] text-[#0a0a0a] truncate">{product.description}</div>
-                    <div className="text-[11px] text-[#475569] font-mono">{product.product_code}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-[14px] font-[700] text-[#16a34a]">£{product.price.toFixed(2)}</div>
-                    <div className="text-[10px] text-[#64748b]">RRP: £{product.base_price.toFixed(2)}</div>
-                  </div>
-                </div>
-              ))}
+          {searchTerm && (
+            <div className="mt-2 text-[12px] text-[#64748b]">
+              Showing {filteredProducts.length} result{filteredProducts.length !== 1 ? 's' : ''}
             </div>
           )}
         </div>
@@ -492,71 +488,17 @@ export default function DistributorDashboard({
 
           {/* Tab Content */}
           <div className="p-6">
-            {activeTab === 'tools' && Object.keys(groupedProducts.tools).length > 0 && (
-              <div className="space-y-6">
-                {Object.entries(groupedProducts.tools).map(([category, categoryProducts]) => (
-                  <div key={category}>
-                    <button
-                      onClick={() => toggleSection(`tool-${category}`)}
-                      className="w-full flex items-center justify-between mb-3 text-left"
-                    >
-                      <h3 className="text-[16px] font-[600] text-[#0a0a0a]">{category}</h3>
-                      <svg
-                        className={`w-5 h-5 text-[#3b82f6] transition-transform ${expandedSections.has(`tool-${category}`) ? 'rotate-180' : ''}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                    {expandedSections.has(`tool-${category}`) && (
-                      <div className="space-y-3">
-                        {categoryProducts.map(renderProductCard)}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {activeTab === 'tools' && Object.keys(groupedProducts.tools).length === 0 && (
+            {filteredProducts.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-[14px] text-[#64748b]">No tools available</p>
+                <p className="text-[14px] text-[#64748b]">
+                  {searchTerm || selectedCategories.size > 0
+                    ? 'No products match your filters'
+                    : `No ${activeTab} available`}
+                </p>
               </div>
-            )}
-
-            {activeTab === 'consumables' && Object.keys(groupedProducts.consumables).length > 0 && (
-              <div className="space-y-6">
-                {Object.entries(groupedProducts.consumables).map(([category, categoryProducts]) => (
-                  <div key={category}>
-                    <button
-                      onClick={() => toggleSection(`consumable-${category}`)}
-                      className="w-full flex items-center justify-between mb-3 text-left"
-                    >
-                      <h3 className="text-[16px] font-[600] text-[#0a0a0a]">{category}</h3>
-                      <svg
-                        className={`w-5 h-5 text-[#3b82f6] transition-transform ${expandedSections.has(`consumable-${category}`) ? 'rotate-180' : ''}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                    {expandedSections.has(`consumable-${category}`) && (
-                      <div className="space-y-3">
-                        {categoryProducts.map(renderProductCard)}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {activeTab === 'consumables' && Object.keys(groupedProducts.consumables).length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-[14px] text-[#64748b]">No consumables available</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredProducts.map(renderProductCard)}
               </div>
             )}
           </div>
