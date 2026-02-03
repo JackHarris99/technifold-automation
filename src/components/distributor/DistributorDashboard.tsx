@@ -498,7 +498,7 @@ export default function DistributorDashboard({
       {/* Right Column - Quote Builder & Summary */}
       <div className="col-span-3 space-y-3">
         {/* Company Info Card */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sticky top-4">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
           <h2 className="text-sm font-bold text-blue-600 mb-1">
             {distributor.company_name}
           </h2>
