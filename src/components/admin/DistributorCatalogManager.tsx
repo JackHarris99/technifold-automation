@@ -190,7 +190,7 @@ export default function DistributorCatalogManager({
   };
 
   const handleClearPrice = async (productCode: string) => {
-    if (!confirm('Clear custom price? Will revert to standard distributor pricing.')) return;
+    if (!confirm('Clear custom price? Will revert to dynamic tier-based pricing (calculated from base price × tier discount).')) return;
 
     try {
       const response = await fetch('/api/admin/product-catalogs/update-price', {
@@ -340,7 +340,7 @@ export default function DistributorCatalogManager({
         <h3 className="text-sm font-semibold text-blue-900 mb-2">How This Works</h3>
         <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
           <li><strong>Add products</strong> to create a custom catalog for this distributor</li>
-          <li><strong>Custom pricing</strong> overrides standard distributor pricing for this distributor only</li>
+          <li><strong>Custom pricing</strong> overrides their tier-based discount (otherwise they get base_price × their tier %)</li>
           <li><strong>If no custom catalog</strong> exists, distributor sees all products with "Show in Distributor Portal" checked</li>
         </ul>
       </div>

@@ -133,7 +133,7 @@ export default function DistributorPortalProducts({
   };
 
   const handleImportAll = async () => {
-    if (!confirm(`Import all ${purchasedProducts.length} purchased products to this distributor's catalog?\n\nThey will be visible in the distributor portal at standard distributor pricing (unless you set custom prices).`)) {
+    if (!confirm(`Import all ${purchasedProducts.length} purchased products to this distributor's catalog?\n\nThey will be visible at their tier-based discount (${companyTier === 'tier_1' ? '40%' : companyTier === 'tier_2' ? '30%' : '20%'} off base prices), unless you set custom prices.`)) {
       return;
     }
 

@@ -448,7 +448,10 @@ export default function DistributorDashboard({
                     <div className="text-[13px] font-[600] text-[#0a0a0a] truncate">{product.description}</div>
                     <div className="text-[11px] text-[#475569] font-mono">{product.product_code}</div>
                   </div>
-                  <div className="text-[14px] font-[700] text-[#0a0a0a]">£{product.price.toFixed(2)}</div>
+                  <div className="text-right">
+                    <div className="text-[14px] font-[700] text-[#16a34a]">£{product.price.toFixed(2)}</div>
+                    <div className="text-[10px] text-[#64748b]">RRP: £{product.base_price.toFixed(2)}</div>
+                  </div>
                 </div>
               ))}
             </div>

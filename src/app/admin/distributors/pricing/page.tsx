@@ -55,14 +55,34 @@ export default async function DistributorPricingPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Info */}
-        <div className="bg-teal-50 border border-teal-200 rounded-lg p-4 mb-6">
-          <h3 className="text-sm font-semibold text-teal-900 mb-2">How Standard Distributor Pricing Works</h3>
-          <ul className="text-sm text-teal-800 space-y-1 list-disc list-inside">
-            <li>Set default distributor prices below. If no price is set, the base product price is used.</li>
-            <li>These prices apply to all distributors unless they have company-specific custom pricing.</li>
-            <li>Only products marked as "show in distributor portal" will be visible to distributors.</li>
-            <li>For distributor-specific pricing, use the Custom Pricing section.</li>
+        {/* DEPRECATION NOTICE */}
+        <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-6 mb-6">
+          <h3 className="text-lg font-bold text-orange-900 mb-3">⚠️ This Page is Deprecated - Using Dynamic Tier-Based Pricing</h3>
+          <div className="text-sm text-orange-800 space-y-2">
+            <p className="font-semibold">
+              Distributor pricing is now calculated dynamically based on each distributor's pricing tier:
+            </p>
+            <ul className="list-disc list-inside space-y-1 ml-2">
+              <li><strong>Tier 1 (40% off):</strong> Distributor pays 60% of base product price</li>
+              <li><strong>Tier 2 (30% off):</strong> Distributor pays 70% of base product price</li>
+              <li><strong>Tier 3 (20% off):</strong> Distributor pays 80% of base product price</li>
+            </ul>
+            <p className="mt-3 font-semibold">
+              When you change a product's base price, all distributor prices update automatically.
+            </p>
+            <p className="mt-2">
+              To set custom pricing for specific distributors, use the <Link href="/admin/distributors/custom-pricing" className="underline font-semibold">Custom Pricing</Link> page or the distributor's company page.
+            </p>
+          </div>
+        </div>
+
+        {/* Legacy Info - Old System (No Longer Used) */}
+        <div className="bg-gray-50 border border-gray-300 rounded-lg p-4 mb-6 opacity-60">
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">Legacy: Old Static Pricing System (Not Used)</h3>
+          <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
+            <li>This table below shows old static prices that are no longer used</li>
+            <li>All pricing is now calculated dynamically from base product price × tier discount</li>
+            <li>This data is kept for reference only</li>
           </ul>
         </div>
 
