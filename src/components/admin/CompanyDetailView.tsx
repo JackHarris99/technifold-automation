@@ -19,6 +19,7 @@ import DistributorCatalogManager from './DistributorCatalogManager';
 import DistributorPortalProducts from './DistributorPortalProducts';
 import PlantListTab from './PlantListTab';
 import DistributorUsersTab from './DistributorUsersTab';
+import CustomPricingTab from './CustomPricingTab';
 
 interface CompanyDetailViewProps {
   company: any;
@@ -324,6 +325,7 @@ export default function CompanyDetailView({
     { id: 'engagement', label: 'Engagement', count: engagement.length },
     ...(isDistributor ? [
       { id: 'portal-users', label: 'Portal Users', count: distributorUsers.length },
+      { id: 'custom-pricing', label: 'Custom Pricing', count: companyPricing.length },
       { id: 'portal-products', label: 'Portal Products', count: null },
       { id: 'catalog', label: 'Catalog & Pricing', count: catalogEntries.filter((e: any) => e.visible).length }
     ] : []),
@@ -560,6 +562,14 @@ export default function CompanyDetailView({
             company={company}
             distributorUsers={distributorUsers}
             contacts={contacts}
+          />
+        )}
+
+        {activeTab === 'custom-pricing' && isDistributor && (
+          <CustomPricingTab
+            company={company}
+            products={products}
+            companyPricing={companyPricing}
           />
         )}
 
