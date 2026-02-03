@@ -38,6 +38,16 @@ interface QuoteFollowUp {
   preview_url: string;
 }
 
+interface PendingDistributorOrder {
+  order_id: string;
+  company_id: string;
+  company_name: string;
+  po_number: string | null;
+  total_amount: number;
+  created_at: string;
+  item_count: number;
+}
+
 interface SalesMetrics {
   total_revenue: number;
   deals_closed: number;
@@ -126,6 +136,7 @@ export default async function SalesCenterPage() {
   let trialsEnding: TrialEnding[] = [];
   let unpaidInvoices: UnpaidInvoice[] = [];
   let quotesFollowUp: QuoteFollowUp[] = [];
+  let pendingOrders: PendingDistributorOrder[] = [];
 
   if (companies.length > 0) {
     // Get current month boundaries
@@ -196,16 +207,33 @@ export default async function SalesCenterPage() {
     unpaidInvoicesQuery = unpaidInvoicesQuery.limit(10);
     endingTrialsQuery = endingTrialsQuery.limit(10);
 
+    // Pending distributor orders query
+    const pendingOrdersQuery = supabase
+      .from('distributor_orders')
+      .select(`
+        order_id,
+        company_id,
+        po_number,
+        total_amount,
+        created_at,
+        companies!inner(company_name)
+      `)
+      .eq('status', 'pending_review')
+      .order('created_at', { ascending: false })
+      .limit(10);
+
     const [
       paidInvoicesResult,
       unpaidInvoicesResult,
       trialsResult,
       endingTrialsResult,
+      pendingOrdersResult,
     ] = await Promise.all([
       paidInvoicesQuery,
       unpaidInvoicesQuery,
       trialsQuery,
       endingTrialsQuery,
+      pendingOrdersQuery,
     ]);
 
     // Process metrics
@@ -268,6 +296,32 @@ export default async function SalesCenterPage() {
       }
     } catch (error) {
       console.error('[Sales Center] Failed to fetch quotes:', error);
+    }
+
+    // Process pending distributor orders
+    const pendingOrdersData = pendingOrdersResult.data || [];
+    if (pendingOrdersData.length > 0) {
+      // Fetch item counts for each order
+      const orderIds = pendingOrdersData.map(o => o.order_id);
+      const { data: itemCounts } = await supabase
+        .from('distributor_order_items')
+        .select('order_id')
+        .in('order_id', orderIds);
+
+      const itemCountMap = (itemCounts || []).reduce((acc, item) => {
+        acc[item.order_id] = (acc[item.order_id] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      pendingOrders = pendingOrdersData.map(order => ({
+        order_id: order.order_id,
+        company_id: order.company_id,
+        company_name: order.companies?.company_name || 'Unknown Company',
+        po_number: order.po_number,
+        total_amount: order.total_amount,
+        created_at: order.created_at,
+        item_count: itemCountMap[order.order_id] || 0,
+      }));
     }
   }
 
@@ -332,6 +386,7 @@ export default async function SalesCenterPage() {
           trialsEnding={trialsEnding}
           unpaidInvoices={unpaidInvoices}
           quotesFollowUp={quotesFollowUp}
+          pendingOrders={pendingOrders}
         />
       </div>
     </div>

@@ -13,6 +13,7 @@ interface Props {
   trialsEnding: any[];
   unpaidInvoices: any[];
   quotesFollowUp: any[];
+  pendingOrders: any[];
 }
 
 export default function SalesCenterClient({
@@ -20,9 +21,49 @@ export default function SalesCenterClient({
   trialsEnding,
   unpaidInvoices,
   quotesFollowUp,
+  pendingOrders,
 }: Props) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Pending Distributor Orders */}
+      <ActionSection
+        title="Pending Distributor Orders"
+        icon="📦"
+        count={pendingOrders.length}
+        emptyMessage="No orders awaiting approval"
+        emptyIcon="✅"
+        color="teal"
+        viewAllHref="/admin/sales/orders/pending"
+      >
+        {pendingOrders.map((order: any) => (
+          <Link
+            key={order.order_id}
+            href={`/admin/sales/orders/${order.order_id}`}
+            className="flex items-start justify-between p-4 hover:bg-teal-50 transition-colors border-b border-gray-100 last:border-b-0"
+          >
+            <div className="flex-1">
+              <h4 className="font-semibold text-gray-900">{order.company_name}</h4>
+              <p className="text-sm text-gray-700 mt-1">
+                {order.po_number ? `PO: ${order.po_number}` : 'No PO number'}
+                {' • '}
+                {order.item_count} item{order.item_count !== 1 ? 's' : ''}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                {new Date(order.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </p>
+            </div>
+            <div className="ml-3 flex-shrink-0 text-right">
+              <div className="font-bold text-gray-900">
+                £{order.total_amount.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
+              </div>
+              <div className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-medium mt-1">
+                Needs Review
+              </div>
+            </div>
+          </Link>
+        ))}
+      </ActionSection>
+
       {/* Active Engagement */}
       <ActionSection
         title="Active Engagement"
