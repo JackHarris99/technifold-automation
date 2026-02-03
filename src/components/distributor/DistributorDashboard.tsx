@@ -468,7 +468,7 @@ export default function DistributorDashboard({
             >
               Tools
               <span className="ml-2 text-[12px] text-[#64748b]">
-                ({Object.values(groupedProducts.tools).flat().length})
+                ({products.filter(p => p.type === 'tool').length})
               </span>
             </button>
             <button
@@ -481,7 +481,7 @@ export default function DistributorDashboard({
             >
               Consumables
               <span className="ml-2 text-[12px] text-[#64748b]">
-                ({Object.values(groupedProducts.consumables).flat().length})
+                ({products.filter(p => p.type === 'consumable').length})
               </span>
             </button>
           </div>
