@@ -21,10 +21,28 @@ async function fetchAllDistributors() {
     return [];
   }
 
-  // Fetch all contacts
-  const { data: contacts } = await supabase
-    .from('contacts')
-    .select('contact_id, company_id, email, full_name');
+  // Fetch all contacts (with pagination to avoid 1000 limit)
+  let allContacts: any[] = [];
+  let contactStart = 0;
+  const contactBatchSize = 1000;
+  let hasMoreContacts = true;
+
+  while (hasMoreContacts) {
+    const { data: batch } = await supabase
+      .from('contacts')
+      .select('contact_id, company_id, email, full_name')
+      .range(contactStart, contactStart + contactBatchSize - 1);
+
+    if (batch && batch.length > 0) {
+      allContacts = allContacts.concat(batch);
+      hasMoreContacts = batch.length === contactBatchSize;
+      contactStart += contactBatchSize;
+    } else {
+      hasMoreContacts = false;
+    }
+  }
+
+  console.log(`[Distributors] Fetched ${allContacts.length} total contacts`);
 
   // Fetch all distributor users
   const { data: users } = await supabase
@@ -33,7 +51,7 @@ async function fetchAllDistributors() {
 
   // Build maps
   const contactsByCompany = new Map<string, any[]>();
-  contacts?.forEach(c => {
+  allContacts.forEach(c => {
     if (!contactsByCompany.has(c.company_id)) {
       contactsByCompany.set(c.company_id, []);
     }
