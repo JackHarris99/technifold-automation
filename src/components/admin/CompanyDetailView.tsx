@@ -591,6 +591,7 @@ export default function CompanyDetailView({
         {activeTab === 'catalog' && isDistributor && (
           <DistributorCatalogManager
             companyId={company.company_id}
+            companyTier={company.pricing_tier || 'tier_1'}
             products={products}
             catalogEntries={catalogEntries}
             distributorPricing={distributorPricing}

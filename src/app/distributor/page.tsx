@@ -169,6 +169,7 @@ export default async function DistributorDashboardPage() {
   // Apply pricing with priority: Custom price → Dynamic tier-based price → Base price
   const productsWithPricing = allProducts.map(product => {
     const customPricingData = customPricingMap.get(product.product_code);
+    const basePrice = product.price; // Store original base price for RRP display
 
     // Priority: 1. Custom price, 2. Dynamic tier-based price (base * multiplier), 3. Base product price
     let finalPrice = product.price;
@@ -189,7 +190,8 @@ export default async function DistributorDashboardPage() {
 
     return {
       ...product,
-      price: finalPrice,
+      price: finalPrice, // Distributor's discounted price
+      base_price: basePrice, // Original full price (RRP)
       currency,
       has_custom_pricing: hasCustomPricing,
       has_distributor_pricing: hasDistributorPricing,

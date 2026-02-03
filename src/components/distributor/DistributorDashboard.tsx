@@ -13,7 +13,8 @@ import PortalAddressCollectionModal from '../portals/PortalAddressCollectionModa
 interface Product {
   product_code: string;
   description: string;
-  price: number;
+  price: number; // Distributor's price (discounted)
+  base_price: number; // Recommended end user price (full price)
   category: string | null;
   type: string;
   currency: string;
@@ -334,9 +335,12 @@ export default function DistributorDashboard({
         <div className="flex-1">
           <div className="font-[600] text-[15px] text-[#0a0a0a]">{product.description}</div>
           <div className="text-[13px] text-[#1e293b] mt-1">{product.product_code}</div>
-          <div className="mt-2">
-            <div className="text-[18px] font-[700] text-[#0a0a0a]">
-              £{product.price.toFixed(2)}
+          <div className="mt-2 space-y-1">
+            <div className="text-[18px] font-[700] text-[#16a34a]">
+              £{product.price.toFixed(2)} <span className="text-[11px] font-[500] text-[#64748b]">Your Price</span>
+            </div>
+            <div className="text-[13px] text-[#64748b]">
+              RRP: £{product.base_price.toFixed(2)}
             </div>
           </div>
         </div>

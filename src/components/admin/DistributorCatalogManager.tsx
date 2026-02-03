@@ -29,6 +29,7 @@ interface CompanyPricing {
 
 interface DistributorCatalogManagerProps {
   companyId: string;
+  companyTier: string; // tier_1, tier_2, tier_3
   products: Product[];
   catalogEntries: CatalogEntry[];
   distributorPricing: DistributorPricing[];
@@ -39,6 +40,7 @@ type ProductType = 'tool' | 'consumable';
 
 export default function DistributorCatalogManager({
   companyId,
+  companyTier,
   products,
   catalogEntries,
   distributorPricing,
@@ -54,7 +56,14 @@ export default function DistributorCatalogManager({
     return prices;
   });
 
-  // Build pricing maps
+  // Calculate discount multiplier based on company tier
+  const discountMultiplier = useMemo(() => {
+    return companyTier === 'tier_1' ? 0.60 : // 40% off
+           companyTier === 'tier_2' ? 0.70 : // 30% off
+           0.80; // 20% off (tier_3 or default)
+  }, [companyTier]);
+
+  // Build pricing maps (legacy - now we calculate dynamically)
   const distPricingMap = useMemo(() => {
     const map = new Map<string, number>();
     distributorPricing.forEach(p => map.set(p.product_code, p.standard_price));
@@ -204,7 +213,8 @@ export default function DistributorCatalogManager({
   };
 
   const ProductRow = ({ product, inCatalog }: { product: Product; inCatalog: boolean }) => {
-    const standardPrice = distPricingMap.get(product.product_code);
+    // Calculate standard distributor price dynamically from base price * tier multiplier
+    const standardPrice = product.price != null ? product.price * discountMultiplier : null;
     const customPrice = customPrices[product.product_code];
     const hasCustomPrice = companyPricing.some(p => p.product_code === product.product_code);
 
@@ -215,7 +225,7 @@ export default function DistributorCatalogManager({
         <td className="py-3 px-4 text-right text-sm text-gray-600">
           {product.price != null ? `£${product.price.toFixed(2)}` : '-'}
         </td>
-        <td className="py-3 px-4 text-right text-sm text-gray-600">
+        <td className="py-3 px-4 text-right text-sm font-medium text-blue-600">
           {standardPrice != null ? `£${standardPrice.toFixed(2)}` : '-'}
         </td>
         <td className="py-3 px-4">
