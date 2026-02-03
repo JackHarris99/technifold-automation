@@ -72,11 +72,11 @@ export default async function DistributorDashboardPage() {
 
   const distributorTier = company?.pricing_tier || 'tier_1';
 
-  // Determine which discount column to use based on pricing tier
-  const discountColumn =
-    distributorTier === 'tier_1' ? 'discount_40_percent' :
-    distributorTier === 'tier_2' ? 'discount_30_percent' :
-    'discount_20_percent';
+  // Determine discount multiplier based on pricing tier
+  const discountMultiplier =
+    distributorTier === 'tier_1' ? 0.60 : // 40% off = 60% of base
+    distributorTier === 'tier_2' ? 0.70 : // 30% off = 70% of base
+    0.80; // 20% off = 80% of base
 
   // Check if company has custom product catalog
   const { data: customCatalog } = await supabase
@@ -128,36 +128,11 @@ export default async function DistributorDashboardPage() {
     }
   }
 
-  // Fetch ALL distributor pricing (with pagination to avoid 1000 row limit)
-  let allPricing: any[] = [];
-  let pricingOffset = 0;
-  const pricingBatchSize = 1000;
-  let hasMorePricing = true;
-
-  while (hasMorePricing) {
-    const { data: pricingBatch, error: pricingError } = await supabase
-      .from('distributor_pricing')
-      .select(`product_code, ${discountColumn}, currency`)
-      .eq('active', true)
-      .range(pricingOffset, pricingOffset + pricingBatchSize - 1);
-
-    if (pricingError) {
-      console.error('[Distributor Portal] Error fetching distributor pricing:', pricingError);
-      break;
-    }
-
-    if (!pricingBatch || pricingBatch.length === 0) {
-      hasMorePricing = false;
-    } else {
-      allPricing = [...allPricing, ...pricingBatch];
-      if (pricingBatch.length < pricingBatchSize) {
-        hasMorePricing = false;
-      }
-      pricingOffset += pricingBatchSize;
-    }
-  }
+  // Note: Distributor pricing is now calculated dynamically from base product price * tier multiplier
+  // No need to fetch from distributor_pricing table (which has stale data)
 
   // Fetch company-specific custom pricing (with pagination)
+  const pricingBatchSize = 1000;
   let allCustomPricing: any[] = [];
   let customPricingOffset = 0;
   let hasMoreCustomPricing = true;
@@ -186,33 +161,29 @@ export default async function DistributorDashboardPage() {
     }
   }
 
-  // Create pricing maps for quick lookup
-  const standardPricingMap = new Map(
-    allPricing.map(dp => [dp.product_code, dp])
-  );
-
+  // Create pricing map for custom prices
   const customPricingMap = new Map(
     allCustomPricing.map(cp => [cp.product_code, cp])
   );
 
-  // Apply pricing with priority: Custom price → Standard distributor price → Base price
+  // Apply pricing with priority: Custom price → Dynamic tier-based price → Base price
   const productsWithPricing = allProducts.map(product => {
     const customPricingData = customPricingMap.get(product.product_code);
-    const standardPricingData = standardPricingMap.get(product.product_code);
 
-    // Priority: 1. Custom price, 2. Standard distributor price, 3. Base product price
+    // Priority: 1. Custom price, 2. Dynamic tier-based price (base * multiplier), 3. Base product price
     let finalPrice = product.price;
     let currency = product.currency;
     let hasCustomPricing = false;
     let hasDistributorPricing = false;
 
     if (customPricingData?.custom_price !== undefined) {
+      // Custom price override
       finalPrice = customPricingData.custom_price;
       currency = customPricingData.currency;
       hasCustomPricing = true;
-    } else if (standardPricingData?.[discountColumn] !== undefined) {
-      finalPrice = standardPricingData[discountColumn];
-      currency = standardPricingData.currency;
+    } else if (product.price !== null && product.price !== undefined) {
+      // Dynamic tier-based pricing
+      finalPrice = product.price * discountMultiplier;
       hasDistributorPricing = true;
     }
 

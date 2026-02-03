@@ -49,30 +49,31 @@ export async function POST(request: NextRequest) {
       .single();
 
     const distributorTier = company?.pricing_tier || 'tier_1';
-    const discountColumn =
-      distributorTier === 'tier_1' ? 'discount_40_percent' :
-      distributorTier === 'tier_2' ? 'discount_30_percent' :
-      'discount_20_percent';
+    const discountMultiplier =
+      distributorTier === 'tier_1' ? 0.60 : // 40% off = 60% of base
+      distributorTier === 'tier_2' ? 0.70 : // 30% off = 70% of base
+      0.80; // 20% off = 80% of base
 
-    // 2. Fetch distributor pricing (wholesale prices)
+    // 2. Fetch custom pricing overrides (if any)
     const productCodes = items.map(item => item.product_code);
-    const { data: pricing, error: pricingError } = await supabase
-      .from('distributor_pricing')
-      .select(`product_code, ${discountColumn}, currency`)
+    const { data: customPricing, error: customPricingError } = await supabase
+      .from('company_distributor_pricing')
+      .select('product_code, custom_price, currency')
       .in('product_code', productCodes)
+      .eq('company_id', distributor.company_id)
       .eq('active', true);
 
-    if (pricingError) {
+    if (customPricingError) {
       return NextResponse.json(
-        { error: 'Failed to fetch pricing' },
+        { error: 'Failed to fetch custom pricing' },
         { status: 500 }
       );
     }
 
-    // 3. Fetch product details
+    // 3. Fetch product details with base prices
     const { data: products, error: productsError } = await supabase
       .from('products')
-      .select('product_code, description, image_url')
+      .select('product_code, description, image_url, price')
       .in('product_code', productCodes);
 
     if (productsError) {
@@ -82,12 +83,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Build line items with wholesale pricing
-    const lineItems = items.map(item => {
-      const priceRecord = pricing?.find(p => p.product_code === item.product_code);
-      const product = products?.find(p => p.product_code === item.product_code);
+    // Create custom pricing map
+    const customPricingMap = new Map(
+      (customPricing || []).map(cp => [cp.product_code, cp])
+    );
 
-      const unit_price = priceRecord?.[discountColumn] || 0;
+    // 4. Build line items with dynamic tier-based pricing
+    const lineItems = items.map(item => {
+      const product = products?.find(p => p.product_code === item.product_code);
+      const customPrice = customPricingMap.get(item.product_code);
+
+      // Priority: 1. Custom price override, 2. Dynamic tier-based price (base * multiplier)
+      let unit_price = 0;
+      if (customPrice?.custom_price !== undefined) {
+        unit_price = customPrice.custom_price;
+      } else if (product?.price !== null && product?.price !== undefined) {
+        unit_price = product.price * discountMultiplier;
+      }
+
       const line_total = unit_price * item.quantity;
 
       return {
@@ -97,7 +110,7 @@ export async function POST(request: NextRequest) {
         unit_price,
         line_total,
         image_url: product?.image_url || null,
-        currency: priceRecord?.currency || 'GBP',
+        currency: customPrice?.currency || 'GBP',
       };
     });
 
