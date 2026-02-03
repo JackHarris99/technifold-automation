@@ -319,14 +319,14 @@ export default function DistributorDashboard({
     return (
       <div
         key={product.product_code}
-        className="flex flex-col p-4 rounded-[12px] border-2 border-blue-200 hover:border-blue-400 transition-all bg-white"
+        className="flex flex-col p-2 rounded-lg border border-gray-200 hover:border-blue-400 transition-all bg-white"
       >
-        <div className="relative w-full aspect-square bg-[#f9fafb] rounded-[8px] mb-3 overflow-hidden">
+        <div className="relative w-full h-20 bg-gray-50 rounded mb-2 overflow-hidden">
           <Image
             src={product.image_url || '/product-placeholder.svg'}
             alt={product.description}
             fill
-            className="object-contain p-2"
+            className="object-contain p-1"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.onerror = null;
@@ -334,22 +334,18 @@ export default function DistributorDashboard({
             }}
           />
         </div>
-        <div className="flex-1">
-          <div className="font-[600] text-[14px] text-[#0a0a0a] line-clamp-2 mb-1">{product.description}</div>
-          <div className="text-[11px] text-[#1e293b] font-mono mb-3">{product.product_code}</div>
-          <div className="space-y-0.5 mb-3">
-            <div className="text-[16px] font-[700] text-[#16a34a]">
-              £{product.price.toFixed(2)} <span className="text-[10px] font-[500] text-[#64748b]">Your Price</span>
-            </div>
-            <div className="text-[11px] text-[#64748b]">
-              RRP: £{product.base_price.toFixed(2)}
-            </div>
+        <div className="flex-1 mb-2">
+          <div className="font-semibold text-xs text-gray-900 line-clamp-2 mb-1">{product.description}</div>
+          <div className="text-[10px] text-gray-600 font-mono mb-1">{product.product_code}</div>
+          <div className="flex items-baseline gap-2">
+            <div className="text-sm font-bold text-green-600">£{product.price.toFixed(2)}</div>
+            <div className="text-[9px] text-gray-500">RRP £{product.base_price.toFixed(2)}</div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <button
             onClick={() => updateQuantity(product.product_code, Math.max(0, currentQty - 1))}
-            className="w-8 h-8 flex items-center justify-center rounded-[8px] bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#475569] font-bold transition-colors"
+            className="w-6 h-6 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold"
           >
             −
           </button>
@@ -358,11 +354,11 @@ export default function DistributorDashboard({
             min="0"
             value={currentQty}
             onChange={(e) => updateQuantity(product.product_code, parseInt(e.target.value) || 0)}
-            className="flex-1 px-2 py-2 border border-[#e8e8e8] rounded-[8px] text-center font-[600] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            className="flex-1 px-1 py-1 border border-gray-300 rounded text-center text-xs font-semibold focus:ring-1 focus:ring-blue-500 outline-none"
           />
           <button
             onClick={() => updateQuantity(product.product_code, currentQty + 1)}
-            className="w-8 h-8 flex items-center justify-center rounded-[8px] bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#475569] font-bold transition-colors"
+            className="w-6 h-6 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold"
           >
             +
           </button>
@@ -372,31 +368,31 @@ export default function DistributorDashboard({
   };
 
   return (
-    <div className="grid grid-cols-12 gap-6">
+    <div className="grid grid-cols-12 gap-4">
       {/* Left Sidebar - Category Filters */}
-      <div className="col-span-2 space-y-4">
-        <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8] p-4 sticky top-6">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-[14px] font-[700] text-[#0a0a0a]">Categories</h3>
+      <div className="col-span-2 space-y-3">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sticky top-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xs font-bold text-gray-900">Categories</h3>
             {selectedCategories.size > 0 && (
               <button
                 onClick={clearAllCategories}
-                className="text-[11px] text-blue-600 hover:text-blue-800 font-[600]"
+                className="text-[10px] text-blue-600 hover:text-blue-800 font-semibold"
               >
                 Clear
               </button>
             )}
           </div>
-          <div className="space-y-2 max-h-[600px] overflow-y-auto">
+          <div className="space-y-1 max-h-[600px] overflow-y-auto">
             {availableCategories.map(category => (
-              <label key={category} className="flex items-center gap-2 cursor-pointer hover:bg-blue-50 p-2 rounded-lg transition-colors">
+              <label key={category} className="flex items-center gap-2 cursor-pointer hover:bg-blue-50 p-1.5 rounded transition-colors">
                 <input
                   type="checkbox"
                   checked={selectedCategories.has(category)}
                   onChange={() => toggleCategory(category)}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-3.5 h-3.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <span className="text-[13px] text-[#334155] font-[500]">{category}</span>
+                <span className="text-xs text-gray-700 font-medium">{category}</span>
               </label>
             ))}
           </div>
@@ -404,11 +400,11 @@ export default function DistributorDashboard({
       </div>
 
       {/* Middle Column - Product Catalog */}
-      <div className="col-span-7 space-y-4">
+      <div className="col-span-7 space-y-3">
         {/* Company Branding */}
-        <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8] p-6">
-          <div className="flex items-center justify-center gap-8">
-            <div className="relative h-10 w-32">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+          <div className="flex items-center justify-center gap-4">
+            <div className="relative h-8 w-24">
               <Image
                 src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/technifold.png"
                 alt="Technifold"
@@ -417,7 +413,7 @@ export default function DistributorDashboard({
                 priority
               />
             </div>
-            <div className="relative h-10 w-32">
+            <div className="relative h-8 w-24">
               <Image
                 src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/technicrease.png"
                 alt="Technicrease"
@@ -426,7 +422,7 @@ export default function DistributorDashboard({
                 priority
               />
             </div>
-            <div className="relative h-10 w-32">
+            <div className="relative h-8 w-24">
               <Image
                 src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/creasestream.png"
                 alt="Creasestream"
@@ -439,65 +435,59 @@ export default function DistributorDashboard({
         </div>
 
         {/* Search */}
-        <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8] p-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
           <input
             type="text"
-            placeholder="Search products by name, code, or category..."
+            placeholder="Search products..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-3 bg-[#f8fafc] border border-[#e2e8f0] rounded-[10px] text-[14px] text-[#0a0a0a] font-[500] focus:outline-none focus:ring-2 focus:ring-[#1e40af] focus:border-transparent transition-all"
+            className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
           {searchTerm && (
-            <div className="mt-2 text-[12px] text-[#64748b]">
-              Showing {filteredProducts.length} result{filteredProducts.length !== 1 ? 's' : ''}
+            <div className="mt-1 text-[11px] text-gray-600">
+              {filteredProducts.length} result{filteredProducts.length !== 1 ? 's' : ''}
             </div>
           )}
         </div>
 
         {/* Product Tabs */}
-        <div className="bg-white rounded-[16px] shadow-sm border-2 border-blue-100 overflow-hidden">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           {/* Tab Headers */}
-          <div className="flex border-b border-[#e8e8e8]">
+          <div className="flex border-b border-gray-200">
             <button
               onClick={() => setActiveTab('tools')}
-              className={`flex-1 px-6 py-4 text-[16px] font-[600] tracking-[-0.01em] transition-colors ${
+              className={`flex-1 px-4 py-2.5 text-sm font-semibold transition-colors ${
                 activeTab === 'tools'
-                  ? 'text-[#1e40af] bg-gradient-to-r from-blue-50/50 to-transparent border-b-2 border-[#1e40af]'
-                  : 'text-[#64748b] hover:text-[#1e40af] hover:bg-blue-50/30'
+                  ? 'text-blue-600 bg-blue-50 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
               }`}
             >
-              Tools
-              <span className="ml-2 text-[12px] text-[#64748b]">
-                ({products.filter(p => p.type === 'tool').length})
-              </span>
+              Tools <span className="text-xs text-gray-500">({products.filter(p => p.type === 'tool').length})</span>
             </button>
             <button
               onClick={() => setActiveTab('consumables')}
-              className={`flex-1 px-6 py-4 text-[16px] font-[600] tracking-[-0.01em] transition-colors ${
+              className={`flex-1 px-4 py-2.5 text-sm font-semibold transition-colors ${
                 activeTab === 'consumables'
-                  ? 'text-[#1e40af] bg-gradient-to-r from-blue-50/50 to-transparent border-b-2 border-[#1e40af]'
-                  : 'text-[#64748b] hover:text-[#1e40af] hover:bg-blue-50/30'
+                  ? 'text-blue-600 bg-blue-50 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
               }`}
             >
-              Consumables
-              <span className="ml-2 text-[12px] text-[#64748b]">
-                ({products.filter(p => p.type === 'consumable').length})
-              </span>
+              Consumables <span className="text-xs text-gray-500">({products.filter(p => p.type === 'consumable').length})</span>
             </button>
           </div>
 
           {/* Tab Content */}
-          <div className="p-6">
+          <div className="p-3">
             {filteredProducts.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-[14px] text-[#64748b]">
+              <div className="text-center py-8">
+                <p className="text-sm text-gray-500">
                   {searchTerm || selectedCategories.size > 0
                     ? 'No products match your filters'
                     : `No ${activeTab} available`}
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-2">
                 {filteredProducts.map(renderProductCard)}
               </div>
             )}
@@ -506,109 +496,108 @@ export default function DistributorDashboard({
       </div>
 
       {/* Right Column - Quote Builder & Summary */}
-      <div className="col-span-5 space-y-6">
+      <div className="col-span-3 space-y-3">
         {/* Company Info Card */}
-        <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8] p-6">
-          <h2 className="text-[20px] font-[600] text-[#1e40af] mb-1 tracking-[-0.01em]">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sticky top-4">
+          <h2 className="text-sm font-bold text-blue-600 mb-1">
             {distributor.company_name}
           </h2>
-          <p className="text-[13px] text-[#334155] font-[400] mb-4">
+          <p className="text-[11px] text-gray-600 mb-3">
             Company and delivery information
           </p>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-3">
             {/* Billing Address */}
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider">Billing Address</div>
+              <div className="flex items-center justify-between mb-1">
+                <div className="text-[10px] font-semibold text-gray-600 uppercase">Billing</div>
                 {billingAddress && (
-                  <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
+                  <button onClick={() => setShowAddressModal(true)} className="text-[9px] text-blue-600 hover:text-blue-700 font-semibold">Edit</button>
                 )}
               </div>
               {loadingAddresses ? (
-                <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
-                  <p className="text-[12px] text-[#475569] italic">Loading...</p>
+                <div className="p-2 bg-gray-50 rounded border border-gray-200">
+                  <p className="text-[10px] text-gray-600 italic">Loading...</p>
                 </div>
               ) : billingAddress && billingAddress.billing_address_line_1 ? (
-                <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
-                  <div className="text-[12px] font-[500] text-[#1e293b]">{billingAddress.billing_address_line_1}</div>
-                  {billingAddress.billing_address_line_2 && <div className="text-[11px] text-[#334155]">{billingAddress.billing_address_line_2}</div>}
-                  <div className="text-[11px] text-[#334155]">{billingAddress.billing_city}{billingAddress.billing_state_province ? `, ${billingAddress.billing_state_province}` : ''}</div>
-                  <div className="text-[11px] text-[#334155]">{billingAddress.billing_postal_code}</div>
-                  <div className="text-[12px] font-[500] text-[#1e293b] mt-1">{billingAddress.billing_country}</div>
+                <div className="p-2 bg-gray-50 rounded border border-gray-200">
+                  <div className="text-[10px] font-medium text-gray-900">{billingAddress.billing_address_line_1}</div>
+                  {billingAddress.billing_address_line_2 && <div className="text-[9px] text-gray-600">{billingAddress.billing_address_line_2}</div>}
+                  <div className="text-[9px] text-gray-600">{billingAddress.billing_city}{billingAddress.billing_state_province ? `, ${billingAddress.billing_state_province}` : ''}</div>
+                  <div className="text-[9px] text-gray-600">{billingAddress.billing_postal_code}</div>
+                  <div className="text-[10px] font-medium text-gray-900 mt-0.5">{billingAddress.billing_country}</div>
                 </div>
               ) : (
-                <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
-                  <p className="text-[11px] text-red-600 italic">No billing address - <button onClick={() => setShowAddressModal(true)} className="underline font-[600]">Add now</button></p>
+                <div className="p-2 bg-gray-50 rounded border border-gray-200">
+                  <p className="text-[10px] text-red-600 italic">No billing address - <button onClick={() => setShowAddressModal(true)} className="underline font-semibold">Add</button></p>
                 </div>
               )}
             </div>
 
             {/* Delivery Addresses */}
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider">Delivery Addresses</div>
-                <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">
-                  {shippingAddresses.length > 0 ? 'Add New' : 'Add'}
+              <div className="flex items-center justify-between mb-1">
+                <div className="text-[10px] font-semibold text-gray-600 uppercase">Delivery</div>
+                <button onClick={() => setShowAddressModal(true)} className="text-[9px] text-blue-600 hover:text-blue-700 font-semibold">
+                  {shippingAddresses.length > 0 ? 'Add' : 'Add'}
                 </button>
               </div>
               {loadingAddresses ? (
-                <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
-                  <p className="text-[12px] text-[#475569] italic">Loading...</p>
+                <div className="p-2 bg-gray-50 rounded border border-gray-200">
+                  <p className="text-[10px] text-gray-600 italic">Loading...</p>
                 </div>
               ) : shippingAddresses.length > 0 ? (
-                <div className="space-y-2 max-h-[120px] overflow-y-auto pr-1">
+                <div className="space-y-1.5 max-h-[100px] overflow-y-auto pr-1">
                   {shippingAddresses.map((addr) => (
                     <div
                       key={addr.address_id}
                       onClick={() => setSelectedAddressId(addr.address_id)}
-                      className={`p-2 rounded-[8px] border cursor-pointer transition-all ${
+                      className={`p-1.5 rounded border cursor-pointer transition-all ${
                         selectedAddressId === addr.address_id
                           ? 'border-blue-500 bg-blue-50'
-                          : 'border-[#e2e8f0] bg-[#f8fafc] hover:border-blue-300'
+                          : 'border-gray-200 bg-gray-50 hover:border-blue-300'
                       }`}
                     >
-                      <div className="flex items-start gap-2">
+                      <div className="flex items-start gap-1.5">
                         <input
                           type="radio"
                           checked={selectedAddressId === addr.address_id}
                           onChange={() => setSelectedAddressId(addr.address_id)}
-                          className="mt-0.5 text-blue-600"
+                          className="mt-0.5 text-blue-600 w-3 h-3"
                         />
                         <div className="flex-1 min-w-0">
                           {addr.label && (
-                            <div className="text-[11px] font-[600] text-[#1e293b] mb-0.5">
+                            <div className="text-[9px] font-semibold text-gray-900 mb-0.5">
                               {addr.label}
-                              {addr.is_default && <span className="ml-1 text-[9px] text-blue-600">(Default)</span>}
+                              {addr.is_default && <span className="ml-1 text-[8px] text-blue-600">(Default)</span>}
                             </div>
                           )}
-                          <div className="text-[10px] text-[#334155]">
-                            {addr.address_line_1}
-                            {addr.address_line_2 && `, ${addr.address_line_2}`}
+                          <div className="text-[9px] text-gray-600">
+                            {addr.address_line_1}{addr.address_line_2 && `, ${addr.address_line_2}`}
                           </div>
-                          <div className="text-[10px] text-[#334155]">
+                          <div className="text-[9px] text-gray-600">
                             {addr.city}{addr.state_province ? `, ${addr.state_province}` : ''} {addr.postal_code}
                           </div>
-                          <div className="text-[10px] font-[500] text-[#1e293b]">{addr.country}</div>
+                          <div className="text-[9px] font-medium text-gray-900">{addr.country}</div>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
-                  <p className="text-[11px] text-[#475569] italic">Address confirmed at checkout</p>
+                <div className="p-2 bg-gray-50 rounded border border-gray-200">
+                  <p className="text-[10px] text-gray-600 italic">Confirmed at checkout</p>
                 </div>
               )}
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-3 mt-6 pt-4 border-t border-[#e8e8e8]">
+          <div className="flex flex-col gap-2 mt-3 pt-3 border-t border-gray-200">
             {distributor.role === 'admin' && (
               <a
                 href="/distributor/users"
-                className="px-4 py-2 text-[13px] font-[600] text-[#475569] hover:text-[#1e40af] transition-colors border border-[#e8e8e8] rounded-lg hover:border-[#1e40af]"
+                className="px-2 py-1.5 text-[11px] font-semibold text-gray-700 hover:text-blue-600 text-center transition-colors border border-gray-300 rounded hover:border-blue-600"
               >
                 Manage Team
               </a>
@@ -616,7 +605,7 @@ export default function DistributorDashboard({
             <form action="/api/distributor/auth/logout" method="POST">
               <button
                 type="submit"
-                className="px-4 py-2 text-[13px] font-[600] text-[#475569] hover:text-[#1e40af] transition-colors border border-[#e8e8e8] rounded-lg hover:border-[#1e40af]"
+                className="w-full px-2 py-1.5 text-[11px] font-semibold text-gray-700 hover:text-blue-600 transition-colors border border-gray-300 rounded hover:border-blue-600"
               >
                 Sign Out
               </button>
@@ -626,63 +615,56 @@ export default function DistributorDashboard({
 
         {/* Selected Products Section */}
         {cartItems.length > 0 && (
-          <div className="bg-white rounded-[16px] p-5 shadow-sm border-2 border-blue-200">
-            <div className="mb-4">
-              <h3 className="text-[15px] font-[700] text-[#0a0a0a] tracking-tight">Selected Products</h3>
-              <p className="text-[11px] text-[#334155] mt-1">{cartItems.length} item{cartItems.length !== 1 ? 's' : ''} selected</p>
+          <div className="bg-white rounded-lg p-2.5 shadow-sm border border-blue-200">
+            <div className="mb-2">
+              <h3 className="text-xs font-bold text-gray-900">Cart</h3>
+              <p className="text-[10px] text-gray-600">{cartItems.length} item{cartItems.length !== 1 ? 's' : ''}</p>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
               {cartItems.map((item) => (
-                <div key={item.product.product_code} className="p-3 bg-blue-50/50 rounded-[10px] border border-blue-200">
-                  <div className="flex items-start justify-between mb-2">
+                <div key={item.product.product_code} className="p-1.5 bg-blue-50 rounded border border-blue-200">
+                  <div className="flex items-start justify-between mb-1">
                     <div className="flex-1 min-w-0">
-                      <div className="text-[11px] font-mono text-[#1e293b] mb-0.5">{item.product.product_code}</div>
-                      <div className="text-[13px] font-[600] text-[#0a0a0a] leading-tight">{item.product.description}</div>
+                      <div className="text-[9px] font-mono text-gray-700">{item.product.product_code}</div>
+                      <div className="text-[10px] font-semibold text-gray-900 leading-tight line-clamp-2">{item.product.description}</div>
                     </div>
                     <button
                       onClick={() => updateQuantity(item.product.product_code, 0)}
-                      className="ml-2 text-red-600 hover:text-red-700 flex-shrink-0"
+                      className="ml-1 text-red-600 hover:text-red-700 flex-shrink-0"
                       title="Remove"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
                   </div>
 
-                  <div className="flex items-center gap-3 mt-2">
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between gap-1.5">
+                    <div className="flex items-center gap-1">
                       <button
                         onClick={() => updateQuantity(item.product.product_code, Math.max(0, item.quantity - 1))}
-                        className="w-6 h-6 rounded-[6px] bg-white border border-[#e8e8e8] flex items-center justify-center hover:bg-gray-50"
+                        className="w-5 h-5 rounded bg-white border border-gray-300 flex items-center justify-center hover:bg-gray-50 text-xs"
                       >
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                        </svg>
+                        −
                       </button>
                       <input
                         type="number"
                         min="0"
                         value={item.quantity}
                         onChange={(e) => updateQuantity(item.product.product_code, parseInt(e.target.value) || 0)}
-                        className="w-16 px-2 py-1 border border-[#e8e8e8] rounded-[6px] text-center text-[13px] font-[600]"
+                        className="w-10 px-1 py-0.5 border border-gray-300 rounded text-center text-[10px] font-semibold"
                       />
                       <button
                         onClick={() => updateQuantity(item.product.product_code, item.quantity + 1)}
-                        className="w-6 h-6 rounded-[6px] bg-white border border-[#e8e8e8] flex items-center justify-center hover:bg-gray-50"
+                        className="w-5 h-5 rounded bg-white border border-gray-300 flex items-center justify-center hover:bg-gray-50 text-xs"
                       >
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
+                        +
                       </button>
                     </div>
-                    <div className="flex-1 text-right">
-                      <div className="text-[11px] text-[#334155]">
-                        <span className="font-[600] text-[#16a34a]">£{item.product.price.toFixed(2)}</span>
-                        <span className="text-[#475569]"> /unit</span>
-                      </div>
-                      <div className="text-[14px] font-[700] text-[#0a0a0a] mt-0.5">£{(item.quantity * item.product.price).toFixed(2)}</div>
+                    <div className="text-right">
+                      <div className="text-[11px] font-bold text-green-600">£{(item.quantity * item.product.price).toFixed(2)}</div>
+                      <div className="text-[9px] text-gray-500">£{item.product.price.toFixed(2)} ea</div>
                     </div>
                   </div>
                 </div>
@@ -693,38 +675,38 @@ export default function DistributorDashboard({
 
         {/* Order Summary Card (Black) */}
         {pricingPreview && cartItems.length > 0 && (
-          <div className="bg-[#0a0a0a] rounded-[20px] p-8 text-white shadow-[0_16px_48px_rgba(0,0,0,0.24)]">
-            <div className="text-[12px] font-[700] text-[#999] uppercase tracking-[0.05em] mb-6">Order Summary</div>
-            <div className="space-y-4">
+          <div className="bg-gray-900 rounded-lg p-3 text-white shadow-lg">
+            <div className="text-[10px] font-bold text-gray-400 uppercase mb-2">Order Summary</div>
+            <div className="space-y-2">
               {/* Subtotal */}
               <div className="flex justify-between items-center">
-                <span className="text-[15px] text-[#999] font-[500]">Subtotal</span>
-                <span className="font-[700] text-[17px] tracking-[-0.01em]">£{pricingPreview.subtotal.toFixed(2)}</span>
+                <span className="text-[11px] text-gray-400">Subtotal</span>
+                <span className="font-semibold text-sm">£{pricingPreview.subtotal.toFixed(2)}</span>
               </div>
 
               {/* Shipping */}
               {pricingPreview.shipping !== undefined && (
                 <div className="flex justify-between items-center">
-                  <span className="text-[15px] text-[#999] font-[500]">Shipping</span>
-                  <span className="font-[600] text-[16px]">{pricingPreview.shipping === 0 ? 'FREE' : `£${pricingPreview.shipping.toFixed(2)}`}</span>
+                  <span className="text-[11px] text-gray-400">Shipping</span>
+                  <span className="font-semibold text-sm">{pricingPreview.shipping === 0 ? 'FREE' : `£${pricingPreview.shipping.toFixed(2)}`}</span>
                 </div>
               )}
 
               {/* VAT */}
               {pricingPreview.vat_amount !== undefined && (
-                <div className="flex justify-between items-center pb-4 border-b border-[#2a2a2a]">
-                  <span className="text-[15px] text-[#999] font-[500]">
+                <div className="flex justify-between items-center pb-2 border-b border-gray-700">
+                  <span className="text-[11px] text-gray-400">
                     VAT {pricingPreview.vat_rate > 0 && `(${(pricingPreview.vat_rate * 100).toFixed(0)}%)`}
                   </span>
-                  <span className="font-[600] text-[16px]">£{pricingPreview.vat_amount.toFixed(2)}</span>
+                  <span className="font-semibold text-sm">£{pricingPreview.vat_amount.toFixed(2)}</span>
                 </div>
               )}
 
               {/* Final Total */}
               {pricingPreview.total !== undefined && (
-                <div className="flex justify-between items-center mb-6">
-                  <span className="text-[20px] font-[700]">Total</span>
-                  <span className="text-[32px] font-[800] text-[#16a34a] tracking-[-0.02em]">£{pricingPreview.total.toFixed(2)}</span>
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-sm font-bold">Total</span>
+                  <span className="text-xl font-bold text-green-500">£{pricingPreview.total.toFixed(2)}</span>
                 </div>
               )}
 
@@ -744,9 +726,9 @@ export default function DistributorDashboard({
               <button
                 onClick={handleSubmitOrder}
                 disabled={submitting || !selectedAddressId}
-                className="w-full py-4 bg-[#16a34a] text-white rounded-[12px] font-[700] text-[16px] tracking-[-0.01em] hover:bg-[#15803d] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-2.5 bg-green-600 text-white rounded-lg font-bold text-sm hover:bg-green-700 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {submitting ? 'Submitting Order...' : 'Place Order'}
+                {submitting ? 'Submitting...' : 'Place Order'}
               </button>
             </div>
           </div>
@@ -754,45 +736,29 @@ export default function DistributorDashboard({
 
         {/* Back-Order Items */}
         {backOrderItems.length > 0 && (
-          <div className="bg-white rounded-[16px] shadow-sm border-2 border-amber-200">
-            <div className="px-6 py-4 bg-gradient-to-r from-amber-50 to-transparent border-b border-amber-200">
-              <h2 className="text-[17px] font-[600] text-[#0a0a0a] tracking-[-0.01em]">📦 Back-Ordered Items</h2>
-              <p className="text-[12px] text-[#334155] mt-0.5 font-[500]">
-                {backOrderItems.length} item{backOrderItems.length !== 1 ? 's' : ''} awaiting stock
-              </p>
+          <div className="bg-white rounded-lg shadow-sm border border-amber-300">
+            <div className="px-2.5 py-2 bg-amber-50 border-b border-amber-200">
+              <h2 className="text-xs font-bold text-gray-900">📦 Back Orders</h2>
+              <p className="text-[10px] text-gray-600">{backOrderItems.length} item{backOrderItems.length !== 1 ? 's' : ''}</p>
             </div>
 
-            <div className="p-6 space-y-3">
+            <div className="p-2 space-y-1.5 max-h-[200px] overflow-y-auto">
               {backOrderItems.map((item) => (
                 <div
                   key={item.item_id}
-                  className="p-3 bg-amber-50/50 rounded-[10px] border border-amber-200"
+                  className="p-1.5 bg-amber-50 rounded border border-amber-200"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="text-[13px] font-[600] text-[#0a0a0a]">
-                        {item.description}
-                      </div>
-                      <div className="text-[11px] text-[#666] font-mono mt-0.5">{item.product_code}</div>
-                      <div className="text-[11px] text-[#475569] mt-1">
-                        Quantity: <span className="font-semibold">{item.quantity}</span>
-                      </div>
-                      {item.predicted_delivery_date && (
-                        <div className="text-[11px] text-amber-700 font-semibold mt-1">
-                          Expected: {new Date(item.predicted_delivery_date).toLocaleDateString('en-GB', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric'
-                          })}
-                        </div>
-                      )}
-                      {item.back_order_notes && (
-                        <div className="text-[10px] text-[#666] mt-1 italic">
-                          {item.back_order_notes}
-                        </div>
-                      )}
+                  <div className="text-[10px] font-semibold text-gray-900">{item.description}</div>
+                  <div className="text-[9px] text-gray-600 font-mono">{item.product_code}</div>
+                  <div className="text-[9px] text-gray-700 mt-0.5">Qty: <span className="font-semibold">{item.quantity}</span></div>
+                  {item.predicted_delivery_date && (
+                    <div className="text-[9px] text-amber-700 font-semibold mt-0.5">
+                      Est: {new Date(item.predicted_delivery_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                     </div>
-                  </div>
+                  )}
+                  {item.back_order_notes && (
+                    <div className="text-[9px] text-gray-600 mt-0.5 italic line-clamp-2">{item.back_order_notes}</div>
+                  )}
                 </div>
               ))}
             </div>
@@ -800,34 +766,32 @@ export default function DistributorDashboard({
         )}
 
         {/* Order & Invoice History */}
-        <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8e8]">
-          <div className="px-6 py-4 bg-gradient-to-r from-purple-50/50 to-transparent border-b border-[#e8e8e8]">
-            <h2 className="text-[17px] font-[600] text-[#0a0a0a] tracking-[-0.01em]">Order History</h2>
-            <p className="text-[12px] text-[#334155] mt-0.5 font-[500]">
-              {orders.length + invoices.length} total
-            </p>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="px-2.5 py-2 bg-gray-50 border-b border-gray-200">
+            <h2 className="text-xs font-bold text-gray-900">Order History</h2>
+            <p className="text-[10px] text-gray-600">{orders.length + invoices.length} total</p>
           </div>
 
-          <div className="p-6 max-h-[400px] overflow-y-auto">
+          <div className="p-2 max-h-[300px] overflow-y-auto">
             {orders.length === 0 && invoices.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-[13px] text-[#475569] font-[400]">No orders yet</p>
+              <div className="text-center py-4">
+                <p className="text-xs text-gray-500">No orders yet</p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {/* Show orders first (most recent) */}
                 {orders.slice(0, 10).map((order) => (
                   <div
                     key={order.order_id}
-                    className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]"
+                    className="p-1.5 bg-gray-50 rounded border border-gray-200"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <div className="text-[13px] font-[600] text-[#0a0a0a] font-mono">
+                    <div className="flex items-center justify-between gap-1">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <div className="text-[10px] font-semibold text-gray-900 font-mono truncate">
                             {order.order_id}
                           </div>
-                          <div className={`px-2 py-0.5 rounded-[6px] text-[9px] font-[700] uppercase tracking-wide ${
+                          <div className={`px-1 py-0.5 rounded text-[8px] font-bold uppercase ${
                             order.status === 'pending_review'
                               ? 'bg-blue-100 text-blue-800'
                               : order.status === 'partially_fulfilled'
@@ -845,24 +809,11 @@ export default function DistributorDashboard({
                               : order.status}
                           </div>
                         </div>
-                        <div className="text-[11px] text-[#475569] font-[500] mt-0.5">
-                          Submitted: {new Date(order.created_at).toLocaleDateString('en-GB', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric'
-                          })}
-                          {order.reviewed_at && (
-                            <span className="ml-2">
-                              • Reviewed: {new Date(order.reviewed_at).toLocaleDateString('en-GB', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric'
-                              })}
-                            </span>
-                          )}
+                        <div className="text-[9px] text-gray-600 mt-0.5">
+                          {new Date(order.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </div>
                       </div>
-                      <div className="text-[15px] font-[700] text-[#0a0a0a] tracking-[-0.01em]">
+                      <div className="text-xs font-bold text-gray-900 text-right">
                         £{order.total_amount.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
                       </div>
                     </div>
@@ -873,16 +824,16 @@ export default function DistributorDashboard({
                 {invoices.slice(0, 10).map((invoice) => (
                   <div
                     key={invoice.invoice_id}
-                    className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]"
+                    className="p-1.5 bg-gray-50 rounded border border-gray-200"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <div className="text-[13px] font-[600] text-[#0a0a0a] font-mono">
+                    <div className="flex items-center justify-between gap-1">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <div className="text-[10px] font-semibold text-gray-900 font-mono truncate">
                             {invoice.invoice_number}
                           </div>
                           {invoice.status && (
-                            <div className={`px-2 py-0.5 rounded-[6px] text-[9px] font-[700] uppercase tracking-wide ${
+                            <div className={`px-1 py-0.5 rounded text-[8px] font-bold uppercase ${
                               invoice.status === 'paid'
                                 ? 'bg-green-100 text-green-800'
                                 : invoice.status === 'pending'
@@ -893,15 +844,11 @@ export default function DistributorDashboard({
                             </div>
                           )}
                         </div>
-                        <div className="text-[11px] text-[#475569] font-[500] mt-0.5">
-                          Invoice Date: {new Date(invoice.invoice_date).toLocaleDateString('en-GB', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric'
-                          })}
+                        <div className="text-[9px] text-gray-600 mt-0.5">
+                          {new Date(invoice.invoice_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </div>
                       </div>
-                      <div className="text-[15px] font-[700] text-[#0a0a0a] tracking-[-0.01em]">
+                      <div className="text-xs font-bold text-gray-900 text-right">
                         £{invoice.total_amount.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
                       </div>
                     </div>
