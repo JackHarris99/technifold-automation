@@ -15,6 +15,7 @@ interface DistributorUser {
   active: boolean;
   invitation_token: string | null;
   last_login_at: string | null;
+  password_hash?: string | null;
 }
 
 interface Contact {
@@ -159,6 +160,29 @@ export default function DistributorInvitationPanel({ company, distributorUsers, 
     }
   };
 
+  const handleLoginAs = async (user: DistributorUser) => {
+    if (!confirm(`Preview portal as ${user.full_name}?`)) return;
+
+    try {
+      const response = await fetch('/api/admin/distributor-users/login-as', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.user_id }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create preview session');
+      }
+
+      // Redirect to distributor portal
+      window.location.href = data.redirect;
+    } catch (error: any) {
+      alert(`Failed to login as user: ${error.message}`);
+    }
+  };
+
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">
@@ -200,15 +224,26 @@ export default function DistributorInvitationPanel({ company, distributorUsers, 
                     )}
                   </div>
                 </div>
-                {user.invitation_token && (
-                  <button
-                    onClick={() => resendInvitation(user)}
-                    disabled={sending}
-                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-                  >
-                    Resend
-                  </button>
-                )}
+                <div className="flex gap-2">
+                  {user.password_hash && user.active && (
+                    <button
+                      onClick={() => handleLoginAs(user)}
+                      className="px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded hover:bg-purple-200 font-medium"
+                      title="Preview portal as this user"
+                    >
+                      👁 Login As
+                    </button>
+                  )}
+                  {user.invitation_token && (
+                    <button
+                      onClick={() => resendInvitation(user)}
+                      disabled={sending}
+                      className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      Resend
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>

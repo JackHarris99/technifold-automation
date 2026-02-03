@@ -85,7 +85,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
     // Distributor Users (for portal access)
     supabase
       .from('distributor_users')
-      .select('user_id, email, full_name, role, active, invitation_token, last_login_at')
+      .select('user_id, email, full_name, role, active, invitation_token, last_login_at, password_hash')
       .eq('company_id', company_id)
       .order('created_at', { ascending: false }),
 
