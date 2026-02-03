@@ -1056,6 +1056,46 @@ function OverviewTab({
                 )}
               </div>
             )}
+
+            {/* Pricing Tier - Distributor Only */}
+            {company.type === 'distributor' && (
+              <div className="border-t pt-3">
+                <dt className="text-sm text-[#475569] mb-2">Pricing Tier</dt>
+                <dd>
+                  <select
+                    value={company.pricing_tier || 'tier_1'}
+                    onChange={async (e) => {
+                      const newTier = e.target.value;
+                      if (!confirm(`Change pricing tier to ${newTier === 'tier_1' ? 'Tier 1 (40% off)' : newTier === 'tier_2' ? 'Tier 2 (30% off)' : 'Tier 3 (20% off)'}?`)) return;
+
+                      try {
+                        const response = await fetch(`/api/admin/companies/${company.company_id}/update-tier`, {
+                          method: 'PATCH',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ pricing_tier: newTier }),
+                        });
+
+                        if (!response.ok) throw new Error('Failed to update tier');
+
+                        window.location.reload();
+                      } catch (error) {
+                        alert('Failed to update pricing tier');
+                        console.error(error);
+                      }
+                    }}
+                    className="text-sm px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
+                  >
+                    <option value="tier_1">Tier 1 (40% off)</option>
+                    <option value="tier_2">Tier 2 (30% off)</option>
+                    <option value="tier_3">Tier 3 (20% off)</option>
+                  </select>
+                </dd>
+                <p className="text-xs text-gray-500 mt-1">
+                  Determines discount level for all products
+                </p>
+              </div>
+            )}
+
             <div>
               <dt className="text-sm text-[#475569]">Country</dt>
               <dd className="text-[13px] font-[600] text-[#0a0a0a]">{company.country || '-'}</dd>

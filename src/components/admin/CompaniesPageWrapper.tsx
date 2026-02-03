@@ -30,6 +30,7 @@ type SortDirection = 'asc' | 'desc';
 export default function CompaniesPageWrapper({ companies, totalCompanies, viewMode }: CompaniesPageWrapperProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'customer' | 'distributor'>('all');
   const [sortField, setSortField] = useState<SortField>('company_name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
@@ -42,10 +43,15 @@ export default function CompaniesPageWrapper({ companies, totalCompanies, viewMo
   const filteredAndSortedCompanies = useMemo(() => {
     let filtered = companies;
 
+    // Apply type filter
+    if (typeFilter !== 'all') {
+      filtered = filtered.filter(company => company.type === typeFilter);
+    }
+
     // Apply search filter
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
-      filtered = companies.filter(company => {
+      filtered = filtered.filter(company => {
         return (
           company.company_name?.toLowerCase().includes(term) ||
           company.company_id?.toLowerCase().includes(term) ||
@@ -75,7 +81,7 @@ export default function CompaniesPageWrapper({ companies, totalCompanies, viewMo
     });
 
     return sorted;
-  }, [companies, searchTerm, sortField, sortDirection]);
+  }, [companies, searchTerm, typeFilter, sortField, sortDirection]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -103,10 +109,47 @@ export default function CompaniesPageWrapper({ companies, totalCompanies, viewMo
     <div className="p-8">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">All Companies</h1>
-        <p className="text-sm text-gray-800 mt-1">
-          {filteredAndSortedCompanies.length} of {totalCompanies} companies • {getViewModeLabel(viewMode)}
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">All Companies</h1>
+            <p className="text-sm text-gray-800 mt-1">
+              {filteredAndSortedCompanies.length} of {totalCompanies} companies • {getViewModeLabel(viewMode)}
+            </p>
+          </div>
+          {/* Type Filter Toggle */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setTypeFilter('all')}
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                typeFilter === 'all'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              All ({companies.length})
+            </button>
+            <button
+              onClick={() => setTypeFilter('customer')}
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                typeFilter === 'customer'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Customers ({companies.filter(c => c.type === 'customer').length})
+            </button>
+            <button
+              onClick={() => setTypeFilter('distributor')}
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                typeFilter === 'distributor'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Distributors ({companies.filter(c => c.type === 'distributor').length})
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Search & Sort Bar */}
@@ -193,13 +236,29 @@ export default function CompaniesPageWrapper({ companies, totalCompanies, viewMo
                   {/* Header Row */}
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-1">
+                      <div className="flex items-center gap-3 mb-1 flex-wrap">
                         <Link
                           href={`/admin/company/${company.company_id}`}
                           className="text-lg font-semibold text-gray-900 hover:text-blue-600"
                         >
                           {company.company_name}
                         </Link>
+                        {company.type === 'distributor' && (
+                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700">
+                            Distributor
+                          </span>
+                        )}
+                        {company.type === 'distributor' && company.pricing_tier && (
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                            company.pricing_tier === 'tier_1' ? 'bg-green-100 text-green-700' :
+                            company.pricing_tier === 'tier_2' ? 'bg-blue-100 text-blue-700' :
+                            'bg-orange-100 text-orange-700'
+                          }`}>
+                            {company.pricing_tier === 'tier_1' ? 'Tier 1 (40% off)' :
+                             company.pricing_tier === 'tier_2' ? 'Tier 2 (30% off)' :
+                             'Tier 3 (20% off)'}
+                          </span>
+                        )}
                         {company.sage_customer_code && (
                           <span className="px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700">
                             Sage: {company.sage_customer_code}
