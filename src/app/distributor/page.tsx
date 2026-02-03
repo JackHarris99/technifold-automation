@@ -70,7 +70,13 @@ export default async function DistributorDashboardPage() {
     .eq('company_id', distributor.company_id)
     .single();
 
-  const distributorTier = company?.pricing_tier || 'standard';
+  const distributorTier = company?.pricing_tier || 'tier_1';
+
+  // Determine which discount column to use based on pricing tier
+  const discountColumn =
+    distributorTier === 'tier_1' ? 'discount_40_percent' :
+    distributorTier === 'tier_2' ? 'discount_30_percent' :
+    'discount_20_percent';
 
   // Check if company has custom product catalog
   const { data: customCatalog } = await supabase
@@ -131,7 +137,7 @@ export default async function DistributorDashboardPage() {
   while (hasMorePricing) {
     const { data: pricingBatch, error: pricingError } = await supabase
       .from('distributor_pricing')
-      .select('product_code, standard_price, currency')
+      .select(`product_code, ${discountColumn}, currency`)
       .eq('active', true)
       .range(pricingOffset, pricingOffset + pricingBatchSize - 1);
 
@@ -204,8 +210,8 @@ export default async function DistributorDashboardPage() {
       finalPrice = customPricingData.custom_price;
       currency = customPricingData.currency;
       hasCustomPricing = true;
-    } else if (standardPricingData?.standard_price !== undefined) {
-      finalPrice = standardPricingData.standard_price;
+    } else if (standardPricingData?.[discountColumn] !== undefined) {
+      finalPrice = standardPricingData[discountColumn];
       currency = standardPricingData.currency;
       hasDistributorPricing = true;
     }

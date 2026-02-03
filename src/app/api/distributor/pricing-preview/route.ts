@@ -41,11 +41,24 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
-    // 1. Fetch distributor pricing (wholesale prices)
+    // 1. Get distributor's pricing tier
+    const { data: company } = await supabase
+      .from('companies')
+      .select('pricing_tier')
+      .eq('company_id', distributor.company_id)
+      .single();
+
+    const distributorTier = company?.pricing_tier || 'tier_1';
+    const discountColumn =
+      distributorTier === 'tier_1' ? 'discount_40_percent' :
+      distributorTier === 'tier_2' ? 'discount_30_percent' :
+      'discount_20_percent';
+
+    // 2. Fetch distributor pricing (wholesale prices)
     const productCodes = items.map(item => item.product_code);
     const { data: pricing, error: pricingError } = await supabase
       .from('distributor_pricing')
-      .select('product_code, standard_price, currency')
+      .select(`product_code, ${discountColumn}, currency`)
       .in('product_code', productCodes)
       .eq('active', true);
 
@@ -56,7 +69,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Fetch product details
+    // 3. Fetch product details
     const { data: products, error: productsError } = await supabase
       .from('products')
       .select('product_code, description, image_url')
@@ -69,12 +82,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Build line items with wholesale pricing
+    // 4. Build line items with wholesale pricing
     const lineItems = items.map(item => {
       const priceRecord = pricing?.find(p => p.product_code === item.product_code);
       const product = products?.find(p => p.product_code === item.product_code);
 
-      const unit_price = priceRecord?.standard_price || 0;
+      const unit_price = priceRecord?.[discountColumn] || 0;
       const line_total = unit_price * item.quantity;
 
       return {
@@ -90,22 +103,22 @@ export async function POST(request: NextRequest) {
 
     const subtotal = lineItems.reduce((sum, item) => sum + item.line_total, 0);
 
-    // 4. Fetch company details for VAT calculation
-    const { data: company, error: companyError } = await supabase
+    // 5. Fetch company details for VAT calculation
+    const { data: companyDetails, error: companyError } = await supabase
       .from('companies')
       .select('company_id, company_name, vat_number, billing_country')
       .eq('company_id', distributor.company_id)
       .single();
 
-    if (companyError || !company) {
+    if (companyError || !companyDetails) {
       return NextResponse.json(
         { error: 'Company not found' },
         { status: 404 }
       );
     }
 
-    // 5. Determine shipping destination
-    let destinationCountry = company.billing_country || 'GB';
+    // 6. Determine shipping destination
+    let destinationCountry = companyDetails.billing_country || 'GB';
 
     if (shipping_address_id) {
       const { data: shippingAddress } = await supabase
@@ -132,14 +145,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 6. Calculate shipping cost
+    // 7. Calculate shipping cost
     const { data: shippingCost } = await supabase.rpc('calculate_shipping_cost', {
       p_country_code: destinationCountry,
       p_order_subtotal: subtotal,
     });
     const shipping = shippingCost || 0;
 
-    // 7. Calculate VAT
+    // 8. Calculate VAT
     const taxableAmount = subtotal + shipping;
     let vat_amount = 0;
     let vat_rate = 0;
@@ -157,7 +170,7 @@ export async function POST(request: NextRequest) {
       const euCountries = ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE'];
 
       if (euCountries.includes(countryUpper)) {
-        if (company.vat_number && company.vat_number.trim().length > 0) {
+        if (companyDetails.vat_number && companyDetails.vat_number.trim().length > 0) {
           vat_amount = 0;
           vat_rate = 0;
           vat_exempt_reason = 'EU Reverse Charge';

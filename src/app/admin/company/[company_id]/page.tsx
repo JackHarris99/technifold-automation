@@ -200,10 +200,10 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
       .select('product_code, visible')
       .eq('company_id', company_id),
 
-    // Standard distributor pricing
+    // Standard distributor pricing (all tiers)
     supabase
       .from('distributor_pricing')
-      .select('product_code, standard_price'),
+      .select('product_code, discount_40_percent, discount_30_percent, discount_20_percent'),
 
     // Company-specific pricing (for distributors)
     supabase
@@ -269,6 +269,19 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
     notFound();
   }
 
+  // Map distributor pricing to standard_price based on company's pricing tier
+  const company = companyResult.data;
+  const pricingTier = company.pricing_tier || 'tier_1';
+  const discountColumn =
+    pricingTier === 'tier_1' ? 'discount_40_percent' :
+    pricingTier === 'tier_2' ? 'discount_30_percent' :
+    'discount_20_percent';
+
+  const mappedDistributorPricing = (distributorPricingResult.data || []).map((pricing: any) => ({
+    product_code: pricing.product_code,
+    standard_price: pricing[discountColumn],
+  }));
+
   return (
     <CompanyDetailView
       company={companyResult.data}
@@ -285,7 +298,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
       quotes={quotesResult.data || []}
       products={allProducts}
       catalogEntries={catalogEntriesResult.data || []}
-      distributorPricing={distributorPricingResult.data || []}
+      distributorPricing={mappedDistributorPricing}
       companyPricing={companyPricingResult.data || []}
       companyMachines={companyMachinesResult.data || []}
       partnerAssociation={partnerAssociationResult.data || null}
