@@ -36,6 +36,7 @@ interface PurchasedProduct {
 
 interface DistributorPortalProductsProps {
   companyId: string;
+  companyTier: string; // tier_1, tier_2, tier_3
   products: Product[];
   catalogEntries: CatalogEntry[];
   distributorPricing: DistributorPricing[];
@@ -45,6 +46,7 @@ interface DistributorPortalProductsProps {
 
 export default function DistributorPortalProducts({
   companyId,
+  companyTier,
   products,
   catalogEntries,
   distributorPricing,
@@ -59,6 +61,12 @@ export default function DistributorPortalProducts({
     return prices;
   });
   const [importing, setImporting] = useState(false);
+
+  // Calculate discount multiplier based on company tier
+  const discountMultiplier =
+    companyTier === 'tier_1' ? 0.60 : // 40% off
+    companyTier === 'tier_2' ? 0.70 : // 30% off
+    0.80; // 20% off (tier_3)
 
   // Check if custom catalog exists
   const hasCustomCatalog = catalogEntries.some(e => e.visible);
@@ -79,26 +87,22 @@ export default function DistributorPortalProducts({
     }
   });
 
-  // Build pricing maps
-  const distPricingMap = new Map<string, number>();
-  distributorPricing.forEach(p => distPricingMap.set(p.product_code, p.standard_price));
-
+  // Build custom pricing map
   const companyPricingMap = new Map<string, number>();
   companyPricing.forEach(p => companyPricingMap.set(p.product_code, p.custom_price));
 
   // Get display price for a product
-  const getDisplayPrice = (product: Product): { price: number; type: 'custom' | 'standard' | 'base' } => {
+  const getDisplayPrice = (product: Product): { price: number; basePrice: number; type: 'custom' | 'tier' } => {
+    const basePrice = product.price || 0;
     const customPrice = companyPricingMap.get(product.product_code);
+
     if (customPrice !== undefined) {
-      return { price: customPrice, type: 'custom' };
+      return { price: customPrice, basePrice, type: 'custom' };
     }
 
-    const standardPrice = distPricingMap.get(product.product_code);
-    if (standardPrice !== undefined) {
-      return { price: standardPrice, type: 'standard' };
-    }
-
-    return { price: product.price || 0, type: 'base' };
+    // Calculate dynamic tier pricing
+    const tierPrice = basePrice * discountMultiplier;
+    return { price: tierPrice, basePrice, type: 'tier' };
   };
 
   const handleSavePrice = async (productCode: string) => {
@@ -233,7 +237,7 @@ export default function DistributorPortalProducts({
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {portalProducts.slice(0, 12).map(product => {
-                  const { price, type } = getDisplayPrice(product);
+                  const { price, basePrice, type } = getDisplayPrice(product);
                   return (
                     <div key={product.product_code} className="border border-gray-200 rounded-lg p-4">
                       <div className="flex items-start gap-3">
@@ -251,13 +255,22 @@ export default function DistributorPortalProducts({
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-gray-900">{product.description}</div>
+                          <div className="font-medium text-gray-900 text-sm">{product.description}</div>
                           <div className="text-xs text-gray-600 mt-1">SKU: {product.product_code}</div>
-                          <div className="text-sm font-semibold text-gray-900 mt-2">
-                            £{price.toFixed(2)}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {type === 'standard' ? 'Standard price' : type === 'custom' ? 'Custom price' : 'Base price'}
+                          <div className="mt-2 space-y-0.5">
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-sm font-semibold text-green-600">
+                                £{price.toFixed(2)}
+                              </span>
+                              <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${
+                                type === 'custom' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                              }`}>
+                                {type === 'custom' ? 'Custom' : `Tier ${companyTier.slice(-1)}`}
+                              </span>
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              RRP: £{basePrice.toFixed(2)}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -311,7 +324,7 @@ export default function DistributorPortalProducts({
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {portalProducts.map(product => {
-                const { price, type } = getDisplayPrice(product);
+                const { price, basePrice, type } = getDisplayPrice(product);
                 const customPrice = customPrices[product.product_code];
                 const hasCustomPrice = companyPricingMap.has(product.product_code);
 
@@ -340,13 +353,22 @@ export default function DistributorPortalProducts({
 
                     {/* Pricing Section */}
                     <div className="border-t border-gray-200 pt-3 space-y-2">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-gray-600">Current Price:</span>
-                        <span className={`font-semibold ${type === 'custom' ? 'text-blue-600' : 'text-gray-900'}`}>
-                          £{price.toFixed(2)}
-                          {type === 'custom' && ' (custom)'}
-                          {type === 'standard' && ' (standard)'}
-                        </span>
+                      <div className="space-y-1">
+                        <div className="flex items-baseline justify-between text-xs">
+                          <span className="text-gray-600">Their Price:</span>
+                          <div className="flex items-baseline gap-2">
+                            <span className="font-semibold text-green-600">£{price.toFixed(2)}</span>
+                            <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${
+                              type === 'custom' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                            }`}>
+                              {type === 'custom' ? 'Custom' : `Tier ${companyTier.slice(-1)}`}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-baseline justify-between text-xs">
+                          <span className="text-gray-600">RRP (Full):</span>
+                          <span className="text-gray-900">£{basePrice.toFixed(2)}</span>
+                        </div>
                       </div>
 
                       {/* Custom Price Input */}
