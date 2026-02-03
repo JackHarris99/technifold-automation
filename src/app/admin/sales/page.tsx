@@ -345,12 +345,20 @@ export default async function SalesCenterPage() {
                 }
               </p>
             </div>
-            <Link
-              href="/admin/my-performance"
-              className="px-4 py-2 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 transition-colors"
-            >
-              💰 My Performance
-            </Link>
+            <div className="flex gap-3">
+              <Link
+                href="/admin/sales/distributor-analytics"
+                className="px-4 py-2 bg-teal-600 text-white rounded-lg font-semibold hover:bg-teal-700 transition-colors"
+              >
+                📊 Distributor Analytics
+              </Link>
+              <Link
+                href="/admin/my-performance"
+                className="px-4 py-2 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 transition-colors"
+              >
+                💰 My Performance
+              </Link>
+            </div>
           </div>
         </div>
       </div>
