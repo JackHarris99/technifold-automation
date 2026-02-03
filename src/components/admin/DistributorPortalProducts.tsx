@@ -145,15 +145,48 @@ export default function DistributorPortalProducts({
             company_id: companyId,
             product_code: p.product_code,
           }),
+        }).then(async (res) => {
+          if (!res.ok) {
+            const error = await res.text();
+            throw new Error(error);
+          }
+          return { success: true, product_code: p.product_code };
+        }).catch((err) => {
+          return { success: false, product_code: p.product_code, error: err.message };
         })
       );
 
-      await Promise.all(promises);
+      const results = await Promise.allSettled(promises);
 
-      alert(`✓ Imported ${purchasedProducts.length} products to catalog`);
-      window.location.reload();
+      // Count successes and failures
+      const succeeded: string[] = [];
+      const failed: Array<{ product_code: string; error: string }> = [];
+
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          if (result.value.success) {
+            succeeded.push(result.value.product_code);
+          } else {
+            failed.push({ product_code: result.value.product_code, error: result.value.error || 'Unknown error' });
+          }
+        } else {
+          failed.push({ product_code: purchasedProducts[index].product_code, error: result.reason?.message || 'Unknown error' });
+        }
+      });
+
+      // Show detailed results
+      if (failed.length === 0) {
+        alert(`✓ Successfully imported all ${succeeded.length} products to catalog`);
+        window.location.reload();
+      } else if (succeeded.length === 0) {
+        alert(`✗ Failed to import any products.\n\nAll ${failed.length} products failed. First error: ${failed[0].error}`);
+      } else {
+        const failedCodes = failed.map(f => f.product_code).join(', ');
+        alert(`⚠ Partial import completed:\n\n✓ ${succeeded.length} products imported successfully\n✗ ${failed.length} products failed: ${failedCodes}\n\nFirst error: ${failed[0].error}`);
+        window.location.reload();
+      }
     } catch (err) {
-      alert('Failed to import products');
+      alert('Failed to import products: ' + (err instanceof Error ? err.message : 'Unknown error'));
     } finally {
       setImporting(false);
     }

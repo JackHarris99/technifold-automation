@@ -33,6 +33,9 @@ export default function CompaniesPageWrapper({ companies, totalCompanies, viewMo
   const [typeFilter, setTypeFilter] = useState<'all' | 'customer' | 'distributor'>('all');
   const [sortField, setSortField] = useState<SortField>('company_name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [selectedCompanies, setSelectedCompanies] = useState<Set<string>>(new Set());
+  const [bulkTier, setBulkTier] = useState<string>('tier_1');
+  const [savingBulk, setSavingBulk] = useState(false);
 
   const handleAddSuccess = () => {
     // Refresh the page to show new company
@@ -89,6 +92,63 @@ export default function CompaniesPageWrapper({ companies, totalCompanies, viewMo
     } else {
       setSortField(field);
       setSortDirection('asc');
+    }
+  };
+
+  const toggleCompanySelection = (companyId: string) => {
+    setSelectedCompanies(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(companyId)) {
+        newSet.delete(companyId);
+      } else {
+        newSet.add(companyId);
+      }
+      return newSet;
+    });
+  };
+
+  const selectAllDistributors = () => {
+    const distributors = filteredAndSortedCompanies.filter(c => c.type === 'distributor');
+    setSelectedCompanies(new Set(distributors.map(c => c.company_id)));
+  };
+
+  const clearSelection = () => {
+    setSelectedCompanies(new Set());
+  };
+
+  const handleBulkTierUpdate = async () => {
+    if (selectedCompanies.size === 0) return;
+
+    if (!confirm(`Change pricing tier to ${bulkTier === 'tier_1' ? 'Tier 1 (40% off)' : bulkTier === 'tier_2' ? 'Tier 2 (30% off)' : 'Tier 3 (20% off)'} for ${selectedCompanies.size} distributor${selectedCompanies.size !== 1 ? 's' : ''}?`)) {
+      return;
+    }
+
+    setSavingBulk(true);
+
+    try {
+      const selectedDistributors = companies
+        .filter(c => selectedCompanies.has(c.company_id))
+        .map(c => ({
+          sage_customer_code: c.sage_customer_code,
+          pricing_tier: bulkTier,
+        }));
+
+      const response = await fetch('/api/admin/distributors/bulk-update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ distributors: selectedDistributors }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update');
+
+      alert(`✓ Updated ${selectedCompanies.size} distributor${selectedCompanies.size !== 1 ? 's' : ''} successfully`);
+      setSelectedCompanies(new Set());
+      window.location.reload();
+    } catch (error) {
+      alert('Failed to update pricing tiers. Please try again.');
+      console.error(error);
+    } finally {
+      setSavingBulk(false);
     }
   };
 
@@ -220,6 +280,50 @@ export default function CompaniesPageWrapper({ companies, totalCompanies, viewMo
         </div>
       </div>
 
+      {/* Bulk Action Bar - Only show when distributors are selected */}
+      {selectedCompanies.size > 0 && typeFilter === 'distributor' && (
+        <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-bold text-gray-900">
+                {selectedCompanies.size} distributor{selectedCompanies.size !== 1 ? 's' : ''} selected
+              </span>
+              <button
+                onClick={selectAllDistributors}
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              >
+                Select All Distributors
+              </button>
+              <button
+                onClick={clearSelection}
+                className="text-sm text-gray-600 hover:text-gray-800 font-medium"
+              >
+                Clear Selection
+              </button>
+            </div>
+            <div className="flex items-center gap-3">
+              <label className="text-sm font-bold text-gray-800">Change pricing tier to:</label>
+              <select
+                value={bulkTier}
+                onChange={(e) => setBulkTier(e.target.value)}
+                className="px-4 py-2 border-2 border-gray-300 rounded-lg text-sm font-semibold bg-white"
+              >
+                <option value="tier_1">Tier 1 (40% off)</option>
+                <option value="tier_2">Tier 2 (30% off)</option>
+                <option value="tier_3">Tier 3 (20% off)</option>
+              </select>
+              <button
+                onClick={handleBulkTierUpdate}
+                disabled={savingBulk}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                {savingBulk ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Companies List */}
       <div className="space-y-3">
         {filteredAndSortedCompanies.length === 0 ? (
@@ -235,7 +339,17 @@ export default function CompaniesPageWrapper({ companies, totalCompanies, viewMo
                 <div className="p-5">
                   {/* Header Row */}
                   <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
+                    <div className="flex items-start gap-3 flex-1">
+                      {/* Checkbox - Only show for distributors */}
+                      {company.type === 'distributor' && (
+                        <input
+                          type="checkbox"
+                          checked={selectedCompanies.has(company.company_id)}
+                          onChange={() => toggleCompanySelection(company.company_id)}
+                          className="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                        />
+                      )}
+                      <div className="flex-1">
                       <div className="flex items-center gap-3 mb-1 flex-wrap">
                         <Link
                           href={`/admin/company/${company.company_id}`}
@@ -267,6 +381,7 @@ export default function CompaniesPageWrapper({ companies, totalCompanies, viewMo
                       </div>
                       <div className="text-xs text-gray-500">
                         ID: {company.company_id}
+                      </div>
                       </div>
                     </div>
                     <Link
