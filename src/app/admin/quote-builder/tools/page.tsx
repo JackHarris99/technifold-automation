@@ -410,6 +410,8 @@ export default function ToolsQuoteBuilderPage() {
               ...li,
               discount_percent: blanketDiscount,
             })),
+            quote_type: quoteType,
+            pricing_mode: quoteType === 'interactive' ? 'standard' : null,
             free_shipping: freeShipping,
           }),
         });
