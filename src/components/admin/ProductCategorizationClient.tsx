@@ -157,9 +157,21 @@ export default function ProductCategorizationClient({ products: initialProducts 
   // Update a field for a product
   const updateField = (productCode: string, field: keyof Product, value: any) => {
     setProducts((prev) =>
-      prev.map((p) =>
-        p.product_code === productCode ? { ...p, [field]: value } : p
-      )
+      prev.map((p) => {
+        if (p.product_code !== productCode) return p;
+
+        const updated = { ...p, [field]: value };
+
+        // Recalculate distributor prices if base price changes
+        if (field === 'price') {
+          const price = parseFloat(value) || 0;
+          updated.dist_price_20 = String(price * 0.80);
+          updated.dist_price_30 = String(price * 0.70);
+          updated.dist_price_40 = String(price * 0.60);
+        }
+
+        return updated;
+      })
     );
     setModifiedCodes((prev) => new Set(prev).add(productCode));
   };
@@ -298,13 +310,13 @@ export default function ProductCategorizationClient({ products: initialProducts 
         throw new Error(errorData.error || 'Failed to save changes');
       }
 
-      setSaveStatus(`✓ Saved ${modifiedProducts.length} products successfully - Reloading...`);
+      setSaveStatus(`✓ Saved ${modifiedProducts.length} products successfully`);
       setModifiedCodes(new Set());
 
-      // Reload page to show updated data
+      // Clear success message after 3 seconds
       setTimeout(() => {
-        window.location.reload();
-      }, 800);
+        setSaveStatus(null);
+      }, 3000);
     } catch (error) {
       setSaveStatus('✗ Failed to save changes');
       console.error('Save error:', error);
