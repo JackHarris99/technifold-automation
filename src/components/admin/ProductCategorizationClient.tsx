@@ -27,6 +27,7 @@ interface Product {
   image_url: string | null;
   last_sold_date: string | null;
   times_sold: number;
+  total_quantity_ordered: number;
   ever_sold: boolean;
   dist_price_20: string;
   dist_price_30: string;
@@ -493,6 +494,14 @@ export default function ProductCategorizationClient({ products: initialProducts 
                   </th>
                   <th
                     className="px-3 py-2 text-center text-xs font-medium text-gray-700 uppercase cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('total_quantity_ordered')}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      Qty Ordered {sortColumn === 'total_quantity_ordered' && <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>}
+                    </div>
+                  </th>
+                  <th
+                    className="px-3 py-2 text-center text-xs font-medium text-gray-700 uppercase cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort('ever_sold')}
                   >
                     <div className="flex items-center justify-center gap-1">
@@ -558,6 +567,7 @@ export default function ProductCategorizationClient({ products: initialProducts 
                       <option value="premium">Prem</option>
                     </select>
                   </th>
+                  <th className="px-3 py-2"></th>
                   <th className="px-3 py-2"></th>
                   <th className="px-3 py-2"></th>
                   <th className="px-3 py-2">
@@ -773,6 +783,12 @@ export default function ProductCategorizationClient({ products: initialProducts 
                               year: '2-digit'
                             })
                           : '-'}
+                      </span>
+                    </td>
+                    {/* Total Quantity Ordered */}
+                    <td className="px-3 py-2 text-center">
+                      <span className={`text-xs font-semibold ${product.total_quantity_ordered > 0 ? 'text-blue-600' : 'text-gray-400'}`}>
+                        {product.total_quantity_ordered || '-'}
                       </span>
                     </td>
                     {/* Ever Sold? */}

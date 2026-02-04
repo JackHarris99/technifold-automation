@@ -8,6 +8,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { getViewModeFromCookies, getSalesRepFromViewMode } from '@/lib/viewMode';
 
 interface TrialEnding {
   subscription_id: string;
@@ -27,9 +28,8 @@ export default async function TrialsEndingPage() {
   }
 
   // Get view mode from cookies
-  const cookieStore = await cookies();
-  const viewModeCookie = cookieStore.get('view_mode');
-  const viewMode = viewModeCookie?.value === 'my_customers' ? 'my_customers' : 'all';
+  const viewMode = await getViewModeFromCookies();
+  const salesRepId = getSalesRepFromViewMode(viewMode, currentUser.sales_rep_id || '');
 
   const supabase = getSupabaseClient();
 
@@ -39,9 +39,9 @@ export default async function TrialsEndingPage() {
     .select('company_id, company_name, account_owner')
     .eq('type', 'customer');  // Only customers in sales centre
 
-  // Apply "My Customers" filter
-  if (viewMode === 'my_customers') {
-    companiesQuery = companiesQuery.eq('account_owner', currentUser.sales_rep_id);
+  // Apply sales rep filter
+  if (salesRepId) {
+    companiesQuery = companiesQuery.eq('account_owner', salesRepId);
   }
 
   const { data: companies } = await companiesQuery;

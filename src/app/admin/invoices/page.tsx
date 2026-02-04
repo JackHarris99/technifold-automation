@@ -9,6 +9,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import InvoiceListClient from '@/components/admin/InvoiceListClient';
+import { getViewModeFromCookies, getSalesRepFromViewMode, getViewModeLabel } from '@/lib/viewMode';
 
 // Force dynamic rendering to respect cookie changes
 export const dynamic = 'force-dynamic';
@@ -34,9 +35,8 @@ export default async function InvoicesPage() {
   }
 
   // Get view mode from cookies
-  const cookieStore = await cookies();
-  const viewModeCookie = cookieStore.get('view_mode');
-  const viewMode = viewModeCookie?.value === 'my_customers' ? 'my_customers' : 'all';
+  const viewMode = await getViewModeFromCookies();
+  const salesRepId = getSalesRepFromViewMode(viewMode, currentUser.sales_rep_id || '');
 
   const supabase = getSupabaseClient();
 
@@ -44,8 +44,8 @@ export default async function InvoicesPage() {
   // Use JOIN pattern to avoid URL length limits with .in() on large arrays
   let invoicesQuery;
 
-  if (viewMode === 'my_customers' && currentUser.sales_rep_id) {
-    // Join with companies to filter by account_owner (avoids .in() with 686 UUIDs)
+  if (salesRepId) {
+    // Filter by specific sales rep (my_customers or view_as_*)
     invoicesQuery = supabase
       .from('invoices')
       .select(`
@@ -61,24 +61,8 @@ export default async function InvoicesPage() {
           account_owner
         )
       `)
-      .eq('companies.account_owner', currentUser.sales_rep_id)
+      .eq('companies.account_owner', salesRepId)
       .order('invoice_date', { ascending: false })
-      .limit(100);
-  } else if (viewMode === 'my_customers') {
-    // My customers mode but no sales_rep_id - return empty
-    invoicesQuery = supabase
-      .from('invoices')
-      .select(`
-        invoice_id,
-        company_id,
-        invoice_number,
-        total_amount,
-        payment_status,
-        invoice_date,
-        invoice_url,
-        stripe_invoice_id
-      `)
-      .eq('company_id', '00000000-0000-0000-0000-000000000000')
       .limit(100);
   } else {
     // All companies mode
@@ -137,7 +121,7 @@ export default async function InvoicesPage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Invoices</h1>
               <p className="text-sm text-gray-800 mt-1">
-                {viewMode === 'my_customers' ? 'My Customers Only' : 'All Companies (Team View)'}
+                {getViewModeLabel(viewMode)}
               </p>
             </div>
           </div>

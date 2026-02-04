@@ -8,6 +8,7 @@ import { getCurrentUser } from '@/lib/auth';
 import EngagementsTable from '@/components/admin/EngagementsTable';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { getViewModeFromCookies, getSalesRepFromViewMode } from '@/lib/viewMode';
 
 export default async function EngagementsPage() {
   const supabase = getSupabaseClient();
@@ -18,9 +19,8 @@ export default async function EngagementsPage() {
   }
 
   // Get view mode from cookies
-  const cookieStore = await cookies();
-  const viewModeCookie = cookieStore.get('view_mode');
-  const viewMode = viewModeCookie?.value === 'my_customers' ? 'my_customers' : 'all';
+  const viewMode = await getViewModeFromCookies();
+  const salesRepId = getSalesRepFromViewMode(viewMode, currentUser.sales_rep_id || '');
 
   // Fetch all engagement events with pagination
   let allEngagements: any[] = [];
@@ -61,11 +61,11 @@ export default async function EngagementsPage() {
     }
   }
 
-  // Filter by account ownership if in "my_customers" mode
+  // Filter by account ownership based on view mode
   let filteredEngagements = allEngagements || [];
-  if (viewMode === 'my_customers') {
+  if (salesRepId) {
     filteredEngagements = filteredEngagements.filter(event =>
-      event.companies?.account_owner === currentUser.sales_rep_id
+      event.companies?.account_owner === salesRepId
     );
   }
 
