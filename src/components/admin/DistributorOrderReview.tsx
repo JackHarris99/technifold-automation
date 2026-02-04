@@ -184,7 +184,7 @@ export default function DistributorOrderReview({ order, items, currentUser, back
           confirmed_shipping: shippingChanged ? (freeShipping ? 0 : parseFloat(shippingCost)) : null,
           shipping_override_reason: shippingChanged ? shippingOverrideReason : null,
 
-          reviewed_by: currentUser.sales_rep_id,
+          reviewed_by: currentUser.user_id,
         }),
       });
 
@@ -196,7 +196,6 @@ export default function DistributorOrderReview({ order, items, currentUser, back
 
       alert(`Invoice created successfully!\nInvoice ID: ${data.invoice_id}\nStripe Invoice: ${data.stripe_invoice_id}`);
       router.push(backUrl);
-      router.refresh();
     } catch (error: any) {
       console.error('Error approving order:', error);
       alert(`Failed to approve order: ${error.message}`);
