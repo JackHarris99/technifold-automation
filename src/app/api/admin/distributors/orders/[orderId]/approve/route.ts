@@ -14,6 +14,10 @@ interface ApprovalData {
   back_order_dates: Record<string, string>;
   back_order_notes: Record<string, string>;
 
+  // Item quantity and price overrides
+  item_quantities: Record<string, number>;
+  item_prices: Record<string, number>;
+
   // Address overrides (null if not changed)
   admin_billing_line_1: string | null;
   admin_billing_line_2: string | null;
@@ -128,8 +132,12 @@ export async function POST(
     // Determine final shipping cost
     const finalShipping = body.confirmed_shipping !== null ? body.confirmed_shipping : order.predicted_shipping;
 
-    // Calculate totals for in-stock items
-    const subtotal = inStockItems.reduce((sum, item) => sum + parseFloat(item.line_total.toString()), 0);
+    // Calculate totals for in-stock items using updated quantities and prices
+    const subtotal = inStockItems.reduce((sum, item) => {
+      const qty = body.item_quantities?.[item.item_id] || item.quantity;
+      const price = body.item_prices?.[item.item_id] || parseFloat(item.unit_price.toString());
+      return sum + (qty * price);
+    }, 0);
     const taxableAmount = subtotal + finalShipping;
 
     // VAT calculation (simplified - use order's original VAT rate)
@@ -184,14 +192,17 @@ export async function POST(
       },
     });
 
-    // 3. Add line items to invoice
+    // 3. Add line items to invoice (with updated quantities and prices)
     for (const item of inStockItems) {
+      const qty = body.item_quantities?.[item.item_id] || item.quantity;
+      const price = body.item_prices?.[item.item_id] || parseFloat(item.unit_price.toString());
+
       await stripe.invoiceItems.create({
         customer: stripeCustomerId,
         invoice: stripeInvoice.id,
         description: `${item.product_code} - ${item.description}`,
-        quantity: item.quantity,
-        unit_amount: Math.round(parseFloat(item.unit_price.toString()) * 100),
+        quantity: qty,
+        unit_amount: Math.round(price * 100),
         currency: 'gbp',
       });
     }
@@ -257,17 +268,23 @@ export async function POST(
 
       invoiceId = invoiceRecord.invoice_id;
 
-      // 8b. Create invoice_items records for in-stock items
+      // 8b. Create invoice_items records for in-stock items (with updated quantities and prices)
       if (inStockItems.length > 0) {
-        const invoiceItemsData = inStockItems.map((item, index) => ({
-          invoice_id: invoiceId,
-          product_code: item.product_code,
-          line_number: index + 1,
-          description: item.description,
-          quantity: item.quantity,
-          unit_price: parseFloat(item.unit_price.toString()),
-          line_total: parseFloat(item.line_total.toString()),
-        }));
+        const invoiceItemsData = inStockItems.map((item, index) => {
+          const qty = body.item_quantities?.[item.item_id] || item.quantity;
+          const price = body.item_prices?.[item.item_id] || parseFloat(item.unit_price.toString());
+          const lineTotal = qty * price;
+
+          return {
+            invoice_id: invoiceId,
+            product_code: item.product_code,
+            line_number: index + 1,
+            description: item.description,
+            quantity: qty,
+            unit_price: price,
+            line_total: lineTotal,
+          };
+        });
 
         const { error: itemsInsertError } = await supabase
           .from('invoice_items')
@@ -308,7 +325,7 @@ export async function POST(
         throw new Error(`Failed to update order: ${orderUpdateError.message}`);
       }
 
-      // 10. Update item statuses
+      // 10. Update item statuses (and quantities/prices if changed)
       for (const item of items) {
         const status = body.item_statuses[item.item_id];
 
@@ -318,6 +335,22 @@ export async function POST(
         }
 
         const updateData: any = { status };
+
+        // Update quantity and price if changed
+        const newQty = body.item_quantities?.[item.item_id];
+        const newPrice = body.item_prices?.[item.item_id];
+        if (newQty !== undefined && newQty !== item.quantity) {
+          updateData.quantity = newQty;
+        }
+        if (newPrice !== undefined && newPrice !== parseFloat(item.unit_price.toString())) {
+          updateData.unit_price = newPrice;
+        }
+        // Recalculate line_total if either changed
+        if (newQty !== undefined || newPrice !== undefined) {
+          const finalQty = newQty !== undefined ? newQty : item.quantity;
+          const finalPrice = newPrice !== undefined ? newPrice : parseFloat(item.unit_price.toString());
+          updateData.line_total = finalQty * finalPrice;
+        }
 
         if (status === 'in_stock') {
           updateData.status = 'fulfilled';

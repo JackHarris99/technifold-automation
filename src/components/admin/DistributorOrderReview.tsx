@@ -90,10 +90,22 @@ export default function DistributorOrderReview({ order, items, currentUser, back
   const [freeShipping, setFreeShipping] = useState(false);
   const [shippingOverrideReason, setShippingOverrideReason] = useState('');
 
-  // Calculate invoice total preview
+  // Item quantity and price overrides
+  const [itemQuantities, setItemQuantities] = useState<Record<string, number>>(
+    () => Object.fromEntries(items.map(item => [item.item_id, item.quantity]))
+  );
+  const [itemPrices, setItemPrices] = useState<Record<string, number>>(
+    () => Object.fromEntries(items.map(item => [item.item_id, item.unit_price]))
+  );
+
+  // Calculate invoice total preview with updated quantities and prices
   const invoicePreview = useMemo(() => {
     const inStockItems = items.filter(item => itemStatuses[item.item_id] === 'in_stock');
-    const subtotal = inStockItems.reduce((sum, item) => sum + item.line_total, 0);
+    const subtotal = inStockItems.reduce((sum, item) => {
+      const qty = itemQuantities[item.item_id] || item.quantity;
+      const price = itemPrices[item.item_id] || item.unit_price;
+      return sum + (qty * price);
+    }, 0);
     const shipping = freeShipping ? 0 : parseFloat(shippingCost) || 0;
     const taxableAmount = subtotal + shipping;
 
@@ -110,7 +122,7 @@ export default function DistributorOrderReview({ order, items, currentUser, back
       vat,
       total,
     };
-  }, [items, itemStatuses, shippingCost, freeShipping, order]);
+  }, [items, itemStatuses, itemQuantities, itemPrices, shippingCost, freeShipping, order]);
 
   const handleApproveOrder = async () => {
     if (submitting) return;
@@ -147,6 +159,10 @@ export default function DistributorOrderReview({ order, items, currentUser, back
           item_statuses: itemStatuses,
           back_order_dates: backOrderDates,
           back_order_notes: backOrderNotes,
+
+          // Item quantity and price overrides
+          item_quantities: itemQuantities,
+          item_prices: itemPrices,
 
           // Billing address (check if changed from original)
           admin_billing_line_1: billingLine1 !== order.billing_address_line_1 ? billingLine1 : null,
@@ -249,9 +265,44 @@ export default function DistributorOrderReview({ order, items, currentUser, back
                         {item.description}
                       </div>
                       <div className="text-sm text-[#666] font-mono">{item.product_code}</div>
-                      <div className="mt-2 text-sm text-[#0a0a0a]">
-                        Quantity: <span className="font-semibold">{item.quantity}</span> × £{item.unit_price.toFixed(2)} =
-                        <span className="font-bold text-[#16a34a] ml-1">£{item.line_total.toFixed(2)}</span>
+
+                      {/* Editable Quantity and Price */}
+                      <div className="mt-3 flex items-center gap-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-[#666] mb-1">Quantity</label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={itemQuantities[item.item_id] || item.quantity}
+                            onChange={(e) => setItemQuantities(prev => ({
+                              ...prev,
+                              [item.item_id]: parseInt(e.target.value) || 0
+                            }))}
+                            className="w-20 px-2 py-1 border border-[#e8e8e8] rounded text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                          />
+                        </div>
+                        <div className="text-[#666] text-lg">×</div>
+                        <div>
+                          <label className="block text-xs font-semibold text-[#666] mb-1">Unit Price</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={itemPrices[item.item_id] || item.unit_price}
+                            onChange={(e) => setItemPrices(prev => ({
+                              ...prev,
+                              [item.item_id]: parseFloat(e.target.value) || 0
+                            }))}
+                            className="w-24 px-2 py-1 border border-[#e8e8e8] rounded text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                          />
+                        </div>
+                        <div className="text-[#666] text-lg">=</div>
+                        <div>
+                          <label className="block text-xs font-semibold text-[#666] mb-1">Line Total</label>
+                          <div className="text-lg font-bold text-[#16a34a]">
+                            £{((itemQuantities[item.item_id] || item.quantity) * (itemPrices[item.item_id] || item.unit_price)).toFixed(2)}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
