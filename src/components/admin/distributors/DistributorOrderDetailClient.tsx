@@ -334,20 +334,15 @@ export default function DistributorOrderDetailClient({
       {order.status === 'pending_review' && (
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Actions</h2>
+          <p className="text-sm text-gray-700 mb-4">
+            Review this order to edit quantities, prices, addresses, and shipping before creating the invoice.
+          </p>
           <div className="flex gap-3">
             <button
-              onClick={handleReject}
-              disabled={processing}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => router.push(`/admin/distributors/orders/${order.order_id}/review`)}
+              className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-bold text-lg shadow-lg transition-all"
             >
-              {processing ? 'Processing...' : 'Reject Order'}
-            </button>
-            <button
-              onClick={handleApprove}
-              disabled={processing}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {processing ? 'Processing...' : 'Approve Order'}
+              Review & Approve Order →
             </button>
           </div>
         </div>
