@@ -9,8 +9,10 @@ import ProductCategorizationClient from '@/components/admin/ProductCategorizatio
 async function fetchAllProducts() {
   const supabase = getSupabaseClient();
 
-  // Fetch products with sales history in a single query
-  const { data: productsData, error: productsError } = await supabase.rpc('get_products_with_sales_history');
+  // Fetch ALL products with sales history (override Supabase 1000 row limit)
+  const { data: productsData, error: productsError } = await supabase
+    .rpc('get_products_with_sales_history')
+    .limit(10000); // Fetch up to 10,000 products
 
   if (productsError) {
     console.error('[Categorization] Error fetching products:', productsError);
@@ -18,6 +20,7 @@ async function fetchAllProducts() {
     const { data: fallbackData } = await supabase
       .from('products')
       .select('*')
+      .limit(10000)
       .order('product_code');
     return fallbackData || [];
   }

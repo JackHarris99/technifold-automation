@@ -48,6 +48,8 @@ export default function ProductCategorizationClient({ products: initialProducts 
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
   const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [addingCategoryForProduct, setAddingCategoryForProduct] = useState<string | null>(null);
+  const [newCategoryInputValue, setNewCategoryInputValue] = useState('');
 
   // Sort and filter state
   const [sortColumn, setSortColumn] = useState<keyof Product>('product_code');
@@ -629,25 +631,68 @@ export default function ProductCategorizationClient({ products: initialProducts 
                     </td>
                     {/* Category */}
                     <td className="px-3 py-2">
-                      <input
-                        type="text"
-                        list={`categories-${product.product_code}`}
-                        value={product.category || ''}
-                        onChange={(e) =>
-                          updateField(
-                            product.product_code,
-                            'category',
-                            e.target.value || null
-                          )
-                        }
-                        placeholder="Type or select..."
-                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
-                      />
-                      <datalist id={`categories-${product.product_code}`}>
-                        {allCategories.map((cat) => (
-                          <option key={cat} value={cat} />
-                        ))}
-                      </datalist>
+                      {addingCategoryForProduct === product.product_code ? (
+                        <div className="flex gap-1">
+                          <input
+                            type="text"
+                            value={newCategoryInputValue}
+                            onChange={(e) => setNewCategoryInputValue(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && newCategoryInputValue.trim()) {
+                                updateField(product.product_code, 'category', newCategoryInputValue.trim());
+                                setAddingCategoryForProduct(null);
+                                setNewCategoryInputValue('');
+                              } else if (e.key === 'Escape') {
+                                setAddingCategoryForProduct(null);
+                                setNewCategoryInputValue('');
+                              }
+                            }}
+                            placeholder="New category name..."
+                            autoFocus
+                            className="flex-1 px-2 py-1 border border-blue-500 rounded text-xs focus:ring-2 focus:ring-blue-500"
+                          />
+                          <button
+                            onClick={() => {
+                              if (newCategoryInputValue.trim()) {
+                                updateField(product.product_code, 'category', newCategoryInputValue.trim());
+                                setAddingCategoryForProduct(null);
+                                setNewCategoryInputValue('');
+                              }
+                            }}
+                            className="px-2 py-1 bg-teal-600 text-white rounded text-xs hover:bg-teal-700"
+                          >
+                            ✓
+                          </button>
+                          <button
+                            onClick={() => {
+                              setAddingCategoryForProduct(null);
+                              setNewCategoryInputValue('');
+                            }}
+                            className="px-2 py-1 bg-gray-300 text-gray-700 rounded text-xs hover:bg-gray-400"
+                          >
+                            ✗
+                          </button>
+                        </div>
+                      ) : (
+                        <select
+                          value={product.category || ''}
+                          onChange={(e) => {
+                            if (e.target.value === '__add_new__') {
+                              setAddingCategoryForProduct(product.product_code);
+                              setNewCategoryInputValue('');
+                            } else {
+                              updateField(product.product_code, 'category', e.target.value || null);
+                            }
+                          }}
+                          className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                        >
+                          <option value="">None</option>
+                          {allCategories.map((cat) => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                          <option value="__add_new__" className="font-semibold text-teal-600">+ Add New Category...</option>
+                        </select>
+                      )}
                     </td>
                     {/* Base Price */}
                     <td className="px-3 py-2">
