@@ -46,6 +46,8 @@ export default function ProductCategorizationClient({ products: initialProducts 
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [modifiedCodes, setModifiedCodes] = useState<Set<string>>(new Set());
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
+  const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
 
   // Sort and filter state
   const [sortColumn, setSortColumn] = useState<keyof Product>('product_code');
@@ -298,13 +300,94 @@ export default function ProductCategorizationClient({ products: initialProducts 
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
 
+            {/* Category Filter and Management */}
+            <div className="flex gap-3 items-center">
+              <div className="flex-1">
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Filter by Category</label>
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">All Categories</option>
+                  <option value="__uncategorized__">⚠️ Uncategorized</option>
+                  {allCategories.map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+
+              {!showNewCategoryInput ? (
+                <button
+                  onClick={() => setShowNewCategoryInput(true)}
+                  className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium transition-colors whitespace-nowrap mt-5"
+                >
+                  + New Category
+                </button>
+              ) : (
+                <div className="flex gap-2 items-end">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">New Category Name</label>
+                    <input
+                      type="text"
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      placeholder="Enter category name..."
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && newCategoryName.trim()) {
+                          // Category will be created when user assigns it to a product
+                          setCategoryFilter(newCategoryName.trim());
+                          setNewCategoryName('');
+                          setShowNewCategoryInput(false);
+                          alert(`Category "${newCategoryName.trim()}" ready! Assign it to products by selecting it from the category dropdown.`);
+                        } else if (e.key === 'Escape') {
+                          setNewCategoryName('');
+                          setShowNewCategoryInput(false);
+                        }
+                      }}
+                    />
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (newCategoryName.trim()) {
+                        setCategoryFilter(newCategoryName.trim());
+                        setNewCategoryName('');
+                        setShowNewCategoryInput(false);
+                        alert(`Category "${newCategoryName.trim()}" ready! Assign it to products by selecting it from the category dropdown.`);
+                      }
+                    }}
+                    className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium transition-colors"
+                  >
+                    Add
+                  </button>
+                  <button
+                    onClick={() => {
+                      setNewCategoryName('');
+                      setShowNewCategoryInput(false);
+                    }}
+                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+
             {(categoryFilter || tierFilter || activeFilter || marketableFilter || portalFilter) && (
-              <button
-                onClick={clearFilters}
-                className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
-              >
-                Clear Filters
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={clearFilters}
+                  className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                >
+                  Clear All Filters
+                </button>
+                {categoryFilter && (
+                  <span className="text-sm text-gray-700">
+                    Showing: <span className="font-semibold">{categoryFilter === '__uncategorized__' ? 'Uncategorized' : categoryFilter}</span> ({filteredProducts.length} products)
+                  </span>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -540,7 +623,9 @@ export default function ProductCategorizationClient({ products: initialProducts 
                     </td>
                     {/* Category */}
                     <td className="px-3 py-2">
-                      <select
+                      <input
+                        type="text"
+                        list={`categories-${product.product_code}`}
                         value={product.category || ''}
                         onChange={(e) =>
                           updateField(
@@ -549,13 +634,14 @@ export default function ProductCategorizationClient({ products: initialProducts 
                             e.target.value || null
                           )
                         }
+                        placeholder="Type or select..."
                         className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
-                      >
-                        <option value="">None</option>
+                      />
+                      <datalist id={`categories-${product.product_code}`}>
                         {allCategories.map((cat) => (
-                          <option key={cat} value={cat}>{cat}</option>
+                          <option key={cat} value={cat} />
                         ))}
-                      </select>
+                      </datalist>
                     </td>
                     {/* Base Price */}
                     <td className="px-3 py-2">
