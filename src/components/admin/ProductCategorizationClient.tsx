@@ -195,9 +195,27 @@ export default function ProductCategorizationClient({ products: initialProducts 
     setSaveStatus(null);
 
     try {
-      const modifiedProducts = products.filter((p) =>
-        modifiedCodes.has(p.product_code)
-      );
+      const modifiedProducts = products
+        .filter((p) => modifiedCodes.has(p.product_code))
+        .map((p) => ({
+          // Only send fields that exist in the products table
+          product_code: p.product_code,
+          description: p.description,
+          type: p.type,
+          category: p.category,
+          pricing_tier: p.pricing_tier,
+          price: p.price,
+          active: p.active,
+          is_marketable: p.is_marketable,
+          is_reminder_eligible: p.is_reminder_eligible,
+          show_in_distributor_portal: p.show_in_distributor_portal,
+          currency: p.currency,
+          weight_kg: p.weight_kg,
+          hs_code: p.hs_code,
+          country_of_origin: p.country_of_origin,
+          cost_price: p.cost_price,
+          image_url: p.image_url,
+        }));
 
       const response = await fetch('/api/admin/products/bulk-update', {
         method: 'POST',
@@ -206,7 +224,9 @@ export default function ProductCategorizationClient({ products: initialProducts 
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save changes');
+        const errorData = await response.json();
+        console.error('Save failed:', errorData);
+        throw new Error(errorData.error || 'Failed to save changes');
       }
 
       setSaveStatus(`✓ Saved ${modifiedProducts.length} products successfully`);
