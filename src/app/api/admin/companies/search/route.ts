@@ -1,6 +1,6 @@
 /**
  * GET /api/admin/companies/search?q=searchterm
- * Search customer companies only (excludes distributors, suppliers, etc.)
+ * Search all companies (customers, distributors, suppliers, etc.)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -33,25 +33,23 @@ export async function GET(request: NextRequest) {
     console.log('[companies/search] Supabase client obtained');
 
     // All users can see all companies (no territory filter on search)
-    // But exclude dead customers from search results
+    // But exclude dead companies from search results
     console.log('[companies/search] Running query...');
 
-    // Search across multiple fields: name, ID, city, postal code, address, sage code, owner, country (customers only)
+    // Search across multiple fields: name, ID, city, postal code, address, sage code, owner, country (all company types)
     const searchPattern = `%${q}%`;
     const { data: companyData, error: companyError } = await supabase
       .from('companies')
-      .select('company_id, company_name, account_owner, status, country, billing_city, billing_postal_code, billing_address_line_1, sage_customer_code')
-      .eq('type', 'customer')
+      .select('company_id, company_name, account_owner, status, country, billing_city, billing_postal_code, billing_address_line_1, sage_customer_code, type')
       .or(`company_name.ilike.${searchPattern},company_id.ilike.${searchPattern},billing_city.ilike.${searchPattern},billing_postal_code.ilike.${searchPattern},billing_address_line_1.ilike.${searchPattern},sage_customer_code.ilike.${searchPattern},account_owner.ilike.${searchPattern},country.ilike.${searchPattern}`)
       .neq('status', 'dead')
       .order('company_name')
       .limit(15);
 
-    // Also search in contacts (name and email) - customers only
+    // Also search in contacts (name and email) - all company types
     const { data: contactData, error: contactError } = await supabase
       .from('contacts')
       .select('company_id, email, full_name, first_name, last_name, companies!inner(company_id, company_name, account_owner, status, country, type)')
-      .eq('companies.type', 'customer')
       .or(`email.ilike.${searchPattern},full_name.ilike.${searchPattern}`)
       .neq('companies.status', 'dead')
       .limit(10);
