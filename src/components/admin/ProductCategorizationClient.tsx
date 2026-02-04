@@ -229,10 +229,21 @@ export default function ProductCategorizationClient({ products: initialProducts 
       }
 
       const data = await response.json();
-      alert(`✓ Successfully deleted ${data.deleted || count} products`);
 
-      // Remove deleted products from state
-      setProducts((prev) => prev.filter(p => !selectedForDelete.has(p.product_code)));
+      // Show detailed message about what was deleted and what was skipped
+      alert(data.message || `✓ Successfully deleted ${data.deleted} products`);
+
+      // Remove only successfully deleted products from state
+      if (data.skipped_products && data.skipped_products.length > 0) {
+        // Some products couldn't be deleted - only remove the ones that were deleted
+        const skippedSet = new Set(data.skipped_products);
+        const actuallyDeleted = productCodes.filter(code => !skippedSet.has(code));
+        setProducts((prev) => prev.filter(p => !actuallyDeleted.includes(p.product_code)));
+      } else {
+        // All selected products were deleted
+        setProducts((prev) => prev.filter(p => !selectedForDelete.has(p.product_code)));
+      }
+
       setSelectedForDelete(new Set());
     } catch (error) {
       console.error('Delete error:', error);
