@@ -50,6 +50,10 @@ export default function ProductCategorizationClient({ products: initialProducts 
   const [addingCategoryForProduct, setAddingCategoryForProduct] = useState<string | null>(null);
   const [newCategoryInputValue, setNewCategoryInputValue] = useState('');
 
+  // Delete state
+  const [selectedForDelete, setSelectedForDelete] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
+
   // Sort and filter state
   const [sortColumn, setSortColumn] = useState<keyof Product>('product_code');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -158,6 +162,72 @@ export default function ProductCategorizationClient({ products: initialProducts 
       )
     );
     setModifiedCodes((prev) => new Set(prev).add(productCode));
+  };
+
+  // Toggle product selection for deletion
+  const toggleSelectForDelete = (productCode: string) => {
+    setSelectedForDelete((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(productCode)) {
+        newSet.delete(productCode);
+      } else {
+        newSet.add(productCode);
+      }
+      return newSet;
+    });
+  };
+
+  // Toggle all visible products
+  const toggleSelectAll = () => {
+    if (selectedForDelete.size === filteredProducts.length) {
+      setSelectedForDelete(new Set());
+    } else {
+      setSelectedForDelete(new Set(filteredProducts.map(p => p.product_code)));
+    }
+  };
+
+  // Delete selected products
+  const deleteSelected = async () => {
+    if (selectedForDelete.size === 0) return;
+
+    const count = selectedForDelete.size;
+    const productCodes = Array.from(selectedForDelete);
+
+    if (!confirm(`⚠️ DELETE ${count} PRODUCTS PERMANENTLY?\n\nThis will remove:\n- Products from database\n- All product history\n- Cannot be undone\n\nType "DELETE" to confirm.`)) {
+      return;
+    }
+
+    const userConfirm = prompt(`Type "DELETE" to confirm deletion of ${count} products:`);
+    if (userConfirm !== 'DELETE') {
+      alert('Deletion cancelled');
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      const response = await fetch('/api/admin/products/bulk-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_codes: productCodes }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete products');
+      }
+
+      const data = await response.json();
+      alert(`✓ Successfully deleted ${data.deleted || count} products`);
+
+      // Remove deleted products from state
+      setProducts((prev) => prev.filter(p => !selectedForDelete.has(p.product_code)));
+      setSelectedForDelete(new Set());
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('Failed to delete products: ' + (error as Error).message);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   // Handle image upload
@@ -276,6 +346,15 @@ export default function ProductCategorizationClient({ products: initialProducts 
                   {saveStatus}
                 </div>
               )}
+              {selectedForDelete.size > 0 && (
+                <button
+                  onClick={deleteSelected}
+                  disabled={deleting}
+                  className="px-6 py-2 rounded-lg font-medium transition-colors bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+                >
+                  {deleting ? 'Deleting...' : `Delete ${selectedForDelete.size} Products`}
+                </button>
+              )}
               <button
                 onClick={saveChanges}
                 disabled={saving || modifiedCodes.size === 0}
@@ -374,6 +453,15 @@ export default function ProductCategorizationClient({ products: initialProducts 
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
                 <tr>
+                  <th className="px-3 py-2 text-center text-xs font-medium text-gray-700 uppercase">
+                    <input
+                      type="checkbox"
+                      checked={selectedForDelete.size > 0 && selectedForDelete.size === filteredProducts.length}
+                      onChange={toggleSelectAll}
+                      className="w-4 h-4 text-red-600 rounded cursor-pointer"
+                      title="Select all visible products"
+                    />
+                  </th>
                   <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase">
                     Image
                   </th>
@@ -480,6 +568,7 @@ export default function ProductCategorizationClient({ products: initialProducts 
                   <th className="px-3 py-2"></th>
                   <th className="px-3 py-2"></th>
                   <th className="px-3 py-2"></th>
+                  <th className="px-3 py-2"></th>
                   <th className="px-3 py-2">
                     <select
                       value={categoryFilter}
@@ -553,8 +642,17 @@ export default function ProductCategorizationClient({ products: initialProducts 
                     key={product.product_code}
                     className={`hover:bg-gray-50 transition-colors ${
                       modifiedCodes.has(product.product_code) ? 'bg-orange-50' : ''
-                    }`}
+                    } ${selectedForDelete.has(product.product_code) ? 'bg-red-50' : ''}`}
                   >
+                    {/* Checkbox for deletion */}
+                    <td className="px-3 py-2 text-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedForDelete.has(product.product_code)}
+                        onChange={() => toggleSelectForDelete(product.product_code)}
+                        className="w-4 h-4 text-red-600 rounded cursor-pointer"
+                      />
+                    </td>
                     {/* Image with Upload */}
                     <td className="px-3 py-2">
                       <div className="flex flex-col gap-1">
