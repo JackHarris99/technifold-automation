@@ -339,7 +339,7 @@ export default function DistributorOrderDetailClient({
           </p>
           <div className="flex gap-3">
             <button
-              onClick={() => router.push(`/admin/distributors/orders/${order.order_id}/review`)}
+              onClick={() => router.push(`/admin/sales/orders/${order.order_id}/review`)}
               className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-bold text-lg shadow-lg transition-all"
             >
               Review & Approve Order →

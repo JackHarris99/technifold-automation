@@ -38,7 +38,7 @@ export default function SalesCenterClient({
         {pendingOrders.map((order: any) => (
           <Link
             key={order.order_id}
-            href={`/admin/distributors/orders/${order.order_id}/review`}
+            href={`/admin/sales/orders/${order.order_id}/review`}
             className="flex items-start justify-between p-4 hover:bg-teal-50 transition-colors border-b border-gray-100 last:border-b-0"
           >
             <div className="flex-1">

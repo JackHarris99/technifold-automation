@@ -152,7 +152,7 @@ export default function DistributorOrderReview({ order, items, currentUser, back
     setSubmitting(true);
 
     try {
-      const response = await fetch(`/api/admin/distributor-orders/${order.order_id}/approve`, {
+      const response = await fetch(`/api/admin/distributors/orders/${order.order_id}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

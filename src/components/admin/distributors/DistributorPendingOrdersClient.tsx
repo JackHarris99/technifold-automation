@@ -265,7 +265,7 @@ export default function DistributorPendingOrdersClient({ orders }: Props) {
             {/* Action Buttons */}
             <div className="p-6 bg-gray-50 flex gap-3 justify-end">
               <Link
-                href={`/admin/distributors/orders/${order.order_id}/review`}
+                href={`/admin/sales/orders/${order.order_id}/review`}
                 className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-bold text-lg shadow-lg transition-all"
               >
                 Review Order & Create Invoice →
