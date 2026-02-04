@@ -506,6 +506,14 @@ export default function ProductCategorizationClient({ products: initialProducts 
                   </th>
                   <th
                     className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('type')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Type {sortColumn === 'type' && <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>}
+                    </div>
+                  </th>
+                  <th
+                    className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort('category')}
                   >
                     <div className="flex items-center gap-1">
@@ -588,6 +596,7 @@ export default function ProductCategorizationClient({ products: initialProducts 
                 </tr>
                 {/* Filter Row */}
                 <tr className="bg-white">
+                  <th className="px-3 py-2"></th>
                   <th className="px-3 py-2"></th>
                   <th className="px-3 py-2"></th>
                   <th className="px-3 py-2"></th>
@@ -724,6 +733,19 @@ export default function ProductCategorizationClient({ products: initialProducts 
                         }
                         className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
                       />
+                    </td>
+                    {/* Type */}
+                    <td className="px-3 py-2">
+                      <select
+                        value={product.type}
+                        onChange={(e) =>
+                          updateField(product.product_code, 'type', e.target.value)
+                        }
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                      >
+                        <option value="tool">Tool</option>
+                        <option value="consumable">Consumable</option>
+                      </select>
                     </td>
                     {/* Category */}
                     <td className="px-3 py-2">
