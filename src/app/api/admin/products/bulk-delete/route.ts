@@ -29,10 +29,12 @@ export async function POST(req: NextRequest) {
     const supabase = getSupabaseClient();
 
     // Check for references in invoice_items (blocks deletion to preserve historical data)
+    // Exclude void invoices as they are cancelled/invalid
     const { data: invoiceRefs } = await supabase
       .from('invoice_items')
-      .select('product_code')
-      .in('product_code', product_codes);
+      .select('product_code, invoices!inner(payment_status)')
+      .in('product_code', product_codes)
+      .neq('invoices.payment_status', 'void');
 
     // Check for references in quote_items
     const { data: quoteRefs } = await supabase
