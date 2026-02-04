@@ -232,7 +232,10 @@ export default function ProductCategorizationClient({ products: initialProducts 
       setSaveStatus(`✓ Saved ${modifiedProducts.length} products successfully`);
       setModifiedCodes(new Set());
 
-      setTimeout(() => setSaveStatus(null), 3000);
+      // Refresh page after 1 second to show updated distributor prices
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
       setSaveStatus('✗ Failed to save changes');
       console.error('Save error:', error);
