@@ -58,16 +58,16 @@ export default function ProductCategorizationClient({ products: initialProducts 
   const [marketableFilter, setMarketableFilter] = useState<string>('');
   const [portalFilter, setPortalFilter] = useState<string>('');
 
-  // Get all unique categories
+  // Get all unique categories (filtered by current tab type)
   const allCategories = useMemo(() => {
     const categorySet = new Set<string>();
     products.forEach((p) => {
-      if (p.category) {
+      if (p.category && p.type === activeTab) {
         categorySet.add(p.category);
       }
     });
     return Array.from(categorySet).sort();
-  }, [products]);
+  }, [products, activeTab]);
 
   // Sort handler
   const handleSort = (column: keyof Product) => {
@@ -269,7 +269,10 @@ export default function ProductCategorizationClient({ products: initialProducts 
           {/* Tabs */}
           <div className="flex gap-2 mt-4 border-b border-gray-200">
             <button
-              onClick={() => setActiveTab('tool')}
+              onClick={() => {
+                setActiveTab('tool');
+                setCategoryFilter(''); // Clear category filter when switching tabs
+              }}
               className={`px-6 py-3 font-medium border-b-2 transition-colors ${
                 activeTab === 'tool'
                   ? 'border-blue-600 text-blue-600'
@@ -279,7 +282,10 @@ export default function ProductCategorizationClient({ products: initialProducts 
               Tools ({toolCount})
             </button>
             <button
-              onClick={() => setActiveTab('consumable')}
+              onClick={() => {
+                setActiveTab('consumable');
+                setCategoryFilter(''); // Clear category filter when switching tabs
+              }}
               className={`px-6 py-3 font-medium border-b-2 transition-colors ${
                 activeTab === 'consumable'
                   ? 'border-blue-600 text-blue-600'
