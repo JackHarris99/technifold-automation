@@ -10,6 +10,10 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import InvoiceListClient from '@/components/admin/InvoiceListClient';
 
+// Force dynamic rendering to respect cookie changes
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface Invoice {
   invoice_id: string;
   company_id: string;
