@@ -14,7 +14,7 @@ export async function POST(
   try {
     const currentUser = await getCurrentUser();
 
-    if (!currentUser || currentUser.role !== 'director') {
+    if (!currentUser || !['director', 'sales_rep'].includes(currentUser.role)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
