@@ -47,8 +47,6 @@ export default function ProductCategorizationClient({ products: initialProducts 
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [modifiedCodes, setModifiedCodes] = useState<Set<string>>(new Set());
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
-  const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState('');
   const [addingCategoryForProduct, setAddingCategoryForProduct] = useState<string | null>(null);
   const [newCategoryInputValue, setNewCategoryInputValue] = useState('');
 
@@ -230,13 +228,13 @@ export default function ProductCategorizationClient({ products: initialProducts 
         throw new Error(errorData.error || 'Failed to save changes');
       }
 
-      setSaveStatus(`✓ Saved ${modifiedProducts.length} products successfully`);
+      setSaveStatus(`✓ Saved ${modifiedProducts.length} products successfully - Reloading...`);
       setModifiedCodes(new Set());
 
-      // Refresh page after 1 second to show updated distributor prices
+      // Reload page to show updated data
       setTimeout(() => {
         window.location.reload();
-      }, 1000);
+      }, 800);
     } catch (error) {
       setSaveStatus('✗ Failed to save changes');
       console.error('Save error:', error);
@@ -348,62 +346,6 @@ export default function ProductCategorizationClient({ products: initialProducts 
                   ))}
                 </select>
               </div>
-
-              {!showNewCategoryInput ? (
-                <button
-                  onClick={() => setShowNewCategoryInput(true)}
-                  className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium transition-colors whitespace-nowrap mt-5"
-                >
-                  + New Category
-                </button>
-              ) : (
-                <div className="flex gap-2 items-end">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">New Category Name</label>
-                    <input
-                      type="text"
-                      value={newCategoryName}
-                      onChange={(e) => setNewCategoryName(e.target.value)}
-                      placeholder="Enter category name..."
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && newCategoryName.trim()) {
-                          // Category will be created when user assigns it to a product
-                          setCategoryFilter(newCategoryName.trim());
-                          setNewCategoryName('');
-                          setShowNewCategoryInput(false);
-                          alert(`Category "${newCategoryName.trim()}" ready! Assign it to products by selecting it from the category dropdown.`);
-                        } else if (e.key === 'Escape') {
-                          setNewCategoryName('');
-                          setShowNewCategoryInput(false);
-                        }
-                      }}
-                    />
-                  </div>
-                  <button
-                    onClick={() => {
-                      if (newCategoryName.trim()) {
-                        setCategoryFilter(newCategoryName.trim());
-                        setNewCategoryName('');
-                        setShowNewCategoryInput(false);
-                        alert(`Category "${newCategoryName.trim()}" ready! Assign it to products by selecting it from the category dropdown.`);
-                      }
-                    }}
-                    className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium transition-colors"
-                  >
-                    Add
-                  </button>
-                  <button
-                    onClick={() => {
-                      setNewCategoryName('');
-                      setShowNewCategoryInput(false);
-                    }}
-                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              )}
             </div>
 
             {(categoryFilter || tierFilter || activeFilter || marketableFilter || portalFilter) && (
