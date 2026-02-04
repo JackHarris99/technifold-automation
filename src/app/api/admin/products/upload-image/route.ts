@@ -5,12 +5,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClient } from '@/lib/supabase';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Force Node.js runtime (Edge Runtime doesn't support file uploads)
+export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,6 +37,9 @@ export async function POST(request: NextRequest) {
     // Convert File to ArrayBuffer then to Buffer
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+
+    // Get Supabase client
+    const supabase = getSupabaseClient();
 
     // Upload to Supabase Storage
     const { error: uploadError } = await supabase.storage
