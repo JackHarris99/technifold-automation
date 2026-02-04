@@ -47,11 +47,23 @@ export default function DistributorPendingOrdersClient({ orders }: Props) {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Filter orders
-  const filteredOrders = orders.filter((order) =>
-    order.companies?.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.companies?.sage_customer_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.po_number?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredOrders = orders.filter((order) => {
+    const search = searchTerm.toLowerCase();
+
+    // If no search term, show all orders
+    if (!search) return true;
+
+    // Search in company name
+    if (order.companies?.company_name?.toLowerCase().includes(search)) return true;
+
+    // Search in customer code
+    if (order.companies?.sage_customer_code?.toLowerCase().includes(search)) return true;
+
+    // Search in PO number
+    if (order.po_number?.toLowerCase().includes(search)) return true;
+
+    return false;
+  });
 
   return (
     <div className="space-y-4">

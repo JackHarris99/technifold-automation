@@ -38,7 +38,7 @@ export default async function PendingDistributorOrdersPage() {
       billing_postal_code,
       billing_country,
       vat_number,
-      companies (
+      companies!distributor_orders_company_id_fkey (
         company_id,
         company_name,
         sage_customer_code,
