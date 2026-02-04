@@ -38,7 +38,7 @@ export default async function PendingDistributorOrdersPage() {
       billing_postal_code,
       billing_country,
       vat_number,
-      companies!distributor_orders_company_id_fkey (
+      companies (
         company_id,
         company_name,
         sage_customer_code,
@@ -49,10 +49,12 @@ export default async function PendingDistributorOrdersPage() {
     .order('created_at', { ascending: false });
 
   if (ordersError) {
-    console.error('[Pending Orders] Error fetching orders:', ordersError);
+    console.error('[Pending Orders] ERROR fetching orders:', ordersError);
+    console.error('[Pending Orders] Error details:', JSON.stringify(ordersError, null, 2));
   }
 
-  console.log('[Pending Orders] Fetched orders:', orders?.length || 0);
+  console.log('[Pending Orders] Fetched orders count:', orders?.length || 0);
+  console.log('[Pending Orders] Raw data:', JSON.stringify(orders, null, 2));
 
   // Fetch order items for each order
   const orderIds = orders?.map(o => o.order_id) || [];
