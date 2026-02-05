@@ -58,11 +58,12 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
 
   const uniqueToolCodes = [...toolQuantities.keys()];
 
-  // Get tool details from products table (for descriptions and images)
+  // Get tool details from products table (for descriptions and images, only active)
   const { data: toolProducts } = await supabase
     .from('products')
     .select('product_code, description, image_url')
-    .in('product_code', uniqueToolCodes);
+    .in('product_code', uniqueToolCodes)
+    .eq('active', true);
 
   const toolDescriptions = new Map<string, string>();
   const toolImages = new Map<string, string | null>();
@@ -119,11 +120,12 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
         };
       }
 
-      // Get consumable details with prices
+      // Get consumable details with prices (only active products)
       const { data: consumables } = await supabase
         .from('products')
         .select('product_code, description, price, category, image_url, pricing_tier')
         .in('product_code', consumableCodes)
+        .eq('active', true)
         .limit(500);
 
       // Map consumables to reorder items using fact table data
@@ -154,11 +156,12 @@ async function generatePortalPayload(companyId: string, companyName: string): Pr
   if (companyConsumables && companyConsumables.length > 0) {
     const orderedProductCodes = companyConsumables.map(cc => cc.product_code);
 
-    // Get product details for all ordered consumables
+    // Get product details for all ordered consumables (only active)
     const { data: orderedProducts } = await supabase
       .from('products')
       .select('product_code, description, price, category, image_url, pricing_tier')
-      .in('product_code', orderedProductCodes);
+      .in('product_code', orderedProductCodes)
+      .eq('active', true);
 
     if (orderedProducts) {
       reorderItems = orderedProducts.map(prod => ({
