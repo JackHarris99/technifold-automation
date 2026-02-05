@@ -9,7 +9,6 @@ interface Product {
   category: string | null;
   price: number | null;
   active: boolean;
-  show_in_distributor_portal: boolean;
 }
 
 interface CatalogEntry {

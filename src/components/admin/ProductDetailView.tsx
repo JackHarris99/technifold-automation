@@ -16,7 +16,6 @@ interface Product {
   type: string;
   category: string | null;
   active: boolean;
-  is_marketable: boolean;
   is_reminder_eligible: boolean;
   price: number | null;
   currency: string;
@@ -356,23 +355,6 @@ export default function ProductDetailView({ product: initialProduct, relatedData
                       </label>
                     ) : (
                       <div className="text-[14px] text-[#0a0a0a] font-[500]">{product.active ? 'Yes' : 'No'}</div>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider mb-2 block">Marketable</label>
-                    {editing ? (
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={currentValue('is_marketable')}
-                          onChange={(e) => handleFieldChange('is_marketable', e.target.checked)}
-                          className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-[#1e40af]"
-                        />
-                        <span className="text-[13px] text-[#0a0a0a] font-[500]">{currentValue('is_marketable') ? 'Yes' : 'No'}</span>
-                      </label>
-                    ) : (
-                      <div className="text-[14px] text-[#0a0a0a] font-[500]">{product.is_marketable ? 'Yes' : 'No'}</div>
                     )}
                   </div>
 

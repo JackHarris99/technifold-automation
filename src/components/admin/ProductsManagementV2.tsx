@@ -10,7 +10,6 @@ interface Product {
   type: string;
   category: string | null;
   active: boolean;
-  is_marketable: boolean;
   is_reminder_eligible: boolean;
   price: number | null;
   currency: string;

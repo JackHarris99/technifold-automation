@@ -10,7 +10,6 @@ interface Product {
   category: string | null;
   price: number | null;
   image_url: string | null;
-  show_in_distributor_portal: boolean;
 }
 
 interface CatalogEntry {
@@ -82,8 +81,8 @@ export default function DistributorPortalProducts({
       // If custom catalog exists, only show products in catalog
       return catalogProductCodes.has(p.product_code);
     } else {
-      // If no custom catalog, show all products with show_in_distributor_portal = true
-      return p.show_in_distributor_portal;
+      // If no custom catalog, show all active products
+      return true;
     }
   });
 

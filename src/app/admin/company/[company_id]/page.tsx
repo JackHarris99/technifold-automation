@@ -33,7 +33,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
   while (hasMoreProducts) {
     const { data: batch, error } = await supabase
       .from('products')
-      .select('product_code, description, type, category, price, active, show_in_distributor_portal, image_url')
+      .select('product_code, description, type, category, price, active, image_url')
       .eq('active', true)
       .order('product_code')
       .range(productStart, productStart + productBatchSize - 1);

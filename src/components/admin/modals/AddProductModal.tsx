@@ -26,7 +26,6 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
     type: 'part',
     category: '',
     active: true,
-    is_marketable: false,
     is_reminder_eligible: false,
     price: '',
     currency: 'GBP',
@@ -86,7 +85,6 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
           type: 'part',
           category: '',
           active: true,
-          is_marketable: false,
           is_reminder_eligible: false,
           price: '',
           currency: 'GBP',
@@ -270,16 +268,6 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
                       className="w-4 h-4 text-blue-600"
                     />
                     <span className="text-sm font-semibold text-gray-700">Active (available for sale)</span>
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.is_marketable}
-                      onChange={(e) => setFormData({ ...formData, is_marketable: e.target.checked })}
-                      className="w-4 h-4 text-blue-600"
-                    />
-                    <span className="text-sm font-semibold text-gray-700">Marketable (show on website)</span>
                   </label>
 
                   <label className="flex items-center gap-2">

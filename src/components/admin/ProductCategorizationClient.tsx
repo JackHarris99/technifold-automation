@@ -16,9 +16,7 @@ interface Product {
   pricing_tier: string | null;
   price: string;
   active: boolean;
-  is_marketable: boolean;
   is_reminder_eligible: boolean;
-  show_in_distributor_portal: boolean;
   currency: string;
   weight_kg: string | null;
   hs_code: string | null;
@@ -60,8 +58,6 @@ export default function ProductCategorizationClient({ products: initialProducts 
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [tierFilter, setTierFilter] = useState<string>('');
   const [activeFilter, setActiveFilter] = useState<string>('');
-  const [marketableFilter, setMarketableFilter] = useState<string>('');
-  const [portalFilter, setPortalFilter] = useState<string>('');
 
   // Get all unique categories (filtered by current tab type)
   const allCategories = useMemo(() => {
@@ -116,12 +112,6 @@ export default function ProductCategorizationClient({ products: initialProducts 
     if (activeFilter) {
       filtered = filtered.filter((p) => p.active === (activeFilter === 'true'));
     }
-    if (marketableFilter) {
-      filtered = filtered.filter((p) => p.is_marketable === (marketableFilter === 'true'));
-    }
-    if (portalFilter) {
-      filtered = filtered.filter((p) => p.show_in_distributor_portal === (portalFilter === 'true'));
-    }
 
     // Sort
     filtered.sort((a, b) => {
@@ -142,7 +132,7 @@ export default function ProductCategorizationClient({ products: initialProducts 
     });
 
     return filtered;
-  }, [products, activeTab, searchTerm, categoryFilter, tierFilter, activeFilter, marketableFilter, portalFilter, sortColumn, sortDirection]);
+  }, [products, activeTab, searchTerm, categoryFilter, tierFilter, activeFilter, sortColumn, sortDirection]);
 
   // Clear all filters
   const clearFilters = () => {
@@ -150,8 +140,6 @@ export default function ProductCategorizationClient({ products: initialProducts 
     setCategoryFilter('');
     setTierFilter('');
     setActiveFilter('');
-    setMarketableFilter('');
-    setPortalFilter('');
   };
 
   // Update a field for a product
@@ -298,9 +286,7 @@ export default function ProductCategorizationClient({ products: initialProducts 
           pricing_tier: p.pricing_tier,
           price: p.price,
           active: p.active,
-          is_marketable: p.is_marketable,
           is_reminder_eligible: p.is_reminder_eligible,
-          show_in_distributor_portal: p.show_in_distributor_portal,
           currency: p.currency,
           weight_kg: p.weight_kg,
           hs_code: p.hs_code,
@@ -450,7 +436,7 @@ export default function ProductCategorizationClient({ products: initialProducts 
               </div>
             </div>
 
-            {(categoryFilter || tierFilter || activeFilter || marketableFilter || portalFilter) && (
+            {(categoryFilter || tierFilter || activeFilter) && (
               <div className="flex items-center gap-3">
                 <button
                   onClick={clearFilters}
@@ -577,22 +563,6 @@ export default function ProductCategorizationClient({ products: initialProducts 
                       Active {sortColumn === 'active' && <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>}
                     </div>
                   </th>
-                  <th
-                    className="px-3 py-2 text-center text-xs font-medium text-gray-700 uppercase cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('is_marketable')}
-                  >
-                    <div className="flex items-center justify-center gap-1">
-                      Market {sortColumn === 'is_marketable' && <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>}
-                    </div>
-                  </th>
-                  <th
-                    className="px-3 py-2 text-center text-xs font-medium text-gray-700 uppercase cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('show_in_distributor_portal')}
-                  >
-                    <div className="flex items-center justify-center gap-1">
-                      Portal {sortColumn === 'show_in_distributor_portal' && <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>}
-                    </div>
-                  </th>
                 </tr>
                 {/* Filter Row */}
                 <tr className="bg-white">
@@ -637,28 +607,6 @@ export default function ProductCategorizationClient({ products: initialProducts 
                     <select
                       value={activeFilter}
                       onChange={(e) => setActiveFilter(e.target.value)}
-                      className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
-                    >
-                      <option value="">All</option>
-                      <option value="true">✓</option>
-                      <option value="false">✗</option>
-                    </select>
-                  </th>
-                  <th className="px-3 py-2">
-                    <select
-                      value={marketableFilter}
-                      onChange={(e) => setMarketableFilter(e.target.value)}
-                      className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
-                    >
-                      <option value="">All</option>
-                      <option value="true">✓</option>
-                      <option value="false">✗</option>
-                    </select>
-                  </th>
-                  <th className="px-3 py-2">
-                    <select
-                      value={portalFilter}
-                      onChange={(e) => setPortalFilter(e.target.value)}
                       className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                     >
                       <option value="">All</option>
@@ -889,32 +837,6 @@ export default function ProductCategorizationClient({ products: initialProducts 
                         checked={product.active}
                         onChange={(e) =>
                           updateField(product.product_code, 'active', e.target.checked)
-                        }
-                        className="w-4 h-4 text-blue-600 rounded"
-                      />
-                    </td>
-                    {/* Marketable */}
-                    <td className="px-3 py-2 text-center">
-                      <input
-                        type="checkbox"
-                        checked={product.is_marketable}
-                        onChange={(e) =>
-                          updateField(product.product_code, 'is_marketable', e.target.checked)
-                        }
-                        className="w-4 h-4 text-blue-600 rounded"
-                      />
-                    </td>
-                    {/* Portal */}
-                    <td className="px-3 py-2 text-center">
-                      <input
-                        type="checkbox"
-                        checked={product.show_in_distributor_portal}
-                        onChange={(e) =>
-                          updateField(
-                            product.product_code,
-                            'show_in_distributor_portal',
-                            e.target.checked
-                          )
                         }
                         className="w-4 h-4 text-blue-600 rounded"
                       />

@@ -48,17 +48,17 @@ export async function resolveStripePriceIds(
   const productCodes = items.map(item => item.product_code);
   const { data: products, error } = await supabase
     .from('products')
-    .select('product_code, description, price, currency, category, type, pricing_tier, is_marketable')
+    .select('product_code, description, price, currency, category, type, pricing_tier, active')
     .in('product_code', productCodes);
 
   if (error || !products) {
     throw new Error(`Failed to fetch products: ${error?.message}`);
   }
 
-  // Validate all products are marketable
-  const unmarketable = products.filter(p => !p.is_marketable);
-  if (unmarketable.length > 0) {
-    throw new Error(`Products not available for purchase: ${unmarketable.map(p => p.product_code).join(', ')}`);
+  // Validate all products are active
+  const inactive = products.filter(p => !p.active);
+  if (inactive.length > 0) {
+    throw new Error(`Products not available for purchase: ${inactive.map(p => p.product_code).join(', ')}`);
   }
 
   // Build cart items for pricing calculation

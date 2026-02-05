@@ -104,10 +104,8 @@ export default async function DistributorDashboardPage() {
     if (hasCustomCatalog) {
       const customProductCodes = customCatalog.map(c => c.product_code);
       query = query.in('product_code', customProductCodes);
-    } else {
-      // Otherwise, show products marked for distributor portal
-      query = query.eq('show_in_distributor_portal', true);
     }
+    // Otherwise, show all active products (no additional filter needed)
 
     query = query
       .order('type', { ascending: true })
