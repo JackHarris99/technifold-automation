@@ -94,6 +94,12 @@ export async function POST(req: NextRequest) {
       response.skipped_products = cannotDelete;
     } else if (deletedCount > 0) {
       response.message = `✓ Successfully deleted ${deletedCount} products`;
+    } else if (errors.length > 0) {
+      // If nothing was deleted and we have errors, show them
+      response.message = `❌ Failed to delete products:\n\n${errors.join('\n\n')}`;
+    } else {
+      // Nothing deleted, no errors, no skips - shouldn't happen but handle it
+      response.message = '⚠️ No products were deleted. They may be referenced in customer purchase history or other tables.';
     }
 
     if (errors.length > 0) {
