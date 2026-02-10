@@ -45,6 +45,33 @@ interface Props {
 export default function DistributorPendingOrdersClient({ orders }: Props) {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [deletingOrder, setDeletingOrder] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleDeleteOrder = async (orderId: string, companyName: string) => {
+    if (!confirm(`Delete this test order from ${companyName}?\n\nThis action cannot be undone.`)) {
+      return;
+    }
+
+    setDeletingOrder(orderId);
+
+    try {
+      const response = await fetch(`/api/distributor/orders/${orderId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete order');
+      }
+
+      // Refresh the page to show updated list
+      router.refresh();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Failed to delete order');
+      setDeletingOrder(null);
+    }
+  };
 
   // Filter orders
   const filteredOrders = orders.filter((order) => {
@@ -264,6 +291,13 @@ export default function DistributorPendingOrdersClient({ orders }: Props) {
 
             {/* Action Buttons */}
             <div className="p-6 bg-gray-50 flex gap-3 justify-end">
+              <button
+                onClick={() => handleDeleteOrder(order.order_id, order.companies?.company_name || 'Unknown')}
+                disabled={deletingOrder === order.order_id}
+                className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deletingOrder === order.order_id ? 'Deleting...' : 'Delete Test Order'}
+              </button>
               <Link
                 href={`/admin/sales/orders/${order.order_id}/review`}
                 className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-bold text-lg shadow-lg transition-all"
