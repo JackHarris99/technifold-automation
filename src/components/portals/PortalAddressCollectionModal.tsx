@@ -176,28 +176,8 @@ export default function PortalAddressCollectionModal({
     setError(null);
 
     try {
-      // Validate VAT number for EU companies
-      if (requiresVAT) {
-        if (!formData.vat_number.trim()) {
-          // No VAT number provided for EU company
-          const proceedAnyway = confirm(
-            'WARNING: No VAT number provided.\n\n20% UK VAT will be charged on all orders.\n\nWe strongly recommend adding your VAT number to qualify for 0% reverse charge.\n\nDo you want to continue without a VAT number?'
-          );
-          if (!proceedAnyway) {
-            setIsSubmitting(false);
-            return;
-          }
-        } else if (!vatVerificationResult || !vatVerificationResult.valid) {
-          // VAT number provided but not verified
-          const proceedAnyway = confirm(
-            'VAT Verification Notice:\n\nYour VAT number could not be verified automatically (this may be due to the EU verification system being temporarily unavailable).\n\nYour VAT number will still be saved and used for orders. Our team will verify it manually.\n\nDo you want to proceed?'
-          );
-          if (!proceedAnyway) {
-            setIsSubmitting(false);
-            return;
-          }
-        }
-      }
+      // VAT validation is now non-blocking - warnings are shown in the UI
+      // The VAT number (if provided) will be saved and verified manually if needed
 
       // Determine which endpoints to use based on token presence
       const useDistributorEndpoints = !token;
@@ -474,8 +454,7 @@ export default function PortalAddressCollectionModal({
                 <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-4">
                   <label className="block text-base font-bold text-gray-900 mb-2 flex items-center gap-2">
                     <span className="text-amber-600">⚠</span>
-                    VAT Number <span className="text-red-600 text-lg">*</span>
-                    <span className="text-xs font-normal text-amber-700 ml-2">(Required for EU companies)</span>
+                    VAT Number (Strongly Recommended)
                   </label>
                   <input
                     type="text"
@@ -485,10 +464,10 @@ export default function PortalAddressCollectionModal({
                     placeholder={`${formData.billing_country}123456789`}
                   />
                   <p className="text-sm text-amber-900 mt-2 font-medium">
-                    💡 Without a valid VAT number, 20% UK VAT will be charged on your orders.
+                    💡 With a valid VAT number: 0% VAT (reverse charge). Without it: 20% UK VAT will be charged.
                   </p>
                   <p className="text-xs text-gray-900 mt-1">
-                    Format: {formData.billing_country}123456789
+                    Format: {formData.billing_country}123456789 (we'll verify it automatically)
                   </p>
 
                   {isVerifyingVAT && (
@@ -496,7 +475,7 @@ export default function PortalAddressCollectionModal({
                   )}
 
                   {vatVerificationResult && !isVerifyingVAT && (
-                    <div className={`mt-3 p-4 rounded-lg border-2 ${vatVerificationResult.valid ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-400'}`}>
+                    <div className={`mt-3 p-4 rounded-lg border-2 ${vatVerificationResult.valid ? 'bg-green-50 border-green-500' : 'bg-blue-50 border-blue-400'}`}>
                       {vatVerificationResult.valid ? (
                         <div>
                           <p className="text-base font-bold text-green-700 flex items-center gap-2">
@@ -511,15 +490,17 @@ export default function PortalAddressCollectionModal({
                         </div>
                       ) : (
                         <div>
-                          <p className="text-base font-bold text-amber-700 flex items-center gap-2">
-                            <span className="text-xl">⚠</span> Automatic Verification Unavailable
+                          <p className="text-base font-bold text-blue-800 flex items-center gap-2">
+                            <span className="text-xl">ℹ️</span> Automatic Verification Temporarily Unavailable
                           </p>
-                          <p className="text-sm text-amber-600 mt-2 font-medium">{vatVerificationResult.error}</p>
-                          <p className="text-sm text-amber-800 mt-3 font-semibold bg-amber-100 p-3 rounded border border-amber-300">
-                            ℹ️ The EU VAT verification system is temporarily unavailable. Your VAT number will be saved and verified manually by our team. If valid, 0% reverse charge VAT will apply to your orders.
+                          <p className="text-sm text-blue-700 mt-2">
+                            The EU VIES system couldn't verify your VAT number right now (this is common and not a problem).
+                          </p>
+                          <p className="text-sm text-blue-800 mt-2 font-medium bg-blue-100 p-3 rounded border border-blue-300">
+                            ✓ You can proceed - your VAT number will be saved and verified manually within 24 hours. If valid, 0% reverse charge VAT will apply to all your orders.
                           </p>
                           <p className="text-xs text-gray-600 mt-2">
-                            If your VAT number is incorrect, you can update it later in your account settings.
+                            Technical details: {vatVerificationResult.error}
                           </p>
                         </div>
                       )}
