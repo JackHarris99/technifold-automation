@@ -80,6 +80,18 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
   const [standardTiers, setStandardTiers] = useState<PricingTier[]>([]);
   const [premiumTiers, setPremiumTiers] = useState<PricingTier[]>([]);
 
+  // Helper to get tier 1 (starting) price for an item
+  const getTier1Price = (pricingTier: string | undefined): number | null => {
+    if (pricingTier === 'standard' && standardTiers.length > 0) {
+      return standardTiers[0].unit_price || null;
+    }
+    if (pricingTier === 'premium' && premiumTiers.length > 0) {
+      // Premium tier 1 is base price with 0% discount
+      return null; // Will use item.price
+    }
+    return null;
+  };
+
   // Load pricing tiers on mount
   useEffect(() => {
     async function loadTiers() {
@@ -514,13 +526,14 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                               <div className="text-[13px] text-[#334155] mb-1">Price per unit</div>
                               {(() => {
                                 const pricing = getPricingInfo(item.consumable_code);
-                                const basePrice = item.price || 0;
+                                const tier1Price = getTier1Price(item.pricing_tier);
+                                const displayPrice = pricing?.discountedPrice || tier1Price || item.price || 0;
 
                                 return (
                                   <>
                                     <div className="flex items-center gap-2">
                                       <div className="text-[18px] font-[700] text-[#0a0a0a]">
-                                        £{pricing?.discountedPrice?.toFixed(2) || basePrice.toFixed(2)}
+                                        £{displayPrice.toFixed(2)}
                                       </div>
                                     </div>
                                     {pricing?.hasDiscount && (
@@ -648,13 +661,14 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                               <div className="text-[13px] text-[#334155] mb-1">Price per unit</div>
                               {(() => {
                                 const pricing = getPricingInfo(item.consumable_code);
-                                const basePrice = item.price || 0;
+                                const tier1Price = getTier1Price(item.pricing_tier);
+                                const displayPrice = pricing?.discountedPrice || tier1Price || item.price || 0;
 
                                 return (
                                   <>
                                     <div className="flex items-center gap-2">
                                       <div className="text-[18px] font-[700] text-[#0a0a0a]">
-                                        £{pricing?.discountedPrice?.toFixed(2) || basePrice.toFixed(2)}
+                                        £{displayPrice.toFixed(2)}
                                       </div>
                                     </div>
                                     {pricing?.hasDiscount && (
