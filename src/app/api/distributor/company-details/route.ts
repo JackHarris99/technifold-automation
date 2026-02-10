@@ -60,13 +60,7 @@ export async function PATCH(request: NextRequest) {
       vat_number,
     } = body;
 
-    if (!billing_address_line_1 || !billing_city || !billing_postal_code || !billing_country) {
-      return NextResponse.json(
-        { error: 'Missing required billing address fields' },
-        { status: 400 }
-      );
-    }
-
+    // No validation - accept partial data for review by sales team
     const supabase = getSupabaseClient();
 
     // Update company billing address

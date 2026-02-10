@@ -101,14 +101,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Company not found' }, { status: 404 });
     }
 
-    // Verify billing address exists
-    if (!company.billing_address_line_1 || !company.billing_city || !company.billing_postal_code) {
-      return NextResponse.json(
-        { error: 'Billing address required' },
-        { status: 400 }
-      );
-    }
-
+    // No billing address validation - sales team will review and complete details
     // Get shipping address
     const { data: shippingAddress, error: shippingError } = await supabase
       .from('shipping_addresses')
@@ -124,14 +117,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify shipping address is complete
-    if (!shippingAddress.address_line_1 || !shippingAddress.city || !shippingAddress.postal_code || !shippingAddress.country) {
-      return NextResponse.json(
-        { error: 'Incomplete shipping address' },
-        { status: 400 }
-      );
-    }
-
+    // No shipping address validation - sales team will review and complete details
     // Calculate totals
     const subtotal = items.reduce(
       (sum: number, item: any) => sum + item.unit_price * item.quantity,
