@@ -522,11 +522,6 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                                       <div className="text-[18px] font-[700] text-[#0a0a0a]">
                                         £{pricing?.discountedPrice?.toFixed(2) || basePrice.toFixed(2)}
                                       </div>
-                                      {pricing?.hasDiscount && (
-                                        <div className="text-[14px] text-[#999] line-through">
-                                          £{pricing.basePrice.toFixed(2)}
-                                        </div>
-                                      )}
                                     </div>
                                     {pricing?.hasDiscount && (
                                       <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 border border-green-200 rounded-[8px] mt-2">
@@ -661,11 +656,6 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                                       <div className="text-[18px] font-[700] text-[#0a0a0a]">
                                         £{pricing?.discountedPrice?.toFixed(2) || basePrice.toFixed(2)}
                                       </div>
-                                      {pricing?.hasDiscount && (
-                                        <div className="text-[14px] text-[#999] line-through">
-                                          £{pricing.basePrice.toFixed(2)}
-                                        </div>
-                                      )}
                                     </div>
                                     {pricing?.hasDiscount && (
                                       <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 border border-green-200 rounded-[8px] mt-2">
@@ -858,9 +848,6 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                             </div>
                             <div className="flex-1 text-right">
                               <div className="text-[11px] text-[#334155]">
-                                {item.unit_price !== item.base_price && (
-                                  <span className="line-through mr-1">£{item.base_price.toFixed(2)}</span>
-                                )}
                                 <span className="font-[600] text-[#16a34a]">£{item.unit_price.toFixed(2)}</span>
                                 <span className="text-[#475569]"> /unit</span>
                               </div>
