@@ -14,6 +14,9 @@ interface ApprovalData {
   back_order_dates: Record<string, string>;
   back_order_notes: Record<string, string>;
 
+  // Removed items
+  removed_item_ids?: string[];
+
   // Item quantity and price overrides
   item_quantities: Record<string, number>;
   item_prices: Record<string, number>;
@@ -92,8 +95,12 @@ export async function POST(
       return NextResponse.json({ error: 'Failed to fetch order items' }, { status: 500 });
     }
 
-    // Filter in-stock items
-    const inStockItems = items.filter(item => {
+    // Filter out removed items
+    const removedItemIds = new Set(body.removed_item_ids || []);
+    const activeItems = items.filter(item => !removedItemIds.has(item.item_id));
+
+    // Filter in-stock items from active items
+    const inStockItems = activeItems.filter(item => {
       if (!body.item_statuses.hasOwnProperty(item.item_id)) {
         console.warn(`[Approve Order] item_id ${item.item_id} (product: ${item.product_code}) not found in item_statuses`);
         return false;
@@ -326,7 +333,7 @@ export async function POST(
       }
 
       // 10. Update item statuses (and quantities/prices if changed)
-      for (const item of items) {
+      for (const item of activeItems) {
         const status = body.item_statuses[item.item_id];
 
         if (!status) {
@@ -371,6 +378,21 @@ export async function POST(
           throw new Error(`Failed to update item ${item.item_id}: ${itemUpdateError.message}`);
         }
       }
+
+      // 11. Mark removed items as removed
+      if (removedItemIds.size > 0) {
+        const { error: removeError } = await supabase
+          .from('distributor_order_items')
+          .update({
+            status: 'removed',
+            removed_at: new Date().toISOString(),
+          })
+          .in('item_id', Array.from(removedItemIds));
+
+        if (removeError) {
+          throw new Error(`Failed to mark items as removed: ${removeError.message}`);
+        }
+      }
     } catch (dbError) {
       // ROLLBACK: Void the Stripe invoice if database operations failed
       console.error('[Approve Order] Database operation failed, rolling back Stripe invoice:', dbError);
@@ -392,9 +414,9 @@ export async function POST(
       invoice_id: invoiceId,
       stripe_invoice_id: finalizedInvoice.id,
       stripe_invoice_number: finalizedInvoice.number,
-      status: inStockItems.length === items.length ? 'fully_fulfilled' : 'partially_fulfilled',
+      status: inStockItems.length === activeItems.length ? 'fully_fulfilled' : 'partially_fulfilled',
       in_stock_count: inStockItems.length,
-      back_order_count: items.length - inStockItems.length,
+      back_order_count: activeItems.length - inStockItems.length,
     });
 
   } catch (error) {

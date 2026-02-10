@@ -60,6 +60,18 @@ export default function DistributorOrderReview({ order, items, currentUser, back
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
+  // Removed items tracking
+  const [removedItemIds, setRemovedItemIds] = useState<Set<string>>(new Set());
+
+  // Reject order modal
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejecting, setRejecting] = useState(false);
+
+  // Retry modal
+  const [showRetryModal, setShowRetryModal] = useState(false);
+  const [lastError, setLastError] = useState<string>('');
+
   // Item statuses: in_stock or back_order
   const [itemStatuses, setItemStatuses] = useState<Record<string, 'in_stock' | 'back_order'>>(
     () => Object.fromEntries(items.map(item => [item.item_id, 'in_stock']))
@@ -100,7 +112,9 @@ export default function DistributorOrderReview({ order, items, currentUser, back
 
   // Calculate invoice total preview with updated quantities and prices
   const invoicePreview = useMemo(() => {
-    const inStockItems = items.filter(item => itemStatuses[item.item_id] === 'in_stock');
+    // Filter out removed items
+    const activeItems = items.filter(item => !removedItemIds.has(item.item_id));
+    const inStockItems = activeItems.filter(item => itemStatuses[item.item_id] === 'in_stock');
     const subtotal = inStockItems.reduce((sum, item) => {
       const qty = itemQuantities[item.item_id] || item.quantity;
       const price = itemPrices[item.item_id] || item.unit_price;
@@ -116,18 +130,51 @@ export default function DistributorOrderReview({ order, items, currentUser, back
 
     return {
       inStockItems,
-      backOrderItems: items.filter(item => itemStatuses[item.item_id] === 'back_order'),
+      backOrderItems: activeItems.filter(item => itemStatuses[item.item_id] === 'back_order'),
       subtotal,
       shipping,
       vat,
       total,
     };
-  }, [items, itemStatuses, itemQuantities, itemPrices, shippingCost, freeShipping, order]);
+  }, [items, itemStatuses, itemQuantities, itemPrices, shippingCost, freeShipping, order, removedItemIds]);
+
+  const handleRejectOrder = async () => {
+    if (!rejectReason.trim()) {
+      alert('Please provide a reason for rejecting this order.');
+      return;
+    }
+
+    setRejecting(true);
+
+    try {
+      const response = await fetch(`/api/admin/distributors/orders/${order.order_id}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reason: rejectReason,
+          rejected_by: currentUser.user_id,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to reject order');
+      }
+
+      alert('Order rejected successfully. The distributor will be notified.');
+      router.push(backUrl);
+    } catch (error: any) {
+      console.error('Error rejecting order:', error);
+      alert(`Failed to reject order: ${error.message}`);
+      setRejecting(false);
+    }
+  };
 
   const handleApproveOrder = async () => {
     if (submitting) return;
 
-    // Validate that at least one item is in stock
+    // Validate that at least one item is in stock (and not removed)
     if (invoicePreview.inStockItems.length === 0) {
       alert('Cannot create invoice with no items in stock. Please mark at least one item as in stock.');
       return;
@@ -159,6 +206,9 @@ export default function DistributorOrderReview({ order, items, currentUser, back
           item_statuses: itemStatuses,
           back_order_dates: backOrderDates,
           back_order_notes: backOrderNotes,
+
+          // Removed items
+          removed_item_ids: Array.from(removedItemIds),
 
           // Item quantity and price overrides
           item_quantities: itemQuantities,
@@ -198,9 +248,24 @@ export default function DistributorOrderReview({ order, items, currentUser, back
       router.push(backUrl);
     } catch (error: any) {
       console.error('Error approving order:', error);
-      alert(`Failed to approve order: ${error.message}`);
+      setLastError(error.message);
+      setShowRetryModal(true);
       setSubmitting(false);
     }
+  };
+
+  const handleRemoveItem = (itemId: string) => {
+    if (confirm('Remove this item from the order?')) {
+      setRemovedItemIds(prev => new Set([...prev, itemId]));
+    }
+  };
+
+  const handleRestoreItem = (itemId: string) => {
+    setRemovedItemIds(prev => {
+      const next = new Set(prev);
+      next.delete(itemId);
+      return next;
+    });
   };
 
   return (
@@ -235,12 +300,18 @@ export default function DistributorOrderReview({ order, items, currentUser, back
         <h2 className="text-xl font-bold text-[#0a0a0a] mb-4">Order Items & Stock Availability</h2>
 
         <div className="space-y-4">
-          {items.map((item) => (
-            <div
-              key={item.item_id}
-              className="border-2 border-blue-200 rounded-xl p-4 hover:border-blue-400 transition-all"
-            >
-              <div className="flex gap-4">
+          {items.map((item) => {
+            const isRemoved = removedItemIds.has(item.item_id);
+            return (
+              <div
+                key={item.item_id}
+                className={`border-2 rounded-xl p-4 transition-all ${
+                  isRemoved
+                    ? 'border-red-200 bg-red-50 opacity-60'
+                    : 'border-blue-200 hover:border-blue-400'
+                }`}
+              >
+                <div className="flex gap-4">
                 {/* Product Image */}
                 <div className="relative w-24 h-24 bg-[#f9fafb] rounded-lg flex-shrink-0 overflow-hidden border border-[#e8e8e8]">
                   <Image
@@ -306,8 +377,23 @@ export default function DistributorOrderReview({ order, items, currentUser, back
                     </div>
                   </div>
 
-                  {/* Stock Status Selection */}
-                  <div className="mt-4 flex items-start gap-6">
+                  {/* Remove/Restore Button */}
+                  {isRemoved ? (
+                    <div className="mt-4">
+                      <button
+                        onClick={() => handleRestoreItem(item.item_id)}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-sm transition-all"
+                      >
+                        ↩ Restore Item
+                      </button>
+                      <span className="ml-3 text-sm font-semibold text-red-700">
+                        This item will be removed from the order
+                      </span>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Stock Status Selection */}
+                      <div className="mt-4 flex items-start gap-6">
                     <div className="flex items-center gap-2">
                       <input
                         type="radio"
@@ -365,10 +451,23 @@ export default function DistributorOrderReview({ order, items, currentUser, back
                       </div>
                     </div>
                   )}
+
+                  {/* Remove Item Button */}
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() => handleRemoveItem(item.item_id)}
+                      className="px-3 py-1.5 bg-red-50 border border-red-200 text-red-700 rounded-lg hover:bg-red-100 font-semibold text-sm transition-all"
+                    >
+                      🗑 Remove from Order
+                    </button>
+                  </div>
+                </>
+                  )}
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -596,24 +695,125 @@ export default function DistributorOrderReview({ order, items, currentUser, back
           </div>
         </div>
 
-        <button
-          onClick={handleApproveOrder}
-          disabled={submitting || invoicePreview.inStockItems.length === 0}
-          className="w-full mt-6 py-4 bg-[#16a34a] text-white rounded-xl font-bold text-lg hover:bg-[#15803d] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {submitting ? (
-            <span className="flex items-center justify-center gap-2">
-              <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Creating Invoice...
-            </span>
-          ) : (
-            'Approve & Create Invoice'
-          )}
-        </button>
+        <div className="grid grid-cols-2 gap-4 mt-6">
+          <button
+            onClick={() => setShowRejectModal(true)}
+            disabled={submitting || rejecting}
+            className="py-4 bg-red-600 text-white rounded-xl font-bold text-lg hover:bg-red-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            ✕ Reject Order
+          </button>
+
+          <button
+            onClick={handleApproveOrder}
+            disabled={submitting || invoicePreview.inStockItems.length === 0}
+            className="py-4 bg-[#16a34a] text-white rounded-xl font-bold text-lg hover:bg-[#15803d] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {submitting ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Creating Invoice...
+              </span>
+            ) : (
+              '✓ Approve & Create Invoice'
+            )}
+          </button>
+        </div>
       </div>
+
+      {/* Reject Order Modal */}
+      {showRejectModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 p-6">
+            <h2 className="text-2xl font-bold text-[#0a0a0a] mb-4">Reject Order</h2>
+            <p className="text-[#666] mb-4">
+              Please provide a reason for rejecting this order. The distributor will be notified.
+            </p>
+
+            <textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="e.g., Items out of stock, Pricing error, Address invalid..."
+              rows={4}
+              className="w-full px-3 py-2 border border-[#e8e8e8] rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none resize-none"
+            />
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowRejectModal(false);
+                  setRejectReason('');
+                }}
+                disabled={rejecting}
+                className="flex-1 px-4 py-3 border border-[#e8e8e8] text-[#666] rounded-lg hover:bg-gray-50 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRejectOrder}
+                disabled={rejecting || !rejectReason.trim()}
+                className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {rejecting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Rejecting...
+                  </span>
+                ) : (
+                  'Reject Order'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Retry Modal */}
+      {showRetryModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 p-6">
+            <h2 className="text-2xl font-bold text-red-600 mb-4">Invoice Creation Failed</h2>
+            <p className="text-[#666] mb-2">
+              The invoice could not be created due to the following error:
+            </p>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <p className="text-sm font-mono text-red-800">{lastError}</p>
+            </div>
+
+            <p className="text-[#666] mb-6">
+              Would you like to retry creating the invoice?
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowRetryModal(false);
+                  setLastError('');
+                }}
+                className="flex-1 px-4 py-3 border border-[#e8e8e8] text-[#666] rounded-lg hover:bg-gray-50 font-semibold transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowRetryModal(false);
+                  setLastError('');
+                  handleApproveOrder();
+                }}
+                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition-all"
+              >
+                🔄 Retry
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
