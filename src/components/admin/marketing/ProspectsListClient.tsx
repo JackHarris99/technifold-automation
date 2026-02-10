@@ -9,16 +9,14 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 
 interface Prospect {
-  prospect_company_id: string;
+  company_id: string;
   company_name: string;
   country: string | null;
-  industry: string | null;
-  source: string;
-  lead_status: string;
+  source: string | null;
   lead_score: number;
-  last_engaged_at: string | null;
+  lead_temperature: string;
   created_at: string;
-  converted_at: string | null;
+  updated_at: string;
 }
 
 interface ProspectsListClientProps {
@@ -44,13 +42,12 @@ export default function ProspectsListClient({ prospects: initialProspects }: Pro
         const search = searchTerm.toLowerCase();
         const matchesSearch =
           prospect.company_name.toLowerCase().includes(search) ||
-          prospect.country?.toLowerCase().includes(search) ||
-          prospect.industry?.toLowerCase().includes(search);
+          prospect.country?.toLowerCase().includes(search);
         if (!matchesSearch) return false;
       }
 
       // Status filter
-      if (statusFilter !== 'all' && prospect.lead_status !== statusFilter) {
+      if (statusFilter !== 'all' && prospect.lead_temperature !== statusFilter) {
         return false;
       }
 
@@ -101,12 +98,11 @@ export default function ProspectsListClient({ prospects: initialProspects }: Pro
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 border border-[#e8e8e8] rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="all">All Statuses</option>
+            <option value="all">All Temperatures</option>
             <option value="cold">Cold</option>
             <option value="warm">Warm</option>
             <option value="hot">Hot</option>
             <option value="qualified">Qualified</option>
-            <option value="converted">Converted</option>
           </select>
 
           {/* Source Filter */}
@@ -134,24 +130,23 @@ export default function ProspectsListClient({ prospects: initialProspects }: Pro
             <tr>
               <th className="text-left py-3 px-4 text-[12px] font-[600] text-[#64748b]">Company</th>
               <th className="text-left py-3 px-4 text-[12px] font-[600] text-[#64748b]">Country</th>
-              <th className="text-left py-3 px-4 text-[12px] font-[600] text-[#64748b]">Industry</th>
               <th className="text-left py-3 px-4 text-[12px] font-[600] text-[#64748b]">Source</th>
-              <th className="text-center py-3 px-4 text-[12px] font-[600] text-[#64748b]">Status</th>
+              <th className="text-center py-3 px-4 text-[12px] font-[600] text-[#64748b]">Temperature</th>
               <th className="text-center py-3 px-4 text-[12px] font-[600] text-[#64748b]">Score</th>
-              <th className="text-left py-3 px-4 text-[12px] font-[600] text-[#64748b]">Last Engaged</th>
+              <th className="text-left py-3 px-4 text-[12px] font-[600] text-[#64748b]">Last Updated</th>
               <th className="text-right py-3 px-4 text-[12px] font-[600] text-[#64748b]">Actions</th>
             </tr>
           </thead>
           <tbody>
             {prospects.length === 0 ? (
               <tr>
-                <td colSpan={8} className="text-center py-12 text-[#64748b]">
+                <td colSpan={7} className="text-center py-12 text-[#64748b]">
                   No prospects found
                 </td>
               </tr>
             ) : (
               prospects.map((prospect) => (
-                <tr key={prospect.prospect_company_id} className="border-b border-[#f1f5f9] hover:bg-[#f8fafc]">
+                <tr key={prospect.company_id} className="border-b border-[#f1f5f9] hover:bg-[#f8fafc]">
                   <td className="py-3 px-4 text-[13px] font-[500] text-[#0a0a0a]">
                     {prospect.company_name}
                   </td>
@@ -159,14 +154,11 @@ export default function ProspectsListClient({ prospects: initialProspects }: Pro
                     {prospect.country || '—'}
                   </td>
                   <td className="py-3 px-4 text-[13px] text-[#64748b]">
-                    {prospect.industry || '—'}
-                  </td>
-                  <td className="py-3 px-4 text-[13px] text-[#64748b]">
-                    {prospect.source}
+                    {prospect.source || '—'}
                   </td>
                   <td className="py-3 px-4 text-center">
-                    <span className={`inline-block px-2 py-1 rounded-full text-[11px] font-[600] ${getStatusColor(prospect.lead_status)}`}>
-                      {prospect.lead_status}
+                    <span className={`inline-block px-2 py-1 rounded-full text-[11px] font-[600] ${getStatusColor(prospect.lead_temperature)}`}>
+                      {prospect.lead_temperature}
                     </span>
                   </td>
                   <td className="py-3 px-4 text-center">
@@ -175,17 +167,15 @@ export default function ProspectsListClient({ prospects: initialProspects }: Pro
                     </span>
                   </td>
                   <td className="py-3 px-4 text-[13px] text-[#64748b]">
-                    {prospect.last_engaged_at
-                      ? new Date(prospect.last_engaged_at).toLocaleDateString('en-GB', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric'
-                        })
-                      : 'Never'}
+                    {new Date(prospect.updated_at).toLocaleDateString('en-GB', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric'
+                    })}
                   </td>
                   <td className="py-3 px-4 text-right">
                     <Link
-                      href={`/admin/marketing/prospects/${prospect.prospect_company_id}`}
+                      href={`/admin/marketing/prospects/${prospect.company_id}`}
                       className="text-blue-600 hover:text-blue-700 font-[500] text-[13px]"
                     >
                       View

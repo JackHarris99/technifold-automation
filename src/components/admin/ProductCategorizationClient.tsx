@@ -57,7 +57,7 @@ export default function ProductCategorizationClient({ products: initialProducts 
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [tierFilter, setTierFilter] = useState<string>('');
-  const [activeFilter, setActiveFilter] = useState<string>('');
+  const [activeFilter, setActiveFilter] = useState<string>('true'); // Default to active only
 
   // Get all unique categories (filtered by current tab type)
   const allCategories = useMemo(() => {
@@ -134,12 +134,12 @@ export default function ProductCategorizationClient({ products: initialProducts 
     return filtered;
   }, [products, activeTab, searchTerm, categoryFilter, tierFilter, activeFilter, sortColumn, sortDirection]);
 
-  // Clear all filters
+  // Clear all filters (but keep active filter on)
   const clearFilters = () => {
     setSearchTerm('');
     setCategoryFilter('');
     setTierFilter('');
-    setActiveFilter('');
+    setActiveFilter('true'); // Reset to active only
   };
 
   // Update a field for a product
