@@ -168,8 +168,15 @@ async function processJob(job: any) {
 
 /**
  * Send offer email with tokenized landing page
+ * Handles both old system (contact_ids + campaign_key) and new Smart Modal (offer_intent_id)
  */
 async function processSendOfferEmail(job: any) {
+  // Check if this is a new Smart Modal offer email
+  if (job.payload.offer_intent_id) {
+    return await processSmartModalOfferEmail(job);
+  }
+
+  // Old system flow
   const {
     company_id,
     contact_ids,
@@ -285,6 +292,147 @@ async function processSendOfferEmail(job: any) {
   }
 
   console.log(`[outbox-worker] Sent ${contacts.length} email(s) successfully`);
+}
+
+/**
+ * Send Smart Modal offer email
+ * Uses new offer_intents table and personalized offer landing pages
+ */
+async function processSmartModalOfferEmail(job: any) {
+  const { offer_intent_id } = job.payload;
+
+  if (!offer_intent_id) {
+    throw new Error('Invalid payload: missing offer_intent_id');
+  }
+
+  const supabase = getSupabaseClient();
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.technifold.com';
+
+  // Fetch offer intent
+  const { data: offerIntent, error: intentError } = await supabase
+    .from('offer_intents')
+    .select('*')
+    .eq('offer_intent_id', offer_intent_id)
+    .single();
+
+  if (intentError || !offerIntent) {
+    throw new Error(`Offer intent not found: ${offer_intent_id}`);
+  }
+
+  // Fetch contact
+  const { data: contact, error: contactError } = await supabase
+    .from('contacts')
+    .select('contact_id, email, first_name, last_name, full_name')
+    .eq('contact_id', offerIntent.contact_id)
+    .single();
+
+  if (contactError || !contact) {
+    throw new Error(`Contact not found: ${offerIntent.contact_id}`);
+  }
+
+  // Fetch company
+  const { data: company } = await supabase
+    .from('companies')
+    .select('company_id, company_name')
+    .eq('company_id', offerIntent.company_id)
+    .single();
+
+  // Fetch machines
+  const { data: machines, error: machinesError } = await supabase
+    .from('machines')
+    .select('machine_id, slug, display_name, brand, model, type')
+    .in('machine_id', offerIntent.machine_ids);
+
+  if (machinesError || !machines || machines.length === 0) {
+    throw new Error(`Machines not found for IDs: ${offerIntent.machine_ids.join(', ')}`);
+  }
+
+  // Generate offer URL
+  const offerUrl = `${baseUrl}/offer/${offerIntent.token}`;
+
+  // Generate unsubscribe URL
+  const unsubscribeUrl = generateUnsubscribeUrl(
+    baseUrl,
+    contact.contact_id,
+    contact.email,
+    company?.company_id
+  );
+
+  // Generate email content using template
+  const { generateOfferEmail } = await import('@/lib/marketing/offer-email-template');
+  const { subject, html } = generateOfferEmail({
+    contact_name: contact.first_name || contact.full_name || contact.email.split('@')[0],
+    contact_email: contact.email,
+    company_name: company?.company_name,
+    machines: machines.map(m => ({
+      slug: m.slug,
+      name: m.display_name,
+      brand: m.brand,
+      model: m.model,
+      type: m.type,
+    })),
+    problem_slug: offerIntent.problem_slug,
+    offer_url: offerUrl,
+    unsubscribe_url: unsubscribeUrl,
+  });
+
+  // Send email via Resend
+  if (!isResendConfigured()) {
+    console.warn('[outbox-worker] Resend not configured - Smart Modal offer email not sent');
+    console.log('[outbox-worker] Offer URL:', offerUrl);
+    return;
+  }
+
+  const { getResendClient } = await import('@/lib/resend-client');
+  const resend = getResendClient();
+
+  if (!resend) {
+    throw new Error('Resend client not available');
+  }
+
+  const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+
+  const { data, error } = await resend.emails.send({
+    from: fromEmail,
+    to: [contact.email],
+    subject,
+    html,
+  });
+
+  if (error) {
+    console.error('[outbox-worker] Smart Modal offer email send error:', error);
+    throw new Error(`Smart Modal offer email send failed: ${error.message}`);
+  }
+
+  console.log(`[outbox-worker] Smart Modal offer email sent to ${contact.email}, messageId: ${data?.id}`);
+
+  // Update offer_intent status to email_sent
+  await supabase
+    .from('offer_intents')
+    .update({
+      status: 'email_sent',
+      email_sent_at: new Date().toISOString(),
+    })
+    .eq('offer_intent_id', offer_intent_id);
+
+  // Track email sent event
+  await supabase.from('engagement_events').insert({
+    contact_id: contact.contact_id,
+    company_id: offerIntent.company_id,
+    occurred_at: new Date().toISOString(),
+    event_type: 'offer_email_sent',
+    event_name: 'Smart Modal offer email sent',
+    source: 'smart_modal',
+    url: offerUrl,
+    meta: {
+      offer_intent_id: offerIntent.offer_intent_id,
+      machines: machines.map(m => m.display_name),
+      problem: offerIntent.problem_slug,
+      message_id: data?.id,
+    },
+  });
+
+  console.log(`[outbox-worker] Smart Modal offer email processed successfully for ${contact.email}`);
 }
 
 /**
