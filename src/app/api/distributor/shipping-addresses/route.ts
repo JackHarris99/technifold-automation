@@ -62,13 +62,7 @@ export async function POST(request: NextRequest) {
       is_default,
     } = body;
 
-    if (!address_line_1 || !city || !postal_code || !country) {
-      return NextResponse.json(
-        { error: 'Missing required address fields' },
-        { status: 400 }
-      );
-    }
-
+    // No validation - accept partial data, sales team will complete during review
     const supabase = getSupabaseClient();
 
     // If this is set as default, unset any existing defaults
