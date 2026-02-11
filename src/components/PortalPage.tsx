@@ -1118,30 +1118,16 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
                 <div className="text-[12px] font-[700] text-[#999] uppercase tracking-[0.05em] mb-6">Order Summary</div>
                 {pricingPreview && pricingPreview.line_items.length > 0 ? (
                   <div className="space-y-4">
-                    {/* Total (before discounts) */}
-                    <div className="flex justify-between items-center">
-                      <span className="text-[15px] text-[#999] font-[500]">Total</span>
-                      <span className="font-[600] text-[16px]">£{(pricingPreview.subtotal + pricingPreview.total_savings).toFixed(2)}</span>
-                    </div>
-
-                    {/* Discount */}
-                    {pricingPreview.total_savings > 0 && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-[15px] text-[#16a34a] font-[500]">Discount</span>
-                        <span className="font-[600] text-[16px] text-[#16a34a]">-£{pricingPreview.total_savings.toFixed(2)}</span>
-                      </div>
-                    )}
-
-                    {/* Subtotal (after discounts) */}
+                    {/* Subtotal */}
                     <div className="flex justify-between items-center pb-4 border-b border-[#2a2a2a]">
                       <span className="text-[15px] text-[#999] font-[500]">Subtotal</span>
                       <span className="font-[700] text-[17px] tracking-[-0.01em]">£{pricingPreview.subtotal.toFixed(2)}</span>
                     </div>
 
-                    {/* Shipping */}
+                    {/* Predicted Shipping */}
                     {pricingPreview.shipping !== undefined && (
                       <div className="flex justify-between items-center">
-                        <span className="text-[15px] text-[#999] font-[500]">Shipping</span>
+                        <span className="text-[15px] text-[#999] font-[500]">Predicted Shipping</span>
                         <span className="font-[600] text-[16px]">{pricingPreview.shipping === 0 ? 'FREE' : `£${pricingPreview.shipping.toFixed(2)}`}</span>
                       </div>
                     )}
