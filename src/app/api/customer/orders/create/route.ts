@@ -28,13 +28,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate shipping address
-    if (!shipping_address_id) {
-      return NextResponse.json(
-        { error: 'Shipping address is required' },
-        { status: 400 }
-      );
-    }
+    // Shipping address is optional - admin can add it during review
+    // No validation needed
 
     // Get authentication (token or session)
     const auth = await getPortalAuth(token);
@@ -61,19 +56,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Fetch shipping address
-    const { data: shippingAddress, error: addressError } = await supabase
-      .from('shipping_addresses')
-      .select('*')
-      .eq('address_id', shipping_address_id)
-      .eq('company_id', company.company_id)
-      .single();
+    // Fetch shipping address (optional - can be added during review)
+    let shippingAddress = null;
+    if (shipping_address_id) {
+      const { data, error: addressError } = await supabase
+        .from('shipping_addresses')
+        .select('*')
+        .eq('address_id', shipping_address_id)
+        .eq('company_id', company.company_id)
+        .single();
 
-    if (addressError || !shippingAddress) {
-      return NextResponse.json(
-        { error: 'Shipping address not found or does not belong to company' },
-        { status: 404 }
-      );
+      if (!addressError && data) {
+        shippingAddress = data;
+      }
+      // If address fetch fails, continue without it (no friction)
     }
 
     // Calculate VAT
@@ -98,8 +94,10 @@ export async function POST(request: NextRequest) {
     }, 0);
 
     // Calculate shipping cost (same as pricing preview)
+    // Use shipping address country if available, otherwise use company country
+    const shippingCountry = shippingAddress?.country || company.country || 'GB';
     const { data: shippingCost } = await supabase.rpc('calculate_shipping_cost', {
-      p_country_code: shippingAddress.country,
+      p_country_code: shippingCountry,
       p_order_subtotal: subtotal,
     });
     const predicted_shipping = shippingCost || 15; // Use calculated or fallback to 15
@@ -136,12 +134,12 @@ export async function POST(request: NextRequest) {
         billing_postal_code: company.billing_postal_code,
         billing_country: company.billing_country,
         vat_number: company.vat_number,
-        shipping_address_line_1: shippingAddress.address_line_1,
-        shipping_address_line_2: shippingAddress.address_line_2,
-        shipping_city: shippingAddress.city,
-        shipping_state_province: shippingAddress.state_province,
-        shipping_postal_code: shippingAddress.postal_code,
-        shipping_country: shippingAddress.country,
+        shipping_address_line_1: shippingAddress?.address_line_1 || null,
+        shipping_address_line_2: shippingAddress?.address_line_2 || null,
+        shipping_city: shippingAddress?.city || null,
+        shipping_state_province: shippingAddress?.state_province || null,
+        shipping_postal_code: shippingAddress?.postal_code || null,
+        shipping_country: shippingAddress?.country || null,
         po_number: po_number || null,
       });
 
@@ -196,7 +194,7 @@ export async function POST(request: NextRequest) {
           order_id,
           items_count: items.length,
           total_amount,
-          shipping_country: shippingAddress.country,
+          shipping_country: shippingAddress?.country || company.country || 'Unknown',
         },
       });
     } catch (e) {
