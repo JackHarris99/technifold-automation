@@ -160,6 +160,12 @@ export default function AddressesClient({ addresses: initialAddresses, userName 
                 >
                   Addresses
                 </a>
+                <a
+                  href="/customer/account"
+                  className="text-sm font-semibold text-[#666] hover:text-[#0a0a0a] transition-colors"
+                >
+                  Account
+                </a>
               </nav>
             </div>
 

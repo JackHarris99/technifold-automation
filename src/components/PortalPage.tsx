@@ -355,6 +355,12 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
                 >
                   Addresses
                 </a>
+                <a
+                  href="/customer/account"
+                  className="text-sm font-semibold text-[#666] hover:text-[#0a0a0a] transition-colors"
+                >
+                  Account
+                </a>
               </nav>
             )}
             </div>
