@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { getCurrentDistributor } from '@/lib/distributorAuth';
+import { notifyOrderSubmitted } from '@/lib/salesNotifications';
 import { Resend } from 'resend';
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
@@ -86,6 +87,7 @@ export async function POST(request: NextRequest) {
       .select(`
         company_id,
         company_name,
+        account_owner,
         vat_number,
         billing_address_line_1,
         billing_address_line_2,
@@ -227,6 +229,29 @@ export async function POST(request: NextRequest) {
         });
     } catch (eventError) {
       console.error('[Create Distributor Order] Failed to log event:', eventError);
+    }
+
+    // Send notification to sales rep (same as invoice paid notifications)
+    if (company?.account_owner) {
+      const { data: user } = await supabase
+        .from('users')
+        .select('user_id, email, full_name')
+        .eq('sales_rep_id', company.account_owner)
+        .single();
+
+      if (user) {
+        notifyOrderSubmitted({
+          user_id: user.user_id,
+          user_email: user.email,
+          user_name: user.full_name || user.email,
+          order_id: order.order_id,
+          company_id: company.company_id,
+          company_name: company.company_name,
+          order_type: 'distributor',
+          total_amount: total,
+          items_count: items.length,
+        }).catch(err => console.error('[Create Distributor Order] Notification failed:', err));
+      }
     }
 
     // Send confirmation email

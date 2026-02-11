@@ -131,9 +131,23 @@ export async function POST(
     const subtotal = inStockItems.reduce((sum, item) => sum + parseFloat(item.line_total.toString()), 0);
     const taxableAmount = subtotal + finalShipping;
 
-    // VAT calculation (simplified - use order's original VAT rate)
-    const originalTaxableAmount = parseFloat(order.subtotal.toString()) + parseFloat(order.predicted_shipping.toString());
-    const vatRate = originalTaxableAmount > 0 ? parseFloat(order.vat_amount.toString()) / originalTaxableAmount : 0;
+    // VAT calculation - recalculate based on actual company country, don't trust order's saved vat_amount
+    const billingCountry = (finalBillingAddress.country || 'GB').toUpperCase();
+    const euCountries = ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE'];
+
+    let vatRate = 0;
+    if (billingCountry === 'GB' || billingCountry === 'UK') {
+      vatRate = 0.20; // UK: 20% VAT
+    } else if (euCountries.includes(billingCountry)) {
+      if (order.companies.vat_number && order.companies.vat_number.trim().length > 0) {
+        vatRate = 0; // EU with VAT number: reverse charge
+      } else {
+        vatRate = 0.20; // EU without VAT number: 20%
+      }
+    } else {
+      vatRate = 0; // Rest of world: no VAT
+    }
+
     const vatAmount = taxableAmount * vatRate;
     const totalAmount = subtotal + finalShipping + vatAmount;
 
@@ -174,7 +188,7 @@ export async function POST(
       collection_method: 'send_invoice',
       days_until_due: 30,
       auto_advance: false,
-      description: `Distributor Order ${order_id}${order.po_number ? ` (PO: ${order.po_number})` : ''}`,
+      description: order.po_number ? `PO: ${order.po_number}` : undefined,
       metadata: {
         order_id: order_id,
         company_id: order.company_id,
@@ -207,6 +221,7 @@ export async function POST(
     }
 
     // 5. Add VAT as line item
+    console.log(`[Approve Order] Adding VAT line item: vatAmount=${vatAmount}, vatRate=${vatRate}`);
     if (vatAmount > 0) {
       await stripe.invoiceItems.create({
         customer: stripeCustomerId,
@@ -215,6 +230,9 @@ export async function POST(
         amount: Math.round(vatAmount * 100),
         currency: 'gbp',
       });
+      console.log(`[Approve Order] VAT line item added successfully: £${vatAmount.toFixed(2)}`);
+    } else {
+      console.log(`[Approve Order] VAT amount is 0, skipping VAT line item`);
     }
 
     // 6. Finalize invoice

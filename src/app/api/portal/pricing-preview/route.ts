@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
       .eq('is_default', true)
       .single();
 
-    const destinationCountry = shippingAddress?.country || company.country || 'GB';
+    const destinationCountry = shippingAddress?.country || company.billing_country || company.country || 'GB';
 
     // 4. Calculate pricing by product type
     let lineItems: any[] = [];

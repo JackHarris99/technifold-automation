@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPortalAuth } from '@/lib/portalAuth';
 import { getSupabaseClient } from '@/lib/supabase';
+import { notifyOrderSubmitted } from '@/lib/salesNotifications';
 
 interface OrderItem {
   product_code: string;
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
     // Fetch company details
     const { data: company, error: companyError } = await supabase
       .from('companies')
-      .select('company_id, company_name, billing_address_line_1, billing_address_line_2, billing_city, billing_state_province, billing_postal_code, billing_country, vat_number, country')
+      .select('company_id, company_name, account_owner, billing_address_line_1, billing_address_line_2, billing_city, billing_state_province, billing_postal_code, billing_country, vat_number, country')
       .eq('company_id', auth.company_id)
       .single();
 
@@ -73,8 +74,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate VAT
-    const isUK = ['GB', 'UK'].includes(company.country?.toUpperCase() || '');
-    const isEU = ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE'].includes(company.country?.toUpperCase() || '');
+    // Use billing_country (where country is actually stored), fallback to country field, then GB
+    const companyCountry = company.billing_country || company.country || 'GB';
+    const isUK = ['GB', 'UK'].includes(companyCountry.toUpperCase());
+    const isEU = ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE'].includes(companyCountry.toUpperCase());
     const hasVAT = !!company.vat_number;
 
     let vatRate = 0;
@@ -94,8 +97,8 @@ export async function POST(request: NextRequest) {
     }, 0);
 
     // Calculate shipping cost (same as pricing preview)
-    // Use shipping address country if available, otherwise use company country
-    const shippingCountry = shippingAddress?.country || company.country || 'GB';
+    // Use shipping address country if available, otherwise use company country (defaulting to GB)
+    const shippingCountry = shippingAddress?.country || companyCountry;
     const { data: shippingCost } = await supabase.rpc('calculate_shipping_cost', {
       p_country_code: shippingCountry,
       p_order_subtotal: subtotal,
@@ -200,6 +203,29 @@ export async function POST(request: NextRequest) {
     } catch (e) {
       console.error('[Customer Order Create] Failed to log event:', e);
       // Non-blocking
+    }
+
+    // Send notification to sales rep (same as invoice paid notifications)
+    if (company?.account_owner) {
+      const { data: user } = await supabase
+        .from('users')
+        .select('user_id, email, full_name')
+        .eq('sales_rep_id', company.account_owner)
+        .single();
+
+      if (user) {
+        notifyOrderSubmitted({
+          user_id: user.user_id,
+          user_email: user.email,
+          user_name: user.full_name || user.email,
+          order_id,
+          company_id: company.company_id,
+          company_name: company.company_name,
+          order_type: 'customer',
+          total_amount,
+          items_count: items.length,
+        }).catch(err => console.error('[Customer Order Create] Notification failed:', err));
+      }
     }
 
     return NextResponse.json({

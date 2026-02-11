@@ -347,6 +347,107 @@ export async function notifyInvoicePaid({
 }
 
 /**
+ * Send instant notification when a customer or distributor places an order
+ */
+export async function notifyOrderSubmitted({
+  user_id,
+  user_email,
+  user_name,
+  order_id,
+  company_id,
+  company_name,
+  order_type,
+  total_amount,
+  items_count,
+}: {
+  user_id: string;
+  user_email: string;
+  user_name: string;
+  order_id: string;
+  company_id: string;
+  company_name: string;
+  order_type: 'customer' | 'distributor';
+  total_amount: number;
+  items_count: number;
+}): Promise<{ success: boolean; error?: string }> {
+  const resend = getResendClient();
+  if (!resend) return { success: false, error: 'Resend not configured' };
+
+  try {
+    const companyUrl = `${BASE_URL}/admin/company/${company_id}`;
+    const ordersUrl = `${BASE_URL}/admin/orders`;
+    const orderTypeLabel = order_type === 'customer' ? 'Customer' : 'Distributor';
+
+    const html = salesEmailWrapper(`
+      <div class="header">
+        <h1 style="margin: 0; font-size: 24px; font-weight: 700;">🛒 New Order Submitted</h1>
+        <p style="margin: 8px 0 0 0; font-size: 16px; opacity: 0.9;">${orderTypeLabel} order pending review</p>
+      </div>
+
+      <div class="content">
+        <p style="font-size: 16px; line-height: 24px; color: #333333; margin: 0 0 16px 0;">
+          Hi ${user_name},
+        </p>
+
+        <p style="font-size: 16px; line-height: 24px; color: #333333; margin: 0 0 24px 0;">
+          <strong>${company_name}</strong> has submitted a new ${order_type} order for review.
+        </p>
+
+        <div class="info-box">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="color: #1e40af; font-size: 14px; padding-bottom: 4px;">Order Total</td>
+              <td align="right" style="color: #1e40af; font-size: 24px; font-weight: 700;">£${total_amount.toLocaleString()}</td>
+            </tr>
+            <tr>
+              <td style="color: #64748b; font-size: 12px; padding-top: 8px;">Items</td>
+              <td align="right" style="color: #64748b; font-size: 12px;">${items_count} product${items_count !== 1 ? 's' : ''}</td>
+            </tr>
+            <tr>
+              <td style="color: #64748b; font-size: 12px; padding-top: 4px;">Order ID</td>
+              <td align="right" style="color: #64748b; font-size: 12px; font-family: monospace;">${order_id.slice(0, 12)}</td>
+            </tr>
+          </table>
+        </div>
+
+        <h3 style="margin: 24px 0 12px 0; font-size: 16px; color: #333333;">Next Steps:</h3>
+        <p style="font-size: 14px; color: #666666; margin: 0 0 16px 0; line-height: 20px;">
+          Review the order and create an invoice to proceed with fulfillment.
+        </p>
+
+        <div style="margin: 16px 0;">
+          <a href="${ordersUrl}" class="button">Review Order</a>
+          <a href="${companyUrl}" class="button button-secondary">View Company</a>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p style="margin: 0; font-size: 12px; color: #666666; line-height: 18px;">
+          This is an automated notification from Technifold Admin.
+        </p>
+      </div>
+    `);
+
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [user_email],
+      subject: `🛒 New ${orderTypeLabel} order from ${company_name} - £${total_amount.toLocaleString()}`,
+      html,
+    });
+
+    if (error) {
+      console.error('[salesNotifications] Order submitted error:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('[salesNotifications] Error:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
  * Send daily digest email to sales rep
  * Summarizes all activity for their customers
  */

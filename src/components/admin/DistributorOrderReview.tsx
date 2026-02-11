@@ -56,7 +56,7 @@ interface Props {
   backUrl?: string;
 }
 
-export default function DistributorOrderReview({ order, items, currentUser, backUrl = '/admin/distributor-orders/pending' }: Props) {
+export default function DistributorOrderReview({ order, items, currentUser, backUrl = '/admin/distributors/orders/pending' }: Props) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
@@ -131,8 +131,23 @@ export default function DistributorOrderReview({ order, items, currentUser, back
     const shipping = freeShipping ? 0 : parseFloat(shippingCost) || 0;
     const taxableAmount = subtotal + shipping;
 
-    // VAT calculation (simplified - use order's original VAT rate)
-    const vatRate = order.subtotal > 0 ? order.vat_amount / (order.subtotal + order.predicted_shipping) : 0;
+    // VAT calculation - recalculate based on actual billing country, don't trust order's saved vat_amount
+    const currentBillingCountry = (billingCountry || order.billing_country || 'GB').toUpperCase();
+    const euCountries = ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE'];
+
+    let vatRate = 0;
+    if (currentBillingCountry === 'GB' || currentBillingCountry === 'UK') {
+      vatRate = 0.20; // UK: 20% VAT
+    } else if (euCountries.includes(currentBillingCountry)) {
+      if (order.vat_number && order.vat_number.trim().length > 0) {
+        vatRate = 0; // EU with VAT number: reverse charge
+      } else {
+        vatRate = 0.20; // EU without VAT number: 20%
+      }
+    } else {
+      vatRate = 0; // Rest of world: no VAT
+    }
+
     const vat = taxableAmount * vatRate;
     const total = subtotal + shipping + vat;
 
@@ -144,7 +159,7 @@ export default function DistributorOrderReview({ order, items, currentUser, back
       vat,
       total,
     };
-  }, [items, itemStatuses, itemQuantities, itemPrices, shippingCost, freeShipping, order, removedItemIds]);
+  }, [items, itemStatuses, itemQuantities, itemPrices, shippingCost, freeShipping, order, removedItemIds, billingCountry]);
 
   const handleRejectOrder = async () => {
     if (!rejectReason.trim()) {
@@ -201,6 +216,33 @@ export default function DistributorOrderReview({ order, items, currentUser, back
     const shippingChanged = freeShipping || parseFloat(shippingCost) !== order.predicted_shipping;
     if (shippingChanged && !shippingOverrideReason.trim()) {
       alert('Please provide a reason for the shipping cost override.');
+      return;
+    }
+
+    // CRITICAL: Validate billing and shipping countries (required for VAT calculation and invoice compliance)
+    if (!billingCountry || billingCountry.trim() === '') {
+      alert('Billing country is required for invoice creation. Please fill in the billing country field.');
+      return;
+    }
+
+    if (!shippingCountry || shippingCountry.trim() === '') {
+      alert('Shipping country is required for invoice creation. Please fill in the shipping country field.');
+      return;
+    }
+
+    // Validate other critical billing fields for invoice compliance
+    if (!billingLine1 || billingLine1.trim() === '') {
+      alert('Billing address line 1 is required for invoice creation.');
+      return;
+    }
+
+    if (!billingCity || billingCity.trim() === '') {
+      alert('Billing city is required for invoice creation.');
+      return;
+    }
+
+    if (!billingPostal || billingPostal.trim() === '') {
+      alert('Billing postal code is required for invoice creation.');
       return;
     }
 

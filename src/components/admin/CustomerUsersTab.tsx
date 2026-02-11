@@ -45,6 +45,7 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
+  const [resendingInvitation, setResendingInvitation] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -77,6 +78,32 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
 
   const clearAll = () => {
     setSelectedContacts(new Set());
+  };
+
+  const resendInvitation = async (userId: string) => {
+    setResendingInvitation(userId);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await fetch(`/api/admin/customer-users/${userId}/resend-invitation`, {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to resend invitation');
+      }
+
+      setSuccess('Invitation resent successfully');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err: any) {
+      setError(err.message);
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setResendingInvitation(null);
+    }
   };
 
   const sendInvitationsToContacts = async () => {
@@ -295,6 +322,9 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Created
                 </th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -333,6 +363,17 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatDate(user.created_at)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right">
+                    {user.invitation_token && !user.password_hash && (
+                      <button
+                        onClick={() => resendInvitation(user.user_id)}
+                        disabled={resendingInvitation === user.user_id}
+                        className="text-sm text-blue-600 hover:text-blue-800 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {resendingInvitation === user.user_id ? 'Sending...' : 'Resend Invitation'}
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
