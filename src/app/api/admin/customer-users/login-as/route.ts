@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
 
     // Set customer session cookie
     const cookieStore = await cookies();
-    cookieStore.set('customer_token', token, {
+    cookieStore.set('customer_session', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
