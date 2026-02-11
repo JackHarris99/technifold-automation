@@ -136,15 +136,14 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
             }
           }
 
-          // For logged-in users, billing address comes from payload company data
-          setBillingAddress({
-            company_name: payload.company_name,
-            billing_address_line_1: payload.billing_address_line_1 || '',
-            billing_city: payload.billing_city || '',
-            billing_postal_code: payload.billing_postal_code || '',
-            billing_country: payload.billing_country || '',
-            vat_number: payload.vat_number || null,
-          });
+          // For logged-in users, fetch billing address from company details
+          // We still need to fetch this because payload doesn't include billing info
+          const billingResponse = await fetch(`/api/portal/company-details?token=${encodeURIComponent(token)}`);
+          const billingData = await billingResponse.json();
+
+          if (billingData.success && billingData.company) {
+            setBillingAddress(billingData.company);
+          }
         } else {
           // Token-based portal - use original portal API
           const shippingResponse = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
