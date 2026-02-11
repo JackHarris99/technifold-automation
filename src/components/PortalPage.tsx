@@ -113,33 +113,67 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
   useEffect(() => {
     const fetchAddresses = async () => {
       try {
-        // Fetch ALL shipping addresses
-        const shippingResponse = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
-        const shippingData = await shippingResponse.json();
+        // Use different API endpoints for logged-in vs token-based portals
+        if (isLoggedIn) {
+          // Logged-in customer portal - use customer API
+          const shippingResponse = await fetch('/api/customer/addresses');
+          const shippingData = await shippingResponse.json();
 
-        if (shippingData.success && shippingData.addresses) {
-          setShippingAddresses(shippingData.addresses);
+          if (shippingData.addresses && shippingData.addresses.length > 0) {
+            setShippingAddresses(shippingData.addresses);
 
-          // Set default address as selected
-          const defaultAddress = shippingData.addresses.find((addr: any) => addr.is_default);
-          if (defaultAddress) {
-            setSelectedAddressId(defaultAddress.address_id);
-          } else if (shippingData.addresses.length > 0) {
-            // If no default, select the first one
-            setSelectedAddressId(shippingData.addresses[0].address_id);
+            // Set default address as selected
+            const defaultAddress = shippingData.addresses.find((addr: any) => addr.is_default);
+            if (defaultAddress) {
+              setSelectedAddressId(defaultAddress.address_id);
+            } else {
+              // If no default, select the first one
+              setSelectedAddressId(shippingData.addresses[0].address_id);
+            }
+          } else {
+            if (!isTest) {
+              setShowAddressModal(true);
+            }
           }
+
+          // For logged-in users, billing address comes from payload company data
+          setBillingAddress({
+            company_name: payload.company_name,
+            billing_address_line_1: payload.billing_address_line_1 || '',
+            billing_city: payload.billing_city || '',
+            billing_postal_code: payload.billing_postal_code || '',
+            billing_country: payload.billing_country || '',
+            vat_number: payload.vat_number || null,
+          });
         } else {
-          if (!isTest) {
-            setShowAddressModal(true);
+          // Token-based portal - use original portal API
+          const shippingResponse = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
+          const shippingData = await shippingResponse.json();
+
+          if (shippingData.success && shippingData.addresses) {
+            setShippingAddresses(shippingData.addresses);
+
+            // Set default address as selected
+            const defaultAddress = shippingData.addresses.find((addr: any) => addr.is_default);
+            if (defaultAddress) {
+              setSelectedAddressId(defaultAddress.address_id);
+            } else if (shippingData.addresses.length > 0) {
+              // If no default, select the first one
+              setSelectedAddressId(shippingData.addresses[0].address_id);
+            }
+          } else {
+            if (!isTest) {
+              setShowAddressModal(true);
+            }
           }
-        }
 
-        // Fetch billing address from company
-        const billingResponse = await fetch(`/api/portal/company-details?token=${encodeURIComponent(token)}`);
-        const billingData = await billingResponse.json();
+          // Fetch billing address from company
+          const billingResponse = await fetch(`/api/portal/company-details?token=${encodeURIComponent(token)}`);
+          const billingData = await billingResponse.json();
 
-        if (billingData.success && billingData.company) {
-          setBillingAddress(billingData.company);
+          if (billingData.success && billingData.company) {
+            setBillingAddress(billingData.company);
+          }
         }
       } catch (error) {
         console.error('[PortalPage] Failed to fetch addresses:', error);
@@ -149,19 +183,34 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
     };
 
     fetchAddresses();
-  }, [token, isTest]);
+  }, [token, isTest, isLoggedIn, payload]);
 
   const handleAddressSaved = async () => {
     setShowAddressModal(false);
     try {
-      const response = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
-      const data = await response.json();
-      if (data.success && data.addresses) {
-        setShippingAddresses(data.addresses);
-        // Select the newly added address (likely the default one)
-        const defaultAddress = data.addresses.find((addr: any) => addr.is_default);
-        if (defaultAddress) {
-          setSelectedAddressId(defaultAddress.address_id);
+      if (isLoggedIn) {
+        // Logged-in customer portal
+        const response = await fetch('/api/customer/addresses');
+        const data = await response.json();
+        if (data.addresses && data.addresses.length > 0) {
+          setShippingAddresses(data.addresses);
+          // Select the newly added address (likely the default one)
+          const defaultAddress = data.addresses.find((addr: any) => addr.is_default);
+          if (defaultAddress) {
+            setSelectedAddressId(defaultAddress.address_id);
+          }
+        }
+      } else {
+        // Token-based portal
+        const response = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
+        const data = await response.json();
+        if (data.success && data.addresses) {
+          setShippingAddresses(data.addresses);
+          // Select the newly added address (likely the default one)
+          const defaultAddress = data.addresses.find((addr: any) => addr.is_default);
+          if (defaultAddress) {
+            setSelectedAddressId(defaultAddress.address_id);
+          }
         }
       }
     } catch (error) {
