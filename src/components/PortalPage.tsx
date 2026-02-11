@@ -886,29 +886,19 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
 
               if (standardItems.length === 0) return null;
 
-              // Calculate total quantity and get tiered price
-              const standardTotalQty = standardItems.reduce((sum, [_, qty]) => sum + qty, 0);
-              const tiersForDisplay = standardTiers.map((tier, idx) => ({
-                min: tier.min_quantity,
-                max: tier.max_quantity || Infinity,
-                price: tier.unit_price || 0,
-                label: `Tier ${idx + 1}`
-              }));
-              const currentTier = tiersForDisplay.find(t => standardTotalQty >= t.min && standardTotalQty <= t.max);
-              const standardUnitPrice = currentTier?.price || standardTiers[0]?.unit_price || 33;
-
-              // Get full product info
+              // Get full product info from pricingPreview API
               const standardProducts = standardItems.map(([code, qty]) => {
                 const item = [...payload.reorder_items, ...(payload.by_tool_tabs?.flatMap(t => t.items) || [])]
                   .find(i => i.consumable_code === code);
+                const previewItem = pricingPreview?.line_items.find(li => li.product_code === code);
 
                 return {
                   product_code: code,
                   description: item?.description || code,
                   quantity: qty,
-                  base_price: item?.price || 0,
-                  unit_price: standardUnitPrice, // Use calculated standard tier price
-                  discount_applied: `Tier pricing: ${standardTotalQty} total units @ £${standardUnitPrice.toFixed(2)}`
+                  base_price: previewItem?.base_price || item?.price || 0,
+                  unit_price: previewItem?.unit_price || item?.price || 0,
+                  discount_applied: previewItem?.discount_applied || null
                 };
               });
 
