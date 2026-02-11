@@ -625,6 +625,19 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
                               {(() => {
                                 const pricing = getPricingInfo(item.consumable_code);
                                 const tier1Price = getTier1Price(item.pricing_tier);
+                                const hasTieredPricing = item.pricing_tier === 'standard' || item.pricing_tier === 'premium';
+
+                                // For tiered items, don't show price until tier1Price is available
+                                if (hasTieredPricing && !tier1Price && !pricing) {
+                                  return (
+                                    <div className="flex items-center gap-2">
+                                      <div className="text-[15px] text-[#999] italic">
+                                        Calculating...
+                                      </div>
+                                    </div>
+                                  );
+                                }
+
                                 const displayPrice = pricing?.discountedPrice || tier1Price || item.price || 0;
 
                                 return (
@@ -760,6 +773,19 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
                               {(() => {
                                 const pricing = getPricingInfo(item.consumable_code);
                                 const tier1Price = getTier1Price(item.pricing_tier);
+                                const hasTieredPricing = item.pricing_tier === 'standard' || item.pricing_tier === 'premium';
+
+                                // For tiered items, don't show price until tier1Price is available
+                                if (hasTieredPricing && !tier1Price && !pricing) {
+                                  return (
+                                    <div className="flex items-center gap-2">
+                                      <div className="text-[15px] text-[#999] italic">
+                                        Calculating...
+                                      </div>
+                                    </div>
+                                  );
+                                }
+
                                 const displayPrice = pricing?.discountedPrice || tier1Price || item.price || 0;
 
                                 return (

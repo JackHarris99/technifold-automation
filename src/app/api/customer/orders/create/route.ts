@@ -97,7 +97,13 @@ export async function POST(request: NextRequest) {
       return sum + (item.quantity * item.unit_price);
     }, 0);
 
-    const predicted_shipping = 15; // Default shipping estimate
+    // Calculate shipping cost (same as pricing preview)
+    const { data: shippingCost } = await supabase.rpc('calculate_shipping_cost', {
+      p_country_code: shippingAddress.country,
+      p_order_subtotal: subtotal,
+    });
+    const predicted_shipping = shippingCost || 15; // Use calculated or fallback to 15
+
     const vat_amount = (subtotal + predicted_shipping) * vatRate;
     const total_amount = subtotal + predicted_shipping + vat_amount;
 
