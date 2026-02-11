@@ -37,21 +37,24 @@ export async function GET(request: NextRequest) {
     console.log('[companies/search] Running query...');
 
     // Search across multiple fields: name, ID, city, postal code, address, sage code, owner, country (all company types)
+    // Exclude prospects from search results
     const searchPattern = `%${q}%`;
     const { data: companyData, error: companyError } = await supabase
       .from('companies')
       .select('company_id, company_name, account_owner, status, country, billing_city, billing_postal_code, billing_address_line_1, sage_customer_code, type')
       .or(`company_name.ilike.${searchPattern},company_id.ilike.${searchPattern},billing_city.ilike.${searchPattern},billing_postal_code.ilike.${searchPattern},billing_address_line_1.ilike.${searchPattern},sage_customer_code.ilike.${searchPattern},account_owner.ilike.${searchPattern},country.ilike.${searchPattern}`)
       .neq('status', 'dead')
+      .neq('customer_status', 'prospect')
       .order('company_name')
       .limit(15);
 
-    // Also search in contacts (name and email) - all company types
+    // Also search in contacts (name and email) - all company types except prospects
     const { data: contactData, error: contactError } = await supabase
       .from('contacts')
       .select('company_id, email, full_name, first_name, last_name, companies!inner(company_id, company_name, account_owner, status, country, type)')
       .or(`email.ilike.${searchPattern},full_name.ilike.${searchPattern}`)
       .neq('companies.status', 'dead')
+      .neq('companies.customer_status', 'prospect')
       .limit(10);
 
     console.log('[companies/search] Query completed', {
