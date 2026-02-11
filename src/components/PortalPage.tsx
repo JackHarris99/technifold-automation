@@ -923,14 +923,17 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
                 const item = [...payload.reorder_items, ...(payload.by_tool_tabs?.flatMap(t => t.items) || [])]
                   .find(i => i.consumable_code === code);
                 const previewItem = pricingPreview?.line_items.find(li => li.product_code === code);
+                const hasTieredPricing = item?.pricing_tier === 'standard' || item?.pricing_tier === 'premium';
 
                 return {
                   product_code: code,
                   description: item?.description || code,
                   quantity: qty,
                   base_price: previewItem?.base_price || item?.price || 0,
-                  unit_price: previewItem?.unit_price || item?.price || 0,
-                  discount_applied: previewItem?.discount_applied || null
+                  // For tiered items, only use previewItem price (don't fall back to base price)
+                  unit_price: hasTieredPricing ? (previewItem?.unit_price || null) : (previewItem?.unit_price || item?.price || 0),
+                  discount_applied: previewItem?.discount_applied || null,
+                  has_tiered_pricing: hasTieredPricing
                 };
               });
 
@@ -944,7 +947,7 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
                   <div className="space-y-3">
                     {standardProducts.map((item) => {
                       const currentQty = itemQuantities.get(item.product_code) || 0;
-                      const lineTotal = item.unit_price * currentQty;
+                      const lineTotal = item.unit_price !== null ? item.unit_price * currentQty : 0;
 
                       return (
                         <div key={item.product_code} className="p-3 bg-green-50/50 rounded-[10px] border border-green-200">
@@ -991,11 +994,17 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
                               </button>
                             </div>
                             <div className="flex-1 text-right">
-                              <div className="text-[11px] text-[#334155]">
-                                <span className="font-[600] text-[#16a34a]">£{item.unit_price.toFixed(2)}</span>
-                                <span className="text-[#475569]"> /unit</span>
-                              </div>
-                              <div className="text-[14px] font-[700] text-[#0a0a0a] mt-0.5">£{lineTotal.toFixed(2)}</div>
+                              {item.unit_price !== null ? (
+                                <>
+                                  <div className="text-[11px] text-[#334155]">
+                                    <span className="font-[600] text-[#16a34a]">£{item.unit_price.toFixed(2)}</span>
+                                    <span className="text-[#475569]"> /unit</span>
+                                  </div>
+                                  <div className="text-[14px] font-[700] text-[#0a0a0a] mt-0.5">£{lineTotal.toFixed(2)}</div>
+                                </>
+                              ) : (
+                                <div className="text-[11px] text-[#999] italic">Calculating...</div>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -1058,7 +1067,8 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
                   description: item?.description || code,
                   quantity: qty,
                   base_price: previewItem?.base_price || item?.price || 0,
-                  unit_price: previewItem?.unit_price || item?.price || 0,
+                  // Premium items always need calculated pricing - don't fall back to base price
+                  unit_price: previewItem?.unit_price || null,
                   discount_applied: previewItem?.discount_applied || null
                 };
               });
@@ -1073,7 +1083,7 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
                   <div className="space-y-3">
                     {premiumProducts.map((item) => {
                       const currentQty = itemQuantities.get(item.product_code) || 0;
-                      const lineTotal = item.unit_price * currentQty;
+                      const lineTotal = item.unit_price !== null ? item.unit_price * currentQty : 0;
 
                       return (
                         <div key={item.product_code} className="p-3 bg-purple-50/50 rounded-[10px] border border-purple-200">
@@ -1120,14 +1130,20 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
                               </button>
                             </div>
                             <div className="flex-1 text-right">
-                              <div className="text-[11px] text-[#334155]">
-                                {item.unit_price !== item.base_price && (
-                                  <span className="line-through mr-1">£{item.base_price.toFixed(2)}</span>
-                                )}
-                                <span className="font-[600] text-[#a855f7]">£{item.unit_price.toFixed(2)}</span>
-                                <span className="text-[#475569]"> /unit</span>
-                              </div>
-                              <div className="text-[14px] font-[700] text-[#0a0a0a] mt-0.5">£{lineTotal.toFixed(2)}</div>
+                              {item.unit_price !== null ? (
+                                <>
+                                  <div className="text-[11px] text-[#334155]">
+                                    {item.unit_price !== item.base_price && (
+                                      <span className="line-through mr-1">£{item.base_price.toFixed(2)}</span>
+                                    )}
+                                    <span className="font-[600] text-[#a855f7]">£{item.unit_price.toFixed(2)}</span>
+                                    <span className="text-[#475569]"> /unit</span>
+                                  </div>
+                                  <div className="text-[14px] font-[700] text-[#0a0a0a] mt-0.5">£{lineTotal.toFixed(2)}</div>
+                                </>
+                              ) : (
+                                <div className="text-[11px] text-[#999] italic">Calculating...</div>
+                              )}
                             </div>
                           </div>
 
