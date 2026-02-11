@@ -42,11 +42,46 @@ export async function generatePortalPayload(companyId: string): Promise<CompanyP
     sample: companyTools?.[0]
   });
 
+  // If no tools, check for custom products before returning empty
   if (!companyTools || companyTools.length === 0) {
+    // Check for custom portal products
+    const { data: customProducts } = await supabase
+      .from('custom_portal_products')
+      .select('product_code')
+      .eq('company_id', companyId);
+
+    if (!customProducts || customProducts.length === 0) {
+      // No tools and no custom products - portal is empty
+      return {
+        company_id: companyId,
+        company_name: companyName,
+        reorder_items: [],
+        by_tool_tabs: []
+      };
+    }
+
+    // Has custom products but no tools - build reorder items from custom products only
+    const customProductCodes = customProducts.map(cp => cp.product_code);
+    const { data: customProductDetails } = await supabase
+      .from('products')
+      .select('product_code, description, price, category, image_url, pricing_tier')
+      .in('product_code', customProductCodes)
+      .eq('active', true);
+
+    const reorderItems: ReorderItem[] = (customProductDetails || []).map(prod => ({
+      consumable_code: prod.product_code,
+      description: prod.description || prod.product_code,
+      price: prod.price,
+      last_purchased: null,
+      category: prod.category,
+      image_url: prod.image_url,
+      pricing_tier: prod.pricing_tier
+    }));
+
     return {
       company_id: companyId,
       company_name: companyName,
-      reorder_items: [],
+      reorder_items: reorderItems,
       by_tool_tabs: []
     };
   }
