@@ -336,19 +336,12 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
                     {formatDate(user.created_at)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                    {user.password_hash && (
-                      <button
-                        onClick={() => handleLoginAs(user.user_id, `${user.first_name} ${user.last_name}`)}
-                        className="px-3 py-1.5 text-sm bg-purple-100 text-purple-700 rounded hover:bg-purple-200 font-medium"
-                      >
-                        👁 Login As
-                      </button>
-                    )}
-                    {user.invitation_token && !user.password_hash && (
-                      <span className="text-xs text-gray-400 italic">
-                        Awaiting acceptance
-                      </span>
-                    )}
+                    <button
+                      onClick={() => handleLoginAs(user.user_id, `${user.first_name} ${user.last_name}`)}
+                      className="px-3 py-1.5 text-sm bg-purple-100 text-purple-700 rounded hover:bg-purple-200 font-medium"
+                    >
+                      👁 Login As
+                    </button>
                   </td>
                 </tr>
               ))}
