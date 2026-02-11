@@ -42,41 +42,84 @@ export async function generatePortalPayload(companyId: string): Promise<CompanyP
     sample: companyTools?.[0]
   });
 
-  // If no tools, check for custom products before returning empty
+  // If no tools, get consumables and custom products
   if (!companyTools || companyTools.length === 0) {
-    // Check for custom portal products
+    let reorderItems: ReorderItem[] = [];
+
+    // Get previously ordered consumables
+    const { data: companyConsumables } = await supabase
+      .from('company_product_history')
+      .select('product_code, last_purchased_at')
+      .eq('company_id', companyId)
+      .eq('product_type', 'consumable');
+
+    if (companyConsumables && companyConsumables.length > 0) {
+      const consumableLastOrdered = new Map<string, string>();
+      companyConsumables.forEach(cc => {
+        if (cc.last_purchased_at) {
+          consumableLastOrdered.set(cc.product_code, cc.last_purchased_at);
+        }
+      });
+
+      const orderedProductCodes = companyConsumables.map(cc => cc.product_code);
+      const { data: orderedProducts } = await supabase
+        .from('products')
+        .select('product_code, description, price, category, image_url, pricing_tier')
+        .in('product_code', orderedProductCodes)
+        .eq('active', true);
+
+      if (orderedProducts) {
+        reorderItems = orderedProducts.map(prod => ({
+          consumable_code: prod.product_code,
+          description: prod.description || prod.product_code,
+          price: prod.price,
+          last_purchased: consumableLastOrdered.get(prod.product_code)?.split('T')[0] || null,
+          category: prod.category,
+          image_url: prod.image_url,
+          pricing_tier: prod.pricing_tier
+        }));
+
+        reorderItems.sort((a, b) => {
+          if (!a.last_purchased) return 1;
+          if (!b.last_purchased) return -1;
+          return new Date(b.last_purchased).getTime() - new Date(a.last_purchased).getTime();
+        });
+      }
+    }
+
+    // Add custom portal products
     const { data: customProducts } = await supabase
       .from('custom_portal_products')
       .select('product_code')
       .eq('company_id', companyId);
 
-    if (!customProducts || customProducts.length === 0) {
-      // No tools and no custom products - portal is empty
-      return {
-        company_id: companyId,
-        company_name: companyName,
-        reorder_items: [],
-        by_tool_tabs: []
-      };
+    if (customProducts && customProducts.length > 0) {
+      const customProductCodes = customProducts.map(cp => cp.product_code);
+      const existingCodes = new Set(reorderItems.map(item => item.consumable_code));
+      const newCustomCodes = customProductCodes.filter(code => !existingCodes.has(code));
+
+      if (newCustomCodes.length > 0) {
+        const { data: customProductDetails } = await supabase
+          .from('products')
+          .select('product_code, description, price, category, image_url, pricing_tier')
+          .in('product_code', newCustomCodes)
+          .eq('active', true);
+
+        if (customProductDetails) {
+          const customItems: ReorderItem[] = customProductDetails.map(prod => ({
+            consumable_code: prod.product_code,
+            description: prod.description || prod.product_code,
+            price: prod.price,
+            last_purchased: null,
+            category: prod.category,
+            image_url: prod.image_url,
+            pricing_tier: prod.pricing_tier
+          }));
+
+          reorderItems.push(...customItems);
+        }
+      }
     }
-
-    // Has custom products but no tools - build reorder items from custom products only
-    const customProductCodes = customProducts.map(cp => cp.product_code);
-    const { data: customProductDetails } = await supabase
-      .from('products')
-      .select('product_code, description, price, category, image_url, pricing_tier')
-      .in('product_code', customProductCodes)
-      .eq('active', true);
-
-    const reorderItems: ReorderItem[] = (customProductDetails || []).map(prod => ({
-      consumable_code: prod.product_code,
-      description: prod.description || prod.product_code,
-      price: prod.price,
-      last_purchased: null,
-      category: prod.category,
-      image_url: prod.image_url,
-      pricing_tier: prod.pricing_tier
-    }));
 
     return {
       company_id: companyId,
