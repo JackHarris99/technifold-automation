@@ -114,8 +114,8 @@ export async function POST(request: NextRequest) {
         company_id: company.company_id,
         user_id: null, // NULL for customer orders (user_id references distributor_users)
         customer_user_id: auth.user_id || null, // Customer user_id from customer_users table
-        user_email: auth.contact_id || 'customer@portal.com', // Placeholder
-        user_name: company.company_name,
+        user_email: auth.email || 'no-email@portal.com', // Customer email from session
+        user_name: auth.full_name || company.company_name, // Customer name from session
         status: 'pending_review',
         order_type: 'customer', // Mark as customer order
         subtotal,
