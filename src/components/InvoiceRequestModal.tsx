@@ -361,11 +361,6 @@ export function InvoiceRequestModal({
                               x{item.quantity}
                             </span>
                             <div className="text-right min-w-[80px]">
-                              {item.discount_applied && item.base_price !== item.unit_price && (
-                                <div className="text-xs text-[#999] line-through">
-                                  £{(item.base_price * item.quantity).toFixed(2)}
-                                </div>
-                              )}
                               <span className="font-semibold text-[#0a0a0a] text-sm">
                                 £{item.line_total.toFixed(2)}
                               </span>
