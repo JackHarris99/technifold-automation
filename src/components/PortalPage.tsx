@@ -54,8 +54,10 @@ interface PortalPageProps {
     full_name: string;
     email: string;
   };
-  token: string;
+  token?: string; // Optional for login-based portal
   isTest?: boolean;
+  isLoggedIn?: boolean; // For login-based portal
+  userName?: string; // User's first name
 }
 
 interface PricingTier {
@@ -65,7 +67,7 @@ interface PricingTier {
   discount_percent?: number;
 }
 
-export function PortalPage({ payload, contact, token, isTest }: PortalPageProps) {
+export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userName }: PortalPageProps) {
   // Track quantities for all items
   const [itemQuantities, setItemQuantities] = useState<Map<string, number>>(new Map());
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['reorder']));
@@ -302,7 +304,8 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
       {/* Top Branding Bar */}
       <div className="bg-white border-b border-[#e8e8e8]">
         <div className="max-w-[1600px] mx-auto px-6 py-4">
-          <div className="flex items-center justify-center gap-8">
+          <div className="flex items-center justify-between">
+            <div className={`flex items-center gap-8 ${isLoggedIn ? '' : 'mx-auto'}`}>
             <div className="relative h-10 w-32">
               <Image
                 src="https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/site/technifold.png"
@@ -330,6 +333,23 @@ export function PortalPage({ payload, contact, token, isTest }: PortalPageProps)
                 priority
               />
             </div>
+            </div>
+
+            {/* User Menu (logged-in portal only) */}
+            {isLoggedIn && (
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-[#666]">Welcome, <strong>{userName}</strong></span>
+                <button
+                  onClick={async () => {
+                    await fetch('/api/customer/auth/logout', { method: 'POST' });
+                    window.location.href = '/customer/login';
+                  }}
+                  className="px-4 py-2 text-sm font-semibold text-[#666] hover:text-[#0a0a0a] hover:bg-gray-100 rounded-lg transition-all"
+                >
+                  Sign Out
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

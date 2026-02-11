@@ -1,37 +1,28 @@
 /**
  * GET /api/portal/company-details
- * Fetch company billing details using HMAC token
+ * Fetch company billing details using token or session
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken, getCompanyQueryField } from '@/lib/tokens';
+import { getPortalAuth } from '@/lib/portalAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.nextUrl.searchParams.get('token');
+    const token = request.nextUrl.searchParams.get('token') || undefined;
 
-    if (!token) {
+    // Get auth from either token or session
+    const auth = await getPortalAuth(token);
+    if (!auth) {
       return NextResponse.json(
-        { error: 'Token is required' },
-        { status: 400 }
-      );
-    }
-
-    // Verify HMAC token
-    const payload = verifyToken(token);
-    if (!payload) {
-      return NextResponse.json(
-        { error: 'Invalid or expired token' },
+        { error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
     const supabase = getSupabaseClient();
-    const company_id = payload.company_id;
 
-    // Fetch company billing details (with backward compatibility for old TEXT company_id values)
-    const companyQuery = getCompanyQueryField(company_id);
+    // Fetch company billing details
     const { data: company, error: companyError } = await supabase
       .from('companies')
       .select(`
@@ -45,7 +36,7 @@ export async function GET(request: NextRequest) {
         billing_country,
         vat_number
       `)
-      .eq(companyQuery.column, companyQuery.value)
+      .eq('company_id', auth.company_id)
       .single();
 
     if (companyError) {
