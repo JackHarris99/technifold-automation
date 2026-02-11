@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { isEUCountry } from '@/lib/vat-helpers';
 import { verifyToken, getCompanyQueryField } from '@/lib/tokens';
+import { getCustomerSession } from '@/lib/customerAuth';
 
 async function checkCompanyDetails(companyId: string) {
   const supabase = getSupabaseClient();
@@ -127,17 +128,30 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { token } = body;
 
-    // Verify HMAC token
-    const payload = verifyToken(token);
-    if (!payload) {
-      return NextResponse.json(
-        { error: 'Invalid or expired token' },
-        { status: 401 }
-      );
-    }
+    let companyId: string;
 
-    // Extract company_id from verified token (not from request body - security!)
-    const companyId = payload.company_id;
+    // Handle both session-based and HMAC token-based auth
+    if (token && token.startsWith('session:')) {
+      // Session-based auth (logged-in customer portal)
+      const session = await getCustomerSession();
+      if (!session) {
+        return NextResponse.json(
+          { error: 'Not authenticated' },
+          { status: 401 }
+        );
+      }
+      companyId = session.company_id;
+    } else {
+      // HMAC token-based auth (reorder links)
+      const payload = verifyToken(token);
+      if (!payload) {
+        return NextResponse.json(
+          { error: 'Invalid or expired token' },
+          { status: 401 }
+        );
+      }
+      companyId = payload.company_id;
+    }
 
     const result = await checkCompanyDetails(companyId);
 
