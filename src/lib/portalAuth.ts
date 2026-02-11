@@ -9,6 +9,7 @@ import { getCustomerSession } from '@/lib/customerAuth';
 interface PortalAuth {
   company_id: string;
   contact_id?: string;
+  user_id?: string; // Customer user_id (for customer portal orders)
 }
 
 /**
@@ -33,6 +34,7 @@ export async function getPortalAuth(token?: string): Promise<PortalAuth | null> 
     return {
       company_id: session.company_id,
       contact_id: undefined, // Session doesn't have contact_id
+      user_id: session.user_id, // Customer user_id from customer_users table
     };
   }
 
