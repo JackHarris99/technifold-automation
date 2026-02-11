@@ -56,20 +56,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Separate items by product type for different pricing logic
-    const toolItems = items.filter(item => {
+    // Separate items by pricing_tier (not product type)
+    const tieredItems = items.filter(item => {
       const product = products.find(p => p.product_code === item.product_code);
-      return product?.type === 'tool';
+      return product?.pricing_tier === 'standard' || product?.pricing_tier === 'premium';
     });
 
-    const consumableItems = items.filter(item => {
+    const fixedPriceItems = items.filter(item => {
       const product = products.find(p => p.product_code === item.product_code);
-      return product?.type === 'consumable';
-    });
-
-    const otherItems = items.filter(item => {
-      const product = products.find(p => p.product_code === item.product_code);
-      return product?.type !== 'tool' && product?.type !== 'consumable';
+      return !product?.pricing_tier || (product.pricing_tier !== 'standard' && product.pricing_tier !== 'premium');
     });
 
     // 2. Fetch company details for tax calculation (with backward compatibility for old TEXT company_id values)
@@ -97,61 +92,13 @@ export async function POST(request: NextRequest) {
 
     const destinationCountry = shippingAddress?.country || company.country || 'GB';
 
-    // 4. Calculate pricing by product type
+    // 4. Calculate pricing by pricing_tier
     let lineItems: any[] = [];
     let validation_errors: string[] = [];
 
-    // TOOLS: Apply quantity-based discount tiers from database
-    const totalToolQuantity = toolItems.reduce((sum, item) => sum + item.quantity, 0);
-    let toolDiscountPercent = 0;
-    let toolDiscountLabel = '';
-
-    if (totalToolQuantity > 0) {
-      // Query tool_pricing_ladder for discount based on total tool quantity
-      const { data: toolTier } = await supabase
-        .from('tool_pricing_ladder')
-        .select('discount_pct, min_qty, max_qty')
-        .lte('min_qty', totalToolQuantity)
-        .gte('max_qty', totalToolQuantity)
-        .eq('active', true)
-        .single();
-
-      if (toolTier) {
-        toolDiscountPercent = parseFloat(toolTier.discount_pct);
-        if (toolTier.max_qty === 999) {
-          toolDiscountLabel = `${toolTier.min_qty}+ tools - ${toolDiscountPercent}% off`;
-        } else if (toolTier.min_qty === toolTier.max_qty) {
-          toolDiscountLabel = `${toolTier.min_qty} tool${toolTier.min_qty > 1 ? 's' : ''} - ${toolDiscountPercent}% off`;
-        } else {
-          toolDiscountLabel = `${toolTier.min_qty}-${toolTier.max_qty} tools - ${toolDiscountPercent}% off`;
-        }
-      }
-    }
-
-    for (const item of toolItems) {
-      const product = products.find(p => p.product_code === item.product_code);
-      if (!product) continue;
-
-      const base_price = product.price || 0;
-      const unit_price = base_price * (1 - toolDiscountPercent / 100);
-      const line_total = unit_price * item.quantity;
-
-      lineItems.push({
-        product_code: item.product_code,
-        description: product.description || '',
-        quantity: item.quantity,
-        base_price,
-        unit_price,
-        line_total,
-        discount_applied: toolDiscountPercent > 0 ? toolDiscountLabel : null,
-        image_url: product.image_url || null,
-        currency: product.currency || 'GBP',
-      });
-    }
-
-    // CONSUMABLES: Apply tiered pricing via pricing-v2
-    if (consumableItems.length > 0) {
-      const cartItems: CartItem[] = consumableItems.map(item => {
+    // TIERED PRICING: Standard and Premium items (uses pricing-v2 lib)
+    if (tieredItems.length > 0) {
+      const cartItems: CartItem[] = tieredItems.map(item => {
         const product = products.find(p => p.product_code === item.product_code);
         if (!product) {
           throw new Error(`Product not found: ${item.product_code}`);
@@ -186,8 +133,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // OTHER PRODUCTS: Fixed price, no discounts
-    for (const item of otherItems) {
+    // FIXED PRICE: Items without pricing_tier (uses base product price)
+    for (const item of fixedPriceItems) {
       const product = products.find(p => p.product_code === item.product_code);
       if (!product) continue;
 
