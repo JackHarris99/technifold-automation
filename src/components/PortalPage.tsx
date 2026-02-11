@@ -349,6 +349,12 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
                 >
                   Order History
                 </a>
+                <a
+                  href="/customer/addresses"
+                  className="text-sm font-semibold text-[#666] hover:text-[#0a0a0a] transition-colors"
+                >
+                  Addresses
+                </a>
               </nav>
             )}
             </div>
