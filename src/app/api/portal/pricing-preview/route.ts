@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken, getCompanyQueryField } from '@/lib/tokens';
 import { getSupabaseClient } from '@/lib/supabase';
 import { calculateCartPricing, CartItem } from '@/lib/pricing-v2';
+import { getCustomerSession } from '@/lib/customerAuth';
 
 interface CartItemInput {
   product_code: string;
@@ -19,13 +20,29 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { token, items, skip_tiered_pricing } = body as { token: string; items: CartItemInput[]; skip_tiered_pricing?: boolean };
 
-    // Verify HMAC token
-    const payload = verifyToken(token);
-    if (!payload) {
-      return NextResponse.json(
-        { error: 'Invalid or expired token' },
-        { status: 401 }
-      );
+    let company_id: string;
+
+    // Handle both session-based (customer portal) and HMAC token-based (reorder links) auth
+    if (token && token.startsWith('session:')) {
+      // Session-based auth (logged-in customer portal)
+      const session = await getCustomerSession();
+      if (!session) {
+        return NextResponse.json(
+          { error: 'Not authenticated' },
+          { status: 401 }
+        );
+      }
+      company_id = session.company_id;
+    } else {
+      // HMAC token-based auth (reorder links)
+      const payload = verifyToken(token);
+      if (!payload) {
+        return NextResponse.json(
+          { error: 'Invalid or expired token' },
+          { status: 401 }
+        );
+      }
+      company_id = payload.company_id;
     }
 
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -40,7 +57,6 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = getSupabaseClient();
-    const company_id = payload.company_id;
 
     // 1. Fetch product details (including pricing_tier)
     const productCodes = items.map(item => item.product_code);
