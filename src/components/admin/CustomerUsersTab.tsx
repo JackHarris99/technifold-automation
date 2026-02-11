@@ -169,6 +169,29 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
     });
   };
 
+  const handleLoginAs = async (userId: string, userName: string) => {
+    if (!confirm(`Preview customer portal as ${userName}?`)) return;
+
+    try {
+      const response = await fetch('/api/admin/customer-users/login-as', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create preview session');
+      }
+
+      // Redirect to customer portal
+      window.location.href = data.redirect;
+    } catch (error: any) {
+      alert(`Failed to login as user: ${error.message}`);
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -255,6 +278,9 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Created
                 </th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -293,6 +319,21 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatDate(user.created_at)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                    {user.password_hash && (
+                      <button
+                        onClick={() => handleLoginAs(user.user_id, `${user.first_name} ${user.last_name}`)}
+                        className="px-3 py-1.5 text-sm bg-purple-100 text-purple-700 rounded hover:bg-purple-200 font-medium"
+                      >
+                        👁 Login As
+                      </button>
+                    )}
+                    {user.invitation_token && !user.password_hash && (
+                      <span className="text-xs text-gray-400 italic">
+                        Awaiting acceptance
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}
