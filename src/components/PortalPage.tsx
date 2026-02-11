@@ -333,6 +333,24 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
                 priority
               />
             </div>
+
+            {/* Navigation (logged-in portal only) */}
+            {isLoggedIn && (
+              <nav className="flex items-center gap-6 ml-8">
+                <a
+                  href="/customer/portal"
+                  className="text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  Reorder
+                </a>
+                <a
+                  href="/customer/orders"
+                  className="text-sm font-semibold text-[#666] hover:text-[#0a0a0a] transition-colors"
+                >
+                  Order History
+                </a>
+              </nav>
+            )}
             </div>
 
             {/* User Menu (logged-in portal only) */}
