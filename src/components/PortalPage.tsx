@@ -886,19 +886,29 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
 
               if (standardItems.length === 0) return null;
 
-              // Get full product info from pricingPreview if available
+              // Calculate total quantity and get tiered price
+              const standardTotalQty = standardItems.reduce((sum, [_, qty]) => sum + qty, 0);
+              const tiersForDisplay = standardTiers.map((tier, idx) => ({
+                min: tier.min_quantity,
+                max: tier.max_quantity || Infinity,
+                price: tier.unit_price || 0,
+                label: `Tier ${idx + 1}`
+              }));
+              const currentTier = tiersForDisplay.find(t => standardTotalQty >= t.min && standardTotalQty <= t.max);
+              const standardUnitPrice = currentTier?.price || standardTiers[0]?.unit_price || 33;
+
+              // Get full product info
               const standardProducts = standardItems.map(([code, qty]) => {
                 const item = [...payload.reorder_items, ...(payload.by_tool_tabs?.flatMap(t => t.items) || [])]
                   .find(i => i.consumable_code === code);
-                const previewItem = pricingPreview?.line_items.find(li => li.product_code === code);
 
                 return {
                   product_code: code,
                   description: item?.description || code,
                   quantity: qty,
-                  base_price: previewItem?.base_price || item?.price || 0,
-                  unit_price: previewItem?.unit_price || item?.price || 0,
-                  discount_applied: previewItem?.discount_applied || null
+                  base_price: item?.price || 0,
+                  unit_price: standardUnitPrice, // Use calculated standard tier price
+                  discount_applied: `Tier pricing: ${standardTotalQty} total units @ £${standardUnitPrice.toFixed(2)}`
                 };
               });
 
@@ -1113,54 +1123,63 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
             })()}
 
             {/* Order Summary Card */}
-            {pricingPreview && pricingPreview.line_items.length > 0 && (
+            {getTotalQuantity() > 0 && (
               <div className="bg-[#0a0a0a] rounded-[20px] p-8 text-white shadow-[0_16px_48px_rgba(0,0,0,0.24)]">
                 <div className="text-[12px] font-[700] text-[#999] uppercase tracking-[0.05em] mb-6">Order Summary</div>
-                <div className="space-y-4">
-                  {/* Total (before discounts) */}
-                  <div className="flex justify-between items-center">
-                    <span className="text-[15px] text-[#999] font-[500]">Total</span>
-                    <span className="font-[600] text-[16px]">£{(pricingPreview.subtotal + pricingPreview.total_savings).toFixed(2)}</span>
+                {pricingPreview && pricingPreview.line_items.length > 0 ? (
+                  <div className="space-y-4">
+                    {/* Total (before discounts) */}
+                    <div className="flex justify-between items-center">
+                      <span className="text-[15px] text-[#999] font-[500]">Total</span>
+                      <span className="font-[600] text-[16px]">£{(pricingPreview.subtotal + pricingPreview.total_savings).toFixed(2)}</span>
+                    </div>
+
+                    {/* Discount */}
+                    {pricingPreview.total_savings > 0 && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-[15px] text-[#16a34a] font-[500]">Discount</span>
+                        <span className="font-[600] text-[16px] text-[#16a34a]">-£{pricingPreview.total_savings.toFixed(2)}</span>
+                      </div>
+                    )}
+
+                    {/* Subtotal (after discounts) */}
+                    <div className="flex justify-between items-center pb-4 border-b border-[#2a2a2a]">
+                      <span className="text-[15px] text-[#999] font-[500]">Subtotal</span>
+                      <span className="font-[700] text-[17px] tracking-[-0.01em]">£{pricingPreview.subtotal.toFixed(2)}</span>
+                    </div>
+
+                    {/* Shipping */}
+                    {pricingPreview.shipping !== undefined && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-[15px] text-[#999] font-[500]">Shipping</span>
+                        <span className="font-[600] text-[16px]">{pricingPreview.shipping === 0 ? 'FREE' : `£${pricingPreview.shipping.toFixed(2)}`}</span>
+                      </div>
+                    )}
+
+                    {/* VAT */}
+                    {pricingPreview.vat_amount !== undefined && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-[15px] text-[#999] font-[500]">VAT</span>
+                        <span className="font-[600] text-[16px]">£{pricingPreview.vat_amount.toFixed(2)}</span>
+                      </div>
+                    )}
+
+                    {/* Final Total */}
+                    {pricingPreview.total !== undefined && (
+                      <div className="flex justify-between items-center pt-4 border-t border-[#2a2a2a]">
+                        <span className="text-[17px] font-[700]">Final Total</span>
+                        <span className="font-[800] text-[28px] tracking-[-0.02em] text-[#16a34a]">£{pricingPreview.total.toFixed(2)}</span>
+                      </div>
+                    )}
                   </div>
-
-                  {/* Discount */}
-                  {pricingPreview.total_savings > 0 && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-[15px] text-[#16a34a] font-[500]">Discount</span>
-                      <span className="font-[600] text-[16px] text-[#16a34a]">-£{pricingPreview.total_savings.toFixed(2)}</span>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="text-center py-4 text-[#999]">
+                      <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-3"></div>
+                      <p className="text-sm">Calculating pricing...</p>
                     </div>
-                  )}
-
-                  {/* Subtotal (after discounts) */}
-                  <div className="flex justify-between items-center pb-4 border-b border-[#2a2a2a]">
-                    <span className="text-[15px] text-[#999] font-[500]">Subtotal</span>
-                    <span className="font-[700] text-[17px] tracking-[-0.01em]">£{pricingPreview.subtotal.toFixed(2)}</span>
                   </div>
-
-                  {/* Shipping */}
-                  {pricingPreview.shipping !== undefined && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-[15px] text-[#999] font-[500]">Shipping</span>
-                      <span className="font-[600] text-[16px]">{pricingPreview.shipping === 0 ? 'FREE' : `£${pricingPreview.shipping.toFixed(2)}`}</span>
-                    </div>
-                  )}
-
-                  {/* VAT */}
-                  {pricingPreview.vat_amount !== undefined && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-[15px] text-[#999] font-[500]">VAT</span>
-                      <span className="font-[600] text-[16px]">£{pricingPreview.vat_amount.toFixed(2)}</span>
-                    </div>
-                  )}
-
-                  {/* Final Total */}
-                  {pricingPreview.total !== undefined && (
-                    <div className="flex justify-between items-center pt-4 border-t border-[#2a2a2a]">
-                      <span className="text-[17px] font-[700]">Final Total</span>
-                      <span className="font-[800] text-[28px] tracking-[-0.02em] text-[#16a34a]">£{pricingPreview.total.toFixed(2)}</span>
-                    </div>
-                  )}
-                </div>
+                )}
                 <button
                   onClick={handleRequestInvoice}
                   disabled={getTotalQuantity() === 0}
