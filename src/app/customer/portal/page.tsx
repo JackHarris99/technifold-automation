@@ -7,7 +7,7 @@
 import { redirect } from 'next/navigation';
 import { getCustomerSession } from '@/lib/customerAuth';
 import { generatePortalPayload } from '@/lib/portal-payload';
-import PortalPage from '@/components/PortalPage';
+import { PortalPage } from '@/components/PortalPage';
 
 export default async function CustomerPortalPage() {
   // Check authentication
