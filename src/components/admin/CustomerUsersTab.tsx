@@ -21,20 +21,30 @@ interface CustomerUser {
   created_at: string;
 }
 
+interface Contact {
+  contact_id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+}
+
 interface Props {
   company: {
     company_id: string;
     company_name: string;
   };
   customerUsers: CustomerUser[];
+  contacts: Contact[];
 }
 
-export default function CustomerUsersTab({ company, customerUsers }: Props) {
+export default function CustomerUsersTab({ company, customerUsers, contacts }: Props) {
   const router = useRouter();
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showAddManualModal, setShowAddManualModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
 
   const [formData, setFormData] = useState({
     email: '',
@@ -42,6 +52,80 @@ export default function CustomerUsersTab({ company, customerUsers }: Props) {
     last_name: '',
     role: 'user',
   });
+
+  // Get contacts who don't have customer accounts yet
+  const existingEmails = new Set(customerUsers.map(u => u.email.toLowerCase()));
+  const eligibleContacts = contacts.filter(c =>
+    c.email && !existingEmails.has(c.email.toLowerCase())
+  );
+
+  const toggleContact = (contactId: string) => {
+    setSelectedContacts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(contactId)) {
+        newSet.delete(contactId);
+      } else {
+        newSet.add(contactId);
+      }
+      return newSet;
+    });
+  };
+
+  const selectAll = () => {
+    setSelectedContacts(new Set(eligibleContacts.map(c => c.contact_id)));
+  };
+
+  const clearAll = () => {
+    setSelectedContacts(new Set());
+  };
+
+  const sendInvitationsToContacts = async () => {
+    if (selectedContacts.size === 0) {
+      setError('Please select at least one contact');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const contactsToInvite = eligibleContacts.filter(c => selectedContacts.has(c.contact_id));
+
+      // Send invitations for each selected contact
+      const results = await Promise.all(
+        contactsToInvite.map(contact =>
+          fetch('/api/admin/customer-users/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              company_id: company.company_id,
+              email: contact.email,
+              first_name: contact.first_name,
+              last_name: contact.last_name,
+              role: 'user',
+            }),
+          })
+        )
+      );
+
+      const successCount = results.filter(r => r.ok).length;
+      const failCount = results.length - successCount;
+
+      if (successCount > 0) {
+        setSuccess(`${successCount} invitation${successCount > 1 ? 's' : ''} sent successfully${failCount > 0 ? ` (${failCount} failed)` : ''}!`);
+        setSelectedContacts(new Set());
+        setShowAddModal(false);
+        router.refresh();
+      } else {
+        throw new Error('All invitations failed');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to send invitations');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +151,7 @@ export default function CustomerUsersTab({ company, customerUsers }: Props) {
 
       setSuccess('Invitation sent successfully!');
       setFormData({ email: '', first_name: '', last_name: '', role: 'user' });
-      setShowAddModal(false);
+      setShowAddManualModal(false);
       router.refresh();
     } catch (err: any) {
       setError(err.message);
@@ -94,12 +178,22 @@ export default function CustomerUsersTab({ company, customerUsers }: Props) {
             Manage customer portal access for {company.company_name}
           </p>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition-all"
-        >
-          + Add User
-        </button>
+        <div className="flex items-center gap-3">
+          {eligibleContacts.length > 0 && (
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition-all"
+            >
+              Invite Contacts ({eligibleContacts.length})
+            </button>
+          )}
+          <button
+            onClick={() => setShowAddManualModal(true)}
+            className="px-4 py-2 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 font-semibold transition-all"
+          >
+            + Add Manually
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -124,12 +218,22 @@ export default function CustomerUsersTab({ company, customerUsers }: Props) {
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">No Portal Users</h3>
           <p className="text-gray-600 mb-4">Add users to give them access to the customer portal.</p>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition-all"
-          >
-            Add First User
-          </button>
+          <div className="flex items-center gap-3 justify-center">
+            {eligibleContacts.length > 0 && (
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition-all"
+              >
+                Invite Contacts
+              </button>
+            )}
+            <button
+              onClick={() => setShowAddManualModal(true)}
+              className="px-4 py-2 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 font-semibold transition-all"
+            >
+              Add Manually
+            </button>
+          </div>
         </div>
       ) : (
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -197,8 +301,101 @@ export default function CustomerUsersTab({ company, customerUsers }: Props) {
         </div>
       )}
 
-      {/* Add User Modal */}
+      {/* Invite Contacts Modal */}
       {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-900">Invite Existing Contacts</h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Select contacts to send customer portal invitations
+              </p>
+            </div>
+
+            <div className="p-6">
+              {eligibleContacts.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-600 mb-4">All contacts already have portal access</p>
+                  <button
+                    onClick={() => setShowAddModal(false)}
+                    className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold transition-all"
+                  >
+                    Close
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-sm text-gray-600">
+                      {selectedContacts.size} of {eligibleContacts.length} selected
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={selectAll}
+                        className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        Select All
+                      </button>
+                      <span className="text-gray-300">|</span>
+                      <button
+                        onClick={clearAll}
+                        className="text-sm text-gray-600 hover:text-gray-800 font-medium"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 max-h-96 overflow-y-auto mb-6">
+                    {eligibleContacts.map((contact) => (
+                      <label
+                        key={contact.contact_id}
+                        className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedContacts.has(contact.contact_id)}
+                          onChange={() => toggleContact(contact.contact_id)}
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        <div className="ml-3">
+                          <div className="text-sm font-medium text-gray-900">
+                            {contact.first_name} {contact.last_name}
+                          </div>
+                          <div className="text-sm text-gray-500">{contact.email}</div>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-6 border-t border-gray-200">
+                    <button
+                      onClick={() => {
+                        setShowAddModal(false);
+                        setSelectedContacts(new Set());
+                      }}
+                      disabled={loading}
+                      className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold transition-all disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={sendInvitationsToContacts}
+                      disabled={loading || selectedContacts.size === 0}
+                      className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition-all disabled:opacity-50"
+                    >
+                      {loading ? 'Sending...' : `Send ${selectedContacts.size} Invitation${selectedContacts.size !== 1 ? 's' : ''}`}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add User Manually Modal */}
+      {showAddManualModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full">
             <div className="p-6 border-b border-gray-200">
@@ -274,7 +471,7 @@ export default function CustomerUsersTab({ company, customerUsers }: Props) {
                 <button
                   type="button"
                   onClick={() => {
-                    setShowAddModal(false);
+                    setShowAddManualModal(false);
                     setError(null);
                   }}
                   disabled={loading}

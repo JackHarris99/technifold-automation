@@ -574,6 +574,7 @@ export default function CompanyDetailView({
           <CustomerUsersTab
             company={company}
             customerUsers={customerUsers}
+            contacts={contacts}
           />
         )}
 
