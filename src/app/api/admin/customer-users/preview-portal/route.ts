@@ -3,7 +3,7 @@
  * Admin-only: Check what products a customer will see in their portal
  */
 
-import { NextRequest, NextResponse } from 'next/router';
+import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { generatePortalPayload } from '@/lib/portal-payload';
 
