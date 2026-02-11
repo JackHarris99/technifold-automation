@@ -184,26 +184,22 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
     });
   };
 
-  const handleLoginAs = async (userId: string, userName: string) => {
-    if (!confirm(`Preview customer portal as ${userName}?`)) return;
-
+  const handlePreviewPortal = async () => {
     try {
-      const response = await fetch('/api/admin/customer-users/login-as', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId }),
-      });
-
+      const response = await fetch(`/api/admin/customer-users/preview-portal?company_id=${company.company_id}`);
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create preview session');
+        throw new Error(data.error || 'Failed to preview portal');
       }
 
-      // Redirect to customer portal
-      window.location.href = data.redirect;
+      if (data.has_content) {
+        alert(`✅ ${data.message}\n\nProducts available:\n• ${data.summary.reorder_items} reorder items\n• ${data.summary.tool_tabs} tool categories\n• ${data.summary.total_products} total products`);
+      } else {
+        alert(`⚠️ ${data.message}\n\nThe customer portal will be empty until they have made their first order.`);
+      }
     } catch (error: any) {
-      alert(`Failed to login as user: ${error.message}`);
+      alert(`Failed to preview portal: ${error.message}`);
     }
   };
 
@@ -217,6 +213,12 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={handlePreviewPortal}
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-semibold transition-all"
+          >
+            👁 Preview Portal Content
+          </button>
           {eligibleContacts.length > 0 && (
             <button
               onClick={() => setShowAddModal(true)}
@@ -293,9 +295,6 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Created
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -334,14 +333,6 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatDate(user.created_at)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                    <button
-                      onClick={() => handleLoginAs(user.user_id, `${user.first_name} ${user.last_name}`)}
-                      className="px-3 py-1.5 text-sm bg-purple-100 text-purple-700 rounded hover:bg-purple-200 font-medium"
-                    >
-                      👁 Login As
-                    </button>
                   </td>
                 </tr>
               ))}
