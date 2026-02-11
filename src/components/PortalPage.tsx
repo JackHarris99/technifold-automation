@@ -638,7 +638,10 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
                                   );
                                 }
 
-                                const displayPrice = pricing?.discountedPrice || tier1Price || item.price || 0;
+                                // For tiered items, never fall back to base price
+                                const displayPrice = hasTieredPricing
+                                  ? (pricing?.discountedPrice || tier1Price || 0)
+                                  : (pricing?.discountedPrice || item.price || 0);
 
                                 return (
                                   <>
@@ -786,7 +789,10 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
                                   );
                                 }
 
-                                const displayPrice = pricing?.discountedPrice || tier1Price || item.price || 0;
+                                // For tiered items, never fall back to base price
+                                const displayPrice = hasTieredPricing
+                                  ? (pricing?.discountedPrice || tier1Price || 0)
+                                  : (pricing?.discountedPrice || item.price || 0);
 
                                 return (
                                   <>
