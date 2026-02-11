@@ -102,6 +102,14 @@ export default function DistributorOrderReview({ order, items, currentUser, back
   const [freeShipping, setFreeShipping] = useState(false);
   const [shippingOverrideReason, setShippingOverrideReason] = useState('');
 
+  // VAT verification
+  const [vatVerifying, setVatVerifying] = useState(false);
+  const [vatResult, setVatResult] = useState<{
+    valid: boolean;
+    companyName?: string;
+    error?: string;
+  } | null>(null);
+
   // Item quantity and price overrides
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>(
     () => Object.fromEntries(items.map(item => [item.item_id, item.quantity]))
@@ -266,6 +274,43 @@ export default function DistributorOrderReview({ order, items, currentUser, back
       next.delete(itemId);
       return next;
     });
+  };
+
+  const handleVerifyVAT = async () => {
+    const vatNumber = order.vat_number;
+    const country = order.billing_country;
+
+    if (!vatNumber || !country) {
+      setVatResult({
+        valid: false,
+        error: 'Missing VAT number or country',
+      });
+      return;
+    }
+
+    setVatVerifying(true);
+    setVatResult(null);
+
+    try {
+      const response = await fetch('/api/vat/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          countryCode: country,
+          vatNumber: vatNumber,
+        }),
+      });
+
+      const data = await response.json();
+      setVatResult(data);
+    } catch (error) {
+      setVatResult({
+        valid: false,
+        error: 'Failed to verify VAT number',
+      });
+    } finally {
+      setVatVerifying(false);
+    }
   };
 
   return (
@@ -535,6 +580,55 @@ export default function DistributorOrderReview({ order, items, currentUser, back
                 />
               </div>
             </div>
+
+            {/* VAT Number Verification */}
+            {order.vat_number && (
+              <div className="mt-4 pt-4 border-t border-[#e8e8e8]">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-xs font-semibold text-[#666]">VAT Number</label>
+                  <button
+                    onClick={handleVerifyVAT}
+                    disabled={vatVerifying}
+                    className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {vatVerifying ? 'Verifying...' : '🔍 Verify VAT'}
+                  </button>
+                </div>
+                <div className="text-sm font-mono text-[#0a0a0a] mb-2">
+                  {order.vat_number}
+                </div>
+                {vatResult && (
+                  <div className={`mt-2 p-3 rounded-lg ${
+                    vatResult.valid
+                      ? 'bg-green-50 border border-green-200'
+                      : 'bg-red-50 border border-red-200'
+                  }`}>
+                    <div className={`flex items-start gap-2 text-sm ${
+                      vatResult.valid ? 'text-green-800' : 'text-red-800'
+                    }`}>
+                      <span className="text-lg">{vatResult.valid ? '✓' : '✗'}</span>
+                      <div className="flex-1">
+                        {vatResult.valid ? (
+                          <>
+                            <div className="font-semibold">Valid VAT Number</div>
+                            {vatResult.companyName && (
+                              <div className="text-xs mt-1">Company: {vatResult.companyName}</div>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <div className="font-semibold">Invalid VAT Number</div>
+                            {vatResult.error && (
+                              <div className="text-xs mt-1">{vatResult.error}</div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
