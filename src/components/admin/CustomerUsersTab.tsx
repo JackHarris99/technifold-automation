@@ -92,10 +92,10 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
     try {
       const contactsToInvite = eligibleContacts.filter(c => selectedContacts.has(c.contact_id));
 
-      // Send invitations for each selected contact
+      // Send invitations for each selected contact and collect detailed results
       const results = await Promise.all(
-        contactsToInvite.map(contact =>
-          fetch('/api/admin/customer-users/create', {
+        contactsToInvite.map(async contact => {
+          const response = await fetch('/api/admin/customer-users/create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -105,20 +105,35 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
               last_name: contact.last_name,
               role: 'user',
             }),
-          })
-        )
+          });
+
+          const data = await response.json();
+
+          return {
+            contact,
+            success: response.ok,
+            error: response.ok ? null : data.error || 'Unknown error',
+          };
+        })
       );
 
-      const successCount = results.filter(r => r.ok).length;
+      const successCount = results.filter(r => r.success).length;
       const failCount = results.length - successCount;
+      const failedContacts = results.filter(r => !r.success);
 
       if (successCount > 0) {
-        setSuccess(`${successCount} invitation${successCount > 1 ? 's' : ''} sent successfully${failCount > 0 ? ` (${failCount} failed)` : ''}!`);
+        let message = `${successCount} invitation${successCount > 1 ? 's' : ''} sent successfully`;
+        if (failCount > 0) {
+          const failedNames = failedContacts.map(r => `${r.contact.first_name} ${r.contact.last_name} (${r.error})`).join(', ');
+          message += `. ${failCount} failed: ${failedNames}`;
+        }
+        setSuccess(message);
         setSelectedContacts(new Set());
         setShowAddModal(false);
         router.refresh();
       } else {
-        throw new Error('All invitations failed');
+        const errorDetails = failedContacts.map(r => `${r.contact.first_name} ${r.contact.last_name}: ${r.error}`).join('; ');
+        throw new Error(`All invitations failed: ${errorDetails}`);
       }
     } catch (err: any) {
       setError(err.message || 'Failed to send invitations');
