@@ -1088,7 +1088,7 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
                   disabled={getTotalQuantity() === 0}
                   className="w-full mt-6 py-4 bg-[#16a34a] text-white rounded-[14px] font-[700] text-[15px] tracking-[-0.01em] hover:bg-[#15803d] transition-all shadow-[0_4px_12px_rgba(22,163,74,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Request Invoice ({getTotalQuantity()} items)
+                  Submit Order ({getTotalQuantity()} items)
                 </button>
               </div>
             )}
@@ -1123,6 +1123,7 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
         onSuccess={handleInvoiceSuccess}
         token={token}
         pricingPreview={pricingPreview}
+        selectedAddressId={selectedAddressId}
       />
     </div>
     </>

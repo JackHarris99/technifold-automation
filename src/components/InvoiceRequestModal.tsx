@@ -35,9 +35,10 @@ interface InvoiceRequestModalProps {
   companyId: string;
   contactId?: string;
   onSuccess: (orderId: string) => void;
-  token: string; // HMAC token for API authentication
+  token: string; // HMAC token or session token for API authentication
   pricingPreview?: PricingPreview | null;
-  quoteType?: 'static' | 'interactive'; // Determines which invoice API to call
+  quoteType?: 'static' | 'interactive'; // Legacy - not used anymore
+  selectedAddressId: string | null; // Required for order submission
 }
 
 interface InvoiceResult {
@@ -69,7 +70,8 @@ export function InvoiceRequestModal({
   onSuccess,
   token,
   pricingPreview,
-  quoteType = 'interactive', // Default to interactive for backwards compatibility
+  quoteType = 'interactive', // Legacy - not used
+  selectedAddressId,
 }: InvoiceRequestModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,6 +82,12 @@ export function InvoiceRequestModal({
   if (!isOpen) return null;
 
   const handleRequestInvoice = async () => {
+    // Validate shipping address is selected
+    if (!selectedAddressId) {
+      setError('Please select a shipping address before submitting your order');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -102,7 +110,7 @@ export function InvoiceRequestModal({
         return;
       }
 
-      // Proceed with invoice creation
+      // Proceed with order creation (not invoice)
       await createInvoice();
     } catch (err) {
       console.error('[InvoiceRequestModal] Error:', err);
@@ -134,21 +142,15 @@ export function InvoiceRequestModal({
               unit_price: item.price, // Fallback to cart price if no preview
             }));
 
-      // Call correct API based on quote type
-      const apiEndpoint = quoteType === 'static'
-        ? '/api/portal/create-invoice-static'
-        : '/api/portal/create-invoice-interactive';
-
-      const response = await fetch(apiEndpoint, {
+      // Submit order for review (does NOT create invoice immediately)
+      const response = await fetch('/api/customer/orders/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           token, // Token for authentication
-          contact_id: contactId,
           items: invoiceItems,
-          currency: 'gbp',
-          offer_key: quoteType === 'static' ? 'portal_quote_static' : 'portal_quote_interactive',
-          campaign_key: `quote_${new Date().toISOString().split('T')[0]}`,
+          shipping_address_id: selectedAddressId, // Need to add this
+          po_number: null, // Could add PO number field later
         }),
       });
 
@@ -243,7 +245,7 @@ export function InvoiceRequestModal({
         <div className="px-6 py-4 border-b border-[#e8e8e8] bg-[#0a0a0a]">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold text-white">
-              {invoiceResult ? 'Invoice Created' : 'Request Invoice'}
+              {invoiceResult ? 'Order Submitted' : 'Submit Order'}
             </h3>
             {!loading && (
               <button
@@ -271,7 +273,7 @@ export function InvoiceRequestModal({
             </div>
           )}
 
-          {/* Invoice Created Success */}
+          {/* Order Submitted Success */}
           {invoiceResult ? (
             <div className="space-y-6">
               <div className="text-center py-6">
@@ -281,12 +283,10 @@ export function InvoiceRequestModal({
                   </svg>
                 </div>
                 <h4 className="text-2xl font-bold text-gray-900 mb-2">
-                  {invoiceResult.idempotent ? 'Invoice Already Created' : 'Invoice Sent!'}
+                  Order Submitted!
                 </h4>
                 <p className="text-gray-800">
-                  {invoiceResult.idempotent
-                    ? 'This quote already has an invoice. You can view or pay it below.'
-                    : 'Your invoice has been created and sent to your email.'}
+                  Your order has been received and is being reviewed by our team.
                 </p>
               </div>
 
@@ -298,9 +298,9 @@ export function InvoiceRequestModal({
                   <div className="flex-1">
                     <h5 className="font-semibold text-blue-900 mb-1">What happens next?</h5>
                     <ul className="text-sm text-blue-800 space-y-1">
-                      <li>• Check your email for the invoice from Stripe</li>
-                      <li>• Click "Pay Now" below to pay immediately</li>
-                      <li>• Or pay later using the link in your email</li>
+                      <li>• Our team will review your order</li>
+                      <li>• We'll verify addresses and pricing</li>
+                      <li>• You'll receive an invoice once approved</li>
                       <li>• Your order will be processed once payment is received</li>
                     </ul>
                   </div>
@@ -309,21 +309,15 @@ export function InvoiceRequestModal({
 
               <div className="flex gap-3">
                 <button
-                  onClick={handlePayNow}
-                  className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-bold hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg"
-                >
-                  Pay Now
-                </button>
-                <button
                   onClick={handlePayLater}
-                  className="flex-1 border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-all"
+                  className="w-full bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition-all"
                 >
-                  I'll Pay Later
+                  Close
                 </button>
               </div>
 
               <p className="text-xs text-center text-gray-700">
-                Invoice ID: {invoiceResult.invoice_id}
+                Order ID: {invoiceResult.order_id}
               </p>
             </div>
           ) : (
@@ -420,14 +414,14 @@ export function InvoiceRequestModal({
                   </div>
 
                   {/* Info Box */}
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                     <div className="flex items-start gap-3">
-                      <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
-                      <div className="flex-1 text-sm text-amber-800">
-                        <strong>How it works:</strong> We'll create a Stripe invoice and send it to your email.
-                        You can pay by card or bank transfer. Your order will be processed once payment is received.
+                      <div className="flex-1 text-sm text-blue-800">
+                        <strong>How it works:</strong> Your order will be reviewed by our team.
+                        We'll verify addresses and pricing, then send you an invoice to complete your purchase.
                       </div>
                     </div>
                   </div>
@@ -450,12 +444,12 @@ export function InvoiceRequestModal({
                         <span className="flex items-center justify-center gap-2">
                           <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 074 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
-                          Creating...
+                          Submitting...
                         </span>
                       ) : (
-                        'Request Invoice'
+                        'Submit Order for Review'
                       )}
                     </button>
                   </div>
