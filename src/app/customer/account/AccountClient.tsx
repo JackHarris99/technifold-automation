@@ -237,53 +237,66 @@ export default function AccountClient({ contact: initialContact, company: initia
           <p className="text-[#666]">Manage your contact information and preferences</p>
         </div>
 
-        {/* Tabs */}
-        <div className="mb-6">
-          <div className="border-b border-gray-200">
-            <nav className="flex gap-8">
-              <button
-                onClick={() => {
-                  setActiveTab('contact');
-                  setError(null);
-                  setSuccess(null);
-                }}
-                className={`pb-4 px-1 border-b-2 font-semibold text-sm transition-colors ${
-                  activeTab === 'contact'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-[#666] hover:text-[#0a0a0a] hover:border-gray-300'
-                }`}
-              >
+        {/* Tabs - Enhanced visibility */}
+        <div className="mb-8">
+          <div className="bg-gray-50 rounded-xl p-2 inline-flex gap-2">
+            <button
+              onClick={() => {
+                setActiveTab('contact');
+                setError(null);
+                setSuccess(null);
+              }}
+              className={`px-6 py-3 rounded-lg font-semibold text-sm transition-all ${
+                activeTab === 'contact'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-[#666] hover:text-[#0a0a0a] hover:bg-white/50'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
                 Contact Information
-              </button>
-              <button
-                onClick={() => {
-                  setActiveTab('company');
-                  setError(null);
-                  setSuccess(null);
-                }}
-                className={`pb-4 px-1 border-b-2 font-semibold text-sm transition-colors ${
-                  activeTab === 'company'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-[#666] hover:text-[#0a0a0a] hover:border-gray-300'
-                }`}
-              >
-                Company Information
-              </button>
-              <button
-                onClick={() => {
-                  setActiveTab('password');
-                  setError(null);
-                  setSuccess(null);
-                }}
-                className={`pb-4 px-1 border-b-2 font-semibold text-sm transition-colors ${
-                  activeTab === 'password'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-[#666] hover:text-[#0a0a0a] hover:border-gray-300'
-                }`}
-              >
+              </div>
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('company');
+                setError(null);
+                setSuccess(null);
+              }}
+              className={`px-6 py-3 rounded-lg font-semibold text-sm transition-all ${
+                activeTab === 'company'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-[#666] hover:text-[#0a0a0a] hover:bg-white/50'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                Company & Billing
+              </div>
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('password');
+                setError(null);
+                setSuccess(null);
+              }}
+              className={`px-6 py-3 rounded-lg font-semibold text-sm transition-all ${
+                activeTab === 'password'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-[#666] hover:text-[#0a0a0a] hover:bg-white/50'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
                 Password
-              </button>
-            </nav>
+              </div>
+            </button>
           </div>
         </div>
 
