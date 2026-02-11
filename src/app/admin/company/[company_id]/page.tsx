@@ -52,6 +52,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
     companyResult,
     contactsResult,
     distributorUsersResult,
+    customerUsersResult,
     toolsResult,
     consumablesResult,
     partsResult,
@@ -86,6 +87,13 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
     supabase
       .from('distributor_users')
       .select('user_id, email, full_name, role, active, invitation_token, last_login_at, password_hash')
+      .eq('company_id', company_id)
+      .order('created_at', { ascending: false }),
+
+    // Customer Users (for customer portal access)
+    supabase
+      .from('customer_users')
+      .select('user_id, email, first_name, last_name, role, is_active, invitation_token, last_login_at, password_hash, created_at')
       .eq('company_id', company_id)
       .order('created_at', { ascending: false }),
 
@@ -287,6 +295,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
       company={companyResult.data}
       contacts={contactsResult.data || []}
       distributorUsers={distributorUsersResult.data || []}
+      customerUsers={customerUsersResult.data || []}
       purchasedTools={toolsResult.data || []}
       purchasedConsumables={consumablesResult.data || []}
       purchasedParts={partsResult.data || []}
