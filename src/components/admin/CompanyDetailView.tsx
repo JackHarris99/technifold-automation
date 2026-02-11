@@ -21,6 +21,7 @@ import PlantListTab from './PlantListTab';
 import DistributorUsersTab from './DistributorUsersTab';
 import CustomerUsersTab from './CustomerUsersTab';
 import CustomPricingTab from './CustomPricingTab';
+import CustomPortalProductsTab from './CustomPortalProductsTab';
 
 interface CompanyDetailViewProps {
   company: any;
@@ -43,6 +44,7 @@ interface CompanyDetailViewProps {
   companyMachines: any[];
   partnerAssociation: any;
   allPartners: any[];
+  customPortalProducts: any[];
   currentUser: any;
 }
 
@@ -67,6 +69,7 @@ export default function CompanyDetailView({
   companyMachines,
   partnerAssociation,
   allPartners,
+  customPortalProducts,
   currentUser,
 }: CompanyDetailViewProps) {
   const [activeTab, setActiveTab] = useState('overview');
@@ -333,6 +336,7 @@ export default function CompanyDetailView({
       { id: 'catalog', label: 'Catalog & Pricing', count: catalogEntries.filter((e: any) => e.visible).length }
     ] : [
       { id: 'customer-portal-users', label: 'Customer Portal Users', count: customerUsers.length },
+      { id: 'custom-portal-products', label: 'Custom Portal Products', count: customPortalProducts.length },
     ]),
   ];
 
@@ -575,6 +579,14 @@ export default function CompanyDetailView({
             company={company}
             customerUsers={customerUsers}
             contacts={contacts}
+          />
+        )}
+
+        {activeTab === 'custom-portal-products' && !isDistributor && (
+          <CustomPortalProductsTab
+            company={company}
+            customProducts={customPortalProducts}
+            allProducts={products}
           />
         )}
 

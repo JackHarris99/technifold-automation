@@ -185,6 +185,44 @@ export async function generatePortalPayload(companyId: string): Promise<CompanyP
     }
   }
 
+  // Add custom portal products (manually added by admin)
+  const { data: customProducts } = await supabase
+    .from('custom_portal_products')
+    .select('product_code')
+    .eq('company_id', companyId);
+
+  if (customProducts && customProducts.length > 0) {
+    const customProductCodes = customProducts.map(cp => cp.product_code);
+
+    // Filter out products already in reorder items
+    const existingCodes = new Set(reorderItems.map(item => item.consumable_code));
+    const newCustomCodes = customProductCodes.filter(code => !existingCodes.has(code));
+
+    if (newCustomCodes.length > 0) {
+      // Get product details for custom products (only active)
+      const { data: customProductDetails } = await supabase
+        .from('products')
+        .select('product_code, description, price, category, image_url, pricing_tier')
+        .in('product_code', newCustomCodes)
+        .eq('active', true);
+
+      if (customProductDetails) {
+        const customItems: ReorderItem[] = customProductDetails.map(prod => ({
+          consumable_code: prod.product_code,
+          description: prod.description || prod.product_code,
+          price: prod.price,
+          last_purchased: null, // Custom products have no purchase history
+          category: prod.category,
+          image_url: prod.image_url,
+          pricing_tier: prod.pricing_tier
+        }));
+
+        // Add custom items to the end of reorder items
+        reorderItems.push(...customItems);
+      }
+    }
+  }
+
   return {
     company_id: companyId,
     company_name: companyName,

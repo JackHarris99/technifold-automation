@@ -68,6 +68,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
     companyMachinesResult,
     partnerAssociationResult,
     allPartnersResult,
+    customPortalProductsResult,
   ] = await Promise.all([
     // Company
     supabase
@@ -270,6 +271,13 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
       .eq('type', 'distributor')
       .eq('distributor_type', 'partner')
       .order('company_name', { ascending: true }),
+
+    // Custom Portal Products
+    supabase
+      .from('custom_portal_products')
+      .select('product_code, added_at')
+      .eq('company_id', company_id)
+      .order('added_at', { ascending: false }),
   ]);
 
   if (companyResult.error || !companyResult.data) {
@@ -312,6 +320,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
       companyMachines={companyMachinesResult.data || []}
       partnerAssociation={partnerAssociationResult.data || null}
       allPartners={allPartnersResult.data || []}
+      customPortalProducts={customPortalProductsResult.data || []}
       currentUser={user}
     />
   );
