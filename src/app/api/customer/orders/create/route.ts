@@ -112,7 +112,8 @@ export async function POST(request: NextRequest) {
       .insert({
         order_id,
         company_id: company.company_id,
-        user_id: auth.user_id || null, // Customer user_id from customer_users table
+        user_id: null, // NULL for customer orders (user_id references distributor_users)
+        customer_user_id: auth.user_id || null, // Customer user_id from customer_users table
         user_email: auth.contact_id || 'customer@portal.com', // Placeholder
         user_name: company.company_name,
         status: 'pending_review',
