@@ -83,31 +83,15 @@ export function InvoiceRequestModal({
 
   const handleRequestInvoice = async () => {
     // Shipping address is optional - admin can add during review
-    // No validation needed here
+    // No address validation needed on customer side
+    // Admin will collect/verify addresses during approval
 
     setLoading(true);
     setError(null);
 
     try {
-      // Check if company details are complete (with token authentication)
-      const checkResponse = await fetch(`/api/companies/check-details-needed`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token }),
-      });
-      const checkData = await checkResponse.json();
-
-      if (checkData.details_needed) {
-        // Show address collection modal
-        setCompanyName(checkData.company.company_name || 'Your Company');
-        setShowAddressModal(true);
-        setLoading(false);
-        return;
-      }
-
-      // Proceed with order creation (not invoice)
+      // Skip details check - allow orders without complete addresses
+      // Admin handles address collection during order approval
       await createInvoice();
     } catch (err) {
       console.error('[InvoiceRequestModal] Error:', err);
