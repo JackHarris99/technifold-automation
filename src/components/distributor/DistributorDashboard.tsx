@@ -79,7 +79,6 @@ export default function DistributorDashboard({
   const [activeTab, setActiveTab] = useState<'tools' | 'consumables'>('tools');
   const [pricingPreview, setPricingPreview] = useState<any>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [orderResult, setOrderResult] = useState<{ order_id: string } | null>(null);
   const [poNumber, setPoNumber] = useState('');
 
@@ -247,7 +246,7 @@ export default function DistributorDashboard({
     }
   };
 
-  const handleSubmitOrder = () => {
+  const handleSubmitOrder = async () => {
     if (cartItems.length === 0) {
       alert('Your cart is empty. Please add items before placing an order.');
       return;
@@ -257,12 +256,7 @@ export default function DistributorDashboard({
     // Order goes to pending_review and admin can add/verify addresses during approval
     // This allows distributors to submit orders without complete address information
 
-    // Show confirmation modal
-    setShowConfirmModal(true);
-  };
-
-  const handleConfirmOrder = async () => {
-    setShowConfirmModal(false);
+    // Submit order directly (no confirmation modal)
     setSubmitting(true);
 
     try {
@@ -698,6 +692,20 @@ export default function DistributorDashboard({
 
               {/* Address selection is optional - admin will handle during approval */}
 
+              {/* PO Number (Optional) */}
+              <div className="mb-3">
+                <label className="block text-xs font-semibold text-[#666] mb-1">
+                  PO Number (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={poNumber}
+                  onChange={(e) => setPoNumber(e.target.value)}
+                  placeholder="Enter PO number"
+                  className="w-full px-3 py-2 border border-[#e8e8e8] rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
+              </div>
+
               {/* Place Order Button */}
               <button
                 onClick={handleSubmitOrder}
@@ -844,152 +852,6 @@ export default function DistributorDashboard({
         companyName={distributor.company_name}
         onSuccess={handleAddressSaved}
       />
-
-      {/* Order Confirmation Modal */}
-      {showConfirmModal && pricingPreview && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            {/* Header */}
-            <div className="px-6 py-4 border-b border-[#e8e8e8] bg-[#0a0a0a]">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-white">
-                  Confirm Order
-                </h3>
-                {!submitting && (
-                  <button
-                    onClick={() => setShowConfirmModal(false)}
-                    className="text-white hover:text-gray-200 transition-colors"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="p-6">
-              {/* Order Summary */}
-              <div className="mb-6">
-                <h4 className="font-semibold text-[#0a0a0a] mb-3">Order Summary</h4>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {cartItems.map((item) => (
-                    <div
-                      key={item.product.product_code}
-                      className="flex justify-between items-center py-2 border-b border-[#f5f5f5] last:border-b-0"
-                    >
-                      <div className="flex-1">
-                        <div className="font-medium text-[#0a0a0a] text-sm">
-                          {item.product.description}
-                        </div>
-                        <div className="text-xs text-[#999] font-mono">
-                          {item.product.product_code}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <span className="text-sm text-[#666]">
-                          x{item.quantity}
-                        </span>
-                        <div className="text-right min-w-[80px]">
-                          <span className="font-semibold text-[#0a0a0a] text-sm">
-                            £{(item.quantity * item.product.price).toFixed(2)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Pricing Breakdown */}
-              <div className="border-t-2 border-[#e8e8e8] pt-4 mb-6 space-y-2">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-[#666]">Subtotal:</span>
-                  <span className="font-semibold text-[#0a0a0a]">
-                    £{pricingPreview.subtotal.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-[#666]">Shipping:</span>
-                  <span className="font-semibold text-[#0a0a0a]">
-                    {pricingPreview.shipping === 0 ? 'FREE' : `£${pricingPreview.shipping.toFixed(2)}`}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-[#666]">VAT:</span>
-                  <span className="font-semibold text-[#0a0a0a]">
-                    £{pricingPreview.vat_amount.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center pt-2 border-t border-[#e8e8e8]">
-                  <span className="font-bold text-[#0a0a0a]">Total:</span>
-                  <span className="font-bold text-[#16a34a] text-lg">
-                    £{pricingPreview.total.toFixed(2)}
-                  </span>
-                </div>
-              </div>
-
-              {/* PO Number (Optional) */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-[#0a0a0a] mb-2">
-                  Purchase Order Number (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={poNumber}
-                  onChange={(e) => setPoNumber(e.target.value)}
-                  placeholder="Enter your PO number for reference"
-                  className="w-full px-4 py-3 border border-[#e8e8e8] rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                />
-                <p className="text-xs text-[#666] mt-1">
-                  This will appear on your invoice for your records
-                </p>
-              </div>
-
-              {/* Info Box */}
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
-                <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                  <div className="flex-1 text-sm text-amber-800">
-                    <strong>How it works:</strong> We'll review your order and send you an invoice via email.
-                    Your order will be shipped once payment is received.
-                  </div>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowConfirmModal(false)}
-                  disabled={submitting}
-                  className="flex-1 border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-all disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleConfirmOrder}
-                  disabled={submitting}
-                  className="flex-1 bg-[#16a34a] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#15803d] transition-all shadow-lg disabled:opacity-50"
-                >
-                  {submitting ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Submitting...
-                    </span>
-                  ) : (
-                    'Place Order'
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Order Success Modal */}
       {orderResult && (
