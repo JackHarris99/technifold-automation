@@ -130,11 +130,9 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
               // If no default, select the first one
               setSelectedAddressId(shippingData.addresses[0].address_id);
             }
-          } else {
-            if (!isTest) {
-              setShowAddressModal(true);
-            }
           }
+          // Don't force address modal - addresses are optional
+          // Admin will collect during order approval if needed
 
           // For logged-in users, fetch billing address from company details
           // We still need to fetch this because payload doesn't include billing info
@@ -160,11 +158,9 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
               // If no default, select the first one
               setSelectedAddressId(shippingData.addresses[0].address_id);
             }
-          } else {
-            if (!isTest) {
-              setShowAddressModal(true);
-            }
           }
+          // Don't force address modal - addresses are optional
+          // Admin will collect during order approval if needed
 
           // Fetch billing address from company
           const billingResponse = await fetch(`/api/portal/company-details?token=${encodeURIComponent(token)}`);
