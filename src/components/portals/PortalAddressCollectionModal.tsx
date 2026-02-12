@@ -294,16 +294,13 @@ export default function PortalAddressCollectionModal({
             </svg>
           </button>
 
-          {/* PROMINENT WARNING: Why this modal appeared */}
-          <div className="bg-blue-50 border-2 border-blue-400 rounded-lg p-4 mb-4">
+          {/* Information about what's needed */}
+          <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4 mb-4">
             <h3 className="text-lg font-bold text-blue-900 flex items-center gap-2 mb-2">
-              <span className="text-2xl">🌍</span> Country Required for Pricing
+              <span className="text-xl">ℹ️</span> What We Need
             </h3>
-            <p className="text-sm text-blue-800 font-semibold">
-              We need your billing and shipping country to calculate tax and shipping costs.
-            </p>
-            <p className="text-sm text-blue-700 mt-1">
-              Other address details are optional but appreciated for smoother delivery.
+            <p className="text-sm text-blue-800 font-medium">
+              Only <span className="text-red-600 font-bold">country</span> is required for tax and shipping calculations. All other address details are optional but help ensure smooth delivery.
             </p>
           </div>
 
@@ -320,21 +317,6 @@ export default function PortalAddressCollectionModal({
             <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4 text-center">
               <div className="inline-block animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full mr-2"></div>
               <span className="text-sm font-semibold text-blue-900">Loading your existing details...</span>
-            </div>
-          )}
-
-          {/* Important Notice */}
-          {!isLoadingExisting && (
-            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
-              <h4 className="text-sm font-bold text-blue-900 mb-2 flex items-center gap-2">
-                <span className="text-xl">ℹ️</span> What's Required
-              </h4>
-              <p className="text-sm text-blue-800">
-                Only fields marked with <span className="text-red-600 font-bold text-lg">*</span> are required. Country is needed for tax and shipping calculations.
-              </p>
-              <p className="text-sm text-blue-800 mt-1">
-                Other details are optional but help ensure smooth delivery.
-              </p>
             </div>
           )}
 
@@ -449,24 +431,24 @@ export default function PortalAddressCollectionModal({
                 </div>
               </div>
 
-              {/* VAT Number (EU only) - PROMINENT SECTION */}
+              {/* VAT Number (EU only) - Optional */}
               {requiresVAT && (
-                <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-4">
-                  <label className="block text-base font-bold text-gray-900 mb-2 flex items-center gap-2">
-                    <span className="text-amber-600">⚠</span>
-                    VAT Number (Strongly Recommended)
+                <div className="bg-gray-50 border-2 border-gray-300 rounded-lg p-4">
+                  <label className="block text-base font-medium text-gray-900 mb-2 flex items-center gap-2">
+                    <span className="text-blue-600">ℹ️</span>
+                    VAT Number (Optional)
                   </label>
                   <input
                     type="text"
                     value={formData.vat_number}
                     onChange={(e) => handleChange('vat_number', e.target.value.toUpperCase())}
-                    className="w-full px-3 py-2 border-2 border-amber-400 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-mono text-base"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-base"
                     placeholder={`${formData.billing_country}123456789`}
                   />
-                  <p className="text-sm text-amber-900 mt-2 font-medium">
+                  <p className="text-sm text-gray-700 mt-2">
                     💡 With a valid VAT number: 0% VAT (reverse charge). Without it: 20% UK VAT will be charged.
                   </p>
-                  <p className="text-xs text-gray-900 mt-1">
+                  <p className="text-xs text-gray-600 mt-1">
                     Format: {formData.billing_country}123456789 (we'll verify it automatically)
                   </p>
 
@@ -517,12 +499,6 @@ export default function PortalAddressCollectionModal({
               <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">2</span>
               Delivery Address
             </h3>
-
-            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-3">
-              <p className="text-sm text-blue-900 font-semibold">
-                📦 Delivery country is required. Other details are optional.
-              </p>
-            </div>
 
             <div className="flex items-center gap-2 bg-gray-50 p-3 rounded-lg border-2 border-gray-300">
               <input
