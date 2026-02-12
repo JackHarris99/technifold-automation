@@ -486,25 +486,17 @@ export function InteractiveQuotePortal({
                               <input
                                 type="number"
                                 min="0"
-                                max={item.pricing_tier === 'standard' ? 15 : item.pricing_tier === 'premium' ? 10 : undefined}
                                 value={currentQty}
                                 onChange={(e) => updateQuantity(item.product_code, parseInt(e.target.value) || 0)}
-                                className={`w-20 px-3 py-2 border rounded-[8px] text-center font-[600] focus:ring-2 outline-none ${
-                                  (item.pricing_tier === 'standard' && currentQty > 15) || (item.pricing_tier === 'premium' && currentQty > 10)
-                                    ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                                    : 'border-[#e8e8e8] focus:ring-[#16a34a] focus:border-[#16a34a]'
-                                }`}
+                                className="w-20 px-3 py-2 border border-[#e8e8e8] rounded-[8px] text-center font-[600] focus:ring-2 focus:ring-[#16a34a] focus:border-[#16a34a] outline-none"
                               />
                             )}
                           </div>
                           {!readOnly && item.pricing_tier === 'standard' && (
-                            <span className="text-[11px] text-[#64748b]">Max 15</span>
+                            <span className="text-[11px] text-[#64748b]">Best pricing up to 15 units</span>
                           )}
                           {!readOnly && item.pricing_tier === 'premium' && (
-                            <span className="text-[11px] text-[#64748b]">Max 10</span>
-                          )}
-                          {!readOnly && ((item.pricing_tier === 'standard' && currentQty > 15) || (item.pricing_tier === 'premium' && currentQty > 10)) && (
-                            <span className="text-[11px] text-red-600 font-[600]">Exceeds limit</span>
+                            <span className="text-[11px] text-[#64748b]">Best pricing up to 10 units</span>
                           )}
                         </div>
                       </div>
