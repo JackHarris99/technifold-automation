@@ -3,7 +3,7 @@
  * Used for tokenized offer links with TTL and tamper protection
  */
 
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 const TOKEN_TTL_HOURS = 72; // 3 days default
 
