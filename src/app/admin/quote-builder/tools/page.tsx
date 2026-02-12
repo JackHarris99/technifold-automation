@@ -440,6 +440,7 @@ export default function ToolsQuoteBuilderPage() {
             quote_type: quoteType,
             is_test: isTestToken,
             free_shipping: freeShipping,
+            requires_approval: true, // All quotes go through admin approval
           }),
         });
 

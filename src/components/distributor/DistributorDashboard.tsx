@@ -253,23 +253,9 @@ export default function DistributorDashboard({
       return;
     }
 
-    if (!selectedAddressId) {
-      alert('Please select a shipping address before placing your order.');
-      return;
-    }
-
-    // CRITICAL: Verify billing address exists before submitting
-    if (!billingAddress || !billingAddress.billing_address_line_1) {
-      alert('Your company must have a billing address before placing orders. Please contact support.');
-      return;
-    }
-
-    // CRITICAL: Verify selected shipping address is complete
-    const selectedAddress = shippingAddresses.find(addr => addr.address_id === selectedAddressId);
-    if (!selectedAddress || !selectedAddress.address_line_1 || !selectedAddress.city || !selectedAddress.postal_code || !selectedAddress.country) {
-      alert('The selected shipping address is incomplete. Please update it with all required fields.');
-      return;
-    }
+    // Address validation removed - addresses are optional
+    // Order goes to pending_review and admin can add/verify addresses during approval
+    // This allows distributors to submit orders without complete address information
 
     // Show confirmation modal
     setShowConfirmModal(true);
@@ -710,22 +696,12 @@ export default function DistributorDashboard({
                 </div>
               )}
 
-              {/* Warning: No Shipping Address Selected */}
-              {!selectedAddressId && (
-                <div className="mb-4 bg-red-50 border-2 border-red-400 rounded-lg p-4">
-                  <p className="text-sm font-bold text-red-900 flex items-center gap-2">
-                    <span className="text-xl">⚠️</span> Shipping Address Required
-                  </p>
-                  <p className="text-sm text-red-800 mt-1">
-                    Select or add a shipping address above to place your order.
-                  </p>
-                </div>
-              )}
+              {/* Address selection is optional - admin will handle during approval */}
 
               {/* Place Order Button */}
               <button
                 onClick={handleSubmitOrder}
-                disabled={submitting || !selectedAddressId}
+                disabled={submitting}
                 className="w-full py-2.5 bg-green-600 text-white rounded-lg font-bold text-sm hover:bg-green-700 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? 'Submitting...' : 'Place Order'}

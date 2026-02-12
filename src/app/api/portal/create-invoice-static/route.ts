@@ -170,22 +170,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check if company has required addresses
-    const checkResponse = await fetch(`${request.nextUrl.origin}/api/companies/check-details-needed?company_id=${company_id}`);
-    const checkData = await checkResponse.json();
-
-    if (checkData.details_needed) {
-      return NextResponse.json(
-        {
-          error: 'Company address required',
-          details: 'This company needs billing and shipping addresses before invoices can be created.',
-          billing_address_needed: checkData.billing_address_needed,
-          shipping_address_needed: checkData.shipping_address_needed,
-          vat_needed: checkData.vat_needed,
-        },
-        { status: 400 }
-      );
-    }
+    // Address validation removed - admin handles addresses during approval
+    // Quotes with requires_approval=true go to pending_approval status (no invoice created)
+    // Admin can collect/verify addresses during approval before creating Stripe invoice
 
     const supabase = getSupabaseClient();
 

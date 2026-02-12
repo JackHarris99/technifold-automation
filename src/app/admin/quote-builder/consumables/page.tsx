@@ -548,6 +548,7 @@ export default function ConsumablesQuoteBuilderPage() {
             quote_type: quoteType, // 'static' or 'interactive'
             is_test: isTestToken, // Test tokens bypass address collection
             free_shipping: freeShipping,
+            requires_approval: true, // All quotes go through admin approval
           }),
         });
 
