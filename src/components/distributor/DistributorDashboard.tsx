@@ -8,7 +8,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import PortalAddressCollectionModal from '../portals/PortalAddressCollectionModal';
+import EditBillingAddressModal from '../address/EditBillingAddressModal';
+import EditVATNumberModal from '../address/EditVATNumberModal';
+import VATNumberDisplay from '../address/VATNumberDisplay';
+import AddDeliveryAddressModal from '../address/AddDeliveryAddressModal';
+import EditDeliveryAddressModal from '../address/EditDeliveryAddressModal';
 
 interface Product {
   product_code: string;
@@ -74,8 +78,14 @@ export default function DistributorDashboard({
   const [shippingAddresses, setShippingAddresses] = useState<any[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [loadingAddresses, setLoadingAddresses] = useState(true);
-  const [showAddressModal, setShowAddressModal] = useState(false);
   const [billingAddress, setBillingAddress] = useState<any>(null);
+
+  // New modal states
+  const [showBillingModal, setShowBillingModal] = useState(false);
+  const [showVATModal, setShowVATModal] = useState(false);
+  const [showAddDeliveryModal, setShowAddDeliveryModal] = useState(false);
+  const [showEditDeliveryModal, setShowEditDeliveryModal] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'tools' | 'consumables'>('tools');
   const [pricingPreview, setPricingPreview] = useState<any>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
@@ -221,8 +231,36 @@ export default function DistributorDashboard({
     0
   );
 
-  const handleAddressSaved = async () => {
-    setShowAddressModal(false);
+  // Handler for billing address modal success
+  const handleBillingSaved = async () => {
+    try {
+      // Refetch billing address
+      const billingResponse = await fetch(`/api/distributor/company-details`);
+      const billingData = await billingResponse.json();
+      if (billingData.success && billingData.company) {
+        setBillingAddress(billingData.company);
+      }
+    } catch (error) {
+      console.error('Failed to refetch billing address:', error);
+    }
+  };
+
+  // Handler for VAT number modal success
+  const handleVATSaved = async () => {
+    try {
+      // Refetch billing address (includes VAT)
+      const billingResponse = await fetch(`/api/distributor/company-details`);
+      const billingData = await billingResponse.json();
+      if (billingData.success && billingData.company) {
+        setBillingAddress(billingData.company);
+      }
+    } catch (error) {
+      console.error('Failed to refetch VAT:', error);
+    }
+  };
+
+  // Handler for delivery address modal success
+  const handleDeliverySaved = async () => {
     try {
       // Refetch shipping addresses
       const shippingResponse = await fetch(`/api/distributor/shipping-addresses`);
@@ -234,15 +272,8 @@ export default function DistributorDashboard({
           setSelectedAddressId(defaultAddress.address_id);
         }
       }
-
-      // Refetch billing address
-      const billingResponse = await fetch(`/api/distributor/company-details`);
-      const billingData = await billingResponse.json();
-      if (billingData.success && billingData.company) {
-        setBillingAddress(billingData.company);
-      }
     } catch (error) {
-      console.error('Failed to refetch addresses:', error);
+      console.error('Failed to refetch shipping addresses:', error);
     }
   };
 
@@ -492,7 +523,7 @@ export default function DistributorDashboard({
               <div className="flex items-center justify-between mb-1">
                 <div className="text-[10px] font-semibold text-gray-600 uppercase">Billing</div>
                 {billingAddress && (
-                  <button onClick={() => setShowAddressModal(true)} className="text-[9px] text-blue-600 hover:text-blue-700 font-semibold">Edit</button>
+                  <button onClick={() => setShowBillingModal(true)} className="text-[9px] text-blue-600 hover:text-blue-700 font-semibold">Edit</button>
                 )}
               </div>
               {loadingAddresses ? (
@@ -509,17 +540,25 @@ export default function DistributorDashboard({
                 </div>
               ) : (
                 <div className="p-2 bg-gray-50 rounded border border-gray-200">
-                  <p className="text-[10px] text-red-600 italic">No billing address - <button onClick={() => setShowAddressModal(true)} className="underline font-semibold">Add</button></p>
+                  <p className="text-[10px] text-red-600 italic">No billing address - <button onClick={() => setShowBillingModal(true)} className="underline font-semibold">Add</button></p>
                 </div>
               )}
             </div>
+
+            {/* VAT Number */}
+            {!loadingAddresses && billingAddress && (
+              <VATNumberDisplay
+                vatNumber={billingAddress.vat_number}
+                onEdit={() => setShowVATModal(true)}
+              />
+            )}
 
             {/* Delivery Addresses */}
             <div>
               <div className="flex items-center justify-between mb-1">
                 <div className="text-[10px] font-semibold text-gray-600 uppercase">Delivery</div>
-                <button onClick={() => setShowAddressModal(true)} className="text-[9px] text-blue-600 hover:text-blue-700 font-semibold">
-                  {shippingAddresses.length > 0 ? 'Add' : 'Add'}
+                <button onClick={() => setShowAddDeliveryModal(true)} className="text-[9px] text-blue-600 hover:text-blue-700 font-semibold">
+                  Add
                 </button>
               </div>
               {loadingAddresses ? (
@@ -531,7 +570,6 @@ export default function DistributorDashboard({
                   {shippingAddresses.map((addr) => (
                     <div
                       key={addr.address_id}
-                      onClick={() => setSelectedAddressId(addr.address_id)}
                       className={`p-1.5 rounded border cursor-pointer transition-all ${
                         selectedAddressId === addr.address_id
                           ? 'border-blue-500 bg-blue-50'
@@ -543,9 +581,10 @@ export default function DistributorDashboard({
                           type="radio"
                           checked={selectedAddressId === addr.address_id}
                           onChange={() => setSelectedAddressId(addr.address_id)}
+                          onClick={() => setSelectedAddressId(addr.address_id)}
                           className="mt-0.5 text-blue-600 w-3 h-3"
                         />
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0" onClick={() => setSelectedAddressId(addr.address_id)}>
                           {addr.label && (
                             <div className="text-[9px] font-semibold text-gray-900 mb-0.5">
                               {addr.label}
@@ -560,6 +599,16 @@ export default function DistributorDashboard({
                           </div>
                           <div className="text-[9px] font-medium text-gray-900">{addr.country}</div>
                         </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingAddressId(addr.address_id);
+                            setShowEditDeliveryModal(true);
+                          }}
+                          className="text-[8px] text-blue-600 hover:text-blue-700 font-semibold"
+                        >
+                          Edit
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -825,14 +874,40 @@ export default function DistributorDashboard({
         </div>
       </div>
 
-      {/* Address Modal */}
-      <PortalAddressCollectionModal
-        isOpen={showAddressModal}
-        onClose={() => setShowAddressModal(false)}
+      {/* Billing Address Modal */}
+      <EditBillingAddressModal
+        isOpen={showBillingModal}
+        onClose={() => setShowBillingModal(false)}
         companyId={distributor.company_id}
-        companyName={distributor.company_name}
-        onSuccess={handleAddressSaved}
+        onSuccess={handleBillingSaved}
       />
+
+      {/* VAT Number Modal */}
+      <EditVATNumberModal
+        isOpen={showVATModal}
+        onClose={() => setShowVATModal(false)}
+        companyId={distributor.company_id}
+        onSuccess={handleVATSaved}
+      />
+
+      {/* Add Delivery Address Modal */}
+      <AddDeliveryAddressModal
+        isOpen={showAddDeliveryModal}
+        onClose={() => setShowAddDeliveryModal(false)}
+        companyId={distributor.company_id}
+        onSuccess={handleDeliverySaved}
+      />
+
+      {/* Edit Delivery Address Modal */}
+      {editingAddressId && (
+        <EditDeliveryAddressModal
+          isOpen={showEditDeliveryModal}
+          onClose={() => setShowEditDeliveryModal(false)}
+          addressId={editingAddressId}
+          companyId={distributor.company_id}
+          onSuccess={handleDeliverySaved}
+        />
+      )}
 
       {/* Order Success Modal */}
       {orderResult && (
