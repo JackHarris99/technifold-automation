@@ -139,11 +139,6 @@ export function TechnicreaseQuotePortal({
   };
 
   const handleRequestInvoice = async () => {
-    if (!selectedAddressId && shippingAddresses.length > 0) {
-      alert('Please select a shipping address');
-      return;
-    }
-
     setIsSubmitting(true);
     try {
       const response = await fetch('/api/portal/create-invoice-interactive', {
