@@ -9,7 +9,11 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { InvoiceRequestModal } from '../InvoiceRequestModal';
-import PortalAddressCollectionModal from '../portals/PortalAddressCollectionModal';
+import EditBillingAddressModal from '../address/EditBillingAddressModal';
+import EditVATNumberModal from '../address/EditVATNumberModal';
+import VATNumberDisplay from '../address/VATNumberDisplay';
+import AddDeliveryAddressModal from '../address/AddDeliveryAddressModal';
+import EditDeliveryAddressModal from '../address/EditDeliveryAddressModal';
 
 interface LineItem {
   product_code: string;
@@ -72,7 +76,14 @@ export function InteractiveQuotePortal({
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [pricingPreview, setPricingPreview] = useState<PricingPreview | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
-  const [showAddressModal, setShowAddressModal] = useState(false);
+
+  // New modal states
+  const [showBillingModal, setShowBillingModal] = useState(false);
+  const [showVATModal, setShowVATModal] = useState(false);
+  const [showAddDeliveryModal, setShowAddDeliveryModal] = useState(false);
+  const [showEditDeliveryModal, setShowEditDeliveryModal] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
+
   const [standardTiers, setStandardTiers] = useState<any[]>([]);
   const [premiumTiers, setPremiumTiers] = useState<any[]>([]);
   const [shippingAddresses, setShippingAddresses] = useState<any[]>([]);
@@ -202,22 +213,29 @@ export function InteractiveQuotePortal({
     };
   };
 
-  // Refetch addresses after adding a new one
-  const handleAddressSaved = async () => {
-    setShowAddressModal(false);
+  // Success handlers for new modals
+  const handleBillingSaved = async () => {
+    setShowBillingModal(false);
+    // Billing changes don't require refetch for quotes
+  };
+
+  const handleVATSaved = async () => {
+    setShowVATModal(false);
+    // VAT changes don't require refetch for quotes
+  };
+
+  const handleDeliverySaved = async () => {
+    setShowAddDeliveryModal(false);
+    setShowEditDeliveryModal(false);
+    // Refetch delivery addresses
     try {
       const response = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
       const data = await response.json();
       if (data.success && data.addresses) {
         setShippingAddresses(data.addresses);
-        // Select the newly added address (should be default)
-        const defaultAddress = data.addresses.find((addr: any) => addr.is_default);
-        if (defaultAddress) {
-          setSelectedAddressId(defaultAddress.address_id);
-        }
       }
     } catch (error) {
-      console.error('[InteractiveQuotePortal] Failed to refetch shipping addresses:', error);
+      console.error('[InteractiveQuotePortal] Failed to refetch delivery addresses:', error);
     }
   };
 
@@ -328,7 +346,7 @@ export function InteractiveQuotePortal({
                     <div className="flex items-center justify-between mb-2">
                       <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider">Billing Address</div>
                       {!readOnly && (
-                        <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
+                        <button onClick={() => setShowBillingModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
                       )}
                     </div>
                     {company.billing_address_line_1 ? (
@@ -341,17 +359,25 @@ export function InteractiveQuotePortal({
                       </div>
                     ) : (
                       <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
-                        <p className="text-[11px] text-red-600 italic">No billing address - <button onClick={() => setShowAddressModal(true)} className="underline font-[600]">Add now</button></p>
+                        <p className="text-[11px] text-red-600 italic">No billing address - <button onClick={() => setShowBillingModal(true)} className="underline font-[600]">Add now</button></p>
                       </div>
                     )}
                   </div>
+
+                  {/* VAT Number */}
+                  {!loadingAddresses && company && (
+                    <VATNumberDisplay
+                      vatNumber={company.vat_number}
+                      onEdit={() => setShowVATModal(true)}
+                    />
+                  )}
 
                   {/* Delivery Addresses */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider">Delivery Addresses</div>
                       {!readOnly && (
-                        <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">+ Add</button>
+                        <button onClick={() => setShowAddDeliveryModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">+ Add</button>
                       )}
                     </div>
 
@@ -371,18 +397,41 @@ export function InteractiveQuotePortal({
                                 : 'border-[#e2e8f0] bg-[#f8fafc] hover:border-[#cbd5e1]'
                             }`}
                           >
-                            {addr.label && (
-                              <div className="text-[11px] font-[600] text-[#1e293b] mb-0.5">
-                                {addr.label}
-                                {addr.is_default && <span className="ml-1 text-[9px] text-blue-600">(Default)</span>}
+                            <div className="flex items-start gap-2">
+                              <input
+                                type="radio"
+                                checked={selectedAddressId === addr.address_id}
+                                onChange={() => !readOnly && setSelectedAddressId(addr.address_id)}
+                                className="mt-0.5 text-blue-600"
+                                disabled={readOnly}
+                              />
+                              <div className="flex-1 min-w-0">
+                                {addr.label && (
+                                  <div className="text-[11px] font-[600] text-[#1e293b] mb-0.5">
+                                    {addr.label}
+                                    {addr.is_default && <span className="ml-1 text-[9px] text-blue-600">(Default)</span>}
+                                  </div>
+                                )}
+                                <div className="text-[10px] text-[#334155]">
+                                  {addr.address_line_1}
+                                  {addr.address_line_2 && `, ${addr.address_line_2}`}
+                                </div>
+                                <div className="text-[10px] text-[#334155]">
+                                  {addr.city}{addr.state_province ? `, ${addr.state_province}` : ''} {addr.postal_code}
+                                </div>
                               </div>
-                            )}
-                            <div className="text-[10px] text-[#334155]">
-                              {addr.address_line_1}
-                              {addr.address_line_2 && `, ${addr.address_line_2}`}
-                            </div>
-                            <div className="text-[10px] text-[#334155]">
-                              {addr.city}{addr.state_province ? `, ${addr.state_province}` : ''} {addr.postal_code}
+                              {!readOnly && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingAddressId(addr.address_id);
+                                    setShowEditDeliveryModal(true);
+                                  }}
+                                  className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]"
+                                >
+                                  Edit
+                                </button>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -1013,14 +1062,44 @@ export function InteractiveQuotePortal({
         </div>
       </div>
 
-      <PortalAddressCollectionModal
-        isOpen={showAddressModal}
-        onClose={() => setShowAddressModal(false)}
+      {/* Billing Address Modal */}
+      <EditBillingAddressModal
+        isOpen={showBillingModal}
+        onClose={() => setShowBillingModal(false)}
         companyId={company.company_id}
-        companyName={company.company_name}
         token={token}
-        onSuccess={handleAddressSaved}
+        onSuccess={handleBillingSaved}
       />
+
+      {/* VAT Number Modal */}
+      <EditVATNumberModal
+        isOpen={showVATModal}
+        onClose={() => setShowVATModal(false)}
+        companyId={company.company_id}
+        token={token}
+        onSuccess={handleVATSaved}
+      />
+
+      {/* Add Delivery Address Modal */}
+      <AddDeliveryAddressModal
+        isOpen={showAddDeliveryModal}
+        onClose={() => setShowAddDeliveryModal(false)}
+        companyId={company.company_id}
+        token={token}
+        onSuccess={handleDeliverySaved}
+      />
+
+      {/* Edit Delivery Address Modal */}
+      {editingAddressId && (
+        <EditDeliveryAddressModal
+          isOpen={showEditDeliveryModal}
+          onClose={() => setShowEditDeliveryModal(false)}
+          addressId={editingAddressId}
+          companyId={company.company_id}
+          token={token}
+          onSuccess={handleDeliverySaved}
+        />
+      )}
 
       <InvoiceRequestModal
         isOpen={isInvoiceModalOpen}
