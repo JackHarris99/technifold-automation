@@ -355,6 +355,31 @@ export async function POST(
           throw new Error(`Failed to update item ${item.item_id}: ${itemUpdateError.message}`);
         }
       }
+
+      // 11. Persist admin address overrides back to companies table
+      // This ensures corrected addresses are saved for future orders
+      const addressUpdates: any = {};
+
+      if (body.admin_billing_line_1) addressUpdates.billing_address_line_1 = body.admin_billing_line_1;
+      if (body.admin_billing_line_2 !== undefined) addressUpdates.billing_address_line_2 = body.admin_billing_line_2;
+      if (body.admin_billing_city) addressUpdates.billing_city = body.admin_billing_city;
+      if (body.admin_billing_state !== undefined) addressUpdates.billing_state_province = body.admin_billing_state;
+      if (body.admin_billing_postal) addressUpdates.billing_postal_code = body.admin_billing_postal;
+      if (body.admin_billing_country) addressUpdates.billing_country = body.admin_billing_country;
+
+      if (Object.keys(addressUpdates).length > 0) {
+        const { error: companyUpdateError } = await supabase
+          .from('companies')
+          .update(addressUpdates)
+          .eq('company_id', order.company_id);
+
+        if (companyUpdateError) {
+          console.error('[Approve Order] Warning: Failed to persist address overrides:', companyUpdateError);
+          // Non-fatal - invoice already created, just log the error
+        } else {
+          console.log('[Approve Order] Address overrides persisted to companies table');
+        }
+      }
     } catch (dbError) {
       // ROLLBACK: Void the Stripe invoice if database operations failed
       console.error('[Approve Order] Database operation failed, rolling back Stripe invoice:', dbError);
