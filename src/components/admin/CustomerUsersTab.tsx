@@ -107,7 +107,8 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
   };
 
   const handleLoginAs = async (user: CustomerUser) => {
-    if (!confirm(`Preview portal as ${user.full_name}?`)) return;
+    const fullName = `${user.first_name} ${user.last_name}`;
+    if (!confirm(`Preview portal as ${fullName}?`)) return;
 
     try {
       const response = await fetch('/api/admin/customer-users/login-as', {

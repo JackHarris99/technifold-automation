@@ -44,12 +44,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Create JWT token for customer (same as login, but with preview flag)
+    const fullName = `${user.first_name} ${user.last_name}`;
     const token = await new SignJWT({
       user_id: user.user_id,
       company_id: user.company_id,
       company_name: user.companies?.company_name || 'Unknown Company',
       email: user.email,
-      full_name: user.full_name,
+      full_name: fullName,
       type: 'customer',
       preview_mode: true, // Flag to show banner
       admin_user_id: currentUser.user_id, // Track who's previewing
@@ -71,8 +72,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Preview session created for ${user.full_name}`,
-      redirect: '/customer',
+      message: `Preview session created for ${fullName}`,
+      redirect: '/customer/portal',
     });
   } catch (error: any) {
     console.error('[Customer Login As] Error:', error);
