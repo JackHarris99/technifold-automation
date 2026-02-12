@@ -1069,6 +1069,7 @@ export function InteractiveQuotePortal({
         token={token}
         pricingPreview={pricingPreview}
         quoteType="interactive"
+        selectedAddressId={selectedAddressId}
       />
     </>
   );

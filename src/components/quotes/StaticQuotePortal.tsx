@@ -813,6 +813,7 @@ export function StaticQuotePortal({
         token={token}
         pricingPreview={pricingPreview}
         quoteType="static"
+        selectedAddressId={selectedAddressId}
       />
     </>
   );
