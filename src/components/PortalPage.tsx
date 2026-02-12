@@ -1152,29 +1152,12 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
                       <span className="font-[700] text-[17px] tracking-[-0.01em]">£{pricingPreview.subtotal.toFixed(2)}</span>
                     </div>
 
-                    {/* Predicted Shipping */}
-                    {pricingPreview.shipping !== undefined && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-[15px] text-[#999] font-[500]">Predicted Shipping</span>
-                        <span className="font-[600] text-[16px]">{pricingPreview.shipping === 0 ? 'FREE' : `£${pricingPreview.shipping.toFixed(2)}`}</span>
-                      </div>
-                    )}
-
-                    {/* VAT */}
-                    {pricingPreview.vat_amount !== undefined && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-[15px] text-[#999] font-[500]">VAT</span>
-                        <span className="font-[600] text-[16px]">£{pricingPreview.vat_amount.toFixed(2)}</span>
-                      </div>
-                    )}
-
-                    {/* Final Total */}
-                    {pricingPreview.total !== undefined && (
-                      <div className="flex justify-between items-center pt-4 border-t border-[#2a2a2a]">
-                        <span className="text-[17px] font-[700]">Final Total</span>
-                        <span className="font-[800] text-[28px] tracking-[-0.02em] text-[#16a34a]">£{pricingPreview.total.toFixed(2)}</span>
-                      </div>
-                    )}
+                    {/* Shipping & VAT Note */}
+                    <div className="bg-[#1a1a1a] rounded-lg p-4 my-3">
+                      <p className="text-[13px] text-[#999] text-center">
+                        💡 Shipping and VAT will be calculated upon order approval
+                      </p>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-4">

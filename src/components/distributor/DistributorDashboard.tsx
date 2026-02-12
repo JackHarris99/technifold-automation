@@ -659,36 +659,17 @@ export default function DistributorDashboard({
             <div className="text-[10px] font-bold text-gray-400 uppercase mb-2">Order Summary</div>
             <div className="space-y-2">
               {/* Subtotal */}
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center pb-2 border-b border-gray-700">
                 <span className="text-[11px] text-gray-400">Subtotal</span>
                 <span className="font-semibold text-sm">£{pricingPreview.subtotal.toFixed(2)}</span>
               </div>
 
-              {/* Shipping */}
-              {pricingPreview.shipping !== undefined && (
-                <div className="flex justify-between items-center">
-                  <span className="text-[11px] text-gray-400">Shipping</span>
-                  <span className="font-semibold text-sm">{pricingPreview.shipping === 0 ? 'FREE' : `£${pricingPreview.shipping.toFixed(2)}`}</span>
-                </div>
-              )}
-
-              {/* VAT */}
-              {pricingPreview.vat_amount !== undefined && (
-                <div className="flex justify-between items-center pb-2 border-b border-gray-700">
-                  <span className="text-[11px] text-gray-400">
-                    VAT {pricingPreview.vat_rate > 0 && `(${(pricingPreview.vat_rate * 100).toFixed(0)}%)`}
-                  </span>
-                  <span className="font-semibold text-sm">£{pricingPreview.vat_amount.toFixed(2)}</span>
-                </div>
-              )}
-
-              {/* Final Total */}
-              {pricingPreview.total !== undefined && (
-                <div className="flex justify-between items-center mb-3">
-                  <span className="text-sm font-bold">Total</span>
-                  <span className="text-xl font-bold text-green-500">£{pricingPreview.total.toFixed(2)}</span>
-                </div>
-              )}
+              {/* Shipping & VAT Note */}
+              <div className="bg-gray-800 rounded p-2 my-2">
+                <p className="text-[10px] text-gray-400 text-center">
+                  💡 Shipping and VAT will be calculated upon order approval
+                </p>
+              </div>
 
               {/* Address selection is optional - admin will handle during approval */}
 
