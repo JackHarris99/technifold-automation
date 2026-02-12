@@ -8,7 +8,6 @@
 
 import { useState } from 'react';
 import { CartItem } from '@/types';
-import AddressCollectionModal from './portals/AddressCollectionModal';
 
 interface PricingPreview {
   line_items: Array<{
@@ -76,8 +75,6 @@ export function InvoiceRequestModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [invoiceResult, setInvoiceResult] = useState<InvoiceResult | null>(null);
-  const [showAddressModal, setShowAddressModal] = useState(false);
-  const [companyName, setCompanyName] = useState<string>('');
 
   if (!isOpen) return null;
 
@@ -163,21 +160,10 @@ export function InvoiceRequestModal({
     }
   };
 
-  const handleAddressSaved = async () => {
-    setShowAddressModal(false);
-    setLoading(true);
-    await createInvoice();
-  };
-
-  const handleAddressCancel = () => {
-    setShowAddressModal(false);
-  };
-
   const handleClose = () => {
     if (!loading) {
       setInvoiceResult(null);
       setError(null);
-      setShowAddressModal(false);
       onClose();
     }
   };
@@ -204,20 +190,6 @@ export function InvoiceRequestModal({
   const shipping = pricingPreview?.shipping ?? 0;
   const vatAmount = pricingPreview?.vat_amount ?? 0;
   const total = pricingPreview?.total ?? subtotal;
-
-  // If showing address modal, render it standalone (not nested)
-  if (showAddressModal) {
-    return (
-      <AddressCollectionModal
-        isOpen={showAddressModal}
-        onClose={handleAddressCancel}
-        companyId={companyId}
-        companyName={companyName}
-        token={token}
-        onSuccess={handleAddressSaved}
-      />
-    );
-  }
 
   return (
     <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
