@@ -193,7 +193,7 @@ function generateInvitationEmail(fullName: string, companyName: string, invitati
         <h3 style="margin-top: 0; color: #1e40af;">What You Can Do:</h3>
         <ul style="margin-bottom: 0;">
           <li><strong>24/7 Ordering</strong> - Place orders anytime, anywhere</li>
-          <li><strong>Instant Pricing</strong> - See your distributor pricing in real-time (Tier 1: 40% off, Tier 2: 30% off, Tier 3: 20% off)</li>
+          <li><strong>Your Pricing</strong> - See your exclusive distributor pricing in real-time</li>
           <li><strong>Order History</strong> - View all your past invoices and orders</li>
           <li><strong>Faster Processing</strong> - Orders go directly into our system</li>
         </ul>
