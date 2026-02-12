@@ -4,7 +4,11 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { CompanyPayload, ReorderItem } from '@/types';
 import { InvoiceRequestModal } from './InvoiceRequestModal';
-import PortalAddressCollectionModal from './portals/PortalAddressCollectionModal';
+import EditBillingAddressModal from './address/EditBillingAddressModal';
+import EditVATNumberModal from './address/EditVATNumberModal';
+import VATNumberDisplay from './address/VATNumberDisplay';
+import AddDeliveryAddressModal from './address/AddDeliveryAddressModal';
+import EditDeliveryAddressModal from './address/EditDeliveryAddressModal';
 
 interface PricingPreview {
   line_items: Array<{
@@ -78,7 +82,14 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [billingAddress, setBillingAddress] = useState<BillingAddress | null>(null);
   const [loadingAddress, setLoadingAddress] = useState(true);
-  const [showAddressModal, setShowAddressModal] = useState(false);
+
+  // New modal states
+  const [showBillingModal, setShowBillingModal] = useState(false);
+  const [showVATModal, setShowVATModal] = useState(false);
+  const [showAddDeliveryModal, setShowAddDeliveryModal] = useState(false);
+  const [showEditDeliveryModal, setShowEditDeliveryModal] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
+
   const [standardTiers, setStandardTiers] = useState<PricingTier[]>([]);
   const [premiumTiers, setPremiumTiers] = useState<PricingTier[]>([]);
 
@@ -180,36 +191,71 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
     fetchAddresses();
   }, [token, isTest, isLoggedIn, payload]);
 
-  const handleAddressSaved = async () => {
-    setShowAddressModal(false);
+  // Success handlers for new modals
+  const handleBillingSaved = async () => {
+    setShowBillingModal(false);
+    // Refetch billing address
     try {
       if (isLoggedIn) {
-        // Logged-in customer portal
+        const response = await fetch('/api/customer/company-details');
+        const data = await response.json();
+        if (data.success && data.company) {
+          setBillingAddress(data.company);
+        }
+      } else {
+        const response = await fetch(`/api/portal/company-details?token=${encodeURIComponent(token)}`);
+        const data = await response.json();
+        if (data.success && data.company) {
+          setBillingAddress(data.company);
+        }
+      }
+    } catch (error) {
+      console.error('[PortalPage] Failed to refetch billing address:', error);
+    }
+  };
+
+  const handleVATSaved = async () => {
+    setShowVATModal(false);
+    // Refetch billing address (includes VAT number)
+    try {
+      if (isLoggedIn) {
+        const response = await fetch('/api/customer/company-details');
+        const data = await response.json();
+        if (data.success && data.company) {
+          setBillingAddress(data.company);
+        }
+      } else {
+        const response = await fetch(`/api/portal/company-details?token=${encodeURIComponent(token)}`);
+        const data = await response.json();
+        if (data.success && data.company) {
+          setBillingAddress(data.company);
+        }
+      }
+    } catch (error) {
+      console.error('[PortalPage] Failed to refetch VAT number:', error);
+    }
+  };
+
+  const handleDeliverySaved = async () => {
+    setShowAddDeliveryModal(false);
+    setShowEditDeliveryModal(false);
+    // Refetch delivery addresses
+    try {
+      if (isLoggedIn) {
         const response = await fetch('/api/customer/addresses');
         const data = await response.json();
         if (data.addresses && data.addresses.length > 0) {
           setShippingAddresses(data.addresses);
-          // Select the newly added address (likely the default one)
-          const defaultAddress = data.addresses.find((addr: any) => addr.is_default);
-          if (defaultAddress) {
-            setSelectedAddressId(defaultAddress.address_id);
-          }
         }
       } else {
-        // Token-based portal
         const response = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
         const data = await response.json();
         if (data.success && data.addresses) {
           setShippingAddresses(data.addresses);
-          // Select the newly added address (likely the default one)
-          const defaultAddress = data.addresses.find((addr: any) => addr.is_default);
-          if (defaultAddress) {
-            setSelectedAddressId(defaultAddress.address_id);
-          }
         }
       }
     } catch (error) {
-      console.error('[PortalPage] Failed to refetch shipping addresses:', error);
+      console.error('[PortalPage] Failed to refetch delivery addresses:', error);
     }
   };
 
@@ -465,7 +511,7 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
                   <div className="flex items-center justify-between mb-2">
                     <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider">Billing Address</div>
                     {billingAddress && (
-                      <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
+                      <button onClick={() => setShowBillingModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">Edit</button>
                     )}
                   </div>
                   {loadingAddress ? (
@@ -479,25 +525,27 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
                       <div className="text-[11px] text-[#334155]">{billingAddress.billing_city}{billingAddress.billing_state_province ? `, ${billingAddress.billing_state_province}` : ''}</div>
                       <div className="text-[11px] text-[#334155]">{billingAddress.billing_postal_code}</div>
                       <div className="text-[12px] font-[500] text-[#1e293b] mt-1">{billingAddress.billing_country}</div>
-                      {billingAddress.vat_number && (
-                        <div className="mt-2 pt-2 border-t border-[#e2e8f0]">
-                          <div className="text-[10px] font-[600] text-[#475569] uppercase tracking-wider mb-1">VAT Number</div>
-                          <div className="text-[12px] font-mono font-[600] text-[#059669]">{billingAddress.vat_number}</div>
-                        </div>
-                      )}
                     </div>
                   ) : (
                     <div className="p-3 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
-                      <p className="text-[11px] text-red-600 italic">No billing address - <button onClick={() => setShowAddressModal(true)} className="underline font-[600]">Add now</button></p>
+                      <p className="text-[11px] text-red-600 italic">No billing address - <button onClick={() => setShowBillingModal(true)} className="underline font-[600]">Add now</button></p>
                     </div>
                   )}
                 </div>
+
+                {/* VAT Number */}
+                {!loadingAddress && billingAddress && (
+                  <VATNumberDisplay
+                    vatNumber={billingAddress.vat_number}
+                    onEdit={() => setShowVATModal(true)}
+                  />
+                )}
 
                 {/* Delivery Addresses */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <div className="text-[11px] font-[600] text-[#475569] uppercase tracking-wider">Delivery Addresses</div>
-                    <button onClick={() => setShowAddressModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">
+                    <button onClick={() => setShowAddDeliveryModal(true)} className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]">
                       {shippingAddresses.length > 0 ? 'Add New' : 'Add'}
                     </button>
                   </div>
@@ -540,6 +588,16 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
                               </div>
                               <div className="text-[10px] font-[500] text-[#1e293b]">{addr.country}</div>
                             </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingAddressId(addr.address_id);
+                                setShowEditDeliveryModal(true);
+                              }}
+                              className="text-[10px] text-blue-600 hover:text-blue-700 font-[600]"
+                            >
+                              Edit
+                            </button>
                           </div>
                         </div>
                       ))}
@@ -1189,14 +1247,44 @@ export function PortalPage({ payload, contact, token, isTest, isLoggedIn, userNa
         </div>
       </div>
 
-      <PortalAddressCollectionModal
-        isOpen={showAddressModal}
-        onClose={() => setShowAddressModal(false)}
+      {/* Billing Address Modal */}
+      <EditBillingAddressModal
+        isOpen={showBillingModal}
+        onClose={() => setShowBillingModal(false)}
         companyId={payload.company_id}
-        companyName={payload.company_name}
         token={token}
-        onSuccess={handleAddressSaved}
+        onSuccess={handleBillingSaved}
       />
+
+      {/* VAT Number Modal */}
+      <EditVATNumberModal
+        isOpen={showVATModal}
+        onClose={() => setShowVATModal(false)}
+        companyId={payload.company_id}
+        token={token}
+        onSuccess={handleVATSaved}
+      />
+
+      {/* Add Delivery Address Modal */}
+      <AddDeliveryAddressModal
+        isOpen={showAddDeliveryModal}
+        onClose={() => setShowAddDeliveryModal(false)}
+        companyId={payload.company_id}
+        token={token}
+        onSuccess={handleDeliverySaved}
+      />
+
+      {/* Edit Delivery Address Modal */}
+      {editingAddressId && (
+        <EditDeliveryAddressModal
+          isOpen={showEditDeliveryModal}
+          onClose={() => setShowEditDeliveryModal(false)}
+          addressId={editingAddressId}
+          companyId={payload.company_id}
+          token={token}
+          onSuccess={handleDeliverySaved}
+        />
+      )}
 
       <InvoiceRequestModal
         isOpen={isInvoiceModalOpen}
