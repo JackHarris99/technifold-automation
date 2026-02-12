@@ -106,6 +106,29 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
     }
   };
 
+  const handleLoginAs = async (user: CustomerUser) => {
+    if (!confirm(`Preview portal as ${user.full_name}?`)) return;
+
+    try {
+      const response = await fetch('/api/admin/customer-users/login-as', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.user_id }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create preview session');
+      }
+
+      // Redirect to customer portal
+      window.location.href = data.redirect;
+    } catch (error: any) {
+      alert(`Failed to login as user: ${error.message}`);
+    }
+  };
+
   const sendInvitationsToContacts = async () => {
     if (selectedContacts.size === 0) {
       setError('Please select at least one contact');
@@ -365,15 +388,26 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
                     {formatDate(user.created_at)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
-                    {user.invitation_token && !user.password_hash && (
-                      <button
-                        onClick={() => resendInvitation(user.user_id)}
-                        disabled={resendingInvitation === user.user_id}
-                        className="text-sm text-blue-600 hover:text-blue-800 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {resendingInvitation === user.user_id ? 'Sending...' : 'Resend Invitation'}
-                      </button>
-                    )}
+                    <div className="flex items-center justify-end gap-2">
+                      {user.password_hash && user.is_active && (
+                        <button
+                          onClick={() => handleLoginAs(user)}
+                          className="px-3 py-1.5 text-sm bg-purple-100 text-purple-700 rounded hover:bg-purple-200 font-medium"
+                          title="Preview portal as this user"
+                        >
+                          👁 Login As
+                        </button>
+                      )}
+                      {user.invitation_token && !user.password_hash && (
+                        <button
+                          onClick={() => resendInvitation(user.user_id)}
+                          disabled={resendingInvitation === user.user_id}
+                          className="text-sm text-blue-600 hover:text-blue-800 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {resendingInvitation === user.user_id ? 'Sending...' : 'Resend Invitation'}
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

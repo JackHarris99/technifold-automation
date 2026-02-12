@@ -39,15 +39,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    if (!user.is_active) {
+      return NextResponse.json({ error: 'User is not active' }, { status: 400 });
+    }
+
     // Create JWT token for customer (same as login, but with preview flag)
     const token = await new SignJWT({
       user_id: user.user_id,
       company_id: user.company_id,
       company_name: user.companies?.company_name || 'Unknown Company',
       email: user.email,
-      first_name: user.first_name,
-      last_name: user.last_name,
-      role: user.role,
+      full_name: user.full_name,
       type: 'customer',
       preview_mode: true, // Flag to show banner
       admin_user_id: currentUser.user_id, // Track who's previewing
@@ -59,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     // Set customer session cookie
     const cookieStore = await cookies();
-    cookieStore.set('customer_session', token, {
+    cookieStore.set('customer_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -69,8 +71,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Preview session created for ${user.first_name} ${user.last_name}`,
-      redirect: '/customer/portal',
+      message: `Preview session created for ${user.full_name}`,
+      redirect: '/customer',
     });
   } catch (error: any) {
     console.error('[Customer Login As] Error:', error);
