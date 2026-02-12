@@ -6,7 +6,6 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { verifyToken } from '@/lib/tokens';
 
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
@@ -34,45 +33,18 @@ export async function middleware(request: NextRequest) {
   let customerContactId = request.cookies.get('customer_contact_id')?.value || null;
   let tokenObjectType = request.cookies.get('token_object_type')?.value || null;
 
-  // Detect path-based tokens and decode them
+  // Detect path-based tokens - store raw token, verify in route handlers
+  // (Token verification requires Node.js crypto, not available in Edge Runtime middleware)
   const pathToken = extractPathToken(pathname);
   if (pathToken) {
-    const decoded = verifyToken(pathToken);
-    if (decoded) {
-      // Set cookies for future visits
-      if (decoded.company_id) {
-        customerCompanyId = decoded.company_id;
-        response.cookies.set('customer_company_id', decoded.company_id, {
-          maxAge: 60 * 60 * 24 * 90, // 90 days for customers
-          path: '/',
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-        });
-      }
-
-      if (decoded.contact_id) {
-        customerContactId = decoded.contact_id;
-        response.cookies.set('customer_contact_id', decoded.contact_id, {
-          maxAge: 60 * 60 * 24 * 90,
-          path: '/',
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-        });
-      }
-
-      if (decoded.object_type) {
-        tokenObjectType = decoded.object_type;
-        response.cookies.set('token_object_type', decoded.object_type, {
-          maxAge: 60 * 60 * 24 * 90,
-          path: '/',
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-        });
-      }
-    }
+    // Store token in cookie - actual verification happens in route handlers
+    response.cookies.set('path_token', pathToken, {
+      maxAge: 60 * 60 * 24 * 90, // 90 days
+      path: '/',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
   }
 
   // ========== TRACK ALL ACTIVITY ==========
