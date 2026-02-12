@@ -390,7 +390,7 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <div className="flex items-center justify-end gap-2">
-                      {user.password_hash && user.is_active && (
+                      {user.is_active && (
                         <button
                           onClick={() => handleLoginAs(user)}
                           className="px-3 py-1.5 text-sm bg-purple-100 text-purple-700 rounded hover:bg-purple-200 font-medium"
