@@ -6,12 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { getSupabaseClient } from '@/lib/supabase';
-import { SignJWT } from 'jose';
-import { cookies } from 'next/headers';
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'your-secret-key-change-this'
-);
+import { createCustomerSession } from '@/lib/customerAuth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,28 +38,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User is not active' }, { status: 400 });
     }
 
-    // Create JWT token matching CustomerSession interface
-    const token = await new SignJWT({
+    // Create customer session using the same helper as regular login
+    await createCustomerSession({
       user_id: user.user_id,
       company_id: user.company_id,
       email: user.email,
       first_name: user.first_name,
       last_name: user.last_name,
       role: user.role || 'user',
-    })
-      .setProtectedHeader({ alg: 'HS256' })
-      .setExpirationTime('1h') // Shorter expiry for preview sessions
-      .setIssuedAt()
-      .sign(JWT_SECRET);
-
-    // Set customer session cookie
-    const cookieStore = await cookies();
-    cookieStore.set('customer_session', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60, // 1 hour
-      path: '/',
     });
 
     return NextResponse.json({
