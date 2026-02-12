@@ -1,7 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import PortalAddressCollectionModal from './portals/PortalAddressCollectionModal';
+import EditBillingAddressModal from './address/EditBillingAddressModal';
+import EditVATNumberModal from './address/EditVATNumberModal';
+import VATNumberDisplay from './address/VATNumberDisplay';
+import AddDeliveryAddressModal from './address/AddDeliveryAddressModal';
+import EditDeliveryAddressModal from './address/EditDeliveryAddressModal';
 
 interface ShippingAddress {
   address_line_1: string;
@@ -39,7 +43,13 @@ export default function StaticToolQuoteViewer({
 }: StaticToolQuoteViewerProps) {
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress | null>(null);
   const [loadingAddress, setLoadingAddress] = useState(true);
-  const [showAddressModal, setShowAddressModal] = useState(false);
+
+  // New modal states
+  const [showBillingModal, setShowBillingModal] = useState(false);
+  const [showVATModal, setShowVATModal] = useState(false);
+  const [showAddDeliveryModal, setShowAddDeliveryModal] = useState(false);
+  const [showEditDeliveryModal, setShowEditDeliveryModal] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
 
   // Fetch shipping address on mount
   useEffect(() => {
@@ -64,15 +74,22 @@ export default function StaticToolQuoteViewer({
     fetchAddress();
   }, [token, isTest]);
 
-  // Handler for when address is successfully saved
-  const handleAddressSaved = async () => {
-    setShowAddressModal(false);
+  // Success handlers for new modals
+  const handleBillingSaved = async () => {
+    setShowBillingModal(false);
+  };
 
-    // Refetch the address
+  const handleVATSaved = async () => {
+    setShowVATModal(false);
+  };
+
+  const handleDeliverySaved = async () => {
+    setShowAddDeliveryModal(false);
+    setShowEditDeliveryModal(false);
+    // Refetch address
     try {
       const response = await fetch(`/api/portal/shipping-address?token=${encodeURIComponent(token)}`);
       const data = await response.json();
-
       if (data.success && data.address) {
         setShippingAddress(data.address);
       }
@@ -193,15 +210,44 @@ export default function StaticToolQuoteViewer({
         </div>
       </div>
 
-      {/* Address Collection Modal */}
-      <PortalAddressCollectionModal
-        isOpen={showAddressModal}
-        onClose={() => setShowAddressModal(false)}
+      {/* Billing Address Modal */}
+      <EditBillingAddressModal
+        isOpen={showBillingModal}
+        onClose={() => setShowBillingModal(false)}
         companyId={companyId}
-        companyName={companyName}
         token={token}
-        onSuccess={handleAddressSaved}
+        onSuccess={handleBillingSaved}
       />
+
+      {/* VAT Number Modal */}
+      <EditVATNumberModal
+        isOpen={showVATModal}
+        onClose={() => setShowVATModal(false)}
+        companyId={companyId}
+        token={token}
+        onSuccess={handleVATSaved}
+      />
+
+      {/* Add Delivery Address Modal */}
+      <AddDeliveryAddressModal
+        isOpen={showAddDeliveryModal}
+        onClose={() => setShowAddDeliveryModal(false)}
+        companyId={companyId}
+        token={token}
+        onSuccess={handleDeliverySaved}
+      />
+
+      {/* Edit Delivery Address Modal */}
+      {editingAddressId && (
+        <EditDeliveryAddressModal
+          isOpen={showEditDeliveryModal}
+          onClose={() => setShowEditDeliveryModal(false)}
+          addressId={editingAddressId}
+          companyId={companyId}
+          token={token}
+          onSuccess={handleDeliverySaved}
+        />
+      )}
     </div>
   );
 }
