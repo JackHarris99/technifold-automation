@@ -64,9 +64,20 @@ export function generateToken(payload: Omit<TokenPayload, 'expires_at'>, ttlHour
  */
 export function verifyToken(token: string): TokenPayload | null {
   try {
+    if (!token) {
+      console.error('[tokens] Token is null/undefined');
+      return null;
+    }
+
+    if (typeof token !== 'string') {
+      console.error('[tokens] Token is not a string, type:', typeof token);
+      return null;
+    }
+
     const [payloadB64, signature] = token.split('.');
 
     if (!payloadB64 || !signature) {
+      console.error('[tokens] Token missing payload or signature. Has dot:', token.includes('.'), 'parts:', token.split('.').length);
       return null;
     }
 
@@ -77,7 +88,9 @@ export function verifyToken(token: string): TokenPayload | null {
 
     // Constant-time comparison to prevent timing attacks
     if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
-      console.warn('[tokens] Invalid signature');
+      console.error('[tokens] Invalid signature - HMAC mismatch');
+      console.error('[tokens] Signature length - received:', signature.length, 'expected:', expectedSignature.length);
+      console.error('[tokens] First 20 chars - received:', signature.substring(0, 20), 'expected:', expectedSignature.substring(0, 20));
       return null;
     }
 
@@ -87,13 +100,18 @@ export function verifyToken(token: string): TokenPayload | null {
 
     // Check expiration
     if (Date.now() > payload.expires_at) {
-      console.warn('[tokens] Token expired');
+      const expiryDate = new Date(payload.expires_at);
+      const now = new Date();
+      console.error('[tokens] Token expired');
+      console.error('[tokens] Expiry:', expiryDate.toISOString(), 'Now:', now.toISOString());
+      console.error('[tokens] Expired by (hours):', ((Date.now() - payload.expires_at) / (1000 * 60 * 60)).toFixed(2));
       return null;
     }
 
     return payload;
   } catch (error) {
     console.error('[tokens] Error verifying token:', error);
+    console.error('[tokens] Token value (first 100 chars):', token?.substring(0, 100));
     return null;
   }
 }

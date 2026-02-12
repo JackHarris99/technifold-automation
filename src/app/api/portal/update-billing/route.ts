@@ -29,12 +29,19 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Verify HMAC token
-    console.log('[portal/update-billing] Verifying token, length:', token?.length, 'first 20 chars:', token?.substring(0, 20));
+    console.log('[portal/update-billing] Verifying token, length:', token?.length, 'first 20 chars:', token?.substring(0, 20), 'type:', typeof token);
+    console.log('[portal/update-billing] Token has dot separator:', token?.includes('.'));
+    console.log('[portal/update-billing] Token is string:', typeof token === 'string');
+
     const payload = verifyToken(token);
     if (!payload) {
-      console.error('[portal/update-billing] TOKEN VERIFICATION FAILED - Check logs above for [tokens] warnings');
+      console.error('[portal/update-billing] TOKEN VERIFICATION FAILED');
+      console.error('[portal/update-billing] Full token (truncated):', token?.substring(0, 100));
+      console.error('[portal/update-billing] Token length:', token?.length);
+      console.error('[portal/update-billing] Request body keys:', Object.keys(body));
+      console.error('[portal/update-billing] Billing country:', billing_country);
       return NextResponse.json(
-        { error: 'Invalid or expired token' },
+        { error: 'Invalid or expired token. Please use a fresh quote link or contact support.' },
         { status: 401 }
       );
     }

@@ -28,12 +28,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify HMAC token
-    console.log('[portal/create-shipping-address] Verifying token, length:', token?.length);
+    console.log('[portal/create-shipping-address] Verifying token, length:', token?.length, 'type:', typeof token);
+    console.log('[portal/create-shipping-address] Token has dot separator:', token?.includes('.'));
+    console.log('[portal/create-shipping-address] Token first 20 chars:', token?.substring(0, 20));
+
     const payload = verifyToken(token);
     if (!payload) {
-      console.error('[portal/create-shipping-address] TOKEN VERIFICATION FAILED - Check logs above for [tokens] warnings');
+      console.error('[portal/create-shipping-address] TOKEN VERIFICATION FAILED');
+      console.error('[portal/create-shipping-address] Full token (truncated):', token?.substring(0, 100));
+      console.error('[portal/create-shipping-address] Token length:', token?.length);
+      console.error('[portal/create-shipping-address] Destination country:', country);
       return NextResponse.json(
-        { error: 'Invalid or expired token' },
+        { error: 'Invalid or expired token. Please use a fresh quote link or contact support.' },
         { status: 401 }
       );
     }
