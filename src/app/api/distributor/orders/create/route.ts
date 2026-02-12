@@ -72,12 +72,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!shipping_address_id) {
-      return NextResponse.json(
-        { error: 'Shipping address is required' },
-        { status: 400 }
-      );
-    }
+    // Shipping address is optional - admin will verify during approval
+    // No validation needed here
 
     const supabase = getSupabaseClient();
 
@@ -104,19 +100,19 @@ export async function POST(request: NextRequest) {
     }
 
     // No billing address validation - sales team will review and complete details
-    // Get shipping address
-    const { data: shippingAddress, error: shippingError } = await supabase
-      .from('shipping_addresses')
-      .select('*')
-      .eq('address_id', shipping_address_id)
-      .eq('company_id', distributor.company_id)
-      .single();
+    // Get shipping address (if provided)
+    let shippingAddress = null;
+    if (shipping_address_id) {
+      const { data, error: shippingError } = await supabase
+        .from('shipping_addresses')
+        .select('*')
+        .eq('address_id', shipping_address_id)
+        .eq('company_id', distributor.company_id)
+        .single();
 
-    if (shippingError || !shippingAddress) {
-      return NextResponse.json(
-        { error: 'Shipping address not found' },
-        { status: 404 }
-      );
+      if (!shippingError && data) {
+        shippingAddress = data;
+      }
     }
 
     // No shipping address validation - sales team will review and complete details
@@ -127,7 +123,8 @@ export async function POST(request: NextRequest) {
     );
 
     // Calculate shipping cost (predicted - admin can override)
-    const destinationCountry = shippingAddress.country || 'GB';
+    // Use shipping address country if available, otherwise use billing country
+    const destinationCountry = shippingAddress?.country || company.billing_country || 'GB';
     const { data: shippingCostData } = await supabase.rpc('calculate_shipping_cost', {
       p_country_code: destinationCountry,
       p_order_subtotal: subtotal,
@@ -165,14 +162,14 @@ export async function POST(request: NextRequest) {
         billing_postal_code: company.billing_postal_code,
         billing_country: company.billing_country,
         vat_number: company.vat_number,
-        // Original shipping address
-        shipping_address_id: shipping_address_id,
-        shipping_address_line_1: shippingAddress.address_line_1,
-        shipping_address_line_2: shippingAddress.address_line_2,
-        shipping_city: shippingAddress.city,
-        shipping_state_province: shippingAddress.state_province,
-        shipping_postal_code: shippingAddress.postal_code,
-        shipping_country: shippingAddress.country,
+        // Original shipping address (may be null - admin will collect during review)
+        shipping_address_id: shipping_address_id || null,
+        shipping_address_line_1: shippingAddress?.address_line_1 || null,
+        shipping_address_line_2: shippingAddress?.address_line_2 || null,
+        shipping_city: shippingAddress?.city || null,
+        shipping_state_province: shippingAddress?.state_province || null,
+        shipping_postal_code: shippingAddress?.postal_code || null,
+        shipping_country: shippingAddress?.country || null,
         // Optional PO number
         po_number: po_number || null,
       })
