@@ -82,11 +82,8 @@ export function InvoiceRequestModal({
   if (!isOpen) return null;
 
   const handleRequestInvoice = async () => {
-    // Validate shipping address is selected
-    if (!selectedAddressId) {
-      setError('Please select a shipping address before submitting your order');
-      return;
-    }
+    // Shipping address is optional - admin can add during review
+    // No validation needed here
 
     setLoading(true);
     setError(null);
