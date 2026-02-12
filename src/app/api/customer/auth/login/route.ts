@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
     await createCustomerSession({
       user_id: user.user_id,
       company_id: user.company_id,
+      contact_id: user.contact_id,
       email: user.email,
       first_name: user.first_name,
       last_name: user.last_name,

@@ -86,6 +86,7 @@ export async function POST(request: NextRequest) {
     // Prepare bulk insert data
     const accountsToInsert = newAccounts.map(contact => ({
       company_id: contact.company_id,
+      contact_id: contact.contact_id,
       email: contact.email.toLowerCase().trim(),
       first_name: contact.first_name || '',
       last_name: contact.last_name || '',

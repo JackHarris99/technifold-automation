@@ -14,6 +14,7 @@ const JWT_SECRET = new TextEncoder().encode(
 export interface CustomerSession {
   user_id: string;
   company_id: string;
+  contact_id: string | null;
   email: string;
   first_name: string;
   last_name: string;

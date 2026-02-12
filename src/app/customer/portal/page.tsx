@@ -7,6 +7,7 @@
 import { redirect } from 'next/navigation';
 import { getCustomerSession } from '@/lib/customerAuth';
 import { generatePortalPayload } from '@/lib/portal-payload';
+import { getSupabaseClient } from '@/lib/supabase';
 import { PortalPage } from '@/components/PortalPage';
 
 export default async function CustomerPortalPage() {
@@ -15,6 +16,25 @@ export default async function CustomerPortalPage() {
 
   if (!session) {
     redirect('/customer/login');
+  }
+
+  // Fetch contact details if contact_id exists
+  let contact = null;
+  if (session.contact_id) {
+    const supabase = getSupabaseClient();
+    const { data } = await supabase
+      .from('contacts')
+      .select('contact_id, email, first_name, last_name, full_name')
+      .eq('contact_id', session.contact_id)
+      .single();
+
+    if (data) {
+      contact = {
+        contact_id: data.contact_id,
+        email: data.email,
+        full_name: data.full_name || `${data.first_name} ${data.last_name}`,
+      };
+    }
   }
 
   // Generate portal data (reuses existing logic)
@@ -40,6 +60,7 @@ export default async function CustomerPortalPage() {
   return (
     <PortalPage
       payload={payload}
+      contact={contact || undefined}
       token={sessionToken}
       isLoggedIn={true}
       userName={session.first_name}
