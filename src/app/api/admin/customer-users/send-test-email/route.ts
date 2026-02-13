@@ -52,11 +52,13 @@ export async function POST(request: NextRequest) {
     const companyName = company?.company_name || 'Your Company';
 
     // Fetch company's CONSUMABLE products only for email display (max 10 for selection, email will show top 6)
+    // Order by most recently purchased to show relevant restocking suggestions
     const { data: productHistory } = await supabase
       .from('company_product_history')
       .select('product_code')
       .eq('company_id', company_id)
       .eq('product_type', 'consumable')
+      .order('last_purchased_at', { ascending: false })
       .limit(10);
 
     let products: Array<{ product_code: string; description: string; image_url?: string | null }> = [];
