@@ -9,6 +9,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Inter } from 'next/font/google';
+import { getSupabaseClient } from '@/lib/supabase';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -272,18 +273,36 @@ export default function ConsumablesQuoteBuilderPage() {
         }
 
         // Set line items with discount_percent
+        // IMPORTANT: Refresh pricing_tier from products table to get current tier (not stale saved value)
         if (quote.line_items && quote.line_items.length > 0) {
-          const items: QuoteLineItem[] = quote.line_items.map((item: any) => ({
-            product_code: item.product_code,
-            description: item.description,
-            quantity: item.quantity,
-            unit_price: item.unit_price,
-            discount_percent: item.discount_percent || 0,
-            product_type: 'consumable',
-            category: item.category,
-            image_url: item.image_url,
-            pricing_tier: item.pricing_tier,
-          }));
+          const productCodes = quote.line_items.map((item: any) => item.product_code);
+
+          // Fetch current product data to get fresh pricing_tier values
+          const supabase = getSupabaseClient();
+          const { data: currentProducts } = await supabase
+            .from('products')
+            .select('product_code, pricing_tier')
+            .in('product_code', productCodes);
+
+          const productsMap = new Map(
+            currentProducts?.map((p) => [p.product_code, p.pricing_tier]) || []
+          );
+
+          const items: QuoteLineItem[] = quote.line_items.map((item: any) => {
+            const currentPricingTier = productsMap.get(item.product_code);
+            return {
+              product_code: item.product_code,
+              description: item.description,
+              quantity: item.quantity,
+              unit_price: item.unit_price,
+              discount_percent: item.discount_percent || 0,
+              product_type: 'consumable',
+              category: item.category,
+              image_url: item.image_url,
+              // Use current pricing_tier from products table, not stale value from quote_line_items
+              pricing_tier: currentPricingTier !== undefined ? currentPricingTier : item.pricing_tier,
+            };
+          });
           setLineItems(items);
         }
 
