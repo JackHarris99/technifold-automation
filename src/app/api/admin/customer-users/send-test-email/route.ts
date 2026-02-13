@@ -15,6 +15,7 @@ const CATEGORY_PRIORITY = [
   'Rubber Creasing Band',
   'Rubber Creasing Band (Inserts - older style)',
   'Rubber Creasing Matrix',
+  'Micro-Perforation Blade',
   'Nylon Sleeve - CP Applicator',
   'Nylon Sleeve - Multi-Tool',
   'Nylon Sleeve - Perforation Device',
