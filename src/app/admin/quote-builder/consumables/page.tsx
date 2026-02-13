@@ -9,7 +9,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Inter } from 'next/font/google';
-import { getSupabaseClient } from '@/lib/supabase';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -277,15 +276,16 @@ export default function ConsumablesQuoteBuilderPage() {
         if (quote.line_items && quote.line_items.length > 0) {
           const productCodes = quote.line_items.map((item: any) => item.product_code);
 
-          // Fetch current product data to get fresh pricing_tier values
-          const supabase = getSupabaseClient();
-          const { data: currentProducts } = await supabase
-            .from('products')
-            .select('product_code, pricing_tier')
-            .in('product_code', productCodes);
+          // Fetch current pricing_tier values from API
+          const pricingResp = await fetch('/api/admin/products/get-pricing-tiers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ product_codes: productCodes }),
+          });
 
+          const pricingData = await pricingResp.json();
           const productsMap = new Map(
-            currentProducts?.map((p) => [p.product_code, p.pricing_tier]) || []
+            pricingData.pricing_tiers?.map((p: any) => [p.product_code, p.pricing_tier]) || []
           );
 
           const items: QuoteLineItem[] = quote.line_items.map((item: any) => {
