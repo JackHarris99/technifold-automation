@@ -12,7 +12,8 @@ import ConsumableReminderEmail, { ConsumableReminderEmailProps } from '@/emails/
  */
 export async function sendConsumableReminder(
   to: string,
-  props: Omit<ConsumableReminderEmailProps, 'unsubscribeUrl'> & { unsubscribeUrl?: string }
+  props: Omit<ConsumableReminderEmailProps, 'unsubscribeUrl'> & { unsubscribeUrl?: string },
+  tracking?: { companyId?: string; contactId?: string; userId?: string }
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const resend = getResendClient();
 
@@ -28,12 +29,21 @@ export async function sendConsumableReminder(
       ConsumableReminderEmail(props)
     );
 
+    // Build tracking tags
+    const tags: { name: string; value: string }[] = [
+      { name: 'email_type', value: 'reorder_reminder' },
+    ];
+    if (tracking?.companyId) tags.push({ name: 'company_id', value: tracking.companyId });
+    if (tracking?.contactId) tags.push({ name: 'contact_id', value: tracking.contactId });
+    if (tracking?.userId) tags.push({ name: 'user_id', value: tracking.userId });
+
     const { data, error } = await resend.emails.send({
       from: fromEmail,
       to: [to],
       subject: 'Time to restock your consumables - Technifold',
       html,
       text,
+      tags
     });
 
     if (error) {

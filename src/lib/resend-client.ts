@@ -567,6 +567,9 @@ export async function sendInvoiceEmail({
   totalAmount,
   currency,
   vatExemptReason,
+  invoiceId,
+  companyId,
+  contactId
 }: {
   to: string;
   contactName: string;
@@ -580,6 +583,9 @@ export async function sendInvoiceEmail({
   totalAmount: number;
   currency: string;
   vatExemptReason?: string | null;
+  invoiceId?: string;
+  companyId?: string;
+  contactId?: string;
 }): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const resend = getResendClient();
 
@@ -720,11 +726,20 @@ export async function sendInvoiceEmail({
       ${emailFooter()}
     `);
 
+    // Build tracking tags
+    const tags: { name: string; value: string }[] = [
+      { name: 'email_type', value: 'invoice' },
+    ];
+    if (invoiceId) tags.push({ name: 'invoice_id', value: invoiceId });
+    if (companyId) tags.push({ name: 'company_id', value: companyId });
+    if (contactId) tags.push({ name: 'contact_id', value: contactId });
+
     const { data, error } = await resend.emails.send({
       from: fromEmail,
       to: [to],
       subject: `Invoice ${invoiceNumber} from Technifold - ${currencySymbol}${totalAmount.toFixed(2)}`,
-      html
+      html,
+      tags
     });
 
     if (error) {
@@ -751,7 +766,10 @@ export async function sendQuoteEmail({
   expiryDate,
   totalAmount,
   currency,
-  itemCount
+  itemCount,
+  quoteId,
+  companyId,
+  contactId
 }: {
   to: string;
   contactName: string;
@@ -762,6 +780,9 @@ export async function sendQuoteEmail({
   totalAmount?: number;
   currency?: string;
   itemCount?: number;
+  quoteId?: string;
+  companyId?: string;
+  contactId?: string;
 }): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const resend = getResendClient();
 
@@ -875,11 +896,20 @@ export async function sendQuoteEmail({
       ${emailFooter()}
     `);
 
+    // Build tags for webhook tracking
+    const tags: { name: string; value: string }[] = [
+      { name: 'email_type', value: 'quote' },
+    ];
+    if (quoteId) tags.push({ name: 'quote_id', value: quoteId });
+    if (companyId) tags.push({ name: 'company_id', value: companyId });
+    if (contactId) tags.push({ name: 'contact_id', value: contactId });
+
     const { data, error } = await resend.emails.send({
       from: fromEmail,
       to: [to],
       subject: `Your Custom Quote from Technifold`,
-      html
+      html,
+      tags
     });
 
     if (error) {

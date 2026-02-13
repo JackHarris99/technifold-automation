@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create customer session using the same helper as regular login
+    // Mark as internal preview so engagement events are filtered out
     await createCustomerSession({
       user_id: user.user_id,
       company_id: user.company_id,
@@ -47,6 +48,7 @@ export async function POST(request: NextRequest) {
       first_name: user.first_name,
       last_name: user.last_name,
       role: user.role || 'user',
+      internal_preview: true, // Admin preview session
     });
 
     return NextResponse.json({

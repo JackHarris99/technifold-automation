@@ -29,15 +29,18 @@ export async function GET(request: NextRequest) {
       .eq('event_type', 'reorder_reminder_sent')
       .gte('occurred_at', startDate.toISOString());
 
-    // Count link clicks from reorder emails
-    const { data: link_clicks_data, count: link_clicks } = await supabase
+    // Count link clicks from reorder emails (exclude internal views)
+    const { data: link_clicks_raw, count: link_clicks } = await supabase
       .from('engagement_events')
       .select('*, contacts(first_name, last_name), companies(company_name)', { count: 'exact' })
       .eq('event_type', 'portal_access')
       .eq('source', 'reorder_email')
       .gte('occurred_at', startDate.toISOString())
       .order('occurred_at', { ascending: false })
-      .limit(50);
+      .limit(100);
+
+    // Filter out internal views in application layer (meta field not queryable in Supabase directly)
+    const link_clicks_data = (link_clicks_raw || []).filter((e: any) => !e.meta?.internal_view).slice(0, 50);
 
     // Count orders from customers who clicked reorder links
     // Get all contact_ids who clicked reorder links

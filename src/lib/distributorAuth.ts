@@ -17,6 +17,7 @@ interface DistributorPayload {
   full_name: string;
   role: string; // 'admin', 'user', 'viewer'
   type: string; // 'distributor'
+  preview_mode?: boolean; // True when admin uses "Login As" to preview distributor portal
 }
 
 export async function getCurrentDistributor(): Promise<DistributorPayload | null> {

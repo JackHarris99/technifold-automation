@@ -309,7 +309,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
       purchasedParts={partsResult.data || []}
       subscriptionTools={subscriptionToolsResult.data || []}
       invoices={invoicesResult.data || []}
-      engagement={engagementResult.data || []}
+      engagement={(engagementResult.data || []).filter((e: any) => !e.meta?.internal_view)}
       subscriptions={subscriptionsResult.data || []}
       shippingAddresses={shippingAddressesResult.data || []}
       quotes={quotesResult.data || []}

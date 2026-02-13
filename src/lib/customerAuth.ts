@@ -19,6 +19,7 @@ export interface CustomerSession {
   first_name: string;
   last_name: string;
   role: 'admin' | 'user';
+  internal_preview?: boolean; // True when admin uses "Login As" to preview customer portal
 }
 
 /**

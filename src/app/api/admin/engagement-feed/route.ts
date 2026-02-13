@@ -45,7 +45,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ events: events || [] });
+    // Filter out internal admin/sales rep activity
+    const filteredEvents = (events || []).filter((e: any) => !e.meta?.internal_view);
+
+    return NextResponse.json({ events: filteredEvents });
   } catch (error) {
     console.error('[engagement-feed] Unexpected error:', error);
     return NextResponse.json(

@@ -35,6 +35,7 @@ export default async function MarketingDashboardPage() {
       event_id,
       event_type,
       occurred_at,
+      meta,
       prospect_contacts (
         email,
         prospect_companies (
@@ -43,7 +44,7 @@ export default async function MarketingDashboardPage() {
       )
     `)
     .order('occurred_at', { ascending: false })
-    .limit(20);
+    .limit(50);
 
   // Calculate campaign totals
   const campaignStats = campaigns?.reduce((acc, c) => ({
@@ -110,7 +111,7 @@ export default async function MarketingDashboardPage() {
           campaigns={campaigns || []}
           campaignStats={campaignStats}
           prospectStats={prospectStats}
-          recentEngagement={recentEngagement || []}
+          recentEngagement={(recentEngagement || []).filter((e: any) => !e.meta?.internal_view).slice(0, 20)}
         />
       </div>
     </div>

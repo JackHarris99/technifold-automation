@@ -82,6 +82,7 @@ export async function GET(request: NextRequest) {
         source,
         url,
         occurred_at,
+        meta,
         companies!inner (
           company_id,
           company_name,
@@ -111,8 +112,8 @@ export async function GET(request: NextRequest) {
     // Process engagement data per company
     const engagementMap = new Map<string, CompanyEngagement & { company_name: string }>();
 
-    // Process activities
-    (activities || []).forEach((activity: any) => {
+    // Process activities (filter out internal admin/sales rep previews)
+    (activities || []).filter((a: any) => !a.meta?.internal_view).forEach((activity: any) => {
       const companyId = activity.company_id;
       if (!companyId) return;
 

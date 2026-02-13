@@ -205,13 +205,21 @@ export async function POST(request: NextRequest) {
       imageUrl: p.image_url,
     }));
 
-    // Send test reminder email using React Email
-    const emailResult = await sendConsumableReminder(user.email, {
-      contactName: user.first_name,
-      companyName,
-      portalUrl,
-      products: emailProducts,
-    });
+    // Send test reminder email using React Email with tracking
+    const emailResult = await sendConsumableReminder(
+      user.email,
+      {
+        contactName: user.first_name,
+        companyName,
+        portalUrl,
+        products: emailProducts,
+      },
+      {
+        companyId: company_id,
+        contactId: user.contact_id || undefined,
+        userId: user_id,
+      }
+    );
 
     if (!emailResult.success) {
       console.error('[Test Email] Send failed:', emailResult.error);

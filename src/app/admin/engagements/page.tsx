@@ -44,6 +44,7 @@ export default async function EngagementsPage() {
         url,
         value,
         currency,
+        meta,
         companies:company_id(company_name, account_owner),
         contacts:contact_id(full_name, email)
       `)
@@ -61,8 +62,11 @@ export default async function EngagementsPage() {
     }
   }
 
-  // Filter by account ownership based on view mode
-  let filteredEngagements = allEngagements || [];
+  // Filter out internal views (admin/sales rep activity) and filter by account ownership
+  let filteredEngagements = (allEngagements || []).filter(event =>
+    !event.meta?.internal_view // Exclude internal admin/sales rep views
+  );
+
   if (salesRepId) {
     filteredEngagements = filteredEngagements.filter(event =>
       event.companies?.account_owner === salesRepId

@@ -203,29 +203,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create order items' }, { status: 500 });
     }
 
-    // Log engagement event
-    try {
-      await supabase
-        .from('engagement_events')
-        .insert({
-          company_id: distributor.company_id,
-          occurred_at: new Date().toISOString(),
-          event_type: 'distributor_order_submitted',
-          event_name: 'Distributor order submitted for review',
-          source: 'distributor_portal',
-          value: subtotal,
-          currency: 'gbp',
-          meta: {
-            order_id: order.order_id,
-            total_amount: total,
-            items_count: items.length,
-            submitted_by: distributor.full_name,
-            submitted_by_email: distributor.email,
-            shipping_country: destinationCountry,
-          },
-        });
-    } catch (eventError) {
-      console.error('[Create Distributor Order] Failed to log event:', eventError);
+    // Log engagement event (skip if admin preview session)
+    if (!distributor.preview_mode) {
+      try {
+        await supabase
+          .from('engagement_events')
+          .insert({
+            company_id: distributor.company_id,
+            occurred_at: new Date().toISOString(),
+            event_type: 'distributor_order_submitted',
+            event_name: 'Distributor order submitted for review',
+            source: 'distributor_portal',
+            value: subtotal,
+            currency: 'gbp',
+            meta: {
+              order_id: order.order_id,
+              total_amount: total,
+              items_count: items.length,
+              submitted_by: distributor.full_name,
+              submitted_by_email: distributor.email,
+              shipping_country: destinationCountry,
+            },
+          });
+      } catch (eventError) {
+        console.error('[Create Distributor Order] Failed to log event:', eventError);
+      }
     }
 
     // Send notification to sales rep (same as invoice paid notifications)

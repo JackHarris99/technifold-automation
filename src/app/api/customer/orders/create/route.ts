@@ -184,25 +184,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Log engagement event
-    try {
-      await supabase.from('engagement_events').insert({
-        contact_id: auth.contact_id || null,
-        company_id: company.company_id,
-        occurred_at: new Date().toISOString(),
-        event_type: 'customer_order_submitted',
-        event_name: 'Customer order submitted for review',
-        source: 'customer_portal',
-        meta: {
-          order_id,
-          items_count: items.length,
-          total_amount,
-          shipping_country: shippingAddress?.country || company.country || 'Unknown',
-        },
-      });
-    } catch (e) {
-      console.error('[Customer Order Create] Failed to log event:', e);
-      // Non-blocking
+    // Log engagement event (skip if admin preview session)
+    if (!auth.internal_preview) {
+      try {
+        await supabase.from('engagement_events').insert({
+          contact_id: auth.contact_id || null,
+          company_id: company.company_id,
+          occurred_at: new Date().toISOString(),
+          event_type: 'customer_order_submitted',
+          event_name: 'Customer order submitted for review',
+          source: 'customer_portal',
+          meta: {
+            order_id,
+            items_count: items.length,
+            total_amount,
+            shipping_country: shippingAddress?.country || company.country || 'Unknown',
+          },
+        });
+      } catch (e) {
+        console.error('[Customer Order Create] Failed to log event:', e);
+        // Non-blocking
+      }
     }
 
     // Send notification to sales rep (same as invoice paid notifications)

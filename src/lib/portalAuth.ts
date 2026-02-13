@@ -12,6 +12,7 @@ interface PortalAuth {
   user_id?: string; // Customer user_id (for customer portal orders)
   email?: string; // Customer email (for customer portal orders)
   full_name?: string; // Customer name (for customer portal orders)
+  internal_preview?: boolean; // True when admin uses "Login As" to preview portal
 }
 
 /**
@@ -39,6 +40,7 @@ export async function getPortalAuth(token?: string): Promise<PortalAuth | null> 
       user_id: session.user_id, // Customer user_id from customer_users table
       email: session.email, // Customer email
       full_name: `${session.first_name} ${session.last_name}`, // Customer name
+      internal_preview: session.internal_preview, // Pass through internal preview flag
     };
   }
 

@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Send professional quote email
+    // Send professional quote email with tracking tags
     const result = await sendQuoteEmail({
       to: contact.email,
       contactName: contact.full_name || contact.first_name || '',
@@ -103,7 +103,10 @@ export async function POST(request: NextRequest) {
       expiryDate: quoteDetails?.expires_at ? new Date(quoteDetails.expires_at) : null,
       totalAmount: quoteDetails?.total_amount,
       currency: quoteDetails?.currency,
-      itemCount: quoteDetails?.itemCount
+      itemCount: quoteDetails?.itemCount,
+      quoteId: quote_id || undefined,
+      companyId: company_id,
+      contactId: contact_id
     });
 
     if (!result.success) {
