@@ -777,6 +777,16 @@ export default function AdminNav({ isDirector = false }: AdminNavProps) {
           >
             Reorder Tools
           </Link>
+          <Link
+            href="/admin/analytics/reorder-links"
+            className={`block px-4 py-2 text-sm font-[500] transition-colors ${
+              pathname === '/admin/analytics/reorder-links'
+                ? `${highlightColor} text-white`
+                : `text-gray-300 ${hoverColor} hover:text-white`
+            }`}
+          >
+            📊 Reorder Analytics
+          </Link>
         </div>
 
         {/* Other */}
