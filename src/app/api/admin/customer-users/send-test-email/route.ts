@@ -77,6 +77,46 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // FALLBACK: If no consumable history, suggest consumables for their tools
+    if (products.length === 0) {
+      // Get tools they've purchased
+      const { data: toolHistory } = await supabase
+        .from('company_product_history')
+        .select('product_code')
+        .eq('company_id', company_id)
+        .eq('product_type', 'tool')
+        .order('last_purchased_at', { ascending: false })
+        .limit(5);
+
+      if (toolHistory && toolHistory.length > 0) {
+        const toolCodes = toolHistory.map(t => t.product_code);
+
+        // Get compatible consumables for these tools
+        const { data: compatibleConsumables } = await supabase
+          .from('tool_consumable_map')
+          .select('consumable_code')
+          .in('tool_code', toolCodes)
+          .limit(10);
+
+        if (compatibleConsumables && compatibleConsumables.length > 0) {
+          const consumableCodes = [...new Set(compatibleConsumables.map(c => c.consumable_code))];
+
+          // Fetch product details for these consumables
+          const { data: productDetails } = await supabase
+            .from('products')
+            .select('product_code, description, image_url')
+            .in('product_code', consumableCodes)
+            .eq('active', true)
+            .eq('type', 'consumable')
+            .limit(10);
+
+          if (productDetails) {
+            products = productDetails;
+          }
+        }
+      }
+    }
+
     // Generate portal access URL using permanent token
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.technifold.com';
     const portalUrl = user.portal_token
