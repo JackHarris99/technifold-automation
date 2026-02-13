@@ -1054,3 +1054,299 @@ export async function sendTrialConfirmation({
     return { success: false, error: err.message };
   }
 }
+
+/**
+ * Send portal reminder email with product images
+ * Beautiful HTML email showing previously ordered products
+ */
+export async function sendPortalReminderEmail({
+  to,
+  contactName,
+  companyName,
+  portalUrl,
+  products
+}: {
+  to: string;
+  contactName: string;
+  companyName: string;
+  portalUrl: string;
+  products: Array<{ product_code: string; description: string; image_url?: string | null }>;
+}): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  const resend = getResendClient();
+
+  if (!resend) {
+    return { success: false, error: 'Resend not configured' };
+  }
+
+  try {
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+
+    // Build product grid (max 6 products for clean layout)
+    const displayProducts = products.slice(0, 6);
+    const productsHtml = displayProducts.map(product => {
+      const imageUrl = product.image_url || 'https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/placeholder-product.png';
+
+      return `
+        <td width="50%" valign="top" style="padding: 12px;">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+            <tr>
+              <td style="background-color: #f9fafb; padding: 16px; text-align: center;">
+                <img src="${imageUrl}" alt="${product.description}" width="120" height="120" style="display: block; margin: 0 auto; object-fit: contain; border-radius: 4px;" />
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 16px;">
+                <p style="margin: 0 0 4px 0; font-family: monospace; font-size: 13px; font-weight: 700; color: #2563eb;">${product.product_code}</p>
+                <p style="margin: 0; font-size: 13px; line-height: 18px; color: #666666; font-family: Arial, sans-serif;">${product.description}</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      `;
+    }).join('');
+
+    // Group products into rows of 2
+    const productRows: string[] = [];
+    for (let i = 0; i < displayProducts.length; i += 2) {
+      const row = `
+        <tr>
+          ${productsHtml.slice(i * 250, (i + 1) * 250)}
+          ${i + 1 >= displayProducts.length ? '<td width="50%" style="padding: 12px;"></td>' : ''}
+        </tr>
+      `;
+      productRows.push(row);
+    }
+
+    const html = emailWrapper(`
+      ${emailHeader('Time to Restock?', 'Your personalized product catalog is ready', '#2563eb')}
+      <tr>
+        <td style="background-color: #ffffff; padding: 30px 40px;" class="mobile-padding">
+          <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 24px; color: #333333; font-family: Arial, sans-serif;">
+            Hi${contactName ? ` ${contactName}` : ''},
+          </p>
+          <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 24px; color: #333333; font-family: Arial, sans-serif;">
+            It's been a while since your last order with Technifold. We thought you might need to restock some of your usual products.
+          </p>
+
+          <h2 style="margin: 0 0 20px 0; font-size: 18px; color: #333333; font-family: Arial, sans-serif;">Your Products</h2>
+
+          <!-- Products Grid -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            ${productRows.join('')}
+          </table>
+
+          ${products.length > 6 ? `
+          <p style="margin: 0 0 24px 0; font-size: 14px; text-align: center; color: #666666; font-family: Arial, sans-serif;">
+            + ${products.length - 6} more products available in your portal
+          </p>
+          ` : ''}
+
+          <!-- CTA Button -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td align="center">
+                ${emailButton('View Your Catalog & Reorder', portalUrl, '#16a34a')}
+              </td>
+            </tr>
+          </table>
+
+          <!-- Benefits Box -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; font-family: Arial, sans-serif;">
+                <h3 style="margin: 0 0 12px 0; font-size: 16px; color: #1e40af; font-family: Arial, sans-serif;">Why Order from Your Portal?</h3>
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="padding: 0 0 8px 0; color: #1e40af; font-size: 14px; line-height: 20px;">
+                      ✓ See your complete order history
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 0 0 8px 0; color: #1e40af; font-size: 14px; line-height: 20px;">
+                      ✓ Personalized pricing for your company
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 0 0 8px 0; color: #1e40af; font-size: 14px; line-height: 20px;">
+                      ✓ Fast reordering with saved addresses
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 0; color: #1e40af; font-size: 14px; line-height: 20px;">
+                      ✓ Secure payment via card or bank transfer
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <p style="margin: 0; font-size: 14px; line-height: 20px; color: #666666; text-align: center; font-family: Arial, sans-serif;">
+            This portal is personalized for ${companyName}. Your link never expires.
+          </p>
+        </td>
+      </tr>
+      ${emailFooter()}
+    `);
+
+    const { data, error } = await resend.emails.send({
+      from: fromEmail,
+      to: [to],
+      subject: `Time to restock? - Technifold`,
+      html
+    });
+
+    if (error) {
+      console.error('[Resend] Portal reminder error:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, messageId: data?.id };
+  } catch (err: any) {
+    console.error('[Resend] Unexpected error:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Send team member invitation email
+ * Invitation to join company portal with personalized access link
+ */
+export async function sendTeamMemberInvitation({
+  to,
+  contactName,
+  companyName,
+  portalUrl,
+  invitedBy,
+  products
+}: {
+  to: string;
+  contactName: string;
+  companyName: string;
+  portalUrl: string;
+  invitedBy: string;
+  products: Array<{ product_code: string; description: string; image_url?: string | null }>;
+}): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  const resend = getResendClient();
+
+  if (!resend) {
+    return { success: false, error: 'Resend not configured' };
+  }
+
+  try {
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+
+    // Show max 4 products for invitation email (more compact)
+    const displayProducts = products.slice(0, 4);
+    const productsHtml = displayProducts.map(product => {
+      const imageUrl = product.image_url || 'https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/placeholder-product.png';
+
+      return `
+        <td width="50%" valign="top" style="padding: 8px;">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px;">
+            <tr>
+              <td style="background-color: #f9fafb; padding: 12px; text-align: center;">
+                <img src="${imageUrl}" alt="${product.description}" width="80" height="80" style="display: block; margin: 0 auto; object-fit: contain;" />
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 12px;">
+                <p style="margin: 0; font-family: monospace; font-size: 11px; font-weight: 700; color: #2563eb;">${product.product_code}</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      `;
+    }).join('');
+
+    const productRows: string[] = [];
+    for (let i = 0; i < displayProducts.length; i += 2) {
+      productRows.push(`<tr>${productsHtml.slice(i * 200, (i + 1) * 200)}${i + 1 >= displayProducts.length ? '<td width="50%" style="padding: 8px;"></td>' : ''}</tr>`);
+    }
+
+    const html = emailWrapper(`
+      ${emailHeader('You\'ve Been Invited', `Join ${companyName}'s portal`, '#7c3aed')}
+      <tr>
+        <td style="background-color: #ffffff; padding: 30px 40px;" class="mobile-padding">
+          <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 24px; color: #333333; font-family: Arial, sans-serif;">
+            Hi${contactName ? ` ${contactName}` : ''},
+          </p>
+          <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 24px; color: #333333; font-family: Arial, sans-serif;">
+            ${invitedBy} has invited you to access ${companyName}'s Technifold portal. You can now view your company's product catalog and place orders on their behalf.
+          </p>
+
+          <!-- CTA Button -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td align="center">
+                ${emailButton('Access Your Portal', portalUrl, '#16a34a')}
+              </td>
+            </tr>
+          </table>
+
+          ${products.length > 0 ? `
+          <h2 style="margin: 0 0 16px 0; font-size: 18px; color: #333333; text-align: center; font-family: Arial, sans-serif;">Products Available</h2>
+
+          <!-- Products Grid -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            ${productRows.join('')}
+          </table>
+          ` : ''}
+
+          <!-- Info Box -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td style="background-color: #f0f9ff; border-left: 4px solid #3b82f6; padding: 20px; font-family: Arial, sans-serif;">
+                <h3 style="margin: 0 0 12px 0; font-size: 16px; color: #1e40af; font-family: Arial, sans-serif;">Your Portal Access</h3>
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="padding: 0 0 8px 0; color: #1e40af; font-size: 14px; line-height: 20px;">
+                      ✓ Your access link never expires
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 0 0 8px 0; color: #1e40af; font-size: 14px; line-height: 20px;">
+                      ✓ View complete order history for ${companyName}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 0 0 8px 0; color: #1e40af; font-size: 14px; line-height: 20px;">
+                      ✓ Place orders that require approval
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 0; color: #1e40af; font-size: 14px; line-height: 20px;">
+                      ✓ Optionally set a password for direct login
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <p style="margin: 0; font-size: 14px; line-height: 20px; color: #666666; text-align: center; font-family: Arial, sans-serif;">
+            Save this email - your portal link works anytime, no password needed.
+          </p>
+        </td>
+      </tr>
+      ${emailFooter()}
+    `);
+
+    const { data, error } = await resend.emails.send({
+      from: fromEmail,
+      to: [to],
+      subject: `You've been invited to ${companyName}'s portal - Technifold`,
+      html
+    });
+
+    if (error) {
+      console.error('[Resend] Team invitation error:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, messageId: data?.id };
+  } catch (err: any) {
+    console.error('[Resend] Unexpected error:', err);
+    return { success: false, error: err.message };
+  }
+}

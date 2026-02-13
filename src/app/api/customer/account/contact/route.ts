@@ -22,39 +22,29 @@ export async function PUT(request: NextRequest) {
     const { first_name, last_name, email, phone } = body;
 
     // Validate required fields
-    if (!first_name || !last_name || !email) {
+    if (!first_name || !last_name) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    const supabase = getSupabaseClient();
-
-    // Check if email is already in use by another contact
-    if (email !== session.email) {
-      const { data: existing } = await supabase
-        .from('contacts')
-        .select('contact_id')
-        .eq('email', email)
-        .neq('contact_id', session.contact_id)
-        .single();
-
-      if (existing) {
-        return NextResponse.json(
-          { error: 'Email already in use' },
-          { status: 400 }
-        );
-      }
+    // Reject email changes - email is tied to account identity
+    if (email && email !== session.email) {
+      return NextResponse.json(
+        { error: 'Email cannot be changed. To add a team member, use the invite feature.' },
+        { status: 400 }
+      );
     }
 
-    // Update contact
+    const supabase = getSupabaseClient();
+
+    // Update contact (first_name, last_name, phone only - email cannot change)
     const { data: contact, error } = await supabase
       .from('contacts')
       .update({
         first_name,
         last_name,
-        email,
         phone: phone || null,
       })
       .eq('contact_id', session.contact_id)

@@ -46,6 +46,7 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
   const [success, setSuccess] = useState<string | null>(null);
   const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
   const [resendingInvitation, setResendingInvitation] = useState<string | null>(null);
+  const [sendingTestEmail, setSendingTestEmail] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -127,6 +128,40 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
       window.location.href = data.redirect;
     } catch (error: any) {
       alert(`Failed to login as user: ${error.message}`);
+    }
+  };
+
+  const handleSendTestEmail = async (user: CustomerUser) => {
+    const fullName = `${user.first_name} ${user.last_name}`;
+    if (!confirm(`Send test reminder email to ${fullName} (${user.email})?`)) return;
+
+    setSendingTestEmail(user.user_id);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await fetch('/api/admin/customer-users/send-test-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user.user_id,
+          company_id: company.company_id
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send test email');
+      }
+
+      setSuccess(`Test email sent to ${user.email}`);
+      setTimeout(() => setSuccess(null), 5000);
+    } catch (error: any) {
+      setError(`Failed to send test email: ${error.message}`);
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setSendingTestEmail(null);
     }
   };
 
@@ -391,13 +426,23 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <div className="flex items-center justify-end gap-2">
                       {user.is_active && (
-                        <button
-                          onClick={() => handleLoginAs(user)}
-                          className="px-3 py-1.5 text-sm bg-purple-100 text-purple-700 rounded hover:bg-purple-200 font-medium"
-                          title="Preview portal as this user"
-                        >
-                          👁 Login As
-                        </button>
+                        <>
+                          <button
+                            onClick={() => handleLoginAs(user)}
+                            className="px-3 py-1.5 text-sm bg-purple-100 text-purple-700 rounded hover:bg-purple-200 font-medium"
+                            title="Preview portal as this user"
+                          >
+                            👁 Login As
+                          </button>
+                          <button
+                            onClick={() => handleSendTestEmail(user)}
+                            disabled={sendingTestEmail === user.user_id}
+                            className="px-3 py-1.5 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Send test reminder email with products"
+                          >
+                            {sendingTestEmail === user.user_id ? '📧 Sending...' : '📧 Test Email'}
+                          </button>
+                        </>
                       )}
                       {user.invitation_token && !user.password_hash && (
                         <button
