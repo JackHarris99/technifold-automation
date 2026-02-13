@@ -18,9 +18,6 @@ export function EmailButton({ href, children }: EmailButtonProps) {
       <Button href={href} style={button}>
         {children}
       </Button>
-      <Text style={fallbackText}>
-        or visit: <Link href={href} style={fallbackLink}>{href}</Link>
-      </Text>
     </Section>
   );
 }

@@ -81,12 +81,18 @@ export async function POST(request: NextRequest) {
       ? `${baseUrl}/customer/access?token=${user.portal_token}`
       : `${baseUrl}/customer/login`;
 
+    // Transform products to match email template interface (sku, imageUrl)
+    const emailProducts = products.map(p => ({
+      sku: p.product_code,
+      imageUrl: p.image_url,
+    }));
+
     // Send test reminder email using React Email
     const emailResult = await sendConsumableReminder(user.email, {
       contactName: user.first_name,
       companyName,
       portalUrl,
-      products,
+      products: emailProducts,
     });
 
     if (!emailResult.success) {
