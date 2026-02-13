@@ -1081,40 +1081,37 @@ export async function sendPortalReminderEmail({
   try {
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
 
-    // Build product grid (max 6 products for clean layout)
+    // Build product grid (max 6 products)
     const displayProducts = products.slice(0, 6);
-    const productsHtml = displayProducts.map(product => {
-      const imageUrl = product.image_url || 'https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/placeholder-product.png';
 
-      return `
-        <td width="50%" valign="top" style="padding: 12px;">
-          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
-            <tr>
-              <td style="background-color: #f9fafb; padding: 16px; text-align: center;">
-                <img src="${imageUrl}" alt="${product.description}" width="120" height="120" style="display: block; margin: 0 auto; object-fit: contain; border-radius: 4px;" />
-              </td>
-            </tr>
-            <tr>
-              <td style="padding: 16px;">
-                <p style="margin: 0 0 4px 0; font-family: monospace; font-size: 13px; font-weight: 700; color: #2563eb;">${product.product_code}</p>
-                <p style="margin: 0; font-size: 13px; line-height: 18px; color: #666666; font-family: Arial, sans-serif;">${product.description}</p>
-              </td>
-            </tr>
-          </table>
-        </td>
-      `;
-    }).join('');
+    let productsHtml = '';
 
-    // Group products into rows of 2
-    const productRows: string[] = [];
-    for (let i = 0; i < displayProducts.length; i += 2) {
-      const row = `
-        <tr>
-          ${productsHtml.slice(i * 250, (i + 1) * 250)}
-          ${i + 1 >= displayProducts.length ? '<td width="50%" style="padding: 12px;"></td>' : ''}
-        </tr>
+    if (displayProducts.length > 0) {
+      const productCards = displayProducts.map(product => {
+        const imageUrl = product.image_url || 'https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/products/placeholder.jpg';
+
+        return `
+          <div style="width: 48%; display: inline-block; vertical-align: top; margin-bottom: 16px; padding: 12px; box-sizing: border-box;">
+            <div style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+              <div style="background-color: #f9fafb; padding: 16px; text-align: center;">
+                <img src="${imageUrl}" alt="${product.description}" width="140" height="140" style="display: block; margin: 0 auto; object-fit: contain; max-width: 100%;" />
+              </div>
+              <div style="padding: 16px;">
+                <div style="font-family: 'Courier New', monospace; font-size: 14px; font-weight: 700; color: #2563eb; margin-bottom: 4px;">${product.product_code}</div>
+                <div style="font-size: 13px; line-height: 1.4; color: #666666;">${product.description}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      productsHtml = `
+        <h2 style="margin: 0 0 20px 0; font-size: 20px; color: #0a0a0a; font-weight: 700;">Your Products</h2>
+        <div style="margin-bottom: 24px;">
+          ${productCards}
+        </div>
+        ${products.length > 6 ? `<p style="text-align: center; color: #666666; font-size: 14px; margin-bottom: 24px;">+ ${products.length - 6} more products available in your portal</p>` : ''}
       `;
-      productRows.push(row);
     }
 
     const html = emailWrapper(`
@@ -1128,18 +1125,7 @@ export async function sendPortalReminderEmail({
             It's been a while since your last order with Technifold. We thought you might need to restock some of your usual products.
           </p>
 
-          <h2 style="margin: 0 0 20px 0; font-size: 18px; color: #333333; font-family: Arial, sans-serif;">Your Products</h2>
-
-          <!-- Products Grid -->
-          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
-            ${productRows.join('')}
-          </table>
-
-          ${products.length > 6 ? `
-          <p style="margin: 0 0 24px 0; font-size: 14px; text-align: center; color: #666666; font-family: Arial, sans-serif;">
-            + ${products.length - 6} more products available in your portal
-          </p>
-          ` : ''}
+          ${productsHtml}
 
           <!-- CTA Button -->
           <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
@@ -1236,32 +1222,35 @@ export async function sendTeamMemberInvitation({
   try {
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
 
-    // Show max 4 products for invitation email (more compact)
+    // Show max 4 products for invitation email
     const displayProducts = products.slice(0, 4);
-    const productsHtml = displayProducts.map(product => {
-      const imageUrl = product.image_url || 'https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/placeholder-product.png';
 
-      return `
-        <td width="50%" valign="top" style="padding: 8px;">
-          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px;">
-            <tr>
-              <td style="background-color: #f9fafb; padding: 12px; text-align: center;">
-                <img src="${imageUrl}" alt="${product.description}" width="80" height="80" style="display: block; margin: 0 auto; object-fit: contain;" />
-              </td>
-            </tr>
-            <tr>
-              <td style="padding: 12px;">
-                <p style="margin: 0; font-family: monospace; font-size: 11px; font-weight: 700; color: #2563eb;">${product.product_code}</p>
-              </td>
-            </tr>
-          </table>
-        </td>
+    let productsSection = '';
+
+    if (displayProducts.length > 0) {
+      const productCards = displayProducts.map(product => {
+        const imageUrl = product.image_url || 'https://pziahtfkagyykelkxmah.supabase.co/storage/v1/object/public/media/media/products/placeholder.jpg';
+
+        return `
+          <div style="width: 48%; display: inline-block; vertical-align: top; margin-bottom: 12px; padding: 8px; box-sizing: border-box;">
+            <div style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden;">
+              <div style="background-color: #f9fafb; padding: 12px; text-align: center;">
+                <img src="${imageUrl}" alt="${product.description}" width="100" height="100" style="display: block; margin: 0 auto; object-fit: contain; max-width: 100%;" />
+              </div>
+              <div style="padding: 12px; text-align: center;">
+                <div style="font-family: 'Courier New', monospace; font-size: 12px; font-weight: 700; color: #2563eb;">${product.product_code}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      productsSection = `
+        <h2 style="margin: 0 0 16px 0; font-size: 18px; color: #333333; text-align: center; font-family: Arial, sans-serif;">Products Available</h2>
+        <div style="margin-bottom: 24px;">
+          ${productCards}
+        </div>
       `;
-    }).join('');
-
-    const productRows: string[] = [];
-    for (let i = 0; i < displayProducts.length; i += 2) {
-      productRows.push(`<tr>${productsHtml.slice(i * 200, (i + 1) * 200)}${i + 1 >= displayProducts.length ? '<td width="50%" style="padding: 8px;"></td>' : ''}</tr>`);
     }
 
     const html = emailWrapper(`
@@ -1284,14 +1273,7 @@ export async function sendTeamMemberInvitation({
             </tr>
           </table>
 
-          ${products.length > 0 ? `
-          <h2 style="margin: 0 0 16px 0; font-size: 18px; color: #333333; text-align: center; font-family: Arial, sans-serif;">Products Available</h2>
-
-          <!-- Products Grid -->
-          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
-            ${productRows.join('')}
-          </table>
-          ` : ''}
+          ${productsSection}
 
           <!-- Info Box -->
           <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">

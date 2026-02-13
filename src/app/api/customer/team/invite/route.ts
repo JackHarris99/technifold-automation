@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate the portal access URL
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.technifold.com';
     const portalAccessUrl = `${baseUrl}/customer/access?token=${newUser.portal_token}`;
 
     console.log('[Team Invite] Created team member account:', {

@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate portal access URL using permanent token
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.technifold.com';
     const portalUrl = user.portal_token
       ? `${baseUrl}/customer/access?token=${user.portal_token}`
       : `${baseUrl}/customer/login`;
