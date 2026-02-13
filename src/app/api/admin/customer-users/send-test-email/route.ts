@@ -7,7 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { getSupabaseClient } from '@/lib/supabase';
-import { sendPortalReminderEmail } from '@/lib/resend-client';
+import { sendConsumableReminder } from '@/lib/emails';
 
 export async function POST(request: NextRequest) {
   try {
@@ -81,9 +81,8 @@ export async function POST(request: NextRequest) {
       ? `${baseUrl}/customer/access?token=${user.portal_token}`
       : `${baseUrl}/customer/login`;
 
-    // Send test reminder email
-    const emailResult = await sendPortalReminderEmail({
-      to: user.email,
+    // Send test reminder email using React Email
+    const emailResult = await sendConsumableReminder(user.email, {
       contactName: user.first_name,
       companyName,
       portalUrl,
