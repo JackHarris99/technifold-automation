@@ -51,11 +51,12 @@ export async function POST(request: NextRequest) {
 
     const companyName = company?.company_name || 'Your Company';
 
-    // Fetch company's products for email display (max 10 for selection, email will show top 6)
+    // Fetch company's CONSUMABLE products only for email display (max 10 for selection, email will show top 6)
     const { data: productHistory } = await supabase
       .from('company_product_history')
       .select('product_code')
       .eq('company_id', company_id)
+      .eq('product_type', 'consumable')
       .limit(10);
 
     let products: Array<{ product_code: string; description: string; image_url?: string | null }> = [];
@@ -66,7 +67,8 @@ export async function POST(request: NextRequest) {
         .from('products')
         .select('product_code, description, image_url')
         .in('product_code', productCodes)
-        .eq('active', true);
+        .eq('active', true)
+        .eq('type', 'consumable');
 
       if (productDetails) {
         products = productDetails;

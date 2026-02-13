@@ -9,11 +9,11 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { createCustomerSession } from '@/lib/customerAuth';
 
 interface PageProps {
-  searchParams: { token?: string };
+  searchParams: Promise<{ token?: string }>;
 }
 
 export default async function CustomerAccessPage({ searchParams }: PageProps) {
-  const { token } = searchParams;
+  const { token } = await searchParams;
 
   if (!token) {
     return (

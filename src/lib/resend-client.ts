@@ -1093,8 +1093,8 @@ export async function sendPortalReminderEmail({
         return `
           <div style="width: 48%; display: inline-block; vertical-align: top; margin-bottom: 16px; padding: 12px; box-sizing: border-box;">
             <div style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
-              <div style="background-color: #f9fafb; padding: 16px; text-align: center;">
-                <img src="${imageUrl}" alt="${product.description}" width="140" height="140" style="display: block; margin: 0 auto; object-fit: contain; max-width: 100%;" />
+              <div style="background-color: #f9fafb; padding: 16px; text-align: center; height: 160px; display: flex; align-items: center; justify-content: center;">
+                <img src="${imageUrl}" alt="${product.description}" style="max-width: 140px; max-height: 140px; width: auto; height: auto; object-fit: contain; image-orientation: from-image;" />
               </div>
               <div style="padding: 16px;">
                 <div style="font-family: 'Courier New', monospace; font-size: 14px; font-weight: 700; color: #2563eb; margin-bottom: 4px;">${product.product_code}</div>
@@ -1234,8 +1234,8 @@ export async function sendTeamMemberInvitation({
         return `
           <div style="width: 48%; display: inline-block; vertical-align: top; margin-bottom: 12px; padding: 8px; box-sizing: border-box;">
             <div style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden;">
-              <div style="background-color: #f9fafb; padding: 12px; text-align: center;">
-                <img src="${imageUrl}" alt="${product.description}" width="100" height="100" style="display: block; margin: 0 auto; object-fit: contain; max-width: 100%;" />
+              <div style="background-color: #f9fafb; padding: 12px; text-align: center; height: 120px; display: flex; align-items: center; justify-content: center;">
+                <img src="${imageUrl}" alt="${product.description}" style="max-width: 100px; max-height: 100px; width: auto; height: auto; object-fit: contain; image-orientation: from-image;" />
               </div>
               <div style="padding: 12px; text-align: center;">
                 <div style="font-family: 'Courier New', monospace; font-size: 12px; font-weight: 700; color: #2563eb;">${product.product_code}</div>
