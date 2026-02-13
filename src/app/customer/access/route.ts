@@ -44,6 +44,27 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  // Track portal access event (for analytics)
+  const source = searchParams.get('source') || 'direct'; // e.g., 'reorder_email', 'direct'
+  const referrer = request.headers.get('referer') || null;
+
+  await supabase.from('engagement_events').insert({
+    event_type: 'portal_access',
+    event_name: 'customer_portal_login',
+    contact_id: user.contact_id,
+    company_id: user.company_id,
+    occurred_at: new Date().toISOString(),
+    source,
+    url: request.url,
+    meta: {
+      user_id: user.user_id,
+      email: user.email,
+      access_method: 'portal_token',
+      referrer,
+      user_agent: request.headers.get('user-agent') || null,
+    },
+  });
+
   // Create customer session (sets cookies in Route Handler - allowed in Next.js 15)
   await createCustomerSession({
     user_id: user.user_id,
