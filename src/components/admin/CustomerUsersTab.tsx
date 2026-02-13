@@ -133,7 +133,7 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
 
   const handleSendTestEmail = async (user: CustomerUser) => {
     const fullName = `${user.first_name} ${user.last_name}`;
-    if (!confirm(`Send test reminder email to ${fullName} (${user.email})?`)) return;
+    if (!confirm(`Send reorder link to ${fullName} (${user.email})?`)) return;
 
     setSendingTestEmail(user.user_id);
     setError(null);
@@ -152,13 +152,13 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to send test email');
+        throw new Error(data.error || 'Failed to send reorder link');
       }
 
-      setSuccess(`Test email sent to ${user.email}`);
+      setSuccess(`Reorder link sent to ${user.email}`);
       setTimeout(() => setSuccess(null), 5000);
     } catch (error: any) {
-      setError(`Failed to send test email: ${error.message}`);
+      setError(`Failed to send reorder link: ${error.message}`);
       setTimeout(() => setError(null), 5000);
     } finally {
       setSendingTestEmail(null);
@@ -438,9 +438,9 @@ export default function CustomerUsersTab({ company, customerUsers, contacts }: P
                             onClick={() => handleSendTestEmail(user)}
                             disabled={sendingTestEmail === user.user_id}
                             className="px-3 py-1.5 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Send test reminder email with products"
+                            title="Send reorder reminder email with portal link"
                           >
-                            {sendingTestEmail === user.user_id ? '📧 Sending...' : '📧 Test Email'}
+                            {sendingTestEmail === user.user_id ? '📧 Sending...' : '📧 Reorder Link'}
                           </button>
                         </>
                       )}
