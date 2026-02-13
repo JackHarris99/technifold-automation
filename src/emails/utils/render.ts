@@ -9,9 +9,9 @@ import * as React from 'react';
 /**
  * Render a React Email component to HTML and plain text
  */
-export function renderEmail(component: React.ReactElement) {
-  const html = render(component);
-  const text = render(component, { plainText: true });
+export async function renderEmail(component: React.ReactElement) {
+  const html = await render(component);
+  const text = await render(component, { plainText: true });
 
   return { html, text };
 }
@@ -22,7 +22,7 @@ export function renderEmail(component: React.ReactElement) {
 export function createEmailRenderer<T>(
   Component: React.ComponentType<T>
 ) {
-  return (props: T) => {
-    return renderEmail(React.createElement(Component, props));
+  return async (props: T) => {
+    return await renderEmail(React.createElement(Component, props));
   };
 }

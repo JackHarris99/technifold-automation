@@ -24,7 +24,7 @@ export async function sendConsumableReminder(
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'sales@technifold.com';
 
     // Render email to HTML and plain text
-    const { html, text } = renderEmail(
+    const { html, text } = await renderEmail(
       ConsumableReminderEmail(props)
     );
 
